@@ -1,10 +1,10 @@
-import HijriDateDisplay from "../components/hijri-date";
 import { getLocationFromIp } from '../../lib/location';
-import { getPrayerTimes, type PrayerTimesResponse } from '../services/prayer-times';
+import { getPrayerTimes } from '../services/prayer-times';
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import { getCurrentGregorianDate } from "lib/gregorian-date";
+import { getCurrentHijriDate } from "lib/hijri-date";
 import { getClientIP, getDirectIP } from "lib/ip";
-import HijriTodayDisplay from "~/components/hijri-today";
+import DayView, { type DayViewProps } from "~/components/day-view";
 
 async function getLocation(request: Request) {
    let ip = getClientIP(request);
@@ -23,7 +23,7 @@ async function getLocation(request: Request) {
    return location;
 }
 
-export async function loader({ request }: LoaderFunctionArgs): Promise<{ prayerTimes: PrayerTimesResponse }> {
+export async function loader({ request }: LoaderFunctionArgs): Promise<DayViewProps> {
 
   try {
     const location = await getLocation(request);
@@ -34,29 +34,23 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<{ prayerT
       longitude: location.longitude,
       timezonestring: 'Asia/Jakarta' // TODO: get timezone from location
     });
+
+
+  const hijriDate = getCurrentHijriDate();
+  const gregorianDate = getCurrentGregorianDate();
+  const l = `/y/${hijriDate.year}/m/${hijriDate.month}`
+  const {Fajr, Dhuhr, Asr, Isha, Maghrib} = prayerTimes.data.timings;
     
-    return { prayerTimes };
+    return {date: hijriDate.date, month: hijriDate.month, year: hijriDate.year, gDate: gregorianDate.date, gMonth: gregorianDate.month, gYear: gregorianDate.year, Fajr, Dhuhr, Asr, Isha, Maghrib };
   } catch (error) {
     throw new Response('Failed to load prayer times', { status: 500 });
   }
 }
 
-function PraySlot({time, name}: {time: string, name: string}) {
-  return <div className="mb-2 border-b pb-2 border-b-stone-300">
-    <h2 className="text-base font-bold">{name}({time})</h2>
-    </div>
-}
 
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  const {Fajr, Dhuhr, Asr, Isha, Maghrib} = data.prayerTimes.data.timings;
-  return <div className="p-6">
-    <HijriTodayDisplay />
-    <PraySlot time={Maghrib} name="Maghrib" />
-    <PraySlot time={Isha} name="Isha" />
-    <PraySlot time={Fajr} name="Fajr" />
-    <PraySlot time={Dhuhr} name="Dhuhr" />
-    <PraySlot time={Asr} name="Asr" />
-  </div>;
+  const l = `/y/${data.year}/m/${data.month}`
+  return <DayView date={data.date} month={data.month} year={data.year} gDate={data.gDate} gMonth={data.gMonth} gYear={data.gYear} Maghrib={ data.Maghrib} Isha={data.Isha} Fajr={data.Fajr} Dhuhr={data.Dhuhr} Asr={data.Asr} /> 
 }

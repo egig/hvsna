@@ -61,3 +61,5 @@ export function getCurrentGregorianDateComponents(): {
     second: now.second()
   };
 }
+
+export const GREGORIAN_MONTH_NAMES_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]

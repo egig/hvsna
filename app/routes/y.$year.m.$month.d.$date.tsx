@@ -1,9 +1,9 @@
-import HijriDateDisplay from "../components/hijri-date";
 import { getLocationFromIp } from '../../lib/location';
 import { getPrayerTimes, type PrayerTimesResponse } from '../services/prayer-times';
 import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router';
-import { getCurrentGregorianDate } from "lib/gregorian-date";
 import { getClientIP, getDirectIP } from "lib/ip";
+import DayView from "~/components/day-view";
+import dayjs from 'dayjs';
 
 async function getLocation(request: Request) {
    let ip = getClientIP(request);
@@ -22,11 +22,12 @@ async function getLocation(request: Request) {
    return location;
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs): Promise<{ prayerTimes: PrayerTimesResponse, date: string, month: string, year: string }> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<{ prayerTimes: PrayerTimesResponse, date: number, month: number, year: number}> {
 
-  const date = params.date as string;
-  const month = params.month as string;
-  const year = params.year as string;
+  const date = Number(params.date);
+  const month = Number(params.month);
+  const year = Number(params.year);
+  
   
   try {
     const location = await getLocation(request);
@@ -38,6 +39,7 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<{
       longitude: location.longitude,
       timezonestring: 'Asia/Jakarta' // TODO: get timezone from location
     });
+
     
     return { prayerTimes, date, month, year };
   } catch (error) {
@@ -45,27 +47,8 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<{
   }
 }
 
-function PraySlot({time, name}: {time: string, name: string}) {
-  return <div className="mb-2 border-b pb-2 border-b-stone-300">
-    <h2 className="text-base font-bold">{name}({time})</h2>
-    </div>
-}
-
-
 export default function YMD() {
   const data = useLoaderData<typeof loader>();
   const {Fajr, Dhuhr, Asr, Isha, Maghrib} = data.prayerTimes.data.timings;
-  return <div className="p-6">  
-    <HijriDateDisplay data={data.date} month={Number(data.month)} year={Number(data.year)} />
-    <div>
-      <Link to="/">Today</Link>
-    </div>
-    <div className="flex flex-col gap-2">
-    <PraySlot time={Maghrib} name="Maghrib" />
-    <PraySlot time={Isha} name="Isha" />
-    <PraySlot time={Fajr} name="Fajr" />
-    <PraySlot time={Dhuhr} name="Dhuhr" />
-    <PraySlot time={Asr} name="Asr" />
-    </div>
-  </div>;
+  return <DayView date={data.date} month={data.month} year={data.year} gDate={data.gDate} gMonth={data.gMonth} gYear={data.gYear} Maghrib={Maghrib} Isha={Isha} Fajr={Fajr} Dhuhr={Dhuhr} Asr={Asr} />;
 }
