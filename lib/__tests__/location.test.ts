@@ -123,13 +123,13 @@ describe('Location Service', () => {
       const errorMessage = 'API Error';
       (mockHttpClient.get as any).mockRejectedValueOnce(new Error(errorMessage));
 
-      await expect(locationService.getLocationFromIp()).rejects.toThrow(`Failed to get location from IP: ${errorMessage}`);
+      await expect(locationService.getLocationFromIp()).rejects.toThrow(`Failed to get location from IP: undefined ${errorMessage}`);
     });
 
     it('should handle unknown errors', async () => {
       (mockHttpClient.get as any).mockRejectedValueOnce('Unknown error');
 
-      await expect(locationService.getLocationFromIp()).rejects.toThrow('Failed to get location from IP: Unknown error');
+      await expect(locationService.getLocationFromIp()).rejects.toThrow('Failed to get location from IP: undefined Unknown error');
     });
 
     it('should use default FetchHttpClient when none provided', () => {

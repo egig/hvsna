@@ -47,3 +47,18 @@ export function getCurrentHijriDateWithMonthName(): {
     year: hijriDate.year
   };
 }
+
+
+
+export function getHijriMonthDays(year: number, month: number): number {
+  // Create a date for the first day of the specified Hijri month
+  const d = dayjs();
+  const hd = d.calendar('hijri');
+  // @ts-ignore
+  const startOfMonth = hd.year(year).month(month - 1).date(1);
+  
+  console.log(startOfMonth);
+
+  // Get the number of days in that month
+  return startOfMonth.daysInMonth();
+}

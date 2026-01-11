@@ -1,10 +1,9 @@
 import HijriDateDisplay from "../components/hijri-date";
 import { getLocationFromIp } from '../../lib/location';
 import { getPrayerTimes, type PrayerTimesResponse } from '../services/prayer-times';
-import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
+import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import { getCurrentGregorianDate } from "lib/gregorian-date";
 import { getClientIP, getDirectIP } from "lib/ip";
-import HijriTodayDisplay from "~/components/hijri-today";
 
 async function getLocation(request: Request) {
    let ip = getClientIP(request);
@@ -23,19 +22,24 @@ async function getLocation(request: Request) {
    return location;
 }
 
-export async function loader({ request }: LoaderFunctionArgs): Promise<{ prayerTimes: PrayerTimesResponse }> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<{ prayerTimes: PrayerTimesResponse, date: string, month: string, year: string }> {
 
+  const date = params.date as string;
+  const month = params.month as string;
+  const year = params.year as string;
+  
   try {
     const location = await getLocation(request);
-    const currentDate = getCurrentGregorianDate();
+    const d = `${year}-${month}-${date}`;
+
     const prayerTimes = await getPrayerTimes({
-      date: currentDate.formatted,
+      date: d,
       latitude: location.latitude,
       longitude: location.longitude,
       timezonestring: 'Asia/Jakarta' // TODO: get timezone from location
     });
     
-    return { prayerTimes };
+    return { prayerTimes, date, month, year };
   } catch (error) {
     throw new Response('Failed to load prayer times', { status: 500 });
   }
@@ -48,15 +52,20 @@ function PraySlot({time, name}: {time: string, name: string}) {
 }
 
 
-export default function Index() {
+export default function YMD() {
   const data = useLoaderData<typeof loader>();
   const {Fajr, Dhuhr, Asr, Isha, Maghrib} = data.prayerTimes.data.timings;
-  return <div className="p-6">
-    <HijriTodayDisplay />
+  return <div className="p-6">  
+    <HijriDateDisplay data={data.date} month={Number(data.month)} year={Number(data.year)} />
+    <div>
+      <Link to="/">Today</Link>
+    </div>
+    <div className="flex flex-col gap-2">
     <PraySlot time={Maghrib} name="Maghrib" />
     <PraySlot time={Isha} name="Isha" />
     <PraySlot time={Fajr} name="Fajr" />
     <PraySlot time={Dhuhr} name="Dhuhr" />
     <PraySlot time={Asr} name="Asr" />
+    </div>
   </div>;
 }
