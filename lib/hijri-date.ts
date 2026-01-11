@@ -44,8 +44,11 @@ export function getNextHijriDate(y: number, m: number, d: number): HijriDate {
 }
 
 export function getHijriDate(y: number, m: number, d: number): HijriDate {
+
+   const da = dayjs();
+  const hd = da.calendar("hijri");
   // @ts-ignore
-  const hijriDate = dayjs(`${y}-${m}-${d}`);
+  const hijriDate = hd.year(y).month(m - 1).date(d);
 
   return {
     date: hijriDate.date(),
