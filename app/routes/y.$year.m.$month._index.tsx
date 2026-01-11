@@ -12,10 +12,12 @@ export function loader(request: LoaderFunctionArgs) {
 
 export default function m() {
     const data = useLoaderData()
-    const days = getHijriMonthDays(data.year, data.month + 1)
+    const days = getHijriMonthDays(data.year, data.month)
+
+    const daysList = ["Fr", "Sa","Su", "Mo", "Tu", "We", "Th"]
 
     return <div>
-        <h1 className="font-bold text-xl">{HIJRI_MONTH_NAMES_EN[data.month]} <Link to={"/y/" + data.year}>{data.year}</Link></h1>
+        <h1 className="font-bold text-xl">{HIJRI_MONTH_NAMES_EN[data.month-1]} <Link to={"/y/" + data.year}>{data.year}</Link></h1>
         <Link to={"/"}>Today</Link>
         <div>
             {Array.from({ length: days }, (_, i) => i + 1).map((day) => (

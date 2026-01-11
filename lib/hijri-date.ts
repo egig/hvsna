@@ -1,7 +1,7 @@
 import { HIJRI_MONTH_NAMES } from "./hijri-months";
 
-import dayjs from 'dayjs';
-import hijri from 'dayjs-hijri';
+import dayjs from "dayjs";
+import hijri from "dayjs-hijri";
 
 // Extend dayjs with hijri plugin
 dayjs.extend(hijri);
@@ -13,6 +13,46 @@ export interface HijriDate {
   date: number;
   month: number;
   year: number;
+  dayName: string;
+}
+
+
+export function getPreviousHijriDate(y: number, m: number, d: number): HijriDate {
+  const da = dayjs();
+  const hd = da.calendar("hijri");
+  // @ts-ignore
+  const previousHijriDate = hd.year(y).month(m - 1).date(d - 1);
+  return {
+    date: previousHijriDate.date(),
+    month: previousHijriDate.month() + 1,
+    year: previousHijriDate.year(),
+    dayName: previousHijriDate.format("ddd"),
+  };
+}
+
+export function getNextHijriDate(y: number, m: number, d: number): HijriDate {
+  const da = dayjs();
+  const hd = da.calendar("hijri");
+  // @ts-ignore
+  const nextHijriDate = hd.year(y).month(m - 1).date(d + 1);
+  return {
+    date: nextHijriDate.date(),
+    month: nextHijriDate.month() + 1,
+    year: nextHijriDate.year(),
+    dayName: nextHijriDate.format("ddd"),
+  };
+}
+
+export function getHijriDate(y: number, m: number, d: number): HijriDate {
+  // @ts-ignore
+  const hijriDate = dayjs(`${y}-${m}-${d}`);
+
+  return {
+    date: hijriDate.date(),
+    month: hijriDate.month() + 1,
+    year: hijriDate.year(),
+    dayName: hijriDate.format("ddd"),
+  };
 }
 
 /**
@@ -20,13 +60,15 @@ export interface HijriDate {
  * @returns Current Hijri date object with date, month, and year
  */
 export function getCurrentHijriDate(): HijriDate {
-  const d = dayjs()
-  const hijriDate = d.calendar('hijri')
-  
+  const d = dayjs();
+  const hijriDate = d.calendar("hijri");
+
   return {
     date: hijriDate.date(),
-    month: hijriDate.month(),
-    year: hijriDate.year()
+    month: hijriDate.month() + 1,
+    year: hijriDate.year(),
+    // @ts-ignore
+    dayName: hijriDate.format("ddddd"),
   };
 }
 
@@ -40,20 +82,18 @@ export function getCurrentHijriDateWithMonthName(): {
   year: number;
 } {
   const hijriDate = getCurrentHijriDate();
-  
+
   return {
     date: hijriDate.date,
-    month: HIJRI_MONTH_NAMES[hijriDate.month - 1] || '',
-    year: hijriDate.year
+    month: HIJRI_MONTH_NAMES[hijriDate.month] || "",
+    year: hijriDate.year,
   };
 }
-
-
 
 export function getHijriMonthDays(year: number, month: number): number {
   // Create a date for the first day of the specified Hijri month
   const d = dayjs();
-  const hd = d.calendar('hijri');
+  const hd = d.calendar("hijri");
   // @ts-ignore
   const startOfMonth = hd.year(year).month(month - 1).date(1);
 

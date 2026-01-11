@@ -1,9 +1,10 @@
 import { getLocationFromIp } from '../../lib/location';
 import { getPrayerTimes, type PrayerTimesResponse } from '../services/prayer-times';
-import { Link, useLoaderData, type LoaderFunctionArgs } from 'react-router';
+import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import { getClientIP, getDirectIP } from "lib/ip";
-import DayView from "~/components/day-view";
+import DayView, { type DayViewProps } from "~/components/day-view";
 import dayjs from 'dayjs';
+import { getNextHijriDate, getPreviousHijriDate } from 'lib/hijri-date';
 
 async function getLocation(request: Request) {
    let ip = getClientIP(request);
@@ -22,7 +23,7 @@ async function getLocation(request: Request) {
    return location;
 }
 
-export async function loader({ request, params }: LoaderFunctionArgs): Promise<{ prayerTimes: PrayerTimesResponse, date: number, month: number, year: number}> {
+export async function loader({ request, params }: LoaderFunctionArgs): Promise<DayViewProps> {
 
   const date = Number(params.date);
   const month = Number(params.month);
@@ -32,16 +33,28 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<{
   try {
     const location = await getLocation(request);
     const d = `${year}-${month}-${date}`;
+    // @ts-ignore
+    const gregorianDate = dayjs(d, {hijri: true});
 
     const prayerTimes = await getPrayerTimes({
-      date: d,
+      // @ts-ignore
+      date: gregorianDate.format('YYYY-MM-DD'),
       latitude: location.latitude,
       longitude: location.longitude,
       timezonestring: 'Asia/Jakarta' // TODO: get timezone from location
     });
 
+    const gDate = gregorianDate.date();
+    const gMonth = gregorianDate.month() + 1;
+    const gYear = gregorianDate.year();
+    const dayName = gregorianDate.format('dddd');
+
+    const prevDate = getPreviousHijriDate(year, month, date);
+    const nextDate = getNextHijriDate(year, month, date);
+    const prevLink = `/y/${prevDate.year}/m/${prevDate.month}/d/${prevDate.date}`;
+    const nextLink = `/y/${nextDate.year}/m/${nextDate.month}/d/${nextDate.date}`;
     
-    return { prayerTimes, date, month, year };
+    return { date, month, year, gDate, gMonth, gYear, dayName, ...prayerTimes.data.timings, prevLink, nextLink };
   } catch (error) {
     throw new Response('Failed to load prayer times', { status: 500 });
   }
@@ -49,6 +62,22 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<{
 
 export default function YMD() {
   const data = useLoaderData<typeof loader>();
-  const {Fajr, Dhuhr, Asr, Isha, Maghrib} = data.prayerTimes.data.timings;
-  return <DayView date={data.date} month={data.month} year={data.year} gDate={data.gDate} gMonth={data.gMonth} gYear={data.gYear} Maghrib={Maghrib} Isha={Isha} Fajr={Fajr} Dhuhr={Dhuhr} Asr={Asr} />;
+  return (
+    <DayView
+      date={data.date}
+      month={data.month}
+      year={data.year}
+      gDate={data.gDate}
+      gMonth={data.gMonth}
+      gYear={data.gYear}
+      Maghrib={data.Maghrib}
+      Isha={data.Isha}
+      Fajr={data.Fajr}
+      Dhuhr={data.Dhuhr}
+      Asr={data.Asr}
+      dayName={data.dayName}
+      prevLink={data.prevLink}
+      nextLink={data.nextLink}
+    />
+  );
 }

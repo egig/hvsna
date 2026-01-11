@@ -24,6 +24,9 @@ export interface DayViewProps {
   gDate: number;
   gMonth: number;
   gYear: number;
+  prevLink: string;
+  nextLink: string;
+  dayName?: string;
 }
 
 export default function DayView({
@@ -38,6 +41,9 @@ export default function DayView({
   Fajr,
   Dhuhr,
   Asr,
+  dayName,
+  prevLink,
+  nextLink
 }: DayViewProps) {
   return (
     <div className="p-4">
@@ -45,11 +51,11 @@ export default function DayView({
         <h1 className="text-xl font-bold">
           {date}{" "}
           <Link to={`/y/${year}/m/${month}`}>
-            {HIJRI_MONTH_NAMES_EN[month]} {year}
+            {HIJRI_MONTH_NAMES_EN[month-1]} {year}
           </Link>
         </h1>
         <span className="text-sm">
-          {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}
+          {dayName} {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}
         </span>
       </div>
       <div className="mb-4">
@@ -62,14 +68,14 @@ export default function DayView({
         |
         <Link
           className="text-blue-500"
-          to={`/y/${year}/m/${month}/d/${date - 1}`}
+          to={prevLink}
         >
           Previous
         </Link>{" "}
         |
         <Link
           className="text-blue-500"
-          to={`/y/${year}/m/${month}/d/${date + 1}`}
+          to={nextLink}
         >
           Next
         </Link>
