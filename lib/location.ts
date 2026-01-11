@@ -84,7 +84,7 @@ export class IpLocationService implements LocationService {
         region: data.region
       };
     } catch (error) {
-      throw new Error(`Failed to get location from IP: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to get location from IP: ${ip} ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }
