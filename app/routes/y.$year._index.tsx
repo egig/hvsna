@@ -1,22 +1,36 @@
+import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
+import { getGregorianFromHijriDate, getHijriMonthDays } from "lib/hijri-date";
 import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
 import { Link, useLoaderData, useParams, type LoaderFunctionArgs } from "react-router";
+import MonthView from "~/components/month-view";
 
 export function loader(request: LoaderFunctionArgs) {
     const params = request.params;
     return {
-        year: params.year,
+        year: Number(params.year),
     }
 }
 
 export default function m() {
     const data = useLoaderData()
-    return <div>
-        <h1 className="font-bold text-xl">{data.year}</h1>
-        <Link to={"/"}>Today</Link>
-        <div>
+    const gStart = getGregorianFromHijriDate(data.year, 1, 1)
+    const gEnd = getGregorianFromHijriDate(data.year, 12, getHijriMonthDays(data.year, 12))
+    
+    return <div className="p-6">
+        <div className="mb-4">
+            <h1 className="font-bold text-xl">{data.year}</h1>
+            <p>{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
+        </div>
+        <div className="mb-4">
+            <Link className="text-blue-500" to={"/"}>Today</Link> |
+            <Link className="text-blue-500" to={"/y/" + (data.year - 1)}>Previous</Link> |
+            <Link className="text-blue-500" to={"/y/" + (data.year + 1)}>Next</Link>
+        </div>
+        <div className="mb-4">
             {Array.from({ length: 12 }, (_, i) => i).map((month) => (
-                <div>
-                    <Link className="p-2 inline-block text-center text-blue-500" key={month} to={`/y/${data.year}/m/${month+1}`}>{HIJRI_MONTH_NAMES_EN[month]}</Link>
+                <div className="mb-6">
+                    <Link className="p-2 inline-block text-center font-bold" key={month} to={`/y/${data.year}/m/${month+1}`}>{HIJRI_MONTH_NAMES_EN[month]}</Link>
+                    <MonthView year={data.year} month={month+1} />
                 </div>
             ))}
         </div>

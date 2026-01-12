@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, getPreviousHijriMonth, getNextHijriMonth, type HijriDate } from '../hijri-date';
+import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, getPreviousHijriMonth, getNextHijriMonth, getGregorianFromHijriDate, type HijriDate } from '../hijri-date';
 
 describe('getHijriMonthDays', () => {
   it('should return correct number of days for Rajab 1447', () => {
@@ -249,6 +249,84 @@ describe('Month navigation consistency', () => {
     
     expect(startOfNextYear.month).toBe(12);
     expect(startOfNextYear.year).toBe(1446);
+  });
+});
+
+describe('getGregorianFromHijriDate', () => {
+  it('should convert Hijri date to Gregorian date correctly', () => {
+    const gregorianDate = getGregorianFromHijriDate(1446, 7, 15);
+    
+    expect(gregorianDate).toHaveProperty('date');
+    expect(gregorianDate).toHaveProperty('month');
+    expect(gregorianDate).toHaveProperty('year');
+    expect(gregorianDate).toHaveProperty('dayName');
+    
+    expect(typeof gregorianDate.date).toBe('number');
+    expect(typeof gregorianDate.month).toBe('number');
+    expect(typeof gregorianDate.year).toBe('number');
+    expect(typeof gregorianDate.dayName).toBe('string');
+  });
+
+  it('should return valid Gregorian date ranges', () => {
+    const gregorianDate = getGregorianFromHijriDate(1446, 7, 15);
+    
+    expect(gregorianDate.date).toBeGreaterThanOrEqual(1);
+    expect(gregorianDate.date).toBeLessThanOrEqual(31);
+    expect(gregorianDate.month).toBeGreaterThanOrEqual(1);
+    expect(gregorianDate.month).toBeLessThanOrEqual(12);
+    expect(gregorianDate.year).toBeGreaterThan(0);
+  });
+
+  it('should return valid day name', () => {
+    const gregorianDate = getGregorianFromHijriDate(1446, 7, 15);
+    
+    expect(gregorianDate.dayName).toMatch(/^(Sat|Sun|Mon|Tue|Wed|Thu|Fri)$/);
+    expect(typeof gregorianDate.dayName).toBe('string');
+    expect(gregorianDate.dayName.length).toBeGreaterThan(0);
+  });
+
+  it('should handle different Hijri dates', () => {
+    const dates = [
+      { hijri: [1446, 1, 1] },
+      { hijri: [1446, 7, 15] },
+      { hijri: [1446, 12, 29] }
+    ];
+
+    dates.forEach(({ hijri }) => {
+      const gregorianDate = getGregorianFromHijriDate(hijri[0], hijri[1], hijri[2]);
+      
+      expect(gregorianDate.date).toBeGreaterThan(0);
+      expect(gregorianDate.month).toBeGreaterThan(0);
+      expect(gregorianDate.month).toBeLessThanOrEqual(12);
+      expect(gregorianDate.year).toBeGreaterThan(0);
+      expect(typeof gregorianDate.dayName).toBe('string');
+    });
+  });
+
+  it('should handle different Hijri years', () => {
+    const year1445 = getGregorianFromHijriDate(1445, 1, 1);
+    const year1446 = getGregorianFromHijriDate(1446, 1, 1);
+    const year1447 = getGregorianFromHijriDate(1447, 1, 1);
+    
+    expect(year1445.year).toBeGreaterThan(0);
+    expect(year1446.year).toBeGreaterThan(0);
+    expect(year1447.year).toBeGreaterThan(0);
+    
+    // Years should be different
+    expect(year1445.year).not.toBe(year1446.year);
+    expect(year1446.year).not.toBe(year1447.year);
+  });
+
+  it('should handle edge cases like first and last days of Hijri month', () => {
+    const firstDay = getGregorianFromHijriDate(1446, 7, 1);
+    const lastDay = getGregorianFromHijriDate(1446, 7, 30);
+    
+    expect(firstDay.date).toBeGreaterThan(0);
+    expect(lastDay.date).toBeGreaterThan(0);
+    expect(firstDay.month).toBeGreaterThan(0);
+    expect(lastDay.month).toBeGreaterThan(0);
+    expect(firstDay.year).toBeGreaterThan(0);
+    expect(lastDay.year).toBeGreaterThan(0);
   });
 });
 

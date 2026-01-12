@@ -46,13 +46,14 @@ export default function DayView({
   nextLink
 }: DayViewProps) {
   return (
-    <div className="p-4">
+    <div className="p-6">
       <div className="mb-4 mx-auto">
         <h1 className="text-xl font-bold">
-          {date}{" "}
           <Link className="text-blue-500" to={`/y/${year}/m/${month}`}>
-            {HIJRI_MONTH_NAMES_EN[month-1]} {year}
+            {year}{" "}
+            {HIJRI_MONTH_NAMES_EN[month-1]}
           </Link>
+          {" "}{date}
         </h1>
         <span className="text-sm">
           {dayName} {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}

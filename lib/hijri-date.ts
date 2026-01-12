@@ -138,3 +138,14 @@ export function getHijriMonthDays(year: number, month: number): number {
   // Get the number of days in that month
   return startOfMonth.daysInMonth();
 }
+
+export function getGregorianFromHijriDate(year: number, month: number, day: number) {
+  // @ts-ignore
+   const d = dayjs(`${year}-${month}-${day}`, {hijri: true});
+   return {
+    date: d.date(),
+    month: d.month() + 1,
+    year: d.year(),
+    dayName: d.format("ddd"),
+   }
+}
