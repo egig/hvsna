@@ -23,15 +23,15 @@ export default function m() {
 
     return <div className="p-6">
         <div className="mb-4">
-        <h1 className="font-bold text-xl">
-            <Link className="text-blue-500" to={"/y/" + data.year}>{data.year}</Link> {HIJRI_MONTH_NAMES_EN[data.month-1]}
+        <h1 className="title">
+            <Link className="parent-link" to={"/y/" + data.year}>{data.year}</Link> {HIJRI_MONTH_NAMES_EN[data.month-1]}
         </h1>
-        <p>{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
+        <p className="subtitle">{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
         </div>
-        <div className="mb-4">
-            <Link className="text-blue-500" to={"/"}>Today</Link> |
-            <Link className="text-blue-500" to={"/y/" + prev.year + "/m/" + prev.month}>Previous</Link> |
-            <Link className="text-blue-500" to={"/y/" + next.year + "/m/" +next.month}>Next</Link>
+        <div className="navigation">
+            <Link to={"/"}>Today</Link>
+            <Link to={"/y/" + prev.year + "/m/" + prev.month}>Previous</Link>
+            <Link to={"/y/" + next.year + "/m/" +next.month}>Next</Link>
         </div>
         <MonthView year={data.year} month={data.month} />
     </div>

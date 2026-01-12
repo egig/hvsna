@@ -4,8 +4,8 @@ import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
 
 function PraySlot({ time, name }: { time: string; name: string }) {
   return (
-    <div className="mb-2 border-b pb-2 border-b-stone-300">
-      <h2 className="text-base font-bold">
+    <div className="mb-6 border-b pb-2 border-b-stone-300">
+      <h2 className="section-title">
         {name}({time})
       </h2>
     </div>
@@ -48,34 +48,29 @@ export default function DayView({
   return (
     <div className="p-6">
       <div className="mb-4 mx-auto">
-        <h1 className="text-xl font-bold">
-          <Link className="text-blue-500" to={`/y/${year}/m/${month}`}>
+        <h1 className="title">
+          <Link className="parent-link" to={`/y/${year}/m/${month}`}>
             {year}{" "}
             {HIJRI_MONTH_NAMES_EN[month-1]}
           </Link>
           {" "}{date}
         </h1>
-        <span className="text-sm">
+        <p className="subtitle">
           {dayName} {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}
-        </span>
+        </p>
       </div>
-      <div className="mb-4">
+      <div className="navigation">
         <Link
-          className="text-blue-500"
           to={"/"}
         >
           Today
-        </Link>{" "}
-        |
+        </Link>
         <Link
-          className="text-blue-500"
           to={prevLink}
         >
           Previous
-        </Link>{" "}
-        |
+        </Link>
         <Link
-          className="text-blue-500"
           to={nextLink}
         >
           Next

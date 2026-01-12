@@ -2,21 +2,18 @@ import clsx from "clsx";
 import { getCurrentHijriDate, getHijriDate, getHijriMonthDays, getNextHijriMonth, getPreviousHijriMonth, type HijriDate } from "lib/hijri-date";
 import { Link } from "react-router";
 
-function DateItem({children}: {children?: React.ReactNode}) {
-    return <div className="w-[calc(100%/7)] inline-block h-10 text-center text-blue-500">{children}</div>
-}
-
 function EmptyDayItem() {
-    return <DateItem key={Math.random()} />
+    return <div
+    className="cursor-default aspect-[1] flex items-center justify-center text-base transition-none rounded-lg"
+    key={Math.random()} />
 }
 
 function DayItem(day: HijriDate, isToday: boolean) {
-    return <DateItem key={day.date}>
-        <Link className={clsx("", { "bg-gray-200": isToday })} key={day.date} to={"/y/" + day.year + "/m/" + day.month + "/d/" + day.date}>{day.date}</Link></DateItem>
-}
-
-function DayNameItem(dayName: string) {
-    return <DateItem key={dayName}>{dayName}</DateItem>
+    let cn = clsx("hover:bg-gray-200 aspect-[1] flex items-center justify-center text-base cursor-pointer transition-all duration-[0.2s] rounded-lg", { "bg-gray-200": isToday })
+    return <div
+    className={cn}
+    key={day.date}>
+        <Link key={day.date} to={"/y/" + day.year + "/m/" + day.month + "/d/" + day.date}>{day.date}</Link></div>
 }
 
 
@@ -33,9 +30,13 @@ export default function MonthView({year, month}: {year: number; month: number}) 
     const firstDate = getHijriDate(year, month, 1)
     const startDay = daysList.indexOf(firstDate.dayName)
 
-    return <div>
-            {daysList.map((day) => DayNameItem(day))}
+    return <div className="max-w-[400px]">
+        <div className="grid grid-cols-[repeat(7,1fr)] gap-1 mb-2.5">
+            {daysList.map((day) => <div className="text-center font-semibold text-indigo-500 text-sm p-2" key={day}>{day}</div>)}
+        </div>
+        <div className="grid grid-cols-[repeat(7,1fr)] gap-1 mb-2.5">
             {Array.from({ length: startDay }, (_, i) => i + 1).map(() => EmptyDayItem())}
             {Array.from({ length: days }, (_, i) => i + 1).map((day) => DayItem(getHijriDate(year, month, day), isToday(getHijriDate(year, month, day))))}
         </div>
+    </div>
 }
