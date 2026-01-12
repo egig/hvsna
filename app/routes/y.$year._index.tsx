@@ -16,25 +16,38 @@ export default function m() {
     const gStart = getGregorianFromHijriDate(data.year, 1, 1)
     const gEnd = getGregorianFromHijriDate(data.year, 12, getHijriMonthDays(data.year, 12))
     
-    return <div className="p-6">
-        <div className="mb-4">
+    return (
+      <div>
+        <div className="px-6 pt-6 sticky top-0 bg-white p-b">
+          <div className="mb-4">
             <h1 className="title">{data.year}</h1>
-            <p className="subtitle">{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
-        </div>
-        <div className="navigation">
+            <p className="subtitle">
+              {GREGORIAN_MONTH_NAMES_EN[gStart.month - 1]} {gStart.year} to{" "}
+              {GREGORIAN_MONTH_NAMES_EN[gEnd.month - 1]} {gEnd.year}
+            </p>
+          </div>
+          <div className="navigation">
             <Link to={"/"}>Today</Link>
             <Link to={"/y/" + (data.year - 1)}>Previous</Link>
             <Link to={"/y/" + (data.year + 1)}>Next</Link>
+          </div>
         </div>
-        <div className="mb-4">
-            {Array.from({ length: 12 }, (_, i) => i).map((month) => (
-                <div className="mb-6">
-                    <div className="mb-2">
-                        <Link className="section-title" key={month} to={`/y/${data.year}/m/${month+1}`}>{HIJRI_MONTH_NAMES_EN[month]}</Link>
-                    </div>
-                    <MonthView year={data.year} month={month+1} />
-                </div>
-            ))}
+        <div className="mb-4 p-6">
+          {Array.from({ length: 12 }, (_, i) => i).map((month) => (
+            <div className="mb-6">
+              <div className="mb-2">
+                <Link
+                  className="section-title"
+                  key={month}
+                  to={`/y/${data.year}/m/${month + 1}`}
+                >
+                  {HIJRI_MONTH_NAMES_EN[month]}
+                </Link>
+              </div>
+              <MonthView year={data.year} month={month + 1} />
+            </div>
+          ))}
         </div>
-    </div>
+      </div>
+    );
 }
