@@ -17,6 +17,41 @@ export interface HijriDate {
 }
 
 
+export function getPreviousHijriMonth(y: number, m: number): HijriDate {
+  const da = dayjs();
+  const hd = da.calendar("hijri");
+  // m is 1 based
+  let currentM = m-1;
+
+  // @ts-ignore
+  const previousHijriDate = hd.year(y).month(currentM-1);
+
+  return {
+    date: previousHijriDate.date(),
+    month: previousHijriDate.month() + 1,
+    year: previousHijriDate.year(),
+    dayName: previousHijriDate.format("ddd"),
+  };
+}
+
+export function getNextHijriMonth(y: number, m: number): HijriDate {
+  const da = dayjs();
+  const hd = da.calendar("hijri");
+  // m is 1 based
+  let currentM = m-1;
+  
+  // @ts-ignore
+  // m is 1 based
+  const nextHijriDate = hd.year(y).month(currentM + 1);
+  return {
+    date: nextHijriDate.date(),
+    month: nextHijriDate.month() + 1,
+    year: nextHijriDate.year(),
+    dayName: nextHijriDate.format("ddd"),
+  };
+}
+
+
 export function getPreviousHijriDate(y: number, m: number, d: number): HijriDate {
   const da = dayjs();
   const hd = da.calendar("hijri");
@@ -71,7 +106,7 @@ export function getCurrentHijriDate(): HijriDate {
     month: hijriDate.month() + 1,
     year: hijriDate.year(),
     // @ts-ignore
-    dayName: hijriDate.format("ddddd"),
+    dayName: hijriDate.format("dddd"),
   };
 }
 

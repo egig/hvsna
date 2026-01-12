@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, type HijriDate } from '../hijri-date';
+import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, getPreviousHijriMonth, getNextHijriMonth, type HijriDate } from '../hijri-date';
 
 describe('getHijriMonthDays', () => {
   it('should return correct number of days for Rajab 1447', () => {
@@ -137,6 +137,118 @@ describe('Date navigation consistency', () => {
     expect(nextFromPrevious.date).toBe(originalDate.date);
     expect(nextFromPrevious.month).toBe(originalDate.month);
     expect(nextFromPrevious.year).toBe(originalDate.year);
+  });
+});
+
+describe('getPreviousHijriMonth', () => {
+  it('should return previous month for a given Hijri month', () => {
+    const currentMonth = getPreviousHijriMonth(1446, 8);
+    
+    expect(currentMonth.month).toBe(7);
+    expect(currentMonth.year).toBe(1446);
+    expect(typeof currentMonth.date).toBe('number');
+    expect(typeof currentMonth.dayName).toBe('string');
+  });
+
+  it('should handle year transition correctly', () => {
+    const firstMonth = getPreviousHijriMonth(1446, 1);
+    
+    expect(firstMonth.month).toBe(12);
+    expect(firstMonth.year).toBe(1445);
+    expect(typeof firstMonth.date).toBe('number');
+    expect(typeof firstMonth.dayName).toBe('string');
+  });
+
+  it('should return valid day name', () => {
+    const previousMonth = getPreviousHijriMonth(1446, 7);
+    
+    expect(previousMonth.dayName).toMatch(/^(Sat|Sun|Mon|Tue|Wed|Thu|Fri)$/);
+    expect(typeof previousMonth.dayName).toBe('string');
+    expect(previousMonth.dayName.length).toBeGreaterThan(0);
+  });
+
+  it('should handle different months correctly', () => {
+    const months = [
+      { input: [1446, 2], expectedMonth: 1 },
+      { input: [1446, 6], expectedMonth: 5 },
+      { input: [1446, 12], expectedMonth: 11 }
+    ];
+
+    months.forEach(({ input, expectedMonth }) => {
+      const result = getPreviousHijriMonth(input[0], input[1]);
+      expect(result.month).toBe(expectedMonth);
+      expect(result.year).toBe(input[0]);
+    });
+  });
+});
+
+describe('getNextHijriMonth', () => {
+  it('should return next month for a given Hijri month', () => {
+    const currentMonth = getNextHijriMonth(1446, 6);
+    
+    expect(currentMonth.month).toBe(7);
+    expect(currentMonth.year).toBe(1446);
+    expect(typeof currentMonth.date).toBe('number');
+    expect(typeof currentMonth.dayName).toBe('string');
+  });
+
+  it('should handle year transition correctly', () => {
+    const lastMonth = getNextHijriMonth(1446, 12);
+    
+    expect(lastMonth.month).toBe(1);
+    expect(lastMonth.year).toBe(1447);
+    expect(typeof lastMonth.date).toBe('number');
+    expect(typeof lastMonth.dayName).toBe('string');
+  });
+
+  it('should return valid day name', () => {
+    const nextMonth = getNextHijriMonth(1446, 7);
+    
+    expect(nextMonth.dayName).toMatch(/^(Sat|Sun|Mon|Tue|Wed|Thu|Fri)$/);
+    expect(typeof nextMonth.dayName).toBe('string');
+    expect(nextMonth.dayName.length).toBeGreaterThan(0);
+  });
+
+  it('should handle different months correctly', () => {
+    const months = [
+      { input: [1446, 1], expectedMonth: 2 },
+      { input: [1446, 5], expectedMonth: 6 },
+      { input: [1446, 11], expectedMonth: 12 }
+    ];
+
+    months.forEach(({ input, expectedMonth }) => {
+      const result = getNextHijriMonth(input[0], input[1]);
+      expect(result.month).toBe(expectedMonth);
+      expect(result.year).toBe(input[0]);
+    });
+  });
+});
+
+describe('Month navigation consistency', () => {
+  it('should maintain consistency between previous and next months', () => {
+    const baseMonth = 7;
+    const baseYear = 1446;
+    const previousMonth = getPreviousHijriMonth(baseYear, baseMonth);
+    const nextMonth = getNextHijriMonth(previousMonth.year, previousMonth.month);
+    
+    expect(nextMonth.month).toBe(baseMonth);
+    expect(nextMonth.year).toBe(baseYear);
+  });
+
+  it('should handle round trip correctly', () => {
+    const originalMonth = getNextHijriMonth(1446, 7);
+    const previousFromNext = getPreviousHijriMonth(originalMonth.year, originalMonth.month);
+    
+    expect(previousFromNext.month).toBe(7);
+    expect(previousFromNext.year).toBe(1446);
+  });
+
+  it('should handle year boundaries correctly', () => {
+    const endOfYear = getNextHijriMonth(1446, 12);
+    const startOfNextYear = getPreviousHijriMonth(endOfYear.year, endOfYear.month);
+    
+    expect(startOfNextYear.month).toBe(12);
+    expect(startOfNextYear.year).toBe(1446);
   });
 });
 

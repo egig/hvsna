@@ -50,7 +50,7 @@ export default function DayView({
       <div className="mb-4 mx-auto">
         <h1 className="text-xl font-bold">
           {date}{" "}
-          <Link to={`/y/${year}/m/${month}`}>
+          <Link className="text-blue-500" to={`/y/${year}/m/${month}`}>
             {HIJRI_MONTH_NAMES_EN[month-1]} {year}
           </Link>
         </h1>

@@ -46,7 +46,7 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<DayViewPr
     const prevLink = `/y/${prevDate.year}/m/${prevDate.month}/d/${prevDate.date}`;
     const nextLink = `/y/${nextDate.year}/m/${nextDate.month}/d/${nextDate.date}`;
   
-    return {date: hijriDate.date, month: hijriDate.month, year: hijriDate.year, gDate: gregorianDate.date, gMonth: gregorianDate.month, gYear: gregorianDate.year, Fajr, Dhuhr, Asr, Isha, Maghrib, prevLink, nextLink };
+    return {date: hijriDate.date, month: hijriDate.month, year: hijriDate.year, gDate: gregorianDate.date, gMonth: gregorianDate.month, gYear: gregorianDate.year, Fajr, Dhuhr, Asr, Isha, Maghrib, prevLink, nextLink, dayName: hijriDate.dayName };
   } catch (error) {
     throw new Response('Failed to load prayer times', { status: 500 });
   }
@@ -57,5 +57,5 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<DayViewPr
 export default function Index() {
   const data = useLoaderData<typeof loader>();
   const l = `/y/${data.year}/m/${data.month}`
-  return <DayView date={data.date} month={data.month} year={data.year} gDate={data.gDate} gMonth={data.gMonth} gYear={data.gYear} Maghrib={ data.Maghrib} Isha={data.Isha} Fajr={data.Fajr} Dhuhr={data.Dhuhr} Asr={data.Asr} prevLink={data.prevLink} nextLink={data.nextLink} /> 
+  return <DayView date={data.date} month={data.month} year={data.year} gDate={data.gDate} gMonth={data.gMonth} gYear={data.gYear} Maghrib={ data.Maghrib} Isha={data.Isha} Fajr={data.Fajr} Dhuhr={data.Dhuhr} Asr={data.Asr} prevLink={data.prevLink} nextLink={data.nextLink} dayName={data.dayName} /> 
 }
