@@ -24,7 +24,7 @@ function isToday(day: HijriDate) {
 
 export default function MonthView({year, month}: {year: number; month: number}) {
 
-    const daysList = ["Fri", "Sat","Sun", "Mon", "Tue", "Wed", "Thu"]
+    const daysList = ["Sat","Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
 
     const days = getHijriMonthDays(year, month)
     const firstDate = getHijriDate(year, month, 1)

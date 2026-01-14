@@ -56,7 +56,7 @@ export default function DayView({
           {" "}{date}
         </h1>
         <p className="subtitle">
-          {dayName} {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}
+          {dayName}, {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}
         </p>
       </div>
       <div className="navigation">

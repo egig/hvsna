@@ -149,3 +149,16 @@ export function getGregorianFromHijriDate(year: number, month: number, day: numb
     dayName: d.format("ddd"),
    }
 }
+
+export function getCurrentWeek() {
+  const d = dayjs();
+  const hd = d.calendar("hijri");
+  // @ts-ignore
+  const startOfWeek = hd.startOf("week");
+  // @ts-ignore
+  const endOfWeek = hd.endOf("week");
+  return {
+    start: startOfWeek.format("YYYY-MM-DD"),
+    end: endOfWeek.format("YYYY-MM-DD"),
+  };
+}

@@ -34,7 +34,7 @@ export default function m() {
         </div>
         <div className="mb-4 p-6">
           {Array.from({ length: 12 }, (_, i) => i).map((month) => (
-            <div className="mb-6">
+            <div className="mb-6" key={month}>
               <div className="mb-2">
                 <Link
                   className="section-title"
