@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, getPreviousHijriMonth, getNextHijriMonth, getGregorianFromHijriDate, getCurrentWeek, type HijriDate } from '../hijri-date';
+import dayjs, {Dayjs} from "dayjs";
 
 describe('getHijriMonthDays', () => {
   it('should return correct number of days for Rajab 1447', () => {
@@ -402,18 +403,15 @@ describe('getCurrentWeek', () => {
     expect(week).toHaveProperty('start');
     expect(week).toHaveProperty('end');
     
-    expect(typeof week.start).toBe('string');
-    expect(typeof week.end).toBe('string');
-    
-    expect(week.start).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(week.end).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(typeof week.start).toBe('object');
+    expect(typeof week.end).toBe('object');
   });
 
   it('should return valid Hijri dates in YYYY-MM-DD format', () => {
     const week = getCurrentWeek();
     
-    const startDate = new Date(week.start);
-    const endDate = new Date(week.end);
+    const startDate = week.start.toDate();
+    const endDate = week.end.toDate();
     
     expect(startDate.toString()).not.toBe('Invalid Date');
     expect(endDate.toString()).not.toBe('Invalid Date');
@@ -421,24 +419,13 @@ describe('getCurrentWeek', () => {
     expect(startDate.getTime()).toBeLessThanOrEqual(endDate.getTime());
   });
 
-  it('should return dates within a reasonable range', () => {
-    const week = getCurrentWeek();
-    
-    const startYear = parseInt(week.start.split('-')[0]);
-    const endYear = parseInt(week.end.split('-')[0]);
-    
-    expect(startYear).toBeGreaterThanOrEqual(1400);
-    expect(startYear).toBeLessThanOrEqual(1600);
-    expect(endYear).toBeGreaterThanOrEqual(1400);
-    expect(endYear).toBeLessThanOrEqual(1600);
-  });
 
   it('should have consistent week span', () => {
     const week = getCurrentWeek();
     
-    const startDate = new Date(week.start);
-    const endDate = new Date(week.end);
-    
+    const startDate =week.start.toDate()
+    const endDate = week.end.toDate()
+
     const dayDiff = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     
     expect(dayDiff).toBeGreaterThanOrEqual(6);

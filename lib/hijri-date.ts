@@ -150,7 +150,8 @@ export function getGregorianFromHijriDate(year: number, month: number, day: numb
    }
 }
 
-export function getCurrentWeek() {
+// TODO wrap dayjs
+export function getCurrentWeek(): {start: dayjs.Dayjs, end: dayjs.Dayjs} {
   const d = dayjs();
   const hd = d.calendar("hijri");
   // @ts-ignore
@@ -158,7 +159,7 @@ export function getCurrentWeek() {
   // @ts-ignore
   const endOfWeek = hd.endOf("week");
   return {
-    start: startOfWeek.format("YYYY-MM-DD"),
-    end: endOfWeek.format("YYYY-MM-DD"),
+    start: startOfWeek,
+    end: endOfWeek
   };
 }
