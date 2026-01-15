@@ -1,4 +1,4 @@
-import { HIJRI_MONTH_NAMES_EN } from '../../lib/hijri-months';
+import { HIJRI_MONTH_NAMES_EN } from 'lib/hijri-months';
 import { Link } from 'react-router';
 export default function HijriDateDisplay({data, month, year}: {data: string, month: number, year: number}) {
   const l = `/y/${year}/m/${month}`

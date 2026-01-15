@@ -1,38 +1,26 @@
-import { getLocationFromIp } from '../../lib/location';
 import { getPrayerTimes } from '../services/prayer-times';
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import { getCurrentGregorianDate } from "lib/gregorian-date";
-import { getCurrentHijriDate, getNextHijriDate, getPreviousHijriDate } from "lib/hijri-date";
-import { getClientIP, getDirectIP } from "lib/ip";
+import { getCurrentHijriDate, getCurrentWeek, getNextHijriDate, getPreviousHijriDate } from "lib/hijri-date";
 import DayView, { type DayViewProps } from "~/components/day-view";
-
-async function getLocation(request: Request) {
-   let ip = getClientIP(request);
-   if (!ip) {
-    ip = getDirectIP(request);
-   }
-
-   if (!ip) {
-    return {
-      latitude: 6.2001514,
-      longitude: 106.829547
-    }
-   }
-
-   const location = await getLocationFromIp(ip as string);
-   return location;
-}
+import WeekView from '~/components/week-view';
+import { getLocationFromRequest } from '~/utils/route-loaders';
+import { DEFAULT_TIMEZONE, PRAYER_TIMES_CONFIG } from '~/utils/config';
 
 export async function loader({ request }: LoaderFunctionArgs): Promise<DayViewProps> {
 
   try {
-    const location = await getLocation(request);
+    const location = await getLocationFromRequest(request);
     const currentDate = getCurrentGregorianDate();
     const prayerTimes = await getPrayerTimes({
       date: currentDate.formatted,
       latitude: location.latitude,
       longitude: location.longitude,
-      timezonestring: 'Asia/Jakarta' // TODO: get timezone from location
+      method: PRAYER_TIMES_CONFIG.method,
+      shafaq: PRAYER_TIMES_CONFIG.shafaq,
+      tune: PRAYER_TIMES_CONFIG.tune,
+      timezonestring: DEFAULT_TIMEZONE,
+      calendarMethod: PRAYER_TIMES_CONFIG.calendarMethod
     });
 
 
@@ -57,5 +45,8 @@ export async function loader({ request }: LoaderFunctionArgs): Promise<DayViewPr
 export default function Index() {
   const data = useLoaderData<typeof loader>();
   const l = `/y/${data.year}/m/${data.month}`
+  // TODO create week view for large screen mode
+  // getCurrentWeek();
+  // return <WeekView />
   return <DayView date={data.date} month={data.month} year={data.year} gDate={data.gDate} gMonth={data.gMonth} gYear={data.gYear} Maghrib={ data.Maghrib} Isha={data.Isha} Fajr={data.Fajr} Dhuhr={data.Dhuhr} Asr={data.Asr} prevLink={data.prevLink} nextLink={data.nextLink} dayName={data.dayName} /> 
 }

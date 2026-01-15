@@ -1,4 +1,4 @@
-import { DAY_NAMES_EN } from '../../lib/days';
+import { DAY_NAMES_EN } from 'lib/days';
 
 interface PrayerTimeRow {
   prayer: string;

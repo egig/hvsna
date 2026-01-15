@@ -1,27 +1,10 @@
-import { getLocationFromIp } from '../../lib/location';
 import { getPrayerTimes, type PrayerTimesResponse } from '../services/prayer-times';
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
-import { getClientIP, getDirectIP } from "lib/ip";
 import DayView, { type DayViewProps } from "~/components/day-view";
 import dayjs from 'dayjs';
 import { getNextHijriDate, getPreviousHijriDate } from 'lib/hijri-date';
-
-async function getLocation(request: Request) {
-   let ip = getClientIP(request);
-   if (!ip) {
-    ip = getDirectIP(request);
-   }
-
-   if (!ip) {
-    return {
-      latitude: 6.2001514,
-      longitude: 106.829547
-    }
-   }
-
-   const location = await getLocationFromIp(ip as string);
-   return location;
-}
+import { getLocationFromRequest } from '~/utils/route-loaders';
+import { DEFAULT_TIMEZONE, PRAYER_TIMES_CONFIG } from '~/utils/config';
 
 export async function loader({ request, params }: LoaderFunctionArgs): Promise<DayViewProps> {
 
@@ -31,7 +14,7 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<D
   
   
   try {
-    const location = await getLocation(request);
+    const location = await getLocationFromRequest(request);
     const d = `${year}-${month}-${date}`;
     // @ts-ignore
     const gregorianDate = dayjs(d, {hijri: true});
@@ -41,7 +24,11 @@ export async function loader({ request, params }: LoaderFunctionArgs): Promise<D
       date: gregorianDate.format('YYYY-MM-DD'),
       latitude: location.latitude,
       longitude: location.longitude,
-      timezonestring: 'Asia/Jakarta' // TODO: get timezone from location
+      method: PRAYER_TIMES_CONFIG.method,
+      shafaq: PRAYER_TIMES_CONFIG.shafaq,
+      tune: PRAYER_TIMES_CONFIG.tune,
+      timezonestring: DEFAULT_TIMEZONE,
+      calendarMethod: PRAYER_TIMES_CONFIG.calendarMethod
     });
 
     const gDate = gregorianDate.date();
