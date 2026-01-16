@@ -1,4 +1,4 @@
-import { getPrayerTimes, type PrayerTimesResponse } from '../services/prayer-times';
+import { getPrayerTimes, type PrayerTimesResponse } from '../../lib/prayer-times';
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import DayView, { type DayViewProps } from "~/components/day-view";
 import dayjs from 'dayjs';

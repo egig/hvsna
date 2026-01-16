@@ -1,16 +1,8 @@
 import { Link } from "react-router";
 import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
 import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
+import { TextEditor } from "./text-editor";
 
-function PraySlot({ time, name }: { time: string; name: string }) {
-  return (
-    <div className="mb-6 border-b pb-2 border-b-stone-300">
-      <h2 className="section-title">
-        {name}({time})
-      </h2>
-    </div>
-  );
-}
 
 export interface DayViewProps {
   date: number;
@@ -76,11 +68,9 @@ export default function DayView({
           Next
         </Link>
       </div>
-      <PraySlot time={Maghrib} name="Maghrib" />
-      <PraySlot time={Isha} name="Isha" />
-      <PraySlot time={Fajr} name="Fajr" />
-      <PraySlot time={Dhuhr} name="Dhuhr" />
-      <PraySlot time={Asr} name="Asr" />
+      <div>
+        <TextEditor content="<p>write...</p>" placeholder="Write..." onChange={(text) => {}} />
+      </div>
     </div>
   );
 }

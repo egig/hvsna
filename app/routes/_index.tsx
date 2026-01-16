@@ -1,9 +1,8 @@
-import { getPrayerTimes } from '../services/prayer-times';
+import { getPrayerTimes } from '../../lib/prayer-times';
 import { useLoaderData, type LoaderFunctionArgs } from 'react-router';
 import { getCurrentGregorianDate } from "lib/gregorian-date";
-import { getCurrentHijriDate, getCurrentWeek, getNextHijriDate, getPreviousHijriDate } from "lib/hijri-date";
+import { getCurrentHijriDate, getNextHijriDate, getPreviousHijriDate } from "lib/hijri-date";
 import DayView, { type DayViewProps } from "~/components/day-view";
-import WeekView from '~/components/week-view';
 import { getLocationFromRequest } from '~/utils/route-loaders';
 import { DEFAULT_TIMEZONE, PRAYER_TIMES_CONFIG } from '~/utils/config';
 
