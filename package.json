@@ -20,10 +20,12 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "dayjs-hijri": "^1.0.1",
+    "dexie": "^4.2.1",
     "isbot": "^5.1.31",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-router": "7.12.0"
+    "react-router": "7.12.0",
+    "rxdb": "^16.21.1"
   },
   "devDependencies": {
     "@react-router/dev": "7.12.0",

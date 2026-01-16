@@ -1,7 +1,6 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { useState } from 'react'
-import { cn } from '~/lib/utils'
+import { cn } from '../../lib/utils'
 
 interface TextEditorProps {
   content?: string
