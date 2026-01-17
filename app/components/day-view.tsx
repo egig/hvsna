@@ -9,11 +9,6 @@ export interface DayViewProps {
   date: number;
   month: number;
   year: number;
-  Maghrib: string;
-  Isha: string;
-  Fajr: string;
-  Dhuhr: string;
-  Asr: string;
   gDate: number;
   gMonth: number;
   gYear: number;
@@ -29,11 +24,6 @@ export default function DayView({
   gDate,
   gMonth,
   gYear,
-  Maghrib,
-  Isha,
-  Fajr,
-  Dhuhr,
-  Asr,
   dayName,
   prevLink,
   nextLink

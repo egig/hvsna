@@ -1,18 +1,14 @@
 import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
 import { getGregorianFromHijriDate, getHijriMonthDays } from "lib/hijri-date";
 import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
-import { Link, useLoaderData, useParams, type LoaderFunctionArgs } from "react-router";
+import { Link, useParams } from "react-router";
 import MonthView from "~/components/month-view";
 
-export function loader(request: LoaderFunctionArgs) {
-    const params = request.params;
-    return {
-        year: Number(params.year),
-    }
-}
 
-export default function m() {
-    const data = useLoaderData()
+export default function YearView() {
+    const data = {
+      year: Number(useParams().year),
+    }
     const gStart = getGregorianFromHijriDate(data.year, 1, 1)
     const gEnd = getGregorianFromHijriDate(data.year, 12, getHijriMonthDays(data.year, 12))
     
