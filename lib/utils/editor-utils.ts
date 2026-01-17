@@ -2,9 +2,8 @@ import type { JSONContent } from '@tiptap/react';
 import type { EditorDocument, EditorDocumentCreateInput } from '../types/editor-document';
 
 export class EditorUtils {
-  static createEmptyDocument(title: string = 'Untitled Document'): EditorDocumentCreateInput {
+  static createEmptyDocument(): EditorDocumentCreateInput {
     return {
-      title,
       content: {
         type: 'doc',
         content: [
@@ -78,74 +77,13 @@ export class EditorUtils {
       .replace(/^-+|-+$/g, '');
   }
 
-  static createDocumentBackup(document: EditorDocument): string {
-    const backup = {
-      ...document,
-      backedUpAt: new Date().toISOString(),
-    };
-    return JSON.stringify(backup, null, 2);
-  }
 
-  static restoreDocumentFromBackup(backupString: string): EditorDocument | null {
-    try {
-      const backup = JSON.parse(backupString);
-      
-      if (!backup.id || !backup.title || !backup.content) {
-        return null;
-      }
-
-      return {
-        id: backup.id,
-        title: backup.title,
-        content: backup.content,
-        createdAt: new Date(backup.createdAt),
-        updatedAt: new Date(backup.updatedAt),
-        version: backup.version || 1,
-        tags: backup.tags || [],
-        metadata: backup.metadata || {},
-      };
-    } catch (error) {
-      return null;
-    }
-  }
-
-  static compareDocuments(doc1: EditorDocument, doc2: EditorDocument): {
-    isEqual: boolean;
-    differences: string[];
-  } {
-    const differences: string[] = [];
-
-    if (doc1.title !== doc2.title) {
-      differences.push('title');
-    }
-
-    if (JSON.stringify(doc1.content) !== JSON.stringify(doc2.content)) {
-      differences.push('content');
-    }
-
-    if (JSON.stringify(doc1.tags) !== JSON.stringify(doc2.tags)) {
-      differences.push('tags');
-    }
-
-    if (JSON.stringify(doc1.metadata) !== JSON.stringify(doc2.metadata)) {
-      differences.push('metadata');
-    }
-
-    return {
-      isEqual: differences.length === 0,
-      differences,
-    };
-  }
 
   static validateDocument(document: any): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!document.id || typeof document.id !== 'string') {
       errors.push('Invalid or missing id');
-    }
-
-    if (!document.title || typeof document.title !== 'string') {
-      errors.push('Invalid or missing title');
     }
 
     if (!this.isValidJSONContent(document.content)) {
@@ -198,14 +136,6 @@ export class EditorUtils {
       const dateA = new Date(a.updatedAt).getTime();
       const dateB = new Date(b.updatedAt).getTime();
       return order === 'desc' ? dateB - dateA : dateA - dateB;
-    });
-  }
-
-  static sortDocumentsByTitle(documents: EditorDocument[], order: 'asc' | 'desc' = 'asc'): EditorDocument[] {
-    return [...documents].sort((a, b) => {
-      const titleA = a.title.toLowerCase();
-      const titleB = b.title.toLowerCase();
-      return order === 'desc' ? titleB.localeCompare(titleA) : titleA.localeCompare(titleB);
     });
   }
 }

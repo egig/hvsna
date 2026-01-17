@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
 import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
 import { TextEditor } from "./text-editor";
+import { useEditorDB } from "../utils/useEditorDB";
 
 
 export interface DayViewProps {
@@ -37,6 +38,11 @@ export default function DayView({
   prevLink,
   nextLink
 }: DayViewProps) {
+
+  let docId = `${year}-${month}-${date}`;
+  const { updateDocument, getDocument } = useEditorDB();
+  // const doc = getDocument(docId);
+
   return (
     <div className="p-6">
       <div className="mb-4 mx-auto">
@@ -69,7 +75,12 @@ export default function DayView({
         </Link>
       </div>
       <div>
-        <TextEditor content="<p>write...</p>" placeholder="Write..." onChange={(text) => {}} />
+        <TextEditor placeholder="Write..." onChange={(jsonContent) => {
+          console.log(jsonContent)
+          updateDocument(docId, {
+            content: [jsonContent]
+          })
+        }} />
       </div>
     </div>
   );

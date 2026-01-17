@@ -29,8 +29,7 @@ export class MockDatabaseAdapter implements DatabaseAdapter {
     
     const now = new Date();
     const document: EditorDocument = {
-      id: this.generateId(),
-      title: input.title,
+      id: input.id || this.generateId(),
       content: input.content,
       createdAt: now,
       updatedAt: now,
@@ -113,16 +112,6 @@ export class MockDatabaseAdapter implements DatabaseAdapter {
     return results.map(doc => ({ ...doc }));
   }
 
-  async searchDocuments(searchTerm: string): Promise<EditorDocument[]> {
-    this.ensureInitialized();
-    
-    const regex = new RegExp(searchTerm, 'i');
-    const results = Array.from(this.documents.values()).filter(doc => 
-      regex.test(doc.title) || this.extractTextFromContent(doc.content).includes(searchTerm)
-    );
-
-    return results.map(doc => ({ ...doc }));
-  }
 
   observeDocument(id: string): any {
     this.ensureInitialized();

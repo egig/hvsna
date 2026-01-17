@@ -1,10 +1,12 @@
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEditor, EditorContent, type JSONContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { cn } from '../../lib/utils'
+import { Placeholder } from '@tiptap/extensions'
+import './text-editor.css'
 
 interface TextEditorProps {
   content?: string
-  onChange?: (content: string) => void
+  onChange?: (content: JSONContent) => void
   placeholder?: string
   className?: string
   editable?: boolean
@@ -20,12 +22,15 @@ export function TextEditor({
   const editor = useEditor({
     immediatelyRender: false, // SSR support
     extensions: [
+      Placeholder.configure({
+        placeholder
+      }),
       StarterKit,
     ],
     content,
     editable,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML())
+      onChange?.(editor.getJSON())
     },
     editorProps: {
       attributes: {
@@ -209,7 +214,7 @@ export function TextEditor({
   return (
     <div className={cn('overflow-hidden', className)}>
       {/* {editable && <MenuBar />} */}
-      <EditorContent editor={editor} />
+      <EditorContent content={content} editor={editor} />
     </div>
   )
 }

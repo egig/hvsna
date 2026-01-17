@@ -1,4 +1,4 @@
-import { createRxDatabase } from 'rxdb';
+import { createRxDatabase } from 'rxdb/plugins/core';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { replicateRxCollection } from 'rxdb/plugins/replication';
 import type { 
@@ -17,7 +17,6 @@ export interface DatabaseAdapter {
   deleteDocument(id: string): Promise<boolean>;
   getAllDocuments(): Promise<EditorDocument[]>;
   queryDocuments(query: EditorDocumentQuery): Promise<EditorDocument[]>;
-  searchDocuments(searchTerm: string): Promise<EditorDocument[]>;
   observeDocument(id: string): any;
   observeAllDocuments(): any;
   exportDocuments(): Promise<EditorDocument[]>;
@@ -51,7 +50,7 @@ export class TipTapEditorDB implements DatabaseAdapter {
 
     try {
       this.db = await createRxDatabase({
-        name: 'tiptap-editor-db',
+        name: 'editor-db',
         storage: getRxStorageDexie(),
       });
 
@@ -73,8 +72,7 @@ export class TipTapEditorDB implements DatabaseAdapter {
     
     const now = new Date().toISOString();
     const document: EditorDocument = {
-      id: this.generateId(),
-      title: input.title,
+      id: input.id ? input.id : this.generateId(),
       content: input.content,
       createdAt: new Date(now),
       updatedAt: new Date(now),
@@ -141,10 +139,6 @@ export class TipTapEditorDB implements DatabaseAdapter {
 
     if (query.id) {
       queryBuilder = queryBuilder.where('id').equals(query.id);
-    }
-
-    if (query.title) {
-      queryBuilder = queryBuilder.where('title').regex(new RegExp(query.title, 'i'));
     }
 
     if (query.tags && query.tags.length > 0) {
@@ -265,9 +259,6 @@ export class EditorDBService {
     return this.adapter.queryDocuments(query);
   }
 
-  async searchDocuments(searchTerm: string): Promise<EditorDocument[]> {
-    return this.adapter.searchDocuments(searchTerm);
-  }
 
   observeDocument(id: string): any {
     return this.adapter.observeDocument(id);

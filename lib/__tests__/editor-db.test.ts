@@ -24,7 +24,6 @@ describe('EditorDBService', () => {
   describe('Document Creation', () => {
     it('should create a new document', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'Test Document',
         content: {
           type: 'doc',
           content: [
@@ -55,7 +54,6 @@ describe('EditorDBService', () => {
 
     it('should create document with minimal data', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'Minimal Document',
         content: {
           type: 'doc',
           content: [
@@ -69,12 +67,41 @@ describe('EditorDBService', () => {
       expect(document.tags).toEqual([]);
       expect(document.metadata).toEqual({});
     });
+
+    it('should use id if provided', async () => {
+      const input: EditorDocumentCreateInput = {
+        id: 'custom-document-id',
+        content: {
+          type: 'doc',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                { type: 'text', text: 'Document with custom ID' }
+              ]
+            }
+          ]
+        },
+        tags: ['custom'],
+        metadata: { source: 'test' }
+      };
+
+      const document = await db.createDocument(input);
+
+      expect(document).toBeDefined();
+      expect(document.id).toBe('custom-document-id');
+      expect(document.content).toEqual(input.content);
+      expect(document.tags).toEqual(input.tags);
+      expect(document.metadata).toEqual(input.metadata);
+      expect(document.version).toBe(1);
+      expect(document.createdAt).toBeInstanceOf(Date);
+      expect(document.updatedAt).toBeInstanceOf(Date);
+    });
   });
 
   describe('Document Retrieval', () => {
     it('should retrieve a document by id', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'Test Document',
         content: {
           type: 'doc',
           content: [
@@ -88,7 +115,6 @@ describe('EditorDBService', () => {
 
       expect(retrieved).toBeDefined();
       expect(retrieved?.id).toBe(created.id);
-      expect(retrieved?.title).toBe(created.title);
     });
 
     it('should return null for non-existent document', async () => {
@@ -98,12 +124,10 @@ describe('EditorDBService', () => {
 
     it('should retrieve all documents', async () => {
       const input1: EditorDocumentCreateInput = {
-        title: 'Document 1',
         content: { type: 'doc', content: [{ type: 'paragraph' }] }
       };
 
       const input2: EditorDocumentCreateInput = {
-        title: 'Document 2',
         content: { type: 'doc', content: [{ type: 'paragraph' }] }
       };
 
@@ -118,7 +142,6 @@ describe('EditorDBService', () => {
   describe('Document Updates', () => {
     it('should update an existing document', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'Original Title',
         content: {
           type: 'doc',
           content: [
@@ -129,7 +152,6 @@ describe('EditorDBService', () => {
 
       const created = await db.createDocument(input);
       const updated = await db.updateDocument(created.id, {
-        title: 'Updated Title',
         content: {
           type: 'doc',
           content: [
@@ -139,14 +161,11 @@ describe('EditorDBService', () => {
       });
 
       expect(updated).toBeDefined();
-      expect(updated?.title).toBe('Updated Title');
       expect(updated?.version).toBe(2);
     });
 
     it('should return null when updating non-existent document', async () => {
-      const result = await db.updateDocument('non-existent-id', {
-        title: 'New Title'
-      });
+      const result = await db.updateDocument('non-existent-id', {});
       expect(result).toBeNull();
     });
   });
@@ -154,7 +173,6 @@ describe('EditorDBService', () => {
   describe('Document Deletion', () => {
     it('should delete a document', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'To Delete',
         content: { type: 'doc', content: [{ type: 'paragraph' }] }
       };
 
@@ -173,60 +191,9 @@ describe('EditorDBService', () => {
     });
   });
 
-  describe('Document Search', () => {
-    beforeEach(async () => {
-      const documents: EditorDocumentCreateInput[] = [
-        {
-          title: 'JavaScript Guide',
-          content: {
-            type: 'doc',
-            content: [
-              { type: 'paragraph', content: [{ type: 'text', text: 'Learn JavaScript programming' }] }
-            ]
-          },
-          tags: ['programming', 'javascript']
-        },
-        {
-          title: 'TypeScript Tutorial',
-          content: {
-            type: 'doc',
-            content: [
-              { type: 'paragraph', content: [{ type: 'text', text: 'TypeScript basics' }] }
-            ]
-          },
-          tags: ['programming', 'typescript']
-        }
-      ];
-
-      for (const doc of documents) {
-        await db.createDocument(doc);
-      }
-    });
-
-    it('should search documents by title', async () => {
-      const results = await db.searchDocuments('JavaScript');
-      expect(results).toHaveLength(1);
-      expect(results[0].title).toBe('JavaScript Guide');
-    });
-
-    it('should search documents by content', async () => {
-      const results = await db.searchDocuments('TypeScript basics');
-      expect(results).toHaveLength(1);
-      expect(results[0].title).toBe('TypeScript Tutorial');
-    });
-
-    it('should query documents by tags', async () => {
-      const results = await db.queryDocuments({
-        tags: ['programming']
-      });
-      expect(results).toHaveLength(2);
-    });
-  });
-
   describe('Database Operations', () => {
     it('should get database statistics', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'Stats Test',
         content: { type: 'doc', content: [{ type: 'paragraph' }] }
       };
 
@@ -240,7 +207,6 @@ describe('EditorDBService', () => {
 
     it('should export and import documents', async () => {
       const input: EditorDocumentCreateInput = {
-        title: 'Export Test',
         content: { type: 'doc', content: [{ type: 'paragraph' }] }
       };
 
@@ -255,7 +221,6 @@ describe('EditorDBService', () => {
       await db.importDocuments(exported);
       const imported = await db.getAllDocuments();
       expect(imported).toHaveLength(1);
-      expect(imported[0].title).toBe('Export Test');
     });
   });
 });
@@ -265,15 +230,13 @@ describe('EditorUtils', () => {
     it('should create empty document', () => {
       const doc = EditorUtils.createEmptyDocument();
       
-      expect(doc.title).toBe('Untitled Document');
       expect(doc.content.type).toBe('doc');
       expect(doc.content.content).toHaveLength(1);
       expect(doc.content.content![0].type).toBe('paragraph');
     });
 
     it('should create empty document with custom title', () => {
-      const doc = EditorUtils.createEmptyDocument('Custom Title');
-      expect(doc.title).toBe('Custom Title');
+      const doc = EditorUtils.createEmptyDocument();
     });
   });
 
@@ -351,7 +314,6 @@ describe('EditorUtils', () => {
   describe('Document Utilities', () => {
     const sampleDoc: EditorDocument = {
       id: 'test-doc',
-      title: 'Test Document',
       content: {
         type: 'doc',
         content: [
@@ -376,31 +338,13 @@ describe('EditorUtils', () => {
       expect(slug).toBe('test-document-title');
     });
 
-    it('should create and restore backup', () => {
-      const backup = EditorUtils.createDocumentBackup(sampleDoc);
-      expect(backup).toContain('"id": "test-doc"');
-
-      const restored = EditorUtils.restoreDocumentFromBackup(backup);
-      expect(restored).toEqual(sampleDoc);
-    });
-
-    it('should compare documents', () => {
-      const modifiedDoc = {
-        ...sampleDoc,
-        title: 'Modified Title'
-      };
-
-      const comparison = EditorUtils.compareDocuments(sampleDoc, modifiedDoc);
-      expect(comparison.isEqual).toBe(false);
-      expect(comparison.differences).toContain('title');
-    });
 
     it('should validate document', () => {
       const validation = EditorUtils.validateDocument(sampleDoc);
       expect(validation.isValid).toBe(true);
       expect(validation.errors).toHaveLength(0);
 
-      const invalidDoc = { ...sampleDoc, title: '' };
+      const invalidDoc = { ...sampleDoc, id: '' };
       const invalidValidation = EditorUtils.validateDocument(invalidDoc);
       expect(invalidValidation.isValid).toBe(false);
       expect(invalidValidation.errors.length).toBeGreaterThan(0);
@@ -411,7 +355,6 @@ describe('EditorUtils', () => {
     const sampleDocs: EditorDocument[] = [
       {
         id: 'doc1',
-        title: 'A Document',
         content: { type: 'doc', content: [{ type: 'paragraph' }] },
         createdAt: new Date('2023-01-01'),
         updatedAt: new Date('2023-01-01'),
@@ -421,7 +364,6 @@ describe('EditorUtils', () => {
       },
       {
         id: 'doc2',
-        title: 'Z Document',
         content: { type: 'doc', content: [{ type: 'paragraph' }] },
         createdAt: new Date('2023-01-02'),
         updatedAt: new Date('2023-01-02'),
@@ -445,11 +387,6 @@ describe('EditorUtils', () => {
     it('should sort by date', () => {
       const sorted = EditorUtils.sortDocumentsByDate(sampleDocs, 'desc');
       expect(sorted[0].id).toBe('doc2');
-    });
-
-    it('should sort by title', () => {
-      const sorted = EditorUtils.sortDocumentsByTitle(sampleDocs, 'asc');
-      expect(sorted[0].id).toBe('doc1');
     });
   });
 });

@@ -4,7 +4,7 @@ import type { EditorDocument } from '../types/editor-document';
 
 const editorDocumentSchema = {
   title: 'editor document',
-  description: 'TipTap editor document content',
+  description: 'editor document content',
   version: 0,
   primaryKey: 'id',
   type: 'object',
@@ -13,12 +13,8 @@ const editorDocumentSchema = {
       type: 'string',
       maxLength: 100,
     },
-    title: {
-      type: 'string',
-      maxLength: 200,
-    },
     content: {
-      type: 'object',
+      type: 'array',
     },
     createdAt: {
       type: 'string',
@@ -42,7 +38,7 @@ const editorDocumentSchema = {
       type: 'object',
     },
   },
-  required: ['id', 'title', 'content', 'createdAt', 'updatedAt', 'version'],
+  required: ['id', 'content', 'createdAt', 'updatedAt', 'version'],
   indexes: [
     ['title'],
     ['createdAt'],
@@ -53,7 +49,7 @@ const editorDocumentSchema = {
 
 const databaseSchema = {
   version: 1,
-  name: 'tiptap-editor-db',
+  name: 'editor-db',
   collections: {
     documents: {
       schema: editorDocumentSchema,

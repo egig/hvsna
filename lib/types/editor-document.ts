@@ -2,8 +2,7 @@ import type { JSONContent } from '@tiptap/react';
 
 export interface EditorDocument {
   id: string;
-  title: string;
-  content: JSONContent;
+  content: JSONContent[];
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -12,15 +11,14 @@ export interface EditorDocument {
 }
 
 export interface EditorDocumentCreateInput {
-  title: string;
-  content: JSONContent;
+  id?: string;
+  content: JSONContent[];
   tags?: string[];
   metadata?: Record<string, any>;
 }
 
 export interface EditorDocumentUpdateInput {
-  title?: string;
-  content?: JSONContent;
+  content?: JSONContent[];
   tags?: string[];
   metadata?: Record<string, any>;
 }
@@ -35,7 +33,6 @@ export interface EditorChange {
 
 export type EditorDocumentQuery = {
   id?: string;
-  title?: string;
   tags?: string[];
   dateRange?: {
     start: Date;

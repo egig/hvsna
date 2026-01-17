@@ -22,6 +22,7 @@ function isToday(day: HijriDate) {
     return day.date === today.date && day.month === today.month && day.year === today.year
 }
 
+
 export default function MonthView({year, month}: {year: number; month: number}) {
 
     const daysList = ["Sat","Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
