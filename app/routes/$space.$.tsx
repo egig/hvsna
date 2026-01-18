@@ -3,6 +3,8 @@ import { createRoot, type Container } from "react-dom/client";
 import type { Route } from "./+types/$space.$";
 import { redirect, useLoaderData, useParams } from "react-router";
 import App from "../.client/app";
+import type { DatabaseConfig } from "lib/database";
+import { get } from "lib/database";
 
 export default function Space() {
   const data = useLoaderData();
@@ -17,11 +19,21 @@ export default function Space() {
       appBaseName: `/${params.space}`,
     };
 
-    const root = document.getElementById("root");
-    createRoot(root as Container).render(<App config={config} />);
-    // @ts-ignore
-    window.__dtMounted = true;
-    window.document.title = "HVSNA";
+    const dbConfig: DatabaseConfig = {
+      name: params.space as string,
+      devMode: import.meta.env.DEV,
+    };
+    
+    const root = createRoot(document.getElementById("root") as Container);
+
+    (async () => {
+      const db = await get(dbConfig);
+      root.render(<App config={config} db={db} />);
+      // @ts-ignore
+      window.__dtMounted = true;
+      window.document.title = "HVSNA";
+    })(); 
+
   }, []);
 
   return (

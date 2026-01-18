@@ -41,7 +41,6 @@ export function getNextHijriMonth(y: number, m: number): HijriDate {
   let currentM = m-1;
   
   // @ts-ignore
-  // m is 1 based
   const nextHijriDate = hd.year(y).month(currentM + 1);
   return {
     date: nextHijriDate.date(),

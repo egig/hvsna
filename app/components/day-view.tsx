@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
 import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
 import { TextEditor } from "./text-editor";
-import { useEditorDB } from "../utils/useEditorDB";
+import { useDayData } from "~/hooks/useDayData";
 
 
 export interface DayViewProps {
@@ -17,6 +17,14 @@ export interface DayViewProps {
   dayName?: string;
 }
 
+let emptyContent = {
+    type: 'doc',
+    content: [{
+      type: 'paragraph',
+      content: []
+    }]
+  }
+
 export default function DayView({
   date,
   month,
@@ -29,9 +37,7 @@ export default function DayView({
   nextLink
 }: DayViewProps) {
 
-  let docId = `${year}-${month}-${date}`;
-  const { updateDocument, getDocument } = useEditorDB();
-  // const doc = getDocument(docId);
+  const { dayData, saveDayData } = useDayData(`${year}-${month}-${date}`);
 
   return (
     <div className="p-6">
@@ -65,11 +71,12 @@ export default function DayView({
         </Link>
       </div>
       <div>
-        <TextEditor placeholder="Write..." onChange={(jsonContent) => {
-          console.log(jsonContent)
-          updateDocument(docId, {
-            content: [jsonContent]
-          })
+        <TextEditor content={dayData?.content?.[0] || emptyContent} placeholder="Write..." onChange={async (jsonContent) => {
+          await saveDayData({
+            id: `${year}-${month}-${date}`,
+            content: [jsonContent],
+            version: 1,
+          });
         }} />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { createRxDatabase } from 'rxdb';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
-import type { EditorDocument } from '../types/editor-document';
+import type { EditorDocument } from './types/editor-document';
 
 const editorDocumentSchema = {
   title: 'editor document',
@@ -15,14 +15,16 @@ const editorDocumentSchema = {
     },
     content: {
       type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: true,
+      },
     },
     createdAt: {
-      type: 'string',
-      format: 'date-time',
+      type: 'number',
     },
     updatedAt: {
-      type: 'string',
-      format: 'date-time',
+      type: 'number',
     },
     version: {
       type: 'number',
@@ -38,13 +40,7 @@ const editorDocumentSchema = {
       type: 'object',
     },
   },
-  required: ['id', 'content', 'createdAt', 'updatedAt', 'version'],
-  indexes: [
-    ['title'],
-    ['createdAt'],
-    ['updatedAt'],
-    ['tags'],
-  ],
+  required: ['id', 'createdAt', 'updatedAt', 'version'],
 } as const;
 
 const databaseSchema = {

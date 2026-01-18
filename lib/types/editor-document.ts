@@ -3,8 +3,8 @@ import type { JSONContent } from '@tiptap/react';
 export interface EditorDocument {
   id: string;
   content: JSONContent[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: number;
+  updatedAt: number;
   version: number;
   tags?: string[];
   metadata?: Record<string, any>;
