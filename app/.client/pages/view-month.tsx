@@ -16,15 +16,14 @@ export default function MonthViewPage() {
     const gStart  = getGregorianFromHijriDate(data.year, data.month, 1)
     const gEnd  = getGregorianFromHijriDate(data.year, data.month, getHijriMonthDays(data.year, data.month))
 
-    return <div className="p-6">
+    return <div className="p-4">
         <div className="mb-4">
         <h1 className="title">
-            <Link className="parent-link" to={"/y/" + data.year}>{data.year}</Link> {HIJRI_MONTH_NAMES_EN[data.month-1]}
+            {HIJRI_MONTH_NAMES_EN[data.month-1]} <Link className="parent-link" to={"/y/" + data.year}>{data.year}</Link>
         </h1>
-        <p className="subtitle">{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
+        <p className="subtitle text-right">{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
         </div>
-        <div className="navigation">
-            <Link to={"/"}>Today</Link>
+        <div className="navigation text-right">
             <Link to={"/y/" + prev.year + "/m/" + prev.month}>Previous</Link>
             <Link to={"/y/" + next.year + "/m/" +next.month}>Next</Link>
         </div>

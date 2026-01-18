@@ -20,7 +20,7 @@ body {
 }
 
 .title {
-  @apply text-indigo-500 font-bold text-xl;
+  @apply text-indigo-500 font-bold text-xl text-right;
 }
 
 .subtitle {
@@ -28,7 +28,7 @@ body {
 }
 
 .navigation {
-  @apply text-gray-500 font-light text-sm mb-4 flex gap-2; 
+  @apply text-gray-500 font-light text-sm mb-4 flex gap-2 justify-end; 
 }
 
 

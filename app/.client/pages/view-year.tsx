@@ -14,16 +14,15 @@ export default function YearView() {
     
     return (
       <div>
-        <div className="px-6 pt-6 sticky top-0 bg-white p-b">
+        <div className="p-4">
           <div className="mb-4">
             <h1 className="title">{data.year}</h1>
-            <p className="subtitle">
+            <p className="subtitle text-right">
               {GREGORIAN_MONTH_NAMES_EN[gStart.month - 1]} {gStart.year} to{" "}
               {GREGORIAN_MONTH_NAMES_EN[gEnd.month - 1]} {gEnd.year}
             </p>
           </div>
           <div className="navigation">
-            <Link to={"/"}>Today</Link>
             <Link to={"/y/" + (data.year - 1)}>Previous</Link>
             <Link to={"/y/" + (data.year + 1)}>Next</Link>
           </div>

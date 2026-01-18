@@ -31,7 +31,7 @@ export default function MonthView({year, month}: {year: number; month: number}) 
     const firstDate = getHijriDate(year, month, 1)
     const startDay = daysList.indexOf(firstDate.dayName)
 
-    return <div className="max-w-[400px]">
+    return <div className="">
         <div className="grid grid-cols-[repeat(7,1fr)] gap-1 mb-2.5">
             {daysList.map((day) => <div className="text-center font-semibold text-indigo-500 text-sm p-2" key={day}>{day}</div>)}
         </div>
