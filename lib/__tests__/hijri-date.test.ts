@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, getPreviousHijriMonth, getNextHijriMonth, getGregorianFromHijriDate, getCurrentWeek } from '../hijri-date';
+import { getHijriMonthDays, getHijriDate, getPreviousHijriDate, getNextHijriDate, getPreviousHijriMonth, getNextHijriMonth, getGregorianFromHijriDate, getCurrentWeek, getWeekOfDate } from '../hijri-date';
 
 describe('getHijriMonthDays', () => {
   it('should return correct number of days for Rajab 1447', () => {
@@ -235,14 +235,13 @@ describe('Month navigation consistency', () => {
     expect(nextMonth.year).toBe(baseYear);
   });
 
-  // TODO
-  // it('should handle round trip correctly', () => {
-  //   const originalMonth = getNextHijriMonth(1446, 7);
-  //   const previousFromNext = getPreviousHijriMonth(originalMonth.year, originalMonth.month);
+  it('should handle round trip correctly', () => {
+    const originalMonth = getNextHijriMonth(1446, 7);
+    const previousFromNext = getPreviousHijriMonth(originalMonth.year, originalMonth.month);
     
-  //   expect(previousFromNext.month).toBe(7);
-  //   expect(previousFromNext.year).toBe(1446);
-  // });
+    expect(previousFromNext.month).toBe(7);
+    expect(previousFromNext.year).toBe(1446);
+  });
 
   it('should handle year boundaries correctly', () => {
     const endOfYear = getNextHijriMonth(1446, 12);
@@ -430,5 +429,112 @@ describe('getCurrentWeek', () => {
     
     expect(dayDiff).toBeGreaterThanOrEqual(6);
     expect(dayDiff).toBeLessThanOrEqual(7);
+  });
+});
+
+describe('getWeekOfDate', () => {
+  it('should return an array of 7 days', () => {
+    const weekDays = getWeekOfDate(1446, 7, 15);
+    
+    expect(Array.isArray(weekDays)).toBe(true);
+    expect(weekDays).toHaveLength(7);
+  });
+
+  it('should return valid dayjs objects', () => {
+    const weekDays = getWeekOfDate(1446, 7, 15);
+    
+    weekDays.forEach(day => {
+      expect(typeof day).toBe('object');
+      expect(day.isValid()).toBe(true);
+    });
+  });
+
+  it('should return consecutive days', () => {
+    const weekDays = getWeekOfDate(1446, 7, 15);
+    
+    for (let i = 1; i < weekDays.length; i++) {
+      const currentDay = weekDays[i];
+      const previousDay = weekDays[i - 1];
+      const diffInDays = currentDay.diff(previousDay, 'day');
+      
+      expect(diffInDays).toBe(1);
+    }
+  });
+
+  it('should handle different dates in the same month', () => {
+    const week1 = getWeekOfDate(1446, 7, 1);
+    const week2 = getWeekOfDate(1446, 7, 15);
+    const week3 = getWeekOfDate(1446, 7, 30);
+    
+    expect(week1).toHaveLength(7);
+    expect(week2).toHaveLength(7);
+    expect(week3).toHaveLength(7);
+    
+    week1.forEach(day => expect(day.isValid()).toBe(true));
+    week2.forEach(day => expect(day.isValid()).toBe(true));
+    week3.forEach(day => expect(day.isValid()).toBe(true));
+  });
+
+  it('should handle month boundaries correctly', () => {
+    const weekFromEndOfMonth = getWeekOfDate(1446, 7, 30);
+    const weekFromStartOfMonth = getWeekOfDate(1446, 8, 1);
+    
+    expect(weekFromEndOfMonth).toHaveLength(7);
+    expect(weekFromStartOfMonth).toHaveLength(7);
+    
+    weekFromEndOfMonth.forEach(day => expect(day.isValid()).toBe(true));
+    weekFromStartOfMonth.forEach(day => expect(day.isValid()).toBe(true));
+  });
+
+  it('should handle year boundaries correctly', () => {
+    const weekFromEndOfYear = getWeekOfDate(1446, 12, 29);
+    const weekFromStartOfYear = getWeekOfDate(1447, 1, 1);
+    
+    expect(weekFromEndOfYear).toHaveLength(7);
+    expect(weekFromStartOfYear).toHaveLength(7);
+    
+    weekFromEndOfYear.forEach(day => expect(day.isValid()).toBe(true));
+    weekFromStartOfYear.forEach(day => expect(day.isValid()).toBe(true));
+  });
+
+  it('should return the same week for different days within the same week', () => {
+    const weekFromDay1 = getWeekOfDate(1446, 7, 15);
+    const weekFromDay2 = getWeekOfDate(1446, 7, 17);
+    
+    expect(weekFromDay1).toHaveLength(7);
+    expect(weekFromDay2).toHaveLength(7);
+    
+    // Check if both weeks contain the same days (within) same week)
+    const firstDayOfWeek1 = weekFromDay1[0];
+    const firstDayOfWeek2 = weekFromDay2[0];
+    
+    // They should be same week start or one week apart
+    const weekDiff = Math.abs(firstDayOfWeek1.diff(firstDayOfWeek2, 'week'));
+    expect(weekDiff).toBeLessThanOrEqual(1);
+  });
+
+  it('should handle different Hijri years', () => {
+    const week1445 = getWeekOfDate(1445, 1, 1);
+    const week1446 = getWeekOfDate(1446, 1, 1);
+    const week1447 = getWeekOfDate(1447, 1, 1);
+    
+    expect(week1445).toHaveLength(7);
+    expect(week1446).toHaveLength(7);
+    expect(week1447).toHaveLength(7);
+    
+    week1445.forEach(day => expect(day.isValid()).toBe(true));
+    week1446.forEach(day => expect(day.isValid()).toBe(true));
+    week1447.forEach(day => expect(day.isValid()).toBe(true));
+  });
+
+  it('should return Hijri calendar dates', () => {
+    const weekDays = getWeekOfDate(1446, 7, 15);
+    
+    weekDays.forEach(day => {
+      // Check if the day has Hijri calendar functionality
+      expect(typeof day.calendar).toBe('function');
+      const hijriDay = day.calendar('hijri');
+      expect(typeof hijriDay).toBe('object');
+    });
   });
 });

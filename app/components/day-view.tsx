@@ -3,6 +3,9 @@ import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
 import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
 import { TextEditor } from "./text-editor";
 import { useDayData } from "~/hooks/useDayData";
+import { getCurrentWeek, getHijriDate, getWeekOfDate, isSameDay, isToday } from "lib/hijri-date";
+import type dayjs from "dayjs";
+import { cn } from "lib/utils";
 
 
 export interface DayViewProps {
@@ -25,6 +28,7 @@ let emptyContent = {
     }]
   }
 
+
 export default function DayView({
   date,
   month,
@@ -38,20 +42,42 @@ export default function DayView({
 }: DayViewProps) {
 
   const { dayData, saveDayData } = useDayData(`${year}-${month}-${date}`);
+  const theDay = getHijriDate(year, month, date);
+
+  const weekDate = getWeekOfDate(year, month, date);
 
   return (
     <div className="p-6">
       <div className="mb-4 mx-auto">
         <h1 className="title">
           <Link className="parent-link" to={`/y/${year}/m/${month}`}>
-            {year}{" "}
-            {HIJRI_MONTH_NAMES_EN[month-1]}
+            {year} {HIJRI_MONTH_NAMES_EN[month-1]}
           </Link>
-          {" "}{date}
         </h1>
-        <p className="subtitle">
+      </div>
+      <div className="flex gap-2">
+        {weekDate.map((date, index) => (
+          <div className={cn("p-2 text-center rounded-md border-1", isToday(date) && "bg-gray-200", isSameDay(date, theDay) ? "border-gray-200" : "border-transparent")} key={index}>
+          <Link to={`/y/${date.year()}/m/${date.month() + 1}/d/${date.date()}`}>
+            <span className="block text-xs">{date.format("dd")}</span>
+            <span className="block">{date.format("DD")}</span>
+          </Link>
+          </div>
+        ))}
+      </div>
+      <div>
+        <p className="subtitle p-2 text-center ">
           {dayName}, {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth-1]} {gYear}
         </p>
+      </div>
+      <div>
+        <TextEditor content={dayData?.content?.[0] || emptyContent} placeholder="Write..." onChange={async (jsonContent) => {
+          await saveDayData({
+            id: `${year}-${month}-${date}`,
+            content: [jsonContent],
+            version: 1,
+          });
+        }} />
       </div>
       <div className="navigation">
         <Link
@@ -69,15 +95,6 @@ export default function DayView({
         >
           Next
         </Link>
-      </div>
-      <div>
-        <TextEditor content={dayData?.content?.[0] || emptyContent} placeholder="Write..." onChange={async (jsonContent) => {
-          await saveDayData({
-            id: `${year}-${month}-${date}`,
-            content: [jsonContent],
-            version: 1,
-          });
-        }} />
       </div>
     </div>
   );

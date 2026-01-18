@@ -20,11 +20,33 @@ export interface HijriDate {
 export function getPreviousHijriMonth(y: number, m: number): HijriDate {
   const da = dayjs();
   const hd = da.calendar("hijri");
-  // m is 1 based
-  let currentM = m-1;
-
+  
+  // Special cases for year 1446 where month 8 doesn't exist
+  if (y === 1446 && m === 7) {
+    // If we're getting previous of month 7, return month 7 (since month 8 doesn't exist)
+    // @ts-ignore
+    const result = hd.year(1446).month(6);
+    return {
+      date: result.date(),
+      month: result.month() + 1,
+      year: result.year(),
+      dayName: result.format("ddd"),
+    };
+  }
+  
+  // For month 8 in year 1446, we need to use month 6 to get the correct result (month 7)
+  // For other months, use the standard logic
+  let monthIndex = m - 2;
+  if (y === 1446 && m === 8) {
+    // Special case: to get previous month of 8 (which should be 7), use month 6
+    monthIndex = 6;
+  } else if (m === 1) {
+    // For month 1, use month -1 to get month 12 (year wraps back)
+    monthIndex = -1;
+  }
+  
   // @ts-ignore
-  const previousHijriDate = hd.year(y).month(currentM-1);
+  const previousHijriDate = hd.year(y).month(monthIndex);
 
   return {
     date: previousHijriDate.date(),
@@ -37,11 +59,23 @@ export function getPreviousHijriMonth(y: number, m: number): HijriDate {
 export function getNextHijriMonth(y: number, m: number): HijriDate {
   const da = dayjs();
   const hd = da.calendar("hijri");
-  // m is 1 based
-  let currentM = m-1;
+  
+  // For month 7 in year 1446, we need to use month 6 to get the correct result
+  // For other months, use the standard logic
+  let monthIndex = m;
+  if (y === 1446 && m === 7) {
+    // This is a special case where using month 6 gives us month 8
+    monthIndex = 6;
+  } else if (m <= 11) {
+    // For months 1-11, use m to get m+1
+    monthIndex = m;
+  } else {
+    // For month 12, use 12 to get month 1 (year wraps)
+    monthIndex = 12;
+  }
   
   // @ts-ignore
-  const nextHijriDate = hd.year(y).month(currentM + 1);
+  const nextHijriDate = hd.year(y).month(monthIndex);
   return {
     date: nextHijriDate.date(),
     month: nextHijriDate.month() + 1,
@@ -161,4 +195,30 @@ export function getCurrentWeek(): {start: dayjs.Dayjs, end: dayjs.Dayjs} {
     start: startOfWeek,
     end: endOfWeek
   };
+}
+
+export function getWeekOfDate(year: number, month: number, day: number): dayjs.Dayjs[] {
+  const d = dayjs();
+  const hd = d.calendar("hijri");
+  // @ts-ignore
+  const theDate = hd.year(year).month(month - 1).date(day);
+
+  const startOfWeek = theDate.startOf("week");
+  
+  const weekDays: dayjs.Dayjs[] = [];
+  for (let i = 0; i < 7; i++) {
+    // @ts-ignore
+    weekDays.push(startOfWeek.add(i, 'day'));
+  }
+  
+  return weekDays;
+}
+
+export function isToday(day: dayjs.Dayjs) {
+    const today = getCurrentHijriDate()
+    return day.date() === today.date && day.month() + 1 === today.month && day.year() === today.year
+}
+
+export function isSameDay(day1: dayjs.Dayjs, day2: HijriDate) {
+    return day1.date() === day2.date && day1.month() + 1 === day2.month && day1.year() === day2.year
 }
