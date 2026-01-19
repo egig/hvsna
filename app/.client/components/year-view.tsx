@@ -6,7 +6,7 @@ import MonthViewSmall from './month-view-small';
 
 export default function YearView({year}: {year: number}) {
   return (
-    <div className="min-h-screen px-2 pb-14">
+    <div className="px-4 mb-14">
       <div className="max-w-7xl mx-auto">
         {/* Mobile: 3x4 grid, Desktop: 4x3 grid */}
         <div className="grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-6">
