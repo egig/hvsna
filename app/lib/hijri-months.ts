@@ -34,8 +34,24 @@ export const HIJRI_MONTH_NAMES_EN = [
   'Dhu al-Hijjah'
 ] as const;
 
+export const HIJRI_MONTH_NAMES_EN_SHORT = [
+  'Muharram',
+  'Safar',
+  'Rabi I',
+  'Rabi II',
+  'Jumada I',
+  'Jumada II',
+  'Rajab',
+  'Shaban',
+  'Ramadan',
+  'Shawwal',
+  'Dhu al-Qidah',
+  'Dhu al-Hijjah'
+] as const;
+
 /**
  * Type definitions for Hijri months
  */
 export type HijriMonth = typeof HIJRI_MONTH_NAMES[number];
 export type HijriMonthEn = typeof HIJRI_MONTH_NAMES_EN[number];
+export type HijriMonthEnShort = typeof HIJRI_MONTH_NAMES_EN_SHORT[number];

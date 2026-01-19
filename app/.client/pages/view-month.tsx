@@ -15,15 +15,15 @@ export default function MonthViewPage() {
     const hm = new HijriMonth(data.year, data.month)
     const prev = hm.previous()
     const next = hm.next()
-    const gStart  = hm.getFirstDay()
-    const gEnd  = hm.getLastDay()
+    const gStart  = hm.getFirstDay().toDate()
+    const gEnd  = hm.getLastDay().toDate()
 
     return <div className="p-4">
         <div className="mb-4">
         <h1 className="title">
             {HIJRI_MONTH_NAMES_EN[data.month-1]} <Link className="parent-link" to={"/y/" + data.year}>{data.year}</Link>
         </h1>
-        <p className="subtitle text-right">{GREGORIAN_MONTH_NAMES_EN[gStart.month-1]} {gStart.year} to {GREGORIAN_MONTH_NAMES_EN[gEnd.month-1]} {gEnd.year}</p>
+        <p className="subtitle text-right">{GREGORIAN_MONTH_NAMES_EN[gStart.getMonth()+1]} {gStart.getFullYear()} to {GREGORIAN_MONTH_NAMES_EN[gEnd.getMonth()+1]} {gEnd.getFullYear()}</p>
         </div>
         <div className="navigation text-right">
             <Link to={"/y/" + prev.year + "/m/" + prev.month}>Previous</Link>

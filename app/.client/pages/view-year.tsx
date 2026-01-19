@@ -3,8 +3,9 @@ import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { Link, useParams } from "react-router";
 import MonthView from "~/.client/components/month-view";
 import { HijriDate } from "~/lib/hijri/hijri-date";
+import YearView from "~/.client/components/year-view";
 
-export default function YearView() {
+export default function YearPage() {
     const data = {
       year: Number(useParams().year),
     }    
@@ -14,8 +15,8 @@ export default function YearView() {
     
     return (
       <div>
-        <div className="p-4">
-          <div className="mb-4">
+        <div className="px-4 py-2">
+          <div className="mb-2">
             <h1 className="title">{data.year}</h1>
             <p className="subtitle text-right">
               {GREGORIAN_MONTH_NAMES_EN[gStart.getMonth()]} {gStart.getFullYear()} to{" "}
@@ -27,22 +28,7 @@ export default function YearView() {
             <Link to={"/y/" + (data.year + 1)}>Next</Link>
           </div>
         </div>
-        <div className="mb-4 p-6">
-          {Array.from({ length: 12 }, (_, i) => i).map((month) => (
-            <div className="mb-6" key={month}>
-              <div className="mb-2">
-                <Link
-                  className="section-title"
-                  key={month}
-                  to={`/y/${data.year}/m/${month + 1}`}
-                >
-                  {HIJRI_MONTH_NAMES_EN[month]}
-                </Link>
-              </div>
-              <MonthView year={data.year} month={month + 1} />
-            </div>
-          ))}
-        </div>
+        <YearView year={data.year} />
       </div>
     );
 }

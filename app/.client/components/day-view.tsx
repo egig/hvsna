@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
-import { useDayData } from "~/hooks/useDayData";
+import { useDayData } from "~/.client/hooks/useDayData";
 import PrevNext from "~/.client/components/prev-next";
 import { HijriDate, isTodayHijriDate, isSameHijriDate } from "~/lib/hijri/hijri-date";
 import clsx from "clsx";
