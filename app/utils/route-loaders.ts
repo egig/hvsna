@@ -1,5 +1,5 @@
-import { getLocationFromIp, type Location } from 'lib/location';
-import { getClientIP, getDirectIP } from 'lib/ip';
+import { getLocationFromIp, type Location } from '~/lib/location';
+import { getClientIP, getDirectIP } from '~/lib/ip';
 import { DEFAULT_LOCATION } from './config';
 
 /**

@@ -1,16 +1,16 @@
-import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
-import { getGregorianFromHijriDate, getHijriMonthDays } from "lib/hijri-date";
-import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
+import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
+import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { Link, useParams } from "react-router";
-import MonthView from "~/components/month-view";
-
+import MonthView from "~/.client/components/month-view";
+import { HijriDate } from "~/lib/hijri/hijri-date";
 
 export default function YearView() {
     const data = {
       year: Number(useParams().year),
-    }
-    const gStart = getGregorianFromHijriDate(data.year, 1, 1)
-    const gEnd = getGregorianFromHijriDate(data.year, 12, getHijriMonthDays(data.year, 12))
+    }    
+
+    const gStart = (new HijriDate(data.year, 1, 1)).toDate()
+    const gEnd = (new HijriDate(data.year, 12, 29)).toDate() 
     
     return (
       <div>
@@ -18,8 +18,8 @@ export default function YearView() {
           <div className="mb-4">
             <h1 className="title">{data.year}</h1>
             <p className="subtitle text-right">
-              {GREGORIAN_MONTH_NAMES_EN[gStart.month - 1]} {gStart.year} to{" "}
-              {GREGORIAN_MONTH_NAMES_EN[gEnd.month - 1]} {gEnd.year}
+              {GREGORIAN_MONTH_NAMES_EN[gStart.getMonth()]} {gStart.getFullYear()} to{" "}
+              {GREGORIAN_MONTH_NAMES_EN[gEnd.getMonth()]} {gEnd.getFullYear()}
             </p>
           </div>
           <div className="navigation">

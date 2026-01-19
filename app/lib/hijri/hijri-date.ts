@@ -14,10 +14,23 @@ export class HijriDate {
         this._rawGregorianDate = new Date(d.year, d.month-1, d.day, hour || 0, minute || 0, second || 0);
     }
 
+    toDate(): Date {
+        return this._rawGregorianDate;
+    }
+
+    static fromDate(date: Date) {
+        const hijriDate = gregorianToHijri({
+            year: date.getFullYear(),
+            month: date.getMonth() + 1, // Month number in Javascript Date API is zero-based.
+            day: date.getDate(),
+        });
+
+         return new HijriDate(hijriDate.year, hijriDate.month, hijriDate.day);
+    }
+
     static fromGregorian(year: number, month?: number, day?: number, hour?: number, minute?: number, second?: number) {
         let date = new Date();
         if (!!month && !!year && !!day) {
-            console.log(year, month, day);
             date = new Date(year, month-1, day, hour || 0, minute || 0, second || 0);
         }
 
@@ -153,4 +166,40 @@ export class HijriDate {
         }
     }
 
+    isToday(): boolean {
+        const today = HijriDate.fromGregorian(
+            new Date().getFullYear(),
+            new Date().getMonth() + 1,
+            new Date().getDate()
+        );
+        return this.year === today.year && 
+               this.month === today.month && 
+               this.day === today.day;
+    }
+
+    getWeekDates(): HijriDate[] {
+        const sow = this.startOfWeek()
+        const weekDates = [sow];
+        for (let i = 0; i < 6; i++) {
+            weekDates.push(weekDates[i].next());
+        }
+        return weekDates;
+    }
+}
+
+export function isTodayHijriDate(hijriDate: HijriDate): boolean {
+    const today = HijriDate.fromGregorian(
+        new Date().getFullYear(),
+        new Date().getMonth() + 1,
+        new Date().getDate()
+    );
+    return hijriDate.year === today.year && 
+           hijriDate.month === today.month && 
+           hijriDate.day === today.day;
+}
+
+export function isSameHijriDate(date1: HijriDate, date2: HijriDate): boolean {
+    return date1.year === date2.year && 
+           date1.month === date2.month && 
+           date1.day === date2.day;
 }

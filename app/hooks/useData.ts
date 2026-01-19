@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import type { EditorDocument } from '../../lib/types/editor-document';
-import { useDatabase } from '../../lib/database';
+import type { EditorDocument } from '../lib/types/editor-document';
+import { useDatabase } from '../lib/database';
 
 export const useData = () => {
   const {db} = useDatabase();

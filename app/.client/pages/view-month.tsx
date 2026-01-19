@@ -1,8 +1,8 @@
-import { getGregorianFromHijriDate, getHijriMonthDays, getNextHijriMonth, getPreviousHijriMonth } from "lib/hijri-date";
-import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
+import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { Link, useParams } from "react-router";
-import MonthView from "~/components/month-view";
-import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
+import MonthView from "~/.client/components/month-view";
+import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
+import { HijriMonth } from "~/lib/hijri/hijri-month";
 
 
 export default function MonthViewPage() {
@@ -11,10 +11,12 @@ export default function MonthViewPage() {
         month: Number(params.month),
         year: Number(params.year)
     }
-    const prev = getPreviousHijriMonth(data.year, data.month)
-    const next = getNextHijriMonth(data.year, data.month)
-    const gStart  = getGregorianFromHijriDate(data.year, data.month, 1)
-    const gEnd  = getGregorianFromHijriDate(data.year, data.month, getHijriMonthDays(data.year, data.month))
+
+    const hm = new HijriMonth(data.year, data.month)
+    const prev = hm.previous()
+    const next = hm.next()
+    const gStart  = hm.getFirstDay()
+    const gEnd  = hm.getLastDay()
 
     return <div className="p-4">
         <div className="mb-4">

@@ -3,7 +3,7 @@ import { AppRoutes } from "./app-routes";
 
 import "./app.css";
 import DroppableContext from "./components/droppable-context";
-import { DatabaseProvider } from "lib/database";
+import { DatabaseProvider } from "~/lib/database";
 
 export interface AppConfig {
   basePath?: string;

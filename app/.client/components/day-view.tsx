@@ -1,18 +1,11 @@
 import { Link } from "react-router";
-import { HIJRI_MONTH_NAMES_EN } from "lib/hijri-months";
-import { GREGORIAN_MONTH_NAMES_EN } from "lib/gregorian-date";
-import { TextEditor } from "./text-editor";
+import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
+import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import { useDayData } from "~/hooks/useDayData";
-import {
-  getCurrentWeek,
-  getHijriDate,
-  getWeekOfDate,
-  isSameDay,
-  isToday,
-} from "lib/hijri-date";
-import type dayjs from "dayjs";
-import { cn } from "lib/utils";
 import PrevNext from "~/.client/components/prev-next";
+import { HijriDate, isTodayHijriDate, isSameHijriDate } from "~/lib/hijri/hijri-date";
+import clsx from "clsx";
+import { TextEditor } from "./text-editor";
 
 export interface DayViewProps {
   date: number;
@@ -48,9 +41,7 @@ export default function DayView({
   nextLink,
 }: DayViewProps) {
   const { dayData, saveDayData } = useDayData(`${year}-${month}-${date}`);
-  const theDay = getHijriDate(year, month, date);
-
-  const weekDate = getWeekOfDate(year, month, date);
+  const theDay = new HijriDate(year, month, date);
 
   return (
     <div className="p-4">
@@ -67,26 +58,26 @@ export default function DayView({
       </div>
       <PrevNext prevLink={prevLink} nextLink={nextLink} />
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
-        {weekDate.map((date, index) => (
+        {theDay.getWeekDates().map((date, index) => (
           <div
-            className={cn(
+            className={clsx(
               "p-1 sm:p-2 text-center rounded-md border-1",
-              isToday(date) && "bg-gray-200",
-              isSameDay(date, theDay)
+              isTodayHijriDate(date) && "bg-gray-200",
+              isSameHijriDate(date, theDay)
                 ? "border-gray-200"
                 : "border-transparent",
             )}
             key={index}
           >
             <Link
-              to={`/y/${date.year()}/m/${date.month() + 1}/d/${date.date()}`}
+              to={`/y/${date.year}/m/${date.month}/d/${date.day}`}
             >
               <span className="block text-xs">{date.format("dd")}</span>
               <span className="block text-sm sm:text-base">{date.format("DD")}</span>
             </Link>
           </div>
         ))}
-      </div>
+      </div>    
       <div>
         <TextEditor
           content={dayData?.content?.[0] || emptyContent}

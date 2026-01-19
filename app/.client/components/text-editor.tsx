@@ -1,8 +1,8 @@
 import { useEditor, EditorContent, type JSONContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { cn } from '../../lib/utils'
 import { Placeholder } from '@tiptap/extensions'
 import './text-editor.css'
+import clsx from 'clsx'
 
 interface TextEditorProps {
   content?: string
@@ -46,7 +46,7 @@ export function TextEditor({
   }
 
   return (
-    <div className={cn('overflow-hidden', className)}>
+    <div className={clsx('overflow-hidden', className)}>
       {/* {editable && <MenuBar />} */}
       <EditorContent editor={editor} />
     </div>

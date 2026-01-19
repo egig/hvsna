@@ -3,8 +3,8 @@ import { createRoot, type Container } from "react-dom/client";
 import type { Route } from "./+types/$space.$";
 import { redirect, useLoaderData, useParams } from "react-router";
 import App from "../.client/app";
-import type { DatabaseConfig } from "lib/database";
-import { get } from "lib/database";
+import type { DatabaseConfig } from "~/lib/database";
+import { get } from "~/lib/database";
 
 export default function Space() {
   const data = useLoaderData();

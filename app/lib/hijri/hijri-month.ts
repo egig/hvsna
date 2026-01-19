@@ -16,7 +16,6 @@ export class HijriMonth {
     static fromGregorian(year: number, month?: number, day?: number) {
         let date = new Date();
         if (!!month && !!year && !!day) {
-            console.log(year, month, day);
             date = new Date(year, month - 1, day);
         }
 
