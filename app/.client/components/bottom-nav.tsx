@@ -8,7 +8,7 @@ export default function BottomNav() {
   ];
 
   return (
-      <nav className="bg-white border-t border-gray-200 shadow-lg fixed bottom-0 left-0 right-0">
+      <nav className="h-[65px] bg-white border-t border-gray-200 shadow-lg fixed bottom-0 left-0 right-0">
         <div className="max-w-md mx-auto px-4">
           <div className="flex justify-around items-center h-16">
             {menuItems.map((item) => {

@@ -2,6 +2,7 @@ import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import { Link, useParams } from "react-router";
 import { HijriDate } from "~/lib/hijri/hijri-date";
 import YearView from "~/.client/components/year-view";
+import PrevNext from "../components/prev-next";
 
 export default function YearPage() {
     const data = {
@@ -21,12 +22,9 @@ export default function YearPage() {
               {GREGORIAN_MONTH_NAMES_EN[gEnd.getMonth()]} {gEnd.getFullYear()}
             </p>
           </div>
-          <div className="navigation">
-            <Link to={"/y/" + (data.year - 1)}>Previous</Link>
-            <Link to={"/y/" + (data.year + 1)}>Next</Link>
-          </div>
         </div>
         <YearView year={data.year} />
+        <PrevNext prevLink={"/y/" + (data.year - 1)} nextLink={"/y/" + (data.year + 1)} />
       </div>
     );
 }

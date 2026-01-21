@@ -56,7 +56,6 @@ export default function DayView({
           {dayName}, {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth - 1]} {gYear}
         </p>
       </div>
-      <PrevNext prevLink={prevLink} nextLink={nextLink} />
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {theDay.getWeekDates().map((date, index) => (
           <div
@@ -91,6 +90,7 @@ export default function DayView({
           }}
         />
       </div>
+      <PrevNext prevLink={prevLink} nextLink={nextLink} />
     </div>
   );
 }

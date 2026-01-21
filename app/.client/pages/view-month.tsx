@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import MonthView from "~/.client/components/month-view";
 import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import { HijriMonth } from "~/lib/hijri/hijri-month";
+import PrevNext from "../components/prev-next";
 
 
 export default function MonthViewPage() {
@@ -25,10 +26,7 @@ export default function MonthViewPage() {
         </h1>
         <p className="subtitle text-right">{GREGORIAN_MONTH_NAMES_EN[gStart.getMonth()+1]} {gStart.getFullYear()} to {GREGORIAN_MONTH_NAMES_EN[gEnd.getMonth()+1]} {gEnd.getFullYear()}</p>
         </div>
-        <div className="navigation text-right">
-            <Link to={"/y/" + prev.year + "/m/" + prev.month}>Previous</Link>
-            <Link to={"/y/" + next.year + "/m/" +next.month}>Next</Link>
-        </div>
         <MonthView year={data.year} month={data.month} />
+        <PrevNext prevLink={"/y/" + prev.year + "/m/" + prev.month} nextLink={"/y/" + next.year + "/m/" +next.month} />
     </div>
 }

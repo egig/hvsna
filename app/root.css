@@ -27,9 +27,6 @@ body {
   @apply text-gray-500 font-light text-sm; 
 }
 
-.navigation {
-  @apply text-gray-500 font-light text-sm mb-4 flex gap-2 justify-end; 
-}
 
 
 .section-title {

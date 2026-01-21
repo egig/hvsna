@@ -31,9 +31,9 @@ export default function MonthViewSmall({year, month}: {year: number; month: numb
     const startDay = daysList.indexOf(firstDate.format("ddd"))
 
     return <div className="">
-        {/* <div className="grid grid-cols-7 gap-1 mb-2.5">
-            {daysListSmall.map((day) => <div className="text-[0.7rem] text-center font-semibold" key={day}>{day}</div>)}
-        </div> */}
+        <div className="grid grid-cols-7 gap-1 mb-2.5">
+            {daysListSmall.map((day) => <div className="text-[0.6rem] text-center font-semibold" key={day}>{day}</div>)}
+        </div>
         <div className="grid grid-cols-7 gap-1 mb-2.5">
             {Array.from({ length: startDay }, (_, i) => i + 1).map(() => EmptyDayItem())}
             {Array.from({ length: days }, (_, i) => i + 1).map((day) => DayItem(new HijriDate(year, month, day)))}
