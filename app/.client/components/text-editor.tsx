@@ -10,6 +10,7 @@ interface TextEditorProps {
   placeholder?: string
   className?: string
   editable?: boolean
+  instanceID: string
 }
 
 export function TextEditor({ 
@@ -17,7 +18,8 @@ export function TextEditor({
   onChange, 
   placeholder = 'Start typing...', 
   className,
-  editable = true 
+  editable = true,
+  instanceID 
 }: TextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false, // SSR support
@@ -38,7 +40,7 @@ export function TextEditor({
         placeholder,
       },
     },
-  }, [content])
+  }, [content, instanceID])
 
 
   if (!editor) {

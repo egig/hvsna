@@ -1,11 +1,16 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import { useDayData } from "~/.client/hooks/useDayData";
 import PrevNext from "~/.client/components/prev-next";
-import { HijriDate, isTodayHijriDate, isSameHijriDate } from "~/lib/hijri/hijri-date";
+import {
+  HijriDate,
+  isTodayHijriDate,
+  isSameHijriDate,
+} from "~/lib/hijri/hijri-date";
 import clsx from "clsx";
 import { TextEditor } from "./text-editor";
+import { useSwipeable } from "react-swipeable";
 
 export interface DayViewProps {
   date: number;
@@ -42,6 +47,18 @@ export default function DayView({
 }: DayViewProps) {
   const { dayData, saveDayData } = useDayData(`${year}-${month}-${date}`);
   const theDay = new HijriDate(year, month, date);
+  const navigate = useNavigate();
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      navigate(nextLink, {viewTransition: true});
+    },
+    onSwipedRight: () => {
+      navigate(prevLink, {viewTransition: true});
+    },
+  });
+
+  const dateLabel = `${dayName}, ${date} ${HIJRI_MONTH_NAMES_EN[month - 1]} ${year}`;
+  const placeholder = `Write for ${dateLabel}...`;
 
   return (
     <div className="p-4">
@@ -53,7 +70,7 @@ export default function DayView({
           </Link>
         </h1>
         <p className="subtitle text-right">
-          {dayName}, {gDate} {GREGORIAN_MONTH_NAMES_EN[gMonth - 1]} {gYear}
+          {dateLabel}
         </p>
       </div>
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
@@ -68,19 +85,20 @@ export default function DayView({
             )}
             key={index}
           >
-            <Link
-              to={`/y/${date.year}/m/${date.month}/d/${date.day}`}
-            >
+            <Link to={`/y/${date.year}/m/${date.month}/d/${date.day}`}>
               <span className="block text-xs">{date.format("dd")}</span>
-              <span className="block text-sm sm:text-base">{date.format("DD")}</span>
+              <span className="block text-sm sm:text-base">
+                {date.format("DD")}
+              </span>
             </Link>
           </div>
         ))}
-      </div>    
-      <div>
+      </div>
+      <div {...handlers}>
         <TextEditor
+          instanceID={`${year}-${month}-${date}`}
           content={dayData?.content?.[0] || emptyContent}
-          placeholder="Write..."
+          placeholder={placeholder}
           onChange={async (jsonContent) => {
             await saveDayData({
               id: `${year}-${month}-${date}`,
@@ -90,7 +108,6 @@ export default function DayView({
           }}
         />
       </div>
-      <PrevNext prevLink={prevLink} nextLink={nextLink} />
     </div>
   );
 }
