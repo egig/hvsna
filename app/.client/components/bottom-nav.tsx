@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router';
-import { Calendar, Info } from 'lucide-react';
+import { Calendar, Info, User } from 'lucide-react';
 
 export default function BottomNav() {
   const menuItems = [

@@ -4,6 +4,7 @@ import { AppRoutes } from "./app-routes";
 import "./app.css";
 import DroppableContext from "./components/droppable-context";
 import { DatabaseProvider } from "~/lib/database";
+import { ClerkProvider } from "@clerk/clerk-react";
 
 export interface AppConfig {
   basePath?: string;
@@ -22,12 +23,14 @@ export interface AppConfig {
 export default function App({ config, db }: { config: AppConfig, db: any }) {
 
   return (
-    <DroppableContext>
-      <DatabaseProvider db={db}>
-        <BrowserRouter basename={config.appBaseName}>
-          <AppRoutes />
-        </BrowserRouter>
-      </DatabaseProvider>
-    </DroppableContext>
+    <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
+      <DroppableContext>
+        <DatabaseProvider db={db}>
+          <BrowserRouter basename={config.appBaseName}>
+            <AppRoutes />
+          </BrowserRouter>
+        </DatabaseProvider>
+      </DroppableContext>
+    </ClerkProvider>
   );
 }

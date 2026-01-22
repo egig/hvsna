@@ -1,22 +1,23 @@
 import { useEffect } from "react";
 import { createRoot, type Container } from "react-dom/client";
 import type { Route } from "./+types/$space.$";
-import { redirect, useLoaderData, useParams } from "react-router";
+import { useParams } from "react-router";
 import App from "../.client/app";
 import type { DatabaseConfig } from "~/lib/database";
 import { get } from "~/lib/database";
+import type { AppConfig } from "../.client/app";
 
 export default function Space() {
-  const data = useLoaderData();
   const params = useParams();
   useEffect(() => {
     // @ts-ignore
     if (!!window.__dtMounted) {
       return;
     }
-    const config = {
+    const config: AppConfig = {
       basePath: import.meta.env.VITE_API_BASE,
       appBaseName: `/${params.space}`,
+      clerkPublishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY!,
     };
 
     const dbConfig: DatabaseConfig = {

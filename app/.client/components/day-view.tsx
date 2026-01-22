@@ -11,6 +11,7 @@ import {
 import clsx from "clsx";
 import { TextEditor } from "./text-editor";
 import { useSwipeable } from "react-swipeable";
+import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 
 export interface DayViewProps {
   date: number;
@@ -62,7 +63,14 @@ export default function DayView({
 
   return (
     <div className="p-4">
-      <div className="mb-4 mx-auto">
+      <div className="mb-4 mx-auto flex items-center justify-between">
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        <SignedOut>
+          <SignInButton />
+        </SignedOut>
+        <div>
         <h1 className="title text-right">
           {date}{" "}
           <Link className="parent-link" to={`/y/${year}/m/${month}`}>
@@ -72,6 +80,7 @@ export default function DayView({
         <p className="subtitle text-right">
           {dateLabel}
         </p>
+        </div>
       </div>
       <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {theDay.getWeekDates().map((date, index) => (
