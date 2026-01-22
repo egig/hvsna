@@ -1,56 +1,61 @@
 import { useCallback } from 'react';
-import type { EditorDocument } from '../../lib/types/editor-document';
+import type { Note } from '../../lib/types/note';
 import { useDatabase } from '../../lib/database';
+import { useUser } from '@clerk/clerk-react';
 
 export const useData = () => {
   const {db} = useDatabase();
+  const { isLoaded, isSignedIn, user } = useUser();
 
-  const getDocument = useCallback(async (id: string): Promise<EditorDocument | null> => {
+  const getDocument = useCallback(async (id: string): Promise<Note | null> => {
     if (!db) throw new Error('Database not initialized');
     
     try {
-      const doc = await db.documents.findOne(id).exec();
-      return doc ? doc.toJSON() : null;
+      const doc = await db.notes.findOne(id).exec();
+      if (doc) {
+        const docData = doc.toJSON();
+        return docData;
+      }
+
+      return null;
     } catch (err) {
       throw new Error(`Failed to get document: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }, [db]);
 
-  const saveDocument = useCallback(async (document: Omit<EditorDocument, 'createdAt' | 'updatedAt'>): Promise<EditorDocument> => {
+  const saveDocument = useCallback(async (document: Omit<Note, 'createdAt' | 'updatedAt'>): Promise<Note> => {
     if (!db) throw new Error('Database not initialized');
     
     try {
-      const now = Date.now();
-      const existingDoc = await db.documents.findOne(document.id).exec();
-      
+      const existingDoc = await db.notes.findOne(document.id).exec();
       if (existingDoc) {
-        await existingDoc.modify((doc: any) => {
-          doc.content = document.content;
-          doc.updatedAt = now;
-          return doc;
+        return await existingDoc.patch({
+          content: document.content,
+          updated_at: new Date().toISOString()
         });
         
-        return existingDoc.toJSON();
       } else {
         const docData = {
           ...document,
-          createdAt: now,
-          updatedAt: now,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         };
-        const newDoc = await db.documents.upsert(docData);
+        const newDoc = await db.notes.upsert(docData);
         return newDoc.toJSON();
       }
     } catch (err) {
-      throw new Error(`Failed to save document: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to save document: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
     }
-  }, [db]);
+  }, [db, user?.id]);
 
 
   const deleteDocument = useCallback(async (id: string): Promise<void> => {
     if (!db) throw new Error('Database not initialized');
     
     try {
-      const doc = await db.documents.findOne(id).exec();
+      const doc = await db.notes.findOne(id).exec();
       if (doc) {
         await doc.remove();
       }
@@ -59,22 +64,22 @@ export const useData = () => {
     }
   }, [db]);
 
-  const getAllDocuments = useCallback(async (): Promise<EditorDocument[]> => {
+  const getAllDocuments = useCallback(async (): Promise<Note[]> => {
     if (!db) throw new Error('Database not initialized');
     
     try {
-      const docs = await db.documents.find().exec();
+      const docs = await db.notes.find().exec();
       return docs.map((doc: any) => doc.toJSON());
     } catch (err) {
       throw new Error(`Failed to get all documents: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }, [db]);
 
-  const queryDocuments = useCallback(async (query: any): Promise<EditorDocument[]> => {
+  const queryDocuments = useCallback(async (query: any): Promise<Note[]> => {
     if (!db) throw new Error('Database not initialized');
     
     try {
-      const docs = await db.documents.find(query).exec();
+      const docs = await db.notes.find(query).exec();
       return docs.map((doc: any) => doc.toJSON());
     } catch (err) {
       throw new Error(`Failed to query documents: ${err instanceof Error ? err.message : 'Unknown error'}`);

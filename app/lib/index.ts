@@ -1,4 +1,4 @@
-export * from './types/editor-document';
+export * from './types/note';
 export * from './schema';
 export * from './utils/editor-utils';
 

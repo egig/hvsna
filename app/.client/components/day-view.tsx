@@ -64,13 +64,15 @@ export default function DayView({
   return (
     <div className="p-4">
       <div className="mb-4 mx-auto flex items-center justify-between">
+        <div className="min-w-[50%]">
         <SignedIn>
           <UserButton />
         </SignedIn>
         <SignedOut>
           <SignInButton />
         </SignedOut>
-        <div>
+        </div>
+        <div className="min-w-[50%]">
         <h1 className="title text-right">
           {date}{" "}
           <Link className="parent-link" to={`/y/${year}/m/${month}`}>
@@ -106,13 +108,12 @@ export default function DayView({
       <div {...handlers}>
         <TextEditor
           instanceID={`${year}-${month}-${date}`}
-          content={dayData?.content?.[0] || emptyContent}
+          content={dayData?.content ? JSON.parse(dayData.content)[0] : emptyContent}
           placeholder={placeholder}
           onChange={async (jsonContent) => {
             await saveDayData({
               id: `${year}-${month}-${date}`,
-              content: [jsonContent],
-              version: 1,
+              content: JSON.stringify([jsonContent])
             });
           }}
         />

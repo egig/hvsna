@@ -3,7 +3,7 @@ import type {
   EditorDocumentCreateInput, 
   EditorDocumentUpdateInput,
   EditorDocumentQuery 
-} from '../../types/editor-document';
+} from '../../types/note';
 import type { DatabaseAdapter } from '../../database/editor-db';
 
 export class MockDatabaseAdapter implements DatabaseAdapter {

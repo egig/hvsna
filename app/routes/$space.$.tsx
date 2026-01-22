@@ -6,9 +6,11 @@ import App from "../.client/app";
 import type { DatabaseConfig } from "~/lib/database";
 import { get } from "~/lib/database";
 import type { AppConfig } from "../.client/app";
-
-export default function Space() {
-  const params = useParams();
+import { createClient } from '@supabase/supabase-js';
+import sync from "~/lib/sync";
+import { useSession } from "@clerk/clerk-react";
+ 
+export default function Space({params}: {params: {space: string}}) {
   useEffect(() => {
     // @ts-ignore
     if (!!window.__dtMounted) {
@@ -25,9 +27,12 @@ export default function Space() {
       devMode: import.meta.env.DEV,
     };
     
+    
     const root = createRoot(document.getElementById("root") as Container);
 
     (async () => {
+      // console.log((new Clerk()).session?.getToken())
+
       const db = await get(dbConfig);
       root.render(<App config={config} db={db} />);
       // @ts-ignore

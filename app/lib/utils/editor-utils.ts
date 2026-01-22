@@ -1,5 +1,5 @@
 import type { JSONContent } from '@tiptap/react';
-import type { EditorDocument, EditorDocumentCreateInput } from '../types/editor-document';
+import type { EditorDocument, EditorDocumentCreateInput } from '../types/note';
 
 export class EditorUtils {
   static createEmptyDocument(): EditorDocumentCreateInput {
