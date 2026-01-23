@@ -6,9 +6,6 @@ import App from "../.client/app";
 import type { DatabaseConfig } from "~/lib/database";
 import { get } from "~/lib/database";
 import type { AppConfig } from "../.client/app";
-import { createClient } from '@supabase/supabase-js';
-import sync from "~/lib/sync";
-import { useSession } from "@clerk/clerk-react";
  
 export default function Space({params}: {params: {space: string}}) {
   useEffect(() => {
@@ -20,6 +17,8 @@ export default function Space({params}: {params: {space: string}}) {
       basePath: import.meta.env.VITE_API_BASE,
       appBaseName: `/${params.space}`,
       clerkPublishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY!,
+      supabaseURL: import.meta.env.VITE_SUPABASE_URL!,
+      supabasePublishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
     };
 
     const dbConfig: DatabaseConfig = {

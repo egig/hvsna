@@ -23,7 +23,7 @@ const  noteSchema = {
     },
     updated_at: {
       type: 'string',
-    }
+    },
   },
   required: ['id'],
 } as const;

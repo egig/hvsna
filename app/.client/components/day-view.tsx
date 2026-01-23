@@ -12,6 +12,7 @@ import clsx from "clsx";
 import { TextEditor } from "./text-editor";
 import { useSwipeable } from "react-swipeable";
 import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
+import { useSync } from "~/lib/sync";
 
 export interface DayViewProps {
   date: number;
@@ -110,14 +111,22 @@ export default function DayView({
           instanceID={`${year}-${month}-${date}`}
           content={dayData?.content ? JSON.parse(dayData.content)[0] : emptyContent}
           placeholder={placeholder}
-          onChange={async (jsonContent) => {
+          onChange={debounce(async (jsonContent) => {
             await saveDayData({
               id: `${year}-${month}-${date}`,
               content: JSON.stringify([jsonContent])
             });
-          }}
+          }, 500)}
         />
       </div>
     </div>
   );
+}
+
+function debounce(callback: (jsonContent: any) => Promise<void>, delay: number) {
+  let timeout: NodeJS.Timeout;
+  return (jsonContent: any) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => callback(jsonContent), delay);
+  };
 }
