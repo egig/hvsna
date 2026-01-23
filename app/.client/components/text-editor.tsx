@@ -1,5 +1,6 @@
 import { useEditor, EditorContent, type JSONContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { TaskItem, TaskList } from '@tiptap/extension-list'
 import { Placeholder } from '@tiptap/extensions'
 import './text-editor.css'
 import clsx from 'clsx'
@@ -28,6 +29,10 @@ export function TextEditor({
         placeholder
       }),
       StarterKit,
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
     ],
     content,
     editable,
@@ -36,7 +41,7 @@ export function TextEditor({
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4',
+        class: 'mx-auto focus:outline-none min-h-[200px] p-4',
         placeholder,
       },
     },

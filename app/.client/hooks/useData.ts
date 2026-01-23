@@ -29,7 +29,7 @@ export const useData = () => {
     try {
       const existingDoc = await db.notes.findOne(document.id).exec();
       if (existingDoc) {
-        return await existingDoc.patch({
+        return await existingDoc.incrementalPatch({
           content: document.content,
           updated_at: new Date().toISOString()
         });

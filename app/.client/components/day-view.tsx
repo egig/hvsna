@@ -47,6 +47,7 @@ export default function DayView({
   prevLink,
   nextLink,
 }: DayViewProps) {
+  const {replication} = useSync();
   const { dayData, saveDayData } = useDayData(`${year}-${month}-${date}`);
   const theDay = new HijriDate(year, month, date);
   const navigate = useNavigate();
@@ -116,6 +117,9 @@ export default function DayView({
               id: `${year}-${month}-${date}`,
               content: JSON.stringify([jsonContent])
             });
+            if(replication?.isPaused() || replication?.isStopped()) {
+              replication.reSync();
+            }
           }, 500)}
         />
       </div>

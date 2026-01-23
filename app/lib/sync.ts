@@ -39,8 +39,8 @@ export default async function sync(
   });
 
   // (optional) observe errors and wait for the first sync barrier
-  replication.error$.subscribe((err) => console.error("[replication]", err));
-  replication.sent$.subscribe(doc => console.log("[sent]", doc));
+  // replication.error$.subscribe((err) => console.error("[replication]", err));
+  // replication.sent$.subscribe(doc => console.log("[sent]", doc));
   await replication.awaitInitialReplication();
   return replication;
 }
