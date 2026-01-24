@@ -1,17 +1,18 @@
 import { Page, Tabs, Tab, Link, Toolbar, ToolbarPane } from 'framework7-react';
+import { NotepadText, CogIcon } from 'lucide-react';
 
 export default () => (
   <Page pageContent={false}>
     <Toolbar bottom tabbar>
       <ToolbarPane>
         <Link tabLink href="/" routeTabId="today">
-          Today
+          <NotepadText />
         </Link>
         {/* <Link tabLink href="/tab2/" routeTabId="tab2">
           Tab 2
         </Link> */}
         <Link tabLink href="/settings/" routeTabId="settings">
-          Settings
+        <CogIcon />
         </Link>
       </ToolbarPane>
     </Toolbar>

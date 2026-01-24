@@ -66,11 +66,7 @@ export default function ViewToday() {
   const weeks = useMemo(() => {
     return generateWeeks(_hijriDate);
   }, [_hijriDate]);
-
-  const currentWeekDates = useMemo(() => {
-    return weeks[currentWeekIndex] || [];
-  }, [weeks, currentWeekIndex]);
-
+  
   const allDates = useMemo(() => {
     return weeks.flat();
   }, [weeks]);
@@ -188,9 +184,7 @@ export default function ViewToday() {
         {allDates.map((date, index: number) => {
           return (
             <SwiperSlide key={index} virtualIndex={index}>
-              <Block strong>
-                <DayNote date={date} />
-              </Block>
+              <DayNote date={date} />
             </SwiperSlide>
           );
         })}

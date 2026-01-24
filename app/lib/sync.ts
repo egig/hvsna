@@ -59,31 +59,30 @@ export const SyncProvider = ({ children, url, publishableKey }: { children: Reac
   const [replication, setReplication] =
     useState<RxSupabaseReplicationState<any> | null>(null);
 
-  // TODO move env to entry
-  const sClient = createClient(
-    url,
-    publishableKey,
-    {
-      accessToken: () => session?.getToken() ?? Promise.resolve(null),
-    },
-  );
+  // // TODO move env to entry
+  // const sClient = createClient(
+  //   url,
+  //   publishableKey,
+  //   {
+  //     accessToken: () => session?.getToken() ?? Promise.resolve(null),
+  //   },
+  // );
 
-  useEffect(() => {
-    const initializeSync = async () => {
-      if (!!db && session?.user?.id && !syncInitialized) {
-        try {
-          const r = await sync(sClient, db?.notes, session?.user?.id);
-          setReplication(r);
-          setSyncInitialized(true);
-        } catch (error) {
-          console.error("sync error", error);
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const initializeSync = async () => {
+  //     if (!!db && session?.user?.id && !syncInitialized) {
+  //       try {
+  //         const r = await sync(sClient, db?.notes, session?.user?.id);
+  //         setReplication(r);
+  //         setSyncInitialized(true);
+  //       } catch (error) {
+  //         console.error("sync error", error);
+  //       }
+  //     }
+  //   };
 
-    // TODO
-    // initializeSync();
-  }, [db, session?.user?.id, syncInitialized, sClient]);
+  //   initializeSync();
+  // }, [db, session?.user?.id, syncInitialized, sClient]);
 
   return React.createElement(
     SyncContext.Provider,

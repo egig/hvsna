@@ -15,20 +15,19 @@ let emptyContent = {
 
 export default function DayNote({ date }: { date: HijriDate }) {
   const { replication } = useSync();
-  const { dayData, saveDayData } = useDayData(
-    `${date.year}-${date.month}-${date.day}`,
-  );
+  const dayNoteId = date.format("YYYYMMDD")
+  const { dayData, saveDayData } = useDayData(dayNoteId);
 
   const placeholder = `Write for this day...`;
 
   return (
     <TextEditor
-      instanceID={`${date.year}-${date.month}-${date.day}`}
+      instanceID={dayNoteId}
       content={dayData?.content ? JSON.parse(dayData.content)[0] : emptyContent}
       placeholder={placeholder}
       onChange={debounce(async (jsonContent) => {
         await saveDayData({
-          id: `${date.year}-${date.month}-${date.day}`,
+          id: dayNoteId,
           content: JSON.stringify([jsonContent]),
         });
         if (replication?.isPaused() || replication?.isStopped()) {
