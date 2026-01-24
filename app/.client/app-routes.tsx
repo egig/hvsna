@@ -5,6 +5,7 @@ import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
 import Layout from "./pages/layout";
 import About from "./pages/about";
+import TabsPage from "./pages/tabs";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -15,6 +16,7 @@ export const AppRoutes = () => {
       <Routes location={settingsBackgroundLocation || location}>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="tabs" element={<TabsPage />} />
           <Route path="about" element={<About />} />
           <Route path="y/:year/m/:month/d/:date" element={<DateView />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />

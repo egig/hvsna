@@ -81,7 +81,8 @@ export const SyncProvider = ({ children, url, publishableKey }: { children: Reac
       }
     };
 
-    initializeSync();
+    // TODO
+    // initializeSync();
   }, [db, session?.user?.id, syncInitialized, sClient]);
 
   return React.createElement(

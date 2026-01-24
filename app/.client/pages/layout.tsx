@@ -7,8 +7,10 @@ import { createClient } from "@supabase/supabase-js";
 import { useDatabase } from "~/lib/database";
 
 export default function Layout() {
-    return <div className="max-w-[520px] m-auto">
-    <Outlet />
-    <BottomNav />
-    </div>
+    return (
+        <div className="max-w-[520px] m-auto">
+            <Outlet />
+            {/* <BottomNav /> */}
+        </div>
+    );
 }

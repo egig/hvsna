@@ -6,13 +6,17 @@ import App from "../.client/app";
 import type { DatabaseConfig } from "~/lib/database";
 import { get } from "~/lib/database";
 import type { AppConfig } from "../.client/app";
- 
-export default function Space({params}: {params: {space: string}}) {
+import Framework7 from 'framework7/lite-bundle';
+import Framework7React from 'framework7-react';
+
+
+export default function Space({params}: Route.ActionArgs) {
   useEffect(() => {
     // @ts-ignore
     if (!!window.__dtMounted) {
       return;
     }
+
     const config: AppConfig = {
       basePath: import.meta.env.VITE_API_BASE,
       appBaseName: `/${params.space}`,
@@ -28,9 +32,14 @@ export default function Space({params}: {params: {space: string}}) {
     
     
     const root = createRoot(document.getElementById("root") as Container);
+    
 
     (async () => {
       // console.log((new Clerk()).session?.getToken())
+
+
+      // Init F7-React Plugin
+      Framework7.use(Framework7React)
 
       const db = await get(dbConfig);
       root.render(<App config={config} db={db} />);
