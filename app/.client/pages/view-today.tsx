@@ -1,101 +1,75 @@
-import { getCurrentGregorianDate, GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
+import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import DayView from "~/.client/components/day-view";
 import {
   HijriDate,
   isSameHijriDate,
   isTodayHijriDate,
 } from "~/lib/hijri/hijri-date";
-import { Block, Navbar, NavTitle, NavTitleLarge, Page } from "framework7-react";
+import { Block, Navbar, NavTitle, NavTitleLarge, Page, useStore } from "framework7-react";
 import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import clsx from "clsx";
-import { TextEditor } from "../components/text-editor";
-import { useSync } from "~/lib/sync";
-import { useDayData } from "../hooks/useDayData";
+import { useMemo, useState } from "react";
 
-let emptyContent = {
-  type: "doc",
-  content: [
-    {
-      type: "paragraph",
-      content: [],
-    },
-  ],
-};
+import {Swiper, SwiperSlide} from 'swiper/react'
+import 'swiper/css'
+import DayNote from "../components/day-note";
 
 export default function ViewToday() {
-  const { replication } = useSync();
+  const _hijriDate = HijriDate.fromDate(new Date());
+  const [activeDate, setActiveDate] = useState(_hijriDate);
+  const [swiper, setSwiper] = useState<any>(null)
+  const gregorianDate = activeDate.toDate();
+  const pageTitle = `${activeDate.day} ${HIJRI_MONTH_NAMES_EN[activeDate.month - 1]} ${activeDate.year}`;
+  const subTitle =  `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`
 
-  const hijriDate = HijriDate.fromDate(new Date());
-  const gregorianDate = hijriDate.toDate();
-  const { dayData, saveDayData } = useDayData(
-    `${hijriDate.year}-${hijriDate.month}-${hijriDate.day}`,
-  );
-
-  const prevDate = hijriDate.previous();
-  const nextDate = hijriDate.next();
-  const prevLink = `/y/${prevDate.year}/m/${prevDate.month}/d/${prevDate.day}`;
-  const nextLink = `/y/${nextDate.year}/m/${nextDate.month}/d/${nextDate.day}`;
-
-  const pageTitle = `${hijriDate.day} ${HIJRI_MONTH_NAMES_EN[hijriDate.month - 1]} ${hijriDate.year}`;
-  const subTitle =  `${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`
-
-  const placeholder = `Write for ${pageTitle}...`;
+  const slides = useMemo(() => {
+    let days = [..._hijriDate.getWeekDates()];
+    let weeks = [_hijriDate.getWeekDates()]
+    return {days, weeks};
+  }, [activeDate]);
 
   return (
     <Page>
       <Navbar>
-        <NavTitle subtitle={subTitle}>
-          {pageTitle}
-        </NavTitle>
+        <NavTitle subtitle={subTitle}>{pageTitle}</NavTitle>
       </Navbar>
       <Block>
         <div className="grid grid-cols-7 gap-1 sm:gap-2">
-          {hijriDate.getWeekDates().map((date, index) => (
+          {activeDate.getWeekDates().map((d: HijriDate, index: number) => (
             <div
               className={clsx(
                 "text-center rounded-md border-1",
-                isTodayHijriDate(date) && "bg-gray-200",
-                isSameHijriDate(date, hijriDate)
-                  ? "border-gray-200"
+                isTodayHijriDate(d) && "bg-gray-200",
+                isSameHijriDate(d, activeDate)
+                  ? "border-gray-300"
                   : "border-transparent",
               )}
               key={index}
+              onClick={() => {
+                setActiveDate(d);
+                swiper.slideTo(index)
+              }}
             >
-              <div className="text-xs">{date.format("dd")}</div>
-              <div className="text-sm sm:text-base">{date.format("DD")}</div>
+              <div className="text-xs">{d.format("dd")}</div>
+              <div className="text-sm sm:text-base">{d.format("DD")}</div>
             </div>
           ))}
         </div>
       </Block>
-      <Block>
-        <TextEditor
-          instanceID={`${hijriDate.year}-${hijriDate.month}-${hijriDate.year}`}
-          content={
-            dayData?.content ? JSON.parse(dayData.content)[0] : emptyContent
-          }
-          placeholder={placeholder}
-          onChange={debounce(async (jsonContent) => {
-            await saveDayData({
-              id: `${hijriDate.year}-${hijriDate.month}-${hijriDate.day}`,
-              content: JSON.stringify([jsonContent]),
-            });
-            if (replication?.isPaused() || replication?.isStopped()) {
-              replication.reSync();
-            }
-          }, 500)}
-        />
-      </Block>
+      <Swiper virtual slidesPerView={1} initialSlide={activeDate.dayOfWeek} onSlideChange={(e) => {
+        setActiveDate(slides.days[e.activeIndex])
+      }} onSwiper={(swiper) => {
+        setSwiper(swiper)
+      }}>
+        {slides.days.map((date, index: number) => {
+          return (
+          <SwiperSlide key={index} virtualIndex={index}>
+            <Block strong>
+              <DayNote date={date} />
+            </Block>
+          </SwiperSlide>
+        )})}
+      </Swiper>
     </Page>
   );
-}
-
-function debounce(
-  callback: (jsonContent: any) => Promise<void>,
-  delay: number,
-) {
-  let timeout: NodeJS.Timeout;
-  return (jsonContent: any) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => callback(jsonContent), delay);
-  };
 }

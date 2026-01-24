@@ -12,6 +12,7 @@ import TabsPage from "./pages/tabs";
 import ViewToday from "./pages/view-today";
 import Settings from "./pages/settings";
 import Template from "./pages/template";
+import store from "./store";
 
 export interface AppConfig {
   basePath?: string;
@@ -31,6 +32,7 @@ export interface AppConfig {
 
 export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
   const f7params = {
+    store,
     routes: [
       {
         path: "/",
@@ -78,7 +80,9 @@ export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
               </BrowserRouter> */}
             <App {...f7params}>
               <Views tabs>
-                  <View main url="/" />
+                  <View id="today" main url="/" />
+                  <View id="tab-2" tab />
+                  <View id="settings" tab />
               </Views>
             </App>
           </SyncProvider>

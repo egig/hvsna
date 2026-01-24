@@ -1,9 +1,12 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 
+const Days = ["fri", "sat", "sun", "mon", "tue", "wed", "thu"]
+
 export class HijriDate {
     year: number;
     month: number;
     day: number;
+    dayOfWeek: number;
     _rawGregorianDate: Date;
 
     constructor(year: number, month: number, day: number, hour?: number, minute?: number, second?: number) {
@@ -12,6 +15,7 @@ export class HijriDate {
         this.day = day;
         let d =  hijriToGregorian(this)
         this._rawGregorianDate = new Date(d.year, d.month-1, d.day, hour || 0, minute || 0, second || 0);
+        this.dayOfWeek = Days.indexOf(this.format("dd").toLowerCase())
     }
 
     toDate(): Date {
