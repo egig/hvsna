@@ -33,6 +33,9 @@ export interface AppConfig {
 export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
   const f7params = {
     store,
+    colors: {
+      primary: "#5A4A7A"
+    },
     routes: [
       {
         path: "/",

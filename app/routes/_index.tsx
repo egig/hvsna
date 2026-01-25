@@ -6,6 +6,7 @@ import App from "../.client/app";
 import type { AppConfig } from "../.client/app";
 import Framework7 from 'framework7/lite-bundle';
 import Framework7React from 'framework7-react';
+import { registerSW } from "virtual:pwa-register";
 
 
 export default function Index({params}: Route.ActionArgs) {
@@ -28,7 +29,6 @@ export default function Index({params}: Route.ActionArgs) {
     (async () => {
       // console.log((new Clerk()).session?.getToken())
 
-
       // Init F7-React Plugin
       Framework7.use(Framework7React)
 
@@ -37,6 +37,20 @@ export default function Index({params}: Route.ActionArgs) {
       window.__dtMounted = true;
       window.document.title = "HVSNA";
     })(); 
+
+    const updateSW = registerSW({
+      onOfflineReady() {
+        console.log('App ready to work offline');
+      },
+      onNeedRefresh() {
+        console.log('New content available, please refresh');
+      },
+    });
+
+    return () => {
+      updateSW();
+    }
+
 
   }, []);
 
