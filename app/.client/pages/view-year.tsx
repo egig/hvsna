@@ -1,4 +1,4 @@
-import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
+import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { Link, useParams } from "react-router";
 import { HijriDate } from "~/lib/hijri/hijri-date";
 import YearView from "~/.client/components/year-view";

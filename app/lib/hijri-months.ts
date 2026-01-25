@@ -49,6 +49,9 @@ export const HIJRI_MONTH_NAMES_EN_SHORT = [
   'Dhu al-Hijjah'
 ] as const;
 
+
+export const GREGORIAN_MONTH_NAMES_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+
 /**
  * Type definitions for Hijri months
  */

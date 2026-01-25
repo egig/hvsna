@@ -14,7 +14,6 @@ let emptyContent = {
 };
 
 export default function DayNote({ date }: { date: HijriDate }) {
-  const { replication } = useSync();
   const dayNoteId = date.format("YYYYMMDD")
   const { dayData, saveDayData } = useDayData(dayNoteId);
 
@@ -23,16 +22,12 @@ export default function DayNote({ date }: { date: HijriDate }) {
   return (
     <TextEditor
       instanceID={dayNoteId}
-      content={dayData?.content ? JSON.parse(dayData.content)[0] : emptyContent}
+      content={dayData?.content ? dayData.content[0] : emptyContent}
       placeholder={placeholder}
       onChange={debounce(async (jsonContent) => {
         await saveDayData({
-          id: dayNoteId,
-          content: JSON.stringify([jsonContent]),
+          content: [jsonContent],
         });
-        if (replication?.isPaused() || replication?.isStopped()) {
-          replication.reSync();
-        }
       }, 500)}
     />
   );

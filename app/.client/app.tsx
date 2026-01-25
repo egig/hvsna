@@ -2,7 +2,6 @@ import { BrowserRouter } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { AppRoutes } from "~/.client/app-routes";
 import DroppableContext from "~/.client/components/droppable-context";
-import { DatabaseProvider } from "~/lib/database";
 import "framework7-icons";
 import "framework7/css/bundle";
 import "./app.css";
@@ -13,6 +12,7 @@ import ViewToday from "./pages/view-today";
 import Settings from "./pages/settings";
 import Template from "./pages/template";
 import store from "./store";
+import { PouchDBProvider } from "./contexts/PouchDB";
 
 export interface AppConfig {
   basePath?: string;
@@ -70,23 +70,15 @@ export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
   return (
     <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
       <DroppableContext>
-        <DatabaseProvider db={db}>
-          <SyncProvider
-            url={config.supabaseURL || ""}
-            publishableKey={config.supabasePublishableKey || ""}
-          >
-            {/* <BrowserRouter basename={config.appBaseName || ""}>
-                <AppRoutes />
-              </BrowserRouter> */}
-            <App {...f7params}>
-              <Views tabs>
-                  <View id="today" main url="/" />
-                  <View id="tab-2" tab />
-                  <View id="settings" tab />
-              </Views>
-            </App>
-          </SyncProvider>
-        </DatabaseProvider>
+          <PouchDBProvider dbName="hvsna-notes">
+              <App {...f7params}>
+                <Views tabs>
+                    <View id="today" main url="/" />
+                    <View id="tab-2" tab />
+                    <View id="settings" tab />
+                </Views>
+              </App>
+          </PouchDBProvider>
       </DroppableContext>
     </ClerkProvider>
   );

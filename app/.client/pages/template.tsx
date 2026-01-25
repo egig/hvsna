@@ -5,9 +5,7 @@ export default function Template() {
     return (
         <Page>
             <Navbar backLink title="Template"></Navbar>
-            <Block strong>
-                <TextEditor instanceID="template"/>
-            </Block>
+            <TextEditor instanceID="template"/>
         </Page>
     );
 }

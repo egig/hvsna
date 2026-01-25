@@ -1,7 +1,6 @@
-import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
+import { GREGORIAN_MONTH_NAMES_EN, HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import { Link, useParams } from "react-router";
 import MonthView from "~/.client/components/month-view";
-import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import { HijriMonth } from "~/lib/hijri/hijri-month";
 import PrevNext from "../components/prev-next";
 

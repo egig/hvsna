@@ -6,7 +6,7 @@ import './text-editor.css'
 import clsx from 'clsx'
 
 interface TextEditorProps {
-  content?: string
+  content?: any
   onChange?: (content: JSONContent) => void
   placeholder?: string
   className?: string

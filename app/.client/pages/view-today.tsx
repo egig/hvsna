@@ -1,4 +1,4 @@
-import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
+import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import DayView from "~/.client/components/day-view";
 import {
   HijriDate,

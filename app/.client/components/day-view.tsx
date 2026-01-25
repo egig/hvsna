@@ -1,8 +1,7 @@
 import { Link, useNavigate } from "react-router";
 import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
-import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/gregorian-date";
 import { useDayData } from "~/.client/hooks/useDayData";
-import PrevNext from "~/.client/components/prev-next";
+
 import {
   HijriDate,
   isTodayHijriDate,
@@ -110,12 +109,11 @@ export default function DayView({
       <div {...handlers}>
         <TextEditor
           instanceID={`${year}-${month}-${date}`}
-          content={dayData?.content ? JSON.parse(dayData.content)[0] : emptyContent}
+          content={dayData?.content ? JSON.stringify(dayData.content[0]) : JSON.stringify(emptyContent)}
           placeholder={placeholder}
           onChange={debounce(async (jsonContent) => {
             await saveDayData({
-              id: `${year}-${month}-${date}`,
-              content: JSON.stringify([jsonContent])
+              content: [jsonContent]
             });
             if(replication?.isPaused() || replication?.isStopped()) {
               replication.reSync();

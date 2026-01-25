@@ -3,8 +3,6 @@ import { createRoot, type Container } from "react-dom/client";
 import type { Route } from "./+types/_index";
 import { useParams } from "react-router";
 import App from "../.client/app";
-import type { DatabaseConfig } from "~/lib/database";
-import { get } from "~/lib/database";
 import type { AppConfig } from "../.client/app";
 import Framework7 from 'framework7/lite-bundle';
 import Framework7React from 'framework7-react';
@@ -24,13 +22,6 @@ export default function Index({params}: Route.ActionArgs) {
       supabaseURL: import.meta.env.VITE_SUPABASE_URL!,
       supabasePublishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
     };
-
-    const dbConfig: DatabaseConfig = {
-      // TODO replace using loggedin users
-      name: "guest",
-      devMode: import.meta.env.DEV,
-    };
-    
     
     const root = createRoot(document.getElementById("root") as Container);
 
@@ -41,8 +32,7 @@ export default function Index({params}: Route.ActionArgs) {
       // Init F7-React Plugin
       Framework7.use(Framework7React)
 
-      const db = await get(dbConfig);
-      root.render(<App config={config} db={db} />);
+      root.render(<App config={config} />);
       // @ts-ignore
       window.__dtMounted = true;
       window.document.title = "HVSNA";

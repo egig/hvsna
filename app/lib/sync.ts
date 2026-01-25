@@ -1,4 +1,3 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import React, {
   createContext,
   useContext,
@@ -6,83 +5,90 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import type { RxReplicationState } from "rxdb/plugins/replication";
-import {
-  replicateSupabase,
-  RxSupabaseReplicationState,
-} from "rxdb/plugins/replication-supabase";
-import { useDatabase } from "./database";
+import PouchDB from "pouchdb";
+import { usePouchDB } from "../.client/contexts/PouchDB";
 import { useSession } from "@clerk/clerk-react";
+import type { Note } from "./types/note";
 
 export default async function sync(
-  s: SupabaseClient,
-  collection: any,
+  localDb: PouchDB.Database,
+  remoteUrl: string,
   userID: string,
 ) {
-  const replication = replicateSupabase({
-    tableName: "notes",
-    client: s,
-    collection: collection,
-    replicationIdentifier: "notes-supabase",
-    live: true,
-    pull: {
-      batchSize: 50,
-      queryBuilder: ({ query }) => {
-        return query.eq("user_id", userID);
-      },
+  const remoteDb = new PouchDB(remoteUrl, {
+    auth: {
+      username: userID,
+      password: '', // Will be set with proper auth token
     },
-    push: {
-      batchSize: 50,
-    },
-    modifiedField: "updated_at",
-    deletedField: "_deleted",
   });
 
-  // (optional) observe errors and wait for the first sync barrier
-  // replication.error$.subscribe((err) => console.error("[replication]", err));
-  // replication.sent$.subscribe(doc => console.log("[sent]", doc));
-  await replication.awaitInitialReplication();
+  const replication = PouchDB.sync(localDb, remoteDb, {
+    live: true,
+    retry: true,
+    filter: function (doc: any) {
+      return doc.user_id === userID;
+    },
+  });
+
   return replication;
 }
 
 // Database Context
 type SyncContextType = {
-  replication: RxReplicationState<any, any> | null;
+  replication: any | null;
 };
 
 const SyncContext = createContext<SyncContextType | undefined>(undefined);
 
-export const SyncProvider = ({ children, url, publishableKey }: { children: ReactNode, url: string, publishableKey: string }) => {
-  const { db } = useDatabase();
+export const SyncProvider = ({ children, couchUrl }: { children: ReactNode, couchUrl: string }) => {
+  const { db } = usePouchDB();
   const { session } = useSession();
   const [syncInitialized, setSyncInitialized] = useState(false);
   const [replication, setReplication] =
-    useState<RxSupabaseReplicationState<any> | null>(null);
+    useState<any | null>(null);
 
-  // // TODO move env to entry
-  // const sClient = createClient(
-  //   url,
-  //   publishableKey,
-  //   {
-  //     accessToken: () => session?.getToken() ?? Promise.resolve(null),
-  //   },
-  // );
+  useEffect(() => {
+    const initializeSync = async () => {
+      if (!!db && session?.user?.id && !syncInitialized && couchUrl) {
+        try {
+          const r = sync(db, `${couchUrl}/notes`, session?.user?.id);
+          setReplication(r);
+          setSyncInitialized(true);
+          
+          // Handle sync events
+          r.then((syncResult: any) => {
+            syncResult.on('change', (info: any) => {
+              console.log('[sync] change:', info);
+            });
+            
+            syncResult.on('paused', (err: any) => {
+              console.log('[sync] paused:', err);
+            });
+            
+            syncResult.on('active', () => {
+              console.log('[sync] active');
+            });
+            
+            syncResult.on('denied', (err: any) => {
+              console.error('[sync] denied:', err);
+            });
+            
+            syncResult.on('complete', (info: any) => {
+              console.log('[sync] complete:', info);
+            });
+            
+            syncResult.on('error', (err: any) => {
+              console.error('[sync] error:', err);
+            });
+          });
+        } catch (error) {
+          console.error("sync error", error);
+        }
+      }
+    };
 
-  // useEffect(() => {
-  //   const initializeSync = async () => {
-  //     if (!!db && session?.user?.id && !syncInitialized) {
-  //       try {
-  //         const r = await sync(sClient, db?.notes, session?.user?.id);
-  //         setReplication(r);
-  //         setSyncInitialized(true);
-  //       } catch (error) {
-  //         console.error("sync error", error);
-  //       }
-  //     }
-  //   };
-
-  //   initializeSync();
-  // }, [db, session?.user?.id, syncInitialized, sClient]);
+    initializeSync();
+  }, [db, session?.user?.id, syncInitialized, couchUrl]);
 
   return React.createElement(
     SyncContext.Provider,
