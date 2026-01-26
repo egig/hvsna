@@ -11,6 +11,7 @@ import TabsPage from "./pages/tabs";
 import ViewToday from "./pages/view-today";
 import Settings from "./pages/settings";
 import Template from "./pages/template";
+import DataManagement from "./pages/data-management";
 import store from "./store";
 import { PouchDBProvider } from "./contexts/PouchDB";
 import Notes from "./pages/notes";
@@ -62,6 +63,10 @@ export default function Hvsna({ config }: { config: AppConfig }) {
       {
         path: "/template/",
         component: Template
+      },
+      {
+        path: "/data-management/",
+        component: DataManagement
       }
     ],
     name: "Hvsna",

@@ -79,13 +79,14 @@ export const TaskItem = BaseTaskItem.extend<TaskItemOptions>({
       ),
       [
         'label',
-        { class: 'task-item-label' },
+        { 
+          class: 'task-item-label',
+        },
         [
           'input',
           {
             type: 'checkbox',
             checked: checked ? 'checked' : undefined,
-            disabled: 'disabled',
           },
         ],
         [

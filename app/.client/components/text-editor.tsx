@@ -1,6 +1,7 @@
 import { useEditor, EditorContent, type JSONContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import {TaskList, TaskItem } from '@tiptap/extension-list'
+import {TaskList } from '@tiptap/extension-list'
+import { TaskItem }  from './text-editor-task-item'
 import { Placeholder } from '@tiptap/extensions'
 import './text-editor.css'
 import clsx from 'clsx'

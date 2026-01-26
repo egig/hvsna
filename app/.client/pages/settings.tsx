@@ -24,6 +24,9 @@ return (
       <ListItem link="/template/" title="Template">
         <Icon slot="media" f7="person_alt_circle" />
       </ListItem>
+      <ListItem link="/data-management/" title="Data Management">
+        <Icon slot="media" f7="folder_fill_badge_minus" />
+      </ListItem>
     </List>
   </Page>
 );
