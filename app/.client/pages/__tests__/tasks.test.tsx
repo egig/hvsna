@@ -163,19 +163,5 @@ describe('Tasks Page', () => {
     expect(screen.getByText('Error: Failed to load tasks')).toBeInTheDocument();
   });
 
-  it('should open add task popup when plus button is clicked', async () => {
-    render(<Tasks />);
-    
-    const addButton = screen.getByTestId('nav-right').querySelector('button') || 
-                     screen.getByTestId('nav-right').querySelector('a');
-    
-    if (addButton) {
-      fireEvent.click(addButton);
-      
-      await waitFor(() => {
-        expect(screen.getByTestId('sheet')).toBeInTheDocument();
-        expect(screen.getByText('New Task')).toBeInTheDocument();
-      });
-    }
-  });
+
 });

@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Sheet, NavRight, Link, ListButton, ListInput, f7 } from "framework7-react";
 import { useTasks } from "../hooks/useTasks";
 import { CheckCircleIcon, CircleIcon, Trash2Icon, EditIcon, PlusIcon, Plus } from "lucide-react";
-import type { Task, TaskCreateInput, TaskUpdateInput, TaskStatus } from "~/lib/types/task";
+import type { Task, TaskStatus } from "~/lib/types/task";
+import TaskForm from "../components/task-form";
 
 export default function Tasks() {
   const { tasks, loading, loadingMore, error, hasMore, deleteTask, refreshTasks, loadMoreTasks, createTask, updateTask } = useTasks();
-  const pageContentRef = useRef<HTMLDivElement>(null);
+  const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [taskName, setTaskName] = useState('');
@@ -133,25 +134,28 @@ export default function Tasks() {
     }
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!pageContentRef.current) return;
-      
-      const { scrollTop, scrollHeight, clientHeight } = pageContentRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 100 && hasMore && !loadingMore) {
-        loadMoreTasks();
-      }
-    };
-
-    const pageContent = pageContentRef.current;
-    if (pageContent) {
-      pageContent.addEventListener('scroll', handleScroll);
-      return () => pageContent.removeEventListener('scroll', handleScroll);
+  const handleInfiniteScroll = () => {
+    if (!allowInfinite.current) return;
+    
+    // Don't load more if already loading or no more data
+    if (loadingMore || !hasMore) {
+      allowInfinite.current = false;
+      return;
     }
-  }, [hasMore, loadingMore, loadMoreTasks]);
+    
+    allowInfinite.current = false;
+    loadMoreTasks().finally(() => {
+      allowInfinite.current = true;
+    });
+  };
 
   return (
-    <Page>
+    <Page 
+      infinite 
+      infiniteDistance={50} 
+      infinitePreloader={loadingMore && hasMore}
+      onInfinite={handleInfiniteScroll}
+    >
       <Navbar>
         <NavTitle>Tasks</NavTitle>
         <NavRight>
@@ -178,25 +182,24 @@ export default function Tasks() {
         </Block>
       )}
 
-      {!loading && !error && (
-        <div ref={pageContentRef} style={{ height: '100%', overflowY: 'auto' }}>
-          {tasks.length === 0 ? (
-            <Block className="text-center">
-              <Icon ios="f7:checkmark_square" md="material:check_box" size="48" />
-              <p>No tasks yet</p>
-              <p>Create your first task to get started!</p>
-              <Button fill onClick={openAddPopup}>
-                <PlusIcon size={16} />
-                Create Task
-              </Button>
-            </Block>
-          ) : (
-            <>
-              <List mediaList>
-                {tasks.map((task) => (
-                  <ListItem
-                    key={task.id}
-                    title={task.name}
+      {!loading && !error && tasks.length === 0 &&
+        <Block className="text-center">
+          <Icon ios="f7:checkmark_square" md="material:check_box" size="48" />
+          <p>No tasks yet</p>
+          <p>Create your first task to get started!</p>
+          <Button fill onClick={openAddPopup}>
+            <PlusIcon size={16} />
+            Create Task
+          </Button>
+        </Block>
+      }
+
+      {!loading && !error && tasks.length > 0 &&
+        <List mediaList>
+          {tasks.map((task) => (
+            <ListItem
+              key={task.id}
+              title={task.name}
                     subtitle={`Scheduled: ${formatScheduledDate(task.scheduledAt)}`}
                     swipeout
                   >
@@ -225,87 +228,31 @@ export default function Tasks() {
                   </ListItem>
                 ))}
               </List>
-              
-              {loadingMore && (
-                <Block className="text-center">
-                  <Preloader />
-                  <div>Loading more tasks...</div>
-                </Block>
-              )}
-              
+      }
               {!hasMore && tasks.length > 0 && (
                 <Block className="text-center">
                   <p>No more tasks to load</p>
                 </Block>
               )}
-            </>
-          )}
-        </div>
-      )}
+
 
       <Sheet 
         opened={sheetOpened} 
         onSheetClose={closePopup}
         backdrop
         swipeToClose
-        style={{ height: '60vh' }}
+        closeOnEscape
       >
         <div className="sheet-modal-swipe-step">
           <div className="sheet-modal-swipe-handler" />
         </div>
         
-        <Block>
-          <h3>{editingTask ? 'Edit Task' : 'New Task'}</h3>
-          
-          <div className="list no-hairlines-md">
-            <ul>
-              <li className="item-content item-input">
-                <div className="item-inner">
-                  <div className="item-title item-label">Task Name</div>
-                  <div className="item-input-wrap">
-                    <input
-                      type="text"
-                      placeholder="Enter task name"
-                      value={taskName}
-                      onChange={(e: any) => setTaskName(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </li>
-              
-              <li className="item-content item-input">
-                <div className="item-inner">
-                  <div className="item-title item-label">Scheduled Date</div>
-                  <div className="item-input-wrap">
-                    <input
-                      type="date"
-                      value={scheduledAt}
-                      onChange={(e: any) => setScheduledAt(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-          
-          <div className="display-flex gap-2 margin-top">
-            <Button 
-              fill 
-              onClick={handleSubmit}
-              disabled={!taskName.trim()}
-              style={{ flex: 1 }}
-            >
-              {editingTask ? 'Update Task' : 'Create Task'}
-            </Button>
-            <Button 
-              onClick={closePopup}
-              style={{ flex: 1 }}
-            >
-              Cancel
-            </Button>
-          </div>
-        </Block>
+        <TaskForm
+          editingTask={editingTask}
+          taskName={taskName}
+          onTaskNameChange={setTaskName}
+          onSubmit={handleSubmit}
+        />
       </Sheet>
     </Page>
   );

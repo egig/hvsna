@@ -1,6 +1,6 @@
 import type { HijriDate } from "~/lib/hijri";
 import { useDayNote } from "../hooks/useDayNote";
-import { TextEditor } from "./text-editor";
+import { Editor } from "~/lib/editor";
 
 let emptyContent = {
   type: "doc",
@@ -19,16 +19,14 @@ export default function DayNote({ date }: { date: HijriDate }) {
   const placeholder = `Write for this day...`;
 
   return (
-    <TextEditor
-      instanceID={dayNoteId}
-      content={dayData?.content ? dayData.content[0] : emptyContent}
-      placeholder={placeholder}
-      onChange={debounce(async (jsonContent) => {
-        await saveDayData({
-          content: [jsonContent],
-        });
-      }, 500)}
+    <div className="p-4">
+    <Editor content={dayData?.content ? dayData.content[0] : emptyContent}
+    onUpdate={debounce(async (content) => { 
+      console.log(content)
+      await saveDayData({ content: [content] })
+    },500)}
     />
+    </div>
   );
 }
 
@@ -39,6 +37,6 @@ function debounce(
   let timeout: NodeJS.Timeout;
   return (jsonContent: any) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => callback(jsonContent), delay);
+    timeout = setTimeout(async () => await callback(jsonContent), delay);
   };
 }
