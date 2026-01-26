@@ -14,28 +14,38 @@ interface PouchDBDocument {
 export interface UseNoteReturn {
   notes: Note[];
   loading: boolean;
+  loadingMore: boolean;
   error: string | null;
+  hasMore: boolean;
   createNote: (input: NoteCreateInput) => Promise<Note>;
   updateNote: (id: string, input: NoteUpdateInput) => Promise<Note>;
   deleteNote: (id: string) => Promise<void>;
   getNote: (id: string) => Promise<Note | null>;
   getNotes: (query?: NoteQuery) => Promise<Note[]>;
   refreshNotes: () => Promise<void>;
+  loadMoreNotes: () => Promise<void>;
 }
 
 export const useNote  = (): UseNoteReturn => {
   const { db } = usePouchDB();
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const PAGE_SIZE = 20;
 
   const refreshNotes = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      setOffset(0);
+      
       const result = await db.allDocs({
         include_docs: true,
         attachments: true,
+        limit: PAGE_SIZE,
       });
       
       const notesList = result.rows
@@ -52,12 +62,50 @@ export const useNote  = (): UseNoteReturn => {
         });
       
       setNotes(notesList);
+      setHasMore(result.rows.length >= PAGE_SIZE);
+      setOffset(PAGE_SIZE);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch notes');
     } finally {
       setLoading(false);
     }
   }, [db]);
+
+  const loadMoreNotes = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+    
+    try {
+      setLoadingMore(true);
+      
+      const result = await db.allDocs({
+        include_docs: true,
+        attachments: true,
+        skip: offset,
+        limit: PAGE_SIZE,
+      });
+      
+      const newNotes = result.rows
+        .filter((row: any) => row.doc && !row.doc._id.startsWith('_'))
+        .map((row: any) => {
+          const doc: PouchDBDocument = row.doc;
+          return {
+            id: doc._id,
+            user_id: doc.user_id,
+            content: doc.content || [],
+            created_at: doc.created_at,
+            updated_at: doc.updated_at,
+          };
+        });
+      
+      setNotes(prev => [...prev, ...newNotes]);
+      setHasMore(result.rows.length >= PAGE_SIZE);
+      setOffset(prev => prev + PAGE_SIZE);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more notes');
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [db, loadingMore, hasMore, offset]);
 
   const createNote = useCallback(async (input: NoteCreateInput): Promise<Note> => {
     try {
@@ -129,7 +177,7 @@ export const useNote  = (): UseNoteReturn => {
       if (!doc._rev) {
         throw new Error('Document revision is required for deletion');
       }
-      await db.remove(doc);
+      await db.remove(doc as any);
       await refreshNotes();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete note';
@@ -198,12 +246,15 @@ export const useNote  = (): UseNoteReturn => {
   return {
     notes,
     loading,
+    loadingMore,
     error,
+    hasMore,
     createNote,
     updateNote,
     deleteNote,
     getNote,
     getNotes,
     refreshNotes,
+    loadMoreNotes,
   };
 };

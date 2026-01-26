@@ -1,11 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button } from "framework7-react";
 import { useNote } from "../hooks/useNote";
 import { StickyNoteIcon } from "lucide-react";
 import { textContent } from "~/lib/text-content";
 
 export default function Notes() {
-  const { notes, loading, error, deleteNote, refreshNotes } = useNote();
+  const { notes, loading, loadingMore, error, hasMore, deleteNote, refreshNotes, loadMoreNotes } = useNote();
+  const pageContentRef = useRef<HTMLDivElement>(null);
 
   const handleDeleteNote = async (id: string) => {
     try {
@@ -34,6 +35,23 @@ export default function Notes() {
     return c || 'No text content';
   };
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!pageContentRef.current) return;
+      
+      const { scrollTop, scrollHeight, clientHeight } = pageContentRef.current;
+      if (scrollHeight - scrollTop <= clientHeight + 100 && hasMore && !loadingMore) {
+        loadMoreNotes();
+      }
+    };
+
+    const pageContent = pageContentRef.current;
+    if (pageContent) {
+      pageContent.addEventListener('scroll', handleScroll);
+      return () => pageContent.removeEventListener('scroll', handleScroll);
+    }
+  }, [hasMore, loadingMore, loadMoreNotes]);
+
   return (
     <Page>
       <Navbar>
@@ -60,7 +78,7 @@ export default function Notes() {
       )}
 
       {!loading && !error && (
-        <>
+        <div ref={pageContentRef} style={{ height: '100%', overflowY: 'auto' }}>
           {notes.length === 0 ? (
             <Block className="text-center">
               <Icon ios="f7:note_text" md="material:note" size="48" />
@@ -68,28 +86,43 @@ export default function Notes() {
               <p>Create your first note to get started!</p>
             </Block>
           ) : (
-            <List mediaList>
-              {notes.map((note) => (
-                <ListItem
-                  key={note.id}
-                  title={getNotePreview(note.content)}
-                  subtitle={formatDate(note.updated_at || note.created_at || '')}
-                  link={`/note/${note.id}`}
-                  swipeout
-                >
-                  <div slot="root-end" className="swipeout-actions-right">
-                    <a href="#" className="swipeout-delete" onClick={() => handleDeleteNote(note.id)}>
-                      Delete
-                    </a>
-                  </div>
-                  <div slot="media">
-                    <StickyNoteIcon />
-                  </div>
-                </ListItem>
-              ))}
-            </List>
+            <>
+              <List mediaList>
+                {notes.map((note) => (
+                  <ListItem
+                    key={note.id}
+                    title={getNotePreview(note.content)}
+                    subtitle={formatDate(note.updated_at || note.created_at || '')}
+                    link={`/note/${note.id}`}
+                    swipeout
+                  >
+                    <div slot="root-end" className="swipeout-actions-right">
+                      <a href="#" className="swipeout-delete" onClick={() => handleDeleteNote(note.id)}>
+                        Delete
+                      </a>
+                    </div>
+                    <div slot="media">
+                      <StickyNoteIcon />
+                    </div>
+                  </ListItem>
+                ))}
+              </List>
+              
+              {loadingMore && (
+                <Block className="text-center">
+                  <Preloader />
+                  <div>Loading more notes...</div>
+                </Block>
+              )}
+              
+              {!hasMore && notes.length > 0 && (
+                <Block className="text-center">
+                  <p>No more notes to load</p>
+                </Block>
+              )}
+            </>
           )}
-        </>
+        </div>
       )}
     </Page>
   );
