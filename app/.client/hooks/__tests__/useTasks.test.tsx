@@ -39,6 +39,7 @@ describe('useTasks', () => {
     user_id: 'default-user',
     name: 'Test Task',
     status: 'pending',
+    scheduledAt: '2024-01-15T00:00:00.000Z',
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: '2024-01-01T00:00:00.000Z',
   };
@@ -49,6 +50,7 @@ describe('useTasks', () => {
     user_id: 'default-user',
     name: 'Test Task',
     status: 'pending',
+    scheduledAt: '2024-01-15T00:00:00.000Z',
     created_at: '2024-01-01T00:00:00.000Z',
     updated_at: '2024-01-01T00:00:00.000Z',
   };
@@ -550,6 +552,137 @@ describe('useTasks', () => {
       await result.current.loadMoreTasks();
 
       expect(mockDb.allDocs).toHaveBeenCalledTimes(1); // Only called for initial load
+    });
+  });
+
+  describe('getTasksByDate', () => {
+    it('should get tasks by scheduled date successfully', async () => {
+      const taskWithDate = {
+        ...mockPouchDoc,
+        _id: 'task_with_date',
+        scheduledAt: '2024-01-15T00:00:00.000Z',
+      };
+      
+      const taskWithoutDate = {
+        ...mockPouchDoc,
+        _id: 'task_without_date',
+        scheduledAt: undefined,
+      };
+      
+      const taskWithDifferentDate = {
+        ...mockPouchDoc,
+        _id: 'task_different_date',
+        scheduledAt: '2024-01-16T00:00:00.000Z',
+      };
+
+      mockDb.allDocs.mockResolvedValue({
+        rows: [
+          { doc: taskWithDate },
+          { doc: taskWithoutDate },
+          { doc: taskWithDifferentDate },
+        ],
+      });
+
+      const { result } = renderHook(() => useTasks());
+
+      const tasksByDate = await result.current.getTasksByDate('2024-01-15');
+
+      expect(tasksByDate).toHaveLength(1); // Only taskWithDate has the matching date
+      expect(tasksByDate[0].scheduledAt).toBe('2024-01-15T00:00:00.000Z');
+      expect(mockDb.allDocs).toHaveBeenCalledWith({
+        include_docs: true,
+        attachments: true,
+        startkey: 'task_',
+        endkey: 'task_\uffff',
+      });
+    });
+
+    it('should return empty array when no tasks scheduled for date', async () => {
+      const taskWithDifferentDate = {
+        ...mockPouchDoc,
+        _id: 'task_different_date',
+        scheduledAt: '2024-01-16T00:00:00.000Z',
+      };
+
+      mockDb.allDocs.mockResolvedValue({
+        rows: [{ doc: taskWithDifferentDate }],
+      });
+
+      const { result } = renderHook(() => useTasks());
+
+      const tasksByDate = await result.current.getTasksByDate('2024-01-15');
+
+      expect(tasksByDate).toHaveLength(0);
+    });
+
+    it('should handle getTasksByDate errors', async () => {
+      const errorMessage = 'Database error';
+      mockDb.allDocs.mockRejectedValue(new Error(errorMessage));
+
+      const { result } = renderHook(() => useTasks());
+
+      // Just verify the error is thrown - the error state might be reset by other operations
+      await expect(result.current.getTasksByDate('2024-01-15')).rejects.toThrow(errorMessage);
+    });
+  });
+
+  describe('scheduledAt functionality', () => {
+    it('should create task with scheduledAt', async () => {
+      const taskInput = {
+        name: 'New Task',
+        scheduledAt: '2024-01-20T00:00:00.000Z',
+      };
+
+      const expectedTask = {
+        id: 'task_test-uuid-123',
+        user_id: 'default-user',
+        name: 'New Task',
+        status: 'pending',
+        scheduledAt: '2024-01-20T00:00:00.000Z',
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+      };
+
+      mockDb.put.mockResolvedValue({ id: 'task_test-uuid-123', rev: '1-rev' });
+      mockDb.allDocs.mockResolvedValue({ rows: [] });
+
+      const { result } = renderHook(() => useTasks());
+
+      const createdTask = await result.current.createTask(taskInput);
+
+      expect(createdTask).toEqual(expectedTask);
+      expect(mockDb.put).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _id: 'task_test-uuid-123',
+          name: 'New Task',
+          scheduledAt: '2024-01-20T00:00:00.000Z',
+          status: 'pending',
+        })
+      );
+    });
+
+    it('should update task scheduledAt', async () => {
+      const updatedDoc = {
+        ...mockPouchDoc,
+        scheduledAt: '2024-01-25T00:00:00.000Z',
+      };
+
+      mockDb.get.mockResolvedValue(mockPouchDoc);
+      mockDb.put.mockResolvedValue({ id: 'task_test-uuid-123', rev: '2-rev' });
+      mockDb.allDocs.mockResolvedValue({ rows: [] });
+
+      const { result } = renderHook(() => useTasks());
+
+      const updatedTask = await result.current.updateTask('task_test-uuid-123', {
+        scheduledAt: '2024-01-25T00:00:00.000Z',
+      });
+
+      expect(updatedTask.scheduledAt).toBe('2024-01-25T00:00:00.000Z');
+      expect(mockDb.put).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scheduledAt: '2024-01-25T00:00:00.000Z',
+        })
+      );
     });
   });
 });

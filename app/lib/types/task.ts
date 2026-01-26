@@ -5,6 +5,7 @@ export interface Task {
   user_id: string;
   name: string;
   status: TaskStatus;
+  scheduledAt?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -13,11 +14,13 @@ export interface TaskCreateInput {
   id?: string;
   name: string;
   status?: TaskStatus;
+  scheduledAt?: string;
 }
 
 export interface TaskUpdateInput {
   name?: string;
   status?: TaskStatus;
+  scheduledAt?: string;
 }
 
 export interface TaskChange {

@@ -8,6 +8,7 @@ interface PouchDBTaskDocument {
   user_id: string;
   name: string;
   status: TaskStatus;
+  scheduledAt?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -23,6 +24,7 @@ export interface UseTasksReturn {
   deleteTask: (id: string) => Promise<void>;
   getTask: (id: string) => Promise<Task | null>;
   getTasks: (query?: TaskQuery) => Promise<Task[]>;
+  getTasksByDate: (date: string) => Promise<Task[]>;
   refreshTasks: () => Promise<void>;
   loadMoreTasks: () => Promise<void>;
 }
@@ -60,6 +62,7 @@ export const useTasks = (): UseTasksReturn => {
             user_id: doc.user_id,
             name: doc.name,
             status: doc.status,
+            scheduledAt: doc.scheduledAt,
             created_at: doc.created_at,
             updated_at: doc.updated_at,
           };
@@ -99,6 +102,7 @@ export const useTasks = (): UseTasksReturn => {
             user_id: doc.user_id,
             name: doc.name,
             status: doc.status,
+            scheduledAt: doc.scheduledAt,
             created_at: doc.created_at,
             updated_at: doc.updated_at,
           };
@@ -124,6 +128,7 @@ export const useTasks = (): UseTasksReturn => {
         user_id: 'default-user', // You might want to get this from auth context
         name: input.name,
         status: input.status || 'pending',
+        scheduledAt: input.scheduledAt,
         created_at: now,
         updated_at: now,
       };
@@ -133,6 +138,7 @@ export const useTasks = (): UseTasksReturn => {
         user_id: newTask.user_id,
         name: newTask.name,
         status: newTask.status,
+        scheduledAt: newTask.scheduledAt,
         created_at: newTask.created_at,
         updated_at: newTask.updated_at,
       };
@@ -164,6 +170,10 @@ export const useTasks = (): UseTasksReturn => {
         updateData.status = input.status;
       }
 
+      if (input.scheduledAt !== undefined) {
+        updateData.scheduledAt = input.scheduledAt;
+      }
+
       const response = await db.put(updateData);
       const updatedDoc: PouchDBTaskDocument = {
         ...updateData,
@@ -177,6 +187,7 @@ export const useTasks = (): UseTasksReturn => {
         user_id: updatedDoc.user_id,
         name: updatedDoc.name,
         status: updatedDoc.status,
+        scheduledAt: updatedDoc.scheduledAt,
         created_at: updatedDoc.created_at,
         updated_at: updatedDoc.updated_at,
       };
@@ -211,6 +222,7 @@ export const useTasks = (): UseTasksReturn => {
         user_id: doc.user_id,
         name: doc.name,
         status: doc.status,
+        scheduledAt: doc.scheduledAt,
         created_at: doc.created_at,
         updated_at: doc.updated_at,
       };
@@ -242,6 +254,7 @@ export const useTasks = (): UseTasksReturn => {
             user_id: doc.user_id,
             name: doc.name,
             status: doc.status,
+            scheduledAt: doc.scheduledAt,
             created_at: doc.created_at,
             updated_at: doc.updated_at,
           };
@@ -265,6 +278,47 @@ export const useTasks = (): UseTasksReturn => {
     }
   }, [db]);
 
+  const getTasksByDate = useCallback(async (date: string): Promise<Task[]> => {
+    try {
+      const result = await db.allDocs({
+        include_docs: true,
+        attachments: true,
+        startkey: 'task_',
+        endkey: 'task_\uffff',
+      });
+      
+      const tasksList = result.rows
+        .filter((row: any) => row.doc && row.doc._id.startsWith('task_'))
+        .map((row: any) => {
+          const doc: PouchDBTaskDocument = row.doc;
+          return {
+            id: doc._id,
+            user_id: doc.user_id,
+            name: doc.name,
+            status: doc.status,
+            scheduledAt: doc.scheduledAt,
+            created_at: doc.created_at,
+            updated_at: doc.updated_at,
+          };
+        });
+
+      // Filter by scheduled date
+      return tasksList.filter(task => {
+        if (!task.scheduledAt) return false;
+        
+        // Parse the scheduled date and compare with the provided date
+        const taskDate = new Date(task.scheduledAt).toISOString().split('T')[0];
+        const providedDate = new Date(date).toISOString().split('T')[0];
+        
+        return taskDate === providedDate;
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get tasks by date';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }, [db]);
+
   useEffect(() => {
     refreshTasks();
   }, [refreshTasks]);
@@ -280,6 +334,7 @@ export const useTasks = (): UseTasksReturn => {
     deleteTask,
     getTask,
     getTasks,
+    getTasksByDate,
     refreshTasks,
     loadMoreTasks,
   };

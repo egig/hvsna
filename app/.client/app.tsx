@@ -15,6 +15,7 @@ import DataManagement from "./pages/data-management";
 import store from "./store";
 import { PouchDBProvider } from "./contexts/PouchDB";
 import Notes from "./pages/notes";
+import Tasks from "./pages/tasks";
 
 export interface AppConfig {
   basePath?: string;
@@ -54,6 +55,11 @@ export default function Hvsna({ config }: { config: AppConfig }) {
             component: Notes
           },
           {
+            path: "/tasks/",
+            id: "tasks",
+            component: Tasks
+          },
+          {
             path: "/settings/",
             id: "settings",
             component: Settings
@@ -80,6 +86,7 @@ export default function Hvsna({ config }: { config: AppConfig }) {
                 <Views tabs>
                     <View id="today" main url="/" />
                     <View id="notes" tab />
+                    <View id="tasks" tab />
                     <View id="settings" tab />
                 </Views>
               </App>

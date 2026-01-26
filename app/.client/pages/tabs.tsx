@@ -1,5 +1,5 @@
 import { Page, Tabs, Tab, Link, Toolbar, ToolbarPane } from 'framework7-react';
-import { NotepadText, List, CogIcon } from 'lucide-react';
+import { NotepadText, List, CogIcon, CheckSquare } from 'lucide-react';
 
 export default () => (
   <Page pageContent={false}>
@@ -8,8 +8,8 @@ export default () => (
         <Link tabLink href="/" routeTabId="today">
           <NotepadText />
         </Link>
-        <Link tabLink href="/notes/" routeTabId="notes">
-          <List />
+        <Link tabLink href="/tasks/" routeTabId="tasks">
+          <CheckSquare />
         </Link>
         <Link tabLink href="/settings/" routeTabId="settings">
         <CogIcon />
@@ -18,7 +18,7 @@ export default () => (
     </Toolbar>
     <Tabs routable>
       <Tab className="page-content" id="today" />
-      <Tab className="page-content" id="notes" />
+      <Tab className="page-content" id="tasks" />
       <Tab className="page-content" id="settings" />
     </Tabs>
   </Page>
