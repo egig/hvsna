@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useNote } from "./useNote";
 import type { Note, NoteCreateInput, NoteUpdateInput } from "../../lib/types/note";
 
-export function useDayData(date: string) {
+export function useDayNote(date: string) {
+    const [fetched, setFetched] = useState(false);
     const [dayData, setDayData] = useState<Note | null>(null);
     const { getNote, createNote, updateNote, loading, error } = useNote();
 
@@ -18,6 +19,7 @@ export function useDayData(date: string) {
         };
 
         fetchDayData();
+        setFetched(true);
     }, [getNote, date]);
     
     const getDayData = useCallback(async (): Promise<Note | null> => {
@@ -46,18 +48,19 @@ export function useDayData(date: string) {
                     id: date,
                     ...data,
                 };
-                savedNote = await createNote(createInput);
+                await createNote(createInput);
             }
             
         } catch (err) {
             throw new Error(`Failed to save day data: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
-    }, [dayData, createNote, updateNote, date]);
+    }, [createNote, updateNote, date]);
 
     return {
         dayData,
         loading,
         error,
+        fetched,
         getDayData,
         saveDayData,
     };

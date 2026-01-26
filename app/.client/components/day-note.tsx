@@ -1,7 +1,6 @@
 import type { HijriDate } from "~/lib/hijri";
-import { useDayData } from "../hooks/useDayData";
+import { useDayNote } from "../hooks/useDayNote";
 import { TextEditor } from "./text-editor";
-import { useSync } from "~/lib/sync";
 
 let emptyContent = {
   type: "doc",
@@ -15,7 +14,7 @@ let emptyContent = {
 
 export default function DayNote({ date }: { date: HijriDate }) {
   const dayNoteId = date.format("YYYYMMDD")
-  const { dayData, saveDayData } = useDayData(dayNoteId);
+  const { dayData, saveDayData } = useDayNote(dayNoteId);
 
   const placeholder = `Write for this day...`;
 

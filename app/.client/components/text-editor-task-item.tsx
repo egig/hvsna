@@ -21,8 +21,8 @@ declare module '@tiptap/core' {
   }
 }
 
-export const TaskItem2 = BaseTaskItem.extend<TaskItemOptions>({
-  name: 'taskItem2',
+export const TaskItem = BaseTaskItem.extend<TaskItemOptions>({
+  name: 'taskItem',
   addOptions() {
     return {
       ...this.parent?.(),
@@ -53,7 +53,7 @@ export const TaskItem2 = BaseTaskItem.extend<TaskItemOptions>({
   parseHTML() {
     return [
       {
-        tag: 'li[data-type="taskItem2"]',
+        tag: 'li[data-type="taskItem"]',
         getAttrs: (element) => {
           return {
             checked: (element as HTMLElement).hasAttribute('data-checked'),
@@ -65,14 +65,12 @@ export const TaskItem2 = BaseTaskItem.extend<TaskItemOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    console.log("NODE", node)
     const { checked } = node.attrs
 
     return [
       'li',
       mergeAttributes(
-        { 'data-type': 'taskItem2' },
-        { 'data-checked': checked },
+        { 'data-type': 'taskItem' },
         this.options.HTMLAttributes,
         HTMLAttributes,
         {
@@ -101,9 +99,9 @@ export const TaskItem2 = BaseTaskItem.extend<TaskItemOptions>({
 
   addKeyboardShortcuts() {
     return {
-      Enter: () => this.editor.commands.splitListItem('taskItem2'),
-      'Shift-Tab': () => this.editor.commands.liftListItem('taskItem2'),
-      Tab: () => this.editor.commands.sinkListItem('taskItem2'),
+      Enter: () => this.editor.commands.splitListItem('taskItem'),
+      'Shift-Tab': () => this.editor.commands.liftListItem('taskItem'),
+      Tab: () => this.editor.commands.sinkListItem('taskItem'),
       'Mod-Enter': () => this.editor.commands.setTaskItemChecked(false),
     }
   },
@@ -117,8 +115,8 @@ export const TaskItem2 = BaseTaskItem.extend<TaskItemOptions>({
           const { selection } = state
           const node = selection.$from.node(selection.$from.depth - 1)
 
-          if (node.type.name === 'taskItem2') {
-            return commands.updateAttributes('taskItem2', {
+          if (node.type.name === 'taskItem') {
+            return commands.updateAttributes('taskItem', {
               checked: !node.attrs.checked,
             })
           }
@@ -131,8 +129,8 @@ export const TaskItem2 = BaseTaskItem.extend<TaskItemOptions>({
           const { selection } = state
           const node = selection.$from.node(selection.$from.depth - 1)
 
-          if (node.type.name === 'taskItem2') {
-            return commands.updateAttributes('taskItem2', {
+          if (node.type.name === 'taskItem') {
+            return commands.updateAttributes('taskItem', {
               checked,
             })
           }

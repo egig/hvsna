@@ -74,6 +74,7 @@ describe('useNote', () => {
       expect(mockDb.allDocs).toHaveBeenCalledWith({
         include_docs: true,
         attachments: true,
+        limit: 20,
       });
     });
   });

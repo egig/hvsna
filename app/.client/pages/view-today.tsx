@@ -1,11 +1,10 @@
 import { GREGORIAN_MONTH_NAMES_EN } from "~/lib/hijri-months";
-import DayView from "~/.client/components/day-view";
 import {
   HijriDate,
   isSameHijriDate,
   isTodayHijriDate,
 } from "~/lib/hijri/hijri-date";
-import { Block, Navbar, NavTitle, NavTitleLarge, Page, useStore } from "framework7-react";
+import { Block, Navbar, NavTitle, Page } from "framework7-react";
 import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
