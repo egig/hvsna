@@ -13,6 +13,7 @@ import Settings from "./pages/settings";
 import Template from "./pages/template";
 import store from "./store";
 import { PouchDBProvider } from "./contexts/PouchDB";
+import Notes from "./pages/notes";
 
 export interface AppConfig {
   basePath?: string;
@@ -30,7 +31,7 @@ export interface AppConfig {
   supabasePublishableKey?: string;
 }
 
-export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
+export default function Hvsna({ config }: { config: AppConfig }) {
   const f7params = {
     store,
     colors: {
@@ -47,13 +48,9 @@ export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
             component: ViewToday
           },
           {
-            path: "/tab2/",
-            id: "tab2",
-            content: `
-        <div class="block block-strong inset">
-          <p>Tab 2 content</p>
-        </div>
-        `,
+            path: "/notes/",
+            id: "notes",
+            component: Notes
           },
           {
             path: "/settings/",
@@ -77,7 +74,7 @@ export default function Hvsna({ config, db }: { config: AppConfig; db: any }) {
               <App {...f7params}>
                 <Views tabs>
                     <View id="today" main url="/" />
-                    <View id="tab-2" tab />
+                    <View id="notes" tab />
                     <View id="settings" tab />
                 </Views>
               </App>

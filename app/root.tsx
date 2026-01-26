@@ -35,7 +35,7 @@ export const links: Route.LinksFunction = () => [
   {
     rel: "icon",
     type: "image/png",
-    href: "/icon-512x512.png",
+    href: "/icon-512.png",
     sizes: "512x512",
   },
   {
