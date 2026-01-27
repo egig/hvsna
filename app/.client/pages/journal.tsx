@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
+import { Icon, List, ListItem, Navbar, NavTitle, Page, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
 import { useLog } from "../hooks/useLog";
 import { useTracker } from "../hooks/useTracker";
 import { Plus, Edit, Trash2, FileText } from "lucide-react";
 import type { Log, Tracker } from "~/lib/tracker/types";
 import LogForm from "../components/log-form";
+import LoadingBlock from "../components/loading-block";
+import ErrorBlock from "../components/error-block";
 
 export default function Journal() {
   const { loading, error, deleteLog, getLogs, refreshLogs } = useLog();
@@ -114,20 +116,11 @@ export default function Journal() {
       </Navbar>
       
       {loading && (
-        <Block className="text-center">
-          <Preloader />
-          <div>Loading journal entries...</div>
-        </Block>
+        <LoadingBlock />
       )}
 
       {error && (
-        <Block className="text-center">
-          <div style={{ color: 'red' }}>Error: {error}</div>
-          <Button fill onClick={loadData}>
-            <Icon ios="f7:arrow_clockwise" md="material:refresh" />
-            Retry
-          </Button>
-        </Block>
+        <ErrorBlock error={error} onRetry={loadData} />
       )}
 
       {!loading && !error && logs.length === 0 && (
@@ -143,9 +136,12 @@ export default function Journal() {
       )}
 
       {!loading && !error && logs.length > 0 && (
-        <List mediaList>
-          {logs.map((log) => (
+        <>
+
+        <List mediaList virtualList>
+          {logs.map((log, index) => (
             <ListItem
+            virtualListIndex={index}
               key={log.id}
               title={getTrackerName(log.trackerId)}
               subtitle={`${formatLogValue(log)} • ${formatTimestamp(log.timestamp)}`}
@@ -171,6 +167,7 @@ export default function Journal() {
             </ListItem>
           ))}
         </List>
+        </>
       )}
 
       <Popup 

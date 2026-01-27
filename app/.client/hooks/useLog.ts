@@ -3,7 +3,7 @@ import { usePouchDB } from '../contexts/PouchDB'
 import type { UUID, EpochTime, Log } from '../../lib/tracker/types'
 
 export interface LogCreateInput {
-  metricId: UUID
+  trackerId: UUID
   timestamp: EpochTime
   value: number
   metadata?: Record<string, unknown>
@@ -16,7 +16,7 @@ export interface LogUpdateInput {
 }
 
 export interface LogQuery {
-  metricId?: UUID
+  trackerId?: UUID
   from?: EpochTime
   to?: EpochTime
   limit?: number
@@ -59,9 +59,14 @@ export function useLog() {
     
     try {
       const doc = await db.get(id)
+      const existingLog = doc as Log
       const updatedLog: Log = {
-        ...doc,
-        ...input
+        id: existingLog.id,
+        trackerId: existingLog.trackerId,
+        timestamp: input.timestamp ?? existingLog.timestamp,
+        value: input.value ?? existingLog.value,
+        metadata: input.metadata ?? existingLog.metadata,
+        createdAt: existingLog.createdAt
       }
       
       await db.put({
@@ -100,7 +105,7 @@ export function useLog() {
     
     try {
       const doc = await db.get(id)
-      return doc as Log
+      return doc as unknown as Log
     } catch (err) {
       if ((err as any).status === 404) {
         throw new Error('Log not found')
@@ -128,8 +133,8 @@ export function useLog() {
         .map((row: any) => row.doc as Log)
       
       // Apply filters
-      if (query.metricId) {
-        logs = logs.filter((e: Log) => e.metricId === query.metricId)
+      if (query.trackerId) {
+        logs = logs.filter((e: Log) => e.trackerId === query.trackerId)
       }
       if (query.from !== undefined) {
         logs = logs.filter((e: Log) => e.timestamp >= query.from!)
