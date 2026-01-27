@@ -17,7 +17,6 @@ export interface Tracker {
   id: UUID
   name: string
   unit: string                 // IDR, count, hours, %, kg
-  baseline: number
   createdAt: EpochTime
 }
 

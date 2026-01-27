@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Block, BlockTitle, ListInput, List, ListButton, Preloader } from "framework7-react";
+import { Block, BlockTitle, ListInput, List, ListButton, Preloader, Page, Navbar, NavRight, NavTitle, Link, NavLeft } from "framework7-react";
 import { useTracker } from "../hooks/useTracker";
 import type { Tracker } from "~/lib/tracker/types";
 
@@ -92,48 +92,64 @@ export default function TrackerForm({
   };
 
   return (
-    <Block>
-      <BlockTitle color="primary">{trackerId ? "Edit Tracker" : "New Tracker"}</BlockTitle>
-      {loading && <div className="text-center"><Preloader /></div>}
-      <List strong dividers>
-        <ListInput 
-          outline 
-          type="text" 
-          value={name} 
-          placeholder="Enter tracker name" 
-          onChange={(e: any) => setName(e.target.value)} 
-          readonly={isSubmitting}
-          label="Name"
-        />
-        <ListInput 
-          outline 
-          type="text" 
-          value={unit} 
-          placeholder="e.g., kg, hours, IDR, count" 
-          onChange={(e: any) => setUnit(e.target.value)} 
-          readonly={isSubmitting}
-          label="Unit"
-        />
-        <ListInput 
-          outline 
-          type="number" 
-          value={baseline} 
-          placeholder="0" 
-          onChange={(e: any) => setBaseline(e.target.value)} 
-          readonly={isSubmitting}
-          label="Baseline"
-        />
-        <div className="display-flex justify-content-space-between padding-horizontal">
-          <ListButton onClick={handleCancel} className={isSubmitting ? 'disabled' : ''}>CANCEL</ListButton>
-          <ListButton color="primary" onClick={handleSubmit} className={(isSubmitting || !name.trim() || !unit.trim()) ? 'disabled' : ''}>
-            {isSubmitting ? (
-              <><Preloader size={16} /> {trackerId ? "UPDATING..." : "CREATING..."}</>
-            ) : (
-              trackerId ? "UPDATE" : "CREATE"
-            )}
-          </ListButton>
-        </div>
-      </List>
-    </Block>
+    <Page pageContent={false}>
+      <Navbar>
+        <NavLeft>
+          <Link onClick={onCancel}>Back</Link>
+        </NavLeft>
+        <NavTitle>{trackerId ? "Edit Tracker" : "New Tracker"}</NavTitle>
+        <NavRight>
+          <Link onClick={handleSubmit}>{isSubmitting ? (
+                <>
+                  <Preloader size={16} />{" "}
+                  {trackerId ? "UPDATING..." : "SAVING..."}
+                </>
+              ) : trackerId ? (
+                "UPDATE"
+              ) : (
+                "SAVE"
+              )}</Link>
+        </NavRight>
+      </Navbar>
+      <Block>
+        <BlockTitle color="primary">
+          {trackerId ? "Edit Tracker" : "New Tracker"}
+        </BlockTitle>
+        {loading && (
+          <div className="text-center">
+            <Preloader />
+          </div>
+        )}
+        <List strong dividers>
+          <ListInput
+            outline
+            type="text"
+            value={name}
+            placeholder="Enter tracker name"
+            onChange={(e: any) => setName(e.target.value)}
+            readonly={isSubmitting}
+            label="Name"
+          />
+          <ListInput
+            outline
+            type="text"
+            value={unit}
+            placeholder="e.g., kg, hours, IDR, count"
+            onChange={(e: any) => setUnit(e.target.value)}
+            readonly={isSubmitting}
+            label="Unit"
+          />
+          <ListInput
+            outline
+            type="number"
+            value={baseline}
+            placeholder="0"
+            onChange={(e: any) => setBaseline(e.target.value)}
+            readonly={isSubmitting}
+            label="Baseline"
+          />
+        </List>
+      </Block>
+    </Page>
   );
 }

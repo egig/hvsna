@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Block, BlockTitle, ListInput, List, ListButton, Preloader } from "framework7-react";
-import { useMetric } from "../hooks/useMetric";
+import { Block, BlockTitle, ListInput, List, Preloader } from "framework7-react";
+import { useTracker } from "../hooks/useTracker";
 import { useLog } from "../hooks/useLog";
-import type { Metric, Log } from "~/lib/tracker/types";
+import BaseForm from "./base-form";
+import type { Tracker, Log } from "~/lib/tracker/types";
 
 interface LogFormProps {
   logId?: string | null;
@@ -17,27 +18,27 @@ export default function LogForm({
   onError,
   onCancel,
 }: LogFormProps) {
-  const { loading: metricLoading, getMetrics } = useMetric();
+  const { loading: trackerLoading, getTrackers } = useTracker();
   const { loading, error, createLog, updateLog, getLog } = useLog();
-  const [metrics, setMetrics] = useState<Metric[]>([]);
-  const [selectedMetricId, setSelectedMetricId] = useState('');
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
+  const [selectedTrackerId, setSelectedTrackerId] = useState('');
   const [value, setValue] = useState('0');
   const [timestamp, setTimestamp] = useState(new Date().toISOString().slice(0, 16));
   const [metadata, setMetadata] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Load available metrics
-    getMetrics().then(setMetrics).catch(() => {
+    // Load available trackers
+    getTrackers().then(setTrackers).catch(() => {
       // Handle error silently
     });
-  }, [getMetrics]);
+  }, [getTrackers]);
 
   useEffect(() => {
     if (logId) {
       getLog(logId).then(fetchedLog => {
         if (fetchedLog) {
-          setSelectedMetricId(fetchedLog.metricId);
+          setSelectedTrackerId(fetchedLog.trackerId);
           setValue(fetchedLog.value.toString());
           setTimestamp(new Date(fetchedLog.timestamp).toISOString().slice(0, 16));
           setMetadata(fetchedLog.metadata ? JSON.stringify(fetchedLog.metadata) : '');
@@ -46,7 +47,7 @@ export default function LogForm({
         // Handle error silently
       });
     } else {
-      setSelectedMetricId('');
+      setSelectedTrackerId('');
       setValue('0');
       setTimestamp(new Date().toISOString().slice(0, 16));
       setMetadata('');
@@ -60,14 +61,14 @@ export default function LogForm({
   }, [error, onError]);
 
   const handleSubmit = async () => {
-    if (!selectedMetricId || !value.trim()) return;
+    if (!selectedTrackerId || !value.trim()) return;
 
     try {
       setIsSubmitting(true);
       
       let result: Log;
       const logData = {
-        metricId: selectedMetricId,
+        trackerId: selectedTrackerId,
         value: parseFloat(value) || 0,
         timestamp: new Date(timestamp).getTime(),
         metadata: metadata.trim() ? JSON.parse(metadata) : undefined
@@ -80,7 +81,7 @@ export default function LogForm({
       }
 
       // Reset form
-      setSelectedMetricId('');
+      setSelectedTrackerId('');
       setValue('0');
       setTimestamp(new Date().toISOString().slice(0, 16));
       setMetadata('');
@@ -89,14 +90,16 @@ export default function LogForm({
         onSuccess(result);
       }
     } catch (err) {
-      // Error is handled by the hook and passed through onError
+      if (onError) {
+        onError(err instanceof Error ? err.message : 'Failed to save log');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    setSelectedMetricId('');
+    setSelectedTrackerId('');
     setValue('0');
     setTimestamp(new Date().toISOString().slice(0, 16));
     setMetadata('');
@@ -105,33 +108,46 @@ export default function LogForm({
     }
   };
 
-  const selectedMetric = metrics.find(m => m.id === selectedMetricId);
+  const selectedTracker = trackers.find(t => t.id === selectedTrackerId);
 
   return (
-    <Block>
-      <BlockTitle color="primary">{logId ? "Edit Log" : "New Log"}</BlockTitle>
-      {(loading || metricLoading) && <div className="text-center"><Preloader /></div>}
-      <List strong dividers>
+    <BaseForm
+      title={logId ? "Edit Log" : "New Log"}
+      onSuccess={handleSubmit}
+      onError={onError}
+      onCancel={handleCancel}
+      isSubmitting={isSubmitting}
+    >
+      <Block>
+        <BlockTitle color="primary">
+          {logId ? "Edit Log" : "New Log"}
+        </BlockTitle>
+        {(loading || trackerLoading) && (
+          <div className="text-center">
+            <Preloader />
+          </div>
+        )}
+        <List strong dividers>
         <ListInput
           outline
           type="select"
-          value={selectedMetricId}
-          onChange={(e: any) => setSelectedMetricId(e.target.value)}
+          value={selectedTrackerId}
+          onChange={(e: any) => setSelectedTrackerId(e.target.value)}
           readonly={isSubmitting}
-          label="Metric"
+          label="Tracker"
         >
-          <option value="">Select a metric</option>
-          {metrics.map(metric => (
-            <option key={metric.id} value={metric.id}>
-              {metric.name} ({metric.unit})
+          <option value="">Select a tracker</option>
+          {trackers.map(tracker => (
+            <option key={tracker.id} value={tracker.id}>
+              {tracker.name} ({tracker.unit})
             </option>
           ))}
         </ListInput>
 
-        {selectedMetric && (
+        {selectedTracker && (
           <div className="padding-horizontal margin-bottom">
             <small className="text-color-gray">
-              Current baseline: {selectedMetric.baseline} {selectedMetric.unit}
+              Tracker: {selectedTracker.name} ({selectedTracker.unit})
             </small>
           </div>
         )}
@@ -144,7 +160,7 @@ export default function LogForm({
           onChange={(e: any) => setValue(e.target.value)} 
           readonly={isSubmitting}
           label="Value"
-          info={selectedMetric ? `Value in ${selectedMetric.unit}` : ''}
+          info={selectedTracker ? `Value in ${selectedTracker.unit}` : ''}
         />
 
         <ListInput
@@ -167,17 +183,8 @@ export default function LogForm({
           info="Optional JSON metadata"
         />
 
-        <div className="display-flex justify-content-space-between padding-horizontal">
-          <ListButton onClick={handleCancel} className={isSubmitting ? 'disabled' : ''}>CANCEL</ListButton>
-          <ListButton color="primary" onClick={handleSubmit} className={(isSubmitting || !selectedMetricId || !value.trim()) ? 'disabled' : ''}>
-            {isSubmitting ? (
-              <><Preloader size={16} /> {logId ? "UPDATING..." : "CREATING..."}</>
-            ) : (
-              logId ? "UPDATE" : "CREATE"
-            )}
-          </ListButton>
-        </div>
-      </List>
-    </Block>
+        </List>
+      </Block>
+    </BaseForm>
   );
 }

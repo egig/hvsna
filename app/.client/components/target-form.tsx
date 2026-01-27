@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Block, BlockTitle, ListInput, List, ListButton, Preloader } from "framework7-react";
+import { Block, BlockTitle, ListInput, List, Preloader } from "framework7-react";
 import { useTracker } from "../hooks/useTracker";
 import { useTarget } from "../hooks/useTarget";
+import BaseForm from "./base-form";
 import type { Tracker, Target as TargetType, TargetType as TargetTypeEnum, TargetPeriod } from "~/lib/tracker/types";
 import type { TargetReducer, TargetDirection } from "../hooks/useTarget";
 
@@ -110,7 +111,9 @@ export default function TargetForm({
         onSuccess(result);
       }
     } catch (err) {
-      // Error is handled by the hook and passed through onError
+      if (onError) {
+        onError(err instanceof Error ? err.message : 'Failed to save target');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -133,10 +136,23 @@ export default function TargetForm({
   const selectedTracker = trackers.find(t => t.id === selectedTrackerId);
 
   return (
-    <Block>
-      <BlockTitle color="primary">{targetId ? "Edit Target" : "New Target"}</BlockTitle>
-      {(loading || trackerLoading) && <div className="text-center"><Preloader /></div>}
-      <List strong dividers>
+    <BaseForm
+      title={targetId ? "Edit Target" : "New Target"}
+      onSuccess={handleSubmit}
+      onError={onError}
+      onCancel={handleCancel}
+      isSubmitting={isSubmitting}
+    >
+      <Block>
+        <BlockTitle color="primary">
+          {targetId ? "Edit Target" : "New Target"}
+        </BlockTitle>
+        {(loading || trackerLoading) && (
+          <div className="text-center">
+            <Preloader />
+          </div>
+        )}
+        <List strong dividers>
         <ListInput
           outline
           type="select"
@@ -156,7 +172,7 @@ export default function TargetForm({
         {selectedTracker && (
           <div className="padding-horizontal margin-bottom">
             <small className="text-color-gray">
-              Current baseline: {selectedTracker.baseline} {selectedTracker.unit}
+              Tracker: {selectedTracker.name} ({selectedTracker.unit})
             </small>
           </div>
         )}
@@ -251,17 +267,8 @@ export default function TargetForm({
           info="Allow going over/under without strict enforcement"
         />
 
-        <div className="display-flex justify-content-space-between padding-horizontal">
-          <ListButton onClick={handleCancel} className={isSubmitting ? 'disabled' : ''}>CANCEL</ListButton>
-          <ListButton color="primary" onClick={handleSubmit} className={(isSubmitting || !selectedTrackerId || !value.trim()) ? 'disabled' : ''}>
-            {isSubmitting ? (
-              <><Preloader size={16} /> {targetId ? "UPDATING..." : "CREATING..."}</>
-            ) : (
-              targetId ? "UPDATE" : "CREATE"
-            )}
-          </ListButton>
-        </div>
-      </List>
-    </Block>
+        </List>
+      </Block>
+    </BaseForm>
   );
 }

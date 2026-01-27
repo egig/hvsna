@@ -63,11 +63,13 @@ export function useTarget() {
     
     try {
       const target: Target = {
-        id: `target_${crypto.randomUUID()}`,
+        id: `target:${crypto.randomUUID()}`,
         ...input,
         createdAt: Date.now()
       }
       
+      console.log("creating target", target)
+
       await db.put({
         _id: target.id,
         ...target
@@ -148,14 +150,15 @@ export function useTarget() {
     try {
       const result = await db.allDocs({
         include_docs: true,
-        startkey: 'target_',
-        endkey: 'target_\uffff'
+        startkey: 'target:',
+        endkey: 'target:\uffff'
       })
       
       let targets = result.rows
-        .filter(row => row.id.startsWith('target_'))
+        .filter(row => row.id.startsWith('target:'))
         .map(row => row.doc as unknown as Target)
       
+      console.log(targets)
       // Apply filters
       if (query.trackerId) {
         targets = targets.filter(t => t.trackerId === query.trackerId)
@@ -183,6 +186,7 @@ export function useTarget() {
       if (query.limit) {
         targets = targets.slice(0, query.limit)
       }
+
       
       return targets
     } catch (err) {

@@ -179,13 +179,6 @@ export default function Journal() {
         backdrop
         closeOnEscape
       >
-        <Page>
-          <Navbar>
-            <NavTitle>{editingLogId ? "Edit Journal Entry" : "New Journal Entry"}</NavTitle>
-            <NavRight>
-              <Link onClick={closePopup}>Done</Link>
-            </NavRight>
-          </Navbar>
           
           <LogForm
             logId={editingLogId}
@@ -193,7 +186,6 @@ export default function Journal() {
             onError={handleLogError}
             onCancel={handleLogCancel}
           />
-        </Page>
       </Popup>
     </Page>
   );

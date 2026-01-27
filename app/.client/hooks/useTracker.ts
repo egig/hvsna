@@ -38,7 +38,7 @@ export function useTracker() {
     
     try {
       const tracker: Tracker = {
-        id: `tracker_${crypto.randomUUID()}`,
+        id: `tracker:${crypto.randomUUID()}`,
         ...input,
         createdAt: Date.now()
       }
@@ -123,12 +123,12 @@ export function useTracker() {
     try {
       const result = await db.allDocs({
         include_docs: true,
-        startkey: 'tracker_',
-        endkey: 'tracker_\uffff'
+        startkey: 'tracker:',
+        endkey: 'tracker:\uffff'
       })
       
       let trackers = result.rows
-        .filter(row => row.id.startsWith('tracker_'))
+        .filter(row => row.id.startsWith('tracker:'))
         .map(row => row.doc as unknown as Tracker)
       
       // Apply pagination

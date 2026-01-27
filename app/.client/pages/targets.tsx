@@ -218,21 +218,12 @@ export default function Targets() {
         backdrop
         closeOnEscape
       >
-        <Page>
-          <Navbar>
-            <NavTitle>{editingTargetId ? "Edit Target" : "New Target"}</NavTitle>
-            <NavRight>
-              <Link onClick={closePopup}>Done</Link>
-            </NavRight>
-          </Navbar>
-          
           <TargetForm
             targetId={editingTargetId}
             onSuccess={handleTargetSuccess}
             onError={handleTargetError}
             onCancel={handleTargetCancel}
           />
-        </Page>
       </Popup>
     </Page>
   );

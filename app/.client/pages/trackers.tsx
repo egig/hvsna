@@ -76,52 +76,9 @@ export default function Trackers() {
       }
     );
   };
-
-  const getDirectionIcon = (direction: string) => {
-    switch (direction) {
-      case 'increase':
-        return <TrendingUp size={24} className="text-green-500" />;
-      case 'decrease':
-        return <TrendingDown size={24} className="text-red-500" />;
-      default:
-        return <Minus size={24} className="text-gray-500" />;
-    }
-  };
-
-  const getReducerLabel = (reducer: string) => {
-    switch (reducer) {
-      case 'sum':
-        return 'Sum';
-      case 'count':
-        return 'Count';
-      case 'last':
-        return 'Last';
-      case 'avg':
-        return 'Average';
-      case 'min':
-        return 'Minimum';
-      case 'max':
-        return 'Maximum';
-      default:
-        return reducer;
-    }
-  };
-
-  const getDirectionLabel = (direction: string) => {
-    switch (direction) {
-      case 'increase':
-        return 'Increase (good when up)';
-      case 'decrease':
-        return 'Decrease (good when down)';
-      case 'neutral':
-        return 'Neutral';
-      default:
-        return direction;
-    }
-  };
-
+  
   return (
-    <Page>
+    <Page >
       <Navbar backLink>
         <NavTitle>Trackers</NavTitle>
         <NavRight>
@@ -130,26 +87,27 @@ export default function Trackers() {
           </Link>
         </NavRight>
       </Navbar>
-      
+      <Block className="text-center">
       {loading && (
-        <Block className="text-center">
+        <>
           <Preloader />
           <div>Loading trackers...</div>
-        </Block>
+        </>
       )}
 
+
       {error && (
-        <Block className="text-center">
+        <>
           <div style={{ color: 'red' }}>Error: {error}</div>
           <Button fill onClick={loadTrackers}>
             <Icon ios="f7:arrow_clockwise" md="material:refresh" />
             Retry
           </Button>
-        </Block>
+        </>
       )}
 
       {!loading && !error && trackers.length === 0 && (
-        <Block className="text-center">
+        <>
           <BarChart2 size={48} />
           <p>No trackers yet</p>
           <p>Create your first tracker to start tracking!</p>
@@ -157,10 +115,14 @@ export default function Trackers() {
             <Plus size={16} />
             Create Tracker
           </Button>
-        </Block>
+        </>
       )}
 
-      {!loading && !error && trackers.length > 0 && (
+      </Block>
+
+    {/* https://forum.framework7.io/t/react-sheet-crashes-app/15326 */}
+      {trackers.length > 0 && (
+        <>
         <List mediaList>
           {trackers.map((tracker) => (
             <ListItem
@@ -178,22 +140,10 @@ export default function Trackers() {
                   Delete
                 </a>
               </div>
-              <div slot="media">
-                {getDirectionIcon(tracker.direction)}
-              </div>
-              <div slot="after">
-                <div className="text-xs text-gray-600">
-                  {getReducerLabel(tracker.reducer)}
-                </div>
-              </div>
-              <div slot="root" onClick={() => openEditPopup(tracker)} style={{ cursor: 'pointer' }}>
-                <div className="text-xs text-gray-500 margin-top">
-                  {getDirectionLabel(tracker.direction)}
-                </div>
-              </div>
             </ListItem>
           ))}
         </List>
+        </>
       )}
 
       <Popup 
@@ -202,21 +152,12 @@ export default function Trackers() {
         backdrop
         closeOnEscape
       >
-        <Page>
-          <Navbar>
-            <NavTitle>{editingTrackerId ? "Edit Tracker" : "New Tracker"}</NavTitle>
-            <NavRight>
-              <Link onClick={closePopup}>Done</Link>
-            </NavRight>
-          </Navbar>
-          
           <TrackerForm
             trackerId={editingTrackerId}
             onSuccess={handleTrackerSuccess}
             onError={handleTrackerError}
             onCancel={handleTrackerCancel}
           />
-        </Page>
       </Popup>
     </Page>
   );
