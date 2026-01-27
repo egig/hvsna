@@ -7,11 +7,8 @@ import {gapCursor} from "prosemirror-gapcursor"
 // import {menuBar, type MenuElement} from "prosemirror-menu"
 import {Schema} from "prosemirror-model"
 
-import {buildMenuItems} from "./menu"
 import {buildKeymap} from "./keymap"
 import {buildInputRules} from "./inputrules"
-
-export {buildMenuItems, buildKeymap, buildInputRules}
 
 /// Create an array of plugins pre-configured for the given schema.
 /// The resulting array will include the following plugins:

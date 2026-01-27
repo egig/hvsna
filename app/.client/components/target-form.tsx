@@ -3,6 +3,7 @@ import { Block, BlockTitle, ListInput, List, ListButton, Preloader } from "frame
 import { useTracker } from "../hooks/useTracker";
 import { useTarget } from "../hooks/useTarget";
 import type { Tracker, Target as TargetType, TargetType as TargetTypeEnum, TargetPeriod } from "~/lib/tracker/types";
+import type { TargetReducer, TargetDirection } from "../hooks/useTarget";
 
 interface TargetFormProps {
   targetId?: string | null;
@@ -22,6 +23,8 @@ export default function TargetForm({
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [selectedTrackerId, setSelectedTrackerId] = useState('');
   const [type, setType] = useState<TargetTypeEnum>('static');
+  const [reducer, setReducer] = useState<TargetReducer>('sum');
+  const [direction, setDirection] = useState<TargetDirection>('increase');
   const [value, setValue] = useState('0');
   const [valueMax, setValueMax] = useState('');
   const [period, setPeriod] = useState<TargetPeriod>('monthly');
@@ -41,6 +44,8 @@ export default function TargetForm({
         if (fetchedTarget) {
           setSelectedTrackerId(fetchedTarget.trackerId);
           setType(fetchedTarget.type);
+          setReducer(fetchedTarget.reducer);
+          setDirection(fetchedTarget.direction);
           setValue(fetchedTarget.value.toString());
           setValueMax(fetchedTarget.valueMax?.toString() || '');
           setPeriod(fetchedTarget.period || 'monthly');
@@ -52,6 +57,8 @@ export default function TargetForm({
     } else {
       setSelectedTrackerId('');
       setType('static');
+      setReducer('sum');
+      setDirection('increase');
       setValue('0');
       setValueMax('');
       setPeriod('monthly');
@@ -75,6 +82,8 @@ export default function TargetForm({
       const targetData = {
         trackerId: selectedTrackerId,
         type,
+        reducer,
+        direction,
         value: parseFloat(value) || 0,
         valueMax: type === 'range' ? (parseFloat(valueMax) || undefined) : undefined,
         period,
@@ -90,6 +99,8 @@ export default function TargetForm({
       // Reset form
       setSelectedTrackerId('');
       setType('static');
+      setReducer('sum');
+      setDirection('increase');
       setValue('0');
       setValueMax('');
       setPeriod('monthly');
@@ -108,6 +119,8 @@ export default function TargetForm({
   const handleCancel = () => {
     setSelectedTrackerId('');
     setType('static');
+    setReducer('sum');
+    setDirection('increase');
     setValue('0');
     setValueMax('');
     setPeriod('monthly');
@@ -158,6 +171,35 @@ export default function TargetForm({
         >
           <option value="static">Static</option>
           <option value="range">Range</option>
+        </ListInput>
+
+        <ListInput
+          outline
+          type="select"
+          value={reducer}
+          onChange={(e: any) => setReducer(e.target.value)}
+          readonly={isSubmitting}
+          label="Reducer"
+        >
+          <option value="sum">Sum</option>
+          <option value="count">Count</option>
+          <option value="last">Last</option>
+          <option value="avg">Average</option>
+          <option value="min">Minimum</option>
+          <option value="max">Maximum</option>
+        </ListInput>
+
+        <ListInput
+          outline
+          type="select"
+          value={direction}
+          onChange={(e: any) => setDirection(e.target.value)}
+          readonly={isSubmitting}
+          label="Direction"
+        >
+          <option value="increase">Increase (good when up)</option>
+          <option value="decrease">Decrease (good when down)</option>
+          <option value="neutral">Neutral</option>
         </ListInput>
 
         <ListInput 
