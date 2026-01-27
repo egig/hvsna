@@ -6,34 +6,23 @@ export interface Tracker {
   id: UUID
   name: string
   unit: string
-  reducer: TrackerReducer
-  direction: TrackerDirection
   baseline: number
   createdAt: EpochTime
 }
 
-export type TrackerReducer = 'sum' | 'count' | 'last' | 'avg' | 'min' | 'max'
-export type TrackerDirection = 'increase' | 'decrease' | 'neutral'
-
 export interface TrackerCreateInput {
   name: string
   unit: string
-  reducer: TrackerReducer
-  direction: TrackerDirection
   baseline: number
 }
 
 export interface TrackerUpdateInput {
   name?: string
   unit?: string
-  reducer?: TrackerReducer
-  direction?: TrackerDirection
   baseline?: number
 }
 
 export interface TrackerQuery {
-  reducer?: TrackerReducer
-  direction?: TrackerDirection
   limit?: number
   skip?: number
 }
@@ -141,14 +130,6 @@ export function useTracker() {
       let trackers = result.rows
         .filter(row => row.id.startsWith('tracker_'))
         .map(row => row.doc as unknown as Tracker)
-      
-      // Apply filters
-      if (query.reducer) {
-        trackers = trackers.filter(t => t.reducer === query.reducer)
-      }
-      if (query.direction) {
-        trackers = trackers.filter(t => t.direction === query.direction)
-      }
       
       // Apply pagination
       if (query.skip) {

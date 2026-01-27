@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
-import { useTracker } from "../hooks/useTracker";
 import { useTarget } from "../hooks/useTarget";
+import { useTracker } from "../hooks/useTracker";
 import { Target, Plus, Edit, Trash2, TargetIcon } from "lucide-react";
-import type { Tracker } from "~/lib/tracker/types";
-import type { Target as TargetType } from "../hooks/useTarget";
-import TargetForm from "../components/evaluation-form";
+import type { Target as TargetType, Tracker } from "~/lib/tracker/types";
+import TargetForm from "../components/target-form";
 
-export default function TargetList() {
+export default function Targets() {
   const { loading, error, deleteTarget, getTargets, refreshTargets } = useTarget();
-  const { loading: trackerLoading, getTrackers } = useTracker();
+  const { getTrackers } = useTracker();
   const [targets, setTargets] = useState<TargetType[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
@@ -21,12 +20,12 @@ export default function TargetList() {
 
   const loadData = async () => {
     try {
-      const [tgts, trks] = await Promise.all([
+      const [targetsData, trackersData] = await Promise.all([
         getTargets(),
         getTrackers()
       ]);
-      setTargets(tgts);
-      setTrackers(trks);
+      setTargets(targetsData);
+      setTrackers(trackersData);
     } catch (err) {
       console.error('Failed to load data:', err);
     }
@@ -57,13 +56,8 @@ export default function TargetList() {
   }, [popupOpened]);
 
   const handleTargetSuccess = () => {
-    resetForm();
-    closePopup();
+    setPopupOpened(false);
     loadData();
-    f7.toast.create({
-      text: 'Target saved successfully',
-      closeTimeout: 2000
-    }).open();
   };
 
   const handleTargetError = (errorMessage: string) => {
@@ -71,34 +65,34 @@ export default function TargetList() {
   };
 
   const handleTargetCancel = () => {
-    resetForm();
-    closePopup();
+    setPopupOpened(false);
   };
 
-  const handleDelete = async (target: TargetType) => {
-    if (!target.id) return;
+  const handleDeleteTarget = async (target: TargetType) => {
+    const tracker = trackers.find(t => t.id === target.trackerId);
+    const trackerName = tracker ? `${tracker.name} (${tracker.unit})` : 'Unknown tracker';
     
-    try {
-      await deleteTarget(target.id);
-      await loadData();
-      f7.toast.create({
-        text: 'Target deleted successfully',
-        closeTimeout: 2000
-      }).open();
-    } catch (err) {
-      console.error('Failed to delete target:', err);
-      f7.dialog.alert('Failed to delete target');
-    }
+    f7.dialog.confirm(
+      `Are you sure you want to delete this target for "${trackerName}"? This action cannot be undone.`,
+      'Delete Target',
+      async () => {
+        try {
+          await deleteTarget(target.id);
+          loadData();
+        } catch (err) {
+          console.error('Failed to delete target:', err);
+          f7.dialog.alert('Failed to delete target. Please try again.');
+        }
+      }
+    );
   };
 
   const getTypeLabel = (type: string) => {
     switch (type) {
-      case 'target':
-        return 'Target';
+      case 'static':
+        return 'Static';
       case 'range':
         return 'Range';
-      case 'threshold':
-        return 'Threshold';
       default:
         return type;
     }
@@ -167,9 +161,9 @@ export default function TargetList() {
 
       {!loading && !error && targets.length === 0 && (
         <Block className="text-center">
-          <TargetIcon size={48} />
+          <TargetIcon size={48} className="text-gray-400" />
           <p>No targets yet</p>
-          <p>Create your first budget, target, or threshold to start tracking!</p>
+          <p>Create your first target to start tracking!</p>
           <Button fill onClick={openAddPopup}>
             <Plus size={16} />
             Create Target
@@ -190,7 +184,7 @@ export default function TargetList() {
                 <a 
                   href="#" 
                   className="swipeout-delete"
-                  onClick={() => handleDelete(target)}
+                  onClick={() => handleDeleteTarget(target)}
                 >
                   Delete
                 </a>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Sheet, NavRight, Link, f7 } from "framework7-react";
 import { useTasks } from "../hooks/useTasks";
-import { CheckCircleIcon, CircleIcon, Trash2Icon, PlusIcon, Plus } from "lucide-react";
+import { CheckCircleIcon, CircleIcon, Trash2Icon, PlusIcon, Plus, Check } from "lucide-react";
 import type { Task, TaskStatus } from "~/lib/types/task";
 import TaskForm from "../components/task-form";
 
@@ -157,7 +157,7 @@ export default function Tasks() {
 
       {!loading && !error && tasks.length === 0 &&
         <Block className="text-center">
-          <Icon ios="f7:checkmark_square" md="material:check_box" size="48" />
+          <Check />
           <p>No tasks yet</p>
           <p>Create your first task to get started!</p>
           <Button fill onClick={openAddPopup}>

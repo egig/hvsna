@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Block, BlockTitle, ListInput, List, ListButton, Preloader } from "framework7-react";
 import { useTracker } from "../hooks/useTracker";
-import type { Tracker, TrackerReducer, TrackerDirection } from "~/lib/tracker/types";
+import type { Tracker } from "~/lib/tracker/types";
 
 interface TrackerFormProps {
   trackerId?: string | null;
@@ -19,8 +19,6 @@ export default function TrackerForm({
   const { loading, error, createTracker, updateTracker, getTracker } = useTracker();
   const [name, setName] = useState('');
   const [unit, setUnit] = useState('');
-  const [reducer, setReducer] = useState<TrackerReducer>('sum');
-  const [direction, setDirection] = useState<TrackerDirection>('increase');
   const [baseline, setBaseline] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,8 +28,6 @@ export default function TrackerForm({
         if (fetchedTracker) {
           setName(fetchedTracker.name);
           setUnit(fetchedTracker.unit);
-          setReducer(fetchedTracker.reducer);
-          setDirection(fetchedTracker.direction);
           setBaseline(fetchedTracker.baseline.toString());
         }
       }).catch(() => {
@@ -40,8 +36,6 @@ export default function TrackerForm({
     } else {
       setName('');
       setUnit('');
-      setReducer('sum');
-      setDirection('increase');
       setBaseline('0');
     }
   }, [trackerId, getTracker]);
@@ -63,16 +57,12 @@ export default function TrackerForm({
         result = await updateTracker(trackerId, {
           name: name.trim(),
           unit: unit.trim(),
-          reducer,
-          direction,
           baseline: parseFloat(baseline) || 0
         });
       } else {
         result = await createTracker({
           name: name.trim(),
           unit: unit.trim(),
-          reducer,
-          direction,
           baseline: parseFloat(baseline) || 0
         });
       }
@@ -80,8 +70,6 @@ export default function TrackerForm({
       // Reset form
       setName('');
       setUnit('');
-      setReducer('sum');
-      setDirection('increase');
       setBaseline('0');
       
       if (onSuccess) {
@@ -97,8 +85,6 @@ export default function TrackerForm({
   const handleCancel = () => {
     setName('');
     setUnit('');
-    setReducer('sum');
-    setDirection('increase');
     setBaseline('0');
     if (onCancel) {
       onCancel();
@@ -128,33 +114,6 @@ export default function TrackerForm({
           readonly={isSubmitting}
           label="Unit"
         />
-        <ListInput
-          outline
-          type="select"
-          value={reducer}
-          onChange={(e: any) => setReducer(e.target.value)}
-          readonly={isSubmitting}
-          label="Reducer"
-        >
-          <option value="sum">Sum</option>
-          <option value="count">Count</option>
-          <option value="last">Last</option>
-          <option value="avg">Average</option>
-          <option value="min">Minimum</option>
-          <option value="max">Maximum</option>
-        </ListInput>
-        <ListInput
-          outline
-          type="select"
-          value={direction}
-          onChange={(e: any) => setDirection(e.target.value)}
-          readonly={isSubmitting}
-          label="Direction"
-        >
-          <option value="increase">Increase (good when up)</option>
-          <option value="decrease">Decrease (good when down)</option>
-          <option value="neutral">Neutral</option>
-        </ListInput>
         <ListInput 
           outline 
           type="number" 

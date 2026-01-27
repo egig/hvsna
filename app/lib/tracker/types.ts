@@ -17,24 +17,9 @@ export interface Tracker {
   id: UUID
   name: string
   unit: string                 // IDR, count, hours, %, kg
-  reducer: TrackerReducer
-  direction: TrackerDirection
   baseline: number
   createdAt: EpochTime
 }
-
-export type TrackerReducer =
-  | 'sum'
-  | 'count'
-  | 'last'
-  | 'avg'
-  | 'min'
-  | 'max'
-
-export type TrackerDirection =
-  | 'increase'
-  | 'decrease'
-  | 'neutral'
 
 /* ---------- Log ---------- */
 /**
@@ -50,26 +35,42 @@ export interface Log {
   createdAt: EpochTime
 }
 
-/* ---------- Evaluation ---------- */
+/* ---------- Target ---------- */
+
+export type TargetReducer =
+  | 'sum'
+  | 'count'
+  | 'last'
+  | 'avg'
+  | 'min'
+  | 'max'
+
+export type TargetDirection =
+  | 'increase'
+  | 'decrease'
+  | 'neutral'
+
 /**
  * Unifies goal, budget, quota, SLA, limit.
  */
-export interface Evaluation {
+export interface Target {
   id: UUID
   trackerId: UUID
-  type: EvaluationType
+  type: TargetType
+  reducer: TargetReducer
+  direction: TargetDirection
   value: number                // target or min
   valueMax?: number             // only for range
-  period?: EvaluationPeriod
+  period?: TargetPeriod
   soft: boolean
   createdAt: EpochTime
 }
 
-export type EvaluationType =
+export type TargetType =
   | 'static'
   | 'range'
 
-export type EvaluationPeriod =
+export type TargetPeriod =
   | 'daily'
   | 'weekly'
   | 'monthly'

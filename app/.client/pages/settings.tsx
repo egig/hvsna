@@ -24,7 +24,7 @@ return (
       <ListItem link="/trackers/" title="Trackers">
         <Icon slot="media" f7="chart_bar_alt_fill" />
       </ListItem>
-      <ListItem link="/evaluations/" title="Budgets / Targets">
+      <ListItem link="/targets/" title="Targets">
         <Icon slot="media" f7="graph_square" />
       </ListItem>
       <ListItem link="/journal/" title="Journal">

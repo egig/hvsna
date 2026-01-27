@@ -17,7 +17,7 @@ import { PouchDBProvider } from "./contexts/PouchDB";
 import Notes from "./pages/notes";
 import Tasks from "./pages/tasks";
 import Trackers from "./pages/trackers";
-import EvaluationList from "./pages/evaluation-list";
+import Targets from "./pages/targets";
 import Journal from "./pages/journal";
 import Overview from "./pages/overview";
 import Categories from "./pages/categories";
@@ -72,8 +72,8 @@ export default function Hvsna({ config }: { config: AppConfig }) {
         ],
       },
       {
-        path: "/evaluations",
-        component: EvaluationList
+        path: "/targets",
+        component: Targets
       },
       {
         path: "/journal",

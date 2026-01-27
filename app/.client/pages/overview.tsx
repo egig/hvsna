@@ -1,16 +1,17 @@
 import { useEffect, useState } from "react";
 import { Navbar, NavTitle, Page, Block, BlockTitle, Progressbar, List, ListItem, Link, Preloader, f7 } from "framework7-react";
-import { useEvaluation } from "../hooks/useEvaluation";
+import { useTarget } from "../hooks/useTarget";
 import { useLog } from "../hooks/useLog";
 import { useTracker } from "../hooks/useTracker";
 import { Target, FileText, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import type { Evaluation, Log, Tracker } from "~/lib/tracker/types";
+import type { Target as TargetType, Log, Tracker } from "~/lib/tracker/types";
+import type { Target as TargetHookType } from "../hooks/useTarget";
 
 export default function Overview() {
-  const { loading: evalLoading, getEvaluations } = useEvaluation();
+  const { loading: targetLoading, getTargets } = useTarget();
   const { loading: logLoading, getLogs } = useLog();
   const { loading: trackerLoading, getTrackers } = useTracker();
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [targets, setTargets] = useState<TargetHookType[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,13 +30,13 @@ export default function Overview() {
       const now = new Date();
       const startOfYear = new Date(now.getFullYear(), 0, 1).getTime();
       
-      const [evals, logs, trks] = await Promise.all([
-        getEvaluations(),
+      const [tgts, logs, trks] = await Promise.all([
+        getTargets(),
         getLogs({ from: startOfYear, limit: 2000 }), // Get comprehensive logs for all periods
         getTrackers()
       ]);
       
-      setEvaluations(evals);
+      setTargets(tgts);
       setRecentLogs(logs);
       setTrackers(trks);
     } catch (err) {
@@ -50,89 +51,71 @@ export default function Overview() {
     return trackers.find(t => t.id === trackerId);
   };
 
-  const calculateProgress = (evaluation: Evaluation, currentValue: number): number => {
-    const tracker = getTrackerById(evaluation.trackerId);
+  const calculateProgress = (target: TargetType, currentValue: number): number => {
+    const tracker = getTrackerById(target.trackerId);
     if (!tracker) return 0;
 
-    const target = evaluation.value;
-    const max = evaluation.valueMax;
+    const targetValue = target.value;
+    const max = target.valueMax;
 
-    if (evaluation.type === 'range') {
+    if (target.type === 'range') {
       if (max !== undefined) {
         // For range, calculate progress within the range
-        const range = max - target;
-        const progress = ((currentValue - target) / range) * 100;
+        const range = max - targetValue;
+        const progress = ((currentValue - targetValue) / range) * 100;
         return Math.max(0, Math.min(100, progress));
       }
-    } else if (evaluation.type === 'target') {
-      // For target, calculate progress towards the target
-      const progress = (currentValue / target) * 100;
+    } else if (target.type === 'static') {
+      // For static, calculate progress towards the target
+      const progress = (currentValue / targetValue) * 100;
       return Math.max(0, Math.min(100, progress));
-    } else if (evaluation.type === 'threshold') {
-      // For threshold, show if we're within threshold
-      return currentValue <= target ? 100 : 0;
     }
 
     return 0;
   };
 
-  const getProgressColor = (evaluation: Evaluation, progress: number): string => {
-    const tracker = getTrackerById(evaluation.trackerId);
-    if (!tracker) return 'gray';
-
-    if (evaluation.type === 'threshold') {
-      return progress === 100 ? 'green' : 'red';
-    }
-
-    if (tracker.direction === 'increase') {
+  const getProgressColor = (target: TargetHookType, progress: number): string => {
+    if (target.direction === 'increase') {
       return progress >= 100 ? 'green' : progress >= 75 ? 'blue' : 'orange';
-    } else if (tracker.direction === 'decrease') {
+    } else if (target.direction === 'decrease') {
       return progress <= 100 ? 'green' : progress <= 125 ? 'blue' : 'orange';
     }
 
     return 'blue';
   };
 
-  const formatProgressText = (evaluation: Evaluation, currentValue: number): string => {
-    const tracker = getTrackerById(evaluation.trackerId);
+  const formatProgressText = (target: TargetType, currentValue: number): string => {
+    const tracker = getTrackerById(target.trackerId);
     if (!tracker) return '';
 
     const unit = tracker.unit;
-    const target = evaluation.value;
-    const max = evaluation.valueMax;
+    const targetValue = target.value;
+    const max = target.valueMax;
 
-    if (evaluation.type === 'range' && max !== undefined) {
-      return `${currentValue} ${unit} / ${target}-${max} ${unit}`;
-    } else if (evaluation.type === 'target') {
-      return `${currentValue} ${unit} / ${target} ${unit}`;
-    } else if (evaluation.type === 'threshold') {
-      return `${currentValue} ${unit} (max: ${target} ${unit})`;
+    if (target.type === 'range' && max !== undefined) {
+      return `${currentValue} ${unit} / ${targetValue}-${max} ${unit}`;
     }
 
-    return `${currentValue} ${unit} / ${target} ${unit}`;
+    return `${currentValue} ${unit} / ${targetValue} ${unit}`;
   };
 
-  const getTrendIcon = (evaluation: Evaluation, currentValue: number) => {
-    const tracker = getTrackerById(evaluation.trackerId);
-    if (!tracker) return <Minus size={16} className="text-gray-500" />;
+  const getTrendIcon = (target: TargetHookType, currentValue: number) => {
+    const progress = calculateProgress(target, currentValue);
+    const color = getProgressColor(target, progress);
 
-    const progress = calculateProgress(evaluation, currentValue);
-    const color = getProgressColor(evaluation, progress);
-
-    if (tracker.direction === 'increase') {
+    if (target.direction === 'increase') {
       return progress >= 100 ? <TrendingUp size={16} className={`text-${color}-500`} /> : <TrendingDown size={16} className="text-orange-500" />;
-    } else if (tracker.direction === 'decrease') {
+    } else if (target.direction === 'decrease') {
       return progress <= 100 ? <TrendingUp size={16} className={`text-${color}-500`} /> : <TrendingDown size={16} className="text-orange-500" />;
     }
 
     return <Minus size={16} className="text-gray-500" />;
   };
 
-  const getEvaluationTypeLabel = (type: string) => {
+  const getTargetTypeLabel = (type: string) => {
     switch (type) {
-      case 'target': return 'Target';
+      case 'static': return 'Static';
       case 'range': return 'Range';
-      case 'threshold': return 'Threshold';
       default: return type;
     }
   };
@@ -152,13 +135,13 @@ export default function Overview() {
     return `${log.value} ${unit}`;
   };
 
-  // Calculate actual current values from log data based on evaluation period
-  const getCurrentValueFromLogs = (evaluation: Evaluation): number => {
+  // Calculate actual current values from log data based on target period
+  const getCurrentValueFromLogs = (target: TargetType): number => {
     const now = Date.now();
     let fromDate: number;
     
-    // Determine the date range based on evaluation period
-    switch (evaluation.period) {
+    // Determine the date range based on target period
+    switch (target.period) {
       case 'daily':
         fromDate = now - (24 * 60 * 60 * 1000); // Last 24 hours
         break;
@@ -175,26 +158,17 @@ export default function Overview() {
         fromDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime(); // Default to monthly
     }
     
-    const metricLogs = recentLogs.filter(log => 
-      log.metricId === evaluation.metricId && log.timestamp >= fromDate
+    const trackerLogs = recentLogs.filter(log => 
+      log.trackerId === target.trackerId && log.timestamp >= fromDate
     );
     
-    if (metricLogs.length === 0) return 0;
+    if (trackerLogs.length === 0) return 0;
     
-    // For different evaluation types, we might want different aggregations
-    if (evaluation.type === 'threshold') {
-      // For threshold, use the latest value
-      const latestLog = metricLogs.reduce((latest, log) => 
-        log.timestamp > latest.timestamp ? log : latest
-      );
-      return latestLog.value;
-    } else {
-      // For target and range, use the latest value as current progress
-      const latestLog = metricLogs.reduce((latest, log) => 
-        log.timestamp > latest.timestamp ? log : latest
-      );
-      return latestLog.value;
-    }
+    // For different target types, use the latest value as current progress
+    const latestLog = trackerLogs.reduce((latest, log) => 
+      log.timestamp > latest.timestamp ? log : latest
+    );
+    return latestLog.value;
   };
 
   return (
@@ -219,34 +193,34 @@ export default function Overview() {
 
       {!loading && !error && (
         <>
-          {/* Quick Evaluation Overview */}
+          {/* Quick Target Overview */}
           <Block>
-            <BlockTitle medium>Quick Evaluation Overview</BlockTitle>
-            {evaluations.length === 0 ? (
+            <BlockTitle medium>Quick Target Overview</BlockTitle>
+            {targets.length === 0 ? (
               <Block className="text-center">
                 <Target size={48} className="text-gray-400" />
-                <p>No evaluations yet</p>
-                <Link href="/evaluations/">Create your first evaluation</Link>
+                <p>No targets yet</p>
+                <Link href="/targets/">Create your first target</Link>
               </Block>
             ) : (
               <List mediaList>
-                {evaluations.map((evaluation) => {
-                  const currentValue = getCurrentValueFromLogs(evaluation);
-                  const progress = calculateProgress(evaluation, currentValue);
-                  const color = getProgressColor(evaluation, progress);
-                  const tracker = getTrackerById(evaluation.trackerId);
+                {targets.map((target) => {
+                  const currentValue = getCurrentValueFromLogs(target);
+                  const progress = calculateProgress(target, currentValue);
+                  const color = getProgressColor(target, progress);
+                  const tracker = getTrackerById(target.trackerId);
 
                   return (
-                    <ListItem key={evaluation.id} title={tracker?.name || 'Unknown Tracker'}>
+                    <ListItem key={target.id} title={tracker?.name || 'Unknown Tracker'}>
                       <div slot="media">
                         <Target size={24} className="text-blue-500" />
                       </div>
                       <div slot="subtitle">
-                        {getEvaluationTypeLabel(evaluation.type)} • {evaluation.period || 'No period'}
+                        {getTargetTypeLabel(target.type)} • {target.period || 'No period'}
                       </div>
                       <div slot="text">
                         <div className="margin-bottom-half">
-                          {formatProgressText(evaluation, currentValue)}
+                          {formatProgressText(target, currentValue)}
                         </div>
                         <Progressbar
                           color={color}
@@ -255,7 +229,7 @@ export default function Overview() {
                         />
                       </div>
                       <div slot="after">
-                        {getTrendIcon(evaluation, currentValue)}
+                        {getTrendIcon(target, currentValue)}
                       </div>
                     </ListItem>
                   );
