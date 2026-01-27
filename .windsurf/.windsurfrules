@@ -1,0 +1,37 @@
+# Custom Windsurf Rules for HVSNA Project
+
+# Rule: Enforce snake_case with dashes for filenames
+rule "use-snake-case-filenames" {
+  description = "All filenames must use snake_case with dashes"
+  pattern = "^[a-z][a-z0-9_-]*\\.(ts|tsx|js|jsx)$"
+  message = "Filenames must use snake_case with dashes (e.g., use-task.ts, day-note.tsx)"
+  severity = "error"
+  exclude = ["node_modules", ".git", "build", "dist"]
+}
+
+# Rule: TypeScript only
+rule "typescript-only" {
+  description = "Only TypeScript/TSX files allowed"
+  pattern = "\\.(js|jsx)$"
+  message = "JavaScript files are not allowed. Use TypeScript (.ts) or TSX (.tsx) instead."
+  severity = "error"
+  exclude = ["node_modules", ".git", "build", "dist", "public"]
+}
+
+# Rule: Require tests for new files
+rule "require-tests" {
+  description = "All new source files must have corresponding test files"
+  pattern = "\\.(ts|tsx)$"
+  message = "Create corresponding test file with .test.ts or .test.tsx extension"
+  severity = "warning"
+  exclude = ["node_modules", ".git", "build", "dist", "__tests__"]
+}
+
+# Rule: No examples unless asked
+rule "no-examples-unless-asked" {
+  description = "Do not create example files unless explicitly requested"
+  pattern = "(example|demo|sample).*\\.(ts|tsx|js|jsx)$"
+  message = "Example files should not be created unless explicitly requested"
+  severity = "warning"
+  exclude = ["node_modules", ".git", "build", "dist"]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "hvsna",
+  "description": "Hijri Calendar App with Task Management",
+  "version": "1.0.0",
+  "mainLanguage": "typescript",
+  "framework": "react-router",
+  "testRunner": "vitest",
+  "packageManager": "npm",
+  "rules": [
+    "use-snake-case-filenames",
+    "typescript-only",
+    "require-tests",
+    "no-examples-unless-asked"
+  ],
+  "paths": {
+    "app": "./app",
+    "client": "./app/.client",
+    "server": "./app/.server",
+    "utils": "./app/utils",
+    "lib": "./app/lib"
+  },
+  "scripts": {
+    "test": "npm run test",
+    "typecheck": "npm run typecheck",
+    "build": "npm run build"
+  }
+}

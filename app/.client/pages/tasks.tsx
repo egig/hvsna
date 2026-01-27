@@ -1,37 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Sheet, NavRight, Link, ListButton, ListInput, f7 } from "framework7-react";
+import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Sheet, NavRight, Link, f7 } from "framework7-react";
 import { useTasks } from "../hooks/useTasks";
-import { CheckCircleIcon, CircleIcon, Trash2Icon, EditIcon, PlusIcon, Plus } from "lucide-react";
+import { CheckCircleIcon, CircleIcon, Trash2Icon, PlusIcon, Plus } from "lucide-react";
 import type { Task, TaskStatus } from "~/lib/types/task";
 import TaskForm from "../components/task-form";
 
 export default function Tasks() {
-  const { tasks, loading, loadingMore, error, hasMore, deleteTask, refreshTasks, loadMoreTasks, createTask, updateTask } = useTasks();
+  const { tasks, loading, loadingMore, error, hasMore, deleteTask, refreshTasks, loadMoreTasks, updateTask } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [taskName, setTaskName] = useState('');
-  const [scheduledAt, setScheduledAt] = useState<string>('');
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   const resetForm = () => {
-    setTaskName('');
-    setScheduledAt('');
-    setEditingTask(null);
+    setEditingTaskId(null);
   };
 
   const openAddPopup = () => {
     // Reset form first, then open sheet
-    setEditingTask(null);
-    setTaskName('');
-    setScheduledAt('');
+    setEditingTaskId(null);
     // Use setTimeout to ensure state is set before opening sheet
     setTimeout(() => setSheetOpened(true), 0);
   };
 
   const openEditPopup = (task: Task) => {
-    setEditingTask(task);
-    setTaskName(task.name);
-    setScheduledAt(task.scheduledAt || '');
+    setEditingTaskId(task.id);
     setSheetOpened(true);
   };
 
@@ -46,27 +38,17 @@ export default function Tasks() {
     }
   }, [sheetOpened]);
 
-  const handleSubmit = async () => {
-    if (!taskName.trim()) return;
+  const handleTaskSuccess = () => {
+    setSheetOpened(false);
+    refreshTasks();
+  };
 
-    try {
-      if (editingTask) {
-        await updateTask(editingTask.id, {
-          name: taskName.trim(),
-          scheduledAt: scheduledAt || undefined
-        });
-      } else {
-        await createTask({
-          name: taskName.trim(),
-          scheduledAt: scheduledAt || undefined
-        });
-      }
-      // Close sheet after successful operation
-      setSheetOpened(false);
-    } catch (err) {
-      console.error('Failed to save task:', err);
-      f7.dialog.alert('Failed to save task. Please try again.');
-    }
+  const handleTaskError = (errorMessage: string) => {
+    f7.dialog.alert(errorMessage);
+  };
+
+  const handleTaskCancel = () => {
+    setSheetOpened(false);
   };
 
   const handleDeleteTask = async (task: Task) => {
@@ -87,20 +69,11 @@ export default function Tasks() {
   const handleStatusChange = async (task: Task, newStatus: TaskStatus) => {
     try {
       await updateTask(task.id, { status: newStatus });
+      refreshTasks();
     } catch (err) {
       console.error('Failed to update task status:', err);
       f7.dialog.alert('Failed to update task status. Please try again.');
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
   };
 
   const formatScheduledDate = (dateString?: string) => {
@@ -248,10 +221,10 @@ export default function Tasks() {
         </div>
         
         <TaskForm
-          editingTask={editingTask}
-          taskName={taskName}
-          onTaskNameChange={setTaskName}
-          onSubmit={handleSubmit}
+          taskId={editingTaskId}
+          onSuccess={handleTaskSuccess}
+          onError={handleTaskError}
+          onCancel={handleTaskCancel}
         />
       </Sheet>
     </Page>
