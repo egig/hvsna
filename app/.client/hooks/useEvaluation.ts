@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { usePouchDB } from '../contexts/PouchDBContext'
+import { usePouchDB } from '../contexts/PouchDB'
 import type { UUID, EpochTime } from '../../lib/tracker/types'
 
 export interface Evaluation {
@@ -43,7 +43,7 @@ export interface EvaluationQuery {
 }
 
 export function useEvaluation() {
-  const db = usePouchDB()
+  const { db } = usePouchDB()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

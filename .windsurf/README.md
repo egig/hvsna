@@ -44,7 +44,7 @@ app/
 
 ## Technology Stack
 
-- **Framework**: React Router v7
+- **Framework**: React Framework7
 - **Language**: TypeScript
 - **Database**: PouchDB
 - **Styling**: Tailwind CSS

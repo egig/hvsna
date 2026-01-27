@@ -3,7 +3,7 @@
   "description": "Hijri Calendar App with Task Management",
   "version": "1.0.0",
   "mainLanguage": "typescript",
-  "framework": "react-router",
+  "framework": "framework7-react",
   "testRunner": "vitest",
   "packageManager": "npm",
   "rules": [

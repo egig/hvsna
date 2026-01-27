@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Page, Tabs, Tab, Link, Toolbar, ToolbarPane, Fab, Sheet, Navbar, NavTitle, f7 } from 'framework7-react';
-import { NotepadText, List, CogIcon, CheckSquare, Plus } from 'lucide-react';
+import { NotepadText, List, CogIcon, CheckSquare, Plus, BarChart3 } from 'lucide-react';
 import TaskForm from '../components/task-form';
 
 export default () => {
@@ -31,6 +31,8 @@ export default () => {
       setActiveTab('settings');
     } else if (currentUrl.includes('/tasks')) {
       setActiveTab('tasks');
+    } else if (currentUrl.includes('/metrics')) {
+      setActiveTab('metrics');
     } else {
       setActiveTab('today');
     }
@@ -40,7 +42,7 @@ export default () => {
     };
   }, []);
 
-  const shouldShowFab = activeTab !== 'settings';
+  const shouldShowFab = activeTab !== 'settings' && activeTab !== 'metrics';
 
   return (
   <Page pageContent={false}>

@@ -16,6 +16,11 @@ import store from "./store";
 import { PouchDBProvider } from "./contexts/PouchDB";
 import Notes from "./pages/notes";
 import Tasks from "./pages/tasks";
+import Metrics from "./pages/metrics";
+import EvaluationList from "./pages/evaluation-list";
+import Journal from "./pages/journal";
+import Overview from "./pages/overview";
+import Categories from "./pages/categories";
 
 export interface AppConfig {
   basePath?: string;
@@ -47,7 +52,7 @@ export default function Hvsna({ config }: { config: AppConfig }) {
           {
             path: "/",
             id: "today",
-            component: ViewToday
+            component: Overview
           },
           {
             path: "/notes/",
@@ -65,6 +70,26 @@ export default function Hvsna({ config }: { config: AppConfig }) {
             component: Settings
           },
         ],
+      },
+      {
+        path: "/evaluations",
+        component: EvaluationList
+      },
+      {
+        path: "/journal",
+        component: Journal
+      },
+      {
+        path: "/overview",
+        component: Overview
+      },
+      {
+        path: "/categories",
+        component: Categories
+      },
+      {
+        path: "/metrics/",
+        component: Metrics
       },
       {
         path: "/template/",

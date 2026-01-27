@@ -36,12 +36,12 @@ export type MetricDirection =
   | 'decrease'
   | 'neutral'
 
-/* ---------- Event ---------- */
+/* ---------- Log ---------- */
 /**
  * Append-only signal.
- * All state is derived from events.
+ * All state is derived from logs.
  */
-export interface Event {
+export interface Log {
   id: UUID
   metricId: UUID
   timestamp: EpochTime
@@ -85,10 +85,10 @@ export interface Category {
   createdAt: EpochTime
 }
 
-/* ---------- EventCategory (Join) ---------- */
+/* ---------- LogCategory (Join) ---------- */
 
-export interface EventCategory {
-  eventId: UUID
+export interface LogCategory {
+  logId: UUID
   categoryId: UUID
 }
 
@@ -110,7 +110,7 @@ export interface AggregationCache {
    ============================================================ */
 
 /**
- * - Events are immutable
+ * - Logs are immutable
  * - Metrics define math, not UI
  * - Evaluations judge aggregated values
  * - All progress, streaks, balances are derived
