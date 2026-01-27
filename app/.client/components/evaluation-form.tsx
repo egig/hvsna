@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Block, BlockTitle, ListInput, List, ListButton, Preloader } from "framework7-react";
-import { useMetric } from "../hooks/useMetric";
+import { useTracker } from "../hooks/useTracker";
 import { useEvaluation } from "../hooks/useEvaluation";
-import type { Metric, Evaluation, EvaluationType, EvaluationPeriod } from "~/lib/tracker/types";
+import type { Tracker, Evaluation, EvaluationType, EvaluationPeriod } from "~/lib/tracker/types";
 
 interface EvaluationFormProps {
   evaluationId?: string | null;
@@ -17,10 +17,10 @@ export default function EvaluationForm({
   onError,
   onCancel,
 }: EvaluationFormProps) {
-  const { loading: metricLoading, getMetrics } = useMetric();
+  const { loading: trackerLoading, getTrackers } = useTracker();
   const { loading, error, createEvaluation, updateEvaluation, getEvaluation } = useEvaluation();
-  const [metrics, setMetrics] = useState<Metric[]>([]);
-  const [selectedMetricId, setSelectedMetricId] = useState('');
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
+  const [selectedTrackerId, setSelectedTrackerId] = useState('');
   const [type, setType] = useState<EvaluationType>('target');
   const [value, setValue] = useState('0');
   const [valueMax, setValueMax] = useState('');
@@ -29,17 +29,17 @@ export default function EvaluationForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Load available metrics
-    getMetrics().then(setMetrics).catch(() => {
+    // Load available trackers
+    getTrackers().then(setTrackers).catch(() => {
       // Handle error silently
     });
-  }, [getMetrics]);
+  }, [getTrackers]);
 
   useEffect(() => {
     if (evaluationId) {
       getEvaluation(evaluationId).then(fetchedEvaluation => {
         if (fetchedEvaluation) {
-          setSelectedMetricId(fetchedEvaluation.metricId);
+          setSelectedTrackerId(fetchedEvaluation.trackerId);
           setType(fetchedEvaluation.type);
           setValue(fetchedEvaluation.value.toString());
           setValueMax(fetchedEvaluation.valueMax?.toString() || '');
@@ -50,7 +50,7 @@ export default function EvaluationForm({
         // Handle error silently
       });
     } else {
-      setSelectedMetricId('');
+      setSelectedTrackerId('');
       setType('target');
       setValue('0');
       setValueMax('');
@@ -66,14 +66,14 @@ export default function EvaluationForm({
   }, [error, onError]);
 
   const handleSubmit = async () => {
-    if (!selectedMetricId || !value.trim()) return;
+    if (!selectedTrackerId || !value.trim()) return;
 
     try {
       setIsSubmitting(true);
       
       let result: Evaluation;
       const evaluationData = {
-        metricId: selectedMetricId,
+        trackerId: selectedTrackerId,
         type,
         value: parseFloat(value) || 0,
         valueMax: type === 'range' ? (parseFloat(valueMax) || undefined) : undefined,
@@ -88,8 +88,8 @@ export default function EvaluationForm({
       }
 
       // Reset form
-      setSelectedMetricId('');
-      setType('target');
+      setSelectedTrackerId('');
+      setType('static');
       setValue('0');
       setValueMax('');
       setPeriod('monthly');
@@ -106,8 +106,8 @@ export default function EvaluationForm({
   };
 
   const handleCancel = () => {
-    setSelectedMetricId('');
-    setType('target');
+    setSelectedTrackerId('');
+    setType('static');
     setValue('0');
     setValueMax('');
     setPeriod('monthly');
@@ -117,33 +117,33 @@ export default function EvaluationForm({
     }
   };
 
-  const selectedMetric = metrics.find(m => m.id === selectedMetricId);
+  const selectedTracker = trackers.find(t => t.id === selectedTrackerId);
 
   return (
     <Block>
       <BlockTitle color="primary">{evaluationId ? "Edit Budget / Target" : "New Budget / Target"}</BlockTitle>
-      {(loading || metricLoading) && <div className="text-center"><Preloader /></div>}
+      {(loading || trackerLoading) && <div className="text-center"><Preloader /></div>}
       <List strong dividers>
         <ListInput
           outline
           type="select"
-          value={selectedMetricId}
-          onChange={(e: any) => setSelectedMetricId(e.target.value)}
+          value={selectedTrackerId}
+          onChange={(e: any) => setSelectedTrackerId(e.target.value)}
           readonly={isSubmitting}
-          label="Metric"
+          label="Tracker"
         >
-          <option value="">Select a metric</option>
-          {metrics.map(metric => (
-            <option key={metric.id} value={metric.id}>
-              {metric.name} ({metric.unit})
+          <option value="">Select a tracker</option>
+          {trackers.map(tracker => (
+            <option key={tracker.id} value={tracker.id}>
+              {tracker.name} ({tracker.unit})
             </option>
           ))}
         </ListInput>
 
-        {selectedMetric && (
+        {selectedTracker && (
           <div className="padding-horizontal margin-bottom">
             <small className="text-color-gray">
-              Current baseline: {selectedMetric.baseline} {selectedMetric.unit}
+              Current baseline: {selectedTracker.baseline} {selectedTracker.unit}
             </small>
           </div>
         )}
@@ -156,9 +156,8 @@ export default function EvaluationForm({
           readonly={isSubmitting}
           label="Type"
         >
-          <option value="target">Target</option>
+          <option value="static">Static</option>
           <option value="range">Range</option>
-          <option value="threshold">Threshold</option>
         </ListInput>
 
         <ListInput 
@@ -168,8 +167,8 @@ export default function EvaluationForm({
           placeholder="0" 
           onChange={(e: any) => setValue(e.target.value)} 
           readonly={isSubmitting}
-          label={type === 'threshold' ? 'Threshold' : 'Target'}
-          info={selectedMetric ? `Value in ${selectedMetric.unit}` : ''}
+          label={type === 'range' ? 'Target' : 'Value'}
+          info={selectedTracker ? `Value in ${selectedTracker.unit}` : ''}
         />
 
         {type === 'range' && (
@@ -181,7 +180,7 @@ export default function EvaluationForm({
             onChange={(e: any) => setValueMax(e.target.value)} 
             readonly={isSubmitting}
             label="Maximum"
-            info={selectedMetric ? `Maximum in ${selectedMetric.unit}` : ''}
+            info={selectedTracker ? `Maximum in ${selectedTracker.unit}` : ''}
           />
         )}
 
@@ -212,7 +211,7 @@ export default function EvaluationForm({
 
         <div className="display-flex justify-content-space-between padding-horizontal">
           <ListButton onClick={handleCancel} className={isSubmitting ? 'disabled' : ''}>CANCEL</ListButton>
-          <ListButton color="primary" onClick={handleSubmit} className={(isSubmitting || !selectedMetricId || !value.trim()) ? 'disabled' : ''}>
+          <ListButton color="primary" onClick={handleSubmit} className={(isSubmitting || !selectedTrackerId || !value.trim()) ? 'disabled' : ''}>
             {isSubmitting ? (
               <><Preloader size={16} /> {evaluationId ? "UPDATING..." : "CREATING..."}</>
             ) : (

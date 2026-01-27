@@ -8,22 +8,22 @@ export type UUID = string
 
 export type EpochTime = number
 
-/* ---------- Metric ---------- */
+/* ---------- Tracker ---------- */
 /**
  * Defines how values behave mathematically.
  * Replaces "tracker", "expense", "goal", etc.
  */
-export interface Metric {
+export interface Tracker {
   id: UUID
   name: string
   unit: string                 // IDR, count, hours, %, kg
-  reducer: MetricReducer
-  direction: MetricDirection
+  reducer: TrackerReducer
+  direction: TrackerDirection
   baseline: number
   createdAt: EpochTime
 }
 
-export type MetricReducer =
+export type TrackerReducer =
   | 'sum'
   | 'count'
   | 'last'
@@ -31,7 +31,7 @@ export type MetricReducer =
   | 'min'
   | 'max'
 
-export type MetricDirection =
+export type TrackerDirection =
   | 'increase'
   | 'decrease'
   | 'neutral'
@@ -43,7 +43,7 @@ export type MetricDirection =
  */
 export interface Log {
   id: UUID
-  metricId: UUID
+  trackerId: UUID
   timestamp: EpochTime
   value: number
   metadata?: Record<string, unknown>
@@ -56,7 +56,7 @@ export interface Log {
  */
 export interface Evaluation {
   id: UUID
-  metricId: UUID
+  trackerId: UUID
   type: EvaluationType
   value: number                // target or min
   valueMax?: number             // only for range
@@ -66,9 +66,8 @@ export interface Evaluation {
 }
 
 export type EvaluationType =
-  | 'target'
+  | 'static'
   | 'range'
-  | 'threshold'
 
 export type EvaluationPeriod =
   | 'daily'
@@ -98,7 +97,7 @@ export interface LogCategory {
  * Never source of truth.
  */
 export interface AggregationCache {
-  metricId: UUID
+  trackerId: UUID
   periodStart: EpochTime
   periodEnd: EpochTime
   value: number
@@ -111,7 +110,7 @@ export interface AggregationCache {
 
 /**
  * - Logs are immutable
- * - Metrics define math, not UI
+ * - Trackers define math, not UI
  * - Evaluations judge aggregated values
  * - All progress, streaks, balances are derived
  */

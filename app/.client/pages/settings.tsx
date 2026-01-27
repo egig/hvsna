@@ -21,7 +21,7 @@ return (
       </NavRight>
     </Navbar>
     <List strong inset dividersIos className="components-list searchbar-found">
-      <ListItem link="/metrics/" title="Metrics">
+      <ListItem link="/trackers/" title="Trackers">
         <Icon slot="media" f7="chart_bar_alt_fill" />
       </ListItem>
       <ListItem link="/evaluations/" title="Budgets / Targets">

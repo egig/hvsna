@@ -31,8 +31,8 @@ export default () => {
       setActiveTab('settings');
     } else if (currentUrl.includes('/tasks')) {
       setActiveTab('tasks');
-    } else if (currentUrl.includes('/metrics')) {
-      setActiveTab('metrics');
+    } else if (currentUrl.includes('/trackers')) {
+      setActiveTab('trackers');
     } else {
       setActiveTab('today');
     }
@@ -42,7 +42,7 @@ export default () => {
     };
   }, []);
 
-  const shouldShowFab = activeTab !== 'settings' && activeTab !== 'metrics';
+  const shouldShowFab = activeTab !== 'settings' && activeTab !== 'trackers';
 
   return (
   <Page pageContent={false}>

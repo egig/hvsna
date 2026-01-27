@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
 import { useEvaluation } from "../hooks/useEvaluation";
-import { useMetric } from "../hooks/useMetric";
+import { useTracker } from "../hooks/useTracker";
 import { Target, Plus, Edit, Trash2, TargetIcon } from "lucide-react";
-import type { Evaluation, Metric } from "~/lib/tracker/types";
+import type { Evaluation, Tracker } from "~/lib/tracker/types";
 import EvaluationForm from "../components/evaluation-form";
 
 export default function EvaluationList() {
   const { loading, error, deleteEvaluation, getEvaluations, refreshEvaluations } = useEvaluation();
-  const { getMetrics } = useMetric();
+  const { getTrackers } = useTracker();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingEvaluationId, setEditingEvaluationId] = useState<string | null>(null);
 
@@ -20,12 +20,12 @@ export default function EvaluationList() {
 
   const loadData = async () => {
     try {
-      const [evaluationsData, metricsData] = await Promise.all([
+      const [evaluationsData, trackersData] = await Promise.all([
         getEvaluations(),
-        getMetrics()
+        getTrackers()
       ]);
       setEvaluations(evaluationsData);
-      setMetrics(metricsData);
+      setTrackers(trackersData);
     } catch (err) {
       console.error('Failed to load data:', err);
     }
@@ -69,11 +69,11 @@ export default function EvaluationList() {
   };
 
   const handleDeleteEvaluation = async (evaluation: Evaluation) => {
-    const metric = metrics.find(m => m.id === evaluation.metricId);
-    const metricName = metric ? `${metric.name} (${metric.unit})` : 'Unknown metric';
+    const tracker = trackers.find(t => t.id === evaluation.trackerId);
+    const trackerName = tracker ? `${tracker.name} (${tracker.unit})` : 'Unknown tracker';
     
     f7.dialog.confirm(
-      `Are you sure you want to delete this evaluation for "${metricName}"? This action cannot be undone.`,
+      `Are you sure you want to delete this evaluation for "${trackerName}"? This action cannot be undone.`,
       'Delete Evaluation',
       async () => {
         try {
@@ -119,8 +119,8 @@ export default function EvaluationList() {
   };
 
   const formatEvaluationValue = (evaluation: Evaluation) => {
-    const metric = metrics.find(m => m.id === evaluation.metricId);
-    const unit = metric ? metric.unit : '';
+    const tracker = trackers.find(t => t.id === evaluation.trackerId);
+    const unit = tracker ? tracker.unit : '';
     
     if (evaluation.type === 'range' && evaluation.valueMax) {
       return `${evaluation.value} - ${evaluation.valueMax} ${unit}`;
@@ -128,9 +128,9 @@ export default function EvaluationList() {
     return `${evaluation.value} ${unit}`;
   };
 
-  const getMetricName = (metricId: string) => {
-    const metric = metrics.find(m => m.id === metricId);
-    return metric ? metric.name : 'Unknown metric';
+  const getTrackerName = (trackerId: string) => {
+    const tracker = trackers.find(t => t.id === trackerId);
+    return tracker ? tracker.name : 'Unknown tracker';
   };
 
   return (
@@ -178,7 +178,7 @@ export default function EvaluationList() {
           {evaluations.map((evaluation) => (
             <ListItem
               key={evaluation.id}
-              title={getMetricName(evaluation.metricId)}
+              title={getTrackerName(evaluation.trackerId)}
               subtitle={`${formatEvaluationValue(evaluation)} • ${getPeriodLabel(evaluation.period)}`}
               swipeout
             >

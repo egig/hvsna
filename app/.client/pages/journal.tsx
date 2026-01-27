@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
 import { useLog } from "../hooks/useLog";
-import { useMetric } from "../hooks/useMetric";
+import { useTracker } from "../hooks/useTracker";
 import { Plus, Edit, Trash2, FileText } from "lucide-react";
-import type { Log, Metric } from "~/lib/tracker/types";
+import type { Log, Tracker } from "~/lib/tracker/types";
 import LogForm from "../components/log-form";
 
 export default function Journal() {
   const { loading, error, deleteLog, getLogs, refreshLogs } = useLog();
-  const { getMetrics } = useMetric();
+  const { getTrackers } = useTracker();
   const [logs, setLogs] = useState<Log[]>([]);
-  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
 
@@ -20,12 +20,12 @@ export default function Journal() {
 
   const loadData = async () => {
     try {
-      const [logsData, metricsData] = await Promise.all([
+      const [logsData, trackersData] = await Promise.all([
         getLogs(),
-        getMetrics()
+        getTrackers()
       ]);
       setLogs(logsData);
-      setMetrics(metricsData);
+      setTrackers(trackersData);
     } catch (err) {
       console.error('Failed to load data:', err);
     }
@@ -69,11 +69,11 @@ export default function Journal() {
   };
 
   const handleDeleteLog = async (log: Log) => {
-    const metric = metrics.find(m => m.id === log.metricId);
-    const metricName = metric ? `${metric.name} (${metric.unit})` : 'Unknown metric';
+    const tracker = trackers.find(t => t.id === log.trackerId);
+    const trackerName = tracker ? `${tracker.name} (${tracker.unit})` : 'Unknown tracker';
     
     f7.dialog.confirm(
-      `Are you sure you want to delete this journal entry for "${metricName}"? This action cannot be undone.`,
+      `Are you sure you want to delete this journal entry for "${trackerName}"? This action cannot be undone.`,
       'Delete Journal Entry',
       async () => {
         try {
@@ -87,14 +87,14 @@ export default function Journal() {
     );
   };
 
-  const getMetricName = (metricId: string) => {
-    const metric = metrics.find(m => m.id === metricId);
-    return metric ? metric.name : 'Unknown metric';
+  const getTrackerName = (trackerId: string) => {
+    const tracker = trackers.find(t => t.id === trackerId);
+    return tracker ? tracker.name : 'Unknown tracker';
   };
 
   const formatLogValue = (log: Log) => {
-    const metric = metrics.find(m => m.id === log.metricId);
-    const unit = metric ? metric.unit : '';
+    const tracker = trackers.find(t => t.id === log.trackerId);
+    const unit = tracker ? tracker.unit : '';
     return `${log.value} ${unit}`;
   };
 
@@ -147,7 +147,7 @@ export default function Journal() {
           {logs.map((log) => (
             <ListItem
               key={log.id}
-              title={getMetricName(log.metricId)}
+              title={getTrackerName(log.trackerId)}
               subtitle={`${formatLogValue(log)} • ${formatTimestamp(log.timestamp)}`}
               swipeout
             >

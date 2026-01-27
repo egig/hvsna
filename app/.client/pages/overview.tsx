@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import { Navbar, NavTitle, Page, Block, BlockTitle, Progressbar, List, ListItem, Link, Preloader, f7 } from "framework7-react";
 import { useEvaluation } from "../hooks/useEvaluation";
 import { useLog } from "../hooks/useLog";
-import { useMetric } from "../hooks/useMetric";
+import { useTracker } from "../hooks/useTracker";
 import { Target, FileText, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import type { Evaluation, Log, Metric } from "~/lib/tracker/types";
+import type { Evaluation, Log, Tracker } from "~/lib/tracker/types";
 
 export default function Overview() {
   const { loading: evalLoading, getEvaluations } = useEvaluation();
   const { loading: logLoading, getLogs } = useLog();
-  const { loading: metricLoading, getMetrics } = useMetric();
+  const { loading: trackerLoading, getTrackers } = useTracker();
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
-  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,15 +25,19 @@ export default function Overview() {
       setLoading(true);
       setError(null);
       
-      const [evals, logs, mets] = await Promise.all([
+      // Get logs from the beginning of the current year to cover all evaluation periods
+      const now = new Date();
+      const startOfYear = new Date(now.getFullYear(), 0, 1).getTime();
+      
+      const [evals, logs, trks] = await Promise.all([
         getEvaluations(),
-        getLogs({ limit: 10 }),
-        getMetrics()
+        getLogs({ from: startOfYear, limit: 2000 }), // Get comprehensive logs for all periods
+        getTrackers()
       ]);
       
       setEvaluations(evals);
       setRecentLogs(logs);
-      setMetrics(mets);
+      setTrackers(trks);
     } catch (err) {
       console.error('Failed to load overview data:', err);
       setError('Failed to load data');
@@ -42,13 +46,13 @@ export default function Overview() {
     }
   };
 
-  const getMetricById = (metricId: string): Metric | undefined => {
-    return metrics.find(m => m.id === metricId);
+  const getTrackerById = (trackerId: string): Tracker | undefined => {
+    return trackers.find(t => t.id === trackerId);
   };
 
   const calculateProgress = (evaluation: Evaluation, currentValue: number): number => {
-    const metric = getMetricById(evaluation.metricId);
-    if (!metric) return 0;
+    const tracker = getTrackerById(evaluation.trackerId);
+    if (!tracker) return 0;
 
     const target = evaluation.value;
     const max = evaluation.valueMax;
@@ -73,16 +77,16 @@ export default function Overview() {
   };
 
   const getProgressColor = (evaluation: Evaluation, progress: number): string => {
-    const metric = getMetricById(evaluation.metricId);
-    if (!metric) return 'gray';
+    const tracker = getTrackerById(evaluation.trackerId);
+    if (!tracker) return 'gray';
 
     if (evaluation.type === 'threshold') {
       return progress === 100 ? 'green' : 'red';
     }
 
-    if (metric.direction === 'increase') {
+    if (tracker.direction === 'increase') {
       return progress >= 100 ? 'green' : progress >= 75 ? 'blue' : 'orange';
-    } else if (metric.direction === 'decrease') {
+    } else if (tracker.direction === 'decrease') {
       return progress <= 100 ? 'green' : progress <= 125 ? 'blue' : 'orange';
     }
 
@@ -90,10 +94,10 @@ export default function Overview() {
   };
 
   const formatProgressText = (evaluation: Evaluation, currentValue: number): string => {
-    const metric = getMetricById(evaluation.metricId);
-    if (!metric) return '';
+    const tracker = getTrackerById(evaluation.trackerId);
+    if (!tracker) return '';
 
-    const unit = metric.unit;
+    const unit = tracker.unit;
     const target = evaluation.value;
     const max = evaluation.valueMax;
 
@@ -109,15 +113,15 @@ export default function Overview() {
   };
 
   const getTrendIcon = (evaluation: Evaluation, currentValue: number) => {
-    const metric = getMetricById(evaluation.metricId);
-    if (!metric) return <Minus size={16} className="text-gray-500" />;
+    const tracker = getTrackerById(evaluation.trackerId);
+    if (!tracker) return <Minus size={16} className="text-gray-500" />;
 
     const progress = calculateProgress(evaluation, currentValue);
     const color = getProgressColor(evaluation, progress);
 
-    if (metric.direction === 'increase') {
+    if (tracker.direction === 'increase') {
       return progress >= 100 ? <TrendingUp size={16} className={`text-${color}-500`} /> : <TrendingDown size={16} className="text-orange-500" />;
-    } else if (metric.direction === 'decrease') {
+    } else if (tracker.direction === 'decrease') {
       return progress <= 100 ? <TrendingUp size={16} className={`text-${color}-500`} /> : <TrendingDown size={16} className="text-orange-500" />;
     }
 
@@ -137,29 +141,61 @@ export default function Overview() {
     return new Date(timestamp).toLocaleString();
   };
 
-  const getMetricName = (metricId: string) => {
-    const metric = metrics.find(m => m.id === metricId);
-    return metric ? metric.name : 'Unknown metric';
+  const getTrackerName = (trackerId: string) => {
+    const tracker = trackers.find(t => t.id === trackerId);
+    return tracker ? tracker.name : 'Unknown tracker';
   };
 
   const formatLogValue = (log: Log) => {
-    const metric = getMetricById(log.metricId);
-    const unit = metric ? metric.unit : '';
+    const tracker = getTrackerById(log.trackerId);
+    const unit = tracker ? tracker.unit : '';
     return `${log.value} ${unit}`;
   };
 
-  // Mock current values for demonstration - in real app, this would come from aggregated data
-  const mockCurrentValues: Record<string, number> = {};
-  evaluations.forEach(evaluationData => {
-    // Simple mock: use some percentage of target based on time of month
-    const metric = getMetricById(evaluationData.metricId);
-    if (metric) {
-      const daysInMonth = 30;
-      const currentDay = new Date().getDate();
-      const progress = currentDay / daysInMonth;
-      mockCurrentValues[evaluationData.id] = evaluationData.value * progress * (0.8 + Math.random() * 0.4); // 80-120% of expected progress
+  // Calculate actual current values from log data based on evaluation period
+  const getCurrentValueFromLogs = (evaluation: Evaluation): number => {
+    const now = Date.now();
+    let fromDate: number;
+    
+    // Determine the date range based on evaluation period
+    switch (evaluation.period) {
+      case 'daily':
+        fromDate = now - (24 * 60 * 60 * 1000); // Last 24 hours
+        break;
+      case 'weekly':
+        fromDate = now - (7 * 24 * 60 * 60 * 1000); // Last 7 days
+        break;
+      case 'monthly':
+        fromDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime(); // Start of current month
+        break;
+      case 'yearly':
+        fromDate = new Date(new Date().getFullYear(), 0, 1).getTime(); // Start of current year
+        break;
+      default:
+        fromDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime(); // Default to monthly
     }
-  });
+    
+    const metricLogs = recentLogs.filter(log => 
+      log.metricId === evaluation.metricId && log.timestamp >= fromDate
+    );
+    
+    if (metricLogs.length === 0) return 0;
+    
+    // For different evaluation types, we might want different aggregations
+    if (evaluation.type === 'threshold') {
+      // For threshold, use the latest value
+      const latestLog = metricLogs.reduce((latest, log) => 
+        log.timestamp > latest.timestamp ? log : latest
+      );
+      return latestLog.value;
+    } else {
+      // For target and range, use the latest value as current progress
+      const latestLog = metricLogs.reduce((latest, log) => 
+        log.timestamp > latest.timestamp ? log : latest
+      );
+      return latestLog.value;
+    }
+  };
 
   return (
     <Page>
@@ -195,13 +231,13 @@ export default function Overview() {
             ) : (
               <List mediaList>
                 {evaluations.map((evaluation) => {
-                  const currentValue = mockCurrentValues[evaluation.id] || 0;
+                  const currentValue = getCurrentValueFromLogs(evaluation);
                   const progress = calculateProgress(evaluation, currentValue);
                   const color = getProgressColor(evaluation, progress);
-                  const metric = getMetricById(evaluation.metricId);
+                  const tracker = getTrackerById(evaluation.trackerId);
 
                   return (
-                    <ListItem key={evaluation.id} title={metric?.name || 'Unknown Metric'}>
+                    <ListItem key={evaluation.id} title={tracker?.name || 'Unknown Tracker'}>
                       <div slot="media">
                         <Target size={24} className="text-blue-500" />
                       </div>
@@ -240,7 +276,7 @@ export default function Overview() {
             ) : (
               <List mediaList>
                 {recentLogs.map((log) => (
-                  <ListItem key={log.id} title={getMetricName(log.metricId)}>
+                  <ListItem key={log.id} title={getTrackerName(log.trackerId)}>
                     <div slot="media">
                       <FileText size={24} className="text-green-500" />
                     </div>
