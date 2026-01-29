@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
-import { TrendingUp, TrendingDown, Minus, Plus, Edit, Trash2, BarChart, BarChart2 } from "lucide-react";
+import { Plus, BarChart2, RefreshCw } from "lucide-react";
 import type { Tracker } from "~/lib/tracker/types";
 import TrackerForm from "../components/tracker-form";
+import { useTracker } from "../hooks/useTracker";
+import { Modal } from "../navigation/components/Modal";
+import Block from "../components/block";
+import { Navbar, Page } from "../navigation/components";
 
 export default function Trackers() {
-  const { loading, error, deleteTracker, getTrackers, refreshTrackers } = useTrack();
-  const [trackers, setTrackers] = useState<Tracker[]>([]);
+  const { loading, error, trackers, deleteTracker, getTrackers, refreshTrackers } = useTracker();
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
 
@@ -16,8 +18,7 @@ export default function Trackers() {
 
   const loadTrackers = async () => {
     try {
-      const trackersData = await getTrackers();
-      setTrackers(trackersData);
+      await getTrackers();
     } catch (err) {
       console.error('Failed to load trackers:', err);
     }
@@ -29,7 +30,7 @@ export default function Trackers() {
 
   const openAddPopup = () => {
     setEditingTrackerId(null);
-    setTimeout(() => setPopupOpened(true), 0);
+    setPopupOpened(true);
   };
 
   const openEditPopup = (tracker: Tracker) => {
@@ -53,7 +54,7 @@ export default function Trackers() {
   };
 
   const handleTrackerError = (errorMessage: string) => {
-    f7.dialog.alert(errorMessage);
+    alert(errorMessage);
   };
 
   const handleTrackerCancel = () => {
@@ -61,101 +62,99 @@ export default function Trackers() {
   };
 
   const handleDeleteTracker = async (tracker: Tracker) => {
-    f7.dialog.confirm(
-      `Are you sure you want to delete "${tracker.name}"? This action cannot be undone.`,
-      'Delete Tracker',
-      async () => {
-        try {
-          await deleteTracker(tracker.id);
-          loadTrackers();
-        } catch (err) {
-          console.error('Failed to delete tracker:', err);
-          f7.dialog.alert('Failed to delete tracker. Please try again.');
-        }
+    if (confirm(`Are you sure you want to delete "${tracker.name}"? This action cannot be undone.`)) {
+      try {
+        await deleteTracker(tracker.id);
+        loadTrackers();
+      } catch (err) {
+        console.error('Failed to delete tracker:', err);
+        alert('Failed to delete tracker. Please try again.');
       }
-    );
+    }
   };
   
   return (
     <Page >
-      <Navbar backLink>
-        <NavTitle>Trackers</NavTitle>
-        <NavRight>
-          <Link onClick={openAddPopup}>
-            <Plus />
-          </Link>
-        </NavRight>
-      </Navbar>
-      <Block className="text-center">
-      {loading && (
-        <>
-          <Preloader />
-          <div>Loading trackers...</div>
-        </>
-      )}
+      {/* Header */}
+      <Navbar title="Trackers" />
+      <div className="p-4">
+        {loading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-600 dark:text-gray-400">Loading trackers...</div>
+          </div>
+        )}
 
-
-      {error && (
-        <>
-          <div style={{ color: 'red' }}>Error: {error}</div>
-          <Button fill onClick={loadTrackers}>
-            <Icon ios="f7:arrow_clockwise" md="material:refresh" />
-            Retry
-          </Button>
-        </>
-      )}
-
-      {!loading && !error && trackers.length === 0 && (
-        <>
-          <BarChart2 size={48} />
-          <p>No trackers yet</p>
-          <p>Create your first tracker to start tracking!</p>
-          <Button fill onClick={openAddPopup}>
-            <Plus size={16} />
-            Create Tracker
-          </Button>
-        </>
-      )}
-
-      </Block>
-
-    {/* https://forum.framework7.io/t/react-sheet-crashes-app/15326 */}
-      {trackers.length > 0 && (
-        <List mediaList>
-          {trackers.map((tracker) => (
-            <ListItem
-              key={tracker.id}
-              title={tracker.name}
-              subtitle={`${tracker.baseline} ${tracker.unit}`}
-              swipeout
+        {error && (
+          <div className="space-y-4">
+            <div className="text-red-600 dark:text-red-400">Error: {error}</div>
+            <button 
+              onClick={loadTrackers}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <div slot="root-end" className="swipeout-actions-right">
-                <a 
-                  href="#" 
-                  className="swipeout-delete"
-                  onClick={() => handleDeleteTracker(tracker)}
-                >
-                  Delete
-                </a>
-              </div>
-            </ListItem>
-          ))}
-        </List>
-      )}
+              <RefreshCw size={16} />
+              Retry
+            </button>
+          </div>
+        )}
 
-      <Popup 
-        opened={popupOpened} 
-        onPopupClose={closePopup}
-        backdrop
-        closeOnEscape
+        {!loading && !error && trackers.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <BarChart2 size={48} className="text-gray-400 mb-4" />
+            <p className="text-gray-600 dark:text-gray-400 mb-2">No trackers yet</p>
+            <p className="text-gray-500 dark:text-gray-500 mb-6">Create your first tracker to start tracking!</p>
+            <button 
+              onClick={openAddPopup}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus size={16} />
+              Create Tracker
+            </button>
+          </div>
+        )}
+
+        {trackers.length > 0 && (
+          <div className="space-y-2">
+            {trackers.map((tracker) => (
+              <div
+                key={tracker.id}
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between group hover:shadow-md transition-shadow"
+              >
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-white">{tracker.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{tracker.baseline} {tracker.unit}</p>
+                </div>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => openEditPopup(tracker)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTracker(tracker)}
+                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Modal 
+        isOpen={popupOpened} 
+        onClose={closePopup}
+        title={editingTrackerId ? "Edit Tracker" : "Create Tracker"}
       >
-          <TrackerForm
-            trackerId={editingTrackerId}
-            onSuccess={handleTrackerSuccess}
-            onError={handleTrackerError}
-            onCancel={handleTrackerCancel}
-          />
-      </Popup>
+        <TrackerForm
+          trackerId={editingTrackerId}
+          onSuccess={handleTrackerSuccess}
+          onError={handleTrackerError}
+          onCancel={handleTrackerCancel}
+        />
+      </Modal>
     </Page>
   );
 }

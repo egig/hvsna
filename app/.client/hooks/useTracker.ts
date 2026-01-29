@@ -1,40 +1,32 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { usePouchDB } from '../contexts/PouchDB'
-import type { UUID, EpochTime } from '../../lib/tracker/types'
-
-export interface Tracker {
-  id: UUID
-  name: string
-  unit: string
-  baseline: number
-  createdAt: EpochTime
-}
-
-export interface TrackerCreateInput {
-  name: string
-  unit: string
-  baseline: number
-}
-
-export interface TrackerUpdateInput {
-  name?: string
-  unit?: string
-  baseline?: number
-}
-
-export interface TrackerQuery {
-  limit?: number
-  skip?: number
-}
+import { useTrackerStore } from '../stores/trackerStore'
+import type { UUID } from '../../lib/tracker/types'
+import type {
+  Tracker,
+  TrackerCreateInput,
+  TrackerUpdateInput,
+  TrackerQuery
+} from '../stores/trackerStore'
 
 export function useTracker() {
   const { db } = usePouchDB()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    trackers,
+    loading,
+    error,
+    setLoading,
+    setError,
+    setTrackers,
+    addTracker,
+    updateTracker: updateTrackerInStore,
+    removeTracker,
+    clearError
+  } = useTrackerStore()
 
   const createTracker = useCallback(async (input: TrackerCreateInput): Promise<Tracker> => {
     setLoading(true)
-    setError(null)
+    clearError()
     
     try {
       const tracker: Tracker = {
@@ -48,23 +40,25 @@ export function useTracker() {
         ...tracker
       })
       
+      addTracker(tracker)
       return tracker
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create tracker')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create tracker'
+      setError(errorMessage)
       throw err
     } finally {
       setLoading(false)
     }
-  }, [db])
+  }, [db, setLoading, clearError, addTracker, setError])
 
   const updateTracker = useCallback(async (id: UUID, input: TrackerUpdateInput): Promise<Tracker> => {
     setLoading(true)
-    setError(null)
+    clearError()
     
     try {
       const doc = await db.get(id)
       const updatedTracker: Tracker = {
-        ...doc as Tracker,
+        ...(doc as unknown as Tracker),
         ...input
       }
       
@@ -74,33 +68,37 @@ export function useTracker() {
         _rev: doc._rev
       })
       
+      updateTrackerInStore(id, updatedTracker)
       return updatedTracker
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update tracker')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update tracker'
+      setError(errorMessage)
       throw err
     } finally {
       setLoading(false)
     }
-  }, [db])
+  }, [db, setLoading, clearError, updateTrackerInStore, setError])
 
   const deleteTracker = useCallback(async (id: UUID): Promise<void> => {
     setLoading(true)
-    setError(null)
+    clearError()
     
     try {
       const doc = await db.get(id)
       await db.remove(doc)
+      removeTracker(id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete tracker')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete tracker'
+      setError(errorMessage)
       throw err
     } finally {
       setLoading(false)
     }
-  }, [db])
+  }, [db, setLoading, clearError, removeTracker, setError])
 
   const getTracker = useCallback(async (id: UUID): Promise<Tracker> => {
     setLoading(true)
-    setError(null)
+    clearError()
     
     try {
       const doc = await db.get(id)
@@ -109,16 +107,17 @@ export function useTracker() {
       if ((err as any).status === 404) {
         throw new Error('Tracker not found')
       }
-      setError(err instanceof Error ? err.message : 'Failed to get tracker')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get tracker'
+      setError(errorMessage)
       throw err
     } finally {
       setLoading(false)
     }
-  }, [db])
+  }, [db, setLoading, clearError, setError])
 
   const getTrackers = useCallback(async (query: TrackerQuery = {}): Promise<Tracker[]> => {
     setLoading(true)
-    setError(null)
+    clearError()
     
     try {
       const result = await db.allDocs({
@@ -139,20 +138,23 @@ export function useTracker() {
         trackers = trackers.slice(0, query.limit)
       }
       
+      setTrackers(trackers)
       return trackers
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to get trackers')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get trackers'
+      setError(errorMessage)
       throw err
     } finally {
       setLoading(false)
     }
-  }, [db])
+  }, [db, setLoading, clearError, setTrackers, setError])
 
   const refreshTrackers = useCallback(async (): Promise<Tracker[]> => {
     return getTrackers()
   }, [getTrackers])
 
   return {
+    trackers,
     loading,
     error,
     createTracker,

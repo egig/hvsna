@@ -4,7 +4,6 @@ import {
   isSameHijriDate,
   isTodayHijriDate,
 } from "~/lib/hijri/hijri-date";
-import { Block, Navbar, NavTitle, Page } from "framework7-react";
 import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
@@ -12,6 +11,8 @@ import { useMemo, useState } from "react";
 import {Swiper, SwiperSlide} from 'swiper/react'
 import 'swiper/css'
 import DayNote from "../components/day-note";
+import { Page } from "../navigation/components/Page";
+import { Navbar } from "../navigation/components";
 
 // Helper function to generate multiple weeks
 function generateWeeks(centerDate: HijriDate, weeksBefore: number = 2, weeksAfter: number = 2): HijriDate[][] {
@@ -76,9 +77,8 @@ export default function ViewToday() {
 
   return (
     <Page>
-      <Navbar>
-        <NavTitle subtitle={subTitle}>
-          <div
+      <Navbar title={pageTitle} 
+      
             onClick={() => {
               const today = HijriDate.fromDate(new Date());
               setActiveDate(today);
@@ -95,13 +95,9 @@ export default function ViewToday() {
                 dateSwiper.slideTo(todayDateIndex);
               }
             }}
-            style={{ cursor: "pointer" }}
-          >
-            {pageTitle}
-          </div>
-        </NavTitle>
+      >
       </Navbar>
-      <Block>
+      <div>
         <Swiper
           virtual
           slidesPerView={1}
@@ -159,7 +155,7 @@ export default function ViewToday() {
             );
           })}
         </Swiper>
-      </Block>
+      </div>
       <Swiper
         virtual
         slidesPerView={1}

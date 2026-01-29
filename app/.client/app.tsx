@@ -2,8 +2,6 @@ import { BrowserRouter } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { AppRoutes } from "~/.client/app-routes";
 import DroppableContext from "~/.client/components/droppable-context";
-import "framework7-icons";
-import "framework7/css/bundle";
 import "./app.css";
 import { SyncProvider } from "~/lib/sync";
 import { App, View, Views } from "framework7-react";
@@ -21,6 +19,8 @@ import Targets from "./pages/targets";
 import Journal from "./pages/journal";
 import Overview from "./pages/overview";
 import Categories from "./pages/categories";
+import { NavigationProvider } from "./navigation/contexts/NavigationContext";
+import { AnimatePresence } from "framer-motion";
 
 export interface AppConfig {
   basePath?: string;
@@ -39,82 +39,17 @@ export interface AppConfig {
 }
 
 export default function Hvsna({ config }: { config: AppConfig }) {
-  const f7params = {
-    store,
-    colors: {
-      primary: "#5A4A7A"
-    },
-    routes: [
-      {
-        path: "/",
-        component: TabsPage,
-        tabs: [
-          {
-            path: "/",
-            id: "today",
-            component: Overview
-          },
-          {
-            path: "/notes/",
-            id: "notes",
-            component: Notes
-          },
-          {
-            path: "/tasks/",
-            id: "tasks",
-            component: Tasks
-          },
-          {
-            path: "/settings/",
-            id: "settings",
-            component: Settings
-          },
-        ],
-      },
-      {
-        path: "/targets",
-        component: Targets
-      },
-      {
-        path: "/journal",
-        component: Journal
-      },
-      {
-        path: "/overview",
-        component: Overview
-      },
-      {
-        path: "/categories",
-        component: Categories
-      },
-      {
-        path: "/trackers/",
-        component: Trackers
-      },
-      {
-        path: "/template/",
-        component: Template
-      },
-      {
-        path: "/data-management/",
-        component: DataManagement
-      }
-    ],
-    name: "Hvsna",
-  };
-
   return (
     <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
       <DroppableContext>
           <PouchDBProvider dbName="hvsna-notes">
-              <App {...f7params}>
-                <Views tabs>
-                    <View id="today" main url="/" />
-                    <View id="notes" tab />
-                    <View id="tasks" tab />
-                    <View id="settings" tab />
-                </Views>
-              </App>
+            <BrowserRouter basename={config.appBaseName || ""}>
+            <NavigationProvider>
+              <AnimatePresence mode="wait">
+              <AppRoutes />
+              </AnimatePresence>
+            </NavigationProvider>
+            </BrowserRouter>
           </PouchDBProvider>
       </DroppableContext>
     </ClerkProvider>

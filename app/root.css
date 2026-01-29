@@ -1,5 +1,4 @@
-@import "tailwindcss/utilities";
-@import "tailwindcss/theme";
+@import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif,

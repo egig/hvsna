@@ -1,44 +1,42 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
-import { Icon, List, ListItem, Navbar, NavRight, NavTitle, Page } from "framework7-react";
-import { LogIn, Trash } from "lucide-react";
+import { LogIn, Trash, Settings as SettingsIcon } from "lucide-react";
+import { Page, Navbar, MenuItem } from "../navigation/components";
 
 export default function Settings() {
-return (
-  <Page>
-    <Navbar>
-      <NavTitle>
-        Settings
-      </NavTitle>
-      <NavRight>
+  return (
+    <Page>
+      <Navbar title="Settings" showBackButton={false} />
+      <div className="bg-white">
+        <MenuItem
+          title="Trackers"
+          subtitle="Manage your tracking preferences"
+          icon={SettingsIcon}
+          to="/trackers/"
+        />
+        
         <SignedIn>
-        <UserButton/>
+          <MenuItem
+            title="Sign Out"
+            subtitle="Sign out of your account"
+            icon={LogIn}
+            onClick={() => {
+              // Handle sign out logic here
+            }}
+          />
         </SignedIn>
+        
         <SignedOut>
-          <SignInButton component="button">
-            <LogIn />
-          </SignInButton>
+          <MenuItem
+            title="Sign In"
+            subtitle="Sign in to your account"
+            icon={LogIn}
+          >
+            <SignInButton mode="modal">
+              <button className="w-full h-full"></button>
+            </SignInButton>
+          </MenuItem>
         </SignedOut>
-      </NavRight>
-    </Navbar>
-    <List strong inset dividersIos className="components-list searchbar-found">
-      <ListItem link="/trackers/" title="Trackers">
-        <Icon slot="media" f7="chart_bar_alt_fill" />
-      </ListItem>
-      <ListItem link="/targets/" title="Targets">
-        <Icon slot="media" f7="graph_square" />
-      </ListItem>
-      <ListItem link="/journal/" title="Journal">
-        <Icon slot="media" f7="book_fill" />
-      </ListItem>
-      <ListItem link="/categories/" title="Categories">
-        <Icon slot="media" f7="tags_fill" />
-      </ListItem>
-    </List>
-    <List strong inset dividersIos className="components-list searchbar-found">
-      <ListItem link="/data-management/" title="Wipe Local Data">
-        <Icon slot="media" f7="paintbrush" />
-      </ListItem>
-    </List>
-  </Page>
-);
+      </div>
+    </Page>
+  );
 }
