@@ -11,20 +11,20 @@ export default function Settings() {
           title="Trackers"
           subtitle="Manage your tracking preferences"
           icon={SettingsIcon}
-          to="/trackers/"
+          to="/trackers"
         />
         
         <MenuItem
           title="Targets"
           subtitle="Manage your goals"
           icon={SettingsIcon}
-          to="/targets/"
+          to="/targets"
         />
         <MenuItem
           title="Journal"
           subtitle="Manage your journal"
           icon={SettingsIcon}
-          to="/journal/"
+          to="/journal"
         />
         
         <SignedIn>

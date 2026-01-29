@@ -232,7 +232,7 @@ function TargetItem({ target, trackers, onEdit, onDelete, getTypeLabel, getPerio
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <Page>
       <Navbar 
         title="Targets" 
         rightAction={
@@ -311,6 +311,6 @@ function TargetItem({ target, trackers, onEdit, onDelete, getTypeLabel, getPerio
           onCancel={handleTargetCancel}
         />
       </Modal>
-    </div>
+    </Page>
   );
 }

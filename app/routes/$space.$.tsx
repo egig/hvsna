@@ -3,8 +3,6 @@ import { createRoot, type Container } from "react-dom/client";
 import type { Route } from "./+types/$space.$";
 import App from "../.client/app";
 import type { AppConfig } from "../.client/app";
-import Framework7 from 'framework7/lite-bundle';
-import Framework7React from 'framework7-react';
 import { registerSW } from "virtual:pwa-register";
 
 
@@ -27,10 +25,6 @@ export default function Space({params}: Route.ActionArgs) {
 
     (async () => {
       // console.log((new Clerk()).session?.getToken())
-
-      // Init F7-React Plugin
-      Framework7.use(Framework7React)
-
       root.render(<App config={config} />);
       // @ts-ignore
       window.__dtMounted = true;

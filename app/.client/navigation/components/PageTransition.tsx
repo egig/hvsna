@@ -54,8 +54,6 @@ export function PageTransition({ children }: PageTransitionProps) {
 
   const currentVariant = variants[currentNavType as keyof typeof variants] || variants.forward;
 
-  console.log(currentNavType, location.pathname);
-
   return (
     <motion.div
       key={location.pathname}

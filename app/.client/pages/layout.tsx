@@ -6,7 +6,6 @@ export default function Layout() {
         <div className="max-w-[520px] m-auto">
             <Outlet />
             <TabBar />
-            {/* <BottomNav /> */}
         </div>
     );
 }

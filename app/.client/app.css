@@ -93,7 +93,7 @@ a {
 }
 
 /* Dark mode support */
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   body {
     background-color: #000000;
     color: #ffffff;
@@ -105,4 +105,4 @@ a {
     background-color: #f5f5f5;
     color: #000000;
   }
-}
+} */

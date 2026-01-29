@@ -4,13 +4,8 @@ import { useTracker } from "../hooks/useTracker";
 import { Plus, Edit, Trash2, FileText, MoreHorizontal } from "lucide-react";
 import type { Log, Tracker } from "~/lib/tracker/types";
 import LogForm from "../components/log-form";
-import LoadingBlock from "../components/loading-block";
-import ErrorBlock from "../components/error-block";
-import { Page } from "../navigation/components/Page";
 import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
-import { LoadingSpinner } from "../components/Loading";
-import Block from "../components/block";
 
 export default function Journal() {
   const { loading, error, deleteLog, getLogs, refreshLogs } = useLog();
@@ -207,14 +202,6 @@ function LogItem({ log, trackers, onEdit, onDelete, getTrackerName, formatLogVal
       />
       
       <div className="p-4">
-        {loading && (
-          <LoadingBlock />
-        )}
-
-        {error && (
-          <ErrorBlock error={error} onRetry={loadData} />
-        )}
-
         {!loading && !error && logs.length === 0 && (
           <div className="text-center py-8">
             <FileText size={48} className="text-gray-400 mx-auto mb-4" />

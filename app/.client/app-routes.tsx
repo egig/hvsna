@@ -9,14 +9,16 @@ import TargetsPage from "./pages/targets";
 import Settings from "./pages/settings";
 import Tasks from "./pages/tasks";
 import Journal from "./pages/journal";
+import { AnimatePresence } from "framer-motion";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
   const location = useLocation();
   const settingsBackgroundLocation = location.state?.settingsBackgroundLocation;
   return (
-    <>
-      <Routes location={settingsBackgroundLocation || location}>
+    // Note that animate present depends to the useLocation hook so it should be here
+    <AnimatePresence mode="wait">
+      <Routes location={settingsBackgroundLocation || location} key={location.pathname}>
         <Route element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
@@ -33,6 +35,6 @@ export const AppRoutes = () => {
         {/* <Route path="settings" element={<div>Settings</div>} /> */}
         {/* <Route path="*" element={<div />} /> */}
       </Routes>
-    </>
+    </AnimatePresence>
   );
 };

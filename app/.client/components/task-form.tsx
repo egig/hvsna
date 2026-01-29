@@ -104,12 +104,7 @@ export default function TaskForm({
           px-4
         ">
           <Card className="mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle size="md" className="text-center">
-                {taskId ? "Edit Task" : "New Task"}
-              </CardTitle>
-            </CardHeader>
-            
+
             <CardContent className="pt-0">
               {loading && (
                 <div className="flex justify-center py-12">

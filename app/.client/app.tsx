@@ -5,7 +5,6 @@ import DroppableContext from "~/.client/components/droppable-context";
 import "./app.css";
 import { PouchDBProvider } from "./contexts/PouchDB";
 import { NavigationProvider } from "./navigation/contexts/NavigationContext";
-import { AnimatePresence } from "framer-motion";
 
 export interface AppConfig {
   basePath?: string;
@@ -30,9 +29,7 @@ export default function Hvsna({ config }: { config: AppConfig }) {
           <PouchDBProvider dbName="hvsna-notes">
             <BrowserRouter basename={config.appBaseName || ""}>
             <NavigationProvider>
-              <AnimatePresence mode="wait">
               <AppRoutes />
-              </AnimatePresence>
             </NavigationProvider>
             </BrowserRouter>
           </PouchDBProvider>
