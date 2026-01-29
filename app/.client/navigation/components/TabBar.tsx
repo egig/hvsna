@@ -3,7 +3,7 @@ import { Button } from './Button';
 
 const tabs = [
   { path: '/', label: 'Home', icon: '🏠' },
-  { path: '/about', label: 'About', icon: '🧪' },
+  { path: '/tasks', label: 'Tasks', icon: '🧪' },
   { path: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 

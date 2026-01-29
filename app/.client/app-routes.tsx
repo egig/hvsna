@@ -4,10 +4,10 @@ import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
 import Layout from "./pages/layout";
 import About from "./pages/about";
-import TabsPage from "./pages/tabs";
 import TrackersPage from "./pages/trackers";
 import TargetsPage from "./pages/targets";
 import Settings from "./pages/settings";
+import Tasks from "./pages/tasks";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -20,6 +20,7 @@ export const AppRoutes = () => {
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
           <Route path="trackers" element={<TrackersPage />} />
+          <Route path="tasks" element={<Tasks />} />
           <Route path="targets" element={<TargetsPage />} />
           <Route path="about" element={<About />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />

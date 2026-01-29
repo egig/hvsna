@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Block, BlockTitle, ListInput, List, Preloader } from "framework7-react";
 import { useTracker } from "../hooks/useTracker";
-import BaseForm from "./base-form";
 import type { Tracker, Target as TargetType, TargetType as TargetTypeEnum, TargetPeriod } from "~/lib/tracker/types";
 import { useTarget, type TargetDirection, type TargetReducer } from "../hooks/use-target";
+import { FormInput } from "./FormInput";
+import { Card, CardHeader, CardTitle, CardContent } from "./Card";
+import { LoadingSpinner } from "./Loading";
+import { Button, Page, Navbar } from "../navigation/components";
 
 interface TargetFormProps {
   targetId?: string | null;
@@ -133,139 +135,282 @@ export default function TargetForm({
   const selectedTracker = trackers.find(t => t.id === selectedTrackerId);
 
   return (
-    <BaseForm
-      title={targetId ? "Edit Target" : "New Target"}
-      onSuccess={handleSubmit}
-      onError={onError}
-      onCancel={handleCancel}
-      isSubmitting={isSubmitting}
-    >
-      <Block>
-        <BlockTitle color="primary">
-          {targetId ? "Edit Target" : "New Target"}
-        </BlockTitle>
-        {(loading || trackerLoading) && (
-          <div className="text-center">
-            <Preloader />
+    <Page>
+      <Navbar 
+        title={targetId ? "Edit Target" : "New Target"}
+        showBackButton={true}
+        customBackAction={onCancel}
+      />
+      
+      <div className="
+        flex-1
+        overflow-y-auto
+        scroll-area
+        bg-gray-50
+        safe-top
+        safe-bottom
+        safe-x
+      ">
+        <div className="
+          max-w-lg
+          mx-auto
+          w-full
+          py-4
+          px-4
+        ">
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle size="md" className="text-center">
+                {targetId ? "Edit Target" : "New Target"}
+              </CardTitle>
+            </CardHeader>
+            
+            <CardContent className="pt-0">
+              {(loading || trackerLoading) && (
+                <div className="flex justify-center py-12">
+                  <LoadingSpinner size="lg" text="Loading target data..." />
+                </div>
+              )}
+              
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+                <div className="space-y-5">
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tracker
+                      <span className="text-red-500 ml-1">*</span>
+                    </label>
+                    <select
+                      value={selectedTrackerId}
+                      onChange={(e) => setSelectedTrackerId(e.target.value)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                      required
+                    >
+                      <option value="">Select a tracker</option>
+                      {trackers.map(tracker => (
+                        <option key={tracker.id} value={tracker.id}>
+                          {tracker.name} ({tracker.unit})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedTracker && (
+                    <div className="text-sm text-gray-500 mb-4">
+                      Tracker: {selectedTracker.name} ({selectedTracker.unit})
+                    </div>
+                  )}
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Type
+                    </label>
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value as TargetTypeEnum)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    >
+                      <option value="static">Static</option>
+                      <option value="range">Range</option>
+                    </select>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Reducer
+                    </label>
+                    <select
+                      value={reducer}
+                      onChange={(e) => setReducer(e.target.value as TargetReducer)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    >
+                      <option value="sum">Sum</option>
+                      <option value="count">Count</option>
+                      <option value="last">Last</option>
+                      <option value="avg">Average</option>
+                      <option value="min">Minimum</option>
+                      <option value="max">Maximum</option>
+                    </select>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Direction
+                    </label>
+                    <select
+                      value={direction}
+                      onChange={(e) => setDirection(e.target.value as TargetDirection)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    >
+                      <option value="increase">Increase (good when up)</option>
+                      <option value="decrease">Decrease (good when down)</option>
+                      <option value="neutral">Neutral</option>
+                    </select>
+                  </div>
+
+                  <FormInput 
+                    label={type === 'range' ? 'Target' : 'Value'}
+                    type="number" 
+                    value={value} 
+                    placeholder="0" 
+                    onChange={setValue}
+                    disabled={isSubmitting}
+                    required={true}
+                    className="text-base"
+                  />
+                  {selectedTracker && (
+                    <p className="text-sm text-gray-500 -mt-2 mb-4">
+                      Value in {selectedTracker.unit}
+                    </p>
+                  )}
+
+                  {type === 'range' && (
+                    <>
+                      <FormInput 
+                        label="Maximum"
+                        type="number" 
+                        value={valueMax} 
+                        placeholder="Maximum value" 
+                        onChange={setValueMax}
+                        disabled={isSubmitting}
+                        className="text-base"
+                      />
+                      {selectedTracker && (
+                        <p className="text-sm text-gray-500 -mt-2 mb-4">
+                          Maximum in {selectedTracker.unit}
+                        </p>
+                      )}
+                    </>
+                  )}
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Period
+                    </label>
+                    <select
+                      value={period}
+                      onChange={(e) => setPeriod(e.target.value as TargetPeriod)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                      <option value="total">Total</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="soft"
+                      checked={soft}
+                      onChange={(e) => setSoft(e.target.checked)}
+                      disabled={isSubmitting}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="soft" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Soft limit
+                    </label>
+                  </div>
+                  {soft && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Allow going over/under without strict enforcement
+                    </p>
+                  )}
+                </div>
+                
+                <div className="
+                  flex
+                  gap-4
+                  mt-8
+                  mb-4
+                  safe-bottom
+                ">
+                  <Button
+                    type="button"
+                    onClick={handleCancel}
+                    disabled={isSubmitting}
+                    className="
+                      flex-1
+                      min-h-[44px]
+                      text-base
+                      font-medium
+                      py-3
+                      px-4
+                      bg-gray-200
+                      hover:bg-gray-300
+                      text-gray-800
+                      rounded-lg
+                      transition-colors
+                      duration-200
+                      active:scale-[0.98]
+                      touch-action-manipulation
+                    "
+                  >
+                    Cancel
+                  </Button>
+                  
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting || !selectedTrackerId || !value.trim()}
+                    className="
+                      flex-1
+                      min-h-[44px]
+                      text-base
+                      font-medium
+                      py-3
+                      px-4
+                      bg-blue-500
+                      hover:bg-blue-600
+                      disabled:bg-gray-300
+                      disabled:cursor-not-allowed
+                      text-white
+                      rounded-lg
+                      transition-colors
+                      duration-200
+                      active:scale-[0.98]
+                      touch-action-manipulation
+                      shadow-sm
+                    "
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center justify-center">
+                        <LoadingSpinner size="sm" />
+                        <span className="ml-2">
+                          {targetId ? "UPDATING..." : "CREATING..."}
+                        </span>
+                      </div>
+                    ) : (
+                      targetId ? "UPDATE" : "CREATE"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+          
+          {/* Mobile-friendly help text */}
+          <div className="
+            text-center
+            text-sm
+            text-gray-500
+            mb-6
+            px-2
+          ">
+            <p>
+              Targets help you set goals and track progress.
+            </p>
+            <p className="mt-1">
+              Define specific values to achieve within time periods.
+            </p>
           </div>
-        )}
-        <List strong dividers>
-        <ListInput
-          outline
-          type="select"
-          value={selectedTrackerId}
-          onChange={(e: any) => setSelectedTrackerId(e.target.value)}
-          readonly={isSubmitting}
-          label="Tracker"
-        >
-          <option value="">Select a tracker</option>
-          {trackers.map(tracker => (
-            <option key={tracker.id} value={tracker.id}>
-              {tracker.name} ({tracker.unit})
-            </option>
-          ))}
-        </ListInput>
-
-        {selectedTracker && (
-          <div className="padding-horizontal margin-bottom">
-            <small className="text-color-gray">
-              Tracker: {selectedTracker.name} ({selectedTracker.unit})
-            </small>
-          </div>
-        )}
-
-        <ListInput
-          outline
-          type="select"
-          value={type}
-          onChange={(e: any) => setType(e.target.value)}
-          readonly={isSubmitting}
-          label="Type"
-        >
-          <option value="static">Static</option>
-          <option value="range">Range</option>
-        </ListInput>
-
-        <ListInput
-          outline
-          type="select"
-          value={reducer}
-          onChange={(e: any) => setReducer(e.target.value)}
-          readonly={isSubmitting}
-          label="Reducer"
-        >
-          <option value="sum">Sum</option>
-          <option value="count">Count</option>
-          <option value="last">Last</option>
-          <option value="avg">Average</option>
-          <option value="min">Minimum</option>
-          <option value="max">Maximum</option>
-        </ListInput>
-
-        <ListInput
-          outline
-          type="select"
-          value={direction}
-          onChange={(e: any) => setDirection(e.target.value)}
-          readonly={isSubmitting}
-          label="Direction"
-        >
-          <option value="increase">Increase (good when up)</option>
-          <option value="decrease">Decrease (good when down)</option>
-          <option value="neutral">Neutral</option>
-        </ListInput>
-
-        <ListInput 
-          outline 
-          type="number" 
-          value={value} 
-          placeholder="0" 
-          onChange={(e: any) => setValue(e.target.value)} 
-          readonly={isSubmitting}
-          label={type === 'range' ? 'Target' : 'Value'}
-          info={selectedTracker ? `Value in ${selectedTracker.unit}` : ''}
-        />
-
-        {type === 'range' && (
-          <ListInput 
-            outline 
-            type="number" 
-            value={valueMax} 
-            placeholder="Maximum value" 
-            onChange={(e: any) => setValueMax(e.target.value)} 
-            readonly={isSubmitting}
-            label="Maximum"
-            info={selectedTracker ? `Maximum in ${selectedTracker.unit}` : ''}
-          />
-        )}
-
-        <ListInput
-          outline
-          type="select"
-          value={period}
-          onChange={(e: any) => setPeriod(e.target.value)}
-          readonly={isSubmitting}
-          label="Period"
-        >
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-          <option value="total">Total</option>
-        </ListInput>
-
-        <ListInput
-          outline
-          type="checkbox"
-          value={soft ? 'yes' : 'no'}
-          onChange={(e: any) => setSoft(e.target.checked)}
-          readonly={isSubmitting}
-          label="Soft limit"
-          info="Allow going over/under without strict enforcement"
-        />
-
-        </List>
-      </Block>
-    </BaseForm>
+        </div>
+      </div>
+    </Page>
   );
 }

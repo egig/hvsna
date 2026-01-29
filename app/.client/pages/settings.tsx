@@ -14,6 +14,13 @@ export default function Settings() {
           to="/trackers/"
         />
         
+        <MenuItem
+          title="Targets"
+          subtitle="Manage your goals"
+          icon={SettingsIcon}
+          to="/targets/"
+        />
+        
         <SignedIn>
           <MenuItem
             title="Sign Out"
