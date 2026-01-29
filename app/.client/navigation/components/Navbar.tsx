@@ -9,8 +9,7 @@ interface NavbarProps {
   className?: string;
 }
 
-const ROOT_PATHS = ['/home', '/explore', '/examples', '/templates', '/'];
-const FORM_PATHS = ['/form-example'];
+const ROOT_PATHS = ['/'];
 
 export function Navbar({ 
   title, 
@@ -24,8 +23,8 @@ export function Navbar({
 
   // Auto-determine if back button should be shown
   const shouldShowBackButton = propShowBackButton ?? (
-    !ROOT_PATHS.includes(location.pathname) && !FORM_PATHS.includes(location.pathname)
-  );
+    !ROOT_PATHS.includes(location.pathname)
+  )
 
   const handleBack = () => {
     if (customBackAction) {

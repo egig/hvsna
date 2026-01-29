@@ -75,7 +75,6 @@ export default function Trackers() {
   
   return (
     <Page >
-      {/* Header */}
       <Navbar title="Trackers" />
       <div className="p-4">
         {loading && (
