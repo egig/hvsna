@@ -20,6 +20,12 @@ export default function Settings() {
           icon={SettingsIcon}
           to="/targets/"
         />
+        <MenuItem
+          title="Journal"
+          subtitle="Manage your journal"
+          icon={SettingsIcon}
+          to="/journal/"
+        />
         
         <SignedIn>
           <MenuItem
