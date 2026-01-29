@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { Navbar, NavTitle, Page, Block, BlockTitle, Progressbar, List, ListItem, Link, Preloader, f7 } from "framework7-react";
-import { useTarget } from "../hooks/useTarget";
 import { useLog } from "../hooks/useLog";
 import { useTracker } from "../hooks/useTracker";
 import { Target, FileText, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { Target as TargetType, Log, Tracker } from "~/lib/tracker/types";
-import type { Target as TargetHookType } from "../hooks/useTarget";
+import { useTargets } from "../hooks/use-targets";
 
 export default function Overview() {
-  const { loading: targetLoading, getTargets } = useTarget();
+  const { loading: targetLoading, getTargets } = useTargets();
   const { loading: logLoading, getLogs } = useLog();
   const { loading: trackerLoading, getTrackers } = useTracker();
-  const [targets, setTargets] = useState<TargetHookType[]>([]);
+  const [targets, setTargets] = useState<TargetType[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);

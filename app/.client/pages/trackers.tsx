@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
-import { useTracker } from "../hooks/useTracker";
 import { TrendingUp, TrendingDown, Minus, Plus, Edit, Trash2, BarChart, BarChart2 } from "lucide-react";
 import type { Tracker } from "~/lib/tracker/types";
 import TrackerForm from "../components/tracker-form";
 
 export default function Trackers() {
-  const { loading, error, deleteTracker, getTrackers, refreshTrackers } = useTracker();
+  const { loading, error, deleteTracker, getTrackers, refreshTrackers } = useTrack();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
@@ -122,7 +121,6 @@ export default function Trackers() {
 
     {/* https://forum.framework7.io/t/react-sheet-crashes-app/15326 */}
       {trackers.length > 0 && (
-        <>
         <List mediaList>
           {trackers.map((tracker) => (
             <ListItem
@@ -143,7 +141,6 @@ export default function Trackers() {
             </ListItem>
           ))}
         </List>
-        </>
       )}
 
       <Popup 

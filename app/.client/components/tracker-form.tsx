@@ -92,7 +92,7 @@ export default function TrackerForm({
   };
 
   return (
-    <Page pageContent={false}>
+    <Page >
       <Navbar>
         <NavLeft>
           <Link onClick={onCancel}>Back</Link>
@@ -111,7 +111,7 @@ export default function TrackerForm({
               )}</Link>
         </NavRight>
       </Navbar>
-      <Block>
+      <Block strong inset outline>
         <BlockTitle color="primary">
           {trackerId ? "Edit Tracker" : "New Tracker"}
         </BlockTitle>

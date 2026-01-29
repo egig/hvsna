@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { Block, BlockTitle, ListInput, List, Preloader } from "framework7-react";
 import { useTracker } from "../hooks/useTracker";
-import { useTarget } from "../hooks/useTarget";
 import BaseForm from "./base-form";
 import type { Tracker, Target as TargetType, TargetType as TargetTypeEnum, TargetPeriod } from "~/lib/tracker/types";
-import type { TargetReducer, TargetDirection } from "../hooks/useTarget";
+import { useTarget, type TargetDirection, type TargetReducer } from "../hooks/use-target";
 
 interface TargetFormProps {
   targetId?: string | null;
@@ -44,8 +43,6 @@ export default function TargetForm({
       getTarget(targetId).then(fetchedTarget => {
         if (fetchedTarget) {
           setSelectedTrackerId(fetchedTarget.trackerId);
-          setType(fetchedTarget.type);
-          setReducer(fetchedTarget.reducer);
           setDirection(fetchedTarget.direction);
           setValue(fetchedTarget.value.toString());
           setValueMax(fetchedTarget.valueMax?.toString() || '');

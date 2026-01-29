@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { Icon, List, ListItem, Navbar, NavTitle, Page, Preloader, Block, Button, Popup, NavRight, Link, f7 } from "framework7-react";
-import { useTarget } from "../hooks/useTarget";
+import { useTargets }  from "../hooks/use-targets";
 import { useTracker } from "../hooks/useTracker";
 import { Target, Plus, Edit, Trash2, TargetIcon } from "lucide-react";
 import type { Target as TargetType, Tracker } from "~/lib/tracker/types";
 import TargetForm from "../components/target-form";
+import { useTarget } from "../hooks/use-target";
 
 export default function Targets() {
-  const { loading, error, deleteTarget, getTargets, refreshTargets } = useTarget();
+  const { loading, error, targets, getTargets, } = useTargets();
+  const {deleteTarget} = useTarget();
   const { getTrackers } = useTracker();
-  const [targets, setTargets] = useState<TargetType[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
@@ -24,7 +25,6 @@ export default function Targets() {
         getTargets(),
         getTrackers()
       ]);
-      setTargets(targetsData);
       setTrackers(trackersData);
     } catch (err) {
       console.error('Failed to load data:', err);
@@ -57,7 +57,7 @@ export default function Targets() {
 
   const handleTargetSuccess = () => {
     setPopupOpened(false);
-    loadData();
+    getTargets();
   };
 
   const handleTargetError = (errorMessage: string) => {
@@ -78,7 +78,6 @@ export default function Targets() {
       async () => {
         try {
           await deleteTarget(target.id);
-          loadData();
         } catch (err) {
           console.error('Failed to delete target:', err);
           f7.dialog.alert('Failed to delete target. Please try again.');
@@ -141,26 +140,26 @@ export default function Targets() {
           </Link>
         </NavRight>
       </Navbar>
-      
+      <Block>
       {loading && (
-        <Block className="text-center">
+        <div className="text-center">
           <Preloader />
           <div>Loading targets...</div>
-        </Block>
+        </div >
       )}
-
+      
       {error && (
-        <Block className="text-center">
+        <div className="text-center">
           <div style={{ color: 'red' }}>Error: {error}</div>
-          <Button fill onClick={loadData}>
+          <Button fill onClick={getTargets}>
             <Icon ios="f7:arrow_clockwise" md="material:refresh" />
             Retry
           </Button>
-        </Block>
+        </div>
       )}
-
-      {!loading && !error && targets.length === 0 && (
-        <Block className="text-center">
+      
+      {!loading && targets.length === 0 && (
+        <div className="text-center">
           <TargetIcon size={48} className="text-gray-400" />
           <p>No targets yet</p>
           <p>Create your first target to start tracking!</p>
@@ -168,11 +167,12 @@ export default function Targets() {
             <Plus size={16} />
             Create Target
           </Button>
-        </Block>
+        </div>
       )}
+      </Block>
+  
 
-      {!loading && !error && targets.length > 0 && (
-        <List mediaList>
+        <List mediaList dividersIos strong outline>
           {targets.map((target) => (
             <ListItem
               key={target.id}
@@ -210,7 +210,6 @@ export default function Targets() {
             </ListItem>
           ))}
         </List>
-      )}
 
       <Popup 
         opened={popupOpened} 
