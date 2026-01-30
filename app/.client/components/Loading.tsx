@@ -1,40 +1,40 @@
-import { Loader2 } from 'lucide-react';
-import { type ReactNode } from 'react';
+import { Loader2 } from "lucide-react";
+import { type ReactNode } from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
   text?: string;
 }
 
 export function LoadingSpinner({
-  size = 'md',
-  className = '',
+  size = "md",
+  className = "",
   text,
 }: LoadingSpinnerProps) {
   const sizeClasses = {
-    sm: 'w-4 h-4',
-    md: 'w-6 h-6',
-    lg: 'w-8 h-8',
+    sm: "w-4 h-4",
+    md: "w-6 h-6",
+    lg: "w-8 h-8",
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       flex
       items-center
       justify-center
       ${className}
-    `}>
-      <Loader2 className={`
+    `}
+    >
+      <Loader2
+        className={`
         ${sizeClasses[size]}
         animate-spin
         text-blue-500
-      `} />
-      {text && (
-        <span className="ml-2 text-sm text-gray-600">
-          {text}
-        </span>
-      )}
+      `}
+      />
+      {text && <span className="ml-2 text-sm text-gray-600">{text}</span>}
     </div>
   );
 }
@@ -48,13 +48,14 @@ interface LoadingOverlayProps {
 export function LoadingOverlay({
   isLoading,
   children,
-  text = 'Loading...',
+  text = "Loading...",
 }: LoadingOverlayProps) {
   return (
     <div className="relative">
       {children}
       {isLoading && (
-        <div className="
+        <div
+          className="
           absolute
           inset-0
           bg-white
@@ -63,7 +64,8 @@ export function LoadingOverlay({
           items-center
           justify-center
           z-10
-        ">
+        "
+        >
           <LoadingSpinner text={text} />
         </div>
       )}

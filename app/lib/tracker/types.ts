@@ -4,9 +4,9 @@
 
 /* ---------- Common ---------- */
 
-export type UUID = string
+export type UUID = string;
 
-export type EpochTime = number
+export type EpochTime = number;
 
 /* ---------- Tracker ---------- */
 /**
@@ -14,10 +14,10 @@ export type EpochTime = number
  * Replaces "tracker", "expense", "goal", etc.
  */
 export interface Tracker {
-  id: UUID
-  name: string
-  unit: string                 // IDR, count, hours, %, kg
-  createdAt: EpochTime
+  id: UUID;
+  name: string;
+  unit: string; // IDR, count, hours, %, kg
+  createdAt: EpochTime;
 }
 
 /* ---------- Log ---------- */
@@ -26,69 +26,53 @@ export interface Tracker {
  * All state is derived from logs.
  */
 export interface Log {
-  id: UUID
-  trackerId: UUID
-  timestamp: EpochTime
-  value: number
-  metadata?: Record<string, unknown>
-  createdAt: EpochTime
+  id: UUID;
+  trackerId: UUID;
+  timestamp: EpochTime;
+  value: number;
+  metadata?: Record<string, unknown>;
+  createdAt: EpochTime;
 }
 
 /* ---------- Target ---------- */
 
-export type TargetReducer =
-  | 'sum'
-  | 'count'
-  | 'last'
-  | 'avg'
-  | 'min'
-  | 'max'
+export type TargetReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
 
-export type TargetDirection =
-  | 'increase'
-  | 'decrease'
-  | 'neutral'
+export type TargetDirection = "increase" | "decrease" | "neutral";
 
 /**
  * Unifies goal, budget, quota, SLA, limit.
  */
 export interface Target {
-  id: UUID
-  trackerId: UUID
-  type: TargetType
-  reducer: TargetReducer
-  direction: TargetDirection
-  value: number                // target or min
-  valueMax?: number             // only for range
-  period?: TargetPeriod
-  soft: boolean
-  createdAt: EpochTime
+  id: UUID;
+  trackerId: UUID;
+  type: TargetType;
+  reducer: TargetReducer;
+  direction: TargetDirection;
+  value: number; // target or min
+  valueMax?: number; // only for range
+  period?: TargetPeriod;
+  soft: boolean;
+  createdAt: EpochTime;
 }
 
-export type TargetType =
-  | 'static'
-  | 'range'
+export type TargetType = "static" | "range";
 
-export type TargetPeriod =
-  | 'daily'
-  | 'weekly'
-  | 'monthly'
-  | 'yearly'
-  | 'total'
+export type TargetPeriod = "daily" | "weekly" | "monthly" | "yearly" | "total";
 
 /* ---------- Category ---------- */
 
 export interface Category {
-  id: UUID
-  name: string
-  createdAt: EpochTime
+  id: UUID;
+  name: string;
+  createdAt: EpochTime;
 }
 
 /* ---------- LogCategory (Join) ---------- */
 
 export interface LogCategory {
-  logId: UUID
-  categoryId: UUID
+  logId: UUID;
+  categoryId: UUID;
 }
 
 /* ---------- Aggregation Cache ---------- */
@@ -97,11 +81,11 @@ export interface LogCategory {
  * Never source of truth.
  */
 export interface AggregationCache {
-  trackerId: UUID
-  periodStart: EpochTime
-  periodEnd: EpochTime
-  value: number
-  computedAt: EpochTime
+  trackerId: UUID;
+  periodStart: EpochTime;
+  periodEnd: EpochTime;
+  value: number;
+  computedAt: EpochTime;
 }
 
 /* ============================================================

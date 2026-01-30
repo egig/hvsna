@@ -20,7 +20,7 @@ export default function TaskForm({
   onError,
   onCancel,
 }: TaskFormProps) {
-  console.log(taskId)
+  console.log(taskId);
 
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
@@ -63,7 +63,7 @@ export default function TaskForm({
     }
   };
 
-  console.log("rendering", task?.name)
+  console.log("rendering", task?.name);
 
   return (
     <form

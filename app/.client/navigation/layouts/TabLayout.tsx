@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router';
-import { TabBar } from '../components/TabBar';
+import { Outlet } from "react-router";
+import { TabBar } from "../components/TabBar";
 
 export function TabLayout() {
   return (

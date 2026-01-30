@@ -1,7 +1,7 @@
-import { useAppNavigation } from '../hooks/useAppNavigation';
-import { type ReactNode } from 'react';
+import { useAppNavigation } from "../hooks/useAppNavigation";
+import { type ReactNode } from "react";
 
-type NavType = 'forward' | 'back' | 'tab' | 'modal';
+type NavType = "forward" | "back" | "tab" | "modal";
 
 interface LinkProps {
   to: string;
@@ -11,7 +11,13 @@ interface LinkProps {
   onClick?: () => void;
 }
 
-export function Link({ to, navType = 'forward', children, className = '', onClick }: LinkProps) {
+export function Link({
+  to,
+  navType = "forward",
+  children,
+  className = "",
+  onClick,
+}: LinkProps) {
   const { navigate } = useAppNavigation();
 
   const handleClick = (e: React.MouseEvent) => {
@@ -21,11 +27,7 @@ export function Link({ to, navType = 'forward', children, className = '', onClic
   };
 
   return (
-    <a 
-      href={to}
-      onClick={handleClick}
-      className={className}
-    >
+    <a href={to} onClick={handleClick} className={className}>
       {children}
     </a>
   );

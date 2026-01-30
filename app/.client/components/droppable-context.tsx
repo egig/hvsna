@@ -10,7 +10,11 @@ import {
 import { useState } from "react";
 import { createPortal } from "react-dom";
 
-export default function DroppableContext({ children }: {children: React.ReactNode}) {
+export default function DroppableContext({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 10,
@@ -33,18 +37,16 @@ export default function DroppableContext({ children }: {children: React.ReactNod
       {children}
       {createPortal(
         <DragOverlay>
-          {!!dragOverlayData && (
-            <p>{dragOverlayData}</p>
-          )}
+          {!!dragOverlayData && <p>{dragOverlayData}</p>}
         </DragOverlay>,
-        document.body
+        document.body,
       )}
     </DndContext>
   );
 }
 
 function handleDrop() {
-    //..
+  //..
 }
 
 function collisionDetectionAlgorithm(args: any) {

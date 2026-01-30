@@ -1,6 +1,6 @@
-import { ChevronRight, type LucideIcon } from 'lucide-react';
-import { type ReactNode } from 'react';
-import { Button } from './Button';
+import { ChevronRight, type LucideIcon } from "lucide-react";
+import { type ReactNode } from "react";
+import { Button } from "./Button";
 
 interface MenuItemProps {
   title: string;
@@ -8,7 +8,7 @@ interface MenuItemProps {
   icon?: LucideIcon;
   onClick?: () => void;
   to?: string;
-  navType?: 'forward' | 'back' | 'tab' | 'modal';
+  navType?: "forward" | "back" | "tab" | "modal";
   disabled?: boolean;
   showChevron?: boolean;
   badge?: ReactNode;
@@ -22,18 +22,19 @@ export function MenuItem({
   icon: Icon,
   onClick,
   to,
-  navType = 'forward',
+  navType = "forward",
   disabled = false,
   showChevron = true,
   badge,
   children,
-  className = '',
+  className = "",
 }: MenuItemProps) {
   // If children are provided, render them directly without Button wrapper
   if (children) {
     return (
       <div className={className}>
-        <div className="
+        <div
+          className="
           relative
           w-full
           flex items-center
@@ -50,16 +51,19 @@ export function MenuItem({
           [-webkit-tap-highlight-color:transparent]
           /* Android specific styling */
           [touch-action:manipulation]
-        ">
+        "
+        >
           {/* Icon */}
           {Icon && (
-            <div className="
+            <div
+              className="
               flex-shrink-0
               mr-3
               text-gray-400
               w-5 h-5
               flex items-center justify-center
-            ">
+            "
+            >
               <Icon className="w-5 h-5" />
             </div>
           )}
@@ -67,52 +71,52 @@ export function MenuItem({
           {/* Main content */}
           <div className="flex-1 min-w-0 text-left">
             {/* Title */}
-            <div className="
+            <div
+              className="
               text-base
               font-medium
               text-gray-900
               truncate
-            ">
+            "
+            >
               {title}
             </div>
 
             {/* Subtitle */}
             {subtitle && (
-              <div className="
+              <div
+                className="
                 text-sm
                 text-gray-500
                 mt-0.5
                 truncate
-              ">
+              "
+              >
                 {subtitle}
               </div>
             )}
           </div>
 
           {/* Badge */}
-          {badge && (
-            <div className="flex-shrink-0 mr-2">
-              {badge}
-            </div>
-          )}
+          {badge && <div className="flex-shrink-0 mr-2">{badge}</div>}
 
           {/* Chevron */}
           {showChevron && (
-            <div className="
+            <div
+              className="
               flex-shrink-0
               ml-2
               text-gray-400
               w-4 h-4
               flex items-center justify-center
-            ">
+            "
+            >
               <ChevronRight className="w-4 h-4" />
             </div>
           )}
 
           {/* Children */}
-          <div className="absolute inset-0">
-            {children}
-          </div>
+          <div className="absolute inset-0">{children}</div>
         </div>
       </div>
     );
@@ -129,7 +133,8 @@ export function MenuItem({
         ${className}
       `}
     >
-      <div className="
+      <div
+        className="
         w-full
         flex items-center
         px-4 py-3
@@ -145,16 +150,19 @@ export function MenuItem({
         [-webkit-tap-highlight-color:transparent]
         /* Android specific styling */
         [touch-action:manipulation]
-      ">
+      "
+      >
         {/* Icon */}
         {Icon && (
-          <div className="
+          <div
+            className="
             flex-shrink-0
             mr-3
             text-gray-400
             w-5 h-5
             flex items-center justify-center
-          ">
+          "
+          >
             <Icon className="w-5 h-5" />
           </div>
         )}
@@ -162,44 +170,46 @@ export function MenuItem({
         {/* Main content */}
         <div className="flex-1 min-w-0 text-left">
           {/* Title */}
-          <div className="
+          <div
+            className="
             text-base
             font-medium
             text-gray-900
             truncate
-          ">
+          "
+          >
             {title}
           </div>
 
           {/* Subtitle */}
           {subtitle && (
-            <div className="
+            <div
+              className="
               text-sm
               text-gray-500
               mt-0.5
               truncate
-            ">
+            "
+            >
               {subtitle}
             </div>
           )}
         </div>
 
         {/* Badge */}
-        {badge && (
-          <div className="flex-shrink-0 mr-2">
-            {badge}
-          </div>
-        )}
+        {badge && <div className="flex-shrink-0 mr-2">{badge}</div>}
 
         {/* Chevron */}
         {showChevron && (
-          <div className="
+          <div
+            className="
             flex-shrink-0
             ml-2
             text-gray-400
             w-4 h-4
             flex items-center justify-center
-          ">
+          "
+          >
             <ChevronRight className="w-4 h-4" />
           </div>
         )}

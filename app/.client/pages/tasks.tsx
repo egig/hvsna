@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useTasks } from "../hooks/use-tasks";
-import { CheckCircleIcon, CircleIcon, Trash2Icon, PlusIcon, Plus, Check, MoreHorizontal } from "lucide-react";
+import {
+  CheckCircleIcon,
+  CircleIcon,
+  Trash2Icon,
+  PlusIcon,
+  Plus,
+  Check,
+  MoreHorizontal,
+} from "lucide-react";
 import type { Task, TaskStatus } from "~/lib/types/task";
 import TaskForm from "../components/task-form";
 import { Page } from "../navigation/components/Page";
@@ -19,20 +27,32 @@ interface TaskItemProps {
   formatScheduledDate: (dateNumber?: number) => string;
 }
 
-function TaskItem({ task, onStatusChange, onEdit, onDelete, getStatusIcon, getStatusColor, formatScheduledDate }: TaskItemProps) {
+function TaskItem({
+  task,
+  onStatusChange,
+  onEdit,
+  onDelete,
+  getStatusIcon,
+  getStatusColor,
+  formatScheduledDate,
+}: TaskItemProps) {
   const [showActions, setShowActions] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = () => setShowActions(false);
     if (showActions) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
     }
   }, [showActions]);
 
   const handleStatusClick = () => {
-    const nextStatus = task.status === 'pending' ? 'in_progress' : 
-                      task.status === 'in_progress' ? 'completed' : 'pending';
+    const nextStatus =
+      task.status === "pending"
+        ? "in_progress"
+        : task.status === "in_progress"
+          ? "completed"
+          : "pending";
     onStatusChange(task, nextStatus);
   };
 
@@ -46,10 +66,10 @@ function TaskItem({ task, onStatusChange, onEdit, onDelete, getStatusIcon, getSt
         >
           {getStatusIcon(task.status)}
         </button>
-        
+
         {/* Task Content */}
         <div className="flex-1 min-w-0">
-          <h3 
+          <h3
             className="font-medium text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
             onClick={() => onEdit(task)}
           >
@@ -59,13 +79,15 @@ function TaskItem({ task, onStatusChange, onEdit, onDelete, getStatusIcon, getSt
             Scheduled: {formatScheduledDate(task.scheduledAt)}
           </p>
         </div>
-        
+
         {/* Status Badge and Actions */}
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(task.status)} bg-opacity-10`}>
-            {task.status.replace('_', ' ')}
+          <span
+            className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(task.status)} bg-opacity-10`}
+          >
+            {task.status.replace("_", " ")}
           </span>
-          
+
           <div className="relative">
             <button
               onClick={(e) => {
@@ -76,7 +98,7 @@ function TaskItem({ task, onStatusChange, onEdit, onDelete, getStatusIcon, getSt
             >
               <MoreHorizontal size={16} className="text-gray-500" />
             </button>
-            
+
             {showActions && (
               <div className="absolute right-0 top-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10 min-w-[120px]">
                 <button
@@ -109,7 +131,17 @@ function TaskItem({ task, onStatusChange, onEdit, onDelete, getStatusIcon, getSt
 }
 
 export default function Tasks() {
-  const { tasks, loading, loadingMore, error, hasMore, deleteTask, refreshTasks, loadMoreTasks, updateTask } = useTasks();
+  const {
+    tasks,
+    loading,
+    loadingMore,
+    error,
+    hasMore,
+    deleteTask,
+    refreshTasks,
+    loadMoreTasks,
+    updateTask,
+  } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -159,8 +191,8 @@ export default function Tasks() {
       try {
         await deleteTask(task.id);
       } catch (err) {
-        console.error('Failed to delete task:', err);
-        alert('Failed to delete task. Please try again.');
+        console.error("Failed to delete task:", err);
+        alert("Failed to delete task. Please try again.");
       }
     }
   };
@@ -170,25 +202,25 @@ export default function Tasks() {
       await updateTask(task.id, { status: newStatus });
       refreshTasks();
     } catch (err) {
-      console.error('Failed to update task status:', err);
-      alert('Failed to update task status. Please try again.');
+      console.error("Failed to update task status:", err);
+      alert("Failed to update task status. Please try again.");
     }
   };
 
   const formatScheduledDate = (dateNumber?: number) => {
-    if (!dateNumber) return 'No date set';
-    return new Date(dateNumber).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    if (!dateNumber) return "No date set";
+    return new Date(dateNumber).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircleIcon size={24} className="text-green-500" />;
-      case 'in_progress':
+      case "in_progress":
         return <CircleIcon size={24} className="text-blue-500" />;
       default:
         return <CircleIcon size={24} className="text-gray-400" />;
@@ -197,27 +229,27 @@ export default function Tasks() {
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
-      case 'completed':
-        return 'text-green-600';
-      case 'in_progress':
-        return 'text-blue-600';
+      case "completed":
+        return "text-green-600";
+      case "in_progress":
+        return "text-blue-600";
       default:
-        return 'text-gray-600';
+        return "text-gray-600";
     }
   };
 
   const handleInfiniteScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (!allowInfinite.current) return;
-    
+
     // Don't load more if already loading or no more data
     if (loadingMore || !hasMore) {
       allowInfinite.current = false;
       return;
     }
-    
+
     const element = e.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = element;
-    
+
     // Load more when user is within 100px of the bottom
     if (scrollHeight - scrollTop - clientHeight < 100) {
       allowInfinite.current = false;
@@ -229,9 +261,9 @@ export default function Tasks() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar 
+      <Navbar
         showBackButton={false}
-        title="Tasks" 
+        title="Tasks"
         rightAction={
           <button
             onClick={openAddPopup}
@@ -242,8 +274,11 @@ export default function Tasks() {
           </button>
         }
       />
-      
-      <div className="p-4 h-[calc(100vh-80px)] overflow-y-auto" onScroll={handleInfiniteScroll}>
+
+      <div
+        className="p-4 h-[calc(100vh-80px)] overflow-y-auto"
+        onScroll={handleInfiniteScroll}
+      >
         {loading && (
           <div className="flex flex-col items-center justify-center py-8">
             <LoadingSpinner size="lg" text="Loading tasks..." />
@@ -266,8 +301,12 @@ export default function Tasks() {
         {!loading && !error && tasks.length === 0 && (
           <div className="text-center py-8">
             <Check className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">No tasks yet</p>
-            <p className="text-gray-500 dark:text-gray-500 mb-4">Create your first task to get started!</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              No tasks yet
+            </p>
+            <p className="text-gray-500 dark:text-gray-500 mb-4">
+              Create your first task to get started!
+            </p>
             <button
               onClick={openAddPopup}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
@@ -294,13 +333,15 @@ export default function Tasks() {
             ))}
           </div>
         )}
-        
+
         {!hasMore && tasks.length > 0 && (
           <div className="text-center py-4">
-            <p className="text-gray-500 dark:text-gray-500">No more tasks to load</p>
+            <p className="text-gray-500 dark:text-gray-500">
+              No more tasks to load
+            </p>
           </div>
         )}
-        
+
         {loadingMore && hasMore && (
           <div className="flex justify-center py-4">
             <LoadingSpinner size="md" />
@@ -308,10 +349,7 @@ export default function Tasks() {
         )}
       </div>
 
-      <Modal 
-        isOpen={sheetOpened} 
-        onClose={closePopup}
-      >
+      <Modal isOpen={sheetOpened} onClose={closePopup}>
         <TaskForm
           taskId={editingTaskId}
           onSuccess={handleTaskSuccess}

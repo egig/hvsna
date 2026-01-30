@@ -18,7 +18,10 @@ export const AppRoutes = () => {
   return (
     // Note that animate present depends to the useLocation hook so it should be here
     <AnimatePresence mode="wait">
-      <Routes location={settingsBackgroundLocation || location} key={location.pathname}>
+      <Routes
+        location={settingsBackgroundLocation || location}
+        key={location.pathname}
+      >
         <Route element={<TabLayout />}>
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />

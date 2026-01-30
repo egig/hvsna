@@ -1,4 +1,4 @@
-export type TaskStatus = 'pending' | 'in_progress' | 'completed';
+export type TaskStatus = "pending" | "in_progress" | "completed";
 
 export interface Task {
   id: string;
@@ -26,7 +26,7 @@ export interface TaskUpdateInput {
 export interface TaskChange {
   id: string;
   documentId: string;
-  type: 'create' | 'update' | 'delete';
+  type: "create" | "update" | "delete";
   timestamp: Date;
   data: Task | TaskUpdateInput;
 }

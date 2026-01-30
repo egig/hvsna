@@ -1,8 +1,13 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import type { Task, TaskCreateInput, TaskUpdateInput, TaskStatus } from '../../lib/types/task';
-import { usePouchDB } from '../contexts/PouchDB';
-import { useEffect } from 'react';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import type {
+  Task,
+  TaskCreateInput,
+  TaskUpdateInput,
+  TaskStatus,
+} from "../../lib/types/task";
+import { usePouchDB } from "../contexts/PouchDB";
+import { useEffect } from "react";
 
 interface PouchDBTaskDocument {
   _id: string;
@@ -45,15 +50,15 @@ export const useTaskStore = create<TaskState>()(
       createTask: async (input: TaskCreateInput, db: any): Promise<Task> => {
         try {
           set({ loading: true, error: null });
-          
+
           const now = Date.now();
           const taskId = input.id || `task_${crypto.randomUUID()}`;
-          
+
           const newTask: Task = {
             id: taskId,
-            user_id: 'default-user', // You might want to get this from auth context
+            user_id: "default-user", // You might want to get this from auth context
             name: input.name,
-            status: input.status || 'pending',
+            status: input.status || "pending",
             scheduledAt: input.scheduledAt,
             created_at: now,
             updated_at: now,
@@ -73,7 +78,8 @@ export const useTaskStore = create<TaskState>()(
           set({ task: newTask });
           return newTask;
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to create task';
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to create task";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -81,12 +87,16 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      updateTask: async (id: string, input: TaskUpdateInput, db: any): Promise<Task> => {
+      updateTask: async (
+        id: string,
+        input: TaskUpdateInput,
+        db: any,
+      ): Promise<Task> => {
         try {
           set({ loading: true, error: null });
-          
+
           const existingDoc: PouchDBTaskDocument = await db.get(id);
-          
+
           const updateData: PouchDBTaskDocument = {
             ...existingDoc,
             updated_at: Date.now(),
@@ -109,7 +119,7 @@ export const useTaskStore = create<TaskState>()(
             ...updateData,
             _rev: response.rev,
           };
-          
+
           const updatedTask: Task = {
             id: updatedDoc._id,
             user_id: updatedDoc.user_id,
@@ -123,7 +133,8 @@ export const useTaskStore = create<TaskState>()(
           set({ task: updatedTask });
           return updatedTask;
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to update task";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -134,21 +145,22 @@ export const useTaskStore = create<TaskState>()(
       deleteTask: async (id: string, db: any): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          
+
           const doc: PouchDBTaskDocument = await db.get(id);
           // Ensure _rev is present before removing
           if (!doc._rev) {
-            throw new Error('Document revision is required for deletion');
+            throw new Error("Document revision is required for deletion");
           }
           await db.remove(doc as any);
-          
+
           // Clear the current task if it matches the deleted task
           const { task } = get();
           if (task && task.id === id) {
             set({ task: null });
           }
         } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to delete task';
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to delete task";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -159,7 +171,7 @@ export const useTaskStore = create<TaskState>()(
       getTask: async (id: string, db: any): Promise<Task | null> => {
         try {
           set({ loading: true, error: null });
-          
+
           const doc: PouchDBTaskDocument = await db.get(id);
           const retrievedTask: Task = {
             id: doc._id,
@@ -170,7 +182,7 @@ export const useTaskStore = create<TaskState>()(
             created_at: doc.created_at,
             updated_at: doc.updated_at,
           };
-          
+
           set({ task: retrievedTask });
           return retrievedTask;
         } catch (err) {
@@ -178,7 +190,8 @@ export const useTaskStore = create<TaskState>()(
             set({ task: null });
             return null;
           }
-          const errorMessage = err instanceof Error ? err.message : 'Failed to get task';
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to get task";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -187,9 +200,9 @@ export const useTaskStore = create<TaskState>()(
       },
     }),
     {
-      name: 'task-store',
-    }
-  )
+      name: "task-store",
+    },
+  ),
 );
 
 export interface UseTaskReturn {
@@ -209,14 +222,13 @@ export const useTask = (taskId?: string): UseTaskReturn => {
 
   useEffect(() => {
     if (taskId) {
-      store.getTask(taskId, db).then(fetchedTask => {
+      store.getTask(taskId, db).then((fetchedTask) => {
         if (fetchedTask) {
-          console.log(fetchedTask.name)
-          store.setTask(fetchedTask)
+          console.log(fetchedTask.name);
+          store.setTask(fetchedTask);
         }
       });
     }
-  
   }, [taskId]);
 
   return {
@@ -224,7 +236,8 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     loading: store.loading,
     error: store.error,
     createTask: (input: TaskCreateInput) => store.createTask(input, db),
-    updateTask: (id: string, input: TaskUpdateInput) => store.updateTask(id, input, db),
+    updateTask: (id: string, input: TaskUpdateInput) =>
+      store.updateTask(id, input, db),
     deleteTask: (id: string) => store.deleteTask(id, db),
     getTask: (id: string) => store.getTask(id, db),
     reset: store.reset,

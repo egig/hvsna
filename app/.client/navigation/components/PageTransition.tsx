@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import { useLocation } from 'react-router';
-import { useEffect, type ReactNode } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { motion } from "framer-motion";
+import { useLocation } from "react-router";
+import { useEffect, type ReactNode } from "react";
+import { useNavigation } from "../contexts/NavigationContext";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -13,12 +13,17 @@ export function PageTransition({ children }: PageTransitionProps) {
   const stateNavType = (location.state as { navType?: string })?.navType;
 
   // Use context navType, but allow location state to override for tab switches and modals
-  const currentNavType = stateNavType === 'tab' ? 'tab' : stateNavType === 'modal' ? 'modal' : navType;
+  const currentNavType =
+    stateNavType === "tab"
+      ? "tab"
+      : stateNavType === "modal"
+        ? "modal"
+        : navType;
 
   // Reset navType to forward after animation completes
   useEffect(() => {
     const timer = setTimeout(() => {
-      setNavType('forward');
+      setNavType("forward");
     }, 300); // Match animation duration
 
     return () => clearTimeout(timer);
@@ -28,15 +33,15 @@ export function PageTransition({ children }: PageTransitionProps) {
   const variants = {
     // Forward navigation (to detail page)
     forward: {
-      initial: { x: '100%', opacity: 0 },
+      initial: { x: "100%", opacity: 0 },
       animate: { x: 0, opacity: 1 },
-      exit: { x: '-20%', opacity: 0 },
+      exit: { x: "-20%", opacity: 0 },
     },
     // Back navigation
     back: {
-      initial: { x: '-20%', opacity: 0 },
+      initial: { x: "-20%", opacity: 0 },
       animate: { x: 0, opacity: 1 },
-      exit: { x: '100%', opacity: 0 },
+      exit: { x: "100%", opacity: 0 },
     },
     // Tab switch
     tab: {
@@ -46,13 +51,14 @@ export function PageTransition({ children }: PageTransitionProps) {
     },
     // Modal presentation
     modal: {
-      initial: { y: '100%', opacity: 0 },
+      initial: { y: "100%", opacity: 0 },
       animate: { y: 0, opacity: 1 },
-      exit: { y: '100%', opacity: 0 },
+      exit: { y: "100%", opacity: 0 },
     },
   };
 
-  const currentVariant = variants[currentNavType as keyof typeof variants] || variants.forward;
+  const currentVariant =
+    variants[currentNavType as keyof typeof variants] || variants.forward;
 
   return (
     <motion.div
@@ -65,7 +71,7 @@ export function PageTransition({ children }: PageTransitionProps) {
         ease: [0.4, 0.0, 0.2, 1],
       }}
       className="h-screen w-full"
-      style={{ willChange: 'transform, opacity' }}
+      style={{ willChange: "transform, opacity" }}
     >
       {children}
     </motion.div>

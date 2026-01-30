@@ -1,4 +1,9 @@
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+} from "@clerk/clerk-react";
 import { LogIn, Trash, Settings as SettingsIcon } from "lucide-react";
 import { Page, Navbar, MenuItem } from "../navigation/components";
 
@@ -13,7 +18,7 @@ export default function Settings() {
           icon={SettingsIcon}
           to="/trackers"
         />
-        
+
         <MenuItem
           title="Targets"
           subtitle="Manage your goals"
@@ -26,7 +31,7 @@ export default function Settings() {
           icon={SettingsIcon}
           to="/journal"
         />
-        
+
         <SignedIn>
           <MenuItem
             title="Sign Out"
@@ -37,7 +42,7 @@ export default function Settings() {
             }}
           />
         </SignedIn>
-        
+
         <SignedOut>
           <MenuItem
             title="Sign In"

@@ -1,6 +1,6 @@
-import { ChevronLeft, ClosedCaption, Cross, X } from 'lucide-react';
-import { useAppNavigation } from '../hooks/useAppNavigation';
-import { useLocation } from 'react-router';
+import { ChevronLeft, ClosedCaption, Cross, X } from "lucide-react";
+import { useAppNavigation } from "../hooks/useAppNavigation";
+import { useLocation } from "react-router";
 
 interface NavbarProps {
   title?: string | React.ReactNode;
@@ -11,23 +11,22 @@ interface NavbarProps {
   modal?: boolean;
 }
 
-const ROOT_PATHS = ['/'];
+const ROOT_PATHS = ["/"];
 
-export function Navbar({ 
-  title, 
+export function Navbar({
+  title,
   showBackButton: propShowBackButton,
   customBackAction,
   rightAction,
   className = "",
-  modal
+  modal,
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
 
   // Auto-determine if back button should be shown
-  const shouldShowBackButton = propShowBackButton ?? (
-    !ROOT_PATHS.includes(location.pathname)
-  )
+  const shouldShowBackButton =
+    propShowBackButton ?? !ROOT_PATHS.includes(location.pathname);
 
   const handleBack = () => {
     if (customBackAction) {
@@ -38,7 +37,9 @@ export function Navbar({
   };
 
   return (
-    <header className={`flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 safe-top ${className}`}>
+    <header
+      className={`flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 safe-top ${className}`}
+    >
       {/* Left: Back Button */}
       <div className="w-16 flex justify-start">
         {shouldShowBackButton && (
@@ -63,9 +64,7 @@ export function Navbar({
       </div>
 
       {/* Right: Action */}
-      <div className="w-16 flex justify-end">
-        {rightAction}
-      </div>
+      <div className="w-16 flex justify-end">{rightAction}</div>
     </header>
   );
 }

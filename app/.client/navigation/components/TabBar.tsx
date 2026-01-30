@@ -1,18 +1,18 @@
-import { useLocation } from 'react-router';
-import { Button } from './Button';
-import { Check, CheckSquare, Home, Settings } from 'lucide-react';
+import { useLocation } from "react-router";
+import { Button } from "./Button";
+import { Check, CheckSquare, Home, Settings } from "lucide-react";
 
 const tabs = [
-  { path: '/', label: 'Home', icon: <Home /> },
-  { path: '/tasks', label: 'Tasks', icon: <CheckSquare /> },
-  { path: '/settings', label: 'Settings', icon: <Settings /> },
+  { path: "/", label: "Home", icon: <Home /> },
+  { path: "/tasks", label: "Tasks", icon: <CheckSquare /> },
+  { path: "/settings", label: "Settings", icon: <Settings /> },
 ];
 
 export function TabBar() {
   const location = useLocation();
 
   const getIsActive = (tabPath: string) => {
-    const isRootTab = tabPath === '/';
+    const isRootTab = tabPath === "/";
     const isCurrentTab = location.pathname === tabPath;
     const isChildTab = location.pathname.startsWith(`${tabPath}/`);
     return isRootTab ? isCurrentTab : isChildTab || isCurrentTab;
@@ -23,7 +23,7 @@ export function TabBar() {
       <div
         className="flex justify-around items-center h-16"
         style={{
-          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
         {tabs.map((tab) => {
@@ -34,11 +34,11 @@ export function TabBar() {
               navType="tab"
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                 isActive
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-600 dark:text-gray-400'
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-600 dark:text-gray-400"
               }`}
               aria-label={tab.label}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
             >
               <span className="text-2xl mb-1">{tab.icon}</span>
               <span className="text-xs font-medium">{tab.label}</span>

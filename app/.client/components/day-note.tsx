@@ -13,19 +13,20 @@ let emptyContent = {
 };
 
 export default function DayNote({ date }: { date: HijriDate }) {
-  const dayNoteId = date.format("YYYYMMDD")
+  const dayNoteId = date.format("YYYYMMDD");
   const { dayData, saveDayData } = useDayNote(dayNoteId);
 
   const placeholder = `Write for this day...`;
 
   return (
     <div className="p-4">
-    <Editor content={dayData?.content ? dayData.content[0] : emptyContent}
-    onUpdate={debounce(async (content) => { 
-      console.log(content)
-      await saveDayData({ content: [content] })
-    },500)}
-    />
+      <Editor
+        content={dayData?.content ? dayData.content[0] : emptyContent}
+        onUpdate={debounce(async (content) => {
+          console.log(content);
+          await saveDayData({ content: [content] });
+        }, 500)}
+      />
     </div>
   );
 }

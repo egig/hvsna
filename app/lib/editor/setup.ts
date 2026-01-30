@@ -1,14 +1,14 @@
-import {keymap} from "prosemirror-keymap"
-import {history} from "prosemirror-history"
-import {baseKeymap} from "prosemirror-commands"
-import {Plugin} from "prosemirror-state"
-import {dropCursor} from "prosemirror-dropcursor"
-import {gapCursor} from "prosemirror-gapcursor"
+import { keymap } from "prosemirror-keymap";
+import { history } from "prosemirror-history";
+import { baseKeymap } from "prosemirror-commands";
+import { Plugin } from "prosemirror-state";
+import { dropCursor } from "prosemirror-dropcursor";
+import { gapCursor } from "prosemirror-gapcursor";
 // import {menuBar, type MenuElement} from "prosemirror-menu"
-import {Schema} from "prosemirror-model"
+import { Schema } from "prosemirror-model";
 
-import {buildKeymap} from "./keymap"
-import {buildInputRules} from "./inputrules"
+import { buildKeymap } from "./keymap";
+import { buildInputRules } from "./inputrules";
 
 /// Create an array of plugins pre-configured for the given schema.
 /// The resulting array will include the following plugins:
@@ -38,16 +38,16 @@ import {buildInputRules} from "./inputrules"
 /// real-world situations.
 export function setup(options: {
   /// The schema to generate key bindings and menu items for.
-  schema: Schema
+  schema: Schema;
 
   /// Can be used to [adjust](#example-setup.buildKeymap)    key bindings created.
-  mapKeys?: {[key: string]: string | false}
+  mapKeys?: { [key: string]: string | false };
 
   /// Set to false to disable the history plugin.
-  history?: boolean
+  history?: boolean;
 
   /// Set to false to make the menu bar non-floating.
-  floatingMenu?: boolean
+  floatingMenu?: boolean;
 
   /// Can be used to override the menu content.
   // menuContent?: MenuElement[][]
@@ -57,15 +57,16 @@ export function setup(options: {
     keymap(buildKeymap(options.schema, options.mapKeys)),
     keymap(baseKeymap),
     dropCursor(),
-    gapCursor()
-  ]
-  
-  if (options.history !== false)
-    plugins.push(history())
+    gapCursor(),
+  ];
 
-  return plugins.concat(new Plugin({
-    props: {
-      attributes: {class: "ProseMirror-hvsna-editor outline-none"}
-    }
-  }))
+  if (options.history !== false) plugins.push(history());
+
+  return plugins.concat(
+    new Plugin({
+      props: {
+        attributes: { class: "ProseMirror-hvsna-editor outline-none" },
+      },
+    }),
+  );
 }

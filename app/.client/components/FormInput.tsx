@@ -1,11 +1,11 @@
-import { type ReactNode } from 'react';
+import { type ReactNode } from "react";
 
 interface FormInputProps {
   name: string;
   label: string;
   value: string;
   placeholder?: string;
-  type?: 'text' | 'number' | 'email' | 'tel';
+  type?: "text" | "number" | "email" | "tel";
   disabled?: boolean;
   required?: boolean;
   error?: string;
@@ -18,12 +18,12 @@ export function FormInput({
   name,
   label,
   value,
-  placeholder = '',
-  type = 'text',
+  placeholder = "",
+  type = "text",
   disabled = false,
   required = false,
   error,
-  className = '',
+  className = "",
   onChange,
   onBlur,
 }: FormInputProps) {
@@ -32,20 +32,21 @@ export function FormInput({
     onChange(e.target.value);
   };
 
-
   return (
     <div className={`mb-4 ${className}`}>
-      <label className="
+      <label
+        className="
         block
         text-sm
         font-medium
         text-gray-700
         mb-2
-      ">
+      "
+      >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      
+
       <input
         key={value}
         name={name}
@@ -63,13 +64,15 @@ export function FormInput({
           transition-colors
           duration-150
           ease-in-out
-          ${error 
-            ? 'border-red-500 focus:ring-red-500 focus:border-red-500' 
-            : 'border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+          ${
+            error
+              ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           }
-          ${disabled 
-            ? 'bg-gray-100 text-gray-500 cursor-not-allowed' 
-            : 'bg-white text-gray-900'
+          ${
+            disabled
+              ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+              : "bg-white text-gray-900"
           }
           focus:outline-none
           focus:ring-2
@@ -80,12 +83,8 @@ export function FormInput({
         onChange={handleChange}
         onBlur={onBlur}
       />
-      
-      {error && (
-        <p className="mt-1 text-sm text-red-600">
-          {error}
-        </p>
-      )}
+
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );
 }

@@ -9,30 +9,28 @@ export default function DataManagement() {
 
   const handleWipePouchDB = async () => {
     if (isDeleting) return;
-    
+
     const confirmed = window.confirm(
-      'Are you sure you want to delete the entire PouchDB database? This will remove all stored data and cannot be undone.'
+      "Are you sure you want to delete the entire PouchDB database? This will remove all stored data and cannot be undone.",
     );
-    
+
     if (!confirmed) return;
 
     setIsDeleting(true);
-    
+
     try {
       // Destroy the entire database
       await db.destroy();
-      
+
       alert(
-        'PouchDB database has been successfully deleted. The app will need to be restarted to create a fresh database.'
+        "PouchDB database has been successfully deleted. The app will need to be restarted to create a fresh database.",
       );
-      
+
       // Optionally redirect or reload
       window.location.reload();
     } catch (error) {
-      console.error('Error destroying database:', error);
-      alert(
-        'An error occurred while deleting the database. Please try again.'
-      );
+      console.error("Error destroying database:", error);
+      alert("An error occurred while deleting the database. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -40,10 +38,7 @@ export default function DataManagement() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar 
-        title="Data Management" 
-        showBackButton 
-      />
+      <Navbar title="Data Management" showBackButton />
 
       <main className="max-w-[520px] mx-auto px-4 py-6">
         {/* Warning Section */}
@@ -58,7 +53,8 @@ export default function DataManagement() {
                 Data deletion is permanent
               </p>
               <p className="text-xs text-orange-700 dark:text-orange-300">
-                These actions cannot be undone. Please make sure you have backups if needed.
+                These actions cannot be undone. Please make sure you have
+                backups if needed.
               </p>
             </div>
           </div>
@@ -72,9 +68,10 @@ export default function DataManagement() {
               Database Management
             </h2>
           </div>
-          
+
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            This will permanently delete all notes, tasks, and other data stored in the local database.
+            This will permanently delete all notes, tasks, and other data stored
+            in the local database.
           </p>
 
           <button
@@ -83,7 +80,7 @@ export default function DataManagement() {
             className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
           >
             <Trash2 className="w-5 h-5" />
-            <span>{isDeleting ? 'Deleting...' : 'Wipe All Data'}</span>
+            <span>{isDeleting ? "Deleting..." : "Wipe All Data"}</span>
           </button>
         </div>
       </main>

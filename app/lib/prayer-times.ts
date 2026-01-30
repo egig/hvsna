@@ -105,34 +105,36 @@ export interface PrayerTimesParams {
   calendarMethod?: string;
 }
 
-export async function getPrayerTimes(params: PrayerTimesParams): Promise<PrayerTimesResponse> {
+export async function getPrayerTimes(
+  params: PrayerTimesParams,
+): Promise<PrayerTimesResponse> {
   const {
     date,
     latitude,
     longitude,
     method = 20,
-    shafaq = 'general',
-    tune = '5,3,5,7,9,-1,0,8,-6',
-    timezonestring = 'UTC',
-    calendarMethod = 'UAQ'
+    shafaq = "general",
+    tune = "5,3,5,7,9,-1,0,8,-6",
+    timezonestring = "UTC",
+    calendarMethod = "UAQ",
   } = params;
 
-  const baseUrl = 'https://api.aladhan.com/v1/timings';
+  const baseUrl = "https://api.aladhan.com/v1/timings";
   const url = new URL(`${baseUrl}/${date}`);
-  
-  url.searchParams.append('latitude', latitude.toString());
-  url.searchParams.append('longitude', longitude.toString());
-  url.searchParams.append('method', method.toString());
-  url.searchParams.append('shafaq', shafaq);
-  url.searchParams.append('tune', tune);
-  url.searchParams.append('timezonestring', timezonestring);
-  url.searchParams.append('calendarMethod', calendarMethod);
+
+  url.searchParams.append("latitude", latitude.toString());
+  url.searchParams.append("longitude", longitude.toString());
+  url.searchParams.append("method", method.toString());
+  url.searchParams.append("shafaq", shafaq);
+  url.searchParams.append("tune", tune);
+  url.searchParams.append("timezonestring", timezonestring);
+  url.searchParams.append("calendarMethod", calendarMethod);
 
   try {
     const response = await fetch(url.toString(), {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'accept': 'application/json',
+        accept: "application/json",
       },
     });
 
@@ -143,6 +145,8 @@ export async function getPrayerTimes(params: PrayerTimesParams): Promise<PrayerT
     const data: PrayerTimesResponse = await response.json();
     return data;
   } catch (error) {
-    throw new Error(`Failed to fetch prayer times: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to fetch prayer times: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }

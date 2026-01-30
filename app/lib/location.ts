@@ -43,11 +43,11 @@ export interface HttpClient {
 export class FetchHttpClient implements HttpClient {
   async get(url: string): Promise<any> {
     const response = await fetch(url);
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     return response.json();
   }
 }
@@ -64,7 +64,7 @@ export interface LocationService {
  */
 export class IpLocationService implements LocationService {
   private httpClient: HttpClient;
-  private readonly baseUrl = 'https://ipapi.co';
+  private readonly baseUrl = "https://ipapi.co";
 
   constructor(httpClient: HttpClient = new FetchHttpClient()) {
     this.httpClient = httpClient;
@@ -72,19 +72,21 @@ export class IpLocationService implements LocationService {
 
   async getLocationFromIp(ip?: string): Promise<Location> {
     const url = ip ? `${this.baseUrl}/${ip}/json/` : `${this.baseUrl}/json/`;
-    
+
     try {
       const data: IpApiResponse = await this.httpClient.get(url);
-      
+
       return {
         latitude: data.latitude,
         longitude: data.longitude,
         city: data.city,
         country: data.country_name,
-        region: data.region
+        region: data.region,
       };
     } catch (error) {
-      throw new Error(`Failed to get location from IP: ${ip} ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to get location from IP: ${ip} ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 }

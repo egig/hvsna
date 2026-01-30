@@ -1,9 +1,9 @@
-import { type ReactNode } from 'react';
-import { Button } from './Button';
+import { type ReactNode } from "react";
+import { Button } from "./Button";
 
 interface CardButtonProps {
   to?: string;
-  navType?: 'forward' | 'back' | 'tab' | 'modal';
+  navType?: "forward" | "back" | "tab" | "modal";
   title: string;
   description?: string;
   icon?: string;
@@ -12,15 +12,15 @@ interface CardButtonProps {
   onClick?: () => void;
 }
 
-export function CardButton({ 
-  to, 
-  navType = 'forward',
-  title, 
-  description, 
+export function CardButton({
+  to,
+  navType = "forward",
+  title,
+  description,
   icon,
   children,
-  className = '',
-  onClick
+  className = "",
+  onClick,
 }: CardButtonProps) {
   return (
     <Button
@@ -36,7 +36,9 @@ export function CardButton({
             {title}
           </h3>
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {description}
+            </p>
           )}
           {children}
         </div>

@@ -6,60 +6,75 @@ import { textContent } from "~/lib/text-content";
 import { Navbar } from "../navigation/components/Navbar";
 
 export default function Notes() {
-  const { notes, loading, loadingMore, error, hasMore, deleteNote, refreshNotes, loadMoreNotes } = useNote();
+  const {
+    notes,
+    loading,
+    loadingMore,
+    error,
+    hasMore,
+    deleteNote,
+    refreshNotes,
+    loadMoreNotes,
+  } = useNote();
   const pageContentRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDeleteNote = async (id: string) => {
     if (deletingId) return;
-    
-    const confirmed = window.confirm('Are you sure you want to delete this note?');
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this note?",
+    );
     if (!confirmed) return;
 
     setDeletingId(id);
     try {
       await deleteNote(id);
     } catch (err) {
-      console.error('Failed to delete note:', err);
-      alert('Failed to delete note. Please try again.');
+      console.error("Failed to delete note:", err);
+      alert("Failed to delete note. Please try again.");
     } finally {
       setDeletingId(null);
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getNotePreview = (content: any[]) => {
-    if (!content || content.length === 0) return 'Empty note';
-    
+    if (!content || content.length === 0) return "Empty note";
+
     const c = textContent(content[0]);
-    
-    return c || 'No text content';
+
+    return c || "No text content";
   };
 
   useEffect(() => {
     const handleScroll = () => {
       if (!pageContentRef.current) return;
-      
+
       const { scrollTop, scrollHeight, clientHeight } = pageContentRef.current;
-      if (scrollHeight - scrollTop <= clientHeight + 100 && hasMore && !loadingMore) {
+      if (
+        scrollHeight - scrollTop <= clientHeight + 100 &&
+        hasMore &&
+        !loadingMore
+      ) {
         loadMoreNotes();
       }
     };
 
     const pageContent = pageContentRef.current;
     if (pageContent) {
-      pageContent.addEventListener('scroll', handleScroll);
-      return () => pageContent.removeEventListener('scroll', handleScroll);
+      pageContent.addEventListener("scroll", handleScroll);
+      return () => pageContent.removeEventListener("scroll", handleScroll);
     }
   }, [hasMore, loadingMore, loadMoreNotes]);
 
@@ -92,8 +107,8 @@ export default function Notes() {
         )}
 
         {!loading && !error && (
-          <div 
-            ref={pageContentRef} 
+          <div
+            ref={pageContentRef}
             className="h-[calc(100vh-8rem)] overflow-y-auto"
           >
             {notes.length === 0 ? (
@@ -117,7 +132,7 @@ export default function Notes() {
                       <div className="flex-shrink-0">
                         <StickyNoteIcon className="w-5 h-5 text-gray-400 dark:text-gray-600 mt-1" />
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <button
                           onClick={() => navigate(`/note/${note.id}`)}
@@ -127,11 +142,13 @@ export default function Notes() {
                             {getNotePreview(note.content)}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatDate(note.updated_at || note.created_at || '')}
+                            {formatDate(
+                              note.updated_at || note.created_at || "",
+                            )}
                           </p>
                         </button>
                       </div>
-                      
+
                       <button
                         onClick={() => handleDeleteNote(note.id)}
                         disabled={deletingId === note.id}
@@ -141,8 +158,18 @@ export default function Notes() {
                           {deletingId === note.id ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
                             </svg>
                           )}
                         </div>
@@ -150,13 +177,13 @@ export default function Notes() {
                     </div>
                   </div>
                 ))}
-                
+
                 {loadingMore && (
                   <div className="flex justify-center py-4">
                     <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
                   </div>
                 )}
-                
+
                 {!hasMore && notes.length > 0 && (
                   <div className="text-center py-4">
                     <p className="text-sm text-gray-500 dark:text-gray-400">

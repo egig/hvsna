@@ -1,6 +1,6 @@
-import { getLocationFromIp, type Location } from '~/lib/location';
-import { getClientIP, getDirectIP } from '~/lib/ip';
-import { DEFAULT_LOCATION } from './config';
+import { getLocationFromIp, type Location } from "~/lib/location";
+import { getClientIP, getDirectIP } from "~/lib/ip";
+import { DEFAULT_LOCATION } from "./config";
 
 /**
  * Extract location from request using IP-based geolocation
@@ -9,7 +9,9 @@ import { DEFAULT_LOCATION } from './config';
  * @param request - The incoming request object
  * @returns Location object with latitude and longitude
  */
-export async function getLocationFromRequest(request: Request): Promise<Location> {
+export async function getLocationFromRequest(
+  request: Request,
+): Promise<Location> {
   // Try to get IP from request headers
   let ip = getClientIP(request);
 
@@ -22,7 +24,7 @@ export async function getLocationFromRequest(request: Request): Promise<Location
   if (!ip) {
     return {
       latitude: DEFAULT_LOCATION.latitude,
-      longitude: DEFAULT_LOCATION.longitude
+      longitude: DEFAULT_LOCATION.longitude,
     };
   }
 
@@ -32,10 +34,10 @@ export async function getLocationFromRequest(request: Request): Promise<Location
     return location;
   } catch (error) {
     // Log error and return default location
-    console.error('Failed to get location from IP:', error);
+    console.error("Failed to get location from IP:", error);
     return {
       latitude: DEFAULT_LOCATION.latitude,
-      longitude: DEFAULT_LOCATION.longitude
+      longitude: DEFAULT_LOCATION.longitude,
     };
   }
 }

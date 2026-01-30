@@ -26,13 +26,13 @@ export default function Hvsna({ config }: { config: AppConfig }) {
   return (
     <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
       <DroppableContext>
-          <PouchDBProvider dbName="hvsna-notes">
-            <BrowserRouter basename={config.appBaseName || ""}>
+        <PouchDBProvider dbName="hvsna-notes">
+          <BrowserRouter basename={config.appBaseName || ""}>
             <NavigationProvider>
               <AppRoutes />
             </NavigationProvider>
-            </BrowserRouter>
-          </PouchDBProvider>
+          </BrowserRouter>
+        </PouchDBProvider>
       </DroppableContext>
     </ClerkProvider>
   );

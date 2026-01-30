@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
-import { usePouchDB } from '../contexts/PouchDB'
-import { useTrackerStore } from '../stores/trackerStore'
-import type { UUID } from '../../lib/tracker/types'
+import { useCallback, useEffect, useState } from "react";
+import { usePouchDB } from "../contexts/PouchDB";
+import { useTrackerStore } from "../stores/trackerStore";
+import type { UUID } from "../../lib/tracker/types";
 import type {
   Tracker,
   TrackerCreateInput,
   TrackerUpdateInput,
-} from '../stores/trackerStore'
+} from "../stores/trackerStore";
 
 export function useTracker(trackerId?: string) {
-  const { db } = usePouchDB()
-  const [tracker, setTracker] = useState<Tracker | null>(null)
+  const { db } = usePouchDB();
+  const [tracker, setTracker] = useState<Tracker | null>(null);
 
   const {
     loading,
@@ -20,113 +20,129 @@ export function useTracker(trackerId?: string) {
     addTracker,
     updateTracker: updateTrackerInStore,
     removeTracker,
-    clearError
-  } = useTrackerStore()
-
+    clearError,
+  } = useTrackerStore();
 
   useEffect(() => {
     if (trackerId) {
-      getTracker(trackerId).then(fetchedTracker => {
-        if (fetchedTracker) { 
-          setTracker(fetchedTracker)
-        }
-      }).catch(() => {
-        // Handle error silently or show error
-      });
+      getTracker(trackerId)
+        .then((fetchedTracker) => {
+          if (fetchedTracker) {
+            setTracker(fetchedTracker);
+          }
+        })
+        .catch(() => {
+          // Handle error silently or show error
+        });
     }
   }, [trackerId]);
 
+  const createTracker = useCallback(
+    async (input: TrackerCreateInput): Promise<Tracker> => {
+      setLoading(true);
+      clearError();
 
-  const createTracker = useCallback(async (input: TrackerCreateInput): Promise<Tracker> => {
-    setLoading(true)
-    clearError()
-    
-    try {
-      const tracker: Tracker = {
-        id: `tracker:${crypto.randomUUID()}`,
-        ...input,
-        createdAt: Date.now()
+      try {
+        const tracker: Tracker = {
+          id: `tracker:${crypto.randomUUID()}`,
+          ...input,
+          createdAt: Date.now(),
+        };
+
+        await db.put({
+          _id: tracker.id,
+          ...tracker,
+        });
+
+        addTracker(tracker);
+        return tracker;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to create tracker";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-      
-      await db.put({
-        _id: tracker.id,
-        ...tracker
-      })
-      
-      addTracker(tracker)
-      return tracker
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create tracker'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [db, setLoading, clearError, addTracker, setError])
+    },
+    [db, setLoading, clearError, addTracker, setError],
+  );
 
-  const updateTracker = useCallback(async (id: UUID, input: TrackerUpdateInput): Promise<Tracker> => {
-    setLoading(true)
-    clearError()
-    
-    try {
-      const doc = await db.get(id)
-      const updatedTracker: Tracker = {
-        ...(doc as unknown as Tracker),
-        ...input
+  const updateTracker = useCallback(
+    async (id: UUID, input: TrackerUpdateInput): Promise<Tracker> => {
+      setLoading(true);
+      clearError();
+
+      try {
+        const doc = await db.get(id);
+        const updatedTracker: Tracker = {
+          ...(doc as unknown as Tracker),
+          ...input,
+        };
+
+        await db.put({
+          ...updatedTracker,
+          _id: id,
+          _rev: doc._rev,
+        });
+
+        updateTrackerInStore(id, updatedTracker);
+        return updatedTracker;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to update tracker";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-      
-      await db.put({
-        ...updatedTracker,
-        _id: id,
-        _rev: doc._rev
-      })
-      
-      updateTrackerInStore(id, updatedTracker)
-      return updatedTracker
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update tracker'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [db, setLoading, clearError, updateTrackerInStore, setError])
+    },
+    [db, setLoading, clearError, updateTrackerInStore, setError],
+  );
 
-  const deleteTracker = useCallback(async (id: UUID): Promise<void> => {
-    setLoading(true)
-    clearError()
-    
-    try {
-      const doc = await db.get(id)
-      await db.remove(doc)
-      removeTracker(id)
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete tracker'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [db, setLoading, clearError, removeTracker, setError])
+  const deleteTracker = useCallback(
+    async (id: UUID): Promise<void> => {
+      setLoading(true);
+      clearError();
 
-  const getTracker = useCallback(async (id: UUID): Promise<Tracker> => {
-    setLoading(true)
-    clearError()
-    
-    try {
-      const doc = await db.get(id)
-      return doc as unknown as Tracker
-    } catch (err) {
-      if ((err as any).status === 404) {
-        throw new Error('Tracker not found')
+      try {
+        const doc = await db.get(id);
+        await db.remove(doc);
+        removeTracker(id);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to delete tracker";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
       }
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get tracker'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [db, setLoading, clearError, setError])
+    },
+    [db, setLoading, clearError, removeTracker, setError],
+  );
+
+  const getTracker = useCallback(
+    async (id: UUID): Promise<Tracker> => {
+      setLoading(true);
+      clearError();
+
+      try {
+        const doc = await db.get(id);
+        return doc as unknown as Tracker;
+      } catch (err) {
+        if ((err as any).status === 404) {
+          throw new Error("Tracker not found");
+        }
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to get tracker";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db, setLoading, clearError, setError],
+  );
 
   return {
     tracker,
@@ -135,6 +151,6 @@ export function useTracker(trackerId?: string) {
     createTracker,
     updateTracker,
     deleteTracker,
-    getTracker
-  }
+    getTracker,
+  };
 }

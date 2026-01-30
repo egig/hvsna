@@ -16,7 +16,7 @@ export const DEFAULT_LOCATION = {
  * Default timezone for prayer times
  * TODO: Should be dynamically determined from location data
  */
-export const DEFAULT_TIMEZONE = 'Asia/Jakarta' as const;
+export const DEFAULT_TIMEZONE = "Asia/Jakarta" as const;
 
 /**
  * Prayer times API configuration
@@ -33,17 +33,17 @@ export const PRAYER_TIMES_CONFIG = {
    * Shafaq parameter for Isha time
    * 'general' uses a general approach
    */
-  shafaq: 'general',
+  shafaq: "general",
 
   /**
    * Tune parameter for adjusting prayer times (in minutes)
    * Format: Imsak,Fajr,Sunrise,Dhuhr,Asr,Sunset,Maghrib,Isha,Midnight
    */
-  tune: '5,3,5,7,9,-1,0,8,-6',
+  tune: "5,3,5,7,9,-1,0,8,-6",
 
   /**
    * Calendar method for Hijri date calculation
    * UAQ = Umm al-Qura University, Makkah
    */
-  calendarMethod: 'UAQ',
+  calendarMethod: "UAQ",
 } as const;

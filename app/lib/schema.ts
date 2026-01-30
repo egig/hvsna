@@ -1,36 +1,36 @@
-import type { Note } from './types/note';
+import type { Note } from "./types/note";
 
-const  noteSchema = {
-  title: 'notes',
-  description: 'notes',
+const noteSchema = {
+  title: "notes",
+  description: "notes",
   version: 0,
-  primaryKey: 'id',
-  type: 'object',
+  primaryKey: "id",
+  type: "object",
   properties: {
     id: {
-      type: 'string',
+      type: "string",
       maxLength: 100,
     },
     user_id: {
-      type: 'string',
+      type: "string",
       maxLength: 100,
     },
     content: {
-      type: 'string',
+      type: "string",
     },
     created_at: {
-      type: 'string',
+      type: "string",
     },
     updated_at: {
-      type: 'string',
+      type: "string",
     },
   },
-  required: ['id'],
+  required: ["id"],
 } as const;
 
 const databaseSchema = {
   version: 2,
-  name: 'editor-db',
+  name: "editor-db",
   collections: {
     notes: {
       schema: noteSchema,

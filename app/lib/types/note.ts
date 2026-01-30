@@ -1,4 +1,4 @@
-import type { JSONContent } from '@tiptap/react';
+import type { JSONContent } from "@tiptap/react";
 
 export interface Note {
   id: string;
@@ -20,7 +20,7 @@ export interface NoteUpdateInput {
 export interface NoteChange {
   id: string;
   documentId: string;
-  type: 'create' | 'update' | 'delete';
+  type: "create" | "update" | "delete";
   timestamp: Date;
   data: Note | NoteUpdateInput;
 }

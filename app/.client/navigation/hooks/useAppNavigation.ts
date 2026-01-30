@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from "react-router";
+import { useNavigation } from "../contexts/NavigationContext";
 
-type NavType = 'forward' | 'back' | 'tab' | 'modal';
+type NavType = "forward" | "back" | "tab" | "modal";
 
 interface NavigateOptions {
   state?: {
@@ -17,11 +17,11 @@ export function useAppNavigation() {
 
   const navigateWithNavType = (
     to: string | number,
-    navType: NavType = 'forward',
-    options?: NavigateOptions
+    navType: NavType = "forward",
+    options?: NavigateOptions,
   ) => {
     setNavType(navType);
-    
+
     const navOptions: NavigateOptions = {
       ...options,
       state: {
@@ -36,11 +36,14 @@ export function useAppNavigation() {
   return {
     // Enhanced navigate function
     navigate: navigateWithNavType,
-    
+
     // Convenience methods
-    goForward: (to: string, options?: NavigateOptions) => navigateWithNavType(to, 'forward', options),
-    goBack: (to?: number) => navigateWithNavType(to || -1, 'back'),
-    goToTab: (to: string, options?: NavigateOptions) => navigateWithNavType(to, 'tab', options),
-    openModal: (to: string, options?: NavigateOptions) => navigateWithNavType(to, 'modal', options),
+    goForward: (to: string, options?: NavigateOptions) =>
+      navigateWithNavType(to, "forward", options),
+    goBack: (to?: number) => navigateWithNavType(to || -1, "back"),
+    goToTab: (to: string, options?: NavigateOptions) =>
+      navigateWithNavType(to, "tab", options),
+    openModal: (to: string, options?: NavigateOptions) =>
+      navigateWithNavType(to, "modal", options),
   };
 }

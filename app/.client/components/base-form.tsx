@@ -19,17 +19,17 @@ export default function BaseForm({
   onCancel,
   onSubmit,
   children,
-  title
+  title,
 }: BaseFormProps) {
   const handleSubmit = async (formData: FormData) => {
     try {
-      await onSubmit(formData)
+      await onSubmit(formData);
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
       if (onError) {
-        onError(err instanceof Error ? err.message : 'An error occurred');
+        onError(err instanceof Error ? err.message : "An error occurred");
       }
     }
   };
@@ -52,9 +52,7 @@ export default function BaseForm({
           </button>
         }
       />
-      <Block>
-        {children}
-      </Block>
+      <Block>{children}</Block>
     </form>
   );
 }

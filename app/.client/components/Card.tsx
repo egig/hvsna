@@ -1,43 +1,45 @@
-import { type ReactNode } from 'react';
+import { type ReactNode } from "react";
 
 interface CardProps {
   children: ReactNode;
   className?: string;
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-  shadow?: 'none' | 'sm' | 'md' | 'lg';
+  padding?: "none" | "sm" | "md" | "lg";
+  shadow?: "none" | "sm" | "md" | "lg";
   border?: boolean;
 }
 
 export function Card({
   children,
-  className = '',
-  padding = 'md',
-  shadow = 'sm',
+  className = "",
+  padding = "md",
+  shadow = "sm",
   border = true,
 }: CardProps) {
   const paddingClasses = {
-    none: '',
-    sm: 'p-3',
-    md: 'p-4',
-    lg: 'p-6',
+    none: "",
+    sm: "p-3",
+    md: "p-4",
+    lg: "p-6",
   };
 
   const shadowClasses = {
-    none: '',
-    sm: 'shadow-sm',
-    md: 'shadow-md',
-    lg: 'shadow-lg',
+    none: "",
+    sm: "shadow-sm",
+    md: "shadow-md",
+    lg: "shadow-lg",
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       bg-white
       rounded-lg
       ${paddingClasses[padding]}
       ${shadowClasses[shadow]}
-      ${border ? 'border border-gray-200' : ''}
+      ${border ? "border border-gray-200" : ""}
       ${className}
-    `}>
+    `}
+    >
       {children}
     </div>
   );
@@ -48,18 +50,17 @@ interface CardHeaderProps {
   className?: string;
 }
 
-export function CardHeader({
-  children,
-  className = '',
-}: CardHeaderProps) {
+export function CardHeader({ children, className = "" }: CardHeaderProps) {
   return (
-    <div className={`
+    <div
+      className={`
       mb-4
       pb-4
       border-b
       border-gray-200
       ${className}
-    `}>
+    `}
+    >
       {children}
     </div>
   );
@@ -68,26 +69,28 @@ export function CardHeader({
 interface CardTitleProps {
   children: ReactNode;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
 export function CardTitle({
   children,
-  className = '',
-  size = 'md',
+  className = "",
+  size = "md",
 }: CardTitleProps) {
   const sizeClasses = {
-    sm: 'text-lg font-semibold',
-    md: 'text-xl font-semibold',
-    lg: 'text-2xl font-bold',
+    sm: "text-lg font-semibold",
+    md: "text-xl font-semibold",
+    lg: "text-2xl font-bold",
   };
 
   return (
-    <h3 className={`
+    <h3
+      className={`
       text-gray-900
       ${sizeClasses[size]}
       ${className}
-    `}>
+    `}
+    >
       {children}
     </h3>
   );
@@ -98,13 +101,6 @@ interface CardContentProps {
   className?: string;
 }
 
-export function CardContent({
-  children,
-  className = '',
-}: CardContentProps) {
-  return (
-    <div className={className}>
-      {children}
-    </div>
-  );
+export function CardContent({ children, className = "" }: CardContentProps) {
+  return <div className={className}>{children}</div>;
 }

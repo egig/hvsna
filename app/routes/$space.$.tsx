@@ -5,8 +5,7 @@ import App from "../.client/app";
 import type { AppConfig } from "../.client/app";
 import { registerSW } from "virtual:pwa-register";
 
-
-export default function Space({params}: Route.ActionArgs) {
+export default function Space({ params }: Route.ActionArgs) {
   useEffect(() => {
     // @ts-ignore
     if (!!window.__dtMounted) {
@@ -20,7 +19,7 @@ export default function Space({params}: Route.ActionArgs) {
       supabaseURL: import.meta.env.VITE_SUPABASE_URL!,
       supabasePublishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
     };
-    
+
     const root = createRoot(document.getElementById("root") as Container);
 
     (async () => {
@@ -29,22 +28,20 @@ export default function Space({params}: Route.ActionArgs) {
       // @ts-ignore
       window.__dtMounted = true;
       window.document.title = "HVSNA";
-    })(); 
+    })();
 
     const updateSW = registerSW({
       onOfflineReady() {
-        console.log('App ready to work offline');
+        console.log("App ready to work offline");
       },
       onNeedRefresh() {
-        console.log('New content available, please refresh');
+        console.log("New content available, please refresh");
       },
     });
 
     return () => {
       updateSW();
-    }
-
-
+    };
   }, []);
 
   return (

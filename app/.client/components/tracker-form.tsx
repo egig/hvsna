@@ -17,9 +17,9 @@ export default function TrackerForm({
   onError,
   onCancel,
 }: TrackerFormProps) {
-  const { loading, error, createTracker, updateTracker, getTracker, tracker } = useTracker(trackerId || undefined);
+  const { loading, error, createTracker, updateTracker, getTracker, tracker } =
+    useTracker(trackerId || undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   useEffect(() => {
     if (error && onError) {
@@ -30,29 +30,29 @@ export default function TrackerForm({
   const handleSubmit = async (form: FormData) => {
     try {
       setIsSubmitting(true);
-      
-      const name = form.get('name') as string;
-      const unit = form.get('unit') as string;
-      const baseline = form.get('baseline') as string;
+
+      const name = form.get("name") as string;
+      const unit = form.get("unit") as string;
+      const baseline = form.get("baseline") as string;
 
       if (!name || !unit || !baseline) {
-        if (onError) onError('All fields are required');
+        if (onError) onError("All fields are required");
         return;
       }
 
-      console.log(name, unit, baseline)
+      console.log(name, unit, baseline);
 
       if (trackerId && tracker) {
         await updateTracker(tracker.id, {
           name,
           unit,
-          baseline: parseFloat(baseline) || 0
+          baseline: parseFloat(baseline) || 0,
         });
       } else {
         await createTracker({
           name,
           unit,
-          baseline: parseFloat(baseline) || 0
+          baseline: parseFloat(baseline) || 0,
         });
       }
 
@@ -76,55 +76,55 @@ export default function TrackerForm({
       onSubmit={handleSubmit}
       onCancel={handleCancel}
     >
-
-      <div className="
+      <div
+        className="
         flex-1
         overflow-y-auto
         scroll-area
         mb-12
-      ">
-        <div className="
+      "
+      >
+        <div
+          className="
           max-w-lg
           mx-auto
           w-full
           py-4
           px-4
-        ">
-              
-                <div className="space-y-2">
-                  <FormInput
-                    name="name"
-                    label="Name"
-                    value={tracker?.name || ''}
-                    placeholder="Enter tracker name"
-                    disabled={isSubmitting}
-                    required={true}
-                    className="text-base"
-                  />
-                  
-                  <FormInput
-                    name="unit"
-                    label="Unit"
-                    value={tracker?.unit || ''}
-                    placeholder="e.g., kg, hours, IDR, count"
-                    disabled={isSubmitting}
-                    required={true}
-                    className="text-base"
-                  />
-                  
-                  <FormInput
-                    name="baseline"
-                    label="Baseline"
-                    value={tracker?.baseline?.toString() || ''}
-                    placeholder="e.g., 0, 100, 1000"
-                    type="number"
-                    disabled={isSubmitting}
-                    required={true}
-                    className="text-base"
-                  />
-                  
-                </div>
-                
+        "
+        >
+          <div className="space-y-2">
+            <FormInput
+              name="name"
+              label="Name"
+              value={tracker?.name || ""}
+              placeholder="Enter tracker name"
+              disabled={isSubmitting}
+              required={true}
+              className="text-base"
+            />
+
+            <FormInput
+              name="unit"
+              label="Unit"
+              value={tracker?.unit || ""}
+              placeholder="e.g., kg, hours, IDR, count"
+              disabled={isSubmitting}
+              required={true}
+              className="text-base"
+            />
+
+            <FormInput
+              name="baseline"
+              label="Baseline"
+              value={tracker?.baseline?.toString() || ""}
+              placeholder="e.g., 0, 100, 1000"
+              type="number"
+              disabled={isSubmitting}
+              required={true}
+              className="text-base"
+            />
+          </div>
         </div>
       </div>
     </BaseForm>
