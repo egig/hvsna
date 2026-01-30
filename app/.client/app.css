@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Mobile-first CSS Reset and Base Styles */
 * {
   -webkit-tap-highlight-color: transparent;
