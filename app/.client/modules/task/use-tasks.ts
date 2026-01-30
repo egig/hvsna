@@ -27,7 +27,6 @@ export const useTasks = (): UseTasksReturn => {
   const { db } = usePouchDB();
   const store = useTaskStore();
 
-
   const loadMoreTasks = useCallback(async () => {
     return store.loadMoreTasks(db);
   }, [store, db]);

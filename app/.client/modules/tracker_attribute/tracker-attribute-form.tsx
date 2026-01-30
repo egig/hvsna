@@ -18,8 +18,14 @@ export default function TrackerAttributeForm({
   onError,
   onCancel,
 }: TrackerAttributeFormProps) {
-  const { loading, error, createTrackerAttribute, updateTrackerAttribute, getTrackerAttribute, trackerAttribute } =
-    useTrackerAttribute(trackerAttributeId || undefined);
+  const {
+    loading,
+    error,
+    createTrackerAttribute,
+    updateTrackerAttribute,
+    getTrackerAttribute,
+    trackerAttribute,
+  } = useTrackerAttribute(trackerAttributeId || undefined);
   const { trackers } = useTrackers();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,7 +40,12 @@ export default function TrackerAttributeForm({
       setIsSubmitting(true);
 
       const name = form.get("name") as string;
-      const type = form.get("type") as "text" | "number" | "boolean" | "date" | "options";
+      const type = form.get("type") as
+        | "text"
+        | "number"
+        | "boolean"
+        | "date"
+        | "options";
       const required = form.get("required") === "on";
       const defaultValue = form.get("defaultValue") as string;
       const description = form.get("description") as string;
@@ -48,7 +59,7 @@ export default function TrackerAttributeForm({
 
       let processedDefaultValue: string | number | boolean | undefined;
       let processedOptions: string[] | undefined;
-      
+
       if (defaultValue) {
         switch (type) {
           case "number":
@@ -61,9 +72,12 @@ export default function TrackerAttributeForm({
             processedDefaultValue = defaultValue;
         }
       }
-      
+
       if (type === "options" && options) {
-        processedOptions = options.split(',').map(opt => opt.trim()).filter(opt => opt.length > 0);
+        processedOptions = options
+          .split(",")
+          .map((opt) => opt.trim())
+          .filter((opt) => opt.length > 0);
       }
 
       if (trackerAttributeId && trackerAttribute) {
@@ -104,7 +118,9 @@ export default function TrackerAttributeForm({
 
   return (
     <BaseForm
-      title={trackerAttributeId ? "Edit Tracker Attribute" : "New Tracker Attribute"}
+      title={
+        trackerAttributeId ? "Edit Tracker Attribute" : "New Tracker Attribute"
+      }
       onSubmit={handleSubmit}
       onCancel={handleCancel}
     >
@@ -179,7 +195,9 @@ export default function TrackerAttributeForm({
                 required
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="" disabled>Select a tracker</option>
+                <option value="" disabled>
+                  Select a tracker
+                </option>
                 {trackers.map((tracker) => (
                   <option key={tracker.id} value={tracker.id}>
                     {tracker.name}
@@ -204,7 +222,7 @@ export default function TrackerAttributeForm({
               </label>
               <textarea
                 name="options"
-                defaultValue={trackerAttribute?.options?.join(', ') || ""}
+                defaultValue={trackerAttribute?.options?.join(", ") || ""}
                 disabled={isSubmitting}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

@@ -9,7 +9,8 @@ import { usePouchDB } from "~/.client/pouchdb";
 
 export function useTrackerAttribute(trackerAttributeId?: string) {
   const { db } = usePouchDB();
-  const [trackerAttribute, setTrackerAttribute] = useState<TrackerAttribute | null>(null);
+  const [trackerAttribute, setTrackerAttribute] =
+    useState<TrackerAttribute | null>(null);
 
   const {
     loading,
@@ -57,7 +58,9 @@ export function useTrackerAttribute(trackerAttributeId?: string) {
         return trackerAttribute;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to create tracker attribute";
+          err instanceof Error
+            ? err.message
+            : "Failed to create tracker attribute";
         setError(errorMessage);
         throw err;
       } finally {
@@ -68,7 +71,10 @@ export function useTrackerAttribute(trackerAttributeId?: string) {
   );
 
   const updateTrackerAttribute = useCallback(
-    async (id: string, input: TrackerAttributeUpdateInput): Promise<TrackerAttribute> => {
+    async (
+      id: string,
+      input: TrackerAttributeUpdateInput,
+    ): Promise<TrackerAttribute> => {
       setLoading(true);
       clearError();
 
@@ -89,7 +95,9 @@ export function useTrackerAttribute(trackerAttributeId?: string) {
         return updatedTrackerAttribute;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to update tracker attribute";
+          err instanceof Error
+            ? err.message
+            : "Failed to update tracker attribute";
         setError(errorMessage);
         throw err;
       } finally {
@@ -110,7 +118,9 @@ export function useTrackerAttribute(trackerAttributeId?: string) {
         removeTrackerAttribute(id);
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to delete tracker attribute";
+          err instanceof Error
+            ? err.message
+            : "Failed to delete tracker attribute";
         setError(errorMessage);
         throw err;
       } finally {
@@ -133,7 +143,9 @@ export function useTrackerAttribute(trackerAttributeId?: string) {
           throw new Error("Tracker attribute not found");
         }
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to get tracker attribute";
+          err instanceof Error
+            ? err.message
+            : "Failed to get tracker attribute";
         setError(errorMessage);
         throw err;
       } finally {

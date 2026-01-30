@@ -64,9 +64,7 @@ export function Navbar({
       </div>
 
       {/* Right: Action */}
-      <div className="w-16 flex justify-end">
-        {rightAction}
-      </div>
+      <div className="w-16 flex justify-end">{rightAction}</div>
     </header>
   );
 }

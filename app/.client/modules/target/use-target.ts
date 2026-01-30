@@ -65,7 +65,7 @@ export function useTarget(targetId: string): UseTargetReturn {
     updateTarget,
     deleteTarget,
     getTarget,
-    target
+    target,
   };
 }
 

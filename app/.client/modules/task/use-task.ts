@@ -26,19 +26,19 @@ interface TaskState {
   task: Task | null;
   loading: boolean;
   error: string | null;
-  
+
   // Multiple tasks state (for useTasks hook)
   tasks: Task[];
   loadingMore: boolean;
   hasMore: boolean;
   offset: number;
-  
+
   // Actions for single task
   setTask: (task: Task | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   reset: () => void;
-  
+
   // Actions for multiple tasks
   setTasks: (tasks: Task[]) => void;
   setLoadingMore: (loadingMore: boolean) => void;
@@ -48,13 +48,13 @@ interface TaskState {
   updateTaskInList: (id: string, updates: Partial<Task>) => void;
   removeTaskFromList: (id: string) => void;
   resetTasks: () => void;
-  
+
   // Async actions for single task
   createTask: (input: TaskCreateInput, db: any) => Promise<Task>;
   updateTask: (id: string, input: TaskUpdateInput, db: any) => Promise<Task>;
   deleteTask: (id: string, db: any) => Promise<void>;
   getTask: (id: string, db: any) => Promise<Task | null>;
-  
+
   // Async actions for multiple tasks
   getTasks: (query?: TaskQuery, db?: any) => Promise<Task[]>;
   getTasksByDate: (date: string, db?: any) => Promise<Task[]>;
@@ -67,28 +67,24 @@ export const useTaskStore = create<TaskState>()(
     (set, get) => ({
       loading: false,
       error: null,
-      
+
       // Multiple tasks state
       tasks: [],
       loadingMore: false,
       hasMore: true,
       offset: 0,
-      
+
       // Actions for single task
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
-      
+
       // Actions for multiple tasks
       setTasks: (tasks) => set({ tasks }),
       setLoadingMore: (loadingMore) => set({ loadingMore }),
       setHasMore: (hasMore) => set({ hasMore }),
       setOffset: (offset) => set({ offset }),
       addTask: (task) =>
-        set(
-          (state) => ({ tasks: [task, ...state.tasks] }),
-          false,
-          "addTask",
-        ),
+        set((state) => ({ tasks: [task, ...state.tasks] }), false, "addTask"),
       updateTaskInList: (id, updates) =>
         set(
           (state) => ({
@@ -107,7 +103,12 @@ export const useTaskStore = create<TaskState>()(
           false,
           "removeTaskFromList",
         ),
-      resetTasks: () => set({ tasks: [], loadingMore: false, hasMore: true, offset: 0 }, false, "resetTasks"),
+      resetTasks: () =>
+        set(
+          { tasks: [], loadingMore: false, hasMore: true, offset: 0 },
+          false,
+          "resetTasks",
+        ),
 
       createTask: async (input: TaskCreateInput, db: any): Promise<Task> => {
         try {
@@ -138,10 +139,10 @@ export const useTaskStore = create<TaskState>()(
 
           await db.put(doc);
           set({ task: newTask });
-          
+
           // Also add to the tasks list
           get().addTask(newTask);
-          
+
           return newTask;
         } catch (err) {
           const errorMessage =
@@ -197,10 +198,10 @@ export const useTaskStore = create<TaskState>()(
           };
 
           // set({ task: updatedTask });
-          
+
           // Also update in the tasks list
           // get().updateTaskInList(id, updatedTask);
-          
+
           return updatedTask;
         } catch (err) {
           const errorMessage =
@@ -228,7 +229,7 @@ export const useTaskStore = create<TaskState>()(
           if (task && task.id === id) {
             set({ task: null });
           }
-          
+
           // Also remove from the tasks list
           get().removeTaskFromList(id);
         } catch (err) {
@@ -310,7 +311,9 @@ export const useTaskStore = create<TaskState>()(
 
           // Filter by status if provided
           if (query?.status) {
-            tasksList = tasksList.filter((task: Task) => task.status === query.status);
+            tasksList = tasksList.filter(
+              (task: Task) => task.status === query.status,
+            );
           }
 
           set({ tasks: tasksList });
@@ -385,7 +388,7 @@ export const useTaskStore = create<TaskState>()(
         }
 
         const { loadingMore, hasMore, offset } = get();
-        
+
         if (loadingMore || !hasMore) return;
 
         const PAGE_SIZE = 20;
@@ -418,7 +421,7 @@ export const useTaskStore = create<TaskState>()(
             });
 
           const { tasks } = get();
-          set({ 
+          set({
             tasks: [...tasks, ...newTasks],
             hasMore: result.rows.length >= PAGE_SIZE,
             offset: offset + PAGE_SIZE,

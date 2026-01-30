@@ -87,7 +87,11 @@ interface TargetState {
 
   // Async actions that take db as parameter
   createTarget: (input: TargetCreateInput, db: any) => Promise<Target>;
-  updateTargetInDB: (id: string, input: TargetUpdateInput, db: any) => Promise<Target>;
+  updateTargetInDB: (
+    id: string,
+    input: TargetUpdateInput,
+    db: any,
+  ) => Promise<Target>;
   deleteTargetFromDB: (id: string, db: any) => Promise<void>;
   getTargetFromDB: (id: string, db: any) => Promise<Target>;
   getTargetsFromDB: (query?: TargetQuery, db?: any) => Promise<Target[]>;
@@ -104,7 +108,8 @@ export const useTargetStore = create<TargetState>()(
       setLoading: (loading) => set({ loading }, false, "setLoading"),
       setError: (error) => set({ error }, false, "setError"),
       setTargets: (targets) => set({ targets }, false, "setTargets"),
-      setCurrentTarget: (target) => set({ currentTarget: target }, false, "setCurrentTarget"),
+      setCurrentTarget: (target) =>
+        set({ currentTarget: target }, false, "setCurrentTarget"),
 
       addTarget: (target) =>
         set(
@@ -132,16 +137,25 @@ export const useTargetStore = create<TargetState>()(
         set(
           (state) => ({
             targets: state.targets.filter((target) => target.id !== id),
-            currentTarget: state.currentTarget?.id === id ? null : state.currentTarget,
+            currentTarget:
+              state.currentTarget?.id === id ? null : state.currentTarget,
           }),
           false,
           "removeTarget",
         ),
 
       clearError: () => set({ error: null }, false, "clearError"),
-      reset: () => set({ targets: [], currentTarget: null, loading: false, error: null }, false, "reset"),
+      reset: () =>
+        set(
+          { targets: [], currentTarget: null, loading: false, error: null },
+          false,
+          "reset",
+        ),
 
-      createTarget: async (input: TargetCreateInput, db: any): Promise<Target> => {
+      createTarget: async (
+        input: TargetCreateInput,
+        db: any,
+      ): Promise<Target> => {
         try {
           set({ loading: true, error: null });
 
@@ -173,7 +187,11 @@ export const useTargetStore = create<TargetState>()(
         }
       },
 
-      updateTargetInDB: async (id: UUID, input: TargetUpdateInput, db: any): Promise<Target> => {
+      updateTargetInDB: async (
+        id: UUID,
+        input: TargetUpdateInput,
+        db: any,
+      ): Promise<Target> => {
         try {
           set({ loading: true, error: null });
 
@@ -244,7 +262,10 @@ export const useTargetStore = create<TargetState>()(
         }
       },
 
-      getTargetsFromDB: async (query: TargetQuery = {}, db?: any): Promise<Target[]> => {
+      getTargetsFromDB: async (
+        query: TargetQuery = {},
+        db?: any,
+      ): Promise<Target[]> => {
         if (!db) {
           throw new Error("Database instance is required");
         }
@@ -264,16 +285,22 @@ export const useTargetStore = create<TargetState>()(
 
           // Apply filters
           if (query.trackerId) {
-            targets = targets.filter((t: Target) => t.trackerId === query.trackerId);
+            targets = targets.filter(
+              (t: Target) => t.trackerId === query.trackerId,
+            );
           }
           if (query.type) {
             targets = targets.filter((t: Target) => t.type === query.type);
           }
           if (query.reducer) {
-            targets = targets.filter((t: Target) => t.reducer === query.reducer);
+            targets = targets.filter(
+              (t: Target) => t.reducer === query.reducer,
+            );
           }
           if (query.direction) {
-            targets = targets.filter((t: Target) => t.direction === query.direction);
+            targets = targets.filter(
+              (t: Target) => t.direction === query.direction,
+            );
           }
           if (query.period) {
             targets = targets.filter((t: Target) => t.period === query.period);

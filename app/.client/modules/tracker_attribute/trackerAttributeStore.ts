@@ -50,7 +50,10 @@ interface TrackerAttributeState {
   setError: (error: string | null) => void;
   setTrackerAttributes: (trackerAttributes: TrackerAttribute[]) => void;
   addTrackerAttribute: (trackerAttribute: TrackerAttribute) => void;
-  updateTrackerAttribute: (id: string, updates: Partial<TrackerAttribute>) => void;
+  updateTrackerAttribute: (
+    id: string,
+    updates: Partial<TrackerAttribute>,
+  ) => void;
   removeTrackerAttribute: (id: string) => void;
   clearError: () => void;
 }
@@ -66,11 +69,14 @@ export const useTrackerAttributeStore = create<TrackerAttributeState>()(
 
       setError: (error) => set({ error }, false, "setError"),
 
-      setTrackerAttributes: (trackerAttributes) => set({ trackerAttributes }, false, "setTrackerAttributes"),
+      setTrackerAttributes: (trackerAttributes) =>
+        set({ trackerAttributes }, false, "setTrackerAttributes"),
 
       addTrackerAttribute: (trackerAttribute) =>
         set(
-          (state) => ({ trackerAttributes: [...state.trackerAttributes, trackerAttribute] }),
+          (state) => ({
+            trackerAttributes: [...state.trackerAttributes, trackerAttribute],
+          }),
           false,
           "addTrackerAttribute",
         ),
@@ -78,8 +84,11 @@ export const useTrackerAttributeStore = create<TrackerAttributeState>()(
       updateTrackerAttribute: (id, updates) =>
         set(
           (state) => ({
-            trackerAttributes: state.trackerAttributes.map((trackerAttribute) =>
-              trackerAttribute.id === id ? { ...trackerAttribute, ...updates } : trackerAttribute,
+            trackerAttributes: state.trackerAttributes.map(
+              (trackerAttribute) =>
+                trackerAttribute.id === id
+                  ? { ...trackerAttribute, ...updates }
+                  : trackerAttribute,
             ),
           }),
           false,
@@ -89,7 +98,9 @@ export const useTrackerAttributeStore = create<TrackerAttributeState>()(
       removeTrackerAttribute: (id) =>
         set(
           (state) => ({
-            trackerAttributes: state.trackerAttributes.filter((trackerAttribute) => trackerAttribute.id !== id),
+            trackerAttributes: state.trackerAttributes.filter(
+              (trackerAttribute) => trackerAttribute.id !== id,
+            ),
           }),
           false,
           "removeTrackerAttribute",

@@ -6,7 +6,12 @@ import { Button, Page, Navbar } from "../navigation";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
 import { LoadingSpinner } from "~/.client/components/loader";
-import { Card, CardContent, CardHeader, CardTitle } from "~/.client/components/Card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "~/.client/components/Card";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import CustomAttributeInput from "~/.client/components/custom-attribute-input";
@@ -25,10 +30,17 @@ export default function LogForm({
   onCancel,
 }: LogFormProps) {
   const { loading: trackerLoading, trackers } = useTrackers();
-  const { loading, error, createLog, updateLog, log } = useLog();
+  const { loading, error, createLog, updateLog, log } = useLog(logId);
   const [selectedTrackerId, setSelectedTrackerId] = useState(log?.trackerId);
-  const { loading: attributesLoading, trackerAttributes } = useTrackerAttributes(selectedTrackerId);
+  const { loading: attributesLoading, trackerAttributes } =
+    useTrackerAttributes(selectedTrackerId);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (logId) {
+      setSelectedTrackerId(log?.trackerId);
+    }
+  }, [logId, log]);
 
   useEffect(() => {
     if (error && onError) {
@@ -37,8 +49,7 @@ export default function LogForm({
   }, [error, onError]);
 
   const handleSubmit = async (formData: FormData) => {
-
-    const {value, timestamp} = Object.fromEntries(formData.entries());
+    const { value, timestamp } = Object.fromEntries(formData.entries());
 
     if (!selectedTrackerId) return;
 
@@ -47,8 +58,9 @@ export default function LogForm({
 
       // Add custom attributes to metadata with 'custom_' prefix
       const customMetadata: Record<string, any> = { ...log?.attributes };
-      Object.values(trackerAttributes).forEach(attr => {
-        customMetadata[`custom_${attr.id}`] = formData.get(attr.id) || attr.defaultValue;
+      Object.values(trackerAttributes).forEach((attr) => {
+        customMetadata[`custom_${attr.id}`] =
+          formData.get(attr.id) || attr.defaultValue;
       });
 
       let result: Log;
@@ -56,7 +68,8 @@ export default function LogForm({
         trackerId: selectedTrackerId,
         value: parseFloat(value) || 0,
         timestamp: new Date().getTime(),
-        attributes: Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
+        attributes:
+          Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
       };
 
       if (logId) {
@@ -128,6 +141,7 @@ export default function LogForm({
                 <span className="text-red-500 ml-1">*</span>
               </label>
               <select
+                key={selectedTrackerId}
                 defaultValue={selectedTrackerId}
                 onChange={(e) => setSelectedTrackerId(e.target.value)}
                 disabled={isSubmitting}
@@ -173,7 +187,7 @@ export default function LogForm({
                 </h3>
                 {trackerAttributes.map((attr) => (
                   <CustomAttributeInput
-                    key={attr.id}
+                    key={log?.id}
                     attr={attr}
                     value={log?.attributes?.[`custom_${attr.id}`]}
                     disabled={isSubmitting}
@@ -181,7 +195,6 @@ export default function LogForm({
                 ))}
               </div>
             )}
-
           </div>
         </div>
       </div>

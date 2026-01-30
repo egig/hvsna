@@ -1,8 +1,4 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-} from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import { LogIn, Settings as SettingsIcon } from "lucide-react";
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";

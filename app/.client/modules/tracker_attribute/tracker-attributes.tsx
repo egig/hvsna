@@ -17,7 +17,9 @@ export default function TrackerAttributes() {
   } = useTrackerAttributes();
   const { trackers } = useTrackers();
   const [popupOpened, setPopupOpened] = useState(false);
-  const [editingTrackerAttributeId, setEditingTrackerAttributeId] = useState<string | null>(null);
+  const [editingTrackerAttributeId, setEditingTrackerAttributeId] = useState<
+    string | null
+  >(null);
 
   const resetForm = () => {
     setEditingTrackerAttributeId(null);
@@ -56,7 +58,9 @@ export default function TrackerAttributes() {
     setPopupOpened(false);
   };
 
-  const handleDeleteTrackerAttribute = async (trackerAttribute: TrackerAttribute) => {
+  const handleDeleteTrackerAttribute = async (
+    trackerAttribute: TrackerAttribute,
+  ) => {
     if (
       confirm(
         `Are you sure you want to delete "${trackerAttribute.name}"? This action cannot be undone.`,
@@ -90,7 +94,7 @@ export default function TrackerAttributes() {
   };
 
   const getTrackerName = (trackerId: string) => {
-    const tracker = trackers.find(t => t.id === trackerId);
+    const tracker = trackers.find((t) => t.id === trackerId);
     return tracker?.name || "Unknown Tracker";
   };
 
@@ -171,16 +175,22 @@ export default function TrackerAttributes() {
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <span>Type: {getTypeLabel(trackerAttribute.type)}</span>
-                    <span>Tracker: {getTrackerName(trackerAttribute.trackerId)}</span>
+                    <span>
+                      Tracker: {getTrackerName(trackerAttribute.trackerId)}
+                    </span>
                     {trackerAttribute.defaultValue !== undefined && (
-                      <span>Default: {trackerAttribute.defaultValue.toString()}</span>
+                      <span>
+                        Default: {trackerAttribute.defaultValue.toString()}
+                      </span>
                     )}
                   </div>
-                  {trackerAttribute.options && trackerAttribute.options.length > 0 && (
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      <span className="font-medium">Options:</span> {trackerAttribute.options.join(", ")}
-                    </div>
-                  )}
+                  {trackerAttribute.options &&
+                    trackerAttribute.options.length > 0 && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-medium">Options:</span>{" "}
+                        {trackerAttribute.options.join(", ")}
+                      </div>
+                    )}
                   {trackerAttribute.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       {trackerAttribute.description}
@@ -195,7 +205,9 @@ export default function TrackerAttributes() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteTrackerAttribute(trackerAttribute)}
+                    onClick={() =>
+                      handleDeleteTrackerAttribute(trackerAttribute)
+                    }
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   >
                     Delete
@@ -210,7 +222,11 @@ export default function TrackerAttributes() {
       <Modal
         isOpen={popupOpened}
         onClose={closePopup}
-        title={editingTrackerAttributeId ? "Edit Tracker Attribute" : "Create Tracker Attribute"}
+        title={
+          editingTrackerAttributeId
+            ? "Edit Tracker Attribute"
+            : "Create Tracker Attribute"
+        }
       >
         <TrackerAttributeForm
           trackerAttributeId={editingTrackerAttributeId}

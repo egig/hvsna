@@ -30,6 +30,7 @@ export function TabBar() {
           const isActive = getIsActive(tab.path);
           return (
             <Button
+              key={tab.path}
               to={tab.path}
               navType="tab"
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${

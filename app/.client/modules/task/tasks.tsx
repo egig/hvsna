@@ -144,7 +144,6 @@ export default function Tasks() {
   const [sheetOpened, setSheetOpened] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
-
   const openAddPopup = () => {
     // Reset form first, then open sheet
     // Use setTimeout to ensure state is set before opening sheet
@@ -158,7 +157,6 @@ export default function Tasks() {
   const closePopup = () => {
     setSheetOpened(false);
   };
-
 
   const handleTaskSuccess = () => {
     setSheetOpened(false);

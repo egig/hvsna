@@ -17,18 +17,13 @@ export default function Journal() {
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
 
-
-  console.log("logs", logs);
-
   useEffect(() => {
     loadData();
   }, []);
 
   const loadData = async () => {
     try {
-      const [trackersData] = await Promise.all([
-        getTrackers(),
-      ]);
+      const [trackersData] = await Promise.all([getTrackers()]);
       setTrackers(trackersData);
     } catch (err) {
       console.error("Failed to load data:", err);

@@ -19,7 +19,6 @@ export default function TaskForm({
   onError,
   onCancel,
 }: TaskFormProps) {
-
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +31,6 @@ export default function TaskForm({
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
-    
 
     try {
       setIsSubmitting(true);
@@ -59,7 +57,6 @@ export default function TaskForm({
       setIsSubmitting(false);
     }
   };
-
 
   return (
     <BaseForm title={taskId ? "Edit Task" : "New Task"} onSubmit={handleSubmit}>

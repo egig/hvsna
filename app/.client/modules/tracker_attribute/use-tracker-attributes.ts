@@ -1,6 +1,9 @@
 import { useCallback, useEffect } from "react";
 import { useTrackerAttributeStore } from "../tracker_attribute/trackerAttributeStore";
-import type { TrackerAttribute, TrackerAttributeQuery } from "../tracker_attribute/trackerAttributeStore";
+import type {
+  TrackerAttribute,
+  TrackerAttributeQuery,
+} from "../tracker_attribute/trackerAttributeStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
 export function useTrackerAttributes(trackerId?: string) {
@@ -40,13 +43,14 @@ export function useTrackerAttributes(trackerId?: string) {
           endkey: "tracker_attribute:\uffff",
         });
 
-        let trackerAttributes = result.rows
-          .map((row) => row.doc as unknown as TrackerAttribute);
+        let trackerAttributes = result.rows.map(
+          (row) => row.doc as unknown as TrackerAttribute,
+        );
 
         // Filter by trackerId if provided
         if (query.trackerId) {
           trackerAttributes = trackerAttributes.filter(
-            (attr) => attr.trackerId === query.trackerId
+            (attr) => attr.trackerId === query.trackerId,
           );
         }
 
@@ -62,7 +66,9 @@ export function useTrackerAttributes(trackerId?: string) {
         return trackerAttributes;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to get tracker attributes";
+          err instanceof Error
+            ? err.message
+            : "Failed to get tracker attributes";
         setError(errorMessage);
         throw err;
       } finally {
@@ -72,7 +78,9 @@ export function useTrackerAttributes(trackerId?: string) {
     [db, setLoading, clearError, setTrackerAttributes, setError],
   );
 
-  const refreshTrackerAttributes = useCallback(async (): Promise<TrackerAttribute[]> => {
+  const refreshTrackerAttributes = useCallback(async (): Promise<
+    TrackerAttribute[]
+  > => {
     return getTrackerAttributes({ trackerId });
   }, [getTrackerAttributes]);
 
@@ -87,7 +95,9 @@ export function useTrackerAttributes(trackerId?: string) {
         removeTrackerAttribute(id);
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to delete tracker attribute";
+          err instanceof Error
+            ? err.message
+            : "Failed to delete tracker attribute";
         setError(errorMessage);
         throw err;
       } finally {

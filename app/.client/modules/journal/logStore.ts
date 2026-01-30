@@ -75,11 +75,7 @@ export const useLogStore = create<LogState>()(
       setCurrentLog: (log) => set({ currentLog: log }, false, "setCurrentLog"),
 
       addLog: (log) =>
-        set(
-          (state) => ({ logs: [...state.logs, log] }),
-          false,
-          "addLog",
-        ),
+        set((state) => ({ logs: [...state.logs, log] }), false, "addLog"),
 
       updateLog: (id, updates) =>
         set(
@@ -107,7 +103,12 @@ export const useLogStore = create<LogState>()(
         ),
 
       clearError: () => set({ error: null }, false, "clearError"),
-      reset: () => set({ logs: [], currentLog: null, loading: false, error: null }, false, "reset"),
+      reset: () =>
+        set(
+          { logs: [], currentLog: null, loading: false, error: null },
+          false,
+          "reset",
+        ),
 
       createLog: async (input: LogCreateInput, db: any): Promise<Log> => {
         try {
@@ -141,7 +142,11 @@ export const useLogStore = create<LogState>()(
         }
       },
 
-      updateLogInDB: async (id: UUID, input: LogUpdateInput, db: any): Promise<Log> => {
+      updateLogInDB: async (
+        id: UUID,
+        input: LogUpdateInput,
+        db: any,
+      ): Promise<Log> => {
         try {
           set({ loading: true, error: null });
 
