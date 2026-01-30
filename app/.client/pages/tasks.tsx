@@ -3,7 +3,6 @@ import { useTasks } from "../hooks/use-tasks";
 import {
   CheckCircleIcon,
   CircleIcon,
-  Trash2Icon,
   PlusIcon,
   Plus,
   Check,
@@ -11,11 +10,9 @@ import {
 } from "lucide-react";
 import type { Task, TaskStatus } from "~/lib/types/task";
 import TaskForm from "../components/task-form";
-import { Page } from "../navigation/components/Page";
 import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
 import { LoadingSpinner } from "../components/loading";
-import Block from "../components/block";
 
 interface TaskItemProps {
   task: Task;
