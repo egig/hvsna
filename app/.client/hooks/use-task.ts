@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import type { Task, TaskCreateInput, TaskUpdateInput, TaskStatus } from '../../lib/types/task';
 import { usePouchDB } from '../contexts/PouchDB';
+import { useEffect } from 'react';
 
 interface PouchDBTaskDocument {
   _id: string;
@@ -9,9 +10,9 @@ interface PouchDBTaskDocument {
   user_id: string;
   name: string;
   status: TaskStatus;
-  scheduledAt?: string;
-  created_at?: string;
-  updated_at?: string;
+  scheduledAt?: number;
+  created_at?: number;
+  updated_at?: number;
 }
 
 interface TaskState {
@@ -45,7 +46,7 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loading: true, error: null });
           
-          const now = new Date().toISOString();
+          const now = Date.now();
           const taskId = input.id || `task_${crypto.randomUUID()}`;
           
           const newTask: Task = {
@@ -88,7 +89,7 @@ export const useTaskStore = create<TaskState>()(
           
           const updateData: PouchDBTaskDocument = {
             ...existingDoc,
-            updated_at: new Date().toISOString(),
+            updated_at: Date.now(),
           };
 
           if (input.name !== undefined) {
@@ -202,9 +203,21 @@ export interface UseTaskReturn {
   reset: () => void;
 }
 
-export const useTask = (): UseTaskReturn => {
+export const useTask = (taskId?: string): UseTaskReturn => {
   const { db } = usePouchDB();
   const store = useTaskStore();
+
+  useEffect(() => {
+    if (taskId) {
+      store.getTask(taskId, db).then(fetchedTask => {
+        if (fetchedTask) {
+          console.log(fetchedTask.name)
+          store.setTask(fetchedTask)
+        }
+      });
+    }
+  
+  }, [taskId]);
 
   return {
     task: store.task,

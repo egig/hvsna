@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePouchDB } from '../contexts/PouchDB'
 import { useTrackerStore } from '../stores/trackerStore'
 import type { UUID } from '../../lib/tracker/types'
@@ -6,23 +6,36 @@ import type {
   Tracker,
   TrackerCreateInput,
   TrackerUpdateInput,
-  TrackerQuery
 } from '../stores/trackerStore'
 
-export function useTracker() {
+export function useTracker(trackerId?: string) {
   const { db } = usePouchDB()
+  const [tracker, setTracker] = useState<Tracker | null>(null)
+
   const {
-    trackers,
     loading,
     error,
     setLoading,
     setError,
-    setTrackers,
     addTracker,
     updateTracker: updateTrackerInStore,
     removeTracker,
     clearError
   } = useTrackerStore()
+
+
+  useEffect(() => {
+    if (trackerId) {
+      getTracker(trackerId).then(fetchedTracker => {
+        if (fetchedTracker) { 
+          setTracker(fetchedTracker)
+        }
+      }).catch(() => {
+        // Handle error silently or show error
+      });
+    }
+  }, [trackerId]);
+
 
   const createTracker = useCallback(async (input: TrackerCreateInput): Promise<Tracker> => {
     setLoading(true)
@@ -115,53 +128,13 @@ export function useTracker() {
     }
   }, [db, setLoading, clearError, setError])
 
-  const getTrackers = useCallback(async (query: TrackerQuery = {}): Promise<Tracker[]> => {
-    setLoading(true)
-    clearError()
-    
-    try {
-      const result = await db.allDocs({
-        include_docs: true,
-        startkey: 'tracker:',
-        endkey: 'tracker:\uffff'
-      })
-      
-      let trackers = result.rows
-        .filter(row => row.id.startsWith('tracker:'))
-        .map(row => row.doc as unknown as Tracker)
-      
-      // Apply pagination
-      if (query.skip) {
-        trackers = trackers.slice(query.skip)
-      }
-      if (query.limit) {
-        trackers = trackers.slice(0, query.limit)
-      }
-      
-      setTrackers(trackers)
-      return trackers
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get trackers'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [db, setLoading, clearError, setTrackers, setError])
-
-  const refreshTrackers = useCallback(async (): Promise<Tracker[]> => {
-    return getTrackers()
-  }, [getTrackers])
-
   return {
-    trackers,
+    tracker,
     loading,
     error,
     createTracker,
     updateTracker,
     deleteTracker,
-    getTracker,
-    getTrackers,
-    refreshTrackers
+    getTracker
   }
 }

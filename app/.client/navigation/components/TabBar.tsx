@@ -1,10 +1,11 @@
 import { useLocation } from 'react-router';
 import { Button } from './Button';
+import { Check, CheckSquare, Home, Settings } from 'lucide-react';
 
 const tabs = [
-  { path: '/', label: 'Home', icon: '🏠' },
-  { path: '/tasks', label: 'Tasks', icon: '🧪' },
-  { path: '/settings', label: 'Settings', icon: '⚙️' },
+  { path: '/', label: 'Home', icon: <Home /> },
+  { path: '/tasks', label: 'Tasks', icon: <CheckSquare /> },
+  { path: '/settings', label: 'Settings', icon: <Settings /> },
 ];
 
 export function TabBar() {

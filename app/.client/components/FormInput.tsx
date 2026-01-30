@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 
 interface FormInputProps {
+  name: string;
   label: string;
   value: string;
   placeholder?: string;
@@ -9,11 +10,12 @@ interface FormInputProps {
   required?: boolean;
   error?: string;
   className?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   onBlur?: () => void;
 }
 
 export function FormInput({
+  name,
   label,
   value,
   placeholder = '',
@@ -26,8 +28,10 @@ export function FormInput({
   onBlur,
 }: FormInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!onChange) return;
     onChange(e.target.value);
   };
+
 
   return (
     <div className={`mb-4 ${className}`}>
@@ -43,8 +47,10 @@ export function FormInput({
       </label>
       
       <input
+        key={value}
+        name={name}
+        defaultValue={value}
         type={type}
-        value={value}
         placeholder={placeholder}
         disabled={disabled}
         className={`

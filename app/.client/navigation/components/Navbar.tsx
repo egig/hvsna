@@ -1,12 +1,14 @@
+import { ChevronLeft, ClosedCaption, Cross, X } from 'lucide-react';
 import { useAppNavigation } from '../hooks/useAppNavigation';
 import { useLocation } from 'react-router';
 
 interface NavbarProps {
-  title?: string;
+  title?: string | React.ReactNode;
   showBackButton?: boolean;
   customBackAction?: () => void;
   rightAction?: React.ReactNode;
   className?: string;
+  modal?: boolean;
 }
 
 const ROOT_PATHS = ['/'];
@@ -16,7 +18,8 @@ export function Navbar({
   showBackButton: propShowBackButton,
   customBackAction,
   rightAction,
-  className = ""
+  className = "",
+  modal
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
@@ -44,17 +47,8 @@ export function Navbar({
             className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
             aria-label="Go back"
           >
-            <svg
-              className="w-6 h-6 text-gray-900 dark:text-white"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M15 19l-7-7 7-7" />
-            </svg>
+            {modal && <X />}
+            {modal || <ChevronLeft />}
           </button>
         )}
       </div>

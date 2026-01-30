@@ -2,27 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, BarChart2, RefreshCw } from "lucide-react";
 import type { Tracker } from "~/lib/tracker/types";
 import TrackerForm from "../components/tracker-form";
-import { useTracker } from "../hooks/useTracker";
+import { useTracker } from "../hooks/use-tracker";
 import { Modal } from "../navigation/components/Modal";
-import Block from "../components/block";
 import { Navbar, Page } from "../navigation/components";
+import { useTrackers } from "../hooks/use-trackers";
 
 export default function Trackers() {
-  const { loading, error, trackers, deleteTracker, getTrackers, refreshTrackers } = useTracker();
+  const { trackers, loading, error, getTrackers: loadTrackers, deleteTracker } = useTrackers();
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadTrackers();
-  }, []);
-
-  const loadTrackers = async () => {
-    try {
-      await getTrackers();
-    } catch (err) {
-      console.error('Failed to load trackers:', err);
-    }
-  };
 
   const resetForm = () => {
     setEditingTrackerId(null);
@@ -75,7 +64,15 @@ export default function Trackers() {
   
   return (
     <Page >
-      <Navbar title="Trackers" />
+      <Navbar title="Trackers" rightAction={
+          <button
+            onClick={openAddPopup}
+            className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            aria-label="Add task"
+          >
+            <Plus size={20} />
+          </button>
+      } />
       <div className="p-4">
         {loading && (
           <div className="flex items-center justify-center py-8">
@@ -87,7 +84,8 @@ export default function Trackers() {
           <div className="space-y-4">
             <div className="text-red-600 dark:text-red-400">Error: {error}</div>
             <button 
-              onClick={loadTrackers}
+              onClick={() => {
+                loadTrackers}}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <RefreshCw size={16} />

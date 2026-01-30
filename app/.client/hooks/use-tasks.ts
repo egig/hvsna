@@ -8,9 +8,9 @@ interface PouchDBTaskDocument {
   user_id: string;
   name: string;
   status: TaskStatus;
-  scheduledAt?: string;
-  created_at?: string;
-  updated_at?: string;
+  scheduledAt?: number;
+  created_at?: number;
+  updated_at?: number;
 }
 
 export interface UseTasksReturn {
@@ -120,7 +120,7 @@ export const useTasks = (): UseTasksReturn => {
 
   const createTask = useCallback(async (input: TaskCreateInput): Promise<Task> => {
     try {
-      const now = new Date().toISOString();
+      const now = Date.now();
       const taskId = input.id || `task_${crypto.randomUUID()}`;
       
       const newTask: Task = {
@@ -159,7 +159,7 @@ export const useTasks = (): UseTasksReturn => {
       
       const updateData: PouchDBTaskDocument = {
         ...existingDoc,
-        updated_at: new Date().toISOString(),
+        updated_at: Date.now(),
       };
 
       if (input.name !== undefined) {

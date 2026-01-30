@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useTasks } from "../hooks/useTasks";
+import { useTasks } from "../hooks/use-tasks";
 import { CheckCircleIcon, CircleIcon, Trash2Icon, PlusIcon, Plus, Check, MoreHorizontal } from "lucide-react";
 import type { Task, TaskStatus } from "~/lib/types/task";
 import TaskForm from "../components/task-form";
@@ -16,7 +16,7 @@ interface TaskItemProps {
   onDelete: (task: Task) => void;
   getStatusIcon: (status: TaskStatus) => React.ReactNode;
   getStatusColor: (status: TaskStatus) => string;
-  formatScheduledDate: (dateString?: string) => string;
+  formatScheduledDate: (dateNumber?: number) => string;
 }
 
 function TaskItem({ task, onStatusChange, onEdit, onDelete, getStatusIcon, getStatusColor, formatScheduledDate }: TaskItemProps) {
@@ -175,9 +175,9 @@ export default function Tasks() {
     }
   };
 
-  const formatScheduledDate = (dateString?: string) => {
-    if (!dateString) return 'No date set';
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatScheduledDate = (dateNumber?: number) => {
+    if (!dateNumber) return 'No date set';
+    return new Date(dateNumber).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
@@ -230,6 +230,7 @@ export default function Tasks() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar 
+        showBackButton={false}
         title="Tasks" 
         rightAction={
           <button

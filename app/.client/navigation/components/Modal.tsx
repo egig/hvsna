@@ -76,18 +76,9 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
             }}
           >
             {/* Handle Bar */}
-            <div className="flex justify-center py-3">
-              <div className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+            <div className="flex justify-center py-1">
+              <div className="w-12 bg-gray-300 dark:bg-gray-600 rounded-full" />
             </div>
-            
-            {/* Header */}
-            {title && (
-              <div className="px-6 pb-4 border-b border-gray-200 dark:border-gray-800">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  {title}
-                </h2>
-              </div>
-            )}
             
             {/* Content */}
             <div className="flex-1 overflow-y-auto scroll-area">

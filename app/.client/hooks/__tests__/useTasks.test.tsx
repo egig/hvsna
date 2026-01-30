@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
-import { useTasks } from '../useTasks';
+import { useTasks } from '../use-tasks';
 import type { Task, TaskCreateInput, TaskUpdateInput } from '../../../lib/types/task';
 
 // Mock the PouchDBContext

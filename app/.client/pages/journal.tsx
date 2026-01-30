@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLog } from "../hooks/useLog";
-import { useTracker } from "../hooks/useTracker";
+import { useTracker } from "../hooks/use-tracker";
 import { Plus, Edit, Trash2, FileText, MoreHorizontal } from "lucide-react";
 import type { Log, Tracker } from "~/lib/tracker/types";
 import LogForm from "../components/log-form";

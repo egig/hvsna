@@ -8,45 +8,62 @@ import { HIJRI_MONTH_NAMES_EN } from "~/lib/hijri-months";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 
-import {Swiper, SwiperSlide} from 'swiper/react'
-import 'swiper/css'
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
 import DayNote from "../components/day-note";
 import { Page } from "../navigation/components/Page";
 import { Navbar } from "../navigation/components";
+import Block from "../components/block";
 
 // Helper function to generate multiple weeks
-function generateWeeks(centerDate: HijriDate, weeksBefore: number = 2, weeksAfter: number = 2): HijriDate[][] {
+function generateWeeks(
+  centerDate: HijriDate,
+  weeksBefore: number = 2,
+  weeksAfter: number = 2,
+): HijriDate[][] {
   const weeks: HijriDate[][] = [];
   const startWeek = centerDate.startOfWeek();
-  
+
   // Generate weeks before
   for (let i = weeksBefore; i > 0; i--) {
-    const weekStart = new HijriDate(startWeek.year, startWeek.month, startWeek.day);
+    const weekStart = new HijriDate(
+      startWeek.year,
+      startWeek.month,
+      startWeek.day,
+    );
     for (let j = 0; j < i * 7; j++) {
-      weekStart._rawGregorianDate.setDate(weekStart._rawGregorianDate.getDate() - 1);
+      weekStart._rawGregorianDate.setDate(
+        weekStart._rawGregorianDate.getDate() - 1,
+      );
     }
     weeks.push(weekStart.getWeekDates());
   }
-  
+
   // Current week
   weeks.push(startWeek.getWeekDates());
-  
+
   // Generate weeks after
   for (let i = 1; i <= weeksAfter; i++) {
-    const weekStart = new HijriDate(startWeek.year, startWeek.month, startWeek.day);
+    const weekStart = new HijriDate(
+      startWeek.year,
+      startWeek.month,
+      startWeek.day,
+    );
     for (let j = 0; j < i * 7; j++) {
-      weekStart._rawGregorianDate.setDate(weekStart._rawGregorianDate.getDate() + 1);
+      weekStart._rawGregorianDate.setDate(
+        weekStart._rawGregorianDate.getDate() + 1,
+      );
     }
     weeks.push(weekStart.getWeekDates());
   }
-  
+
   return weeks;
 }
 
 // Helper function to get week index from date
 function getWeekIndexFromDate(date: HijriDate, weeks: HijriDate[][]): number {
   for (let i = 0; i < weeks.length; i++) {
-    if (weeks[i].some(d => isSameHijriDate(d, date))) {
+    if (weeks[i].some((d) => isSameHijriDate(d, date))) {
       return i;
     }
   }
@@ -57,28 +74,29 @@ export default function ViewToday() {
   const _hijriDate = HijriDate.fromDate(new Date());
   const [activeDate, setActiveDate] = useState(_hijriDate);
   const [currentWeekIndex, setCurrentWeekIndex] = useState(2); // Center week index
-  const [weekSwiper, setWeekSwiper] = useState<any>(null)
-  const [dateSwiper, setDateSwiper] = useState<any>(null)
+  const [weekSwiper, setWeekSwiper] = useState<any>(null);
+  const [dateSwiper, setDateSwiper] = useState<any>(null);
   const gregorianDate = activeDate.toDate();
   const pageTitle = `${activeDate.day} ${HIJRI_MONTH_NAMES_EN[activeDate.month - 1]} ${activeDate.year}`;
-  const subTitle =  `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`
+  const subTitle = `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`;
 
   const weeks = useMemo(() => {
     return generateWeeks(_hijriDate);
   }, [_hijriDate]);
-  
+
   const allDates = useMemo(() => {
     return weeks.flat();
   }, [weeks]);
 
   const currentDateIndex = useMemo(() => {
-    return allDates.findIndex(d => isSameHijriDate(d, activeDate));
+    return allDates.findIndex((d) => isSameHijriDate(d, activeDate));
   }, [allDates, activeDate]);
 
   return (
     <Page>
-      <Navbar title={pageTitle} 
-      
+      <Navbar
+        title={
+          <div
             onClick={() => {
               const today = HijriDate.fromDate(new Date());
               setActiveDate(today);
@@ -95,11 +113,14 @@ export default function ViewToday() {
                 dateSwiper.slideTo(todayDateIndex);
               }
             }}
-      >
-      </Navbar>
-      <div>
+          >
+            {pageTitle}
+            <div className="text-sm text-gray-500">{subTitle}</div>
+          </div>
+        }
+      />
+      <Block>
         <Swiper
-          virtual
           slidesPerView={1}
           initialSlide={currentWeekIndex}
           onSlideChange={(e) => {
@@ -122,7 +143,7 @@ export default function ViewToday() {
         >
           {weeks.map((weekDates, weekIndex: number) => {
             return (
-              <SwiperSlide key={weekIndex} virtualIndex={weekIndex}>
+              <SwiperSlide key={weekIndex}>
                 <div className="grid grid-cols-7 gap-1 sm:gap-2">
                   {weekDates.map((d: HijriDate, index: number) => (
                     <div
@@ -155,7 +176,7 @@ export default function ViewToday() {
             );
           })}
         </Swiper>
-      </div>
+      </Block>
       <Swiper
         virtual
         slidesPerView={1}

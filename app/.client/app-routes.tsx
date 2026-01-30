@@ -2,7 +2,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import Home from "./pages/view-today";
 import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
-import Layout from "./pages/layout";
+import TabLayout from "./pages/tab-layout";
 import About from "./pages/about";
 import TrackersPage from "./pages/trackers";
 import TargetsPage from "./pages/targets";
@@ -19,10 +19,9 @@ export const AppRoutes = () => {
     // Note that animate present depends to the useLocation hook so it should be here
     <AnimatePresence mode="wait">
       <Routes location={settingsBackgroundLocation || location} key={location.pathname}>
-        <Route element={<Layout />}>
+        <Route element={<TabLayout />}>
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="trackers" element={<TrackersPage />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="targets" element={<TargetsPage />} />
           <Route path="journal" element={<Journal />} />
@@ -30,6 +29,7 @@ export const AppRoutes = () => {
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
         </Route>
+        <Route path="trackers" element={<TrackersPage />} />
       </Routes>
       <Routes>
         {/* <Route path="settings" element={<div>Settings</div>} /> */}

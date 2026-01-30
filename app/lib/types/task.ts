@@ -5,22 +5,22 @@ export interface Task {
   user_id: string;
   name: string;
   status: TaskStatus;
-  scheduledAt?: string;
-  created_at?: string;
-  updated_at?: string;
+  scheduledAt?: number;
+  created_at?: number;
+  updated_at?: number;
 }
 
 export interface TaskCreateInput {
   id?: string;
   name: string;
   status?: TaskStatus;
-  scheduledAt?: string;
+  scheduledAt?: number;
 }
 
 export interface TaskUpdateInput {
   name?: string;
   status?: TaskStatus;
-  scheduledAt?: string;
+  scheduledAt?: number;
 }
 
 export interface TaskChange {

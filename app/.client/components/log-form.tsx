@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useTracker } from "../hooks/useTracker";
+import { useTracker } from "../hooks/use-tracker";
 import { useLog } from "../hooks/useLog";
 import type { Tracker, Log } from "~/lib/tracker/types";
 import { FormInput } from "./FormInput";

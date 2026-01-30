@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTargets }  from "../hooks/use-targets";
-import { useTracker } from "../hooks/useTracker";
+import { useTracker } from "../hooks/use-tracker";
 import { Target, Plus, Edit, Trash2, TargetIcon, MoreHorizontal } from "lucide-react";
 import type { Target as TargetType, Tracker } from "~/lib/tracker/types";
 import TargetForm from "../components/target-form";
