@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 import { useEffect, type ReactNode } from "react";
 
@@ -39,7 +39,7 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
   };
 
   return (
-    <>
+    <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -85,6 +85,6 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
           </motion.div>
         </motion.div>
       )}
-    </>
+    </AnimatePresence>
   );
 }

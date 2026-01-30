@@ -26,13 +26,13 @@ export const AppRoutes = () => {
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
           <Route path="tasks" element={<Tasks />} />
-          <Route path="targets" element={<TargetsPage />} />
           <Route path="journal" element={<Journal />} />
           <Route path="about" element={<About />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
         </Route>
         <Route path="trackers" element={<TrackersPage />} />
+        <Route path="targets" element={<TargetsPage />} />
       </Routes>
       <Routes>
         {/* <Route path="settings" element={<div>Settings</div>} /> */}

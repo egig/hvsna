@@ -17,11 +17,12 @@ import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
 import { LoadingSpinner } from "../components/loading";
 import Block from "../components/block";
+import { useTrackers } from "../hooks/use-trackers";
 
 export default function Targets() {
   const { loading, error, targets, getTargets } = useTargets();
   const { deleteTarget } = useTarget();
-  const { getTrackers } = useTracker();
+  const { getTrackers } = useTrackers();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTargetId, setEditingTargetId] = useState<string | null>(null);

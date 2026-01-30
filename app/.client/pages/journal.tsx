@@ -6,10 +6,11 @@ import type { Log, Tracker } from "~/lib/tracker/types";
 import LogForm from "../components/log-form";
 import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
+import { useTrackers } from "../hooks/use-trackers";
 
 export default function Journal() {
   const { loading, error, deleteLog, getLogs, refreshLogs } = useLog();
-  const { getTrackers } = useTracker();
+  const { getTrackers } = useTrackers();
   const [logs, setLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
