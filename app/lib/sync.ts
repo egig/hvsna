@@ -6,7 +6,7 @@ import React, {
   type ReactNode,
 } from "react";
 import PouchDB from "pouchdb";
-import { usePouchDB } from "../.client/contexts/PouchDB";
+import { usePouchDB } from "../.client/pouchdb";
 import { useSession } from "@clerk/clerk-react";
 import type { Note } from "./types/note";
 

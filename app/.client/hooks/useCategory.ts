@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { usePouchDB } from "../contexts/PouchDB";
+import { usePouchDB } from "../pouchdb";
 import type { UUID, EpochTime } from "../../lib/tracker/types";
 
 export interface Category {

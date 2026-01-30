@@ -45,6 +45,7 @@ export type TargetDirection = "increase" | "decrease" | "neutral";
  */
 export interface Target {
   id: UUID;
+  name: string;
   trackerId: UUID;
   type: TargetType;
   reducer: TargetReducer;

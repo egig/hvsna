@@ -2,10 +2,11 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  UserButton,
 } from "@clerk/clerk-react";
-import { LogIn, Trash, Settings as SettingsIcon } from "lucide-react";
-import { Page, Navbar, MenuItem } from "../navigation/components";
+import { LogIn, Settings as SettingsIcon } from "lucide-react";
+import { Page } from "../modules/navigation";
+import { MenuItem } from "../components/MenuItem";
+import { Navbar } from "../modules/navigation";
 
 export default function Settings() {
   return (

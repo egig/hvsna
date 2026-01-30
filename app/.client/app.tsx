@@ -3,8 +3,8 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { AppRoutes } from "~/.client/app-routes";
 import DroppableContext from "~/.client/components/droppable-context";
 import "./app.css";
-import { PouchDBProvider } from "./contexts/PouchDB";
-import { NavigationProvider } from "./navigation/contexts/NavigationContext";
+import { PouchDBProvider } from "./pouchdb";
+import { NavigationProvider } from "./modules/navigation/context";
 
 export interface AppConfig {
   basePath?: string;

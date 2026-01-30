@@ -20,7 +20,7 @@ Object.defineProperty(global, "crypto", {
   writable: true,
 });
 
-import { usePouchDB } from "../../contexts/PouchDB";
+import { usePouchDB } from "../../pouchdb";
 
 // Mock PouchDB database methods
 const mockDb: any = {

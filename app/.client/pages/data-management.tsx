@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Database, Trash2, AlertTriangle } from "lucide-react";
-import { usePouchDB } from "../contexts/PouchDB";
+import { usePouchDB } from "../pouchdb";
 import { Navbar } from "../navigation/components/Navbar";
 
 export default function DataManagement() {

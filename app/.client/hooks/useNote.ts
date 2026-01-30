@@ -5,7 +5,7 @@ import type {
   NoteUpdateInput,
   NoteQuery,
 } from "../../lib/types/note";
-import { usePouchDB } from "../contexts/PouchDB";
+import { usePouchDB } from "../pouchdb";
 
 interface PouchDBDocument {
   _id: string;

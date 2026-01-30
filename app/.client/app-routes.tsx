@@ -2,14 +2,14 @@ import { Navigate, Route, Routes, useLocation } from "react-router";
 import Home from "./pages/view-today";
 import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
-import TabLayout from "./pages/tab-layout";
+import TabLayout from "./layouts/tab-layout";
 import About from "./pages/about";
-import TrackersPage from "./pages/trackers";
-import TargetsPage from "./pages/targets";
 import Settings from "./pages/settings";
-import Tasks from "./pages/tasks";
-import Journal from "./pages/journal";
 import { AnimatePresence } from "framer-motion";
+import Tasks from "./modules/task/tasks";
+import Journal from "./modules/journal/journal";
+import Trackers from "./modules/tracker/trackers";
+import Targets from "./modules/target/targets";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -31,8 +31,8 @@ export const AppRoutes = () => {
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
         </Route>
-        <Route path="trackers" element={<TrackersPage />} />
-        <Route path="targets" element={<TargetsPage />} />
+        <Route path="trackers" element={<Trackers />} />
+        <Route path="targets" element={<Targets />} />
       </Routes>
       <Routes>
         {/* <Route path="settings" element={<div>Settings</div>} /> */}

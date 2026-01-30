@@ -11,9 +11,8 @@ import { useMemo, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import DayNote from "../components/day-note";
-import { Page } from "../navigation/components/Page";
-import { Navbar } from "../navigation/components";
 import Block from "../components/block";
+import { Navbar, Page } from "../modules/navigation";
 
 // Helper function to generate multiple weeks
 function generateWeeks(

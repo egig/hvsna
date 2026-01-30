@@ -1,9 +1,9 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { Check } from "lucide-react";
-import { Navbar } from "../navigation/components";
 import Block from "./block";
 import { FormInput } from "./form-input";
 import NavActionButton from "./nav-action-button";
+import { Navbar } from "../modules/navigation";
 
 interface BaseFormProps {
   onSuccess?: () => void;
