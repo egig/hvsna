@@ -1,17 +1,20 @@
 import type { TrackerAttribute } from "../modules/tracker_attribute/trackerAttributeStore";
 import type { Log } from "~/lib/tracker/types";
+import type { AttributeOption } from "../modules/attribute_option/attributeOptionStore";
 
 interface CustomAttributeInputProps {
   attr: TrackerAttribute;
   value: any;
   disabled?: boolean;
   onChange?: (value: any) => void;
+  attributeOptions?: AttributeOption[];
 }
 
 export default function CustomAttributeInput({
   attr,
   value,
   disabled = false,
+  attributeOptions = [],
 }: CustomAttributeInputProps) {
   return (
     <div className="mb-3">
@@ -80,9 +83,9 @@ export default function CustomAttributeInput({
           className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
         >
           <option value="">Select an option</option>
-          {attr.options?.map((option) => (
-            <option key={option} value={option}>
-              {option}
+          {attributeOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
             </option>
           ))}
         </select>

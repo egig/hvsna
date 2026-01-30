@@ -24,6 +24,13 @@ export default function Settings() {
         />
 
         <MenuItem
+          title="Attribute Options"
+          subtitle="Manage your attribute options"
+          icon={SettingsIcon}
+          to="/attribute-options"
+        />
+
+        <MenuItem
           title="Targets"
           subtitle="Manage your goals"
           icon={SettingsIcon}

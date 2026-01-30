@@ -2,9 +2,11 @@ import { useState, useEffect, use } from "react";
 import { useLog } from "./use-log";
 import type { Tracker, Log } from "~/lib/tracker/types";
 import type { TrackerAttribute } from "../tracker_attribute/trackerAttributeStore";
+import type { AttributeOption } from "../attribute_option/attributeOptionStore";
 import { Button, Page, Navbar } from "../navigation";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
+import { useAttributeOptions } from "../attribute_option/use-attribute-options";
 import { LoadingSpinner } from "~/.client/components/loader";
 import {
   Card,
@@ -15,6 +17,28 @@ import {
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import CustomAttributeInput from "~/.client/components/custom-attribute-input";
+
+// Wrapper component to handle attribute options fetching
+function AttributeInputWrapper({ 
+  attr, 
+  value, 
+  disabled 
+}: { 
+  attr: TrackerAttribute; 
+  value: any; 
+  disabled: boolean; 
+}) {
+  const { attributeOptions } = useAttributeOptions(attr.type === "options" ? attr.id : undefined);
+  
+  return (
+    <CustomAttributeInput
+      attr={attr}
+      value={value}
+      disabled={disabled}
+      attributeOptions={attributeOptions}
+    />
+  );
+}
 
 interface LogFormProps {
   logId?: string | null;
@@ -186,8 +210,8 @@ export default function LogForm({
                   Custom Attributes
                 </h3>
                 {trackerAttributes.map((attr) => (
-                  <CustomAttributeInput
-                    key={log?.id}
+                  <AttributeInputWrapper
+                    key={attr.id}
                     attr={attr}
                     value={log?.attributes?.[`custom_${attr.id}`]}
                     disabled={isSubmitting}

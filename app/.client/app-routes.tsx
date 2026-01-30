@@ -11,6 +11,7 @@ import Journal from "./modules/journal/journal";
 import Trackers from "./modules/tracker/trackers";
 import Targets from "./modules/target/targets";
 import TrackersAttributes from "./modules/tracker_attribute/tracker-attributes";
+import AttributeOptions from "./modules/attribute_option/attribute-options";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -34,6 +35,7 @@ export const AppRoutes = () => {
         </Route>
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
+        <Route path="attribute-options" element={<AttributeOptions />} />
         <Route path="targets" element={<Targets />} />
       </Routes>
       <Routes>
