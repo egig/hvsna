@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLog } from "./use-log";
-import type { Tracker, Log } from "~/lib/tracker/types";
+import type { Tracker, Log, TrackerAttribute } from "~/lib/tracker/types";
 import { Button, Page, Navbar } from "../navigation";
 import { useTrackers } from "../tracker/use-trackers";
 import { LoadingSpinner } from "~/.client/components/loader";
@@ -22,7 +22,7 @@ export default function LogForm({
   onCancel,
 }: LogFormProps) {
   const { loading: trackerLoading, getTrackers } = useTrackers();
-  const { loading, error, createLog, updateLog, getLog } = useLog();
+  const { loading, error, createLog, updateLog, getLog, log } = useLog();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [selectedTrackerId, setSelectedTrackerId] = useState("");
   const [value, setValue] = useState("0");
@@ -30,6 +30,7 @@ export default function LogForm({
     new Date().toISOString().slice(0, 16),
   );
   const [metadata, setMetadata] = useState("");
+  const [customAttributeValues, setCustomAttributeValues] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -41,31 +42,20 @@ export default function LogForm({
       });
   }, [getTrackers]);
 
+
+  // Reset custom attributes when tracker changes
   useEffect(() => {
-    if (logId) {
-      getLog(logId)
-        .then((fetchedLog) => {
-          if (fetchedLog) {
-            setSelectedTrackerId(fetchedLog.trackerId);
-            setValue(fetchedLog.value.toString());
-            setTimestamp(
-              new Date(fetchedLog.timestamp).toISOString().slice(0, 16),
-            );
-            setMetadata(
-              fetchedLog.metadata ? JSON.stringify(fetchedLog.metadata) : "",
-            );
-          }
-        })
-        .catch(() => {
-          // Handle error silently
-        });
+    const selectedTracker = trackers.find(t => t.id === selectedTrackerId);
+    if (selectedTracker?.customAttributes) {
+      const newValues: Record<string, any> = {};
+      selectedTracker.customAttributes.forEach(attr => {
+        newValues[attr.id] = attr.defaultValue || (attr.type === 'number' ? 0 : '');
+      });
+      setCustomAttributeValues(newValues);
     } else {
-      setSelectedTrackerId("");
-      setValue("0");
-      setTimestamp(new Date().toISOString().slice(0, 16));
-      setMetadata("");
+      setCustomAttributeValues({});
     }
-  }, [logId, getLog]);
+  }, [selectedTrackerId, trackers]);
 
   useEffect(() => {
     if (error && onError) {
@@ -79,12 +69,28 @@ export default function LogForm({
     try {
       setIsSubmitting(true);
 
+      // Merge custom attributes with existing metadata
+      let parsedMetadata: Record<string, any> = {};
+      if (metadata.trim()) {
+        try {
+          parsedMetadata = JSON.parse(metadata);
+        } catch (e) {
+          // If metadata is invalid JSON, treat as empty object
+        }
+      }
+
+      // Add custom attributes to metadata with 'custom_' prefix
+      const customMetadata: Record<string, any> = { ...parsedMetadata };
+      Object.keys(customAttributeValues).forEach(attrId => {
+        customMetadata[`custom_${attrId}`] = customAttributeValues[attrId];
+      });
+
       let result: Log;
       const logData = {
         trackerId: selectedTrackerId,
         value: parseFloat(value) || 0,
         timestamp: new Date(timestamp).getTime(),
-        metadata: metadata.trim() ? JSON.parse(metadata) : undefined,
+        metadata: Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
       };
 
       if (logId) {
@@ -98,6 +104,7 @@ export default function LogForm({
       setValue("0");
       setTimestamp(new Date().toISOString().slice(0, 16));
       setMetadata("");
+      setCustomAttributeValues({});
 
       if (onSuccess) {
         onSuccess(result);
@@ -116,6 +123,7 @@ export default function LogForm({
     setValue("0");
     setTimestamp(new Date().toISOString().slice(0, 16));
     setMetadata("");
+    setCustomAttributeValues({});
     if (onCancel) {
       onCancel();
     }
@@ -134,6 +142,7 @@ export default function LogForm({
         safe-top
         safe-bottom
         safe-x
+        mb-12
       "
       >
         <div
@@ -158,7 +167,7 @@ export default function LogForm({
                       <span className="text-red-500 ml-1">*</span>
                     </label>
                     <select
-                      value={selectedTrackerId}
+                      defaultValue={selectedTrackerId}
                       onChange={(e) => setSelectedTrackerId(e.target.value)}
                       disabled={isSubmitting}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
@@ -196,6 +205,79 @@ export default function LogForm({
                     </p>
                   )}
 
+                  {/* Custom Attributes */}
+                  {selectedTracker?.customAttributes && selectedTracker.customAttributes.length > 0 && (
+                    <div className="space-y-4 mb-4">
+                      <h3 className="text-sm font-medium text-gray-700">Custom Attributes</h3>
+                      {selectedTracker.customAttributes.map((attr) => (
+                        <div key={attr.id} className="mb-3">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {attr.name}
+                            {attr.required && <span className="text-red-500 ml-1">*</span>}
+                          </label>
+                          {attr.type === 'text' && (
+                            <input
+                              type="text"
+                              value={customAttributeValues[attr.id] || ''}
+                              onChange={(e) => setCustomAttributeValues(prev => ({
+                                ...prev,
+                                [attr.id]: e.target.value
+                              }))}
+                              disabled={isSubmitting}
+                              required={attr.required}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                            />
+                          )}
+                          {attr.type === 'number' && (
+                            <input
+                              type="number"
+                              value={customAttributeValues[attr.id] || ''}
+                              onChange={(e) => setCustomAttributeValues(prev => ({
+                                ...prev,
+                                [attr.id]: parseFloat(e.target.value) || 0
+                              }))}
+                              disabled={isSubmitting}
+                              required={attr.required}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                            />
+                          )}
+                          {attr.type === 'date' && (
+                            <input
+                              type="date"
+                              value={customAttributeValues[attr.id] || ''}
+                              onChange={(e) => setCustomAttributeValues(prev => ({
+                                ...prev,
+                                [attr.id]: e.target.value
+                              }))}
+                              disabled={isSubmitting}
+                              required={attr.required}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                            />
+                          )}
+                          {attr.type === 'select' && (
+                            <select
+                              value={customAttributeValues[attr.id] || ''}
+                              onChange={(e) => setCustomAttributeValues(prev => ({
+                                ...prev,
+                                [attr.id]: e.target.value
+                              }))}
+                              disabled={isSubmitting}
+                              required={attr.required}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                            >
+                              <option value="">Select an option</option>
+                              {attr.options?.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Timestamp
@@ -227,78 +309,7 @@ export default function LogForm({
                   </div>
                 </div>
 
-                <div
-                  className="
-                  flex
-                  gap-4
-                  mt-8
-                  mb-4
-                  safe-bottom
-                "
-                >
-                  <Button
-                    type="button"
-                    onClick={handleCancel}
-                    disabled={isSubmitting}
-                    className="
-                      flex-1
-                      min-h-[44px]
-                      text-base
-                      font-medium
-                      py-3
-                      px-4
-                      bg-gray-200
-                      hover:bg-gray-300
-                      text-gray-800
-                      rounded-lg
-                      transition-colors
-                      duration-200
-                      active:scale-[0.98]
-                      touch-action-manipulation
-                    "
-                  >
-                    Cancel
-                  </Button>
-
-                  <Button
-                    type="submit"
-                    disabled={
-                      isSubmitting || !selectedTrackerId || !value.trim()
-                    }
-                    className="
-                      flex-1
-                      min-h-[44px]
-                      text-base
-                      font-medium
-                      py-3
-                      px-4
-                      bg-blue-500
-                      hover:bg-blue-600
-                      disabled:bg-gray-300
-                      disabled:cursor-not-allowed
-                      text-white
-                      rounded-lg
-                      transition-colors
-                      duration-200
-                      active:scale-[0.98]
-                      touch-action-manipulation
-                      shadow-sm
-                    "
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center justify-center">
-                        <LoadingSpinner size="sm" />
-                        <span className="ml-2">
-                          {logId ? "UPDATING..." : "CREATING..."}
-                        </span>
-                      </div>
-                    ) : logId ? (
-                      "UPDATE"
-                    ) : (
-                      "CREATE"
-                    )}
-                  </Button>
-                </div>
+            
         </div>
       </div>
     </BaseForm>

@@ -18,6 +18,16 @@ export interface Tracker {
   name: string;
   unit: string; // IDR, count, hours, %, kg
   createdAt: EpochTime;
+  customAttributes?: TrackerAttribute[];
+}
+
+export interface TrackerAttribute {
+  id: string;
+  name: string;
+  type: 'text' | 'number' | 'date' | 'select';
+  required?: boolean;
+  options?: string[]; // for select type
+  defaultValue?: string | number;
 }
 
 /* ---------- Log ---------- */

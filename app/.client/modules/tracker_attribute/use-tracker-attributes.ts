@@ -36,12 +36,11 @@ export function useTrackerAttributes() {
       try {
         const result = await db.allDocs({
           include_docs: true,
-          startkey: "tracker:",
-          endkey: "tracker:\uffff",
+          startkey: "tracker_attribute:",
+          endkey: "tracker_attribute:\uffff",
         });
 
         let trackerAttributes = result.rows
-          .filter((row) => row.id.includes(":attributes:"))
           .map((row) => row.doc as unknown as TrackerAttribute);
 
         // Filter by trackerId if provided

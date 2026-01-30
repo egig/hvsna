@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useJournal } from "./useJournal";
 import { useLog } from "./use-log";
 import { Plus, Edit, Trash2, FileText, MoreHorizontal } from "lucide-react";
 import type { Log, Tracker } from "~/lib/tracker/types";
@@ -9,7 +10,8 @@ import { useTrackers } from "../tracker/use-trackers";
 import { Page } from "../navigation";
 
 export default function Journal() {
-  const { loading, error, deleteLog, getLogs, refreshLogs } = useLog();
+  const { loading, error, getLogs, refreshLogs } = useJournal();
+  const { deleteLog } = useLog();
   const { getTrackers } = useTrackers();
   const [logs, setLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);

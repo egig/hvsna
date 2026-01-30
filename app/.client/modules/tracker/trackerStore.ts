@@ -8,6 +8,16 @@ export interface Tracker {
   unit: string;
   baseline: number;
   createdAt: EpochTime;
+  customAttributes?: TrackerAttribute[];
+}
+
+export interface TrackerAttribute {
+  id: string;
+  name: string;
+  type: 'text' | 'number' | 'date' | 'select';
+  required?: boolean;
+  options?: string[];
+  defaultValue?: string | number;
 }
 
 export interface TrackerCreateInput {
