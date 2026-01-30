@@ -4,6 +4,7 @@ import type { Task } from "~/lib/types/task";
 import { Check } from "lucide-react";
 import { Navbar } from "../navigation";
 import { FormInput } from "~/.client/components/form-input";
+import BaseForm from "~/.client/components/base-form";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -18,11 +19,9 @@ export default function TaskForm({
   onError,
   onCancel,
 }: TaskFormProps) {
-  console.log(taskId);
 
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
-  const [taskName, setTaskName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -31,8 +30,9 @@ export default function TaskForm({
     }
   }, [error, onError]);
 
-  const handleSubmit = async () => {
-    if (!taskName.trim()) return;
+  const handleSubmit = async (formData: FormData) => {
+    const taskData = Object.fromEntries(formData) as unknown as Task;
+    
 
     try {
       setIsSubmitting(true);
@@ -40,15 +40,14 @@ export default function TaskForm({
       let result: Task;
       if (taskId) {
         result = await updateTask(taskId, {
-          name: taskName.trim(),
+          name: taskData.name.trim(),
         });
       } else {
         result = await createTask({
-          name: taskName.trim(),
+          name: taskData.name.trim(),
         });
       }
 
-      setTaskName("");
       reset();
 
       if (onSuccess) {
@@ -61,26 +60,9 @@ export default function TaskForm({
     }
   };
 
-  console.log("rendering", task?.name);
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSubmit();
-      }}
-    >
-      <Navbar
-        title={taskId ? "Edit Task" : "New Task"}
-        showBackButton={true}
-        customBackAction={onCancel}
-        rightAction={
-          <button>
-            <Check />
-          </button>
-        }
-      />
-
+    <BaseForm title={taskId ? "Edit Task" : "New Task"} onSubmit={handleSubmit}>
       <div
         className="
         flex-1
@@ -108,14 +90,10 @@ export default function TaskForm({
             placeholder="Enter task name"
             disabled={isSubmitting}
             required={true}
-            onChange={(v) => {
-              console.log(v);
-              setTaskName(v);
-            }}
             className="text-base"
           />
         </div>
       </div>
-    </form>
+    </BaseForm>
   );
 }

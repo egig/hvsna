@@ -6,6 +6,7 @@ import { useTrackers } from "../tracker/use-trackers";
 import { LoadingSpinner } from "~/.client/components/loader";
 import { Card, CardContent, CardHeader, CardTitle } from "~/.client/components/Card";
 import { FormInput } from "~/.client/components/form-input";
+import BaseForm from "~/.client/components/base-form";
 
 interface LogFormProps {
   logId?: string | null;
@@ -123,13 +124,7 @@ export default function LogForm({
   const selectedTracker = trackers.find((t) => t.id === selectedTrackerId);
 
   return (
-    <Page>
-      <Navbar
-        title={logId ? "Edit Log" : "New Log"}
-        showBackButton={true}
-        customBackAction={onCancel}
-      />
-
+    <BaseForm onSubmit={handleSubmit} title={logId ? "Edit Log" : "New Log"} onSuccess={handleCancel} onError={onError} onCancel={handleCancel}>
       <div
         className="
         flex-1
@@ -150,26 +145,12 @@ export default function LogForm({
           px-4
         "
         >
-          <Card className="mb-6">
-            <CardHeader className="pb-3">
-              <CardTitle size="md" className="text-center">
-                {logId ? "Edit Log" : "New Log"}
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="pt-0">
               {(loading || trackerLoading) && (
                 <div className="flex justify-center py-12">
                   <LoadingSpinner size="lg" text="Loading log data..." />
                 </div>
               )}
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSubmit();
-                }}
-              >
                 <div className="space-y-5">
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -199,6 +180,7 @@ export default function LogForm({
                   )}
 
                   <FormInput
+                    name="value"
                     label="Value"
                     type="number"
                     value={value}
@@ -317,27 +299,8 @@ export default function LogForm({
                     )}
                   </Button>
                 </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Mobile-friendly help text */}
-          <div
-            className="
-            text-center
-            text-sm
-            text-gray-500
-            mb-6
-            px-2
-          "
-          >
-            <p>Journal entries help you track daily activities and progress.</p>
-            <p className="mt-1">
-              Record values for your trackers to monitor trends over time.
-            </p>
-          </div>
         </div>
       </div>
-    </Page>
+    </BaseForm>
   );
 }

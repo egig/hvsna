@@ -1,0 +1,109 @@
+import { useCallback, useEffect } from "react";
+import { useTrackerAttributeStore } from "../tracker_attribute/trackerAttributeStore";
+import type { TrackerAttribute, TrackerAttributeQuery } from "../tracker_attribute/trackerAttributeStore";
+import { usePouchDB } from "~/.client/pouchdb";
+
+export function useTrackerAttributes() {
+  const { db } = usePouchDB();
+  const {
+    trackerAttributes,
+    loading,
+    error,
+    setLoading,
+    setError,
+    setTrackerAttributes,
+    clearError,
+    removeTrackerAttribute,
+  } = useTrackerAttributeStore();
+
+  useEffect(() => {
+    loadTrackerAttributes();
+  }, []);
+
+  const loadTrackerAttributes = async () => {
+    try {
+      await getTrackerAttributes();
+    } catch (err) {
+      console.error("Failed to load tracker attributes:", err);
+    }
+  };
+
+  const getTrackerAttributes = useCallback(
+    async (query: TrackerAttributeQuery = {}): Promise<TrackerAttribute[]> => {
+      setLoading(true);
+      clearError();
+
+      try {
+        const result = await db.allDocs({
+          include_docs: true,
+          startkey: "tracker:",
+          endkey: "tracker:\uffff",
+        });
+
+        let trackerAttributes = result.rows
+          .filter((row) => row.id.includes(":attributes:"))
+          .map((row) => row.doc as unknown as TrackerAttribute);
+
+        // Filter by trackerId if provided
+        if (query.trackerId) {
+          trackerAttributes = trackerAttributes.filter(
+            (attr) => attr.trackerId === query.trackerId
+          );
+        }
+
+        // Apply pagination
+        if (query.skip) {
+          trackerAttributes = trackerAttributes.slice(query.skip);
+        }
+        if (query.limit) {
+          trackerAttributes = trackerAttributes.slice(0, query.limit);
+        }
+
+        setTrackerAttributes(trackerAttributes);
+        return trackerAttributes;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to get tracker attributes";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db, setLoading, clearError, setTrackerAttributes, setError],
+  );
+
+  const refreshTrackerAttributes = useCallback(async (): Promise<TrackerAttribute[]> => {
+    return getTrackerAttributes();
+  }, [getTrackerAttributes]);
+
+  const deleteTrackerAttribute = useCallback(
+    async (id: string): Promise<void> => {
+      setLoading(true);
+      clearError();
+
+      try {
+        const doc = await db.get(id);
+        await db.remove(doc);
+        removeTrackerAttribute(id);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to delete tracker attribute";
+        setError(errorMessage);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db, setLoading, clearError, removeTrackerAttribute, setError],
+  );
+
+  return {
+    trackerAttributes,
+    loading,
+    error,
+    getTrackerAttributes,
+    refreshTrackerAttributes,
+    deleteTrackerAttribute,
+  };
+}

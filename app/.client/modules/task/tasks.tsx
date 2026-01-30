@@ -13,6 +13,7 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { LoadingSpinner } from "~/.client/components/loader";
 import TaskForm from "./task-form";
+import { Page } from "../navigation";
 
 interface TaskItemProps {
   task: Task;
@@ -143,19 +144,14 @@ export default function Tasks() {
   const [sheetOpened, setSheetOpened] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
-  const resetForm = () => {
-    setEditingTaskId(null);
-  };
 
   const openAddPopup = () => {
     // Reset form first, then open sheet
-    setEditingTaskId(null);
     // Use setTimeout to ensure state is set before opening sheet
     setTimeout(() => setSheetOpened(true), 0);
   };
 
   const openEditPopup = (task: Task) => {
-    setEditingTaskId(task.id);
     setSheetOpened(true);
   };
 
@@ -163,12 +159,6 @@ export default function Tasks() {
     setSheetOpened(false);
   };
 
-  // Reset form when sheet is closed
-  useEffect(() => {
-    if (!sheetOpened) {
-      resetForm();
-    }
-  }, [sheetOpened]);
 
   const handleTaskSuccess = () => {
     setSheetOpened(false);
@@ -257,7 +247,7 @@ export default function Tasks() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <Page>
       <Navbar
         showBackButton={false}
         title="Tasks"
@@ -354,6 +344,6 @@ export default function Tasks() {
           onCancel={handleTaskCancel}
         />
       </Modal>
-    </div>
+    </Page>
   );
 }

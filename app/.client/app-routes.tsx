@@ -10,6 +10,7 @@ import Tasks from "./modules/task/tasks";
 import Journal from "./modules/journal/journal";
 import Trackers from "./modules/tracker/trackers";
 import Targets from "./modules/target/targets";
+import TrackersAttributes from "./modules/tracker_attribute/tracker-attributes";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -32,6 +33,7 @@ export const AppRoutes = () => {
           <Route path="y/:year" element={<YearView />} />
         </Route>
         <Route path="trackers" element={<Trackers />} />
+        <Route path="trackers-attributes" element={<TrackersAttributes />} />
         <Route path="targets" element={<Targets />} />
       </Routes>
       <Routes>

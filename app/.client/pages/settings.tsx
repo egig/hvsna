@@ -21,6 +21,13 @@ export default function Settings() {
         />
 
         <MenuItem
+          title="Trackers Attributes"
+          subtitle="Manage your tracking attributes"
+          icon={SettingsIcon}
+          to="/trackers-attributes"
+        />
+
+        <MenuItem
           title="Targets"
           subtitle="Manage your goals"
           icon={SettingsIcon}

@@ -4,7 +4,7 @@ import { usePouchDB } from "../../pouchdb";
 import { useTask } from "./use-task";
 
 // Mock the PouchDB context
-vi.mock("../../contexts/PouchDB", () => ({
+vi.mock("../../pouchdb", () => ({
   usePouchDB: vi.fn(),
 }));
 

@@ -8,7 +8,7 @@ import type {
 } from "../../../lib/types/note";
 
 // Mock the PouchDBContext
-vi.mock("../../contexts/PouchDB", () => ({
+vi.mock("../../pouchdb", () => ({
   usePouchDB: vi.fn(),
 }));
 

@@ -6,6 +6,7 @@ import LogForm from "./log-form";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { useTrackers } from "../tracker/use-trackers";
+import { Page } from "../navigation";
 
 export default function Journal() {
   const { loading, error, deleteLog, getLogs, refreshLogs } = useLog();
@@ -201,7 +202,7 @@ export default function Journal() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <Page>
       <Navbar
         title="Journal"
         rightAction={
@@ -261,6 +262,6 @@ export default function Journal() {
           onCancel={handleLogCancel}
         />
       </Modal>
-    </div>
+    </Page>
   );
 }

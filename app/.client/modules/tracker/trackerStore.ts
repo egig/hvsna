@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { UUID, EpochTime } from "../../lib/tracker/types";
+import type { EpochTime } from "~/lib/tracker/types";
 
 export interface Tracker {
-  id: UUID;
+  id: string;
   name: string;
   unit: string;
   baseline: number;
@@ -37,8 +37,8 @@ interface TrackerState {
   setError: (error: string | null) => void;
   setTrackers: (trackers: Tracker[]) => void;
   addTracker: (tracker: Tracker) => void;
-  updateTracker: (id: UUID, updates: Partial<Tracker>) => void;
-  removeTracker: (id: UUID) => void;
+  updateTracker: (id: string, updates: Partial<Tracker>) => void;
+  removeTracker: (id: string) => void;
   clearError: () => void;
 }
 
