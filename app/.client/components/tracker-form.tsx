@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTracker } from "../hooks/use-tracker";
 import type { Tracker } from "~/lib/tracker/types";
-import { FormInput } from "./FormInput";
+import { FormInput } from "./form-input";
 import BaseForm from "./base-form";
 
 interface TrackerFormProps {

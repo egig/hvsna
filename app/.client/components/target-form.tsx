@@ -11,9 +11,9 @@ import {
   type TargetDirection,
   type TargetReducer,
 } from "../hooks/use-target";
-import { FormInput } from "./FormInput";
+import { FormInput } from "./form-input";
 import { Card, CardHeader, CardTitle, CardContent } from "./Card";
-import { LoadingSpinner } from "./Loading";
+import { LoadingSpinner } from "./loading";
 import { Button, Page, Navbar } from "../navigation/components";
 
 interface TargetFormProps {

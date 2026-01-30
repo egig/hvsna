@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useTracker } from "../hooks/use-tracker";
 import { useLog } from "../hooks/useLog";
 import type { Tracker, Log } from "~/lib/tracker/types";
-import { FormInput } from "./FormInput";
+import { FormInput } from "./form-input";
 import { Card, CardHeader, CardTitle, CardContent } from "./Card";
-import { LoadingSpinner } from "./Loading";
+import { LoadingSpinner } from "./loading";
 import { Button, Page, Navbar } from "../navigation/components";
 
 interface LogFormProps {

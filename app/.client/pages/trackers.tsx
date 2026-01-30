@@ -143,7 +143,7 @@ export default function Trackers() {
                     {tracker.baseline} {tracker.unit}
                   </p>
                 </div>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex gap-2 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => openEditPopup(tracker)}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"

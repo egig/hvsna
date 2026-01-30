@@ -2,7 +2,8 @@ import { useState, useEffect, type ReactNode } from "react";
 import { Check } from "lucide-react";
 import { Navbar } from "../navigation/components";
 import Block from "./block";
-import { FormInput } from "./FormInput";
+import { FormInput } from "./form-input";
+import NavActionButton from "./nav-action-button";
 
 interface BaseFormProps {
   onSuccess?: () => void;
@@ -47,9 +48,9 @@ export default function BaseForm({
         showBackButton={true}
         customBackAction={onCancel}
         rightAction={
-          <button type="submit">
+          <NavActionButton type="submit">
             <Check />
-          </button>
+          </NavActionButton>
         }
       />
       <Block>{children}</Block>

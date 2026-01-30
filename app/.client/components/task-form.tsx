@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useTask } from "../hooks/use-task";
 import type { Task } from "~/lib/types/task";
-import { FormInput } from "./FormInput";
+import { FormInput } from "./form-input";
 import { Card, CardHeader, CardTitle, CardContent } from "./Card";
-import { LoadingSpinner } from "./Loading";
+import { LoadingSpinner } from "./loading";
 import { Button, Page, Navbar } from "../navigation/components";
 import { Check } from "lucide-react";
 

@@ -36,24 +36,28 @@ export function PageTransition({ children }: PageTransitionProps) {
       initial: { x: "100%", opacity: 0 },
       animate: { x: 0, opacity: 1 },
       exit: { x: "-20%", opacity: 0 },
+      duration: 0.3
     },
     // Back navigation
     back: {
       initial: { x: "-20%", opacity: 0 },
       animate: { x: 0, opacity: 1 },
       exit: { x: "100%", opacity: 0 },
+      duration: 0.3
     },
     // Tab switch
     tab: {
-      initial: { opacity: 0 },
+      initial: { opacity: 0.6 },
       animate: { opacity: 1 },
-      exit: { opacity: 0 },
+      exit: { opacity: 0.6 },
+      duration: 0.1
     },
     // Modal presentation
     modal: {
       initial: { y: "100%", opacity: 0 },
       animate: { y: 0, opacity: 1 },
       exit: { y: "100%", opacity: 0 },
+      duration: 0.3
     },
   };
 
@@ -67,7 +71,7 @@ export function PageTransition({ children }: PageTransitionProps) {
       animate={currentVariant.animate}
       exit={currentVariant.exit}
       transition={{
-        duration: 0.3,
+        duration: currentVariant.duration,
         ease: [0.4, 0.0, 0.2, 1],
       }}
       className="h-screen w-full"

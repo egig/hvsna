@@ -14,7 +14,7 @@ import TaskForm from "../components/task-form";
 import { Page } from "../navigation/components/Page";
 import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
-import { LoadingSpinner } from "../components/Loading";
+import { LoadingSpinner } from "../components/loading";
 import Block from "../components/block";
 
 interface TaskItemProps {
