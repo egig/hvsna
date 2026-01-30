@@ -1,12 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useLog } from "./use-log";
-import type { Tracker, Log, TrackerAttribute } from "~/lib/tracker/types";
+import type { Tracker, Log } from "~/lib/tracker/types";
+import type { TrackerAttribute } from "../tracker_attribute/trackerAttributeStore";
 import { Button, Page, Navbar } from "../navigation";
 import { useTrackers } from "../tracker/use-trackers";
+import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
 import { LoadingSpinner } from "~/.client/components/loader";
 import { Card, CardContent, CardHeader, CardTitle } from "~/.client/components/Card";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
+import CustomAttributeInput from "~/.client/components/custom-attribute-input";
 
 interface LogFormProps {
   logId?: string | null;
@@ -21,41 +24,11 @@ export default function LogForm({
   onError,
   onCancel,
 }: LogFormProps) {
-  const { loading: trackerLoading, getTrackers } = useTrackers();
-  const { loading, error, createLog, updateLog, getLog, log } = useLog();
-  const [trackers, setTrackers] = useState<Tracker[]>([]);
-  const [selectedTrackerId, setSelectedTrackerId] = useState("");
-  const [value, setValue] = useState("0");
-  const [timestamp, setTimestamp] = useState(
-    new Date().toISOString().slice(0, 16),
-  );
-  const [metadata, setMetadata] = useState("");
-  const [customAttributeValues, setCustomAttributeValues] = useState<Record<string, any>>({});
+  const { loading: trackerLoading, trackers } = useTrackers();
+  const { loading, error, createLog, updateLog, log } = useLog();
+  const [selectedTrackerId, setSelectedTrackerId] = useState(log?.trackerId);
+  const { loading: attributesLoading, trackerAttributes } = useTrackerAttributes(selectedTrackerId);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    // Load available trackers
-    getTrackers()
-      .then(setTrackers)
-      .catch(() => {
-        // Handle error silently
-      });
-  }, [getTrackers]);
-
-
-  // Reset custom attributes when tracker changes
-  useEffect(() => {
-    const selectedTracker = trackers.find(t => t.id === selectedTrackerId);
-    if (selectedTracker?.customAttributes) {
-      const newValues: Record<string, any> = {};
-      selectedTracker.customAttributes.forEach(attr => {
-        newValues[attr.id] = attr.defaultValue || (attr.type === 'number' ? 0 : '');
-      });
-      setCustomAttributeValues(newValues);
-    } else {
-      setCustomAttributeValues({});
-    }
-  }, [selectedTrackerId, trackers]);
 
   useEffect(() => {
     if (error && onError) {
@@ -63,34 +36,27 @@ export default function LogForm({
     }
   }, [error, onError]);
 
-  const handleSubmit = async () => {
-    if (!selectedTrackerId || !value.trim()) return;
+  const handleSubmit = async (formData: FormData) => {
+
+    const {value, timestamp} = Object.fromEntries(formData.entries());
+
+    if (!selectedTrackerId) return;
 
     try {
       setIsSubmitting(true);
 
-      // Merge custom attributes with existing metadata
-      let parsedMetadata: Record<string, any> = {};
-      if (metadata.trim()) {
-        try {
-          parsedMetadata = JSON.parse(metadata);
-        } catch (e) {
-          // If metadata is invalid JSON, treat as empty object
-        }
-      }
-
       // Add custom attributes to metadata with 'custom_' prefix
-      const customMetadata: Record<string, any> = { ...parsedMetadata };
-      Object.keys(customAttributeValues).forEach(attrId => {
-        customMetadata[`custom_${attrId}`] = customAttributeValues[attrId];
+      const customMetadata: Record<string, any> = { ...log?.attributes };
+      Object.values(trackerAttributes).forEach(attr => {
+        customMetadata[`custom_${attr.id}`] = formData.get(attr.id) || attr.defaultValue;
       });
 
       let result: Log;
       const logData = {
         trackerId: selectedTrackerId,
         value: parseFloat(value) || 0,
-        timestamp: new Date(timestamp).getTime(),
-        metadata: Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
+        timestamp: new Date().getTime(),
+        attributes: Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
       };
 
       if (logId) {
@@ -98,13 +64,6 @@ export default function LogForm({
       } else {
         result = await createLog(logData);
       }
-
-      // Reset form
-      setSelectedTrackerId("");
-      setValue("0");
-      setTimestamp(new Date().toISOString().slice(0, 16));
-      setMetadata("");
-      setCustomAttributeValues({});
 
       if (onSuccess) {
         onSuccess(result);
@@ -120,10 +79,6 @@ export default function LogForm({
 
   const handleCancel = () => {
     setSelectedTrackerId("");
-    setValue("0");
-    setTimestamp(new Date().toISOString().slice(0, 16));
-    setMetadata("");
-    setCustomAttributeValues({});
     if (onCancel) {
       onCancel();
     }
@@ -132,7 +87,13 @@ export default function LogForm({
   const selectedTracker = trackers.find((t) => t.id === selectedTrackerId);
 
   return (
-    <BaseForm onSubmit={handleSubmit} title={logId ? "Edit Log" : "New Log"} onSuccess={handleCancel} onError={onError} onCancel={handleCancel}>
+    <BaseForm
+      onSubmit={handleSubmit}
+      title={logId ? "Edit Log" : "New Log"}
+      onSuccess={handleCancel}
+      onError={onError}
+      onCancel={handleCancel}
+    >
       <div
         className="
         flex-1
@@ -154,162 +115,74 @@ export default function LogForm({
           px-4
         "
         >
-              {(loading || trackerLoading) && (
-                <div className="flex justify-center py-12">
-                  <LoadingSpinner size="lg" text="Loading log data..." />
-                </div>
-              )}
+          {(loading || trackerLoading || attributesLoading) && (
+            <div className="flex justify-center py-12">
+              <LoadingSpinner size="lg" text="Loading log data..." />
+            </div>
+          )}
 
-                <div className="space-y-5">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tracker
-                      <span className="text-red-500 ml-1">*</span>
-                    </label>
-                    <select
-                      defaultValue={selectedTrackerId}
-                      onChange={(e) => setSelectedTrackerId(e.target.value)}
-                      disabled={isSubmitting}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                      required
-                    >
-                      <option value="">Select a tracker</option>
-                      {trackers.map((tracker) => (
-                        <option key={tracker.id} value={tracker.id}>
-                          {tracker.name} ({tracker.unit})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+          <div className="space-y-5">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tracker
+                <span className="text-red-500 ml-1">*</span>
+              </label>
+              <select
+                defaultValue={selectedTrackerId}
+                onChange={(e) => setSelectedTrackerId(e.target.value)}
+                disabled={isSubmitting}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                required
+              >
+                <option value="">Select a tracker</option>
+                {trackers.map((tracker) => (
+                  <option key={tracker.id} value={tracker.id}>
+                    {tracker.name} ({tracker.unit})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                  {selectedTracker && (
-                    <div className="text-sm text-gray-500 mb-4">
-                      Tracker: {selectedTracker.name} ({selectedTracker.unit})
-                    </div>
-                  )}
+            {selectedTracker && (
+              <div className="text-sm text-gray-500 mb-4">
+                Tracker: {selectedTracker.name} ({selectedTracker.unit})
+              </div>
+            )}
 
-                  <FormInput
-                    name="value"
-                    label="Value"
-                    type="number"
-                    value={value}
-                    placeholder="0"
-                    onChange={setValue}
+            <FormInput
+              name="value"
+              label="Value"
+              type="number"
+              value={log?.value as unknown as string}
+              placeholder="0"
+              disabled={isSubmitting}
+              required={true}
+              className="text-base"
+            />
+            {selectedTracker && (
+              <p className="text-sm text-gray-500 -mt-2 mb-4">
+                Value in {selectedTracker.unit}
+              </p>
+            )}
+
+            {/* Custom Attributes */}
+            {trackerAttributes && trackerAttributes.length > 0 && (
+              <div className="space-y-4 mb-4 border-1 border-gray-200 p-4 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700">
+                  Custom Attributes
+                </h3>
+                {trackerAttributes.map((attr) => (
+                  <CustomAttributeInput
+                    key={attr.id}
+                    attr={attr}
+                    value={log?.attributes?.[`custom_${attr.id}`]}
                     disabled={isSubmitting}
-                    required={true}
-                    className="text-base"
                   />
-                  {selectedTracker && (
-                    <p className="text-sm text-gray-500 -mt-2 mb-4">
-                      Value in {selectedTracker.unit}
-                    </p>
-                  )}
+                ))}
+              </div>
+            )}
 
-                  {/* Custom Attributes */}
-                  {selectedTracker?.customAttributes && selectedTracker.customAttributes.length > 0 && (
-                    <div className="space-y-4 mb-4">
-                      <h3 className="text-sm font-medium text-gray-700">Custom Attributes</h3>
-                      {selectedTracker.customAttributes.map((attr) => (
-                        <div key={attr.id} className="mb-3">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            {attr.name}
-                            {attr.required && <span className="text-red-500 ml-1">*</span>}
-                          </label>
-                          {attr.type === 'text' && (
-                            <input
-                              type="text"
-                              value={customAttributeValues[attr.id] || ''}
-                              onChange={(e) => setCustomAttributeValues(prev => ({
-                                ...prev,
-                                [attr.id]: e.target.value
-                              }))}
-                              disabled={isSubmitting}
-                              required={attr.required}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                            />
-                          )}
-                          {attr.type === 'number' && (
-                            <input
-                              type="number"
-                              value={customAttributeValues[attr.id] || ''}
-                              onChange={(e) => setCustomAttributeValues(prev => ({
-                                ...prev,
-                                [attr.id]: parseFloat(e.target.value) || 0
-                              }))}
-                              disabled={isSubmitting}
-                              required={attr.required}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                            />
-                          )}
-                          {attr.type === 'date' && (
-                            <input
-                              type="date"
-                              value={customAttributeValues[attr.id] || ''}
-                              onChange={(e) => setCustomAttributeValues(prev => ({
-                                ...prev,
-                                [attr.id]: e.target.value
-                              }))}
-                              disabled={isSubmitting}
-                              required={attr.required}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                            />
-                          )}
-                          {attr.type === 'select' && (
-                            <select
-                              value={customAttributeValues[attr.id] || ''}
-                              onChange={(e) => setCustomAttributeValues(prev => ({
-                                ...prev,
-                                [attr.id]: e.target.value
-                              }))}
-                              disabled={isSubmitting}
-                              required={attr.required}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                            >
-                              <option value="">Select an option</option>
-                              {attr.options?.map((option) => (
-                                <option key={option} value={option}>
-                                  {option}
-                                </option>
-                              ))}
-                            </select>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Timestamp
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={timestamp}
-                      onChange={(e) => setTimestamp(e.target.value)}
-                      disabled={isSubmitting}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Metadata (JSON)
-                    </label>
-                    <textarea
-                      value={metadata}
-                      placeholder='{"key": "value"}'
-                      onChange={(e) => setMetadata(e.target.value)}
-                      disabled={isSubmitting}
-                      rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50 resize-none"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">
-                      Optional JSON metadata
-                    </p>
-                  </div>
-                </div>
-
-            
+          </div>
         </div>
       </div>
     </BaseForm>

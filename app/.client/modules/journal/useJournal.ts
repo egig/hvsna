@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { usePouchDB } from "../../pouchdb";
 import { useLogStore } from "./logStore";
 import type { LogCreateInput, LogUpdateInput, LogQuery } from "./logStore";
@@ -22,6 +22,10 @@ export function useJournal() {
     reset,
     getLogsFromDB,
   } = useLogStore();
+
+  useEffect(() => {
+    getLogs();
+  }, []);
 
   const getLogs = useCallback(async (query?: LogQuery): Promise<Log[]> => {
     return getLogsFromDB(query, db);

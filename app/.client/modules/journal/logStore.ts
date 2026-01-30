@@ -14,7 +14,7 @@ export interface LogCreateInput {
 export interface LogUpdateInput {
   timestamp?: EpochTime;
   value?: number;
-  metadata?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface LogQuery {
@@ -152,7 +152,7 @@ export const useLogStore = create<LogState>()(
             trackerId: existingLog.trackerId,
             timestamp: input.timestamp ?? existingLog.timestamp,
             value: input.value ?? existingLog.value,
-            metadata: input.metadata ?? existingLog.metadata,
+            attributes: input.attributes ?? existingLog.attributes,
             createdAt: existingLog.createdAt,
           };
 

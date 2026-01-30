@@ -40,7 +40,7 @@ export interface Log {
   trackerId: UUID;
   timestamp: EpochTime;
   value: number;
-  metadata?: Record<string, unknown>;
+  attributes?: Record<string, unknown>;
   createdAt: EpochTime;
 }
 

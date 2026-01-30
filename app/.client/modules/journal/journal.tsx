@@ -10,13 +10,15 @@ import { useTrackers } from "../tracker/use-trackers";
 import { Page } from "../navigation";
 
 export default function Journal() {
-  const { loading, error, getLogs, refreshLogs } = useJournal();
+  const { loading, error, getLogs, refreshLogs, logs } = useJournal();
   const { deleteLog } = useLog();
   const { getTrackers } = useTrackers();
-  const [logs, setLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
+
+
+  console.log("logs", logs);
 
   useEffect(() => {
     loadData();
@@ -24,11 +26,9 @@ export default function Journal() {
 
   const loadData = async () => {
     try {
-      const [logsData, trackersData] = await Promise.all([
-        getLogs(),
+      const [trackersData] = await Promise.all([
         getTrackers(),
       ]);
-      setLogs(logsData);
       setTrackers(trackersData);
     } catch (err) {
       console.error("Failed to load data:", err);

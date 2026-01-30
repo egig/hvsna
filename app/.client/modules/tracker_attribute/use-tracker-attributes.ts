@@ -3,7 +3,7 @@ import { useTrackerAttributeStore } from "../tracker_attribute/trackerAttributeS
 import type { TrackerAttribute, TrackerAttributeQuery } from "../tracker_attribute/trackerAttributeStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
-export function useTrackerAttributes() {
+export function useTrackerAttributes(trackerId?: string) {
   const { db } = usePouchDB();
   const {
     trackerAttributes,
@@ -18,11 +18,11 @@ export function useTrackerAttributes() {
 
   useEffect(() => {
     loadTrackerAttributes();
-  }, []);
+  }, [trackerId]);
 
   const loadTrackerAttributes = async () => {
     try {
-      await getTrackerAttributes();
+      await getTrackerAttributes({ trackerId });
     } catch (err) {
       console.error("Failed to load tracker attributes:", err);
     }
@@ -73,7 +73,7 @@ export function useTrackerAttributes() {
   );
 
   const refreshTrackerAttributes = useCallback(async (): Promise<TrackerAttribute[]> => {
-    return getTrackerAttributes();
+    return getTrackerAttributes({ trackerId });
   }, [getTrackerAttributes]);
 
   const deleteTrackerAttribute = useCallback(
