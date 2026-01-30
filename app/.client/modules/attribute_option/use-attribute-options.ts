@@ -52,7 +52,7 @@ export function useAttributeOptions(attributeId?: string) {
           attributeOptions = attributeOptions.filter(
             (option) => option.attributeId === query.attributeId,
           );
-        }
+        }        
 
         // Apply pagination
         if (query.skip) {

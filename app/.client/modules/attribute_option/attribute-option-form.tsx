@@ -91,11 +91,6 @@ export default function AttributeOptionForm({
     if (onCancel) onCancel();
   };
 
-  const getAttributeName = (attributeId: string) => {
-    const attribute = trackerAttributes.find((attr) => attr.id === attributeId);
-    return attribute?.name || "Unknown Attribute";
-  };
-
   return (
     <BaseForm
       title={
@@ -160,6 +155,8 @@ export default function AttributeOptionForm({
                 Attribute *
               </label>
               <select
+                // HACK to force re-render
+                key={Math.random()}
                 name="attributeId"
                 defaultValue={attributeOption?.attributeId || ""}
                 disabled={isSubmitting || !selectedTrackerId}

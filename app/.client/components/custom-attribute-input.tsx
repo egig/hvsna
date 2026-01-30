@@ -1,8 +1,11 @@
 import type { TrackerAttribute } from "../modules/tracker_attribute/trackerAttributeStore";
 import type { Log } from "~/lib/tracker/types";
 import type { AttributeOption } from "../modules/attribute_option/attributeOptionStore";
+import { useAttributeOptions } from "../modules/attribute_option/use-attribute-options";
+import { useEffect, useState } from "react";
 
 interface CustomAttributeInputProps {
+  logId?: string;
   attr: TrackerAttribute;
   value: any;
   disabled?: boolean;
@@ -11,11 +14,20 @@ interface CustomAttributeInputProps {
 }
 
 export default function CustomAttributeInput({
+  logId,
   attr,
   value,
   disabled = false,
-  attributeOptions = [],
-}: CustomAttributeInputProps) {
+}: CustomAttributeInputProps) { 
+  const {getAttributeOptions} = useAttributeOptions(attr.type === "options" ? attr.id : undefined);
+  const [attributeOptions, setAttributeOptions] = useState<AttributeOption[]>([]);
+
+  useEffect(() => {
+    getAttributeOptions({attributeId: attr.id}).then((options) => {
+      setAttributeOptions(options);
+    });
+  }, [attr.id, logId]);
+
   return (
     <div className="mb-3">
       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -74,8 +86,11 @@ export default function CustomAttributeInput({
       )}
 
       {attr.type === "options" && (
-        <select
-          key={attr.trackerId}
+        (() => {
+          console.log("renderings", attr.type, value)
+        return <select
+          // HACK to force re-render
+          key={Math.random()}
           name={attr.id}
           defaultValue={(value as string) || ""}
           disabled={disabled}
@@ -89,6 +104,7 @@ export default function CustomAttributeInput({
             </option>
           ))}
         </select>
+        })()
       )}
     </div>
   );

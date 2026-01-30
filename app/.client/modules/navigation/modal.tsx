@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,28 +9,9 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, children, title }: ModalProps) {
-  const navigate = useNavigate();
-
   // Handle browser back button to close modal
-  useEffect(() => {
-    const handlePopState = () => {
-      onClose();
-    };
-
-    if (isOpen) {
-      window.addEventListener("popstate", handlePopState);
-      // Add a history entry so back button works
-      window.history.pushState(null, "", window.location.href);
-    }
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [isOpen, onClose]);
-
   const handleBackdropClick = () => {
     onClose();
-    navigate(-1);
   };
 
   const handleContentClick = (e: React.MouseEvent) => {

@@ -18,27 +18,6 @@ import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import CustomAttributeInput from "~/.client/components/custom-attribute-input";
 
-// Wrapper component to handle attribute options fetching
-function AttributeInputWrapper({ 
-  attr, 
-  value, 
-  disabled 
-}: { 
-  attr: TrackerAttribute; 
-  value: any; 
-  disabled: boolean; 
-}) {
-  const { attributeOptions } = useAttributeOptions(attr.type === "options" ? attr.id : undefined);
-  
-  return (
-    <CustomAttributeInput
-      attr={attr}
-      value={value}
-      disabled={disabled}
-      attributeOptions={attributeOptions}
-    />
-  );
-}
 
 interface LogFormProps {
   logId?: string | null;
@@ -54,7 +33,7 @@ export default function LogForm({
   onCancel,
 }: LogFormProps) {
   const { loading: trackerLoading, trackers } = useTrackers();
-  const { loading, error, createLog, updateLog, log } = useLog(logId);
+  const { loading, error, createLog, updateLog, log } = useLog(logId || undefined);
   const [selectedTrackerId, setSelectedTrackerId] = useState(log?.trackerId);
   const { loading: attributesLoading, trackerAttributes } =
     useTrackerAttributes(selectedTrackerId);
@@ -210,8 +189,9 @@ export default function LogForm({
                   Custom Attributes
                 </h3>
                 {trackerAttributes.map((attr) => (
-                  <AttributeInputWrapper
+                  <CustomAttributeInput
                     key={attr.id}
+                    logId={log?.id}
                     attr={attr}
                     value={log?.attributes?.[`custom_${attr.id}`]}
                     disabled={isSubmitting}
