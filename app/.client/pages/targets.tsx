@@ -15,7 +15,7 @@ import { useTarget } from "../hooks/use-target";
 import { Page } from "../navigation/components/Page";
 import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
-import { LoadingSpinner } from "../components/loading";
+import { LoadingSpinner } from "../components/loader";
 import Block from "../components/block";
 import { useTrackers } from "../hooks/use-trackers";
 

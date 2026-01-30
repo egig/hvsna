@@ -3,7 +3,7 @@ import { useTask } from "../hooks/use-task";
 import type { Task } from "~/lib/types/task";
 import { FormInput } from "./form-input";
 import { Card, CardHeader, CardTitle, CardContent } from "./Card";
-import { LoadingSpinner } from "./loading";
+import { LoadingSpinner } from "./loader";
 import { Button, Page, Navbar } from "../navigation/components";
 import { Check } from "lucide-react";
 

@@ -12,7 +12,7 @@ import type { Task, TaskStatus } from "~/lib/types/task";
 import TaskForm from "../components/task-form";
 import { Navbar } from "../navigation/components/Navbar";
 import { Modal } from "../navigation/components/Modal";
-import { LoadingSpinner } from "../components/loading";
+import { LoadingSpinner } from "../components/loader";
 
 interface TaskItemProps {
   task: Task;

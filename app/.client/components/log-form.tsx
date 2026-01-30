@@ -4,7 +4,7 @@ import { useLog } from "../hooks/useLog";
 import type { Tracker, Log } from "~/lib/tracker/types";
 import { FormInput } from "./form-input";
 import { Card, CardHeader, CardTitle, CardContent } from "./Card";
-import { LoadingSpinner } from "./loading";
+import { LoadingSpinner } from "./loader";
 import { Button, Page, Navbar } from "../navigation/components";
 
 interface LogFormProps {
