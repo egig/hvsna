@@ -40,7 +40,6 @@ export default function TrackerForm({
         return;
       }
 
-      console.log(name, unit, baseline);
 
       if (trackerId && tracker) {
         await updateTracker(tracker.id, {

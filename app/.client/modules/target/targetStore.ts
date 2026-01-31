@@ -280,7 +280,7 @@ export const useTargetStore = create<TargetState>()(
           });
 
           let targets = result.rows
-            .filter((row: any) => row.id.startsWith("target:"))
+            .filter((row: any) => row.id.startsWith("target_"))
             .map((row: any) => row.doc as unknown as Target);
 
           // Apply filters

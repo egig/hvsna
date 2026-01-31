@@ -148,7 +148,7 @@ export default function Tasks() {
     deleteTask,
     refreshTasks,
     loadMoreTasks,
-    updateTask,
+    updateStatus
   } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
@@ -157,6 +157,7 @@ export default function Tasks() {
   const openAddPopup = () => {
     // Reset form first, then open sheet
     // Use setTimeout to ensure state is set before opening sheet
+    setEditingTaskId(null)
     setTimeout(() => setSheetOpened(true), 0);
   };
 
@@ -195,7 +196,7 @@ export default function Tasks() {
 
   const handleStatusChange = async (task: Task, newStatus: TaskStatus) => {
     try {
-      await updateTask(task.id, { status: newStatus });
+      await updateStatus(task.id, newStatus);
       refreshTasks();
     } catch (err) {
       console.error("Failed to update task status:", err);

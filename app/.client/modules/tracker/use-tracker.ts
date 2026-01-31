@@ -53,6 +53,7 @@ export function useTracker(trackerId?: string) {
           ...tracker,
         });
 
+
         addTracker(tracker);
         return tracker;
       } catch (err) {

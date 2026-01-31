@@ -18,7 +18,7 @@ export interface UseTargetReturn {
   target: Target | null;
 }
 
-export function useTarget(targetId: string): UseTargetReturn {
+export function useTarget(targetId?: string): UseTargetReturn {
   const { db } = usePouchDB();
   const store = useTargetStore();
   const [target, setTarget] = useState<Target | null>(null);

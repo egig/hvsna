@@ -72,20 +72,6 @@ export type TargetType = "static" | "range";
 
 export type TargetPeriod = "log" | "daily" | "weekly" | "monthly" | "yearly" | "total";
 
-/* ---------- Category ---------- */
-
-export interface Category {
-  id: UUID;
-  name: string;
-  createdAt: EpochTime;
-}
-
-/* ---------- LogCategory (Join) ---------- */
-
-export interface LogCategory {
-  logId: UUID;
-  categoryId: UUID;
-}
 
 /* ---------- Aggregation Cache ---------- */
 /**

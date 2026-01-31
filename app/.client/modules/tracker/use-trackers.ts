@@ -40,8 +40,9 @@ export function useTrackers() {
           endkey: "trac_:\uffff",
         });
 
+
         let trackers = result.rows
-          .filter((row) => row.id.startsWith("tracker:"))
+          .filter((row) => row.id.startsWith("trac_"))
           .map((row) => row.doc as unknown as Tracker);
 
         // Apply pagination
@@ -71,7 +72,7 @@ export function useTrackers() {
   }, [getTrackers]);
 
   const deleteTracker = useCallback(
-    async (id: UUID): Promise<void> => {
+    async (id: string): Promise<void> => {
       setLoading(true);
       clearError();
 
