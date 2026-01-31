@@ -54,6 +54,15 @@ function TaskItem({
     onStatusChange(task, nextStatus);
   };
 
+  const getTargetInfo = () => {
+    if (!task.targetId) return null;
+    return (
+      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+        Target: {task.targetId} {task.targetValue && `(Value: ${task.targetValue})`}
+      </p>
+    );
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
       <div className="flex items-start gap-3">
@@ -76,6 +85,7 @@ function TaskItem({
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Scheduled: {formatScheduledDate(task.scheduledAt)}
           </p>
+          {getTargetInfo()}
         </div>
 
         {/* Status Badge and Actions */}

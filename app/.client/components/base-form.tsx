@@ -5,28 +5,30 @@ import { FormInput } from "./form-input";
 import NavActionButton from "./nav-action-button";
 import { Navbar } from "../modules/navigation";
 
-interface BaseFormProps {
-  onSuccess?: () => void;
+interface BaseFormProps<T = void> {
+  onSuccess?: (data: T) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (formData: FormData) => Promise<T>;
   children: ReactNode;
   title: string;
+  isSubmitting?: boolean;
 }
 
-export default function BaseForm({
+export default function BaseForm<T = void>({
   onSuccess,
   onError,
   onCancel,
   onSubmit,
   children,
   title,
-}: BaseFormProps) {
+  isSubmitting = false,
+}: BaseFormProps<T>) {
   const handleSubmit = async (formData: FormData) => {
     try {
-      await onSubmit(formData);
-      if (onSuccess) {
-        onSuccess();
+      const result = await onSubmit(formData);
+      if (onSuccess && result !== undefined) {
+        onSuccess(result);
       }
     } catch (err) {
       if (onError) {
@@ -48,7 +50,7 @@ export default function BaseForm({
         showBackButton={true}
         customBackAction={onCancel}
         rightAction={
-          <NavActionButton type="submit">
+          <NavActionButton type="submit" disabled={isSubmitting}>
             <Check />
           </NavActionButton>
         }

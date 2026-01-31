@@ -100,6 +100,8 @@ export default function TargetForm({
       if (onSuccess) {
         onSuccess(result);
       }
+      
+      return result;
     } catch (err) {
       throw err; // Re-throw to let BaseForm handle it
     } finally {
@@ -133,10 +135,11 @@ export default function TargetForm({
   return (
     <BaseForm
       title={targetId ? "Edit Target" : "New Target"}
-      onSuccess={() => {}}
+      onSuccess={onSuccess}
       onError={onError}
       onCancel={handleCancel}
       onSubmit={handleSubmit}
+      isSubmitting={isSubmitting}
     >
       <div
         className="

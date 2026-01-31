@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useTask } from "../task/use-task";
+import { useTargetStore } from "../target/targetStore";
+import { usePouchDB } from "../../pouchdb";
 import type { Task } from "~/lib/types/task";
+import type { Target } from "../target/targetStore";
 import { Check } from "lucide-react";
 import { Navbar } from "../navigation";
 import { FormInput } from "~/.client/components/form-input";
@@ -21,7 +24,12 @@ export default function TaskForm({
 }: TaskFormProps) {
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
+  const { db } = usePouchDB();
+  const { getTargetsFromDB } = useTargetStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [targets, setTargets] = useState<Target[]>([]);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
+  const [targetValue, setTargetValue] = useState<string>("");
 
   useEffect(() => {
     if (error && onError) {
@@ -29,21 +37,53 @@ export default function TaskForm({
     }
   }, [error, onError]);
 
+  useEffect(() => {
+    const loadTargets = async () => {
+      if (db) {
+        try {
+          const targetsList = await getTargetsFromDB({}, db);
+          setTargets(targetsList);
+        } catch (err) {
+          console.error("Failed to load targets:", err);
+        }
+      }
+    };
+    loadTargets();
+  }, [db, getTargetsFromDB]);
+
+  useEffect(() => {
+    if (task) {
+      setSelectedTargetId(task.targetId || "");
+      setTargetValue(task.targetValue?.toString() || "");
+    } else {
+      setSelectedTargetId("");
+      setTargetValue("");
+    }
+  }, [task]);
+
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
 
     try {
       setIsSubmitting(true);
 
+      const taskInput: any = {
+        name: taskData.name.trim(),
+      };
+
+      if (selectedTargetId) {
+        taskInput.targetId = selectedTargetId;
+      }
+
+      if (targetValue) {
+        taskInput.targetValue = parseFloat(targetValue);
+      }
+
       let result: Task;
       if (taskId) {
-        result = await updateTask(taskId, {
-          name: taskData.name.trim(),
-        });
+        result = await updateTask(taskId, taskInput);
       } else {
-        result = await createTask({
-          name: taskData.name.trim(),
-        });
+        result = await createTask(taskInput);
       }
 
       reset();
@@ -69,6 +109,7 @@ export default function TaskForm({
         safe-top
         safe-bottom
         safe-x
+        mb-12
       "
       >
         <div
@@ -89,6 +130,39 @@ export default function TaskForm({
             required={true}
             className="text-base"
           />
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Target (Optional)
+            </label>
+            <select
+              value={selectedTargetId}
+              onChange={(e) => setSelectedTargetId(e.target.value)}
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="">Select a target</option>
+              {targets.map((target) => (
+                <option key={target.id} value={target.id}>
+                  {target.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedTargetId && (
+            <FormInput
+              name="targetValue"
+              label="Target Value"
+              value={targetValue}
+              onChange={setTargetValue}
+              placeholder="Enter target value"
+              type="number"
+              disabled={isSubmitting}
+              required={false}
+              className="text-base"
+            />
+          )}
         </div>
       </div>
     </BaseForm>

@@ -6,6 +6,8 @@ export interface Task {
   name: string;
   status: TaskStatus;
   scheduledAt?: number;
+  targetId?: string;
+  targetValue?: number;
   created_at?: number;
   updated_at?: number;
 }
@@ -15,12 +17,16 @@ export interface TaskCreateInput {
   name: string;
   status?: TaskStatus;
   scheduledAt?: number;
+  targetId?: string;
+  targetValue?: number;
 }
 
 export interface TaskUpdateInput {
   name?: string;
   status?: TaskStatus;
   scheduledAt?: number;
+  targetId?: string;
+  targetValue?: number;
 }
 
 export interface TaskChange {

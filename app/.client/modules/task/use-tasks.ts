@@ -6,7 +6,7 @@ import type {
   TaskQuery,
 } from "../../../lib/types/task";
 import { usePouchDB } from "../../pouchdb";
-import { useTaskStore } from "./use-task";
+import { useTaskStore } from "./task-store";
 
 export interface UseTasksReturn {
   tasks: Task[];
@@ -21,6 +21,7 @@ export interface UseTasksReturn {
   getTasks: (query?: TaskQuery) => Promise<Task[]>;
   getTasksByDate: (date: string) => Promise<Task[]>;
   loadMoreTasks: () => Promise<void>;
+  refreshTasks: () => Promise<void>;
 }
 
 export const useTasks = (): UseTasksReturn => {
@@ -73,6 +74,11 @@ export const useTasks = (): UseTasksReturn => {
     [store, db],
   );
 
+  const refreshTasks = useCallback(async () => {
+    store.resetTasks();
+    await store.getTasks({}, db);
+  }, [store, db]);
+
   return {
     tasks: store.tasks,
     loading: store.loading,
@@ -86,5 +92,6 @@ export const useTasks = (): UseTasksReturn => {
     getTasks,
     getTasksByDate,
     loadMoreTasks,
+    refreshTasks,
   };
 };
