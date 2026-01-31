@@ -1,54 +1,53 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { EpochTime } from "~/lib/tracker/types";
+import type { EpochTime, UUID } from "~/lib/tracker/types";
 
 export interface Target {
   id: string;
   name: string;
   trackerId: string;
   type: TargetType;
-  reducer: TargetReducer;
+  calculation: TargetCalculation;
   direction: TargetDirection;
   value: number;
   valueMax?: number;
   period?: TargetPeriod;
-  soft: boolean;
+  scope: string[];
   createdAt: EpochTime;
 }
 
 export type TargetType = "static" | "range";
-export type TargetReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
+export type TargetCalculation = "sum" | "count" | "last" | "avg" | "min" | "max";
 export type TargetDirection = "increase" | "decrease" | "neutral";
-export type TargetPeriod = "daily" | "weekly" | "monthly" | "yearly" | "total";
+export type TargetPeriod = "log" | "daily" | "weekly" | "monthly" | "yearly" | "total";
 
 export interface TargetCreateInput {
   trackerId: string;
   type: TargetType;
-  reducer: TargetReducer;
+  calculation: TargetCalculation;
   direction: TargetDirection;
   value: number;
   valueMax?: number;
   period?: TargetPeriod;
-  soft: boolean;
+  scope: string[];
 }
 
 export interface TargetUpdateInput {
   type?: TargetType;
-  reducer?: TargetReducer;
+  calculation?: TargetCalculation;
   direction?: TargetDirection;
   value?: number;
   valueMax?: number;
   period?: TargetPeriod;
-  soft?: boolean;
+  scope?: string[];
 }
 
 export interface TargetQuery {
   trackerId?: string;
   type?: TargetType;
-  reducer?: TargetReducer;
+  calculation?: TargetCalculation;
   direction?: TargetDirection;
   period?: TargetPeriod;
-  soft?: boolean;
   limit?: number;
   skip?: number;
 }
@@ -59,12 +58,12 @@ interface PouchDBTargetDocument {
   id: string;
   trackerId: string;
   type: TargetType;
-  reducer: TargetReducer;
+  calculation: TargetCalculation;
   direction: TargetDirection;
   value: number;
   valueMax?: number;
   period?: TargetPeriod;
-  soft: boolean;
+  scope: string[];
   createdAt: EpochTime;
 }
 
@@ -161,6 +160,7 @@ export const useTargetStore = create<TargetState>()(
 
           const target: Target = {
             id: `target:${crypto.randomUUID()}`,
+            name: "",
             ...input,
             createdAt: Date.now(),
           };
@@ -292,9 +292,9 @@ export const useTargetStore = create<TargetState>()(
           if (query.type) {
             targets = targets.filter((t: Target) => t.type === query.type);
           }
-          if (query.reducer) {
+          if (query.calculation) {
             targets = targets.filter(
-              (t: Target) => t.reducer === query.reducer,
+              (t: Target) => t.calculation === query.calculation,
             );
           }
           if (query.direction) {
@@ -304,9 +304,6 @@ export const useTargetStore = create<TargetState>()(
           }
           if (query.period) {
             targets = targets.filter((t: Target) => t.period === query.period);
-          }
-          if (query.soft !== undefined) {
-            targets = targets.filter((t: Target) => t.soft === query.soft);
           }
 
           // Apply pagination

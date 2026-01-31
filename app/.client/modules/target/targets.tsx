@@ -19,7 +19,7 @@ import { LoadingSpinner } from "~/.client/components/loader";
 
 export default function Targets() {
   const { loading, error, targets, getTargets } = useTargets();
-  const { deleteTarget } = useTarget();
+  const { deleteTarget } = useTarget("");
   const { getTrackers } = useTrackers();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
@@ -182,7 +182,7 @@ export default function Targets() {
               className="font-medium text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
               onClick={() => onEdit(target)}
             >
-              {getTrackerName(target.trackerId)}
+              {getTrackerName(target.trackerId)} - {target.name}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {formatTargetValue(target)} • {getPeriodLabel(target.period)}
@@ -198,9 +198,6 @@ export default function Targets() {
               <div className="text-xs text-gray-600 dark:text-gray-400">
                 {getTypeLabel(target.type)}
               </div>
-              {target.soft && (
-                <div className="text-xs text-orange-600">Soft</div>
-              )}
             </div>
 
             <div className="relative">

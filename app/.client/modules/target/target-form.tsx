@@ -8,11 +8,12 @@ import type {
 import {
   useTarget,
   type TargetDirection,
-  type TargetReducer,
+  type TargetCalculation,
 } from "../target/use-target";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import { useTrackers } from "../tracker/use-trackers";
+import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
 
 interface TargetFormProps {
   targetId?: string | null;
@@ -32,11 +33,18 @@ export default function TargetForm({
     useTarget(targetId as string);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedTrackerId, setSelectedTrackerId] = useState<string>(target?.trackerId || "");
+  const [selectedAttributes, setSelectedAttributes] = useState<string[]>(target?.scope || []);
+  const { trackerAttributes, loading: attributesLoading } = useTrackerAttributes(
+    selectedTrackerId
+  );
 
   useEffect(() => {
     // Load available trackers
     getTrackers()
-      .then(setTrackers)
+      .then((trackerData) => {
+        setTrackers(trackerData);
+      })
       .catch(() => {
         // Handle error silently
       });
@@ -48,30 +56,39 @@ export default function TargetForm({
     }
   }, [error, onError]);
 
+  useEffect(() => {
+    // Update form state when target changes
+    if (target) {
+      setSelectedTrackerId(target.trackerId);
+      setSelectedAttributes(target.scope || []);
+    }
+  }, [target]);
+
   const handleSubmit = async (formData: FormData) => {
     const trackerId = formData.get("trackerId") as string;
     const type = formData.get("type") as TargetTypeEnum;
-    const reducer = formData.get("reducer") as TargetReducer;
+    const calculation = formData.get("calculation") as TargetCalculation;
     const direction = formData.get("direction") as TargetDirection;
     const value = formData.get("value") as string;
     const valueMax = formData.get("valueMax") as string;
     const period = formData.get("period") as TargetPeriod;
-    const soft = formData.get("soft") as string; // formData.get returns string
+    const name = formData.get("name") as string;
 
     try {
       setIsSubmitting(true);
 
       let result: TargetType;
       const targetData = {
+        name,
         trackerId,
         type,
-        reducer,
+        calculation,
         direction,
         value: parseFloat(value) || 0,
         valueMax:
           type === "range" ? parseFloat(valueMax) || undefined : undefined,
         period,
-        soft: soft === "true",
+        scope: selectedAttributes,
       };
 
       if (targetId) {
@@ -96,8 +113,23 @@ export default function TargetForm({
     }
   };
 
-  const selectedTracker = trackers.find((t) => t.id === target?.trackerId);
+  const handleTrackerChange = (trackerId: string) => {
+    setSelectedTrackerId(trackerId);
+    // Reset selected attributes when tracker changes
+    setSelectedAttributes([]);
+  };
 
+  const handleAttributeToggle = (attributeId: string) => {
+    setSelectedAttributes(prev => 
+      prev.includes(attributeId) 
+        ? prev.filter(id => id !== attributeId)
+        : [...prev, attributeId]
+    );
+  };
+
+  const selectedTracker = trackers.find((t) => t.id === selectedTrackerId);
+
+  // Helper function to add sample custom attributes for testing
   return (
     <BaseForm
       title={targetId ? "Edit Target" : "New Target"}
@@ -146,7 +178,8 @@ export default function TargetForm({
               </label>
               <select
                 name="trackerId"
-                defaultValue={target?.trackerId || ""}
+                value={selectedTrackerId}
+                onChange={(e) => handleTrackerChange(e.target.value)}
                 disabled={isSubmitting}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
                 required
@@ -163,6 +196,57 @@ export default function TargetForm({
             {selectedTracker && (
               <div className="text-sm text-gray-500 mb-4">
                 Tracker: {selectedTracker.name} ({selectedTracker.unit})
+              </div>
+            )}
+
+            {/* Attributes Multi-Select */}
+            {selectedTracker && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Attributes
+                  <span className="text-gray-400 ml-1">(optional)</span>
+                </label>
+                {attributesLoading ? (
+                  <div className="text-sm text-gray-500 italic border border-gray-200 rounded-lg p-3 bg-gray-50">
+                    Loading attributes...
+                  </div>
+                ) : trackerAttributes && trackerAttributes.length > 0 ? (
+                  <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg p-2">
+                    {trackerAttributes.map((attribute) => (
+                      <label
+                        key={attribute.id}
+                        className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedAttributes.includes(attribute.id)}
+                          onChange={() => handleAttributeToggle(attribute.id)}
+                          disabled={isSubmitting}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">
+                          {attribute.name}
+                          {attribute.required && (
+                            <span className="text-red-500 ml-1">*</span>
+                          )}
+                          <span className="text-gray-400 ml-1">({attribute.type})</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 italic border border-gray-200 rounded-lg p-3 bg-gray-50">
+                    No custom attributes defined for this tracker. 
+                    <span className="block text-xs mt-1">
+                      Custom attributes can be added to trackers to enable more detailed tracking.
+                    </span>
+                  </div>
+                )}
+                {selectedAttributes.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {selectedAttributes.length} attribute{selectedAttributes.length > 1 ? 's' : ''} selected
+                  </p>
+                )}
               </div>
             )}
 
@@ -183,11 +267,11 @@ export default function TargetForm({
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Reducer
+                Calculation
               </label>
               <select
-                name="reducer"
-                defaultValue={target?.reducer || "sum"}
+                name="calculation"
+                defaultValue={target?.calculation || "sum"}
                 disabled={isSubmitting}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
               >
@@ -268,28 +352,7 @@ export default function TargetForm({
                 <option value="total">Total</option>
               </select>
             </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                name="soft"
-                id="soft"
-                defaultChecked={target?.soft || false}
-                disabled={isSubmitting}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label
-                htmlFor="soft"
-                className="text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                Soft limit
-              </label>
-            </div>
-            {target?.soft && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Allow going over/under without strict enforcement
-              </p>
-            )}
+            
           </div>
         </div>
       </div>

@@ -47,6 +47,7 @@ export interface Log {
 /* ---------- Target ---------- */
 
 export type TargetReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
+export type TargetCalculation = "sum" | "count" | "last" | "avg" | "min" | "max";
 
 export type TargetDirection = "increase" | "decrease" | "neutral";
 
@@ -58,18 +59,18 @@ export interface Target {
   name: string;
   trackerId: UUID;
   type: TargetType;
-  reducer: TargetReducer;
+  calculation: TargetCalculation;
   direction: TargetDirection;
   value: number; // target or min
   valueMax?: number; // only for range
   period?: TargetPeriod;
-  soft: boolean;
+  scope: string[]; // list of attributeId
   createdAt: EpochTime;
 }
 
 export type TargetType = "static" | "range";
 
-export type TargetPeriod = "daily" | "weekly" | "monthly" | "yearly" | "total";
+export type TargetPeriod = "log" | "daily" | "weekly" | "monthly" | "yearly" | "total";
 
 /* ---------- Category ---------- */
 

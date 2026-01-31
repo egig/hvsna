@@ -25,8 +25,7 @@ export function useTarget(targetId: string): UseTargetReturn {
 
   useEffect(() => {
     if (targetId) {
-      let target = store.getTargetFromDB(targetId, db);
-      setTarget(target);
+      store.getTargetFromDB(targetId, db).then(setTarget);
     }
   }, [targetId]);
 
@@ -76,7 +75,7 @@ export type {
   TargetUpdateInput,
   TargetQuery,
   TargetType,
-  TargetReducer,
+  TargetCalculation,
   TargetDirection,
   TargetPeriod,
 } from "../target/targetStore";
