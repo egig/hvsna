@@ -37,7 +37,7 @@ export function useTrackers() {
         const result = await db.allDocs({
           include_docs: true,
           startkey: "trac_",
-          endkey: "trac_:\uffff",
+          endkey: "trac_\uffff",
         });
 
 

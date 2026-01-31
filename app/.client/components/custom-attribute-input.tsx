@@ -87,7 +87,6 @@ export default function CustomAttributeInput({
 
       {attr.type === "options" && (
         (() => {
-          console.log("renderings", attr.type, value)
         return <select
           // HACK to force re-render
           key={Math.random()}

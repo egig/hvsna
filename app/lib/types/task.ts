@@ -8,6 +8,7 @@ export interface Task {
   scheduledAt?: number;
   targetId?: string;
   targetValue?: number;
+  attributes?: Record<string, string>;
   created_at?: number;
   updated_at?: number;
 }
@@ -19,6 +20,7 @@ export interface TaskCreateInput {
   scheduledAt?: number;
   targetId?: string;
   targetValue?: number;
+  attributes?: Record<string, string>;
 }
 
 export interface TaskUpdateInput {
@@ -27,6 +29,7 @@ export interface TaskUpdateInput {
   scheduledAt?: number;
   targetId?: string;
   targetValue?: number;
+  attributes?: Record<string, string>;
 }
 
 export interface TaskChange {

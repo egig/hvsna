@@ -19,6 +19,7 @@ interface PouchDBTaskDocument {
   targetValue?: number;
   created_at?: number;
   updated_at?: number;
+  attributes?: Record<string, any>
 }
 
 interface TaskState {
@@ -129,6 +130,7 @@ export const useTaskStore = create<TaskState>()(
             targetValue: input.targetValue,
             created_at: now,
             updated_at: now,
+            attributes: input.attributes
           };
 
           const doc: PouchDBTaskDocument = {
@@ -141,6 +143,7 @@ export const useTaskStore = create<TaskState>()(
             targetValue: newTask.targetValue,
             created_at: newTask.created_at,
             updated_at: newTask.updated_at,
+            attributes: newTask.attributes
           };
 
           await db.put(doc);
@@ -194,6 +197,10 @@ export const useTaskStore = create<TaskState>()(
           if (input.targetValue !== undefined) {
             updateData.targetValue = input.targetValue;
           }
+          
+          if (input.attributes !== undefined) {
+            updateData.attributes = input.attributes;
+          }
 
           const response = await db.put(updateData);
           const updatedDoc: PouchDBTaskDocument = {
@@ -211,6 +218,7 @@ export const useTaskStore = create<TaskState>()(
             targetValue: updatedDoc.targetValue,
             created_at: updatedDoc.created_at,
             updated_at: updatedDoc.updated_at,
+            attributes: updatedDoc.attributes
           };
           // set({ task: updatedTask });
 
@@ -272,6 +280,7 @@ export const useTaskStore = create<TaskState>()(
             targetValue: doc.targetValue,
             created_at: doc.created_at,
             updated_at: doc.updated_at,
+            attributes: doc.attributes
           };
 
           // set({ task: retrievedTask });

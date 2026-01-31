@@ -44,7 +44,7 @@ export function useAttributeOption(attributeOptionId?: string) {
 
       try {
         const attributeOption: AttributeOption = {
-          id: `opt_:${crypto.randomUUID()}`,
+          id: `opt_${crypto.randomUUID()}`,
           ...input,
           createdAt: Date.now(),
         };

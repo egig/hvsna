@@ -40,17 +40,19 @@ export function useTargetResults() {
 
     switch (calculation) {
       case "sum":
-        return logs.reduce((sum, log) => sum + log.value, 0);
+        return logs.reduce((sum, log) => sum + Number(log.value), 0);
       case "count":
-        return logs.length;
+        // return logs.length
+        // count always has value of 1 in the log
+        return logs.reduce((sum, log) => sum + Number(log.value), 0);
       case "last":
-        return logs[logs.length - 1]?.value || 0;
+        return Number(logs[logs.length - 1]?.value) || 0;
       case "avg":
-        return logs.reduce((sum, log) => sum + log.value, 0) / logs.length;
+        return logs.reduce((sum, log) => sum + Number(log.value), 0) / logs.length;
       case "min":
-        return Math.min(...logs.map(log => log.value));
+        return Math.min(...logs.map(log => Number(log.value)));
       case "max":
-        return Math.max(...logs.map(log => log.value));
+        return Math.max(...logs.map(log => Number(log.value)));
       default:
         return 0;
     }

@@ -39,8 +39,8 @@ export function useAttributeOptions(attributeId?: string) {
       try {
         const result = await db.allDocs({
           include_docs: true,
-          startkey: "opt_:",
-          endkey: ":\uffff",
+          startkey: "opt_",
+          endkey: "opt_\uffff",
         });
 
         let attributeOptions = result.rows.map(

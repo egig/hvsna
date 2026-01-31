@@ -213,7 +213,7 @@ export function Home() {
 
   return (
     <div className="p-6 h-screen overflow-y-auto">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-8 mb-20">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>

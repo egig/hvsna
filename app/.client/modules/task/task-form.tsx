@@ -4,11 +4,14 @@ import { useTargetStore } from "../target/targetStore";
 import { usePouchDB } from "../../pouchdb";
 import type { Task } from "~/lib/types/task";
 import type { Target } from "../target/targetStore";
+import type { TrackerAttribute } from "../attribute/trackerAttributeStore";
 import { Check } from "lucide-react";
 import { Navbar } from "../navigation";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import { useTargets } from "../target/use-targets";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
+import CustomAttributeInput from "~/.client/components/custom-attribute-input";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -30,6 +33,9 @@ export default function TaskForm({
   const { getTargetsFromDB } = useTargetStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>(task?.targetId as string);
+  const [selectedTarget, setSelectedTarget] = useState<Target | null>(null);
+  const { trackerAttributes } = useTrackerAttributes(selectedTarget?.trackerId);
+
 
   useEffect(() => {
     if (error && onError) {
@@ -41,6 +47,30 @@ export default function TaskForm({
     setSelectedTargetId(task?.targetId || "");
   }, [task])
 
+  useEffect(() => {
+    const target = targets.find(t => t.id === selectedTargetId);
+    setSelectedTarget(target || null);
+  }, [selectedTargetId, targets]);
+
+  // Helper function to get attribute by ID
+  const getAttributeById = (attributeId: string): TrackerAttribute | undefined => {
+    return trackerAttributes.find(attr => attr.id === attributeId);
+  };
+
+  // Helper function to render attribute input using CustomAttributeInput
+  const renderAttributeInput = (attribute: TrackerAttribute, index: number) => {
+    const value = task?.attributes?.[attribute.id];
+    
+    return (
+      <CustomAttributeInput
+        key={attribute.id}
+        attr={attribute}
+        value={value}
+        disabled={isSubmitting}
+      />
+    );
+  };
+
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
@@ -48,10 +78,23 @@ export default function TaskForm({
     try {
       setIsSubmitting(true);
 
+      // Extract scope values from form data
+      var attr: Record<string, any> = {};
+      if (selectedTarget?.scope) {
+        for (let i = 0; i < selectedTarget.scope.length; i++) {
+          const attributeId = selectedTarget.scope[i];
+          let value = formData.get(attributeId) as string;
+          attr[attributeId] = value;
+        }
+      }
+
+      console.log("attr", attr, selectedTarget)
+
       const taskInput: any = {
         name: taskData.name.trim(),
         targetId: taskData.targetId,
-        targetValue: taskData.targetValue
+        targetValue: taskData.targetValue,
+        attributes: attr,
       };
 
       if (selectedTargetId) {
@@ -132,16 +175,40 @@ export default function TaskForm({
           </div>
 
           {selectedTargetId && (
-            <FormInput
-              name="targetValue"
-              label="Target Value"
-              value={task?.targetValue?.toString() || ""}
-              placeholder="Enter target value"
-              type="number"
-              disabled={isSubmitting}
-              required={false}
-              className="text-base"
-            />
+            <>
+              <FormInput
+                name="targetValue"
+                label="Target Value"
+                value={task?.targetValue?.toString() || ""}
+                placeholder="Enter target value"
+                type="number"
+                disabled={isSubmitting}
+                required={false}
+                className="text-base"
+              />
+              
+              {selectedTarget?.scope?.map((attributeId, index) => {
+                const attribute = getAttributeById(attributeId);
+                if (!attribute) {
+                  // Fallback to basic text input if attribute not found
+                  return (
+                    <FormInput
+                      key={`scope-${index}`}
+                      name={`scope_${index}`}
+                      label={`Scope: ${attributeId}`}
+                      value={task?.scopeValues?.[index]?.toString() || ""}
+                      placeholder={`Enter value for ${attributeId}`}
+                      type="text"
+                      disabled={isSubmitting}
+                      required={false}
+                      className="text-base"
+                    />
+                  );
+                }
+                
+                return renderAttributeInput(attribute, index);
+              })}
+            </>
           )}
         </div>
       </div>
