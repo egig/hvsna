@@ -1,7 +1,7 @@
 import { useState, useEffect, use } from "react";
 import { useLog } from "./use-log";
 import { useTrackers } from "../tracker/use-trackers";
-import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { LoadingSpinner } from "~/.client/components/loader";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";

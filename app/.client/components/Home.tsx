@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usePouchDB } from '../pouchdb';
 import { useTargetResults } from '../hooks/useTargetResults';
-import { useLogStore } from '../modules/journal/logStore';
+import { useLogStore } from '../modules/log/logStore';
 import { TargetResultsSummary } from '../components/TargetResultsDashboard';
 import type { TargetResultData } from '../hooks/useTargetResults';
 import type { Log } from '~/lib/tracker/types';

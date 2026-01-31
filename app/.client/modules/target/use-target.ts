@@ -6,7 +6,7 @@ import type {
   TargetUpdateInput,
 } from "../target/targetStore";
 import type { UUID } from "crypto";
-import { usePouchDB } from "~/.client/pouchdb";
+import { usePouchDB } from "../..//pouchdb";
 
 export interface UseTargetReturn {
   loading: boolean;

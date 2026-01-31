@@ -6,7 +6,7 @@ import type {
 import { useEffect, useState } from "react";
 import { usePouchDB } from "../../pouchdb";
 import { useTaskStore } from "./task-store";
-import { useLog } from "../journal/use-log";
+import { useLog } from "../log/use-log";
 import { useTarget } from "../target/use-target";
 
 export interface UseTaskReturn {

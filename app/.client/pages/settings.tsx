@@ -37,10 +37,16 @@ export default function Settings() {
           to="/targets"
         />
         <MenuItem
-          title="Journal"
-          subtitle="Manage your journal"
+          title="Logs"
+          subtitle="Manage your logs"
           icon={SettingsIcon}
-          to="/journal"
+          to="/logs"
+        />
+        <MenuItem
+          title="Wipe Local data"
+          subtitle="Delete all local data"
+          icon={SettingsIcon}
+          to="/wipe-local"
         />
 
         <SignedIn>

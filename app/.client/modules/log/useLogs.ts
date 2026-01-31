@@ -4,7 +4,7 @@ import { useLogStore } from "./logStore";
 import type { LogCreateInput, LogUpdateInput, LogQuery } from "./logStore";
 import type { Log } from "~/lib/tracker/types";
 
-export function useJournal() {
+export function useLogs() {
   const { db } = usePouchDB();
   const {
     logs,

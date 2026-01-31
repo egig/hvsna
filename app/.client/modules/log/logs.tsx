@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useJournal } from "./useJournal";
+import { useLogs } from "./useLogs";
 import { useLog } from "./use-log";
 import { Plus, Edit, Trash2, FileText, MoreHorizontal } from "lucide-react";
 import type { Log, Tracker } from "~/lib/tracker/types";
@@ -9,8 +9,8 @@ import { Modal } from "../navigation/modal";
 import { useTrackers } from "../tracker/use-trackers";
 import { Page } from "../navigation";
 
-export default function Journal() {
-  const { loading, error, getLogs, refreshLogs, logs } = useJournal();
+export default function Logs() {
+  const { loading, error, getLogs, refreshLogs, logs } = useLogs();
   const { deleteLog } = useLog();
   const { getTrackers } = useTrackers();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
@@ -75,7 +75,7 @@ export default function Journal() {
 
     if (
       confirm(
-        `Are you sure you want to delete this journal entry for "${trackerName}"? This action cannot be undone.`,
+        `Are you sure you want to delete this log entry for "${trackerName}"? This action cannot be undone.`,
       )
     ) {
       try {
@@ -83,7 +83,7 @@ export default function Journal() {
         loadData();
       } catch (err) {
         console.error("Failed to delete log:", err);
-        alert("Failed to delete journal entry. Please try again.");
+        alert("Failed to delete log entry. Please try again.");
       }
     }
   };
@@ -201,12 +201,12 @@ export default function Journal() {
   return (
     <Page>
       <Navbar
-        title="Journal"
+        title="Logs"
         rightAction={
           <button
             onClick={openAddPopup}
             className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-            aria-label="Add journal entry"
+            aria-label="Add log entry"
           >
             <Plus size={20} />
           </button>
@@ -218,17 +218,17 @@ export default function Journal() {
           <div className="text-center py-8">
             <FileText size={48} className="text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
-              No journal entries yet
+              No log entries yet
             </p>
             <p className="text-gray-500 dark:text-gray-500 mb-4">
-              Create your first journal entry to start tracking!
+              Create your first log entry to start tracking!
             </p>
             <button
               onClick={openAddPopup}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
             >
               <Plus size={16} />
-              Create Journal Entry
+              Create Log Entry
             </button>
           </div>
         )}

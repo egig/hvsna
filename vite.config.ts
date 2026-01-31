@@ -15,7 +15,7 @@ export default defineConfig({
       manifest: {
         name: 'Hvsna',
         short_name: 'Hvsna',
-        description: 'Hijri journal and calendar',
+        description: 'Hijri logs and calendar',
         theme_color: '#5A4A7A',
         background_color: '#ffffff',
         display: 'standalone',

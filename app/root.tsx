@@ -54,7 +54,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           content="width=device-width, initial-scale=1, maximum-scale=1"
         />
         <meta name="theme-color" content="#5A4A7A" />
-        <meta name="description" content="Hijri journal and calendar" />
+        <meta name="description" content="Hijri logs and calendar" />
         <Meta />
         <Links />
       </head>

@@ -2,13 +2,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useTargetResults } from '../useTargetResults';
 import { useTargetStore } from '../../modules/target/targetStore';
-import { useLogStore } from '../../modules/journal/logStore';
+import { useLogStore } from '../../modules/log/logStore';
 import type { Target } from '../../modules/target/targetStore';
 import type { Log } from '~/lib/tracker/types';
 
 // Mock the stores
 vi.mock('../../modules/target/targetStore');
-vi.mock('../../modules/journal/logStore');
+vi.mock('../../modules/log/logStore');
 
 const mockGetTargetsFromDB = vi.fn();
 const mockGetLogsFromDB = vi.fn();

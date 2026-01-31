@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAttributeOptionStore } from "./attributeOptionStore";
+import { useAttributeOptionStore } from "./optionStore";
 import type {
   AttributeOption,
   AttributeOptionCreateInput,
   AttributeOptionUpdateInput,
-} from "./attributeOptionStore";
+} from "./optionStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
 export function useAttributeOption(attributeOptionId?: string) {
@@ -44,7 +44,7 @@ export function useAttributeOption(attributeOptionId?: string) {
 
       try {
         const attributeOption: AttributeOption = {
-          id: `attribute_option:${crypto.randomUUID()}`,
+          id: `opt_:${crypto.randomUUID()}`,
           ...input,
           createdAt: Date.now(),
         };

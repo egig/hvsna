@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { useTrackerAttributeStore } from "../tracker_attribute/trackerAttributeStore";
+import { useTrackerAttributeStore } from "../attribute/trackerAttributeStore";
 import type {
   TrackerAttribute,
   TrackerAttributeCreateInput,
   TrackerAttributeUpdateInput,
-} from "../tracker_attribute/trackerAttributeStore";
+} from "../attribute/trackerAttributeStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
 export function useTrackerAttribute(trackerAttributeId?: string) {
@@ -44,7 +44,7 @@ export function useTrackerAttribute(trackerAttributeId?: string) {
 
       try {
         const trackerAttribute: TrackerAttribute = {
-          id: `tracker_attribute:${crypto.randomUUID()}`,
+          id: `attr_${crypto.randomUUID()}`,
           ...input,
           createdAt: Date.now(),
         };

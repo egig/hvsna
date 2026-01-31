@@ -36,8 +36,8 @@ export function useTrackers() {
       try {
         const result = await db.allDocs({
           include_docs: true,
-          startkey: "tracker:",
-          endkey: "tracker:\uffff",
+          startkey: "trac_",
+          endkey: "trac_:\uffff",
         });
 
         let trackers = result.rows

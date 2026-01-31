@@ -159,7 +159,7 @@ export const useTargetStore = create<TargetState>()(
           set({ loading: true, error: null });
 
           const target: Target = {
-            id: `target:${crypto.randomUUID()}`,
+            id: `target_${crypto.randomUUID()}`,
             name: "",
             ...input,
             createdAt: Date.now(),
@@ -275,8 +275,8 @@ export const useTargetStore = create<TargetState>()(
 
           const result = await db.allDocs({
             include_docs: true,
-            startkey: "target:",
-            endkey: "target:\uffff",
+            startkey: "target_",
+            endkey: "target_\uffff",
           });
 
           let targets = result.rows

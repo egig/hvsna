@@ -1,7 +1,7 @@
-import type { TrackerAttribute } from "../modules/tracker_attribute/trackerAttributeStore";
+import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
 import type { Log } from "~/lib/tracker/types";
-import type { AttributeOption } from "../modules/attribute_option/attributeOptionStore";
-import { useAttributeOptions } from "../modules/attribute_option/use-attribute-options";
+import type { AttributeOption } from "../modules/option/optionStore";
+import { useAttributeOptions } from "../modules/option/use-options";
 import { useEffect, useState } from "react";
 
 interface CustomAttributeInputProps {

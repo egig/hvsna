@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Database, Trash2, AlertTriangle } from "lucide-react";
 import { usePouchDB } from "../pouchdb";
-import { Navbar } from "../navigation/components/Navbar";
+import { Navbar, Page } from "../modules/navigation";
 
 export default function DataManagement() {
   const { db } = usePouchDB();
@@ -37,8 +37,8 @@ export default function DataManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar title="Data Management" showBackButton />
+    <Page>
+      <Navbar title="Wipe local data" showBackButton />
 
       <main className="max-w-[520px] mx-auto px-4 py-6">
         {/* Warning Section */}
@@ -84,6 +84,6 @@ export default function DataManagement() {
           </button>
         </div>
       </main>
-    </div>
+    </Page>
   );
 }

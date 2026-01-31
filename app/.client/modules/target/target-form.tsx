@@ -13,7 +13,7 @@ import {
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import { useTrackers } from "../tracker/use-trackers";
-import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 
 interface TargetFormProps {
   targetId?: string | null;

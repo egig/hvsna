@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import type { AttributeOption } from "./attributeOptionStore";
+import type { AttributeOption } from "./optionStore";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
-import { useAttributeOption } from "./use-attribute-option";
-import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
+import { useAttributeOption } from "./use-option";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTrackers } from "../tracker/use-trackers";
 
 interface AttributeOptionFormProps {

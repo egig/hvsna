@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { useAttributeOptionStore } from "./attributeOptionStore";
+import { useAttributeOptionStore } from "./optionStore";
 import type {
   AttributeOption,
   AttributeOptionQuery,
-} from "./attributeOptionStore";
+} from "./optionStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
 export function useAttributeOptions(attributeId?: string) {
@@ -39,8 +39,8 @@ export function useAttributeOptions(attributeId?: string) {
       try {
         const result = await db.allDocs({
           include_docs: true,
-          startkey: "attribute_option:",
-          endkey: "attribute_option:\uffff",
+          startkey: "opt_:",
+          endkey: ":\uffff",
         });
 
         let attributeOptions = result.rows.map(

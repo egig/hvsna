@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Plus, Settings, RefreshCw } from "lucide-react";
-import type { AttributeOption } from "./attributeOptionStore";
-import AttributeOptionForm from "./attribute-option-form";
+import type { AttributeOption } from "./optionStore";
 import { Modal } from "../navigation/modal";
 import { Navbar, Page } from "../navigation";
-import { useAttributeOptions } from "./use-attribute-options";
-import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
+import { useAttributeOptions } from "./use-options";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
+import AttributeOptionForm from "./option-form";
 
 export default function AttributeOptions() {
   const {

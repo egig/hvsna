@@ -43,7 +43,7 @@ export function useTracker(trackerId?: string) {
 
       try {
         const tracker: Tracker = {
-          id: `tracker:${crypto.randomUUID()}`,
+          id: `trac_${crypto.randomUUID()}`,
           ...input,
           createdAt: Date.now(),
         };

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useTargetStore } from "../modules/target/targetStore";
-import { useLogStore } from "../modules/journal/logStore";
+import { useLogStore } from "../modules/log/logStore";
 import type { Target, TargetCalculation, TargetDirection, TargetPeriod } from "../modules/target/targetStore";
 import type { Log } from "~/lib/tracker/types";
 import type { EpochTime } from "~/lib/tracker/types";

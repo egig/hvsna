@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { useTrackerAttributeStore } from "../tracker_attribute/trackerAttributeStore";
+import { useTrackerAttributeStore } from "../attribute/trackerAttributeStore";
 import type {
   TrackerAttribute,
   TrackerAttributeQuery,
-} from "../tracker_attribute/trackerAttributeStore";
+} from "../attribute/trackerAttributeStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
 export function useTrackerAttributes(trackerId?: string) {
@@ -39,8 +39,8 @@ export function useTrackerAttributes(trackerId?: string) {
       try {
         const result = await db.allDocs({
           include_docs: true,
-          startkey: "tracker_attribute:",
-          endkey: "tracker_attribute:\uffff",
+          startkey: "attr_",
+          endkey: "attr_\uffff",
         });
 
         let trackerAttributes = result.rows.map(

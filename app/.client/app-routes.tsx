@@ -6,13 +6,14 @@ import About from "./pages/about";
 import Settings from "./pages/settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
-import Journal from "./modules/journal/journal";
+import Logs from "./modules/log/logs";
 import Trackers from "./modules/tracker/trackers";
 import Targets from "./modules/target/targets";
-import TrackersAttributes from "./modules/tracker_attribute/tracker-attributes";
-import AttributeOptions from "./modules/attribute_option/attribute-options";
+import TrackersAttributes from "./modules/attribute/tracker-attributes";
+import AttributeOptions from "./modules/option/options";
 import { TargetResults } from "./components/TargetResults";
 import { Home } from "./components/Home";
+import DataManagement from "./pages/data-management";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -30,8 +31,9 @@ export const AppRoutes = () => {
           <Route path="settings" element={<Settings />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="results" element={<TargetResults />} />
-          <Route path="journal" element={<Journal />} />
+          <Route path="logs" element={<Logs />} />
           <Route path="about" element={<About />} />
+          <Route path="wipe-local" element={<DataManagement />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
         </Route>
