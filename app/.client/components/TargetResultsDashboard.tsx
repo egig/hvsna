@@ -80,7 +80,7 @@ interface TargetResultsSummaryProps {
   results: TargetResultData[];
 }
 
-function TargetResultsSummary({ results }: TargetResultsSummaryProps) {
+export function TargetResultsSummary({ results }: TargetResultsSummaryProps) {
   const stats = {
     total: results.length,
     succeed: results.filter(r => r.result === 'succeed').length,

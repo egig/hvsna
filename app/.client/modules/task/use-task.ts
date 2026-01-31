@@ -65,12 +65,10 @@ export const useTask = (taskId?: string): UseTaskReturn => {
           trackerId: target.trackerId,
           timestamp: Date.now(),
           value: updatedTask.targetValue as number, // 1 for completed, 0 for re-opened
-          metadata: {
-            taskName: updatedTask.name,
-            previousStatus: currentTask.status,
+          taskId: updatedTask.id,
+          attributes: {
             newStatus: input.status,
             targetValue: updatedTask.targetValue,
-            reversedValue: input.status === 'completed' ? undefined : -1 // Mark as reversed when re-opened
           }
         });
       } catch (logError) {

@@ -1,0 +1,247 @@
+import { useState, useEffect } from 'react';
+import { usePouchDB } from '../pouchdb';
+import { useTargetResults } from '../hooks/useTargetResults';
+import { useLogStore } from '../modules/journal/logStore';
+import { TargetResultsSummary } from '../components/TargetResultsDashboard';
+import type { TargetResultData } from '../hooks/useTargetResults';
+import type { Log } from '~/lib/tracker/types';
+
+interface RecentLogsProps {
+  logs: Log[];
+}
+
+function RecentLogs({ logs }: RecentLogsProps) {
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (logs.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-400 mb-2">No recent logs</div>
+        <div className="text-gray-500 text-sm">Start tracking to see your recent activity</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {logs.map((log) => (
+        <div key={log.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <div className="font-medium text-gray-900">
+                Value: {log.value}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Tracker ID: {log.trackerId}
+              </div>
+              {log.attributes && Object.keys(log.attributes).length > 0 && (
+                <div className="text-xs text-gray-500 mt-2">
+                  {Object.entries(log.attributes).map(([key, value]) => (
+                    <span key={key} className="mr-3">
+                      {key}: {String(value)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="text-sm text-gray-500 whitespace-nowrap ml-4">
+              {formatDate(log.timestamp)}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface TargetResultsOverviewProps {
+  results: TargetResultData[];
+}
+
+function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
+  if (results.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-400 mb-2">No targets found</div>
+        <div className="text-gray-500 text-sm">Create some targets to see your progress</div>
+      </div>
+    );
+  }
+
+  // Show only the first 6 results for overview
+  const overviewResults = results.slice(0, 6);
+
+  return (
+    <div className="space-y-4">
+      <TargetResultsSummary results={results} />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {overviewResults.map((result) => (
+          <div key={result.targetId} className={`border rounded-lg p-4 transition-all hover:shadow-md ${
+            result.result === 'succeed' ? 'text-green-600 bg-green-50 border-green-200' :
+            result.result === 'on-track' ? 'text-blue-600 bg-blue-50 border-blue-200' :
+            'text-orange-600 bg-orange-50 border-orange-200'
+          }`}>
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-semibold text-lg truncate flex-1 mr-2">{result.targetName}</h3>
+              <span className={`px-2 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
+                result.result === 'succeed' ? 'text-green-600 bg-green-100' :
+                result.result === 'on-track' ? 'text-blue-600 bg-blue-100' :
+                'text-orange-600 bg-orange-100'
+              }`}>
+                {result.result === 'succeed' ? '✓' : 
+                 result.result === 'on-track' ? '→' : '!'} {result.result}
+              </span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm opacity-75">Current</span>
+                <span className="font-medium">{result.currentValue}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm opacity-75">Target</span>
+                <span className="font-medium">
+                  {result.targetValue}
+                  {result.targetMax && ` - ${result.targetMax}`}
+                </span>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs opacity-60">
+                  <span>Progress</span>
+                  <span>{Math.round(result.percentage)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      result.result === 'succeed' ? 'bg-green-600' :
+                      result.result === 'on-track' ? 'bg-blue-600' :
+                      'bg-orange-600'
+                    }`}
+                    style={{ width: `${Math.min(100, result.percentage)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {results.length > 6 && (
+        <div className="text-center">
+          <div className="text-sm text-gray-500">
+            Showing 6 of {results.length} targets
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Home() {
+  const { db } = usePouchDB();
+  const { getTargetResults } = useTargetResults();
+  const { getLogsFromDB } = useLogStore();
+  
+  const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
+  const [recentLogs, setRecentLogs] = useState<Log[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadHomeData = async () => {
+      if (!db) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Load target results (last 30 days)
+        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const results = await getTargetResults({
+          from: thirtyDaysAgo,
+          to: Date.now()
+        }, db);
+
+        // Load recent logs (last 10 logs)
+        const logs = await getLogsFromDB({ limit: 10 }, db);
+
+        setTargetResults(results);
+        setRecentLogs(logs);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load home data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHomeData();
+  }, [db, getTargetResults, getLogsFromDB]);
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="text-gray-600">Loading home dashboard...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="text-red-800 font-medium">Error</div>
+          <div className="text-red-600 text-sm mt-1">{error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 h-screen overflow-y-auto">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
+          <p className="text-gray-600">Track your progress and recent activity</p>
+        </div>
+
+        {/* Target Results Overview */}
+        <section>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900">Target Results Overview</h2>
+            <div className="text-sm text-gray-500">
+              Last 30 days
+            </div>
+          </div>
+          <TargetResultsOverview results={targetResults} />
+        </section>
+
+        {/* Recent Logs */}
+        <section>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900">Recent Activity</h2>
+            <div className="text-sm text-gray-500">
+              Last 10 logs
+            </div>
+          </div>
+          <RecentLogs logs={recentLogs} />
+        </section>
+      </div>
+    </div>
+  );
+}

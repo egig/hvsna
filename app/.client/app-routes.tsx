@@ -1,5 +1,4 @@
 import { Navigate, Route, Routes, useLocation } from "react-router";
-import Home from "./pages/view-today";
 import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
 import TabLayout from "./layouts/tab-layout";
@@ -13,6 +12,7 @@ import Targets from "./modules/target/targets";
 import TrackersAttributes from "./modules/tracker_attribute/tracker-attributes";
 import AttributeOptions from "./modules/attribute_option/attribute-options";
 import { TargetResults } from "./components/TargetResults";
+import { Home } from "./components/Home";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/

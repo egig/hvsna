@@ -1,5 +1,5 @@
-import { TargetResultsDemo } from "../.client/components/TargetResults";
+import { TargetResults } from "../.client/components/TargetResults";
 
 export default function ResultsPage() {
-  return <TargetResultsDemo />;
+  return <TargetResults />;
 }

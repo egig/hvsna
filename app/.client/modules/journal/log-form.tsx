@@ -1,22 +1,12 @@
 import { useState, useEffect, use } from "react";
 import { useLog } from "./use-log";
-import type { Tracker, Log } from "~/lib/tracker/types";
-import type { TrackerAttribute } from "../tracker_attribute/trackerAttributeStore";
-import type { AttributeOption } from "../attribute_option/attributeOptionStore";
-import { Button, Page, Navbar } from "../navigation";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../tracker_attribute/use-tracker-attributes";
-import { useAttributeOptions } from "../attribute_option/use-attribute-options";
 import { LoadingSpinner } from "~/.client/components/loader";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "~/.client/components/Card";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import CustomAttributeInput from "~/.client/components/custom-attribute-input";
+import type { Log } from "~/lib/tracker/types";
 
 
 interface LogFormProps {
@@ -69,7 +59,7 @@ export default function LogForm({
       let result: Log;
       const logData = {
         trackerId: selectedTrackerId,
-        value: parseFloat(value) || 0,
+        value: parseFloat(value?.toString()) || 0,
         timestamp: new Date().getTime(),
         attributes:
           Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
