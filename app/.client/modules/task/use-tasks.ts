@@ -116,14 +116,7 @@ export const useTasks = (): UseTasksReturn => {
 
     
       try {
-        
         const target = await getTarget(updatedTask.targetId as string);
-        let attr;
-        // TODO
-        // for (let i of target.scope) {
-        //   attr[i] = currentTask.attributes[i]          
-        // }
-
         let v = updatedTask.targetValue || 0;
         if (status !== "completed") {
           v = -1 * v
@@ -132,9 +125,9 @@ export const useTasks = (): UseTasksReturn => {
         await createLog({
           trackerId: target.trackerId,
           timestamp: Date.now(),
-          value: v, // 1 for completed, 0 for re-opened
+          value: v,
           taskId: updatedTask.id,
-          attributes: attr
+          attributes: updatedTask.attributes
         });
       } catch (logError) {
         // Log creation failure shouldn't break task update
