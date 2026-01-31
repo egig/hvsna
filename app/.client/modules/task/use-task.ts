@@ -59,21 +59,10 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     // Create log if status changed
     if (input.status !== undefined && currentTask && input.status !== currentTask.status) {
       try {
-        let trackerId = id; // Default to task ID
         
-        // If task has a targetId, get the target and use its trackerId
-        if (updatedTask.targetId) {
-          try {
-            const target = await getTarget(updatedTask.targetId);
-            trackerId = target.trackerId;
-          } catch (targetError) {
-            // If target not found, fall back to task ID
-            console.warn('Target not found for task, using task ID as tracker ID:', targetError);
-          }
-        }
-        
+        const target = await getTarget(updatedTask.targetId as string);
         await createLog({
-          trackerId: trackerId,
+          trackerId: target.trackerId,
           timestamp: Date.now(),
           value: updatedTask.targetValue as number, // 1 for completed, 0 for re-opened
           metadata: {
