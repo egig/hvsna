@@ -16,6 +16,8 @@ interface LogItemProps {
   onDelete?: (log: Log) => void;
   showActions?: boolean;
   compact?: boolean;
+  trackerAttributes?: TrackerAttribute[];
+  attributeOptions?: AttributeOption[];
 }
 
 export function LogItem({
@@ -37,32 +39,34 @@ export function LogItem({
   onDelete,
   showActions = true,
   compact = false,
+  trackerAttributes,
+  attributeOptions
 }: LogItemProps) {
   const [actionsOpen, setActionsOpen] = useState(false);
   const [attributesMap, setAttributesMap] = useState<Record<string, TrackerAttribute>>({});
   const [optionsMap, setOptionsMap] = useState<Record<string, AttributeOption>>({});
   
-  // Get all tracker attributes for the log's tracker
-  const { trackerAttributes } = useTrackerAttributes(log.trackerId);
-  
-  // Get attribute options for attributes that have options
-  const { attributeOptions } = useAttributeOptions();
-
   useEffect(() => {
+    if (!trackerAttributes) return
+
     // Build attributes map for quick lookup
     const attrMap: Record<string, TrackerAttribute> = {};
     trackerAttributes.forEach((attr) => {
       attrMap[attr.id] = attr;
     });
     setAttributesMap(attrMap);
-
+  }, [trackerAttributes]);
+  
+  useEffect(() => {
+    if (!attributeOptions) return
     // Build options map for quick lookup
     const optMap: Record<string, AttributeOption> = {};
     attributeOptions.forEach((opt) => {
       optMap[opt.id] = opt;
     });
     setOptionsMap(optMap);
-  }, [trackerAttributes, attributeOptions]);
+  }, [attributeOptions]);
+
 
   useEffect(() => {
     const handleClickOutside = () => setActionsOpen(false);

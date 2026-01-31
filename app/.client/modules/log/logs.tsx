@@ -9,6 +9,8 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { useTrackers } from "../tracker/use-trackers";
 import { Page } from "../navigation";
+import { useAttributeOptions } from "../option/use-options";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 
 export default function Logs() {
   const { loading, error, getLogs, refreshLogs, logs } = useLogs();
@@ -17,6 +19,8 @@ export default function Logs() {
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
+  const {attributeOptions} = useAttributeOptions()
+  const {trackerAttributes} = useTrackerAttributes()
 
   useEffect(() => {
     loadData();
@@ -151,6 +155,8 @@ export default function Logs() {
                 getTrackerName={getTrackerName}
                 formatLogValue={formatLogValue}
                 formatTimestamp={formatTimestamp}
+                attributeOptions={attributeOptions}
+                trackerAttributes={trackerAttributes}
               />
             ))}
           </div>

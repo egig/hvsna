@@ -8,13 +8,19 @@ import { TargetResultsSummary } from '../components/TargetResultsDashboard';
 import type { TargetResultData } from '../hooks/useTargetResults';
 import type { Log } from '~/lib/tracker/types';
 import type { Tracker } from '~/lib/tracker/types';
+import type { AttributeOption } from '../modules/option/optionStore';
+import type { TrackerAttribute } from '../modules/attribute/trackerAttributeStore';
+import { useAttributeOptions } from '../modules/option/use-options';
+import { useTrackerAttributes } from '../modules/attribute/use-tracker-attributes';
 
 interface RecentLogsProps {
   logs: Log[];
   trackers: Tracker[];
+  attributeOptions: AttributeOption[];
+  trackerAttributes: TrackerAttribute[];
 }
 
-function RecentLogs({ logs, trackers }: RecentLogsProps) {
+function RecentLogs({ logs, trackers, attributeOptions, trackerAttributes }: RecentLogsProps) {
   if (logs.length === 0) {
     return (
       <div className="text-center py-8">
@@ -33,6 +39,8 @@ function RecentLogs({ logs, trackers }: RecentLogsProps) {
           trackers={trackers}
           compact={true}
           showActions={false}
+          attributeOptions={attributeOptions}
+          trackerAttributes={trackerAttributes}
         />
       ))}
     </div>
@@ -136,6 +144,8 @@ export function Home() {
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {attributeOptions} = useAttributeOptions()
+  const {trackerAttributes} = useTrackerAttributes()
 
   useEffect(() => {
     const loadHomeData = async () => {
@@ -221,7 +231,7 @@ export function Home() {
               Last 10 logs
             </div>
           </div>
-          <RecentLogs logs={recentLogs} trackers={trackers} />
+          <RecentLogs logs={recentLogs} trackers={trackers}  trackerAttributes={trackerAttributes} attributeOptions={attributeOptions}/>
         </section>
       </div>
     </div>
