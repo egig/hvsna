@@ -1,10 +1,11 @@
 import { useLocation } from "react-router";
 import { Button } from "./button";
-import { Check, CheckSquare, Home, Settings } from "lucide-react";
+import { CheckSquare, Home, Settings, Target } from "lucide-react";
 
 const tabs = [
   { path: "/", label: "Home", icon: <Home /> },
   { path: "/tasks", label: "Tasks", icon: <CheckSquare /> },
+  { path: "/results", label: "Results", icon: <Target /> },
   { path: "/settings", label: "Settings", icon: <Settings /> },
 ];
 

@@ -12,6 +12,7 @@ import Trackers from "./modules/tracker/trackers";
 import Targets from "./modules/target/targets";
 import TrackersAttributes from "./modules/tracker_attribute/tracker-attributes";
 import AttributeOptions from "./modules/attribute_option/attribute-options";
+import { TargetResultsDemo } from "./components/TargetResults";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -28,6 +29,7 @@ export const AppRoutes = () => {
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="results" element={<TargetResultsDemo />} />
           <Route path="journal" element={<Journal />} />
           <Route path="about" element={<About />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />
