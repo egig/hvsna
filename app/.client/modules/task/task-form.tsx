@@ -8,6 +8,7 @@ import { Check } from "lucide-react";
 import { Navbar } from "../navigation";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
+import { useTargets } from "../target/use-targets";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -24,12 +25,11 @@ export default function TaskForm({
 }: TaskFormProps) {
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
+  const {targets} = useTargets();
   const { db } = usePouchDB();
   const { getTargetsFromDB } = useTargetStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [targets, setTargets] = useState<Target[]>([]);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
-  const [targetValue, setTargetValue] = useState<string>("");
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(task?.targetId as string);
 
   useEffect(() => {
     if (error && onError) {
@@ -38,28 +38,9 @@ export default function TaskForm({
   }, [error, onError]);
 
   useEffect(() => {
-    const loadTargets = async () => {
-      if (db) {
-        try {
-          const targetsList = await getTargetsFromDB({}, db);
-          setTargets(targetsList);
-        } catch (err) {
-          console.error("Failed to load targets:", err);
-        }
-      }
-    };
-    loadTargets();
-  }, [db, getTargetsFromDB]);
+    setSelectedTargetId(task?.targetId || "");
+  }, [task])
 
-  useEffect(() => {
-    if (task) {
-      setSelectedTargetId(task.targetId || "");
-      setTargetValue(task.targetValue?.toString() || "");
-    } else {
-      setSelectedTargetId("");
-      setTargetValue("");
-    }
-  }, [task]);
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
@@ -69,14 +50,12 @@ export default function TaskForm({
 
       const taskInput: any = {
         name: taskData.name.trim(),
+        targetId: taskData.targetId,
+        targetValue: taskData.targetValue
       };
 
       if (selectedTargetId) {
         taskInput.targetId = selectedTargetId;
-      }
-
-      if (targetValue) {
-        taskInput.targetValue = parseFloat(targetValue);
       }
 
       let result: Task;
@@ -136,7 +115,9 @@ export default function TaskForm({
               Target (Optional)
             </label>
             <select
-              value={selectedTargetId}
+              // HACK to set this re-render
+              key={Math.random()}
+              defaultValue={selectedTargetId}
               onChange={(e) => setSelectedTargetId(e.target.value)}
               disabled={isSubmitting}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -154,8 +135,7 @@ export default function TaskForm({
             <FormInput
               name="targetValue"
               label="Target Value"
-              value={targetValue}
-              onChange={setTargetValue}
+              value={task?.targetValue?.toString() || ""}
               placeholder="Enter target value"
               type="number"
               disabled={isSubmitting}

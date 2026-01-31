@@ -3,7 +3,7 @@ import type {
   TaskCreateInput,
   TaskUpdateInput,
 } from "../../../lib/types/task";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePouchDB } from "../../pouchdb";
 import { useTaskStore } from "./task-store";
 
@@ -21,20 +21,20 @@ export interface UseTaskReturn {
 export const useTask = (taskId?: string): UseTaskReturn => {
   const { db } = usePouchDB();
   const store = useTaskStore();
+  const [task, setTask] = useState<Task | null>(null)
 
-  // useEffect(() => {
-  //   if (taskId) {
-  //     store.getTask(taskId, db).then((fetchedTask) => {
-  //       if (fetchedTask) {
-  //         console.log(fetchedTask.name);
-  //         store.setTask(fetchedTask);
-  //       }
-  //     });
-  //   }
-  // }, [taskId]);
+  useEffect(() => {
+    if (taskId) {
+      store.getTask(taskId, db).then((fetchedTask) => {
+        if (fetchedTask) {
+          setTask(fetchedTask)
+        }
+      });
+    }
+  }, [taskId]);
 
   return {
-    task: store.task,
+    task,
     loading: store.loading,
     error: store.error,
     createTask: (input: TaskCreateInput) => store.createTask(input, db),

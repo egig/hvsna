@@ -212,18 +212,6 @@ export const useTaskStore = create<TaskState>()(
             created_at: updatedDoc.created_at,
             updated_at: updatedDoc.updated_at,
           };
-
-          // Log when task status changes to completed
-          if (input.status === "completed" && existingDoc.status !== "completed") {
-            console.log("Task completed:", {
-              taskId: updatedTask.id,
-              taskName: updatedTask.name,
-              targetId: updatedTask.targetId,
-              targetValue: updatedTask.targetValue,
-              completedAt: new Date().toISOString(),
-            });
-          }
-
           // set({ task: updatedTask });
 
           // Also update in the tasks list

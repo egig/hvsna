@@ -161,6 +161,7 @@ export default function Tasks() {
   };
 
   const openEditPopup = (task: Task) => {
+    setEditingTaskId(task.id)
     setSheetOpened(true);
   };
 
