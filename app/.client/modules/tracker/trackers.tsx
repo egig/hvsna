@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { Plus, BarChart2, RefreshCw } from "lucide-react";
 import type { Tracker } from "~/lib/tracker/types";
 import TrackerForm from "./tracker-form";
 import { Modal } from "../navigation/modal";
-import { Navbar, Page } from "../navigation";
+import { Button, Navbar, Page } from "../navigation";
 import { useTrackers } from "./use-trackers";
 
 export default function Trackers() {
@@ -132,9 +133,9 @@ export default function Trackers() {
             {trackers.map((tracker) => (
               <div
                 key={tracker.id}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between group hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between group hover:shadow-md transition-shadow cursor-pointer"
               >
-                <div>
+                <div className="flex-1">
                   <h3 className="font-medium text-gray-900 dark:text-white">
                     {tracker.name}
                   </h3>
@@ -143,14 +144,21 @@ export default function Trackers() {
                   </p>
                 </div>
                 <div className="flex gap-2 group-hover:opacity-100 transition-opacity">
+                  <Button to={`/trackers/${tracker.id}`}>Detail</Button>
                   <button
-                    onClick={() => openEditPopup(tracker)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditPopup(tracker);
+                    }}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeleteTracker(tracker)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTracker(tracker);
+                    }}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   >
                     Delete

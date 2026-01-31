@@ -157,6 +157,7 @@ export default function TrackerAttributeForm({
                 Type
               </label>
               <select
+                key={Math.random()}
                 name="type"
                 defaultValue={trackerAttribute?.type || "text"}
                 disabled={isSubmitting}
@@ -189,6 +190,7 @@ export default function TrackerAttributeForm({
                 Tracker *
               </label>
               <select
+                key={Math.random()}
                 name="trackerId"
                 defaultValue={trackerAttribute?.trackerId || ""}
                 disabled={isSubmitting}

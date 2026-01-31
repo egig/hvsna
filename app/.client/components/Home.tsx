@@ -2,24 +2,19 @@ import { useState, useEffect } from 'react';
 import { usePouchDB } from '../pouchdb';
 import { useTargetResults } from '../hooks/useTargetResults';
 import { useLogStore } from '../modules/log/logStore';
+import { useTrackers } from '../modules/tracker/use-trackers';
+import { LogItem } from './log-item';
 import { TargetResultsSummary } from '../components/TargetResultsDashboard';
 import type { TargetResultData } from '../hooks/useTargetResults';
 import type { Log } from '~/lib/tracker/types';
+import type { Tracker } from '~/lib/tracker/types';
 
 interface RecentLogsProps {
   logs: Log[];
+  trackers: Tracker[];
 }
 
-function RecentLogs({ logs }: RecentLogsProps) {
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
+function RecentLogs({ logs, trackers }: RecentLogsProps) {
   if (logs.length === 0) {
     return (
       <div className="text-center py-8">
@@ -32,30 +27,13 @@ function RecentLogs({ logs }: RecentLogsProps) {
   return (
     <div className="space-y-3">
       {logs.map((log) => (
-        <div key={log.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <div className="font-medium text-gray-900">
-                Value: {log.value}
-              </div>
-              <div className="text-sm text-gray-600 mt-1">
-                Tracker ID: {log.trackerId}
-              </div>
-              {log.attributes && Object.keys(log.attributes).length > 0 && (
-                <div className="text-xs text-gray-500 mt-2">
-                  {Object.entries(log.attributes).map(([key, value]) => (
-                    <span key={key} className="mr-3">
-                      {key}: {String(value)}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="text-sm text-gray-500 whitespace-nowrap ml-4">
-              {formatDate(log.timestamp)}
-            </div>
-          </div>
-        </div>
+        <LogItem
+          key={log.id}
+          log={log}
+          trackers={trackers}
+          compact={true}
+          showActions={false}
+        />
       ))}
     </div>
   );
@@ -151,9 +129,11 @@ export function Home() {
   const { db } = usePouchDB();
   const { getTargetResults } = useTargetResults();
   const { getLogsFromDB } = useLogStore();
+  const { getTrackers } = useTrackers();
   
   const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
+  const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -167,16 +147,18 @@ export function Home() {
 
         // Load target results (last 30 days)
         const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-        const results = await getTargetResults({
-          from: thirtyDaysAgo,
-          to: Date.now()
-        }, db);
-
-        // Load recent logs (last 10 logs)
-        const logs = await getLogsFromDB({ limit: 10 }, db);
+        const [results, logs, trackersData] = await Promise.all([
+          getTargetResults({
+            from: thirtyDaysAgo,
+            to: Date.now()
+          }, db),
+          getLogsFromDB({ limit: 10 }, db),
+          getTrackers()
+        ]);
 
         setTargetResults(results);
         setRecentLogs(logs);
+        setTrackers(trackersData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load home data');
       } finally {
@@ -185,7 +167,7 @@ export function Home() {
     };
 
     loadHomeData();
-  }, [db, getTargetResults, getLogsFromDB]);
+  }, [db, getTargetResults, getLogsFromDB, getTrackers]);
 
   if (loading) {
     return (
@@ -239,7 +221,7 @@ export function Home() {
               Last 10 logs
             </div>
           </div>
-          <RecentLogs logs={recentLogs} />
+          <RecentLogs logs={recentLogs} trackers={trackers} />
         </section>
       </div>
     </div>

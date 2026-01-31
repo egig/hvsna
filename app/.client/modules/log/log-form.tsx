@@ -52,7 +52,7 @@ export default function LogForm({
       // Add custom attributes to metadata with 'custom_' prefix
       const customMetadata: Record<string, any> = { ...log?.attributes };
       Object.values(trackerAttributes).forEach((attr) => {
-        customMetadata[`custom_${attr.id}`] =
+        customMetadata[`${attr.id}`] =
           formData.get(attr.id) || attr.defaultValue;
       });
 
@@ -183,7 +183,7 @@ export default function LogForm({
                     key={attr.id}
                     logId={log?.id}
                     attr={attr}
-                    value={log?.attributes?.[`custom_${attr.id}`]}
+                    value={log?.attributes?.[`${attr.id}`]}
                     disabled={isSubmitting}
                   />
                 ))}

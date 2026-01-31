@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLogs } from "./useLogs";
 import { useLog } from "./use-log";
-import { Plus, Edit, Trash2, FileText, MoreHorizontal } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
 import type { Log, Tracker } from "~/lib/tracker/types";
 import LogForm from "./log-form";
+import { LogItem } from "../../components/log-item";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { useTrackers } from "../tracker/use-trackers";
@@ -102,101 +103,6 @@ export default function Logs() {
   const formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
   };
-
-  interface LogItemProps {
-    log: Log;
-    trackers: Tracker[];
-    onEdit: (log: Log) => void;
-    onDelete: (log: Log) => void;
-    getTrackerName: (trackerId: string) => string;
-    formatLogValue: (log: Log) => string;
-    formatTimestamp: (timestamp: number) => string;
-  }
-
-  function LogItem({
-    log,
-    trackers,
-    onEdit,
-    onDelete,
-    getTrackerName,
-    formatLogValue,
-    formatTimestamp,
-  }: LogItemProps) {
-    const [showActions, setShowActions] = useState(false);
-
-    useEffect(() => {
-      const handleClickOutside = () => setShowActions(false);
-      if (showActions) {
-        document.addEventListener("click", handleClickOutside);
-        return () => document.removeEventListener("click", handleClickOutside);
-      }
-    }, [showActions]);
-
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-start gap-3">
-          {/* Log Icon */}
-          <div className="flex-shrink-0 mt-1">
-            <FileText size={24} className="text-green-500" />
-          </div>
-
-          {/* Log Content */}
-          <div className="flex-1 min-w-0">
-            <h3
-              className="font-medium text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-              onClick={() => onEdit(log)}
-            >
-              {getTrackerName(log.trackerId)}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {formatLogValue(log)} • {formatTimestamp(log.timestamp)}
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Created: {new Date(log.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-
-          {/* Actions */}
-          <div className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowActions(!showActions);
-              }}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <MoreHorizontal size={16} className="text-gray-500" />
-            </button>
-
-            {showActions && (
-              <div className="absolute right-0 top-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10 min-w-[120px]">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(log);
-                    setShowActions(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(log);
-                    setShowActions(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <Page>
