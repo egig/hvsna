@@ -7,13 +7,14 @@ import { LogItem } from "./log-item";
 import { TargetResultsSummary } from "../components/TargetResultsDashboard";
 import type { TargetResultData } from "../hooks/useTargetResults";
 import type { Log } from "~/lib/tracker/types";
-import type { Tracker } from "~/lib/tracker/types";
 import type { AttributeOption } from "../modules/option/optionStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
 import { useAttributeOptions } from "../modules/option/use-options";
 import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 import { Navbar, Page } from "../modules/navigation";
 import Block from "./block";
+import BlockTitle from "./block-title";
+import type { Tracker } from "../modules/tracker/trackerStore";
 
 interface RecentLogsProps {
   logs: Log[];
@@ -77,7 +78,6 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
 
   return (
     <div className="space-y-4">
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {overviewResults.map((result) => (
           <div
@@ -239,19 +239,11 @@ export function Home() {
     <Page>
       <Navbar title={"Home"} />
       <Block>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Results Overview
-          </h2>
-          <div className="text-sm text-gray-500"> Latest</div>
-        </div>
+        <BlockTitle extra={"Latest"}>Summary</BlockTitle>
         <TargetResultsOverview results={targetResults} />
       </Block>
       <Block>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Recent</h2>
-          <div className="text-sm text-gray-500">Last 10 logs</div>
-        </div>
+        <BlockTitle extra={"Last 10 logs"}>Recent</BlockTitle>
         <RecentLogs
           logs={recentLogs}
           trackers={trackers}

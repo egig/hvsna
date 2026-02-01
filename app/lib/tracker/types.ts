@@ -30,6 +30,7 @@ export interface Log {
   attributes?: Record<string, unknown>;
   createdAt: EpochTime;
   negative?: boolean;
+  note?: string;
 }
 
 /* ---------- Target ---------- */

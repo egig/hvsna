@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
     e.stopPropagation();
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -65,6 +66,7 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }

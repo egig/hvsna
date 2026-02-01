@@ -9,9 +9,9 @@ export function Reports() {
 
   return (
     <Page>
-      <Navbar showBackButton={false} title="Reports"/>
+      <Navbar showBackButton={false} title="Reports" />
       <Block>
-      <TargetResultsDashboard db={db} />
+        <TargetResultsDashboard db={db} />
       </Block>
     </Page>
   );

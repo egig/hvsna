@@ -10,12 +10,14 @@ export interface LogCreateInput {
   value: number;
   taskId?: string;
   attributes?: Record<string, unknown>;
+  note?: string;
 }
 
 export interface LogUpdateInput {
   timestamp?: EpochTime;
   value?: number;
   attributes?: Record<string, unknown>;
+  note?: string;
 }
 
 export interface LogQuery {
@@ -35,6 +37,7 @@ interface PouchDBLogDocument {
   value: number;
   metadata?: Record<string, unknown>;
   createdAt: EpochTime;
+  note?: string;
 }
 
 interface LogState {
@@ -159,6 +162,7 @@ export const useLogStore = create<LogState>()(
             timestamp: input.timestamp ?? existingLog.timestamp,
             value: input.value ?? existingLog.value,
             attributes: input.attributes ?? existingLog.attributes,
+            note: input.note ?? (existingLog as any).note,
             createdAt: existingLog.createdAt,
           };
 

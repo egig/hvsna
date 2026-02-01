@@ -32,7 +32,6 @@ export const AppRoutes = () => {
           <Route path="settings" element={<Settings />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="reports" element={<Reports />} />
-          <Route path="logs" element={<Logs />} />
           <Route path="about" element={<About />} />
           <Route path="wipe-local" element={<DataManagement />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />
@@ -43,6 +42,7 @@ export const AppRoutes = () => {
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
         <Route path="attribute-options" element={<AttributeOptions />} />
         <Route path="targets" element={<Targets />} />
+        <Route path="logs" element={<Logs />} />
       </Routes>
       <Routes>
         {/* <Route path="settings" element={<div>Settings</div>} /> */}

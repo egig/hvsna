@@ -43,7 +43,7 @@ export default function LogForm({
   }, [error, onError]);
 
   const handleSubmit = async (formData: FormData) => {
-    const { value, timestamp, negative } = Object.fromEntries(
+    const { value, timestamp, negative, note } = Object.fromEntries(
       formData.entries(),
     );
 
@@ -65,6 +65,7 @@ export default function LogForm({
         negative,
         value: parseFloat(value?.toString()) || 0,
         timestamp: new Date().getTime(),
+        note: note?.toString() || undefined,
         attributes:
           Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
       };
@@ -104,114 +105,101 @@ export default function LogForm({
       onError={onError}
       onCancel={handleCancel}
     >
-      <div
-        className="
-        flex-1
-        overflow-y-auto
-        scroll-area
-        bg-gray-50
-        safe-top
-        safe-bottom
-        safe-x
-        mb-12
-      "
-      >
-        <div
-          className="
-          max-w-lg
-          mx-auto
-          w-full
-          py-4
-          px-4
-        "
-        >
-          {(loading || trackerLoading || attributesLoading) && (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner size="lg" text="Loading log data..." />
-            </div>
-          )}
+      {(loading || trackerLoading || attributesLoading) && (
+        <div className="flex justify-center py-12">
+          <LoadingSpinner size="lg" text="Loading log data..." />
+        </div>
+      )}
 
-          <div className="space-y-5">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tracker
-                <span className="text-red-500 ml-1">*</span>
-              </label>
-              <select
-                key={selectedTrackerId}
-                defaultValue={selectedTrackerId}
-                onChange={(e) => setSelectedTrackerId(e.target.value)}
-                disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-                required
-              >
-                <option value="">Select a tracker</option>
-                {trackers.map((tracker) => (
-                  <option key={tracker.id} value={tracker.id}>
-                    {tracker.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+      <div className="space-y-5">
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tracker
+            <span className="text-red-500 ml-1">*</span>
+          </label>
+          <select
+            key={selectedTrackerId}
+            defaultValue={selectedTrackerId}
+            onChange={(e) => setSelectedTrackerId(e.target.value)}
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+            required
+          >
+            <option value="">Select a tracker</option>
+            {trackers.map((tracker) => (
+              <option key={tracker.id} value={tracker.id}>
+                {tracker.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            {selectedTracker && (
-              <div className="text-sm text-gray-500 mb-4">
-                Tracker: {selectedTracker.name}
-              </div>
-            )}
-
-            <div className="space-y-5">
-              <div className="mb-4">
-                <label>
-                  <input
-                    key={Math.random()}
-                    defaultChecked={
-                      log ? log.negative : selectedTracker?.negative
-                    }
-                    name="negative"
-                    type="checkbox"
-                  />{" "}
-                  negative
-                </label>
-              </div>
-            </div>
-
-            {selectedTracker?.type === "amount" && (
-              <FormInput
-                name="value"
-                label="Value"
-                type="number"
-                value={log?.value as unknown as string}
-                placeholder="0"
-                disabled={isSubmitting}
-                required={true}
-                className="text-base"
-              />
-            )}
-            {selectedTracker && selectedTracker.type === "amount" && (
-              <p className="text-sm text-gray-500 -mt-2 mb-4">
-                Value in {selectedTracker.unit}
-              </p>
-            )}
-
-            {/* Custom Attributes */}
-            {trackerAttributes && trackerAttributes.length > 0 && (
-              <div className="space-y-4 mb-4 border-1 border-gray-200 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700">
-                  Custom Attributes
-                </h3>
-                {trackerAttributes.map((attr) => (
-                  <CustomAttributeInput
-                    key={attr.id}
-                    logId={log?.id}
-                    attr={attr}
-                    value={log?.attributes?.[`${attr.id}`]}
-                    disabled={isSubmitting}
-                  />
-                ))}
-              </div>
-            )}
+        {selectedTracker && (
+          <div className="text-sm text-gray-500 mb-4">
+            Tracker: {selectedTracker.name}
           </div>
+        )}
+
+        <div className="space-y-5">
+          <div className="mb-4">
+            <label>
+              <input
+                key={Math.random()}
+                defaultChecked={log ? log.negative : selectedTracker?.negative}
+                name="negative"
+                type="checkbox"
+              />{" "}
+              negative
+            </label>
+          </div>
+        </div>
+
+        {selectedTracker?.type === "amount" && (
+          <FormInput
+            name="value"
+            label="Value"
+            type="number"
+            value={log?.value as unknown as string}
+            placeholder="0"
+            disabled={isSubmitting}
+            required={true}
+            className="text-base"
+          />
+        )}
+        {selectedTracker && selectedTracker.type === "amount" && (
+          <p className="text-sm text-gray-500 -mt-2 mb-4">
+            Value in {selectedTracker.unit}
+          </p>
+        )}
+
+        {/* Custom Attributes */}
+        {trackerAttributes && trackerAttributes.length > 0 && (
+          <div className="">
+            {trackerAttributes.map((attr) => (
+              <CustomAttributeInput
+                key={attr.id}
+                logId={log?.id}
+                attr={attr}
+                value={log?.attributes?.[`${attr.id}`]}
+                disabled={isSubmitting}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Note Field */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Note
+          </label>
+          <textarea
+            name="note"
+            defaultValue={log?.note || ""}
+            disabled={isSubmitting}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50 resize-none"
+            placeholder="Add a note..."
+          />
         </div>
       </div>
     </BaseForm>

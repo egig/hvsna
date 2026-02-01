@@ -39,6 +39,7 @@ export default function BaseForm<T = void>({
 
   return (
     <form
+      className="h-[100%]"
       onSubmit={async (e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -55,7 +56,7 @@ export default function BaseForm<T = void>({
           </NavActionButton>
         }
       />
-      <Block>{children}</Block>
+      <div className="p-6 max-h-[450px] overflow-y-auto">{children}</div>
     </form>
   );
 }
