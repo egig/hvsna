@@ -59,11 +59,16 @@ export default function LogForm({
           formData.get(attr.id) || attr.defaultValue;
       });
 
+      let v = parseFloat(value?.toString())
+      if (selectedTracker?.type === "counter") {
+        v = 1;
+      }
+
       let result: Log;
       const logData = {
         trackerId: selectedTrackerId,
         negative,
-        value: parseFloat(value?.toString()) || 0,
+        value: v,
         timestamp: new Date().getTime(),
         note: note?.toString() || undefined,
         attributes:

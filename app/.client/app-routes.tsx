@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from "react-router";
+import { Navigate, Route, Routes, useLocation, useNavigationType } from "react-router";
 import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
 import TabLayout from "./layouts/tab-layout";
@@ -43,10 +43,7 @@ export const AppRoutes = () => {
         <Route path="attribute-options" element={<AttributeOptions />} />
         <Route path="targets" element={<Targets />} />
         <Route path="logs" element={<Logs />} />
-      </Routes>
-      <Routes>
-        {/* <Route path="settings" element={<div>Settings</div>} /> */}
-        {/* <Route path="*" element={<div />} /> */}
+        <Route path="*" element={<p>Not Found</p>} />
       </Routes>
     </AnimatePresence>
   );

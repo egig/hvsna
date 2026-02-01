@@ -7,7 +7,7 @@ import {
   TargetIcon,
   MoreHorizontal,
 } from "lucide-react";
-import type { Target as TargetType, Tracker } from "~/lib/tracker/types";
+import type { Target as TargetType } from "~/lib/tracker/types";
 import TargetForm from "./target-form";
 import { Page } from "../navigation/page";
 import { Navbar } from "../navigation/navbar";
@@ -16,6 +16,7 @@ import { useTrackers } from "../tracker/use-trackers";
 import { useTargets } from "../target/use-targets";
 import { useTarget } from "../target/use-target";
 import { LoadingSpinner } from "~/.client/components/loader";
+import type { Tracker } from "../tracker/trackerStore";
 
 export default function Targets() {
   const { loading, error, targets, getTargets } = useTargets();
@@ -81,7 +82,7 @@ export default function Targets() {
   const handleDeleteTarget = async (target: TargetType) => {
     const tracker = trackers.find((t) => t.id === target.trackerId);
     const trackerName = tracker
-      ? `${tracker.name} (${tracker.unit})`
+      ? `${tracker.name}`
       : "Unknown tracker";
 
     if (
@@ -132,9 +133,9 @@ export default function Targets() {
     const unit = tracker ? tracker.unit : "";
 
     if (target.type === "range" && target.valueMax) {
-      return `${target.value} - ${target.valueMax} ${unit}`;
+      return `${target.value} - ${target.valueMax}`;
     }
-    return `${target.value} ${unit}`;
+    return `${target.value}`;
   };
 
   interface TargetItemProps {

@@ -145,27 +145,6 @@ export default function TargetForm({
       onSubmit={handleSubmit}
       isSubmitting={isSubmitting}
     >
-      <div
-        className="
-        flex-1
-        overflow-y-auto
-        scroll-area
-        bg-gray-50
-        safe-top
-        safe-bottom
-        safe-x
-        mb-12
-      "
-      >
-        <div
-          className="
-          max-w-lg
-          mx-auto
-          w-full
-          py-4
-          px-4
-        "
-        >
           <div className="space-y-5">
             <FormInput
               name="name"
@@ -194,7 +173,7 @@ export default function TargetForm({
                 <option value="">Select a tracker</option>
                 {trackers.map((tracker) => (
                   <option key={tracker.id} value={tracker.id}>
-                    {tracker.name} ({tracker.unit})
+                    {tracker.name}
                   </option>
                 ))}
               </select>
@@ -360,8 +339,6 @@ export default function TargetForm({
               </select>
             </div>
           </div>
-        </div>
-      </div>
     </BaseForm>
   );
 }

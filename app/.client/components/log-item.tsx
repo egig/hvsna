@@ -28,9 +28,10 @@ export function LogItem({
     return tracker ? tracker.name : "Unknown tracker";
   },
   formatLogValue = (log: Log) => {
-    const tracker = trackers.find((t) => t.id === log.trackerId);
-    const unit = tracker ? tracker.unit : "";
-    return `${log.value} ${unit}`;
+    if (log.negative) {
+      return `-${log.value}`
+    }
+    return `${log.value}`;
   },
   formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();
@@ -108,7 +109,7 @@ export function LogItem({
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm transition-shadow ${
+      className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2 hover:shadow-sm transition-shadow ${
         !compact && onEdit ? "cursor-pointer" : ""
       }`}
       onClick={handleItemClick}
@@ -166,6 +167,8 @@ export function LogItem({
               ))}
             </div>
           )}
+
+          {log.note && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{log.note}</p>}
         </div>
 
         {/* Actions */}

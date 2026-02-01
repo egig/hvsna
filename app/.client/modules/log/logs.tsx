@@ -99,9 +99,7 @@ export default function Logs() {
   };
 
   const formatLogValue = (log: Log) => {
-    const tracker = trackers.find((t) => t.id === log.trackerId);
-    const unit = tracker ? tracker.unit : "";
-    return `${log.value} ${unit}`;
+    return `${log.value}`;
   };
 
   const formatTimestamp = (timestamp: number) => {

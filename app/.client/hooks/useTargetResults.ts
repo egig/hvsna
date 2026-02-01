@@ -45,20 +45,28 @@ export function useTargetResults() {
       calculation: TargetCalculation,
       trackerType: string,
     ): number => {
+
+      function valueSum(sum: number, log: Log) {
+          if (log.negative) {
+            log.value = -1 * Math.abs(Number(log.value))
+          }
+          return sum + Number(log.value);
+      }
+
       if (logs.length === 0) return 0;
       if (trackerType === "counter") {
         // counter always has value of 1 in the log
-        return logs.reduce((sum, log) => sum + Number(log.value), 0);
+        return logs.reduce(valueSum, 0);
       }
 
       switch (calculation) {
         case "sum":
-          return logs.reduce((sum, log) => sum + Number(log.value), 0);
+          return logs.reduce(valueSum, 0);
         case "last":
           return Number(logs[logs.length - 1]?.value) || 0;
         case "avg":
           return (
-            logs.reduce((sum, log) => sum + Number(log.value), 0) / logs.length
+            logs.reduce(valueSum, 0) / logs.length
           );
         case "min":
           return Math.min(...logs.map((log) => Number(log.value)));
@@ -199,8 +207,8 @@ export function useTargetResults() {
             db,
           );
 
-          const tracker = getTracker(target.trackerId);
-          const currentValue = calculateValue(
+          const tracker = await getTracker(target.trackerId);
+          const currentValue = tracker.baseline + calculateValue(
             logs,
             target.calculation,
             tracker.type,
