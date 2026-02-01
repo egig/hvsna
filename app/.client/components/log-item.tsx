@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { FileText, MoreHorizontal } from "lucide-react";
 import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 import { useAttributeOptions } from "../modules/option/use-options";
-import type { Log, Tracker } from "~/lib/tracker/types";
+import { formatValue } from "~/utils/format";
+import type { Log } from "~/lib/tracker/types";
+import type { Tracker } from "../modules/tracker/trackerStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
 import type { AttributeOption } from "../modules/option/optionStore";
 
@@ -28,10 +30,9 @@ export function LogItem({
     return tracker ? tracker.name : "Unknown tracker";
   },
   formatLogValue = (log: Log) => {
-    if (log.negative) {
-      return `-${log.value}`
-    }
-    return `${log.value}`;
+    const tracker = trackers.find((t) => t.id === log.trackerId);
+    const value = log.negative ? -Math.abs(log.value) : log.value;
+    return formatValue(value, tracker?.format);
   },
   formatTimestamp = (timestamp: number) => {
     return new Date(timestamp).toLocaleString();

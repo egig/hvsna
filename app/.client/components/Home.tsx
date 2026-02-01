@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { usePouchDB } from "../pouchdb";
+import { formatValue } from "~/utils/format";
 import { useTargetResults } from "../hooks/useTargetResults";
 import { useLogStore } from "../modules/log/logStore";
 import { useTrackers } from "../modules/tracker/use-trackers";
@@ -115,14 +116,14 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm opacity-75">Current</span>
-                <span className="font-medium">{result.currentValue}</span>
+                <span className="font-medium">{formatValue(result.currentValue, result.trackerFormat)}</span>
               </div>
 
               <div className="flex justify-between items-center">
                 <span className="text-sm opacity-75">Target</span>
                 <span className="font-medium">
-                  {result.targetValue}
-                  {result.targetMax && ` - ${result.targetMax}`}
+                  {formatValue(result.targetValue, result.trackerFormat)}
+                  {result.targetMax && ` - ${formatValue(result.targetMax, result.trackerFormat)}`}
                 </span>
               </div>
 

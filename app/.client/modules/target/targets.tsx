@@ -7,6 +7,7 @@ import {
   TargetIcon,
   MoreHorizontal,
 } from "lucide-react";
+import { formatValue } from "~/utils/format";
 import type { Target as TargetType } from "~/lib/tracker/types";
 import TargetForm from "./target-form";
 import { Page } from "../navigation/page";
@@ -130,12 +131,13 @@ export default function Targets() {
 
   const formatTargetValue = (target: TargetType) => {
     const tracker = trackers.find((t) => t.id === target.trackerId);
-    const unit = tracker ? tracker.unit : "";
 
     if (target.type === "range" && target.valueMax) {
-      return `${target.value} - ${target.valueMax}`;
+      const minValue = formatValue(target.value, tracker?.format);
+      const maxValue = formatValue(target.valueMax, tracker?.format);
+      return `${minValue} - ${maxValue}`;
     }
-    return `${target.value}`;
+    return formatValue(target.value, tracker?.format);
   };
 
   interface TargetItemProps {

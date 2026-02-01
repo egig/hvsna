@@ -25,6 +25,7 @@ export interface TargetResultData {
   logsUsed: number;
   calculation: TargetCalculation;
   direction: TargetDirection;
+  trackerFormat?: "plain" | "idr";
 }
 
 export interface TargetResultQuery {
@@ -228,6 +229,7 @@ export function useTargetResults() {
             logsUsed: logs.length,
             calculation: target.calculation,
             direction: target.direction,
+            trackerFormat: tracker.format,
           });
         }
 

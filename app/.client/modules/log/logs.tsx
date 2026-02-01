@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useLogs } from "./useLogs";
 import { useLog } from "./use-log";
 import { Plus, FileText } from "lucide-react";
-import type { Log, Tracker } from "~/lib/tracker/types";
+import { formatValue } from "~/utils/format";
+import type { Log } from "~/lib/tracker/types";
+import type { Tracker } from "../tracker/trackerStore";
 import LogForm from "./log-form";
 import { LogItem } from "../../components/log-item";
 import { Navbar } from "../navigation/navbar";
@@ -99,7 +101,9 @@ export default function Logs() {
   };
 
   const formatLogValue = (log: Log) => {
-    return `${log.value}`;
+    const tracker = trackers.find((t) => t.id === log.trackerId);
+    const value = log.negative ? -Math.abs(log.value) : log.value;
+    return formatValue(value, tracker?.format);
   };
 
   const formatTimestamp = (timestamp: number) => {

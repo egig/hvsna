@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { BarChart3 } from "lucide-react";
+import { formatValue } from "~/utils/format";
 import { useTracker } from "./use-tracker";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useAttributeOptions } from "../option/use-options";
@@ -168,8 +169,8 @@ export default function TrackerDetail() {
             {tracker.name}
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-            <span>Unit: {tracker.unit}</span>
-            <span>Baseline: {tracker.baseline}</span>
+            <span>Unit: {tracker.format !== "idr" ? tracker.unit : "IDR"}</span>
+            <span>Baseline: {formatValue(tracker.baseline, tracker.format)}</span>
           </div>
         </div>
 
@@ -221,7 +222,7 @@ export default function TrackerDetail() {
                               {item.sum.toLocaleString()}
                             </div>
                             <div className="text-gray-600 dark:text-gray-400">
-                              {tracker.unit}
+                              {tracker.format !== "idr" ? tracker.unit : ""}
                             </div>
                           </div>
                           <div className="text-right">

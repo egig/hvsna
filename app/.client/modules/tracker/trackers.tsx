@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus, BarChart2, RefreshCw } from "lucide-react";
-import type { Tracker } from "~/lib/tracker/types";
+import { formatValue } from "~/utils/format";
+import type { Tracker } from "./trackerStore";
 import TrackerForm from "./tracker-form";
 import { Modal } from "../navigation/modal";
 import { Button, Navbar, Page } from "../navigation";
@@ -140,7 +141,7 @@ export default function Trackers() {
                     {tracker.name}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {tracker.baseline} {tracker.unit}
+                    {formatValue(tracker.baseline, tracker.format)}{tracker.format !== "idr" && tracker.unit ? ` ${tracker.unit}` : ""}
                   </p>
                 </div>
                 <div className="flex gap-2 group-hover:opacity-100 transition-opacity">
