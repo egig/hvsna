@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { usePouchDB } from '../pouchdb';
-import { useTargetResults } from '../hooks/useTargetResults';
-import { useLogStore } from '../modules/log/logStore';
-import { useTrackers } from '../modules/tracker/use-trackers';
-import { LogItem } from './log-item';
-import { TargetResultsSummary } from '../components/TargetResultsDashboard';
-import type { TargetResultData } from '../hooks/useTargetResults';
-import type { Log } from '~/lib/tracker/types';
-import type { Tracker } from '~/lib/tracker/types';
-import type { AttributeOption } from '../modules/option/optionStore';
-import type { TrackerAttribute } from '../modules/attribute/trackerAttributeStore';
-import { useAttributeOptions } from '../modules/option/use-options';
-import { useTrackerAttributes } from '../modules/attribute/use-tracker-attributes';
+import { useState, useEffect } from "react";
+import { usePouchDB } from "../pouchdb";
+import { useTargetResults } from "../hooks/useTargetResults";
+import { useLogStore } from "../modules/log/logStore";
+import { useTrackers } from "../modules/tracker/use-trackers";
+import { LogItem } from "./log-item";
+import { TargetResultsSummary } from "../components/TargetResultsDashboard";
+import type { TargetResultData } from "../hooks/useTargetResults";
+import type { Log } from "~/lib/tracker/types";
+import type { Tracker } from "~/lib/tracker/types";
+import type { AttributeOption } from "../modules/option/optionStore";
+import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
+import { useAttributeOptions } from "../modules/option/use-options";
+import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 
 interface RecentLogsProps {
   logs: Log[];
@@ -20,12 +20,19 @@ interface RecentLogsProps {
   trackerAttributes: TrackerAttribute[];
 }
 
-function RecentLogs({ logs, trackers, attributeOptions, trackerAttributes }: RecentLogsProps) {
+function RecentLogs({
+  logs,
+  trackers,
+  attributeOptions,
+  trackerAttributes,
+}: RecentLogsProps) {
   if (logs.length === 0) {
     return (
       <div className="text-center py-8">
         <div className="text-gray-400 mb-2">No recent logs</div>
-        <div className="text-gray-500 text-sm">Start tracking to see your recent activity</div>
+        <div className="text-gray-500 text-sm">
+          Start tracking to see your recent activity
+        </div>
       </div>
     );
   }
@@ -56,7 +63,9 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
     return (
       <div className="text-center py-8">
         <div className="text-gray-400 mb-2">No targets found</div>
-        <div className="text-gray-500 text-sm">Create some targets to see your progress</div>
+        <div className="text-gray-500 text-sm">
+          Create some targets to see your progress
+        </div>
       </div>
     );
   }
@@ -67,32 +76,47 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
   return (
     <div className="space-y-4">
       <TargetResultsSummary results={results} />
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {overviewResults.map((result) => (
-          <div key={result.targetId} className={`border rounded-lg p-4 transition-all hover:shadow-md ${
-            result.result === 'succeed' ? 'text-green-600 bg-green-50 border-green-200' :
-            result.result === 'on-track' ? 'text-blue-600 bg-blue-50 border-blue-200' :
-            'text-orange-600 bg-orange-50 border-orange-200'
-          }`}>
+          <div
+            key={result.targetId}
+            className={`border rounded-lg p-4 transition-all hover:shadow-md ${
+              result.result === "succeed"
+                ? "text-green-600 bg-green-50 border-green-200"
+                : result.result === "on-track"
+                  ? "text-blue-600 bg-blue-50 border-blue-200"
+                  : "text-orange-600 bg-orange-50 border-orange-200"
+            }`}
+          >
             <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-lg truncate flex-1 mr-2">{result.targetName}</h3>
-              <span className={`px-2 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
-                result.result === 'succeed' ? 'text-green-600 bg-green-100' :
-                result.result === 'on-track' ? 'text-blue-600 bg-blue-100' :
-                'text-orange-600 bg-orange-100'
-              }`}>
-                {result.result === 'succeed' ? '✓' : 
-                 result.result === 'on-track' ? '→' : '!'} {result.result}
+              <h3 className="font-semibold text-lg truncate flex-1 mr-2">
+                {result.targetName}
+              </h3>
+              <span
+                className={`px-2 py-1 rounded-full text-sm font-medium whitespace-nowrap ${
+                  result.result === "succeed"
+                    ? "text-green-600 bg-green-100"
+                    : result.result === "on-track"
+                      ? "text-blue-600 bg-blue-100"
+                      : "text-orange-600 bg-orange-100"
+                }`}
+              >
+                {result.result === "succeed"
+                  ? "✓"
+                  : result.result === "on-track"
+                    ? "→"
+                    : "!"}{" "}
+                {result.result}
               </span>
             </div>
-            
+
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm opacity-75">Current</span>
                 <span className="font-medium">{result.currentValue}</span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-sm opacity-75">Target</span>
                 <span className="font-medium">
@@ -100,18 +124,20 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
                   {result.targetMax && ` - ${result.targetMax}`}
                 </span>
               </div>
-              
+
               <div className="space-y-1">
                 <div className="flex justify-between text-xs opacity-60">
                   <span>Progress</span>
                   <span>{Math.round(result.percentage)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className={`h-2 rounded-full transition-all duration-300 ${
-                      result.result === 'succeed' ? 'bg-green-600' :
-                      result.result === 'on-track' ? 'bg-blue-600' :
-                      'bg-orange-600'
+                      result.result === "succeed"
+                        ? "bg-green-600"
+                        : result.result === "on-track"
+                          ? "bg-blue-600"
+                          : "bg-orange-600"
                     }`}
                     style={{ width: `${Math.min(100, result.percentage)}%` }}
                   />
@@ -121,7 +147,7 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
           </div>
         ))}
       </div>
-      
+
       {results.length > 6 && (
         <div className="text-center">
           <div className="text-sm text-gray-500">
@@ -138,14 +164,14 @@ export function Home() {
   const { getTargetResults } = useTargetResults();
   const { getLogsFromDB } = useLogStore();
   const { getTrackers } = useTrackers();
-  
+
   const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {attributeOptions} = useAttributeOptions()
-  const {trackerAttributes} = useTrackerAttributes()
+  const { attributeOptions } = useAttributeOptions();
+  const { trackerAttributes } = useTrackerAttributes();
 
   useEffect(() => {
     const loadHomeData = async () => {
@@ -156,21 +182,26 @@ export function Home() {
         setError(null);
 
         // Load target results (last 30 days)
-        const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
         const [results, logs, trackersData] = await Promise.all([
-          getTargetResults({
-            from: thirtyDaysAgo,
-            to: Date.now()
-          }, db),
+          getTargetResults(
+            {
+              from: thirtyDaysAgo,
+              to: Date.now(),
+            },
+            db,
+          ),
           getLogsFromDB({ limit: 10 }, db),
-          getTrackers()
+          getTrackers(),
         ]);
 
         setTargetResults(results);
         setRecentLogs(logs);
         setTrackers(trackersData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load home data');
+        setError(
+          err instanceof Error ? err.message : "Failed to load home data",
+        );
       } finally {
         setLoading(false);
       }
@@ -209,16 +240,18 @@ export function Home() {
         {/* Header */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-          <p className="text-gray-600">Track your progress and recent activity</p>
+          <p className="text-gray-600">
+            Track your progress and recent activity
+          </p>
         </div>
 
         {/* Target Results Overview */}
         <section>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">Target Results Overview</h2>
-            <div className="text-sm text-gray-500">
-              Last 30 days
-            </div>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Target Results Overview
+            </h2>
+            <div className="text-sm text-gray-500">Last 30 days</div>
           </div>
           <TargetResultsOverview results={targetResults} />
         </section>
@@ -226,12 +259,17 @@ export function Home() {
         {/* Recent Logs */}
         <section>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">Recent Activity</h2>
-            <div className="text-sm text-gray-500">
-              Last 10 logs
-            </div>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Recent Activity
+            </h2>
+            <div className="text-sm text-gray-500">Last 10 logs</div>
           </div>
-          <RecentLogs logs={recentLogs} trackers={trackers}  trackerAttributes={trackerAttributes} attributeOptions={attributeOptions}/>
+          <RecentLogs
+            logs={recentLogs}
+            trackers={trackers}
+            trackerAttributes={trackerAttributes}
+            attributeOptions={attributeOptions}
+          />
         </section>
       </div>
     </div>

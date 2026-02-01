@@ -31,12 +31,12 @@ export interface UseTasksReturn {
 export const useTasks = (): UseTasksReturn => {
   const { db } = usePouchDB();
   const store = useTaskStore();
-  const {createLog} = useLog()
-  const {getTarget} = useTarget();
+  const { createLog } = useLog();
+  const { getTarget } = useTarget();
 
   useEffect(() => {
-    getTasks()
-  }, [])
+    getTasks();
+  }, []);
 
   const loadMoreTasks = useCallback(async () => {
     return store.loadMoreTasks(db);
@@ -88,22 +88,28 @@ export const useTasks = (): UseTasksReturn => {
     store.resetTasks();
     await store.getTasks({}, db);
   }, [store, db]);
-  
-  const updateStatus = async (id: string, status: TaskStatus): Promise<Task> => {
 
+  const updateStatus = async (
+    id: string,
+    status: TaskStatus,
+  ): Promise<Task> => {
     // Get the current task before updating to check status change
     const currentTask = await store.getTask(id, db);
     if (!currentTask) {
-      throw new Error("updating not existing task: " + id)
+      throw new Error("updating not existing task: " + id);
     }
-    
+
     // Update the task
-    const updatedTask = await store.updateTask(id, {
-      status,
-    }, db);
+    const updatedTask = await store.updateTask(
+      id,
+      {
+        status,
+      },
+      db,
+    );
 
     if (!updatedTask.targetId) {
-      return updatedTask
+      return updatedTask;
     }
 
     if (status === currentTask.status) {
@@ -111,33 +117,30 @@ export const useTasks = (): UseTasksReturn => {
     }
 
     if (status === "in_progress") {
-      return updatedTask
+      return updatedTask;
     }
 
-    
-      try {
-        const target = await getTarget(updatedTask.targetId as string);
-        let v = updatedTask.targetValue || 0;
-        if (status !== "completed") {
-          v = -1 * v
-        }
-
-        await createLog({
-          trackerId: target.trackerId,
-          timestamp: Date.now(),
-          value: v,
-          taskId: updatedTask.id,
-          attributes: updatedTask.attributes
-        });
-      } catch (logError) {
-        // Log creation failure shouldn't break task update
-        console.warn('Failed to create log for task status change:', logError);
+    try {
+      const target = await getTarget(updatedTask.targetId as string);
+      let v = updatedTask.targetValue || 0;
+      if (status !== "completed") {
+        v = -1 * v;
       }
 
-    
+      await createLog({
+        trackerId: target.trackerId,
+        timestamp: Date.now(),
+        value: v,
+        taskId: updatedTask.id,
+        attributes: updatedTask.attributes,
+      });
+    } catch (logError) {
+      // Log creation failure shouldn't break task update
+      console.warn("Failed to create log for task status change:", logError);
+    }
+
     return updatedTask;
   };
-
 
   return {
     tasks: store.tasks,
@@ -153,6 +156,6 @@ export const useTasks = (): UseTasksReturn => {
     getTasksByDate,
     loadMoreTasks,
     refreshTasks,
-    updateStatus
+    updateStatus,
   };
 };

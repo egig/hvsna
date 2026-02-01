@@ -8,7 +8,6 @@ import BaseForm from "~/.client/components/base-form";
 import CustomAttributeInput from "~/.client/components/custom-attribute-input";
 import type { Log } from "~/lib/tracker/types";
 
-
 interface LogFormProps {
   logId?: string | null;
   onSuccess?: (log: Log) => void;
@@ -23,7 +22,9 @@ export default function LogForm({
   onCancel,
 }: LogFormProps) {
   const { loading: trackerLoading, trackers } = useTrackers();
-  const { loading, error, createLog, updateLog, log } = useLog(logId || undefined);
+  const { loading, error, createLog, updateLog, log } = useLog(
+    logId || undefined,
+  );
   const [selectedTrackerId, setSelectedTrackerId] = useState(log?.trackerId);
   const { loading: attributesLoading, trackerAttributes } =
     useTrackerAttributes(selectedTrackerId);
@@ -42,7 +43,9 @@ export default function LogForm({
   }, [error, onError]);
 
   const handleSubmit = async (formData: FormData) => {
-    const { value, timestamp } = Object.fromEntries(formData.entries());
+    const { value, timestamp, negative } = Object.fromEntries(
+      formData.entries(),
+    );
 
     if (!selectedTrackerId) return;
 
@@ -59,6 +62,7 @@ export default function LogForm({
       let result: Log;
       const logData = {
         trackerId: selectedTrackerId,
+        negative,
         value: parseFloat(value?.toString()) || 0,
         timestamp: new Date().getTime(),
         attributes:
@@ -144,7 +148,7 @@ export default function LogForm({
                 <option value="">Select a tracker</option>
                 {trackers.map((tracker) => (
                   <option key={tracker.id} value={tracker.id}>
-                    {tracker.name} ({tracker.unit})
+                    {tracker.name}
                   </option>
                 ))}
               </select>
@@ -152,21 +156,39 @@ export default function LogForm({
 
             {selectedTracker && (
               <div className="text-sm text-gray-500 mb-4">
-                Tracker: {selectedTracker.name} ({selectedTracker.unit})
+                Tracker: {selectedTracker.name}
               </div>
             )}
 
-            <FormInput
-              name="value"
-              label="Value"
-              type="number"
-              value={log?.value as unknown as string}
-              placeholder="0"
-              disabled={isSubmitting}
-              required={true}
-              className="text-base"
-            />
-            {selectedTracker && (
+            <div className="space-y-5">
+              <div className="mb-4">
+                <label>
+                  <input
+                    key={Math.random()}
+                    defaultChecked={
+                      log ? log.negative : selectedTracker?.negative
+                    }
+                    name="negative"
+                    type="checkbox"
+                  />{" "}
+                  negative
+                </label>
+              </div>
+            </div>
+
+            {selectedTracker?.type === "amount" && (
+              <FormInput
+                name="value"
+                label="Value"
+                type="number"
+                value={log?.value as unknown as string}
+                placeholder="0"
+                disabled={isSubmitting}
+                required={true}
+                className="text-base"
+              />
+            )}
+            {selectedTracker && selectedTracker.type === "amount" && (
               <p className="text-sm text-gray-500 -mt-2 mb-4">
                 Value in {selectedTracker.unit}
               </p>

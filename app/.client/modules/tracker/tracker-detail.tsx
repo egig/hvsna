@@ -19,18 +19,27 @@ interface AttributeOptionSum {
 export default function TrackerDetail() {
   const { trackerId } = useParams<{ trackerId: string }>();
   const { db } = usePouchDB();
-  const { tracker, loading: trackerLoading, error: trackerError } = useTracker(trackerId);
-  const { trackerAttributes, loading: attributesLoading } = useTrackerAttributes(trackerId);
+  const {
+    tracker,
+    loading: trackerLoading,
+    error: trackerError,
+  } = useTracker(trackerId);
+  const { trackerAttributes, loading: attributesLoading } =
+    useTrackerAttributes(trackerId);
   const { getLogsByTracker } = useLogs();
-  const [attributeSums, setAttributeSums] = useState<Record<string, AttributeOptionSum[]>>({});
+  const [attributeSums, setAttributeSums] = useState<
+    Record<string, AttributeOptionSum[]>
+  >({});
   const [loading, setLoading] = useState(true);
-  const [attributeOptionsMap, setAttributeOptionsMap] = useState<Record<string, AttributeOption[]>>({});
+  const [attributeOptionsMap, setAttributeOptionsMap] = useState<
+    Record<string, AttributeOption[]>
+  >({});
 
   // Fetch options for each attribute
   useEffect(() => {
     const fetchAttributeOptions = async () => {
       const optionsMap: Record<string, AttributeOption[]> = {};
-      
+
       for (const attribute of trackerAttributes) {
         if (attribute.type === "options") {
           try {
@@ -47,12 +56,15 @@ export default function TrackerDetail() {
 
             optionsMap[attribute.id] = options;
           } catch (error) {
-            console.error(`Failed to fetch options for attribute ${attribute.id}:`, error);
+            console.error(
+              `Failed to fetch options for attribute ${attribute.id}:`,
+              error,
+            );
             optionsMap[attribute.id] = [];
           }
         }
       }
-      
+
       setAttributeOptionsMap(optionsMap);
     };
 
@@ -62,7 +74,11 @@ export default function TrackerDetail() {
   }, [trackerAttributes, db]);
 
   useEffect(() => {
-    if (trackerId && trackerAttributes.length > 0 && Object.keys(attributeOptionsMap).length > 0) {
+    if (
+      trackerId &&
+      trackerAttributes.length > 0 &&
+      Object.keys(attributeOptionsMap).length > 0
+    ) {
       calculateAttributeSums();
     }
   }, [trackerId, trackerAttributes, attributeOptionsMap]);
@@ -82,10 +98,8 @@ export default function TrackerDetail() {
         const options = attributeOptionsMap[attribute.id] || [];
         if (options.length === 0) return;
 
-
         const optionSums: Record<string, number> = {};
         const optionCounts: Record<string, number> = {};
-
 
         // Initialize all options with 0
         options.forEach((option) => {
@@ -98,7 +112,11 @@ export default function TrackerDetail() {
           if (!log.attributes || !log.attributes[attribute.id]) return;
 
           const attributeValue = log.attributes[attribute.id];
-          if (typeof attributeValue !== "string" || optionSums[attributeValue] === undefined) return;
+          if (
+            typeof attributeValue !== "string" ||
+            optionSums[attributeValue] === undefined
+          )
+            return;
 
           optionSums[attributeValue] += Number(log.value);
           optionCounts[attributeValue]++;
@@ -120,13 +138,10 @@ export default function TrackerDetail() {
     }
   };
 
-
   if (trackerError || !tracker) {
     return (
       <Page>
-        <Navbar
-          title="Tracker Details"
-        />
+        <Navbar title="Tracker Details" />
         <div className="flex items-center justify-center py-8">
           <div className="text-red-600 dark:text-red-400">
             {trackerError || "Tracker not found"}
@@ -137,15 +152,15 @@ export default function TrackerDetail() {
   }
 
   const hasOptionsAttributes = trackerAttributes.some(
-    (attr) => attr.type === "options" && attributeOptionsMap[attr.id] && attributeOptionsMap[attr.id].length > 0
+    (attr) =>
+      attr.type === "options" &&
+      attributeOptionsMap[attr.id] &&
+      attributeOptionsMap[attr.id].length > 0,
   );
-
 
   return (
     <Page>
-      <Navbar
-        title="Tracker Details"
-      />
+      <Navbar title="Tracker Details" />
       <div className="p-4">
         {/* Tracker Information */}
         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -163,10 +178,15 @@ export default function TrackerDetail() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <BarChart3 size={20} />
-              Attribute Options
+              Attributes
             </h2>
             {trackerAttributes
-              .filter((attr) => attr.type === "options" && attributeOptionsMap[attr.id] && attributeOptionsMap[attr.id].length > 0)
+              .filter(
+                (attr) =>
+                  attr.type === "options" &&
+                  attributeOptionsMap[attr.id] &&
+                  attributeOptionsMap[attr.id].length > 0,
+              )
               .map((attribute) => (
                 <div
                   key={attribute.id}
@@ -174,7 +194,9 @@ export default function TrackerDetail() {
                 >
                   <h3 className="font-medium text-gray-900 dark:text-white mb-3">
                     {attribute.name}
-                    {attribute.required && <span className="text-red-500 ml-1">*</span>}
+                    {attribute.required && (
+                      <span className="text-red-500 ml-1">*</span>
+                    )}
                   </h3>
                   {attribute.description && (
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
@@ -204,13 +226,15 @@ export default function TrackerDetail() {
                           </div>
                           <div className="text-right">
                             <div className="text-gray-600 dark:text-gray-400">
-                              {item.count} {item.count === 1 ? "entry" : "entries"}
+                              {item.count}{" "}
+                              {item.count === 1 ? "entry" : "entries"}
                             </div>
                           </div>
                         </div>
                       </div>
                     ))}
-                    {(!attributeSums[attribute.name] || attributeSums[attribute.name].length === 0) && (
+                    {(!attributeSums[attribute.name] ||
+                      attributeSums[attribute.name].length === 0) && (
                       <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                         No data available for this attribute
                       </div>
@@ -226,13 +250,15 @@ export default function TrackerDetail() {
               No Options Attributes
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              This tracker doesn't have any attributes with options to display summaries.
+              This tracker doesn't have any attributes with options to display
+              summaries.
             </p>
           </div>
         )}
 
         {/* Other Attributes (non-options) */}
-        {trackerAttributes.filter((attr) => attr.type !== "options").length > 0 && (
+        {trackerAttributes.filter((attr) => attr.type !== "options").length >
+          0 && (
           <div className="mt-6">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Other Attributes
@@ -250,7 +276,9 @@ export default function TrackerDetail() {
                         <span className="font-medium text-gray-900 dark:text-white">
                           {attribute.name}
                         </span>
-                        {attribute.required && <span className="text-red-500 ml-1">*</span>}
+                        {attribute.required && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
                         <span className="ml-2 text-sm text-gray-500 dark:text-gray-400 capitalize">
                           ({attribute.type})
                         </span>

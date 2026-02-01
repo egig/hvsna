@@ -40,7 +40,6 @@ export function useTrackers() {
           endkey: "trac_\uffff",
         });
 
-
         let trackers = result.rows
           .filter((row) => row.id.startsWith("trac_"))
           .map((row) => row.doc as unknown as Tracker);

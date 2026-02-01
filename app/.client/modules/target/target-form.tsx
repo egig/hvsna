@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import type {
-  Tracker,
   Target as TargetType,
   TargetType as TargetTypeEnum,
   TargetPeriod,
@@ -14,6 +13,8 @@ import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
+import Select from "~/.client/components/form-select";
+import type { Tracker } from "../tracker/trackerStore";
 
 interface TargetFormProps {
   targetId?: string | null;
@@ -33,11 +34,14 @@ export default function TargetForm({
     useTarget(targetId as string);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTrackerId, setSelectedTrackerId] = useState<string>(target?.trackerId || "");
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>(target?.scope || []);
-  const { trackerAttributes, loading: attributesLoading } = useTrackerAttributes(
-    selectedTrackerId
+  const [selectedTrackerId, setSelectedTrackerId] = useState<string>(
+    target?.trackerId || "",
   );
+  const [selectedAttributes, setSelectedAttributes] = useState<string[]>(
+    target?.scope || [],
+  );
+  const { trackerAttributes, loading: attributesLoading } =
+    useTrackerAttributes(selectedTrackerId);
 
   useEffect(() => {
     // Load available trackers
@@ -100,7 +104,7 @@ export default function TargetForm({
       if (onSuccess) {
         onSuccess(result);
       }
-      
+
       return result;
     } catch (err) {
       throw err; // Re-throw to let BaseForm handle it
@@ -122,10 +126,10 @@ export default function TargetForm({
   };
 
   const handleAttributeToggle = (attributeId: string) => {
-    setSelectedAttributes(prev => 
-      prev.includes(attributeId) 
-        ? prev.filter(id => id !== attributeId)
-        : [...prev, attributeId]
+    setSelectedAttributes((prev) =>
+      prev.includes(attributeId)
+        ? prev.filter((id) => id !== attributeId)
+        : [...prev, attributeId],
     );
   };
 
@@ -232,25 +236,44 @@ export default function TargetForm({
                           {attribute.required && (
                             <span className="text-red-500 ml-1">*</span>
                           )}
-                          <span className="text-gray-400 ml-1">({attribute.type})</span>
+                          <span className="text-gray-400 ml-1">
+                            ({attribute.type})
+                          </span>
                         </span>
                       </label>
                     ))}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500 italic border border-gray-200 rounded-lg p-3 bg-gray-50">
-                    No custom attributes defined for this tracker. 
+                    No custom attriamountbutes defined for this tracker.
                     <span className="block text-xs mt-1">
-                      Custom attributes can be added to trackers to enable more detailed tracking.
+                      Custom attributes can be added to trackers to enable more
+                      detailed tracking.
                     </span>
                   </div>
                 )}
                 {selectedAttributes.length > 0 && (
                   <p className="text-xs text-gray-500 mt-1">
-                    {selectedAttributes.length} attribute{selectedAttributes.length > 1 ? 's' : ''} selected
+                    {selectedAttributes.length} attribute
+                    {selectedAttributes.length > 1 ? "s" : ""} selected
                   </p>
                 )}
               </div>
+            )}
+
+            {selectedTracker?.type === "amount" && (
+              <Select
+                label="Calculation"
+                name="calculation"
+                value={target?.calculation || "sum"}
+                options={[
+                  { label: "Sum", value: "sum" },
+                  { label: "Last", value: "last" },
+                  { label: "Average", value: "avg" },
+                  { label: "Minimum", value: "min" },
+                  { label: "Maximum", value: "max" },
+                ]}
+              />
             )}
 
             <div className="mb-4">
@@ -265,25 +288,6 @@ export default function TargetForm({
               >
                 <option value="static">Static</option>
                 <option value="range">Range</option>
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Calculation
-              </label>
-              <select
-                name="calculation"
-                defaultValue={target?.calculation || "sum"}
-                disabled={isSubmitting}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-              >
-                <option value="sum">Sum</option>
-                <option value="count">Count</option>
-                <option value="last">Last</option>
-                <option value="avg">Average</option>
-                <option value="min">Minimum</option>
-                <option value="max">Maximum</option>
               </select>
             </div>
 
@@ -355,7 +359,6 @@ export default function TargetForm({
                 <option value="total">Total</option>
               </select>
             </div>
-            
           </div>
         </div>
       </div>

@@ -8,19 +8,6 @@ export type UUID = string;
 
 export type EpochTime = number;
 
-/* ---------- Tracker ---------- */
-/**
- * Defines how values behave mathematically.
- * Replaces "tracker", "expense", "goal", etc.
- */
-export interface Tracker {
-  id: UUID;
-  name: string;
-  unit: string; // IDR, count, hours, %, kg
-  createdAt: EpochTime;
-  customAttributes?: TrackerAttribute[];
-}
-
 export interface TrackerAttribute {
   id: string;
   name: string;
@@ -42,12 +29,19 @@ export interface Log {
   value: number;
   attributes?: Record<string, unknown>;
   createdAt: EpochTime;
+  negative?: boolean;
 }
 
 /* ---------- Target ---------- */
 
 export type TargetReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
-export type TargetCalculation = "sum" | "count" | "last" | "avg" | "min" | "max";
+export type TargetCalculation =
+  | "sum"
+  | "count"
+  | "last"
+  | "avg"
+  | "min"
+  | "max";
 
 export type TargetDirection = "increase" | "decrease" | "neutral";
 
@@ -70,8 +64,13 @@ export interface Target {
 
 export type TargetType = "static" | "range";
 
-export type TargetPeriod = "log" | "daily" | "weekly" | "monthly" | "yearly" | "total";
-
+export type TargetPeriod =
+  | "log"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "total";
 
 /* ---------- Aggregation Cache ---------- */
 /**

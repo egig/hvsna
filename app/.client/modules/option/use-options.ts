@@ -1,9 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useAttributeOptionStore } from "./optionStore";
-import type {
-  AttributeOption,
-  AttributeOptionQuery,
-} from "./optionStore";
+import type { AttributeOption, AttributeOptionQuery } from "./optionStore";
 import { usePouchDB } from "~/.client/pouchdb";
 
 export function useAttributeOptions(attributeId?: string) {
@@ -52,7 +49,7 @@ export function useAttributeOptions(attributeId?: string) {
           attributeOptions = attributeOptions.filter(
             (option) => option.attributeId === query.attributeId,
           );
-        }        
+        }
 
         // Apply pagination
         if (query.skip) {

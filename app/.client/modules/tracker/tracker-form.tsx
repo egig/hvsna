@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import type { Tracker } from "~/lib/tracker/types";
 import { FormInput } from "~/.client/components/form-input";
 import BaseForm from "~/.client/components/base-form";
 import { useTracker } from "./use-tracker";
+import Select from "~/.client/components/form-select";
 
 interface TrackerFormProps {
   trackerId?: string | null;
@@ -20,6 +20,13 @@ export default function TrackerForm({
   const { loading, error, createTracker, updateTracker, getTracker, tracker } =
     useTracker(trackerId || undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedType, setSelectedType] = useState<any>();
+
+  useEffect(() => {
+    if (tracker) {
+      setSelectedType(tracker.type);
+    }
+  }, [tracker]);
 
   useEffect(() => {
     if (error && onError) {
@@ -32,25 +39,30 @@ export default function TrackerForm({
       setIsSubmitting(true);
 
       const name = form.get("name") as string;
+      const type = form.get("type") as any;
       const unit = form.get("unit") as string;
       const baseline = form.get("baseline") as string;
+      const negative = form.get("negative") as string;
 
-      if (!name || !unit || !baseline) {
-        if (onError) onError("All fields are required");
+      if (!name || !type) {
+        if (onError) onError("Name and type fields are required");
         return;
       }
-
 
       if (trackerId && tracker) {
         await updateTracker(tracker.id, {
           name,
           unit,
+          type,
+          negative: Boolean(negative),
           baseline: parseFloat(baseline) || 0,
         });
       } else {
         await createTracker({
           name,
+          type,
           unit,
+          negative: Boolean(negative),
           baseline: parseFloat(baseline) || 0,
         });
       }
@@ -103,26 +115,61 @@ export default function TrackerForm({
               className="text-base"
             />
 
-            <FormInput
-              name="unit"
-              label="Unit"
-              value={tracker?.unit || ""}
-              placeholder="e.g., kg, hours, IDR, count"
-              disabled={isSubmitting}
-              required={true}
-              className="text-base"
+            <Select
+              name="type"
+              label="Type"
+              key={Math.random()}
+              value={selectedType}
+              required
+              onChange={(e) => {
+                setSelectedType(e.target.value);
+              }}
+              options={[
+                {
+                  value: "counter",
+                  label: "Counter",
+                },
+                {
+                  value: "amount",
+                  label: "Amount",
+                },
+              ]}
             />
 
-            <FormInput
-              name="baseline"
-              label="Baseline"
-              value={tracker?.baseline?.toString() || ""}
-              placeholder="e.g., 0, 100, 1000"
-              type="number"
-              disabled={isSubmitting}
-              required={true}
-              className="text-base"
-            />
+            <div className="mb-4">
+              <label>
+                <input
+                  key={Math.random()}
+                  defaultChecked={tracker?.negative}
+                  name="negative"
+                  type="checkbox"
+                />{" "}
+                Negative
+              </label>
+            </div>
+
+            {selectedType === "amount" && (
+              <FormInput
+                name="unit"
+                label="Unit"
+                value={tracker?.unit || ""}
+                placeholder="e.g., kg, hours, IDR, count"
+                disabled={isSubmitting}
+                className="text-base"
+              />
+            )}
+
+            {selectedType === "amount" && (
+              <FormInput
+                name="baseline"
+                label="Baseline"
+                value={tracker?.baseline?.toString() || ""}
+                placeholder="e.g., 0, 100, 1000"
+                type="number"
+                disabled={isSubmitting}
+                className="text-base"
+              />
+            )}
           </div>
         </div>
       </div>

@@ -26,9 +26,9 @@ export const useTask = (taskId?: string): UseTaskReturn => {
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  
+
   // Use the useTarget hook when we have a targetId
-  const { target: currentTarget, getTarget } = useTarget(currentTargetId || '');
+  const { target: currentTarget, getTarget } = useTarget(currentTargetId || "");
 
   useEffect(() => {
     if (taskId) {
@@ -44,22 +44,27 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     }
   }, [taskId, currentTargetId]);
 
-  const updateTaskWithLog = async (id: string, input: TaskUpdateInput): Promise<Task> => {
-
+  const updateTaskWithLog = async (
+    id: string,
+    input: TaskUpdateInput,
+  ): Promise<Task> => {
     // Get the current task before updating to check status change
     const currentTask = await store.getTask(id, db);
-    
+
     // Update the task
     const updatedTask = await store.updateTask(id, input, db);
 
     if (!input.targetId) {
-      return updatedTask
+      return updatedTask;
     }
-    
+
     // Create log if status changed
-    if (input.status !== undefined && currentTask && input.status !== currentTask.status) {
+    if (
+      input.status !== undefined &&
+      currentTask &&
+      input.status !== currentTask.status
+    ) {
       try {
-        
         const target = await getTarget(updatedTask.targetId as string);
         await createLog({
           trackerId: target.trackerId,
@@ -69,14 +74,14 @@ export const useTask = (taskId?: string): UseTaskReturn => {
           attributes: {
             newStatus: input.status,
             targetValue: updatedTask.targetValue,
-          }
+          },
         });
       } catch (logError) {
         // Log creation failure shouldn't break task update
-        console.warn('Failed to create log for task status change:', logError);
+        console.warn("Failed to create log for task status change:", logError);
       }
     }
-    
+
     return updatedTask;
   };
 

@@ -143,9 +143,7 @@ export function useAttributeOption(attributeOptionId?: string) {
           throw new Error("Attribute option not found");
         }
         const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Failed to get attribute option";
+          err instanceof Error ? err.message : "Failed to get attribute option";
         setError(errorMessage);
         throw err;
       } finally {

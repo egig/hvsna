@@ -18,12 +18,16 @@ export default function CustomAttributeInput({
   attr,
   value,
   disabled = false,
-}: CustomAttributeInputProps) { 
-  const {getAttributeOptions} = useAttributeOptions(attr.type === "options" ? attr.id : undefined);
-  const [attributeOptions, setAttributeOptions] = useState<AttributeOption[]>([]);
+}: CustomAttributeInputProps) {
+  const { getAttributeOptions } = useAttributeOptions(
+    attr.type === "options" ? attr.id : undefined,
+  );
+  const [attributeOptions, setAttributeOptions] = useState<AttributeOption[]>(
+    [],
+  );
 
   useEffect(() => {
-    getAttributeOptions({attributeId: attr.id}).then((options) => {
+    getAttributeOptions({ attributeId: attr.id }).then((options) => {
       setAttributeOptions(options);
     });
   }, [attr.id, logId]);
@@ -85,26 +89,27 @@ export default function CustomAttributeInput({
         </div>
       )}
 
-      {attr.type === "options" && (
+      {attr.type === "options" &&
         (() => {
-        return <select
-          // HACK to force re-render
-          key={Math.random()}
-          name={attr.id}
-          defaultValue={(value as string) || ""}
-          disabled={disabled}
-          required={attr.required}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-        >
-          <option value="">Select an option</option>
-          {attributeOptions.map((option) => (
-            <option key={option.id} value={option.id}>
-              {option.name}
-            </option>
-          ))}
-        </select>
-        })()
-      )}
+          return (
+            <select
+              // HACK to force re-render
+              key={Math.random()}
+              name={attr.id}
+              defaultValue={(value as string) || ""}
+              disabled={disabled}
+              required={attr.required}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+            >
+              <option value="">Select an option</option>
+              {attributeOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          );
+        })()}
     </div>
   );
 }

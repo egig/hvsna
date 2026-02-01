@@ -19,8 +19,8 @@ export default function Logs() {
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingLogId, setEditingLogId] = useState<string | null>(null);
-  const {attributeOptions} = useAttributeOptions()
-  const {trackerAttributes} = useTrackerAttributes()
+  const { attributeOptions } = useAttributeOptions();
+  const { trackerAttributes } = useTrackerAttributes();
 
   useEffect(() => {
     loadData();

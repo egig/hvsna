@@ -8,7 +8,7 @@ export interface LogCreateInput {
   trackerId: UUID;
   timestamp: EpochTime;
   value: number;
-  taskId?: string,
+  taskId?: string;
   attributes?: Record<string, unknown>;
 }
 

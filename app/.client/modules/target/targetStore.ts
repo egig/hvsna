@@ -17,9 +17,21 @@ export interface Target {
 }
 
 export type TargetType = "static" | "range";
-export type TargetCalculation = "sum" | "count" | "last" | "avg" | "min" | "max";
+export type TargetCalculation =
+  | "sum"
+  | "count"
+  | "last"
+  | "avg"
+  | "min"
+  | "max";
 export type TargetDirection = "increase" | "decrease" | "neutral";
-export type TargetPeriod = "log" | "daily" | "weekly" | "monthly" | "yearly" | "total";
+export type TargetPeriod =
+  | "log"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "total";
 
 export interface TargetCreateInput {
   trackerId: string;

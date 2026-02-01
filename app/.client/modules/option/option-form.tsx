@@ -41,7 +41,9 @@ export default function AttributeOptionForm({
   useEffect(() => {
     // Pre-select tracker when editing
     if (attributeOption && trackerAttributes.length > 0) {
-      const attribute = trackerAttributes.find(attr => attr.id === attributeOption.attributeId);
+      const attribute = trackerAttributes.find(
+        (attr) => attr.id === attributeOption.attributeId,
+      );
       if (attribute && attribute.trackerId !== selectedTrackerId) {
         setSelectedTrackerId(attribute.trackerId);
       }
@@ -164,7 +166,9 @@ export default function AttributeOptionForm({
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed"
               >
                 <option value="" disabled>
-                  {selectedTrackerId ? "Select an attribute" : "Select a tracker first"}
+                  {selectedTrackerId
+                    ? "Select an attribute"
+                    : "Select a tracker first"}
                 </option>
                 {trackerAttributes.map((attribute) => (
                   <option key={attribute.id} value={attribute.id}>

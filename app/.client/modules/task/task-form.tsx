@@ -28,14 +28,15 @@ export default function TaskForm({
 }: TaskFormProps) {
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
-  const {targets} = useTargets();
+  const { targets } = useTargets();
   const { db } = usePouchDB();
   const { getTargetsFromDB } = useTargetStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>(task?.targetId as string);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(
+    task?.targetId as string,
+  );
   const [selectedTarget, setSelectedTarget] = useState<Target | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedTarget?.trackerId);
-
 
   useEffect(() => {
     if (error && onError) {
@@ -45,22 +46,24 @@ export default function TaskForm({
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
-  }, [task])
+  }, [task]);
 
   useEffect(() => {
-    const target = targets.find(t => t.id === selectedTargetId);
+    const target = targets.find((t) => t.id === selectedTargetId);
     setSelectedTarget(target || null);
   }, [selectedTargetId, targets]);
 
   // Helper function to get attribute by ID
-  const getAttributeById = (attributeId: string): TrackerAttribute | undefined => {
-    return trackerAttributes.find(attr => attr.id === attributeId);
+  const getAttributeById = (
+    attributeId: string,
+  ): TrackerAttribute | undefined => {
+    return trackerAttributes.find((attr) => attr.id === attributeId);
   };
 
   // Helper function to render attribute input using CustomAttributeInput
   const renderAttributeInput = (attribute: TrackerAttribute, index: number) => {
     const value = task?.attributes?.[attribute.id];
-    
+
     return (
       <CustomAttributeInput
         key={attribute.id}
@@ -70,7 +73,6 @@ export default function TaskForm({
       />
     );
   };
-
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
@@ -88,7 +90,7 @@ export default function TaskForm({
         }
       }
 
-      console.log("attr", attr, selectedTarget)
+      console.log("attr", attr, selectedTarget);
 
       const taskInput: any = {
         name: taskData.name.trim(),
@@ -186,7 +188,7 @@ export default function TaskForm({
                 required={false}
                 className="text-base"
               />
-              
+
               {selectedTarget?.scope?.map((attributeId, index) => {
                 const attribute = getAttributeById(attributeId);
                 if (!attribute) {
@@ -205,7 +207,7 @@ export default function TaskForm({
                     />
                   );
                 }
-                
+
                 return renderAttributeInput(attribute, index);
               })}
             </>

@@ -1,5 +1,5 @@
-import { TargetResultsDashboard } from '../components/TargetResultsDashboard';
-import { usePouchDB } from '../pouchdb';
+import { TargetResultsDashboard } from "../components/TargetResultsDashboard";
+import { usePouchDB } from "../pouchdb";
 
 // Example usage page component
 export default function TargetResultsPage() {
@@ -21,10 +21,10 @@ export function TrackerTargetResults({ trackerId }: { trackerId: string }) {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Tracker Performance</h1>
-      <TargetResultsDashboard 
-        db={db} 
+      <TargetResultsDashboard
+        db={db}
         trackerId={trackerId}
-        from={Date.now() - (30 * 24 * 60 * 60 * 1000)} // Last 30 days
+        from={Date.now() - 30 * 24 * 60 * 60 * 1000} // Last 30 days
         to={Date.now()}
       />
     </div>
@@ -35,10 +35,5 @@ export function TrackerTargetResults({ trackerId }: { trackerId: string }) {
 export function SelectedTargetsResults({ targetIds }: { targetIds: string[] }) {
   const { db } = usePouchDB();
 
-  return (
-    <TargetResultsDashboard 
-      db={db} 
-      targetIds={targetIds}
-    />
-  );
+  return <TargetResultsDashboard db={db} targetIds={targetIds} />;
 }

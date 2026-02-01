@@ -69,11 +69,10 @@ export const useAttributeOptionStore = create<AttributeOptionState>()(
       updateAttributeOption: (id, updates) =>
         set(
           (state) => ({
-            attributeOptions: state.attributeOptions.map(
-              (attributeOption) =>
-                attributeOption.id === id
-                  ? { ...attributeOption, ...updates }
-                  : attributeOption,
+            attributeOptions: state.attributeOptions.map((attributeOption) =>
+              attributeOption.id === id
+                ? { ...attributeOption, ...updates }
+                : attributeOption,
             ),
           }),
           false,

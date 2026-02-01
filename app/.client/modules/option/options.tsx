@@ -126,7 +126,8 @@ export default function AttributeOptions() {
               No attribute options yet
             </p>
             <p className="text-gray-500 dark:text-gray-500 mb-6">
-              Create your first attribute option to provide choices for your attributes!
+              Create your first attribute option to provide choices for your
+              attributes!
             </p>
             <button
               onClick={openAddPopup}
@@ -165,9 +166,7 @@ export default function AttributeOptions() {
                     Edit
                   </button>
                   <button
-                    onClick={() =>
-                      handleDeleteAttributeOption(attributeOption)
-                    }
+                    onClick={() => handleDeleteAttributeOption(attributeOption)}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                   >
                     Delete

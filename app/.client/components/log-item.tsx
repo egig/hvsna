@@ -40,14 +40,18 @@ export function LogItem({
   showActions = true,
   compact = false,
   trackerAttributes,
-  attributeOptions
+  attributeOptions,
 }: LogItemProps) {
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [attributesMap, setAttributesMap] = useState<Record<string, TrackerAttribute>>({});
-  const [optionsMap, setOptionsMap] = useState<Record<string, AttributeOption>>({});
-  
+  const [attributesMap, setAttributesMap] = useState<
+    Record<string, TrackerAttribute>
+  >({});
+  const [optionsMap, setOptionsMap] = useState<Record<string, AttributeOption>>(
+    {},
+  );
+
   useEffect(() => {
-    if (!trackerAttributes) return
+    if (!trackerAttributes) return;
 
     // Build attributes map for quick lookup
     const attrMap: Record<string, TrackerAttribute> = {};
@@ -56,9 +60,9 @@ export function LogItem({
     });
     setAttributesMap(attrMap);
   }, [trackerAttributes]);
-  
+
   useEffect(() => {
-    if (!attributeOptions) return
+    if (!attributeOptions) return;
     // Build options map for quick lookup
     const optMap: Record<string, AttributeOption> = {};
     attributeOptions.forEach((opt) => {
@@ -66,7 +70,6 @@ export function LogItem({
     });
     setOptionsMap(optMap);
   }, [attributeOptions]);
-
 
   useEffect(() => {
     const handleClickOutside = () => setActionsOpen(false);
@@ -104,9 +107,9 @@ export function LogItem({
   };
 
   return (
-    <div 
+    <div
       className={`bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:shadow-sm transition-shadow ${
-        !compact && onEdit ? 'cursor-pointer' : ''
+        !compact && onEdit ? "cursor-pointer" : ""
       }`}
       onClick={handleItemClick}
     >
@@ -118,38 +121,47 @@ export function LogItem({
 
         {/* Log Content */}
         <div className="flex-1 min-w-0">
-          <h3 className={`font-medium text-gray-900 dark:text-white truncate ${
-            !compact && onEdit ? 'hover:text-blue-600 dark:hover:text-blue-400' : ''
-          }`}>
+          <h3
+            className={`font-medium text-gray-900 dark:text-white truncate ${
+              !compact && onEdit
+                ? "hover:text-blue-600 dark:hover:text-blue-400"
+                : ""
+            }`}
+          >
             {getTrackerName(log.trackerId)}
           </h3>
-          <p className={`text-gray-500 dark:text-gray-400 mt-1 ${
-            compact ? 'text-xs' : 'text-sm'
-          }`}>
-            {formatLogValue(log)} • {compact 
-              ? new Date(log.timestamp).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
+          <p
+            className={`text-gray-500 dark:text-gray-400 mt-1 ${
+              compact ? "text-xs" : "text-sm"
+            }`}
+          >
+            {formatLogValue(log)} •{" "}
+            {compact
+              ? new Date(log.timestamp).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })
-              : formatTimestamp(log.timestamp)
-            }
+              : formatTimestamp(log.timestamp)}
           </p>
           {!compact && (
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
               Created: {new Date(log.createdAt).toLocaleDateString()}
             </p>
           )}
-          
+
           {/* Attributes */}
           {log.attributes && Object.keys(log.attributes).length > 0 && (
-            <div className={`text-gray-500 dark:text-gray-400 mt-2 ${
-              compact ? 'text-xs' : 'text-xs'
-            }`}>
+            <div
+              className={`text-gray-500 dark:text-gray-400 mt-2 ${
+                compact ? "text-xs" : "text-xs"
+              }`}
+            >
               {Object.entries(log.attributes).map(([attributeId, value]) => (
                 <span key={attributeId} className="mr-3">
-                  {getAttributeDisplayName(attributeId)}: {formatAttributeValue(attributeId, value)}
+                  {getAttributeDisplayName(attributeId)}:{" "}
+                  {formatAttributeValue(attributeId, value)}
                 </span>
               ))}
             </div>
@@ -166,7 +178,10 @@ export function LogItem({
               }}
               className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              <MoreHorizontal size={compact ? 14 : 16} className="text-gray-500" />
+              <MoreHorizontal
+                size={compact ? 14 : 16}
+                className="text-gray-500"
+              />
             </button>
 
             {actionsOpen && (

@@ -61,7 +61,8 @@ function TaskItem({
     const targetName = target?.name || "Unknown Target";
     return (
       <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-        Target: {targetName} {task.targetValue && `(Value: ${task.targetValue})`}
+        Target: {targetName}{" "}
+        {task.targetValue && `(Value: ${task.targetValue})`}
       </p>
     );
   };
@@ -151,7 +152,7 @@ export default function Tasks() {
     deleteTask,
     refreshTasks,
     loadMoreTasks,
-    updateStatus
+    updateStatus,
   } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
@@ -160,12 +161,12 @@ export default function Tasks() {
   const openAddPopup = () => {
     // Reset form first, then open sheet
     // Use setTimeout to ensure state is set before opening sheet
-    setEditingTaskId(null)
+    setEditingTaskId(null);
     setTimeout(() => setSheetOpened(true), 0);
   };
 
   const openEditPopup = (task: Task) => {
-    setEditingTaskId(task.id)
+    setEditingTaskId(task.id);
     setSheetOpened(true);
   };
 

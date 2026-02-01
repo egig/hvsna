@@ -5,6 +5,8 @@ import type { EpochTime } from "~/lib/tracker/types";
 export interface Tracker {
   id: string;
   name: string;
+  type: "counter" | "amount";
+  negative: boolean;
   unit: string;
   baseline: number;
   createdAt: EpochTime;
@@ -22,12 +24,16 @@ export interface TrackerAttribute {
 
 export interface TrackerCreateInput {
   name: string;
+  type: "counter" | "amount";
+  negative: boolean;
   unit: string;
   baseline: number;
 }
 
 export interface TrackerUpdateInput {
   name?: string;
+  type: "counter" | "amount";
+  negative: boolean;
   unit?: string;
   baseline?: number;
 }
