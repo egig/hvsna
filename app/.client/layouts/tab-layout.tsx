@@ -3,8 +3,10 @@ import { TabBar } from "../modules/navigation";
 
 export default function TabLayout() {
   return (
-    <div className="max-w-[520px] m-auto">
+    <div className="m-auto h-[100%]">
+      <div className="h-[calc(100%-70px)]">
       <Outlet />
+      </div>
       <TabBar />
     </div>
   );

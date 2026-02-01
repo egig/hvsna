@@ -74,7 +74,7 @@ export function PageTransition({ children }: PageTransitionProps) {
         duration: currentVariant.duration,
         ease: [0.4, 0.0, 0.2, 1],
       }}
-      className="h-screen w-full"
+      className="h-[100%] w-full"
       style={{ willChange: "transform, opacity" }}
     >
       {children}

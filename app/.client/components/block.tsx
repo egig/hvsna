@@ -1,3 +1,3 @@
 export default function Block({ children }: { children: React.ReactNode }) {
-  return <div className="p-2">{children}</div>;
+  return <div className="p-6">{children}</div>;
 }

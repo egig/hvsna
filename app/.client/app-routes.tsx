@@ -11,7 +11,7 @@ import Trackers from "./modules/tracker/trackers";
 import Targets from "./modules/target/targets";
 import TrackersAttributes from "./modules/attribute/tracker-attributes";
 import AttributeOptions from "./modules/option/options";
-import { TargetResults } from "./components/TargetResults";
+import { Reports } from "./components/resports";
 import { Home } from "./components/Home";
 import DataManagement from "./pages/data-management";
 import TrackerDetail from "./modules/tracker/tracker-detail";
@@ -31,7 +31,7 @@ export const AppRoutes = () => {
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
           <Route path="tasks" element={<Tasks />} />
-          <Route path="results" element={<TargetResults />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="logs" element={<Logs />} />
           <Route path="about" element={<About />} />
           <Route path="wipe-local" element={<DataManagement />} />

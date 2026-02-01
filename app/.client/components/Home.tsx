@@ -12,6 +12,8 @@ import type { AttributeOption } from "../modules/option/optionStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
 import { useAttributeOptions } from "../modules/option/use-options";
 import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
+import { Navbar, Page } from "../modules/navigation";
+import Block from "./block";
 
 interface RecentLogsProps {
   logs: Log[];
@@ -75,7 +77,6 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
 
   return (
     <div className="space-y-4">
-      <TargetResultsSummary results={results} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {overviewResults.map((result) => (
@@ -235,43 +236,29 @@ export function Home() {
   }
 
   return (
-    <div className="p-6 h-screen overflow-y-auto">
-      <div className="max-w-7xl mx-auto space-y-8 mb-20">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-          <p className="text-gray-600">
-            Track your progress and recent activity
-          </p>
+    <Page>
+      <Navbar title={"Home"} />
+      <Block>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Results Overview
+          </h2>
+          <div className="text-sm text-gray-500"> Latest</div>
         </div>
-
-        {/* Target Results Overview */}
-        <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Target Results Overview
-            </h2>
-            <div className="text-sm text-gray-500">Last 30 days</div>
-          </div>
-          <TargetResultsOverview results={targetResults} />
-        </section>
-
-        {/* Recent Logs */}
-        <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Recent Activity
-            </h2>
-            <div className="text-sm text-gray-500">Last 10 logs</div>
-          </div>
-          <RecentLogs
-            logs={recentLogs}
-            trackers={trackers}
-            trackerAttributes={trackerAttributes}
-            attributeOptions={attributeOptions}
-          />
-        </section>
-      </div>
-    </div>
+        <TargetResultsOverview results={targetResults} />
+      </Block>
+      <Block>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-900">Recent</h2>
+          <div className="text-sm text-gray-500">Last 10 logs</div>
+        </div>
+        <RecentLogs
+          logs={recentLogs}
+          trackers={trackers}
+          trackerAttributes={trackerAttributes}
+          attributeOptions={attributeOptions}
+        />
+      </Block>
+    </Page>
   );
 }
