@@ -9,6 +9,7 @@ export interface Tracker {
   negative: boolean;
   unit: string;
   baseline: number;
+  format?: "plain" | "idr";
   createdAt: EpochTime;
   customAttributes?: TrackerAttribute[];
 }
@@ -28,6 +29,7 @@ export interface TrackerCreateInput {
   negative: boolean;
   unit: string;
   baseline: number;
+  format?: "plain" | "idr";
 }
 
 export interface TrackerUpdateInput {
@@ -36,6 +38,7 @@ export interface TrackerUpdateInput {
   negative: boolean;
   unit?: string;
   baseline?: number;
+  format?: "plain" | "idr";
 }
 
 export interface TrackerQuery {

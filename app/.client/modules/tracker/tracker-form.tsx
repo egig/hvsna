@@ -43,6 +43,7 @@ export default function TrackerForm({
       const unit = form.get("unit") as string;
       const baseline = form.get("baseline") as string;
       const negative = form.get("negative") as string;
+      const format = form.get("format") as string;
 
       if (!name || !type) {
         if (onError) onError("Name and type fields are required");
@@ -56,6 +57,7 @@ export default function TrackerForm({
           type,
           negative: Boolean(negative),
           baseline: parseFloat(baseline) || 0,
+          format: format as "plain" | "idr" || "plain",
         });
       } else {
         await createTracker({
@@ -64,6 +66,7 @@ export default function TrackerForm({
           unit,
           negative: Boolean(negative),
           baseline: parseFloat(baseline) || 0,
+          format: format as "plain" | "idr" || "plain",
         });
       }
 
@@ -168,6 +171,26 @@ export default function TrackerForm({
                 type="number"
                 disabled={isSubmitting}
                 className="text-base"
+              />
+            )}
+
+            {selectedType === "amount" && (
+              <Select
+                name="format"
+                label="Format"
+                key={Math.random()}
+                value={tracker?.format || "plain"}
+                disabled={isSubmitting}
+                options={[
+                  {
+                    value: "plain",
+                    label: "Plain Number",
+                  },
+                  {
+                    value: "idr",
+                    label: "Indonesian Rupiah",
+                  },
+                ]}
               />
             )}
           </div>
