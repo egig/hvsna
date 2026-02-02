@@ -253,7 +253,7 @@ function TargetResultsTable({ results }: TargetResultsTableProps) {
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="text-left p-3 font-medium text-gray-900">
-                Target
+                Goal
               </th>
               <th className="text-right p-3 font-medium text-gray-900">
                 Current

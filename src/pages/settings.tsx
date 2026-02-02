@@ -3,8 +3,10 @@ import { ChartArea, ChartBar, GitBranchIcon, List, LogIn, Logs, Settings as Sett
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";
 import { Navbar } from "../modules/navigation";
+import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 
 export default function Settings() {
+  const attrEnabled = useFeatureFlag("TRACKER_ATTR");
   return (
     <Page>
       <Navbar title="Settings" showBackButton={false} />
@@ -23,19 +25,19 @@ export default function Settings() {
           to="/trackers"
         />
 
-        <MenuItem
+        {attrEnabled && <MenuItem
           title="Trackers Attributes"
           subtitle="Manage your tracking attributes"
           icon={GitBranchIcon}
           to="/trackers-attributes"
-        />
+        /> }
 
-        <MenuItem
+        {attrEnabled && <MenuItem
           title="Attribute Options"
           subtitle="Manage your attribute options"
           icon={List}
           to="/attribute-options"
-        />
+        /> }
 
         <MenuItem
           title="Goals"

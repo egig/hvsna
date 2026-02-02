@@ -7,6 +7,7 @@ import TrackerForm from "./tracker-form";
 import { Modal } from "../navigation/modal";
 import { Button, Navbar, Page } from "../navigation";
 import { useTrackers } from "./use-trackers";
+import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 
 export default function Trackers() {
   const {
@@ -18,6 +19,7 @@ export default function Trackers() {
   } = useTrackers();
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
+  const attrEnabled = useFeatureFlag("TRACKER_ATTR")
 
   const resetForm = () => {
     setEditingTrackerId(null);
@@ -87,14 +89,6 @@ export default function Trackers() {
         }
       />
       <div className="p-4">
-        {/* {loading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-gray-600 dark:text-gray-400">
-              Loading trackers...
-            </div>
-          </div>
-        )} */}
-
         {error && (
           <div className="space-y-4">
             <div className="text-red-600 dark:text-red-400">Error: {error}</div>
@@ -145,7 +139,7 @@ export default function Trackers() {
                   </p>
                 </div>
                 <div className="flex gap-2 group-hover:opacity-100 transition-opacity">
-                  <Button to={`/trackers/${tracker.id}`}>Detail</Button>
+                  {attrEnabled && <Button to={`/trackers/${tracker.id}`}>Detail</Button> }
                   <button
                     onClick={(e) => {
                       e.stopPropagation();

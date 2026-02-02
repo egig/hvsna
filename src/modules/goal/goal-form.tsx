@@ -14,6 +14,7 @@ import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import type { Tracker } from "../tracker/trackerStore";
 import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
+import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 
 interface GoalFormProps {
   goalId?: string | null;
@@ -41,6 +42,9 @@ export default function GoalForm({
   );
   const { trackerAttributes, loading: attributesLoading } =
     useTrackerAttributes(selectedTrackerId);
+  
+  const attrEnabled = useFeatureFlag("TRACKER_ATTR")
+  const rangeEnabled = useFeatureFlag("GOAL_RANGE")
 
   useEffect(() => {
     // Load available trackers
@@ -180,12 +184,11 @@ export default function GoalForm({
 
             {selectedTracker && (
               <div className="text-sm text-gray-500 mb-4">
-                Tracker: {selectedTracker.name} ({selectedTracker.unit})
+                Tracker: {selectedTracker.name}
               </div>
             )}
 
-            {/* Attributes Multi-Select */}
-            {selectedTracker && (
+            {attrEnabled && selectedTracker && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Attributes
@@ -259,7 +262,7 @@ export default function GoalForm({
               </div>
             )}
 
-            <div className="mb-4">
+            {rangeEnabled && <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Type
               </label>
@@ -272,7 +275,7 @@ export default function GoalForm({
                 <option value="static">Static</option>
                 <option value="range">Range</option>
               </select>
-            </div>
+            </div> }
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">

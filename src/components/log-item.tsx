@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { FileText, MoreHorizontal } from "lucide-react";
 import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 import { useAttributeOptions } from "../modules/option/use-options";
-import { formatValue } from "src/lib/format";
-import type { Log } from "src/lib/tracker/types";
 import type { Tracker } from "../modules/tracker/trackerStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
 import type { AttributeOption } from "../modules/option/optionStore";
+import type { Log } from "src/lib/tracker/types";
+import { formatValue } from "src/lib/format";
 
 interface LogItemProps {
   log: Log;
@@ -118,7 +118,7 @@ export function LogItem({
       <div className="flex items-start gap-3">
         {/* Log Icon */}
         <div className="flex-shrink-0 mt-1">
-          <FileText size={compact ? 16 : 24} className="text-green-500" />
+          <FileText size={compact ? 16 : 24} className="text-gray-400" />
         </div>
 
         {/* Log Content */}
