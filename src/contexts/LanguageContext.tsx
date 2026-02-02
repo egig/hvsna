@@ -6,7 +6,7 @@ import { useSettings } from '../hooks/useSettings';
 interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -30,8 +30,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     loadSettings();
   }, [loadSettings]);
 
-  const t = (key: string): string => {
-    return (translations[settings.language] as any)?.[key] || key;
+  const t = (key: string, params?: Record<string, string | number>): string => {
+    const translation = (translations[settings.language] as any)?.[key] || key;
+    
+    if (!params) return translation;
+    
+    // Replace parameters in the translation string
+    return translation.replace(/\{(\w+)\}/g, (match: string, paramKey: string) => {
+      return params[paramKey]?.toString() || match;
+    });
   };
 
   return (
