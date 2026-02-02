@@ -1,43 +1,43 @@
 import { useState, useEffect } from "react";
 import type {
-  Target as TargetType,
-  TargetType as TargetTypeEnum,
-  TargetPeriod,
+  Goal as GoalType,
+  GoalType as GoalTypeEnum,
+  GoalPeriod,
 } from "src/lib/tracker/types";
 import {
-  useTarget,
-  type TargetDirection,
-  type TargetCalculation,
-} from "./use-target";
+  useGoal,
+  type GoalDirection,
+  type GoalCalculation,
+} from "./use-goal";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import type { Tracker } from "../tracker/trackerStore";
 import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
 
-interface TargetFormProps {
-  targetId?: string | null;
-  onSuccess?: (target: TargetType) => void;
+interface GoalFormProps {
+  goalId?: string | null;
+  onSuccess?: (goal: GoalType) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
 }
 
-export default function TargetForm({
-  targetId,
+export default function GoalForm({
+  goalId,
   onSuccess,
   onError,
   onCancel,
-}: TargetFormProps) {
+}: GoalFormProps) {
   const { loading: trackerLoading, getTrackers } = useTrackers();
-  const { loading, error, createTarget, updateTarget, getTarget, target } =
-    useTarget(targetId as string);
+  const { loading, error, createGoal, updateGoal, getGoal, goal } =
+    useGoal(goalId as string);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTrackerId, setSelectedTrackerId] = useState<string>(
-    target?.trackerId || "",
+    goal?.trackerId || "",
   );
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>(
-    target?.scope || [],
+    goal?.scope || [],
   );
   const { trackerAttributes, loading: attributesLoading } =
     useTrackerAttributes(selectedTrackerId);
@@ -60,28 +60,28 @@ export default function TargetForm({
   }, [error, onError]);
 
   useEffect(() => {
-    // Update form state when target changes
-    if (target) {
-      setSelectedTrackerId(target.trackerId);
-      setSelectedAttributes(target.scope || []);
+    // Update form state when goal changes
+    if (goal) {
+      setSelectedTrackerId(goal.trackerId);
+      setSelectedAttributes(goal.scope || []);
     }
-  }, [target]);
+  }, [goal]);
 
   const handleSubmit = async (formData: FormData) => {
     const trackerId = formData.get("trackerId") as string;
-    const type = formData.get("type") as TargetTypeEnum;
-    const calculation = formData.get("calculation") as TargetCalculation;
-    const direction = formData.get("direction") as TargetDirection;
+    const type = formData.get("type") as GoalTypeEnum;
+    const calculation = formData.get("calculation") as GoalCalculation;
+    const direction = formData.get("direction") as GoalDirection;
     const value = formData.get("value") as string;
     const valueMax = formData.get("valueMax") as string;
-    const period = formData.get("period") as TargetPeriod;
+    const period = formData.get("period") as GoalPeriod;
     const name = formData.get("name") as string;
 
     try {
       setIsSubmitting(true);
 
-      let result: TargetType;
-      const targetData = {
+      let result: GoalType;
+      const goalData = {
         name,
         trackerId,
         type,
@@ -94,10 +94,10 @@ export default function TargetForm({
         scope: selectedAttributes,
       };
 
-      if (targetId) {
-        result = await updateTarget(targetId, targetData);
+      if (goalId) {
+        result = await updateGoal(goalId, goalData);
       } else {
-        result = await createTarget(targetData);
+        result = await createGoal(goalData);
       }
 
       if (onSuccess) {
@@ -137,7 +137,7 @@ export default function TargetForm({
   // Helper function to add sample custom attributes for testing
   return (
     <BaseForm
-      title={targetId ? "Edit Target" : "New Target"}
+      title={goalId ? "Edit Goal" : "New Goal"}
       onSuccess={onSuccess}
       onError={onError}
       onCancel={handleCancel}
@@ -149,8 +149,8 @@ export default function TargetForm({
               name="name"
               label="Name"
               type="text"
-              value={target?.name || ""}
-              placeholder="Target name"
+              value={goal?.name || ""}
+              placeholder="Goal name"
               disabled={isSubmitting}
               required={true}
               className="text-base"
@@ -240,18 +240,23 @@ export default function TargetForm({
             )}
 
             {selectedTracker?.type === "amount" && (
-              <Select
-                label="Calculation"
-                name="calculation"
-                value={target?.calculation || "sum"}
-                options={[
-                  { label: "Sum", value: "sum" },
-                  { label: "Last", value: "last" },
-                  { label: "Average", value: "avg" },
-                  { label: "Minimum", value: "min" },
-                  { label: "Maximum", value: "max" },
-                ]}
-              />
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Calculation
+                </label>
+                <select
+                  name="calculation"
+                  value={goal?.calculation || "sum"}
+                  disabled={isSubmitting}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                >
+                  <option value="sum">Sum</option>
+                  <option value="last">Last</option>
+                  <option value="avg">Average</option>
+                  <option value="min">Minimum</option>
+                  <option value="max">Maximum</option>
+                </select>
+              </div>
             )}
 
             <div className="mb-4">
@@ -260,7 +265,7 @@ export default function TargetForm({
               </label>
               <select
                 name="type"
-                defaultValue={target?.type || "static"}
+                defaultValue={goal?.type || "static"}
                 disabled={isSubmitting}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
               >
@@ -275,7 +280,7 @@ export default function TargetForm({
               </label>
               <select
                 name="direction"
-                defaultValue={target?.direction || "increase"}
+                defaultValue={goal?.direction || "increase"}
                 disabled={isSubmitting}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
               >
@@ -287,9 +292,9 @@ export default function TargetForm({
 
             <FormInput
               name="value"
-              label={target?.type === "range" ? "Target" : "Value"}
+              label={goal?.type === "range" ? "Goal" : "Value"}
               type="number"
-              value={target?.value?.toString() || ""}
+              value={goal?.value?.toString() || ""}
               placeholder="0"
               disabled={isSubmitting}
               required={true}
@@ -301,13 +306,13 @@ export default function TargetForm({
               </p>
             )}
 
-            {target?.type === "range" && (
+            {goal?.type === "range" && (
               <>
                 <FormInput
                   name="valueMax"
                   label="Maximum"
                   type="number"
-                  value={target?.valueMax?.toString() || ""}
+                  value={goal?.valueMax?.toString() || ""}
                   placeholder="Maximum value"
                   disabled={isSubmitting}
                   className="text-base"
@@ -326,7 +331,7 @@ export default function TargetForm({
               </label>
               <select
                 name="period"
-                defaultValue={target?.period || "monthly"}
+                defaultValue={goal?.period || "monthly"}
                 disabled={isSubmitting}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
               >

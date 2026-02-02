@@ -31,10 +31,10 @@ export default function Settings() {
         />
 
         <MenuItem
-          title="Targets"
+          title="Goals"
           subtitle="Manage your goals"
           icon={Target}
-          to="/targets"
+          to="/goals"
         />
         <MenuItem
           title="Logs"

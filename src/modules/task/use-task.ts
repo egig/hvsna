@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { usePouchDB } from "../../pouchdb";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
-import { useTarget } from "../target/use-target";
+import { useGoal } from "../goal/use-goal";
 
 export interface UseTaskReturn {
   task: Task | null;
@@ -27,8 +27,8 @@ export const useTask = (taskId?: string): UseTaskReturn => {
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
 
-  // Use the useTarget hook when we have a targetId
-  const { target: currentTarget, getTarget } = useTarget(currentTargetId || "");
+  // Use the useGoal hook when we have a goalId
+  const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
   useEffect(() => {
     if (taskId) {
@@ -65,9 +65,9 @@ export const useTask = (taskId?: string): UseTaskReturn => {
       input.status !== currentTask.status
     ) {
       try {
-        const target = await getTarget(updatedTask.targetId as string);
+        const goal = await getGoal(updatedTask.targetId as string);
         await createLog({
-          trackerId: target.trackerId,
+          trackerId: goal.trackerId,
           timestamp: Date.now(),
           value: updatedTask.targetValue as number, // 1 for completed, 0 for re-opened
           taskId: updatedTask.id,

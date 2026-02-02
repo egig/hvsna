@@ -1,31 +1,31 @@
 import { useEffect, useState } from "react";
 import {
-  Target,
+  Target as GoalIcon,
   Plus,
   Edit,
   Trash2,
-  TargetIcon,
+  Target,
   MoreHorizontal,
 } from "lucide-react";
 import { formatValue } from "src/lib/format";
-import type { Target as TargetType } from "src/lib/tracker/types";
-import TargetForm from "./target-form";
+import type { Goal as GoalType } from "src/lib/tracker/types";
+import GoalForm from "./goal-form";
 import { Page } from "../navigation/page";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { useTrackers } from "../tracker/use-trackers";
-import { useTargets } from "./use-targets";
-import { useTarget } from "./use-target";
+import { useGoals } from "./use-goals";
+import { useGoal } from "./use-goal";
 import type { Tracker } from "../tracker/trackerStore";
 import { LoadingSpinner } from "src/components/loader";
 
-export default function Targets() {
-  const { loading, error, targets, getTargets } = useTargets();
-  const { deleteTarget } = useTarget("");
+export default function Goals() {
+  const { loading, error, goals, getGoals } = useGoals();
+  const { deleteGoal } = useGoal("");
   const { getTrackers } = useTrackers();
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [popupOpened, setPopupOpened] = useState(false);
-  const [editingTargetId, setEditingTargetId] = useState<string | null>(null);
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -33,8 +33,8 @@ export default function Targets() {
 
   const loadData = async () => {
     try {
-      const [targetsData, trackersData] = await Promise.all([
-        getTargets(),
+      const [goalsData, trackersData] = await Promise.all([
+        getGoals(),
         getTrackers(),
       ]);
       setTrackers(trackersData);
@@ -44,16 +44,16 @@ export default function Targets() {
   };
 
   const resetForm = () => {
-    setEditingTargetId(null);
+    setEditingGoalId(null);
   };
 
   const openAddPopup = () => {
-    setEditingTargetId(null);
+    setEditingGoalId(null);
     setTimeout(() => setPopupOpened(true), 0);
   };
 
-  const openEditPopup = (target: TargetType) => {
-    setEditingTargetId(target.id);
+  const openEditPopup = (goal: GoalType) => {
+    setEditingGoalId(goal.id);
     setPopupOpened(true);
   };
 
@@ -67,35 +67,35 @@ export default function Targets() {
     }
   }, [popupOpened]);
 
-  const handleTargetSuccess = () => {
+  const handleGoalSuccess = () => {
     setPopupOpened(false);
-    getTargets();
+    getGoals();
   };
 
-  const handleTargetError = (errorMessage: string) => {
+  const handleGoalError = (errorMessage: string) => {
     alert(errorMessage);
   };
 
-  const handleTargetCancel = () => {
+  const handleGoalCancel = () => {
     setPopupOpened(false);
   };
 
-  const handleDeleteTarget = async (target: TargetType) => {
-    const tracker = trackers.find((t) => t.id === target.trackerId);
+  const handleDeleteGoal = async (goal: GoalType) => {
+    const tracker = trackers.find((t) => t.id === goal.trackerId);
     const trackerName = tracker
       ? `${tracker.name}`
       : "Unknown tracker";
 
     if (
       confirm(
-        `Are you sure you want to delete this target for "${trackerName}"? This action cannot be undone.`,
+        `Are you sure you want to delete this goal for "${trackerName}"? This action cannot be undone.`,
       )
     ) {
       try {
-        await deleteTarget(target.id);
+        await deleteGoal(goal.id);
       } catch (err) {
-        console.error("Failed to delete target:", err);
-        alert("Failed to delete target. Please try again.");
+        console.error("Failed to delete goal:", err);
+        alert("Failed to delete goal. Please try again.");
       }
     }
   };
@@ -129,38 +129,38 @@ export default function Targets() {
     }
   };
 
-  const formatTargetValue = (target: TargetType) => {
-    const tracker = trackers.find((t) => t.id === target.trackerId);
+  const formatGoalValue = (goal: GoalType) => {
+    const tracker = trackers.find((t) => t.id === goal.trackerId);
 
-    if (target.type === "range" && target.valueMax) {
-      const minValue = formatValue(target.value, tracker?.format);
-      const maxValue = formatValue(target.valueMax, tracker?.format);
+    if (goal.type === "range" && goal.valueMax) {
+      const minValue = formatValue(goal.value, tracker?.format);
+      const maxValue = formatValue(goal.valueMax, tracker?.format);
       return `${minValue} - ${maxValue}`;
     }
-    return formatValue(target.value, tracker?.format);
+    return formatValue(goal.value, tracker?.format);
   };
 
-  interface TargetItemProps {
-    target: TargetType;
+  interface GoalItemProps {
+    goal: GoalType;
     trackers: Tracker[];
-    onEdit: (target: TargetType) => void;
-    onDelete: (target: TargetType) => void;
+    onEdit: (goal: GoalType) => void;
+    onDelete: (goal: GoalType) => void;
     getTypeLabel: (type: string) => string;
     getPeriodLabel: (period?: string) => string;
-    formatTargetValue: (target: TargetType) => string;
+    formatGoalValue: (goal: GoalType) => string;
     getTrackerName: (trackerId: string) => string;
   }
 
-  function TargetItem({
-    target,
+  function GoalItem({
+    goal,
     trackers,
     onEdit,
     onDelete,
     getTypeLabel,
     getPeriodLabel,
-    formatTargetValue,
+    formatGoalValue,
     getTrackerName,
-  }: TargetItemProps) {
+  }: GoalItemProps) {
     const [showActions, setShowActions] = useState(false);
 
     useEffect(() => {
@@ -174,24 +174,24 @@ export default function Targets() {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-start gap-3">
-          {/* Target Icon */}
+          {/* Goal Icon */}
           <div className="flex-shrink-0 mt-1">
-            <Target size={24} className="text-blue-500" />
+            <GoalIcon size={24} className="text-blue-500" />
           </div>
 
-          {/* Target Content */}
+          {/* Goal Content */}
           <div className="flex-1 min-w-0">
             <h3
               className="font-medium text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-              onClick={() => onEdit(target)}
+              onClick={() => onEdit(goal)}
             >
-              {getTrackerName(target.trackerId)} - {target.name}
+              {getTrackerName(goal.trackerId)} - {goal.name}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {formatTargetValue(target)} • {getPeriodLabel(target.period)}
+              {formatGoalValue(goal)} • {getPeriodLabel(goal.period)}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Created: {new Date(target.createdAt).toLocaleDateString()}
+              Created: {new Date(goal.createdAt).toLocaleDateString()}
             </p>
           </div>
 
@@ -199,7 +199,7 @@ export default function Targets() {
           <div className="flex flex-col items-end gap-2">
             <div className="text-right">
               <div className="text-xs text-gray-600 dark:text-gray-400">
-                {getTypeLabel(target.type)}
+                {getTypeLabel(goal.type)}
               </div>
             </div>
 
@@ -219,7 +219,7 @@ export default function Targets() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onEdit(target);
+                      onEdit(goal);
                       setShowActions(false);
                     }}
                     className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -229,7 +229,7 @@ export default function Targets() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(target);
+                      onDelete(goal);
                       setShowActions(false);
                     }}
                     className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -253,12 +253,12 @@ export default function Targets() {
   return (
     <Page>
       <Navbar
-        title="Targets"
+        title="Goals"
         rightAction={
           <button
             onClick={openAddPopup}
             className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-            aria-label="Add target"
+            aria-label="Add goal"
           >
             <Plus size={20} />
           </button>
@@ -268,7 +268,7 @@ export default function Targets() {
       <div className="p-4">
         {loading && (
           <div className="flex flex-col items-center justify-center py-8">
-            <LoadingSpinner size="lg" text="Loading targets..." />
+            <LoadingSpinner size="lg" text="Loading goals..." />
           </div>
         )}
 
@@ -276,7 +276,7 @@ export default function Targets() {
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">Error: {error}</div>
             <button
-              onClick={() => getTargets()}
+              onClick={() => getGoals()}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
             >
               <Plus className="rotate-45" size={16} />
@@ -285,37 +285,37 @@ export default function Targets() {
           </div>
         )}
 
-        {!loading && targets.length === 0 && (
+        {!loading && goals.length === 0 && (
           <div className="text-center py-8">
-            <TargetIcon size={48} className="text-gray-400 mx-auto mb-4" />
+            <GoalIcon size={48} className="text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
-              No targets yet
+              No goals yet
             </p>
             <p className="text-gray-500 dark:text-gray-500 mb-4">
-              Create your first target to start tracking!
+              Create your first goal to start tracking!
             </p>
             <button
               onClick={openAddPopup}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
             >
               <Plus size={16} />
-              Create Target
+              Create Goal
             </button>
           </div>
         )}
 
-        {targets.length > 0 && (
+        {goals.length > 0 && (
           <div className="space-y-2">
-            {targets.map((target) => (
-              <TargetItem
-                key={target.id}
-                target={target}
+            {goals.map((goal) => (
+              <GoalItem
+                key={goal.id}
+                goal={goal}
                 trackers={trackers}
                 onEdit={openEditPopup}
-                onDelete={handleDeleteTarget}
+                onDelete={handleDeleteGoal}
                 getTypeLabel={getTypeLabel}
                 getPeriodLabel={getPeriodLabel}
-                formatTargetValue={formatTargetValue}
+                formatGoalValue={formatGoalValue}
                 getTrackerName={getTrackerName}
               />
             ))}
@@ -324,11 +324,11 @@ export default function Targets() {
       </div>
 
       <Modal isOpen={popupOpened} onClose={closePopup}>
-        <TargetForm
-          targetId={editingTargetId}
-          onSuccess={handleTargetSuccess}
-          onError={handleTargetError}
-          onCancel={handleTargetCancel}
+        <GoalForm
+          goalId={editingGoalId}
+          onSuccess={handleGoalSuccess}
+          onError={handleGoalError}
+          onCancel={handleGoalCancel}
         />
       </Modal>
     </Page>

@@ -33,10 +33,10 @@ export interface Log {
   note?: string;
 }
 
-/* ---------- Target ---------- */
+/* ---------- Goal ---------- */
 
-export type TargetReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
-export type TargetCalculation =
+export type GoalReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
+export type GoalCalculation =
   | "sum"
   | "count"
   | "last"
@@ -44,28 +44,28 @@ export type TargetCalculation =
   | "min"
   | "max";
 
-export type TargetDirection = "increase" | "decrease" | "neutral";
+export type GoalDirection = "increase" | "decrease" | "neutral";
 
 /**
  * Unifies goal, budget, quota, SLA, limit.
  */
-export interface Target {
+export interface Goal {
   id: UUID;
   name: string;
   trackerId: UUID;
-  type: TargetType;
-  calculation: TargetCalculation;
-  direction: TargetDirection;
-  value: number; // target or min
+  type: GoalType;
+  calculation: GoalCalculation;
+  direction: GoalDirection;
+  value: number; // goal or min
   valueMax?: number; // only for range
-  period?: TargetPeriod;
+  period?: GoalPeriod;
   scope: string[]; // list of attributeId
   createdAt: EpochTime;
 }
 
-export type TargetType = "static" | "range";
+export type GoalType = "static" | "range";
 
-export type TargetPeriod =
+export type GoalPeriod =
   | "log"
   | "daily"
   | "weekly"

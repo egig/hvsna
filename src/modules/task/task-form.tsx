@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useTask } from "./use-task";
-import { useTargetStore } from "../target/targetStore";
+import { useGoalStore } from "../goal/goalStore";
 import { usePouchDB } from "../../pouchdb";
 import type { Task } from "src/lib/types/task";
-import type { Target } from "../target/targetStore";
-import type { TrackerAttribute } from "../attribute/trackerAttributeStore";
+import type { Goal } from "../goal/goalStore";
+import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { Check } from "lucide-react";
 import { Navbar } from "../navigation";
-import { useTargets } from "../target/use-targets";
-import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
+import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
@@ -28,15 +27,15 @@ export default function TaskForm({
 }: TaskFormProps) {
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
-  const { targets } = useTargets();
+  const { goals } = useGoals();
   const { db } = usePouchDB();
-  const { getTargetsFromDB } = useTargetStore();
+  const { getGoalsFromDB } = useGoalStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>(
     task?.targetId as string,
   );
-  const [selectedTarget, setSelectedTarget] = useState<Target | null>(null);
-  const { trackerAttributes } = useTrackerAttributes(selectedTarget?.trackerId);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
 
   useEffect(() => {
     if (error && onError) {
@@ -49,19 +48,19 @@ export default function TaskForm({
   }, [task]);
 
   useEffect(() => {
-    const target = targets.find((t) => t.id === selectedTargetId);
-    setSelectedTarget(target || null);
-  }, [selectedTargetId, targets]);
+    const goal = goals.find((g) => g.id === selectedTargetId);
+    setSelectedGoal(goal || null);
+  }, [selectedTargetId, goals]);
 
   // Helper function to get attribute by ID
   const getAttributeById = (
     attributeId: string,
-  ): TrackerAttribute | undefined => {
+  ): any | undefined => {
     return trackerAttributes.find((attr) => attr.id === attributeId);
   };
 
   // Helper function to render attribute input using CustomAttributeInput
-  const renderAttributeInput = (attribute: TrackerAttribute, index: number) => {
+  const renderAttributeInput = (attribute: any, index: number) => {
     const value = task?.attributes?.[attribute.id];
 
     return (
@@ -82,15 +81,15 @@ export default function TaskForm({
 
       // Extract scope values from form data
       var attr: Record<string, any> = {};
-      if (selectedTarget?.scope) {
-        for (let i = 0; i < selectedTarget.scope.length; i++) {
-          const attributeId = selectedTarget.scope[i];
+      if (selectedGoal?.scope) {
+        for (let i = 0; i < selectedGoal.scope.length; i++) {
+          const attributeId = selectedGoal.scope[i];
           let value = formData.get(attributeId) as string;
           attr[attributeId] = value;
         }
       }
 
-      console.log("attr", attr, selectedTarget);
+      console.log("attr", attr, selectedGoal);
 
       const taskInput: any = {
         name: taskData.name.trim(),
@@ -167,10 +166,10 @@ export default function TaskForm({
               disabled={isSubmitting}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              <option value="">Select a target</option>
-              {targets.map((target) => (
-                <option key={target.id} value={target.id}>
-                  {target.name}
+              <option value="">Select a goal</option>
+              {goals.map((goal) => (
+                <option key={goal.id} value={goal.id}>
+                  {goal.name}
                 </option>
               ))}
             </select>
@@ -189,7 +188,7 @@ export default function TaskForm({
                 className="text-base"
               />
 
-              {selectedTarget?.scope?.map((attributeId, index) => {
+              {selectedGoal?.scope?.map((attributeId, index) => {
                 const attribute = getAttributeById(attributeId);
                 if (!attribute) {
                   // Fallback to basic text input if attribute not found

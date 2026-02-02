@@ -8,7 +8,7 @@ import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
 import Logs from "./modules/log/logs";
 import Trackers from "./modules/tracker/trackers";
-import Targets from "./modules/target/targets";
+import Goals from "./modules/goal/goals";
 import TrackersAttributes from "./modules/attribute/tracker-attributes";
 import AttributeOptions from "./modules/option/options";
 import { Reports } from "./components/resports";
@@ -41,7 +41,7 @@ export const AppRoutes = () => {
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
         <Route path="attribute-options" element={<AttributeOptions />} />
-        <Route path="targets" element={<Targets />} />
+        <Route path="goals" element={<Goals />} />
         <Route path="logs" element={<Logs />} />
         <Route path="*" element={<p>Not Found</p>} />
       </Routes>

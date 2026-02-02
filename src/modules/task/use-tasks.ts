@@ -9,7 +9,7 @@ import type {
 import { usePouchDB } from "../../pouchdb";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
-import { useTarget } from "../target/use-target";
+import { useGoal } from "../goal/use-goal";
 
 export interface UseTasksReturn {
   tasks: Task[];
@@ -32,7 +32,7 @@ export const useTasks = (): UseTasksReturn => {
   const { db } = usePouchDB();
   const store = useTaskStore();
   const { createLog } = useLog();
-  const { getTarget } = useTarget();
+  const { getGoal } = useGoal();
 
   useEffect(() => {
     getTasks();
@@ -121,14 +121,14 @@ export const useTasks = (): UseTasksReturn => {
     }
 
     try {
-      const target = await getTarget(updatedTask.targetId as string);
+      const goal = await getGoal(updatedTask.targetId as string);
       let v = updatedTask.targetValue || 0;
       if (status !== "completed") {
         v = -1 * v;
       }
 
       await createLog({
-        trackerId: target.trackerId,
+        trackerId: goal.trackerId,
         timestamp: Date.now(),
         value: v,
         taskId: updatedTask.id,

@@ -1,19 +1,19 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useTargetResults } from "../useTargetResults";
-import { useTargetStore } from "../../modules/target/targetStore";
+import { useGoalStore } from "../../modules/goal/goalStore";
 import { useLogStore } from "../../modules/log/logStore";
-import type { Target } from "../../modules/target/targetStore";
+import type { Goal } from "../../modules/goal/goalStore";
 import type { Log } from "src/lib/tracker/types";
 
 // Mock the stores
-vi.mock("../../modules/target/targetStore");
+vi.mock("../../modules/goal/goalStore");
 vi.mock("../../modules/log/logStore");
 
-const mockGetTargetsFromDB = vi.fn();
+const mockGetGoalsFromDB = vi.fn();
 const mockGetLogsFromDB = vi.fn();
 
-const mockTarget: Target = {
+const mockGoal: Goal = {
   id: "target:test",
   name: "Test Target",
   trackerId: "tracker:test",
@@ -47,8 +47,8 @@ describe("useTargetResults", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    (useTargetStore as any).mockReturnValue({
-      getTargetsFromDB: mockGetTargetsFromDB,
+    (useGoalStore as any).mockReturnValue({
+      getTargetsFromDB: mockGetGoalsFromDB,
     });
 
     (useLogStore as any).mockReturnValue({
@@ -58,7 +58,7 @@ describe("useTargetResults", () => {
 
   describe("getTargetResults", () => {
     it("should calculate target results correctly", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
       const { result } = renderHook(() => useTargetResults());
@@ -81,14 +81,14 @@ describe("useTargetResults", () => {
     });
 
     it("should handle range targets correctly", async () => {
-      const rangeTarget: Target = {
-        ...mockTarget,
+      const rangeGoal: Goal = {
+        ...mockGoal,
         type: "range",
         value: 50,
         valueMax: 150,
       };
 
-      mockGetTargetsFromDB.mockResolvedValue([rangeTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([rangeGoal]);
       mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
       const { result } = renderHook(() => useTargetResults());
@@ -116,10 +116,10 @@ describe("useTargetResults", () => {
 
       for (const testCase of testCases) {
         const testTarget = {
-          ...mockTarget,
+          ...mockGoal,
           calculation: testCase.calculation as any,
         };
-        mockGetTargetsFromDB.mockResolvedValue([testTarget]);
+        mockGetGoalsFromDB.mockResolvedValue([testTarget]);
         mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
         const { result } = renderHook(() => useTargetResults());
@@ -132,7 +132,7 @@ describe("useTargetResults", () => {
     });
 
     it("should filter by trackerId", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue([]);
 
       const { result } = renderHook(() => useTargetResults());
@@ -143,14 +143,14 @@ describe("useTargetResults", () => {
         mockDb,
       );
 
-      expect(mockGetTargetsFromDB).toHaveBeenCalledWith(
+      expect(mockGetGoalsFromDB).toHaveBeenCalledWith(
         { trackerId: "tracker:test", limit: undefined },
         mockDb,
       );
     });
 
     it("should filter by targetIds", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue([]);
 
       const { result } = renderHook(() => useTargetResults());
@@ -161,14 +161,14 @@ describe("useTargetResults", () => {
         mockDb,
       );
 
-      expect(mockGetTargetsFromDB).toHaveBeenCalledWith(
+      expect(mockGetGoalsFromDB).toHaveBeenCalledWith(
         { trackerId: undefined, limit: 1 },
         mockDb,
       );
     });
 
     it("should handle date range filtering", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue([]);
 
       const { result } = renderHook(() => useTargetResults());
@@ -189,7 +189,7 @@ describe("useTargetResults", () => {
     });
 
     it("should handle empty logs", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue([]);
 
       const { result } = renderHook(() => useTargetResults());
@@ -208,7 +208,7 @@ describe("useTargetResults", () => {
 
   describe("getTargetResult", () => {
     it("should return single target result", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
       const { result } = renderHook(() => useTargetResults());
@@ -227,7 +227,7 @@ describe("useTargetResults", () => {
     });
 
     it("should return null for non-existent target", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([]);
+      mockGetGoalsFromDB.mockResolvedValue([]);
 
       const { result } = renderHook(() => useTargetResults());
       const mockDb = {};
@@ -244,7 +244,7 @@ describe("useTargetResults", () => {
 
   describe("getResultsByTracker", () => {
     it("should get results for specific tracker", async () => {
-      mockGetTargetsFromDB.mockResolvedValue([mockTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([mockGoal]);
       mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
       const { result } = renderHook(() => useTargetResults());
@@ -256,7 +256,7 @@ describe("useTargetResults", () => {
         mockDb,
       );
 
-      expect(mockGetTargetsFromDB).toHaveBeenCalledWith(
+      expect(mockGetGoalsFromDB).toHaveBeenCalledWith(
         { trackerId: "tracker:test", limit: undefined },
         mockDb,
       );
@@ -266,13 +266,13 @@ describe("useTargetResults", () => {
 
   describe("result calculations", () => {
     it("should calculate decrease direction correctly", async () => {
-      const decreaseTarget: Target = {
-        ...mockTarget,
+      const decreaseGoal: Goal = {
+        ...mockGoal,
         direction: "decrease",
         value: 50,
       };
 
-      mockGetTargetsFromDB.mockResolvedValue([decreaseTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([decreaseGoal]);
       mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
       const { result } = renderHook(() => useTargetResults());
@@ -289,13 +289,13 @@ describe("useTargetResults", () => {
     });
 
     it("should calculate neutral direction correctly", async () => {
-      const neutralTarget: Target = {
-        ...mockTarget,
+      const neutralGoal: Goal = {
+        ...mockGoal,
         direction: "neutral",
         value: 80,
       };
 
-      mockGetTargetsFromDB.mockResolvedValue([neutralTarget]);
+      mockGetGoalsFromDB.mockResolvedValue([neutralGoal]);
       mockGetLogsFromDB.mockResolvedValue(mockLogs);
 
       const { result } = renderHook(() => useTargetResults());
@@ -321,7 +321,7 @@ describe("useTargetResults", () => {
     });
 
     it("should propagate database errors", async () => {
-      mockGetTargetsFromDB.mockRejectedValue(new Error("Database error"));
+      mockGetGoalsFromDB.mockRejectedValue(new Error("Database error"));
 
       const { result } = renderHook(() => useTargetResults());
       const mockDb = {};

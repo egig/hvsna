@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTasks } from "./use-tasks";
-import { useTarget } from "../target/use-target";
+import { useGoal } from "../goal/use-goal";
 import {
   CheckCircleIcon,
   CircleIcon,
@@ -35,7 +35,7 @@ function TaskItem({
   getStatusColor,
   formatScheduledDate,
 }: TaskItemProps) {
-  const { target } = useTarget(task.targetId);
+  const { goal } = useGoal(task.targetId);
   const [showActions, setShowActions] = useState(false);
 
   useEffect(() => {
@@ -58,10 +58,10 @@ function TaskItem({
 
   const getTargetInfo = () => {
     if (!task.targetId) return null;
-    const targetName = target?.name || "Unknown Target";
+    const targetName = goal?.name || "Unknown Goal";
     return (
       <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-        Target: {targetName}{" "}
+        Goal: {targetName}{" "}
         {task.targetValue && `(Value: ${task.targetValue})`}
       </p>
     );

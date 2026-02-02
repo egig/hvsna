@@ -1,12 +1,12 @@
 import { useCallback } from "react";
-import { useTargetStore } from "../modules/target/targetStore";
+import { useGoalStore } from "../modules/goal/goalStore";
 import { useLogStore } from "../modules/log/logStore";
 import type {
-  Target,
-  TargetCalculation,
-  TargetDirection,
-  TargetPeriod,
-} from "../modules/target/targetStore";
+  Goal,
+  GoalCalculation,
+  GoalDirection,
+  GoalPeriod,
+} from "../modules/goal/goalStore";
 import type { Log } from "src/lib/tracker/types";
 import type { EpochTime } from "src/lib/tracker/types";
 import { useTracker } from "../modules/tracker/use-tracker";
@@ -21,10 +21,10 @@ export interface TargetResultData {
   targetMax?: number;
   result: TargetResult;
   percentage: number;
-  period?: TargetPeriod;
+  period?: GoalPeriod;
   logsUsed: number;
-  calculation: TargetCalculation;
-  direction: TargetDirection;
+  calculation: GoalCalculation;
+  direction: GoalDirection;
   trackerFormat?: "plain" | "idr";
 }
 
@@ -36,14 +36,14 @@ export interface TargetResultQuery {
 }
 
 export function useTargetResults() {
-  const { getTargetsFromDB } = useTargetStore();
+  const { getGoalsFromDB } = useGoalStore();
   const { getLogsFromDB } = useLogStore();
   const { getTracker } = useTracker();
 
   const calculateValue = useCallback(
     (
       logs: Log[],
-      calculation: TargetCalculation,
+      calculation: GoalCalculation,
       trackerType: string,
     ): number => {
 
@@ -82,7 +82,7 @@ export function useTargetResults() {
 
   const getDateRange = useCallback(
     (
-      period: TargetPeriod | undefined,
+      period: GoalPeriod | undefined,
       to: EpochTime = Date.now(),
     ): { from: EpochTime; to: EpochTime } => {
       const toDate = new Date(to);
@@ -123,10 +123,10 @@ export function useTargetResults() {
   );
 
   const calculateTargetResult = useCallback(
-    (target: Target, currentValue: number): TargetResult => {
-      const { value, valueMax, direction } = target;
+    (goal: Goal, currentValue: number): TargetResult => {
+      const { value, valueMax, direction } = goal;
 
-      if (target.type === "range" && valueMax !== undefined) {
+      if (goal.type === "range" && valueMax !== undefined) {
         if (currentValue < value) return "on-track";
         if (currentValue >= value && currentValue <= valueMax) return "succeed";
         return "exceed";
@@ -152,10 +152,10 @@ export function useTargetResults() {
   );
 
   const calculatePercentage = useCallback(
-    (target: Target, currentValue: number): number => {
-      const { value, valueMax } = target;
+    (goal: Goal, currentValue: number): number => {
+      const { value, valueMax } = goal;
 
-      if (target.type === "range" && valueMax !== undefined) {
+      if (goal.type === "range" && valueMax !== undefined) {
         const range = valueMax - value;
         if (range === 0) return 100;
         return Math.min(
@@ -180,7 +180,7 @@ export function useTargetResults() {
       }
 
       try {
-        const targets = await getTargetsFromDB(
+        const goals = await getGoalsFromDB(
           {
             trackerId: query.trackerId,
             limit: query.targetIds?.length,
@@ -188,47 +188,47 @@ export function useTargetResults() {
           db,
         );
 
-        const filteredTargets = query.targetIds
-          ? targets.filter((target: Target) =>
-              query.targetIds!.includes(target.id),
+        const filteredGoals = query.targetIds
+          ? goals.filter((goal: Goal) =>
+              query.targetIds!.includes(goal.id),
             )
-          : targets;
+          : goals;
 
         const results: TargetResultData[] = [];
 
-        for (const target of filteredTargets) {
-          const dateRange = getDateRange(target.period, query.to);
+        for (const goal of filteredGoals) {
+          const dateRange = getDateRange(goal.period, query.to);
 
           const logs = await getLogsFromDB(
             {
-              trackerId: target.trackerId,
+              trackerId: goal.trackerId,
               from: dateRange.from,
               to: dateRange.to,
             },
             db,
           );
 
-          const tracker = await getTracker(target.trackerId);
+          const tracker = await getTracker(goal.trackerId);
           const currentValue = tracker.baseline + calculateValue(
             logs,
-            target.calculation,
+            goal.calculation,
             tracker.type,
           );
-          const result = calculateTargetResult(target, currentValue);
-          const percentage = calculatePercentage(target, currentValue);
+          const result = calculateTargetResult(goal, currentValue);
+          const percentage = calculatePercentage(goal, currentValue);
 
           results.push({
-            targetId: target.id,
-            targetName: target.name,
+            targetId: goal.id,
+            targetName: goal.name,
             currentValue,
-            targetValue: target.value,
-            targetMax: target.valueMax,
+            targetValue: goal.value,
+            targetMax: goal.valueMax,
             result,
             percentage,
-            period: target.period,
+            period: goal.period,
             logsUsed: logs.length,
-            calculation: target.calculation,
-            direction: target.direction,
+            calculation: goal.calculation,
+            direction: goal.direction,
             trackerFormat: tracker.format,
           });
         }
@@ -241,7 +241,7 @@ export function useTargetResults() {
       }
     },
     [
-      getTargetsFromDB,
+      getGoalsFromDB,
       getLogsFromDB,
       getDateRange,
       calculateValue,
