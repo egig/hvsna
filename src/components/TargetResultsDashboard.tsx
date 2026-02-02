@@ -5,6 +5,7 @@ import {
   type TargetResultData,
 } from "../hooks/useTargetResults";
 import type { TargetResult } from "../hooks/useTargetResults";
+import BlockTitle from "./block-title";
 
 interface TargetResultCardProps {
   result: TargetResultData;
@@ -223,42 +224,8 @@ export function TargetResultsDashboard({
   return (
     <div className="space-y-6">
       <TargetResultsSummary results={results} />
-
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-900">Target Results</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode("card")}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              viewMode === "card"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Card View
-          </button>
-          <button
-            onClick={() => setViewMode("table")}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              viewMode === "table"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            Table View
-          </button>
-        </div>
-      </div>
-
-      {viewMode === "card" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {results.map((result) => (
-            <TargetResultCard key={result.targetId} result={result} />
-          ))}
-        </div>
-      ) : (
-        <TargetResultsTable results={results} />
-      )}
+      <BlockTitle>Results</BlockTitle>
+      <TargetResultsTable results={results} />
     </div>
   );
 }
