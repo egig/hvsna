@@ -141,7 +141,7 @@ export default function Trackers() {
                     {tracker.name}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {formatValue(tracker.baseline, tracker.format)}{tracker.format !== "idr" && tracker.unit ? ` ${tracker.unit}` : ""}
+                    Baseline: {formatValue(tracker.baseline, tracker.format)}{tracker.format !== "idr" && tracker.unit ? ` ${tracker.unit}` : ""}
                   </p>
                 </div>
                 <div className="flex gap-2 group-hover:opacity-100 transition-opacity">

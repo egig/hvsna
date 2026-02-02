@@ -11,6 +11,8 @@ import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
+import { useTracker } from "../tracker/use-tracker";
+import type { Tracker } from "../tracker/trackerStore";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -35,7 +37,9 @@ export default function TaskForm({
     task?.targetId as string,
   );
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
+  const [tracker, setTracker] = useState<Tracker | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
+  const {getTracker} = useTracker();
 
   useEffect(() => {
     if (error && onError) {
@@ -45,11 +49,18 @@ export default function TaskForm({
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
+
   }, [task]);
 
   useEffect(() => {
     const goal = goals.find((g) => g.id === selectedTargetId);
     setSelectedGoal(goal || null);
+
+    if (goal) {
+      getTracker(goal?.trackerId as string).then(tr => {
+        setTracker(tr)
+      })
+    }
   }, [selectedTargetId, goals]);
 
   // Helper function to get attribute by ID
@@ -89,7 +100,15 @@ export default function TaskForm({
         }
       }
 
-      console.log("attr", attr, selectedGoal);
+      if (tracker?.type === "counter") {
+        taskData.targetValue = 1;
+      }
+
+      if (tracker?.negative) {
+        taskData.targetValue = -1 * (taskData.targetValue || 0)   
+      }
+
+      console.log(tracker)
 
       const taskInput: any = {
         name: taskData.name.trim(),
@@ -177,7 +196,7 @@ export default function TaskForm({
 
           {selectedTargetId && (
             <>
-              <FormInput
+              {tracker?.type === "amount" && <FormInput
                 name="targetValue"
                 label="Target Value"
                 value={task?.targetValue?.toString() || ""}
@@ -186,7 +205,7 @@ export default function TaskForm({
                 disabled={isSubmitting}
                 required={false}
                 className="text-base"
-              />
+              />}
 
               {selectedGoal?.scope?.map((attributeId, index) => {
                 const attribute = getAttributeById(attributeId);
@@ -194,8 +213,8 @@ export default function TaskForm({
                   // Fallback to basic text input if attribute not found
                   return (
                     <FormInput
-                      key={`scope-${index}`}
-                      name={`scope_${index}`}
+                      key={`${index}`}
+                      name={`${attributeId}`}
                       label={`Scope: ${attributeId}`}
                       value={task?.attributes?.[index]?.toString() || ""}
                       placeholder={`Enter value for ${attributeId}`}
