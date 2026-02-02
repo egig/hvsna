@@ -1,0 +1,72 @@
+import { Page } from "../modules/navigation";
+import { Navbar } from "../modules/navigation";
+import { useSettings } from "../hooks/useSettings";
+import { useLanguageContext } from "../contexts/LanguageContext";
+
+export default function GeneralSettings() {
+  const { settings, setLanguage, loading, updateSettings } = useSettings();
+  const { t } = useLanguageContext();
+
+  const handleLanguageChange = async (newLanguage: 'en' | 'id') => {
+    // console.log(newLanguage)
+    await updateSettings({language: newLanguage})
+    // await setLanguage(newLanguage);
+  };
+
+  return (
+    <Page>
+      <Navbar title={t('general')} showBackButton={true} />
+      <div className="bg-white p-4">
+        <div className="space-y-4">
+          <div className="border-b pb-4">
+            <h2 className="text-lg font-semibold mb-2">{t('general_settings')}</h2>
+            <p className="text-gray-600">{t('general_settings_subtitle')}</p>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">{t('language')}</span>
+                {loading && <span className="text-sm text-gray-500">Loading...</span>}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleLanguageChange('en')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    settings.language === 'en'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  {t('english')}
+                </button>
+                <button
+                  onClick={() => handleLanguageChange('id')}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    settings.language === 'id'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  disabled={loading}
+                >
+                  {t('bahasa')}
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span>{t('theme')}</span>
+              <span className="text-gray-500">{t('coming_soon')}</span>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span>{t('notifications')}</span>
+              <span className="text-gray-500">{t('coming_soon')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}

@@ -4,6 +4,7 @@ import YearView from "./pages/view-year";
 import TabLayout from "./layouts/tab-layout";
 import About from "./pages/about";
 import Settings from "./pages/settings";
+import GeneralSettings from "./pages/general-settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
 import Logs from "./modules/log/logs";
@@ -30,6 +31,7 @@ export const AppRoutes = () => {
         <Route element={<TabLayout />}>
           <Route index element={<Home />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="general-settings" element={<GeneralSettings />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="reports" element={<Reports />} />
           <Route path="about" element={<About />} />

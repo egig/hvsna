@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-import { ChartArea, ChartBar, GitBranchIcon, List, LogIn, Logs, Settings as SettingsIcon, Target, Trash } from "lucide-react";
+import { ChartArea, ChartBar, GitBranchIcon, List, LogIn, Logs, Settings as SettingsIcon, Target, Trash, Cog } from "lucide-react";
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";
 import { Navbar } from "../modules/navigation";
@@ -9,6 +9,13 @@ export default function Settings() {
     <Page>
       <Navbar title="Settings" showBackButton={false} />
       <div className="bg-white">
+        <MenuItem
+          title="General"
+          subtitle="General application settings"
+          icon={Cog}
+          to="/general-settings"
+        />
+
         <MenuItem
           title="Trackers"
           subtitle="Manage your tracking preferences"
