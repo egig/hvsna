@@ -30,14 +30,13 @@ export function ListItem({
       className={`bg-white dark:bg-gray-800 border-b border-gray-200 p-4 transition-${
         hoverable && onClick ? "cursor-pointer hover:shadow-sm" : ""
       } ${className}`}
-      onClick={onClick}
     >
       <div className="flex items-start gap-3">
         {/* Left Icon */}
         {leftIcon && <div className="flex-shrink-0 mt-1">{leftIcon}</div>}
 
         {/* Main Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0" onClick={onClick}>
           <h3
             className={`font-medium text-gray-900 dark:text-white truncate ${
               hoverable && onClick

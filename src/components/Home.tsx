@@ -246,15 +246,6 @@ export function Home() {
         <BlockTitle extra={"Latest"}>Summary</BlockTitle>
         <TargetResultsOverview results={targetResults} />
       </Block>
-      <Block>
-        <BlockTitle extra={"Last 10 logs"}>Recent</BlockTitle>
-        <RecentLogs
-          logs={recentLogs}
-          trackers={trackers}
-          trackerAttributes={trackerAttributes}
-          attributeOptions={attributeOptions}
-        />
-      </Block>
     </Page>
   );
 }

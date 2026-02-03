@@ -38,7 +38,11 @@ export function Navbar({
 
   return (
     <header
-      className={`flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm border-b border-gray-200 safe-top ${className}`}
+      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm border-b border-gray-200 safe-top ${className}`}
+      style={{
+        position: "-webkit-sticky",
+        scrollMarginTop: "64px",
+      }}
     >
       {/* Left: Back Button */}
       <div className="w-16 flex justify-start">

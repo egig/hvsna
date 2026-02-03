@@ -7,7 +7,6 @@ import {
   PlusIcon,
   Plus,
   Check,
-  MoreHorizontal,
 } from "lucide-react";
 import type { Task, TaskStatus } from "src/lib/types/task";
 import { Navbar } from "../navigation/navbar";
@@ -15,129 +14,60 @@ import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
 import { Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
+import { ListItem } from "src/components/list-item";
 
-interface TaskItemProps {
+interface TaskListItemProps {
   task: Task;
-  onStatusChange: (task: Task, newStatus: TaskStatus) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (task: Task) => void;
+  formatScheduledDate: (dateNumber?: number) => string;
   getStatusIcon: (status: TaskStatus) => React.ReactNode;
   getStatusColor: (status: TaskStatus) => string;
-  formatScheduledDate: (dateNumber?: number) => string;
+  onStatusChange: (task: Task, newStatus: TaskStatus) => void;
+  onEdit: (task: Task) => void;
+  getTargetInfo: (goal: any) => string | null;
 }
 
-function TaskItem({
+function TaskListItem({
   task,
-  onStatusChange,
-  onEdit,
-  onDelete,
+  formatScheduledDate,
   getStatusIcon,
   getStatusColor,
-  formatScheduledDate,
-}: TaskItemProps) {
-  const { goal } = useGoal(task.targetId);
-  const [showActions, setShowActions] = useState(false);
-
-  useEffect(() => {
-    const handleClickOutside = () => setShowActions(false);
-    if (showActions) {
-      document.addEventListener("click", handleClickOutside);
-      return () => document.removeEventListener("click", handleClickOutside);
-    }
-  }, [showActions]);
-
-  const handleStatusClick = () => {
-    const nextStatus =
-      task.status === "pending"
-        ? "in_progress"
-        : task.status === "in_progress"
-          ? "completed"
-          : "pending";
-    onStatusChange(task, nextStatus);
-  };
-
-  const getTargetInfo = () => {
-    if (!task.targetId) return null;
-    const targetName = goal?.name || "Unknown Goal";
-    return (
-      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-        Goal: {targetName} {task.targetValue && `(Value: ${task.targetValue})`}
-      </p>
-    );
-  };
+  onStatusChange,
+  onEdit,
+  getTargetInfo,
+}: TaskListItemProps) {
+  const { goal } = useGoal(task.targetId || undefined);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-      <div className="flex items-start gap-3">
-        {/* Status Icon */}
+    <ListItem
+      key={task.id}
+      title={task.name}
+      subtitle={`Scheduled: ${formatScheduledDate(task.scheduledAt)}`}
+      description={getTargetInfo(goal) || undefined}
+      leftIcon={
         <button
-          onClick={handleStatusClick}
+          onClick={() => {
+            const nextStatus =
+              task.status === "pending"
+                ? "in_progress"
+                : task.status === "in_progress"
+                  ? "completed"
+                  : "pending";
+            onStatusChange(task, nextStatus);
+          }}
           className="flex-shrink-0 mt-1 transition-transform hover:scale-110"
         >
           {getStatusIcon(task.status)}
         </button>
-
-        {/* Task Content */}
-        <div className="flex-1 min-w-0">
-          <h3
-            className="font-medium text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-            onClick={() => onEdit(task)}
-          >
-            {task.name}
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Scheduled: {formatScheduledDate(task.scheduledAt)}
-          </p>
-          {getTargetInfo()}
-        </div>
-
-        {/* Status Badge and Actions */}
-        <div className="flex items-center gap-2">
-          <span
-            className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(task.status)} bg-opacity-10`}
-          >
-            {task.status.replace("_", " ")}
-          </span>
-
-          <div className="relative">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowActions(!showActions);
-              }}
-              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <MoreHorizontal size={16} className="text-gray-500" />
-            </button>
-
-            {showActions && (
-              <div className="absolute right-0 top-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10 min-w-[120px]">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEdit(task);
-                    setShowActions(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(task);
-                    setShowActions(false);
-                  }}
-                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
+      }
+      onClick={() => onEdit(task)}
+      rightIcon={
+        <span
+          className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(task.status)} bg-opacity-10`}
+        >
+          {task.status.replace("_", " ")}
+        </span>
+      }
+    />
   );
 }
 
@@ -190,10 +120,18 @@ export default function Tasks() {
     if (confirm(`Are you sure you want to delete "${task.name}"?`)) {
       try {
         await deleteTask(task.id);
+        refreshTasks();
       } catch (err) {
         console.error("Failed to delete task:", err);
         alert("Failed to delete task. Please try again.");
       }
+    }
+  };
+
+  const handleDeleteTaskById = async (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (task) {
+      await handleDeleteTask(task);
     }
   };
 
@@ -276,7 +214,7 @@ export default function Tasks() {
       />
 
       <div
-        className="p-4 h-[calc(100vh-80px)] overflow-y-auto"
+        className="h-[calc(100vh-160px)] overflow-y-auto"
         onScroll={handleInfiniteScroll}
       >
         {loading && (
@@ -318,20 +256,28 @@ export default function Tasks() {
         )}
 
         {!loading && !error && tasks.length > 0 && (
-          <div className="space-y-2">
-            {tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={openEditPopup}
-                onDelete={handleDeleteTask}
-                getStatusIcon={getStatusIcon}
-                getStatusColor={getStatusColor}
-                formatScheduledDate={formatScheduledDate}
-              />
-            ))}
-          </div>
+          <>
+            {tasks.map((task) => {
+              const getTargetInfo = (goal: any) => {
+                if (!task.targetId) return null;
+                const targetName = goal?.name || "Unknown Goal";
+                return `Goal: ${targetName}${task.targetValue ? ` (Value: ${task.targetValue})` : ""}`;
+              };
+
+              return (
+                <TaskListItem
+                  key={task.id}
+                  task={task}
+                  formatScheduledDate={formatScheduledDate}
+                  getStatusIcon={getStatusIcon}
+                  getStatusColor={getStatusColor}
+                  onStatusChange={handleStatusChange}
+                  onEdit={openEditPopup}
+                  getTargetInfo={getTargetInfo}
+                />
+              );
+            })}
+          </>
         )}
 
         {!hasMore && tasks.length > 0 && (
@@ -355,6 +301,7 @@ export default function Tasks() {
           onSuccess={handleTaskSuccess}
           onError={handleTaskError}
           onCancel={handleTaskCancel}
+          onDelete={handleDeleteTaskById}
         />
       </Modal>
     </Page>

@@ -5,7 +5,7 @@ import { usePouchDB } from "../../pouchdb";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { Check } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 import { Navbar } from "../navigation";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
@@ -19,6 +19,7 @@ interface TaskFormProps {
   onSuccess?: (task: Task) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
+  onDelete?: (taskId: string) => void;
 }
 
 export default function TaskForm({
@@ -26,6 +27,7 @@ export default function TaskForm({
   onSuccess,
   onError,
   onCancel,
+  onDelete,
 }: TaskFormProps) {
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
@@ -137,100 +139,104 @@ export default function TaskForm({
     }
   };
 
+  const handleDelete = () => {
+    if (taskId && onDelete && task) {
+      if (
+        confirm(
+          `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
+        )
+      ) {
+        onDelete(taskId);
+      }
+    }
+  };
+
   return (
     <BaseForm title={taskId ? "Edit Task" : "New Task"} onSubmit={handleSubmit}>
-      <div
-        className="
-        flex-1
-        overflow-y-auto
-        scroll-area
-        bg-gray-50
-        safe-top
-        safe-bottom
-        safe-x
-        mb-12
-      "
-      >
-        <div
-          className="
-          max-w-lg
-          mx-auto
-          w-full
-          py-4
-          px-4
-        "
+      <FormInput
+        name="name"
+        label="Task Name"
+        value={task ? task.name : ""}
+        placeholder="Enter task name"
+        disabled={isSubmitting}
+        required={true}
+        className="text-base"
+      />
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Target (Optional)
+        </label>
+        <select
+          // HACK to set this re-render
+          key={Math.random()}
+          defaultValue={selectedTargetId}
+          onChange={(e) => setSelectedTargetId(e.target.value)}
+          disabled={isSubmitting}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
         >
-          <FormInput
-            name="name"
-            label="Task Name"
-            value={task ? task.name : ""}
-            placeholder="Enter task name"
-            disabled={isSubmitting}
-            required={true}
-            className="text-base"
-          />
+          <option value="">Select a goal</option>
+          {goals.map((goal) => (
+            <option key={goal.id} value={goal.id}>
+              {goal.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Target (Optional)
-            </label>
-            <select
-              // HACK to set this re-render
-              key={Math.random()}
-              defaultValue={selectedTargetId}
-              onChange={(e) => setSelectedTargetId(e.target.value)}
+      {selectedTargetId && (
+        <>
+          {tracker?.type === "amount" && (
+            <FormInput
+              name="targetValue"
+              label="Target Value"
+              value={task?.targetValue?.toString() || ""}
+              placeholder="Enter target value"
+              type="number"
               disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="">Select a goal</option>
-              {goals.map((goal) => (
-                <option key={goal.id} value={goal.id}>
-                  {goal.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              required={false}
+              className="text-base"
+            />
+          )}
 
-          {selectedTargetId && (
-            <>
-              {tracker?.type === "amount" && (
+          {selectedGoal?.scope?.map((attributeId, index) => {
+            const attribute = getAttributeById(attributeId);
+            if (!attribute) {
+              // Fallback to basic text input if attribute not found
+              return (
                 <FormInput
-                  name="targetValue"
-                  label="Target Value"
-                  value={task?.targetValue?.toString() || ""}
-                  placeholder="Enter target value"
-                  type="number"
+                  key={`${index}`}
+                  name={`${attributeId}`}
+                  label={`Scope: ${attributeId}`}
+                  value={task?.attributes?.[index]?.toString() || ""}
+                  placeholder={`Enter value for ${attributeId}`}
+                  type="text"
                   disabled={isSubmitting}
                   required={false}
                   className="text-base"
                 />
-              )}
+              );
+            }
 
-              {selectedGoal?.scope?.map((attributeId, index) => {
-                const attribute = getAttributeById(attributeId);
-                if (!attribute) {
-                  // Fallback to basic text input if attribute not found
-                  return (
-                    <FormInput
-                      key={`${index}`}
-                      name={`${attributeId}`}
-                      label={`Scope: ${attributeId}`}
-                      value={task?.attributes?.[index]?.toString() || ""}
-                      placeholder={`Enter value for ${attributeId}`}
-                      type="text"
-                      disabled={isSubmitting}
-                      required={false}
-                      className="text-base"
-                    />
-                  );
-                }
+            return renderAttributeInput(attribute, index);
+          })}
+        </>
+      )}
 
-                return renderAttributeInput(attribute, index);
-              })}
-            </>
-          )}
+      {/* Delete Button - Only show for existing tasks */}
+      {taskId && (
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isSubmitting}
+            className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Trash2 size={18} />
+            Delete Task
+          </button>
         </div>
-      </div>
+      )}
     </BaseForm>
   );
 }
