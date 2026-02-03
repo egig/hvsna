@@ -13,6 +13,7 @@ export interface Goal {
   valueMax?: number;
   period?: GoalPeriod;
   scope: string[];
+  due?: EpochTime; // due date for total goals
   createdAt: EpochTime;
 }
 
@@ -36,6 +37,7 @@ export interface GoalCreateInput {
   valueMax?: number;
   period?: GoalPeriod;
   scope: string[];
+  due?: EpochTime; // due date for total goals
 }
 
 export interface GoalUpdateInput {
@@ -46,6 +48,7 @@ export interface GoalUpdateInput {
   valueMax?: number;
   period?: GoalPeriod;
   scope?: string[];
+  due?: EpochTime; // due date for total goals
 }
 
 export interface GoalQuery {

@@ -5,7 +5,7 @@ interface FormInputProps {
   label: string;
   value: string;
   placeholder?: string;
-  type?: "text" | "number" | "email" | "tel";
+  type?: "text" | "number" | "email" | "tel" | "date" | "datetime-local";
   disabled?: boolean;
   required?: boolean;
   error?: string;

@@ -12,6 +12,7 @@ import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { Trash2 } from "lucide-react";
+import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 
 interface GoalFormProps {
   goalId?: string | null;
@@ -40,8 +41,12 @@ export default function GoalForm({
   const [selectedAttributes, setSelectedAttributes] = useState<string[]>(
     goal?.scope || [],
   );
+  const [selectedPeriod, setSelectedPeriod] = useState<GoalPeriod>(
+    goal?.period || "monthly",
+  );
   const { trackerAttributes, loading: attributesLoading } =
     useTrackerAttributes(selectedTrackerId);
+  const { createRecurringTask } = useRecurringTasks();
 
   const attrEnabled = useFeatureFlag("TRACKER_ATTR");
   const rangeEnabled = useFeatureFlag("GOAL_RANGE");
@@ -68,6 +73,7 @@ export default function GoalForm({
     if (goal) {
       setSelectedTrackerId(goal.trackerId);
       setSelectedAttributes(goal.scope || []);
+      setSelectedPeriod(goal.period || "monthly");
     }
   }, [goal]);
 
@@ -80,12 +86,13 @@ export default function GoalForm({
     const valueMax = formData.get("valueMax") as string;
     const period = formData.get("period") as GoalPeriod;
     const name = formData.get("name") as string;
+    const due = formData.get("due") as string;
 
     try {
       setIsSubmitting(true);
 
       let result: GoalType;
-      const goalData = {
+      const goalData: any = {
         name,
         trackerId,
         type,
@@ -98,10 +105,37 @@ export default function GoalForm({
         scope: selectedAttributes,
       };
 
+      // Handle due date - only include for total goals
+      if (period === "total" && due) {
+        goalData.due = new Date(due).getTime();
+      }
+
       if (goalId) {
         result = await updateGoal(goalId, goalData);
       } else {
         result = await createGoal(goalData);
+      }
+
+      // Create recurring task for non-total periods
+      if (period !== "total" && period !== "log") {
+        try {
+          const repeatMap: Record<string, "daily" | "monthly" | "yearly"> = {
+            daily: "daily",
+            weekly: "monthly", // Map weekly to monthly
+            monthly: "monthly",
+            yearly: "yearly",
+          };
+
+          await createRecurringTask({
+            name: `Goal: ${name}`,
+            targetId: result.id,
+            repeat: repeatMap[period],
+            baseDate: Date.now(), // Start from now
+          });
+        } catch (recurringError) {
+          console.error("Failed to create recurring task for goal:", recurringError);
+          // Don't fail the main goal creation if recurring task creation fails
+        }
       }
 
       if (onSuccess) {
@@ -310,7 +344,8 @@ export default function GoalForm({
           </label>
           <select
             name="period"
-            defaultValue={goal?.period || "monthly"}
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value as GoalPeriod)}
             disabled={isSubmitting}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
           >
@@ -321,6 +356,20 @@ export default function GoalForm({
             <option value="total">Total</option>
           </select>
         </div>
+
+        {/* Due Date Input - Only show for Total goals */}
+        {selectedPeriod === "total" && (
+          <FormInput
+            name="due"
+            label="Due Date & Time"
+            value={goal?.due ? new Date(goal.due).toISOString().slice(0, 16) : ""}
+            placeholder="Select due date and time"
+            type="datetime-local"
+            disabled={isSubmitting}
+            required={false}
+            className="text-base"
+          />
+        )}
 
         <FormInput
           name="value"

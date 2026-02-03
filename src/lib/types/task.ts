@@ -1,11 +1,13 @@
 export type TaskStatus = "pending" | "in_progress" | "completed";
+export type TaskRepeat = "none" | "daily" | "monthly" | "yearly";
 
 export interface Task {
   id: string;
-  user_id: string;
+  user_id?: string;
   name: string;
   status: TaskStatus;
   scheduledAt?: number;
+  repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
@@ -18,6 +20,7 @@ export interface TaskCreateInput {
   name: string;
   status?: TaskStatus;
   scheduledAt?: number;
+  repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
@@ -27,6 +30,7 @@ export interface TaskUpdateInput {
   name?: string;
   status?: TaskStatus;
   scheduledAt?: number;
+  repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;

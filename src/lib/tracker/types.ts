@@ -54,6 +54,7 @@ export interface Goal {
   valueMax?: number; // only for range
   period?: GoalPeriod;
   scope: string[]; // list of attributeId
+  due?: EpochTime; // due date for total goals
   createdAt: EpochTime;
 }
 

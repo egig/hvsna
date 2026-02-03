@@ -13,6 +13,8 @@ import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import type { Tracker } from "../tracker/trackerStore";
+import { useRecurringTasks } from "../../hooks/useRecurringTasks";
+import { HijriDateInput } from "../../components/hijri-date-input";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -34,6 +36,7 @@ export default function TaskForm({
   const { goals } = useGoals();
   const { db } = usePouchDB();
   const { getGoalsFromDB } = useGoalStore();
+  const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>(
     task?.targetId as string,
@@ -116,6 +119,16 @@ export default function TaskForm({
         attributes: attr,
       };
 
+      // Handle scheduledAt - convert date string to timestamp if provided
+      if (taskData.scheduledAt) {
+        taskInput.scheduledAt = new Date(taskData.scheduledAt).getTime();
+      }
+
+      // Handle repeat - only include if not "none"
+      if (taskData.repeat && taskData.repeat !== "none") {
+        taskInput.repeat = taskData.repeat;
+      }
+
       if (selectedTargetId) {
         taskInput.targetId = selectedTargetId;
       }
@@ -125,6 +138,23 @@ export default function TaskForm({
         result = await updateTask(taskId, taskInput);
       } else {
         result = await createTask(taskInput);
+      }
+
+      // Create recurring task if repeat is selected and not "none"
+      if (taskData.repeat && taskData.repeat !== "none" && taskInput.scheduledAt) {
+        try {
+          await createRecurringTask({
+            name: taskInput.name,
+            targetId: taskInput.targetId,
+            targetValue: taskInput.targetValue,
+            attributes: taskInput.attributes,
+            repeat: taskData.repeat,
+            baseDate: taskInput.scheduledAt,
+          });
+        } catch (recurringError) {
+          console.error("Failed to create recurring task:", recurringError);
+          // Don't fail the main task creation if recurring task creation fails
+        }
       }
 
       reset();
@@ -162,6 +192,33 @@ export default function TaskForm({
         required={true}
         className="text-base"
       />
+
+      <HijriDateInput
+        name="scheduledAt"
+        label="Scheduled Date & Time (Hijri)"
+        value={task?.scheduledAt ? new Date(task.scheduledAt).toISOString().slice(0, 16) : ""}
+        placeholder="Select Hijri date and time"
+        disabled={isSubmitting}
+        required={false}
+        className="text-base"
+      />
+
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Repeat
+        </label>
+        <select
+          name="repeat"
+          defaultValue={task?.repeat || "none"}
+          disabled={isSubmitting}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+        >
+          <option value="none">No repeat</option>
+          <option value="daily">Daily at selected time</option>
+          <option value="monthly">Monthly at selected date and time</option>
+          <option value="yearly">Yearly at selected date and time</option>
+        </select>
+      </div>
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
