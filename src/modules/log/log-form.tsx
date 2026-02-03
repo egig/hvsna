@@ -7,12 +7,14 @@ import BaseForm from "src/components/base-form";
 import { LoadingSpinner } from "src/components/loader";
 import { FormInput } from "src/components/form-input";
 import CustomAttributeInput from "src/components/custom-attribute-input";
+import { Trash2 } from "lucide-react";
 
 interface LogFormProps {
   logId?: string | null;
   onSuccess?: (log: Log) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
+  onDelete?: (logId: string) => void;
 }
 
 export default function LogForm({
@@ -20,9 +22,10 @@ export default function LogForm({
   onSuccess,
   onError,
   onCancel,
+  onDelete,
 }: LogFormProps) {
   const { loading: trackerLoading, trackers } = useTrackers();
-  const { loading, error, createLog, updateLog, log } = useLog(
+  const { loading, error, createLog, updateLog, deleteLog, log } = useLog(
     logId || undefined,
   );
   const [selectedTrackerId, setSelectedTrackerId] = useState(log?.trackerId);
@@ -97,6 +100,23 @@ export default function LogForm({
     setSelectedTrackerId("");
     if (onCancel) {
       onCancel();
+    }
+  };
+
+  const handleDelete = () => {
+    if (logId && onDelete) {
+      const tracker = trackers.find((t) => t.id === log?.trackerId);
+      const trackerName = tracker
+        ? `${tracker.name}`
+        : "Unknown tracker";
+
+      if (
+        confirm(
+          `Are you sure you want to delete this log entry for "${trackerName}"? This action cannot be undone.`,
+        )
+      ) {
+        onDelete(logId);
+      }
     }
   };
 
@@ -206,6 +226,21 @@ export default function LogForm({
             placeholder="Add a note..."
           />
         </div>
+
+        {/* Delete Button - Only show for existing logs */}
+        {logId && (
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isSubmitting}
+              className="w-full px-4 py-3 hover:text-red-00 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <Trash2 size={18} />
+              Delete Log Entry
+            </button>
+          </div>
+        )}
       </div>
     </BaseForm>
   );
