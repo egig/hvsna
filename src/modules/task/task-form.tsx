@@ -3,6 +3,7 @@ import { useTask } from "./use-task";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
+import { Trash2 } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import BaseForm from "src/components/base-form";

@@ -1,5 +1,4 @@
 import { useEffect, useCallback } from "react";
-import { RRule, rrulestr } from "rrule";
 import type {
   Task,
   TaskCreateInput,
@@ -13,6 +12,8 @@ import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
 import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 import type { RecurringTask } from "../../lib/types/recurring-task";
+import { HijriDate } from "../../lib/hijri/hijri-date";
+import { HijriMonth } from "../../lib/hijri/hijri-month";
 
 export interface UseTasksReturn {
   tasks: Task[];
@@ -100,12 +101,7 @@ export const useTasks = (): UseTasksReturn => {
         const recurringInstances: Task[] = [];
 
         for (const recurringTask of recurringTasks) {
-          const rule = new RRule({
-            freq: getRRuleFrequency(recurringTask.repeat),
-            dtstart: new Date(recurringTask.baseDate),
-          });
-
-          const occurrences = rule.between(startOfDay, endOfDay);
+          const occurrences = getRecurringOccurrences(recurringTask, startOfDay, endOfDay);
 
           for (const occurrence of occurrences) {
             // Check if this recurring task instance already exists
@@ -125,8 +121,8 @@ export const useTasks = (): UseTasksReturn => {
                 targetId: recurringTask.targetId,
                 targetValue: recurringTask.targetValue,
                 attributes: recurringTask.attributes,
-                created_at: Date.now(),
-                updated_at: Date.now(),
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
               };
               recurringInstances.push(virtualTask);
             }
@@ -164,6 +160,15 @@ export const useTasks = (): UseTasksReturn => {
       id,
       {
         status,
+        hijriDate: currentTask.hijriDate || (() => {
+          const now = new Date();
+          const hijriNow = HijriDate.fromDate(now);
+          return {
+            year: hijriNow.year,
+            month: hijriNow.month,
+            day: hijriNow.day,
+          };
+        })(),
       },
       db,
     );
@@ -202,18 +207,79 @@ export const useTasks = (): UseTasksReturn => {
     return updatedTask;
   };
 
-  // Helper function to convert repeat type to RRule frequency
-  const getRRuleFrequency = (repeat: string): number => {
-    switch (repeat) {
+  // Helper function to get occurrences using HijriDate
+  const getRecurringOccurrences = (
+    recurringTask: RecurringTask,
+    startDate: Date,
+    endDate: Date
+  ): Date[] => {
+    const occurrences: Date[] = [];
+    const baseHijriDate = HijriDate.fromDate(new Date(recurringTask.baseDate));
+    const startHijriDate = HijriDate.fromDate(startDate);
+    const endHijriDate = HijriDate.fromDate(endDate);
+
+    // Generate dates based on repeat frequency
+    switch (recurringTask.repeat) {
       case "daily":
-        return RRule.DAILY;
+        let currentDate = startHijriDate;
+        while (currentDate.year < endHijriDate.year || 
+               (currentDate.year === endHijriDate.year && currentDate.month < endHijriDate.month) ||
+               (currentDate.year === endHijriDate.year && currentDate.month === endHijriDate.month && currentDate.day <= endHijriDate.day)) {
+          
+          // Check if this date matches or comes after the base date
+          if (currentDate.toDate().getTime() >= new Date(recurringTask.baseDate).getTime()) {
+            occurrences.push(currentDate.toDate());
+          }
+          currentDate = currentDate.next();
+        }
+        break;
+
       case "monthly":
-        return RRule.MONTHLY;
+        // Generate monthly occurrences on the same Hijri day
+        let currentMonth = new HijriMonth(startHijriDate.year, startHijriDate.month);
+        
+        while (currentMonth.year < endHijriDate.year || 
+               (currentMonth.year === endHijriDate.year && currentMonth.month <= endHijriDate.month)) {
+          
+          // Ensure the day exists in this month (Hijri months have 29 or 30 days)
+          const maxDay = currentMonth.getDaysInMonth();
+          const targetDay = Math.min(baseHijriDate.day, maxDay);
+          const adjustedDate = new HijriDate(currentMonth.year, currentMonth.month, targetDay);
+          
+          if (adjustedDate.toDate().getTime() >= new Date(recurringTask.baseDate).getTime()) {
+            occurrences.push(adjustedDate.toDate());
+          }
+          
+          // Move to next month
+          currentMonth = currentMonth.next();
+        }
+        break;
+
       case "yearly":
-        return RRule.YEARLY;
+        // Generate yearly occurrences on the same Hijri month and day
+        let currentYear = startHijriDate.year;
+        
+        while (currentYear <= endHijriDate.year) {
+          // Create HijriMonth to check if the day exists in this month
+          const yearMonth = new HijriMonth(currentYear, baseHijriDate.month);
+          const maxDay = yearMonth.getDaysInMonth();
+          const targetDay = Math.min(baseHijriDate.day, maxDay);
+          const adjustedDate = new HijriDate(currentYear, baseHijriDate.month, targetDay);
+          
+          if (adjustedDate.toDate().getTime() >= new Date(recurringTask.baseDate).getTime()) {
+            occurrences.push(adjustedDate.toDate());
+          }
+          
+          currentYear++;
+        }
+        break;
+
       default:
-        return RRule.DAILY;
+        // For "none" or unsupported frequencies, return empty array
+        break;
     }
+
+    return occurrences;
   };
 
   // Generate recurring task instances for a date range
@@ -224,21 +290,21 @@ export const useTasks = (): UseTasksReturn => {
         const generatedTasks: Task[] = [];
 
         for (const recurringTask of recurringTasks) {
-          const rule = new RRule({
-            freq: getRRuleFrequency(recurringTask.repeat),
-            dtstart: new Date(recurringTask.baseDate),
-            until: endDate,
-          });
-
-          const occurrences = rule.between(startDate, endDate);
+          const occurrences = getRecurringOccurrences(recurringTask, startDate, endDate);
 
           for (const occurrence of occurrences) {
+            const occurrenceHijriDate = HijriDate.fromDate(occurrence);
             const taskData: TaskCreateInput = {
               name: recurringTask.name,
               targetId: recurringTask.targetId,
               targetValue: recurringTask.targetValue,
               attributes: recurringTask.attributes,
               scheduledAt: occurrence.getTime(),
+              hijriDate: {
+                year: occurrenceHijriDate.year,
+                month: occurrenceHijriDate.month,
+                day: occurrenceHijriDate.day,
+              },
             };
 
             // Check if task already exists for this date
