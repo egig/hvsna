@@ -184,10 +184,10 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
 
             <div className="space-y-2">
               <div className="flex justify-between gap-1">
-                <div className="w-[50%]">
+                <div className="w-[50%] text-xs">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm opacity-75">Current</span>
-                    <span className="font-medium">
+                    <span className="opacity-75">Current</span>
+                    <span className="font-medium ">
                       {formatValue(result.currentValue, result.trackerFormat)}
                     </span>
                   </div>

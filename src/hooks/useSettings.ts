@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useSettingsStore } from "../stores/settingsStore";
-import type { GeneralSettings, Language } from "../lib/types/settings";
+import type { GeneralSettings } from "../lib/types/settings";
+import type { Language } from "../lib/types/language";
 import { usePouchDB } from "../pouchdb";
 
 const SETTINGS_DOC_ID = "general_settings";

@@ -1,9 +1,5 @@
-import { en } from "./en";
-import { id } from "./id";
+import { translations } from "./en";
+import type { Translations, TranslationKey } from "../lib/types/language";
 
-export const translations = {
-  en,
-  id,
-} as const;
-
-export type TranslationKey = keyof typeof en;
+export { translations };
+export type { TranslationKey };

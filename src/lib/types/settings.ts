@@ -1,4 +1,4 @@
-export type Language = "en" | "id";
+import type { Language } from "./language";
 
 export interface GeneralSettings {
   language: Language;

@@ -4,7 +4,7 @@ import React, {
   type ReactNode,
   useEffect,
 } from "react";
-import type { Language } from "../lib/types/settings";
+import type { Language } from "../lib/types/language";
 import { translations } from "../locales";
 import { useSettings } from "../hooks/useSettings";
 
@@ -42,7 +42,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   }, [loadSettings]);
 
   const t = (key: string, params?: Record<string, string | number>): string => {
-    const translation = (translations[settings.language] as any)?.[key] || key;
+    const translation = translations[key]?.[settings.language] || key;
 
     if (!params) return translation;
 

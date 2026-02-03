@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { GeneralSettings, Language } from "../lib/types/settings";
+import type { GeneralSettings } from "../lib/types/settings";
+import type { Language } from "../lib/types/language";
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   language: "en",
