@@ -55,12 +55,6 @@ export default function Settings() {
         )}
 
         <MenuItem
-          title="Goals"
-          subtitle="Manage your goals"
-          icon={Target}
-          to="/goals"
-        />
-        <MenuItem
           title="Logs"
           subtitle="Manage your logs"
           icon={Logs}

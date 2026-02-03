@@ -15,10 +15,9 @@ import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
 import Logs from "./modules/log/logs";
 import Trackers from "./modules/tracker/trackers";
-import Goals from "./modules/goal/goals";
 import TrackersAttributes from "./modules/attribute/tracker-attributes";
 import AttributeOptions from "./modules/option/options";
-import { Reports } from "./components/resports";
+import { Goals } from "./modules/goal/goals";
 import { Home } from "./components/Home";
 import DataManagement from "./pages/data-management";
 import TrackerDetail from "./modules/tracker/tracker-detail";
@@ -39,17 +38,16 @@ export const AppRoutes = () => {
           <Route path="settings" element={<Settings />} />
           <Route path="general-settings" element={<GeneralSettings />} />
           <Route path="tasks" element={<Tasks />} />
-          <Route path="reports" element={<Reports />} />
           <Route path="about" element={<About />} />
           <Route path="wipe-local" element={<DataManagement />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
+          <Route path="goals" element={<Goals />} />
         </Route>
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
         <Route path="attribute-options" element={<AttributeOptions />} />
-        <Route path="goals" element={<Goals />} />
         <Route path="logs" element={<Logs />} />
         <Route path="*" element={<p>Not Found</p>} />
       </Routes>

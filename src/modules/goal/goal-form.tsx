@@ -164,17 +164,6 @@ export default function GoalForm({
       isSubmitting={isSubmitting}
     >
       <div className="space-y-5">
-        <FormInput
-          name="name"
-          label="Name"
-          type="text"
-          value={goal?.name || ""}
-          placeholder="Goal name"
-          disabled={isSubmitting}
-          required={true}
-          className="text-base"
-        />
-
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Tracker
@@ -197,11 +186,16 @@ export default function GoalForm({
           </select>
         </div>
 
-        {selectedTracker && (
-          <div className="text-sm text-gray-500 mb-4">
-            Tracker: {selectedTracker.name}
-          </div>
-        )}
+        <FormInput
+          name="name"
+          label="Name"
+          type="text"
+          value={goal?.name || ""}
+          placeholder="Goal name"
+          disabled={isSubmitting}
+          required={true}
+          className="text-base"
+        />
 
         {attrEnabled && selectedTracker && (
           <div className="mb-4">
@@ -310,6 +304,24 @@ export default function GoalForm({
           </select>
         </div>
 
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Period
+          </label>
+          <select
+            name="period"
+            defaultValue={goal?.period || "monthly"}
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+            <option value="total">Total</option>
+          </select>
+        </div>
+
         <FormInput
           name="value"
           label={goal?.type === "range" ? "Goal" : "Value"}
@@ -320,7 +332,7 @@ export default function GoalForm({
           required={true}
           className="text-base"
         />
-        {selectedTracker && (
+        {selectedTracker && selectedTracker.type === "amount" && (
           <p className="text-sm text-gray-500 -mt-2 mb-4">
             Value in {selectedTracker.unit}
           </p>
@@ -344,24 +356,6 @@ export default function GoalForm({
             )}
           </>
         )}
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Period
-          </label>
-          <select
-            name="period"
-            defaultValue={goal?.period || "monthly"}
-            disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
-          >
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-            <option value="total">Total</option>
-          </select>
-        </div>
 
         {/* Delete Button - Only show for existing goals */}
         {goalId && (

@@ -4,8 +4,8 @@ import { formatValue } from "src/lib/format";
 import { useTargetResults } from "../hooks/useTargetResults";
 import { useLogStore } from "../modules/log/logStore";
 import { useTrackers } from "../modules/tracker/use-trackers";
+import { useTasks } from "../modules/task/use-tasks";
 import { LogItem } from "./log-item";
-import { TargetResultsSummary } from "../components/TargetResultsDashboard";
 import type { TargetResultData } from "../hooks/useTargetResults";
 import type { Log } from "src/lib/tracker/types";
 import type { AttributeOption } from "../modules/option/optionStore";
@@ -16,6 +16,75 @@ import { Navbar, Page } from "../modules/navigation";
 import Block from "./block";
 import BlockTitle from "./block-title";
 import type { Tracker } from "../modules/tracker/trackerStore";
+import type { Task } from "../lib/types/task";
+import { CheckCircleIcon, CircleIcon, ClockIcon } from "lucide-react";
+
+interface TodayTasksProps {
+  tasks: Task[];
+}
+
+function TodayTasks({ tasks }: TodayTasksProps) {
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircleIcon size={16} className="text-green-500" />;
+      case "in_progress":
+        return <CircleIcon size={16} className="text-blue-500" />;
+      default:
+        return <CircleIcon size={16} className="text-gray-400" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "in_progress":
+        return "text-blue-600 bg-blue-50 border-blue-200";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200";
+    }
+  };
+
+  if (tasks.length === 0) {
+    return (
+      <div className="text-center py-6">
+        <div className="text-gray-400 mb-2">No tasks scheduled for today</div>
+        <div className="text-gray-500 text-sm">
+          Tasks scheduled for today will appear here
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {tasks.map((task) => (
+        <div
+          key={task.id}
+          className={`flex items-center gap-3 p-3 rounded-lg border transition-all hover:shadow-sm ${getStatusColor(
+            task.status,
+          )}`}
+        >
+          <div className="flex-shrink-0">{getStatusIcon(task.status)}</div>
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-sm truncate">{task.name}</div>
+            {task.targetValue && (
+              <div className="text-xs opacity-75">
+                Target: {task.targetValue}
+              </div>
+            )}
+          </div>
+          <div className="flex-shrink-0">
+            <span className="text-xs font-medium px-2 py-1 rounded-full bg-white bg-opacity-60">
+              {task.status.replace("_", " ")}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 interface RecentLogsProps {
   logs: Log[];
@@ -114,27 +183,30 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-sm opacity-75">Current</span>
-                <span className="font-medium">
-                  {formatValue(result.currentValue, result.trackerFormat)}
-                </span>
-              </div>
+              <div className="flex justify-between gap-1">
+                <div className="w-[50%]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm opacity-75">Current</span>
+                    <span className="font-medium">
+                      {formatValue(result.currentValue, result.trackerFormat)}
+                    </span>
+                  </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-sm opacity-75">Target</span>
-                <span className="font-medium">
-                  {formatValue(result.targetValue, result.trackerFormat)}
-                  {result.targetMax &&
-                    ` - ${formatValue(result.targetMax, result.trackerFormat)}`}
-                </span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm opacity-75">Target</span>
+                    <span className="font-medium">
+                      {formatValue(result.targetValue, result.trackerFormat)}
+                      {result.targetMax &&
+                        ` - ${formatValue(result.targetMax, result.trackerFormat)}`}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex justify-between text-[2rem] font-bold opacity-60">
+                  <span>{Math.round(result.percentage)}%</span>
+                </div>
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-xs opacity-60">
-                  <span>Progress</span>
-                  <span>{Math.round(result.percentage)}%</span>
-                </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all duration-300 ${
@@ -169,10 +241,12 @@ export function Home() {
   const { getTargetResults } = useTargetResults();
   const { getLogsFromDB } = useLogStore();
   const { getTrackers } = useTrackers();
+  const { getTasksByDate } = useTasks();
 
   const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
+  const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { attributeOptions } = useAttributeOptions();
@@ -188,7 +262,9 @@ export function Home() {
 
         // Load target results (last 30 days)
         const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const [results, logs, trackersData] = await Promise.all([
+        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+
+        const [results, logs, trackersData, tasks] = await Promise.all([
           getTargetResults(
             {
               from: thirtyDaysAgo,
@@ -198,11 +274,13 @@ export function Home() {
           ),
           getLogsFromDB({ limit: 10 }, db),
           getTrackers(),
+          getTasksByDate(today),
         ]);
 
         setTargetResults(results);
         setRecentLogs(logs);
         setTrackers(trackersData);
+        setTodayTasks(tasks);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load home data",
@@ -213,7 +291,7 @@ export function Home() {
     };
 
     loadHomeData();
-  }, [db, getTargetResults, getLogsFromDB, getTrackers]);
+  }, [db]);
 
   if (loading) {
     return (
@@ -242,9 +320,19 @@ export function Home() {
   return (
     <Page>
       <Navbar title={"Home"} />
+
+      {/* Target Results Summary */}
       <Block>
         <BlockTitle extra={"Latest"}>Summary</BlockTitle>
         <TargetResultsOverview results={targetResults} />
+      </Block>
+
+      {/* Today's Tasks Section */}
+      <Block>
+        <BlockTitle extra={<ClockIcon size={16} className="text-blue-500" />}>
+          Today's Tasks
+        </BlockTitle>
+        <TodayTasks tasks={todayTasks} />
       </Block>
     </Page>
   );

@@ -14,6 +14,7 @@ import { useTracker } from "../modules/tracker/use-tracker";
 export type TargetResult = "on-track" | "succeed" | "exceed";
 
 export interface TargetResultData {
+  goal: Goal;
   targetId: string;
   targetName: string;
   currentValue: number;
@@ -211,6 +212,7 @@ export function useTargetResults() {
           const percentage = calculatePercentage(goal, currentValue);
 
           results.push({
+            goal: goal,
             targetId: goal.id,
             targetName: goal.name,
             currentValue,
