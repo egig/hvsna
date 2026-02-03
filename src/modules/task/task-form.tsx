@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTask } from "./use-task";
-import { useGoalStore } from "../goal/goalStore";
-import { usePouchDB } from "../../pouchdb";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { Check, Trash2 } from "lucide-react";
-import { Navbar } from "../navigation";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import BaseForm from "src/components/base-form";
@@ -15,6 +11,7 @@ import { useTracker } from "../tracker/use-tracker";
 import type { Tracker } from "../tracker/trackerStore";
 import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 import { HijriDateInput } from "../../components/hijri-date-input";
+import { HijriDate } from "src/lib/hijri";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -34,8 +31,6 @@ export default function TaskForm({
   const { task, loading, error, createTask, updateTask, getTask, reset } =
     useTask(taskId as string);
   const { goals } = useGoals();
-  const { db } = usePouchDB();
-  const { getGoalsFromDB } = useGoalStore();
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTargetId, setSelectedTargetId] = useState<string>(
@@ -45,6 +40,22 @@ export default function TaskForm({
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
+  const [selectedHijriDate, setSelectedHijriDate] =
+    useState<Partial<HijriDate>>();
+
+  useEffect(() => {
+    if (task?.hijriDate) {
+      setSelectedHijriDate(
+        new HijriDate(
+          task.hijriDate.year,
+          task.hijriDate.month,
+          task.hijriDate.day,
+          task.hour,
+          task.minute,
+        ),
+      );
+    }
+  }, [task]);
 
   useEffect(() => {
     if (error && onError) {
@@ -89,6 +100,19 @@ export default function TaskForm({
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
 
+    if (selectedHijriDate) {
+      taskData.hijriDate = {
+        year: selectedHijriDate?.year as number,
+        month: selectedHijriDate?.month as number,
+        day: selectedHijriDate?.day as number,
+      };
+
+      taskData.hour = selectedHijriDate?.hour;
+      taskData.minute = selectedHijriDate?.minute;
+      // @ts-ignore
+      taskData.scheduledAt = selectedHijriDate?.toDate().valueOf();
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -110,13 +134,16 @@ export default function TaskForm({
         taskData.targetValue = -1 * (taskData.targetValue || 0);
       }
 
-      console.log(tracker);
-
       const taskInput: any = {
         name: taskData.name.trim(),
         targetId: taskData.targetId,
         targetValue: taskData.targetValue,
         attributes: attr,
+        hijriDate: {
+          year: taskData.hijriDate?.year,
+          month: taskData.hijriDate?.month,
+          day: taskData.hijriDate?.day,
+        },
       };
 
       // Handle scheduledAt - convert date string to timestamp if provided
@@ -133,6 +160,7 @@ export default function TaskForm({
         taskInput.targetId = selectedTargetId;
       }
 
+      console.log("submitting", taskInput);
       let result: Task;
       if (taskId) {
         result = await updateTask(taskId, taskInput);
@@ -141,7 +169,11 @@ export default function TaskForm({
       }
 
       // Create recurring task if repeat is selected and not "none"
-      if (taskData.repeat && taskData.repeat !== "none" && taskInput.scheduledAt) {
+      if (
+        taskData.repeat &&
+        taskData.repeat !== "none" &&
+        taskInput.scheduledAt
+      ) {
         try {
           await createRecurringTask({
             name: taskInput.name,
@@ -163,6 +195,7 @@ export default function TaskForm({
         onSuccess(result);
       }
     } catch (err) {
+      console.error(err);
       // Error is handled by the hook and passed through onError
     } finally {
       setIsSubmitting(false);
@@ -196,11 +229,14 @@ export default function TaskForm({
       <HijriDateInput
         name="scheduledAt"
         label="Scheduled Date & Time (Hijri)"
-        value={task?.scheduledAt ? new Date(task.scheduledAt).toISOString().slice(0, 16) : ""}
+        value={selectedHijriDate as HijriDate}
         placeholder="Select Hijri date and time"
         disabled={isSubmitting}
         required={false}
         className="text-base"
+        onChange={(hijriDate) => {
+          setSelectedHijriDate(hijriDate);
+        }}
       />
 
       <div className="mb-4">

@@ -133,7 +133,10 @@ export default function GoalForm({
             baseDate: Date.now(), // Start from now
           });
         } catch (recurringError) {
-          console.error("Failed to create recurring task for goal:", recurringError);
+          console.error(
+            "Failed to create recurring task for goal:",
+            recurringError,
+          );
           // Don't fail the main goal creation if recurring task creation fails
         }
       }
@@ -362,7 +365,9 @@ export default function GoalForm({
           <FormInput
             name="due"
             label="Due Date & Time"
-            value={goal?.due ? new Date(goal.due).toISOString().slice(0, 16) : ""}
+            value={
+              goal?.due ? new Date(goal.due).toISOString().slice(0, 16) : ""
+            }
             placeholder="Select due date and time"
             type="datetime-local"
             disabled={isSubmitting}

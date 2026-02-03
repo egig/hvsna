@@ -5,12 +5,12 @@ import { Modal } from "../modules/navigation/modal";
 interface HijriDateInputProps {
   name: string;
   label: string;
-  value?: string;
+  value?: HijriDate;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: HijriDate) => void;
   onBlur?: () => void;
 }
 
@@ -21,18 +21,43 @@ interface CalendarModalProps {
   onDateSelect: (date: HijriDate) => void;
 }
 
-function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: CalendarModalProps) {
+function CalendarModal({
+  isOpen,
+  onClose,
+  selectedDate,
+  onDateSelect,
+}: CalendarModalProps) {
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
-    selectedDate ? new HijriMonth(selectedDate.year, selectedDate.month) : HijriMonth.fromGregorian(new Date().getFullYear(), new Date().getMonth() + 1)
+    selectedDate
+      ? new HijriMonth(selectedDate.year, selectedDate.month)
+      : HijriMonth.fromGregorian(
+          new Date().getFullYear(),
+          new Date().getMonth() + 1,
+        ),
   );
-  const [selectedHour, setSelectedHour] = useState(selectedDate?.toDate().getHours() || 0);
-  const [selectedMinute, setSelectedMinute] = useState(selectedDate?.toDate().getMinutes() || 0);
-  const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(selectedDate);
+  const [selectedHour, setSelectedHour] = useState(
+    selectedDate?.toDate().getHours() || 0,
+  );
+  const [selectedMinute, setSelectedMinute] = useState(
+    selectedDate?.toDate().getMinutes() || 0,
+  );
+  const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
+    selectedDate,
+  );
 
   const hijriMonthNames = [
-    "Muharram", "Safar", "Rabi al-Awwal", "Rabi al-Thani",
-    "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Shaaban",
-    "Ramadan", "Shawwal", "Dhu al-Qidah", "Dhu al-Hijjah"
+    "Muharram",
+    "Safar",
+    "Rabi al-Awwal",
+    "Rabi al-Thani",
+    "Jumada al-Awwal",
+    "Jumada al-Thani",
+    "Rajab",
+    "Shaaban",
+    "Ramadan",
+    "Shawwal",
+    "Dhu al-Qidah",
+    "Dhu al-Hijjah",
   ];
 
   const weekDays = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"];
@@ -58,19 +83,19 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
     const firstDay = getFirstDayOfMonth();
     const daysInMonth = getDaysInMonth();
     const startDayOfWeek = firstDay.dayOfWeek;
-    
+
     const days = [];
-    
+
     // Add empty cells for days before month starts
     for (let i = 0; i < startDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new HijriDate(currentMonth.year, currentMonth.month, day));
     }
-    
+
     return days;
   };
 
@@ -93,7 +118,7 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
         tempSelectedDate.month,
         tempSelectedDate.day,
         selectedHour,
-        selectedMinute
+        selectedMinute,
       );
       onDateSelect(finalDate);
       onClose();
@@ -117,21 +142,41 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
             onClick={handlePreviousMonth}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
-          
+
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             {hijriMonthNames[currentMonth.month - 1]} {currentMonth.year}
           </h3>
-          
+
           <button
             onClick={handleNextMonth}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -140,7 +185,10 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
         <div className="mb-4">
           <div className="grid grid-cols-7 gap-1 text-center mb-2">
             {weekDays.map((day) => (
-              <div key={day} className="text-xs font-medium text-gray-500 dark:text-gray-400 py-2">
+              <div
+                key={day}
+                className="text-xs font-medium text-gray-500 dark:text-gray-400 py-2"
+              >
                 {day}
               </div>
             ))}
@@ -152,12 +200,14 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
                   <button
                     onClick={() => handleDateClick(date)}
                     className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
-                      tempSelectedDate && date.year === tempSelectedDate.year && 
-                      date.month === tempSelectedDate.month && date.day === tempSelectedDate.day
-                        ? 'bg-blue-500 text-white'
+                      tempSelectedDate &&
+                      date.year === tempSelectedDate.year &&
+                      date.month === tempSelectedDate.month &&
+                      date.day === tempSelectedDate.day
+                        ? "bg-blue-500 text-white"
                         : date.isToday()
-                        ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
+                          ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                     }`}
                   >
                     {date.day}
@@ -183,11 +233,13 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
             >
               {Array.from({ length: 24 }, (_, i) => (
                 <option key={i} value={i}>
-                  {i.toString().padStart(2, '0')}
+                  {i.toString().padStart(2, "0")}
                 </option>
               ))}
             </select>
-            <span className="flex items-center text-gray-500 dark:text-gray-400">:</span>
+            <span className="flex items-center text-gray-500 dark:text-gray-400">
+              :
+            </span>
             <select
               value={selectedMinute}
               onChange={(e) => setSelectedMinute(parseInt(e.target.value))}
@@ -195,7 +247,7 @@ function CalendarModal({ isOpen, onClose, selectedDate, onDateSelect }: Calendar
             >
               {Array.from({ length: 60 }, (_, i) => (
                 <option key={i} value={i}>
-                  {i.toString().padStart(2, '0')}
+                  {i.toString().padStart(2, "0")}
                 </option>
               ))}
             </select>
@@ -248,9 +300,7 @@ export function HijriDateInput({
   // Initialize from Gregorian value
   useEffect(() => {
     if (value) {
-      const gregDate = new Date(value);
-      const hijri = HijriDate.fromDate(gregDate);
-      setSelectedDate(hijri);
+      setSelectedDate(value);
     } else {
       setSelectedDate(null);
     }
@@ -258,11 +308,8 @@ export function HijriDateInput({
 
   const handleDateSelect = (date: HijriDate) => {
     setSelectedDate(date);
-    
-    const gregorianDate = date.toDate();
-    const gregorianString = gregorianDate.toISOString().slice(0, 16);
     if (onChange) {
-      onChange(gregorianString);
+      onChange(date);
     }
   };
 
@@ -283,37 +330,43 @@ export function HijriDateInput({
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      
+
       <button
         type="button"
         onClick={handleButtonClick}
         disabled={disabled}
         className={`w-full px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-          disabled 
-            ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-50' 
-            : 'bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer'
+          disabled
+            ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-50"
+            : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
         }`}
       >
         <div className="flex items-center justify-between">
-          <span className={selectedDate ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
+          <span
+            className={
+              selectedDate
+                ? "text-gray-900 dark:text-white"
+                : "text-gray-500 dark:text-gray-400"
+            }
+          >
             {formatDateDisplay(selectedDate)}
           </span>
-          <svg 
-            className="w-5 h-5 text-gray-400" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
         </div>
       </button>
-      
+
       <p className="text-xs text-gray-500 mt-1">
         Hijri Calendar - Using accurate conversion library
       </p>

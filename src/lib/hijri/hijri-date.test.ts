@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { HijriDate } from "./hijri-date";
+import { HijriDate, getSunsetTime, isAfterSunset } from "./hijri-date";
 
 describe("HijriDate", () => {
   describe("constructor", () => {
@@ -373,6 +373,148 @@ describe("HijriDate", () => {
           // Skip invalid dates
           console.log(`Skipping invalid date: ${year}-${month}-${day}`);
         }
+      });
+    });
+  });
+
+  describe("Sunset-based functionality", () => {
+    describe("with coordinates", () => {
+      const latitude = 21.4225; // Mecca
+      const longitude = 39.8262;
+
+      it("should include coordinates in HijriDate constructor", () => {
+        const hijriDate = new HijriDate(
+          1445,
+          1,
+          1,
+          12,
+          0,
+          0,
+          latitude,
+          longitude,
+        );
+        expect(hijriDate._latitude).toBe(latitude);
+        expect(hijriDate._longitude).toBe(longitude);
+      });
+
+      it("should include coordinates in fromGregorian", () => {
+        const hijriDate = HijriDate.fromGregorian(
+          2024,
+          1,
+          1,
+          12,
+          0,
+          0,
+          latitude,
+          longitude,
+        );
+        expect(hijriDate._latitude).toBe(latitude);
+        expect(hijriDate._longitude).toBe(longitude);
+      });
+
+      it("should include coordinates in fromDate", () => {
+        const date = new Date(2024, 0, 1, 12, 0, 0);
+        const hijriDate = HijriDate.fromDate(date, latitude, longitude);
+        expect(hijriDate._latitude).toBe(latitude);
+        expect(hijriDate._longitude).toBe(longitude);
+      });
+
+      it("should return original date when no coordinates provided", () => {
+        const date = new Date(2024, 0, 1, 12, 0, 0);
+        const adjustedDate = HijriDate.adjustForSunset(date);
+        expect(adjustedDate).toEqual(date);
+      });
+
+      it("should handle invalid coordinates gracefully", () => {
+        const date = new Date(2024, 0, 1, 12, 0, 0);
+        const adjustedDate = HijriDate.adjustForSunset(date, 999, 999);
+        expect(adjustedDate).toEqual(date);
+      });
+    });
+
+    describe("getSunsetTime", () => {
+      const latitude = 21.4225; // Mecca
+      const longitude = 39.8262;
+
+      it("should return sunset time for valid coordinates", () => {
+        const date = new Date(2024, 0, 1);
+        const sunset = getSunsetTime(date, latitude, longitude);
+        expect(sunset).toBeInstanceOf(Date);
+        expect(sunset).toBeTruthy();
+      });
+
+      it("should return null for invalid coordinates", () => {
+        const date = new Date(2024, 0, 1);
+        const sunset = getSunsetTime(date, 999, 999);
+        expect(sunset).toBeNull();
+      });
+    });
+
+    describe("isAfterSunset", () => {
+      const latitude = 21.4225; // Mecca
+      const longitude = 39.8262;
+
+      it("should return false for time before sunset", () => {
+        const date = new Date(2024, 0, 1, 10, 0, 0); // 10 AM
+        expect(isAfterSunset(date, latitude, longitude)).toBe(false);
+      });
+
+      it("should return true for time after sunset", () => {
+        const date = new Date(2024, 0, 1, 22, 0, 0); // 10 PM
+        expect(isAfterSunset(date, latitude, longitude)).toBe(true);
+      });
+
+      it("should return false for invalid coordinates", () => {
+        const date = new Date(2024, 0, 1, 22, 0, 0);
+        expect(isAfterSunset(date, 999, 999)).toBe(false);
+      });
+    });
+
+    describe("sunset-based date transition", () => {
+      const latitude = 21.4225; // Mecca
+      const longitude = 39.8262;
+
+      it("should adjust date after sunset to next day", () => {
+        const eveningDate = new Date(2024, 0, 1, 22, 0, 0); // 10 PM
+        const adjustedDate = HijriDate.adjustForSunset(
+          eveningDate,
+          latitude,
+          longitude,
+        );
+
+        expect(adjustedDate.getDate()).toBeGreaterThan(eveningDate.getDate());
+      });
+
+      it("should not adjust date before sunset", () => {
+        const morningDate = new Date(2024, 0, 1, 10, 0, 0); // 10 AM
+        const adjustedDate = HijriDate.adjustForSunset(
+          morningDate,
+          latitude,
+          longitude,
+        );
+
+        expect(adjustedDate.getDate()).toBe(morningDate.getDate());
+      });
+
+      it("should create different Hijri dates for same Gregorian day before and after sunset", () => {
+        const gregorianDate = new Date(2024, 0, 1);
+
+        // Before sunset
+        const beforeSunset = new Date(gregorianDate);
+        beforeSunset.setHours(10, 0, 0);
+        const hijriBefore = HijriDate.fromDate(
+          beforeSunset,
+          latitude,
+          longitude,
+        );
+
+        // After sunset
+        const afterSunset = new Date(gregorianDate);
+        afterSunset.setHours(22, 0, 0);
+        const hijriAfter = HijriDate.fromDate(afterSunset, latitude, longitude);
+
+        // The Hijri date should be different (after sunset should be next day)
+        expect(hijriBefore.day).not.toBe(hijriAfter.day);
       });
     });
   });

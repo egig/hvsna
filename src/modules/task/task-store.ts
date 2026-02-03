@@ -11,15 +11,22 @@ import type {
 interface PouchDBTaskDocument {
   _id: string;
   _rev?: string;
-  user_id: string;
+  userId?: string;
   name: string;
   status: TaskStatus;
   scheduledAt?: number;
   targetId?: string;
   targetValue?: number;
-  created_at?: number;
-  updated_at?: number;
+  createdAt?: number;
+  updatedAt?: number;
   attributes?: Record<string, any>;
+  hijriDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  hour?: number;
+  minute?: number;
 }
 
 interface TaskState {
@@ -122,28 +129,33 @@ export const useTaskStore = create<TaskState>()(
 
           const newTask: Task = {
             id: taskId,
-            user_id: "default-user", // You might want to get this from auth context
             name: input.name,
             status: input.status || "pending",
             scheduledAt: input.scheduledAt,
             targetId: input.targetId,
             targetValue: input.targetValue,
-            created_at: now,
-            updated_at: now,
+            createdAt: now,
+            updatedAt: now,
             attributes: input.attributes,
+            hijriDate: input.hijriDate,
+            hour: input.hour,
+            minute: input.minute,
           };
 
           const doc: PouchDBTaskDocument = {
             _id: taskId,
-            user_id: newTask.user_id,
+            userId: newTask.userId,
             name: newTask.name,
             status: newTask.status,
             scheduledAt: newTask.scheduledAt,
             targetId: newTask.targetId,
             targetValue: newTask.targetValue,
-            created_at: newTask.created_at,
-            updated_at: newTask.updated_at,
+            createdAt: newTask.createdAt,
+            updatedAt: newTask.updatedAt,
             attributes: newTask.attributes,
+            hijriDate: newTask.hijriDate,
+            hour: newTask.hour,
+            minute: newTask.minute,
           };
 
           await db.put(doc);
@@ -175,7 +187,7 @@ export const useTaskStore = create<TaskState>()(
 
           const updateData: PouchDBTaskDocument = {
             ...existingDoc,
-            updated_at: Date.now(),
+            updatedAt: Date.now(),
           };
 
           if (input.name !== undefined) {
@@ -202,6 +214,12 @@ export const useTaskStore = create<TaskState>()(
             updateData.attributes = input.attributes;
           }
 
+          if (input.hijriDate !== undefined) {
+            updateData.hijriDate = input.hijriDate;
+            updateData.hour = input.hour;
+            updateData.minute = input.minute;
+          }
+
           const response = await db.put(updateData);
           const updatedDoc: PouchDBTaskDocument = {
             ...updateData,
@@ -210,20 +228,16 @@ export const useTaskStore = create<TaskState>()(
 
           const updatedTask: Task = {
             id: updatedDoc._id,
-            user_id: updatedDoc.user_id,
+            userId: updatedDoc.userId,
             name: updatedDoc.name,
             status: updatedDoc.status,
             scheduledAt: updatedDoc.scheduledAt,
             targetId: updatedDoc.targetId,
             targetValue: updatedDoc.targetValue,
-            created_at: updatedDoc.created_at,
-            updated_at: updatedDoc.updated_at,
+            createdAt: updatedDoc.createdAt,
+            updatedAt: updatedDoc.updatedAt,
             attributes: updatedDoc.attributes,
           };
-          // set({ task: updatedTask });
-
-          // Also update in the tasks list
-          // get().updateTaskInList(id, updatedTask);
 
           return updatedTask;
         } catch (err) {
@@ -272,15 +286,17 @@ export const useTaskStore = create<TaskState>()(
           const doc: PouchDBTaskDocument = await db.get(id);
           const retrievedTask: Task = {
             id: doc._id,
-            user_id: doc.user_id,
             name: doc.name,
             status: doc.status,
             scheduledAt: doc.scheduledAt,
             targetId: doc.targetId,
             targetValue: doc.targetValue,
-            created_at: doc.created_at,
-            updated_at: doc.updated_at,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
             attributes: doc.attributes,
+            hijriDate: doc.hijriDate,
+            hour: doc.hour,
+            minute: doc.minute,
           };
 
           // set({ task: retrievedTask });
@@ -321,14 +337,16 @@ export const useTaskStore = create<TaskState>()(
               const doc: PouchDBTaskDocument = row.doc;
               return {
                 id: doc._id,
-                user_id: doc.user_id,
                 name: doc.name,
                 status: doc.status,
                 scheduledAt: doc.scheduledAt,
                 targetId: doc.targetId,
                 targetValue: doc.targetValue,
-                created_at: doc.created_at,
-                updated_at: doc.updated_at,
+                createdAt: doc.createdAt,
+                updatedAt: doc.updatedAt,
+                hijriDate: doc.hijriDate,
+                hour: doc.hour,
+                minute: doc.minute,
               };
             });
 

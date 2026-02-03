@@ -117,14 +117,13 @@ export default function Tasks() {
   };
 
   const handleDeleteTask = async (task: Task) => {
-    if (confirm(`Are you sure you want to delete "${task.name}"?`)) {
-      try {
-        await deleteTask(task.id);
-        refreshTasks();
-      } catch (err) {
-        console.error("Failed to delete task:", err);
-        alert("Failed to delete task. Please try again.");
-      }
+    try {
+      await deleteTask(task.id);
+      refreshTasks();
+      setSheetOpened(false);
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+      alert("Failed to delete task. Please try again.");
     }
   };
 

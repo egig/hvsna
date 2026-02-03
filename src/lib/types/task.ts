@@ -3,16 +3,26 @@ export type TaskRepeat = "none" | "daily" | "monthly" | "yearly";
 
 export interface Task {
   id: string;
-  user_id?: string;
+  userId?: string;
   name: string;
   status: TaskStatus;
   scheduledAt?: number;
   repeat?: TaskRepeat;
   targetId?: string;
+  hijriDate?: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  hour?: number;
+  minute?: number;
+  lat?: number;
+  long?: number;
+  timezone?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
-  created_at?: number;
-  updated_at?: number;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface TaskCreateInput {
@@ -24,6 +34,15 @@ export interface TaskCreateInput {
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
+  hijriDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  hour?: number;
+  minute?: number;
+  lat?: number;
+  long?: number;
 }
 
 export interface TaskUpdateInput {
@@ -34,6 +53,16 @@ export interface TaskUpdateInput {
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
+  hijriDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
+
+  hour?: number;
+  minute?: number;
+  lat?: number;
+  long?: number;
 }
 
 export interface TaskChange {

@@ -1,13 +1,54 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
+import * as SunCalc from "suncalc";
 
 const Days = ["fri", "sat", "sun", "mon", "tue", "wed", "thu"];
+
+// Jakarta coordinates (default location)
+const DEFAULT_LATITUDE = -6.2088;
+const DEFAULT_LONGITUDE = 106.8456;
 
 export class HijriDate {
   year: number;
   month: number;
   day: number;
   dayOfWeek: number;
+  hour: number;
+  minute: number;
   _rawGregorianDate: Date;
+  _latitude?: number;
+  _longitude?: number;
+
+  /**
+   * Adjust date for sunset-based Hijri date transition
+   * If current time is after sunset, the Hijri date has already changed to the next day
+   */
+  static adjustForSunset(
+    date: Date,
+    latitude?: number,
+    longitude?: number,
+  ): Date {
+    // Use Jakarta coordinates as default if not provided
+    const lat = latitude ?? DEFAULT_LATITUDE;
+    const lng = longitude ?? DEFAULT_LONGITUDE;
+
+    try {
+      const times = SunCalc.getTimes(date, lat, lng);
+      const sunset = times.sunset;
+
+      // If sunset time is available and current time is after sunset
+      if (sunset && date >= sunset) {
+        // Move to next day for Hijri calendar calculation
+        const nextDay = new Date(date);
+        nextDay.setDate(nextDay.getDate() + 1);
+        return nextDay;
+      }
+    } catch (error) {
+      // If SunCalc fails (e.g., invalid coordinates), fall back to original date
+      console.warn("SunCalc calculation failed:", error);
+    }
+
+    return date;
+  }
 
   constructor(
     year: number,
@@ -16,10 +57,17 @@ export class HijriDate {
     hour?: number,
     minute?: number,
     second?: number,
+    latitude?: number,
+    longitude?: number,
   ) {
     this.year = year;
     this.month = month;
     this.day = day;
+    ((this.hour = hour || 0),
+      (this.minute = minute || 0),
+      (this._latitude = latitude));
+    this._longitude = longitude;
+
     let d = hijriToGregorian(this);
     this._rawGregorianDate = new Date(
       d.year,
@@ -36,14 +84,28 @@ export class HijriDate {
     return this._rawGregorianDate;
   }
 
-  static fromDate(date: Date) {
+  static fromDate(date: Date, latitude?: number, longitude?: number) {
+    // Use Jakarta coordinates as default if not provided
+    const lat = latitude ?? DEFAULT_LATITUDE;
+    const lng = longitude ?? DEFAULT_LONGITUDE;
+
+    const adjustedDate = HijriDate.adjustForSunset(date, lat, lng);
     const hijriDate = gregorianToHijri({
-      year: date.getFullYear(),
-      month: date.getMonth() + 1, // Month number in Javascript Date API is zero-based.
-      day: date.getDate(),
+      year: adjustedDate.getFullYear(),
+      month: adjustedDate.getMonth() + 1, // Month number in Javascript Date API is zero-based.
+      day: adjustedDate.getDate(),
     });
 
-    return new HijriDate(hijriDate.year, hijriDate.month, hijriDate.day);
+    return new HijriDate(
+      hijriDate.year,
+      hijriDate.month,
+      hijriDate.day,
+      0,
+      0,
+      0,
+      lat,
+      lng,
+    );
   }
 
   static fromGregorian(
@@ -53,7 +115,13 @@ export class HijriDate {
     hour?: number,
     minute?: number,
     second?: number,
+    latitude?: number,
+    longitude?: number,
   ) {
+    // Use Jakarta coordinates as default if not provided
+    const lat = latitude ?? DEFAULT_LATITUDE;
+    const lng = longitude ?? DEFAULT_LONGITUDE;
+
     let date = new Date();
     if (!!month && !!year && !!day) {
       date = new Date(
@@ -66,10 +134,11 @@ export class HijriDate {
       );
     }
 
+    const adjustedDate = HijriDate.adjustForSunset(date, lat, lng);
     const hijriDate = gregorianToHijri({
-      year: date.getFullYear(),
-      month: date.getMonth() + 1, // Month number in Javascript Date API is zero-based.
-      day: date.getDate(),
+      year: adjustedDate.getFullYear(),
+      month: adjustedDate.getMonth() + 1, // Month number in Javascript Date API is zero-based.
+      day: adjustedDate.getDate(),
     });
 
     return new HijriDate(
@@ -79,6 +148,8 @@ export class HijriDate {
       hour || 0,
       minute || 0,
       second || 0,
+      lat,
+      lng,
     );
   }
 
@@ -247,10 +318,19 @@ export class HijriDate {
   }
 
   isToday(): boolean {
+    // Use Jakarta coordinates as default if not available
+    const lat = this._latitude ?? DEFAULT_LATITUDE;
+    const lng = this._longitude ?? DEFAULT_LONGITUDE;
+
     const today = HijriDate.fromGregorian(
       new Date().getFullYear(),
       new Date().getMonth() + 1,
       new Date().getDate(),
+      0,
+      0,
+      0,
+      lat,
+      lng,
     );
     return (
       this.year === today.year &&
@@ -270,10 +350,19 @@ export class HijriDate {
 }
 
 export function isTodayHijriDate(hijriDate: HijriDate): boolean {
+  // Use Jakarta coordinates as default if not available
+  const lat = hijriDate._latitude ?? DEFAULT_LATITUDE;
+  const lng = hijriDate._longitude ?? DEFAULT_LONGITUDE;
+
   const today = HijriDate.fromGregorian(
     new Date().getFullYear(),
     new Date().getMonth() + 1,
     new Date().getDate(),
+    0,
+    0,
+    0,
+    lat,
+    lng,
   );
   return (
     hijriDate.year === today.year &&
@@ -288,4 +377,40 @@ export function isSameHijriDate(date1: HijriDate, date2: HijriDate): boolean {
     date1.month === date2.month &&
     date1.day === date2.day
   );
+}
+
+/**
+ * Get sunset time for a specific date and location
+ */
+export function getSunsetTime(
+  date: Date,
+  latitude: number,
+  longitude: number,
+): Date | null {
+  try {
+    const times = SunCalc.getTimes(date, latitude, longitude);
+    const sunset = times.sunset;
+
+    // Check if sunset is a valid date
+    if (!sunset || isNaN(sunset.getTime())) {
+      return null;
+    }
+
+    return sunset;
+  } catch (error) {
+    console.warn("SunCalc calculation failed:", error);
+    return null;
+  }
+}
+
+/**
+ * Check if current time is after sunset for given location
+ */
+export function isAfterSunset(
+  date: Date,
+  latitude: number,
+  longitude: number,
+): boolean {
+  const sunset = getSunsetTime(date, latitude, longitude);
+  return sunset ? date >= sunset : false;
 }

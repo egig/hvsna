@@ -88,7 +88,7 @@ export const useTasks = (): UseTasksReturn => {
       try {
         // Get normal tasks for the date
         const normalTasks = await store.getTasksByDate(date, db);
-        
+
         // Get recurring tasks and generate instances for this date
         const recurringTasks = await getRecurringTasksFromHook();
         const targetDate = new Date(date);
@@ -110,8 +110,9 @@ export const useTasks = (): UseTasksReturn => {
           for (const occurrence of occurrences) {
             // Check if this recurring task instance already exists
             const exists = normalTasks.some(
-              task => task.name === recurringTask.name && 
-                     task.scheduledAt === occurrence.getTime()
+              (task) =>
+                task.name === recurringTask.name &&
+                task.scheduledAt === occurrence.getTime(),
             );
 
             if (!exists) {
@@ -241,10 +242,13 @@ export const useTasks = (): UseTasksReturn => {
             };
 
             // Check if task already exists for this date
-            const existingTasks = await getTasksByDate(occurrence.toISOString().split('T')[0]);
+            const existingTasks = await getTasksByDate(
+              occurrence.toISOString().split("T")[0],
+            );
             const exists = existingTasks.some(
-              task => task.name === recurringTask.name && 
-                     task.scheduledAt === occurrence.getTime()
+              (task) =>
+                task.name === recurringTask.name &&
+                task.scheduledAt === occurrence.getTime(),
             );
 
             if (!exists) {

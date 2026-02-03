@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { usePouchDB } from "../pouchdb";
-import type { 
-  RecurringTask, 
-  RecurringTaskCreateInput, 
+import type {
+  RecurringTask,
+  RecurringTaskCreateInput,
   RecurringTaskUpdateInput,
-  RecurringTaskQuery 
+  RecurringTaskQuery,
 } from "../lib/types/recurring-task";
 
 export function useRecurringTasks() {
@@ -12,143 +12,172 @@ export function useRecurringTasks() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createRecurringTask = useCallback(async (input: RecurringTaskCreateInput): Promise<RecurringTask> => {
-    setLoading(true);
-    setError(null);
+  const createRecurringTask = useCallback(
+    async (input: RecurringTaskCreateInput): Promise<RecurringTask> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const id = input.id || `recurring_task_${crypto.randomUUID()}`;
-      const now = Date.now();
+      try {
+        const id = input.id || `recurring_task_${crypto.randomUUID()}`;
+        const now = Date.now();
 
-      const recurringTask: RecurringTask = {
-        id,
-        user_id: "current_user", // TODO: Get from auth context
-        name: input.name,
-        targetId: input.targetId,
-        targetValue: input.targetValue,
-        attributes: input.attributes,
-        repeat: input.repeat,
-        baseDate: input.baseDate,
-        created_at: now,
-        updated_at: now,
-      };
+        const recurringTask: RecurringTask = {
+          id,
+          user_id: "current_user", // TODO: Get from auth context
+          name: input.name,
+          targetId: input.targetId,
+          targetValue: input.targetValue,
+          attributes: input.attributes,
+          repeat: input.repeat,
+          baseDate: input.baseDate,
+          created_at: now,
+          updated_at: now,
+        };
 
-      const response = await db.put({
-        _id: id,
-        ...recurringTask,
-      });
+        const response = await db.put({
+          _id: id,
+          ...recurringTask,
+        });
 
-      return {
-        ...recurringTask,
-        _rev: response.rev,
-      } as unknown as RecurringTask;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create recurring task";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [db]);
-
-  const getRecurringTask = useCallback(async (id: string): Promise<RecurringTask> => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const doc = await db.get(id);
-      return doc as unknown as RecurringTask;
-    } catch (err: any) {
-      if (err.status === 404) {
-        throw new Error("Recurring task not found");
+        return {
+          ...recurringTask,
+          _rev: response.rev,
+        } as unknown as RecurringTask;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to create recurring task";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
       }
-      const errorMessage = err instanceof Error ? err.message : "Failed to get recurring task";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [db]);
+    },
+    [db],
+  );
 
-  const getRecurringTasks = useCallback(async (query?: RecurringTaskQuery): Promise<RecurringTask[]> => {
-    setLoading(true);
-    setError(null);
+  const getRecurringTask = useCallback(
+    async (id: string): Promise<RecurringTask> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await db.allDocs({
-        include_docs: true,
-        startkey: 'recurring_task_',
-        endkey: 'recurring_task_\uffff',
-      });
-
-      let tasks = response.rows
-        .filter((row: any) => row.doc)
-        .map((row: any) => row.doc) as RecurringTask[];
-
-      // Apply filters if query is provided
-      if (query) {
-        if (query.repeat) {
-          tasks = tasks.filter(task => task.repeat === query.repeat);
+      try {
+        const doc = await db.get(id);
+        return doc as unknown as RecurringTask;
+      } catch (err: any) {
+        if (err.status === 404) {
+          throw new Error("Recurring task not found");
         }
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to get recurring task";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
       }
+    },
+    [db],
+  );
 
-      return tasks;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to get recurring tasks";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [db]);
+  const getRecurringTasks = useCallback(
+    async (query?: RecurringTaskQuery): Promise<RecurringTask[]> => {
+      setLoading(true);
+      setError(null);
 
-  const updateRecurringTask = useCallback(async (id: string, input: RecurringTaskUpdateInput): Promise<RecurringTask> => {
-    setLoading(true);
-    setError(null);
+      try {
+        const response = await db.allDocs({
+          include_docs: true,
+          startkey: "recurring_task_",
+          endkey: "recurring_task_\uffff",
+        });
 
-    try {
-      const existingDoc = await db.get(id);
-      
-      const updatedTask: RecurringTask = {
-        ...(existingDoc as RecurringTask),
-        ...input,
-        updated_at: Date.now(),
-      };
+        let tasks = response.rows
+          .filter((row: any) => row.doc)
+          .map((row: any) => row.doc) as RecurringTask[];
 
-      const response = await db.put({
-        _id: id,
-        _rev: existingDoc._rev,
-        ...updatedTask,
-      });
+        // Apply filters if query is provided
+        if (query) {
+          if (query.repeat) {
+            tasks = tasks.filter((task) => task.repeat === query.repeat);
+          }
+        }
 
-      return {
-        ...updatedTask,
-        _rev: response.rev,
-      } as unknown as RecurringTask;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to update recurring task";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [db]);
+        return tasks;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to get recurring tasks";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db],
+  );
 
-  const deleteRecurringTask = useCallback(async (id: string): Promise<void> => {
-    setLoading(true);
-    setError(null);
+  const updateRecurringTask = useCallback(
+    async (
+      id: string,
+      input: RecurringTaskUpdateInput,
+    ): Promise<RecurringTask> => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const doc = await db.get(id);
-      await db.remove(doc);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to delete recurring task";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [db]);
+      try {
+        const existingDoc = await db.get(id);
+
+        const updatedTask: RecurringTask = {
+          ...(existingDoc as RecurringTask),
+          ...input,
+          updated_at: Date.now(),
+        };
+
+        const response = await db.put({
+          _id: id,
+          _rev: existingDoc._rev,
+          ...updatedTask,
+        });
+
+        return {
+          ...updatedTask,
+          _rev: response.rev,
+        } as unknown as RecurringTask;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to update recurring task";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db],
+  );
+
+  const deleteRecurringTask = useCallback(
+    async (id: string): Promise<void> => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const doc = await db.get(id);
+        await db.remove(doc);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to delete recurring task";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db],
+  );
 
   return {
     createRecurringTask,
