@@ -62,7 +62,7 @@ export default function LogForm({
           formData.get(attr.id) || attr.defaultValue;
       });
 
-      let v = parseFloat(value?.toString())
+      let v = parseFloat(value?.toString());
       if (selectedTracker?.type === "counter") {
         v = 1;
       }
@@ -106,9 +106,7 @@ export default function LogForm({
   const handleDelete = () => {
     if (logId && onDelete) {
       const tracker = trackers.find((t) => t.id === log?.trackerId);
-      const trackerName = tracker
-        ? `${tracker.name}`
-        : "Unknown tracker";
+      const trackerName = tracker ? `${tracker.name}` : "Unknown tracker";
 
       if (
         confirm(

@@ -63,14 +63,17 @@ function TargetResultCard({ result }: TargetResultCardProps) {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-sm opacity-75">Current</span>
-          <span className="font-medium text-lg">{formatValue(result.currentValue, result.trackerFormat)}</span>
+          <span className="font-medium text-lg">
+            {formatValue(result.currentValue, result.trackerFormat)}
+          </span>
         </div>
 
         <div className="flex justify-between items-center">
           <span className="text-sm opacity-75">Target</span>
           <span className="font-medium">
             {formatValue(result.targetValue, result.trackerFormat)}
-            {result.targetMax && ` - ${formatValue(result.targetMax, result.trackerFormat)}`}
+            {result.targetMax &&
+              ` - ${formatValue(result.targetMax, result.trackerFormat)}`}
           </span>
         </div>
 
@@ -252,9 +255,7 @@ function TargetResultsTable({ results }: TargetResultsTableProps) {
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="text-left p-3 font-medium text-gray-900">
-                Goal
-              </th>
+              <th className="text-left p-3 font-medium text-gray-900">Goal</th>
               <th className="text-right p-3 font-medium text-gray-900">
                 Current
               </th>

@@ -1,6 +1,6 @@
-import { useCallback, useMemo } from 'react';
-import { getFeatureFlags, isFeatureEnabled } from '../lib/featureFlags';
-import type { FeatureFlags } from '../lib/types/featureFlags';
+import { useCallback, useMemo } from "react";
+import { getFeatureFlags, isFeatureEnabled } from "../lib/featureFlags";
+import type { FeatureFlags } from "../lib/types/featureFlags";
 
 /**
  * Hook for accessing feature flags in React components

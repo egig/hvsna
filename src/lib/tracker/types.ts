@@ -36,13 +36,7 @@ export interface Log {
 /* ---------- Goal ---------- */
 
 export type GoalReducer = "sum" | "count" | "last" | "avg" | "min" | "max";
-export type GoalCalculation =
-  | "sum"
-  | "count"
-  | "last"
-  | "avg"
-  | "min"
-  | "max";
+export type GoalCalculation = "sum" | "count" | "last" | "avg" | "min" | "max";
 
 export type GoalDirection = "increase" | "decrease" | "neutral";
 

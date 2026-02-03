@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Target as GoalIcon,
-  Plus,
-  Edit,
-  Trash2,
-  Target,
-  MoreHorizontal,
-} from "lucide-react";
+import { Target as GoalIcon, Plus, Target } from "lucide-react";
 import { formatValue } from "src/lib/format";
 import type { Goal as GoalType } from "src/lib/tracker/types";
 import GoalForm from "./goal-form";
@@ -18,6 +11,7 @@ import { useGoals } from "./use-goals";
 import { useGoal } from "./use-goal";
 import type { Tracker } from "../tracker/trackerStore";
 import { LoadingSpinner } from "src/components/loader";
+import { ListItem } from "../../components/list-item";
 
 export default function Goals() {
   const { loading, error, goals, getGoals } = useGoals();
@@ -81,22 +75,20 @@ export default function Goals() {
   };
 
   const handleDeleteGoal = async (goal: GoalType) => {
-    const tracker = trackers.find((t) => t.id === goal.trackerId);
-    const trackerName = tracker
-      ? `${tracker.name}`
-      : "Unknown tracker";
+    try {
+      await deleteGoal(goal.id);
+      getGoals();
+      setPopupOpened(false);
+    } catch (err) {
+      console.error("Failed to delete goal:", err);
+      alert("Failed to delete goal. Please try again.");
+    }
+  };
 
-    if (
-      confirm(
-        `Are you sure you want to delete this goal for "${trackerName}"? This action cannot be undone.`,
-      )
-    ) {
-      try {
-        await deleteGoal(goal.id);
-      } catch (err) {
-        console.error("Failed to delete goal:", err);
-        alert("Failed to delete goal. Please try again.");
-      }
+  const handleDeleteGoalById = async (goalId: string) => {
+    const goal = goals.find((g) => g.id === goalId);
+    if (goal) {
+      await handleDeleteGoal(goal);
     }
   };
 
@@ -140,111 +132,6 @@ export default function Goals() {
     return formatValue(goal.value, tracker?.format);
   };
 
-  interface GoalItemProps {
-    goal: GoalType;
-    trackers: Tracker[];
-    onEdit: (goal: GoalType) => void;
-    onDelete: (goal: GoalType) => void;
-    getTypeLabel: (type: string) => string;
-    getPeriodLabel: (period?: string) => string;
-    formatGoalValue: (goal: GoalType) => string;
-    getTrackerName: (trackerId: string) => string;
-  }
-
-  function GoalItem({
-    goal,
-    trackers,
-    onEdit,
-    onDelete,
-    getTypeLabel,
-    getPeriodLabel,
-    formatGoalValue,
-    getTrackerName,
-  }: GoalItemProps) {
-    const [showActions, setShowActions] = useState(false);
-
-    useEffect(() => {
-      const handleClickOutside = () => setShowActions(false);
-      if (showActions) {
-        document.addEventListener("click", handleClickOutside);
-        return () => document.removeEventListener("click", handleClickOutside);
-      }
-    }, [showActions]);
-
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-        <div className="flex items-start gap-3">
-          {/* Goal Icon */}
-          <div className="flex-shrink-0 mt-1">
-            <GoalIcon size={24} className="text-blue-500" />
-          </div>
-
-          {/* Goal Content */}
-          <div className="flex-1 min-w-0">
-            <h3
-              className="font-medium text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-              onClick={() => onEdit(goal)}
-            >
-              {getTrackerName(goal.trackerId)} - {goal.name}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {formatGoalValue(goal)} • {getPeriodLabel(goal.period)}
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Created: {new Date(goal.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-
-          {/* Status and Actions */}
-          <div className="flex flex-col items-end gap-2">
-            <div className="text-right">
-              <div className="text-xs text-gray-600 dark:text-gray-400">
-                {getTypeLabel(goal.type)}
-              </div>
-            </div>
-
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActions(!showActions);
-                }}
-                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                <MoreHorizontal size={16} className="text-gray-500" />
-              </button>
-
-              {showActions && (
-                <div className="absolute right-0 top-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-10 min-w-[120px]">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(goal);
-                      setShowActions(false);
-                    }}
-                    className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(goal);
-                      setShowActions(false);
-                    }}
-                    className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const getTrackerName = (trackerId: string) => {
     const tracker = trackers.find((t) => t.id === trackerId);
     return tracker ? tracker.name : "Unknown tracker";
@@ -265,14 +152,16 @@ export default function Goals() {
         }
       />
 
-      <div className="p-4">
-        {loading && (
+      {loading && (
+        <div className="p-4">
           <div className="flex flex-col items-center justify-center py-8">
             <LoadingSpinner size="lg" text="Loading goals..." />
           </div>
-        )}
+        </div>
+      )}
 
-        {error && (
+      {error && (
+        <div className="p-4">
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">Error: {error}</div>
             <button
@@ -283,9 +172,11 @@ export default function Goals() {
               Retry
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {!loading && goals.length === 0 && (
+      {!loading && goals.length === 0 && (
+        <div className="p-4">
           <div className="text-center py-8">
             <GoalIcon size={48} className="text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
@@ -302,26 +193,29 @@ export default function Goals() {
               Create Goal
             </button>
           </div>
-        )}
-
-        {goals.length > 0 && (
-          <div className="space-y-2">
-            {goals.map((goal) => (
-              <GoalItem
-                key={goal.id}
-                goal={goal}
-                trackers={trackers}
-                onEdit={openEditPopup}
-                onDelete={handleDeleteGoal}
-                getTypeLabel={getTypeLabel}
-                getPeriodLabel={getPeriodLabel}
-                formatGoalValue={formatGoalValue}
-                getTrackerName={getTrackerName}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      {goals.length > 0 && (
+        <>
+          {goals.map((goal) => (
+            <ListItem
+              key={goal.id}
+              title={`${getTrackerName(goal.trackerId)} - ${goal.name}`}
+              subtitle={`${formatGoalValue(goal)} • ${getPeriodLabel(goal.period)}`}
+              description={`Created: ${new Date(goal.createdAt).toLocaleDateString()}`}
+              leftIcon={<GoalIcon size={24} className="text-blue-500" />}
+              onClick={() => openEditPopup(goal)}
+              rightIcon={
+                <div className="text-right">
+                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                    {getTypeLabel(goal.type)}
+                  </div>
+                </div>
+              }
+            />
+          ))}
+        </>
+      )}
 
       <Modal isOpen={popupOpened} onClose={closePopup}>
         <GoalForm
@@ -329,6 +223,7 @@ export default function Goals() {
           onSuccess={handleGoalSuccess}
           onError={handleGoalError}
           onCancel={handleGoalCancel}
+          onDelete={handleDeleteGoalById}
         />
       </Modal>
     </Page>

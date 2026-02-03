@@ -92,14 +92,7 @@ export function useSettings() {
         setLoading(false);
       }
     },
-    [
-      db,
-      settings,
-      setLoading,
-      clearError,
-      updateSettingsInStore,
-      setError,
-    ],
+    [db, settings, setLoading, clearError, updateSettingsInStore, setError],
   );
 
   const setLanguage = useCallback(

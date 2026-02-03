@@ -17,13 +17,7 @@ export interface Goal {
 }
 
 export type GoalType = "static" | "range";
-export type GoalCalculation =
-  | "sum"
-  | "count"
-  | "last"
-  | "avg"
-  | "min"
-  | "max";
+export type GoalCalculation = "sum" | "count" | "last" | "avg" | "min" | "max";
 export type GoalDirection = "increase" | "decrease" | "neutral";
 export type GoalPeriod =
   | "log"
@@ -123,11 +117,7 @@ export const useGoalStore = create<GoalState>()(
         set({ currentGoal: goal }, false, "setCurrentGoal"),
 
       addGoal: (goal) =>
-        set(
-          (state) => ({ goals: [...state.goals, goal] }),
-          false,
-          "addGoal",
-        ),
+        set((state) => ({ goals: [...state.goals, goal] }), false, "addGoal"),
 
       updateGoal: (id, updates) =>
         set(
@@ -163,10 +153,7 @@ export const useGoalStore = create<GoalState>()(
           "reset",
         ),
 
-      createGoal: async (
-        input: GoalCreateInput,
-        db: any,
-      ): Promise<Goal> => {
+      createGoal: async (input: GoalCreateInput, db: any): Promise<Goal> => {
         try {
           set({ loading: true, error: null });
 
@@ -297,9 +284,7 @@ export const useGoalStore = create<GoalState>()(
 
           // Apply filters
           if (query.trackerId) {
-            goals = goals.filter(
-              (g: Goal) => g.trackerId === query.trackerId,
-            );
+            goals = goals.filter((g: Goal) => g.trackerId === query.trackerId);
           }
           if (query.type) {
             goals = goals.filter((g: Goal) => g.type === query.type);
@@ -310,9 +295,7 @@ export const useGoalStore = create<GoalState>()(
             );
           }
           if (query.direction) {
-            goals = goals.filter(
-              (g: Goal) => g.direction === query.direction,
-            );
+            goals = goals.filter((g: Goal) => g.direction === query.direction);
           }
           if (query.period) {
             goals = goals.filter((g: Goal) => g.period === query.period);

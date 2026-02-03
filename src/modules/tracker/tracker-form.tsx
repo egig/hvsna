@@ -3,12 +3,14 @@ import { useTracker } from "./use-tracker";
 import BaseForm from "src/components/base-form";
 import Select from "src/components/form-select";
 import { FormInput } from "src/components/form-input";
+import { Trash2 } from "lucide-react";
 
 interface TrackerFormProps {
   trackerId?: string | null;
   onSuccess?: () => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
+  onDelete?: (trackerId: string) => void;
 }
 
 export default function TrackerForm({
@@ -16,6 +18,7 @@ export default function TrackerForm({
   onSuccess,
   onError,
   onCancel,
+  onDelete,
 }: TrackerFormProps) {
   const { loading, error, createTracker, updateTracker, getTracker, tracker } =
     useTracker(trackerId || undefined);
@@ -57,7 +60,7 @@ export default function TrackerForm({
           type,
           negative: Boolean(negative),
           baseline: parseFloat(baseline) || 0,
-          format: format as "plain" | "idr" || "plain",
+          format: (format as "plain" | "idr") || "plain",
         });
       } else {
         await createTracker({
@@ -66,7 +69,7 @@ export default function TrackerForm({
           unit,
           negative: Boolean(negative),
           baseline: parseFloat(baseline) || 0,
-          format: format as "plain" | "idr" || "plain",
+          format: (format as "plain" | "idr") || "plain",
         });
       }
 
@@ -82,6 +85,18 @@ export default function TrackerForm({
 
   const handleCancel = () => {
     if (onCancel) onCancel();
+  };
+
+  const handleDelete = () => {
+    if (trackerId && onDelete && tracker) {
+      if (
+        confirm(
+          `Are you sure you want to delete "${tracker.name}"? This action cannot be undone.`,
+        )
+      ) {
+        onDelete(trackerId);
+      }
+    }
   };
 
   return (
@@ -194,6 +209,21 @@ export default function TrackerForm({
               />
             )}
           </div>
+
+          {/* Delete Button - Only show for existing trackers */}
+          {trackerId && (
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 size={18} />
+                Delete Tracker
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </BaseForm>

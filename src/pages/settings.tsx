@@ -1,5 +1,16 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-import { ChartArea, ChartBar, GitBranchIcon, List, LogIn, Logs, Settings as SettingsIcon, Target, Trash, Cog } from "lucide-react";
+import {
+  ChartArea,
+  ChartBar,
+  GitBranchIcon,
+  List,
+  LogIn,
+  Logs,
+  Settings as SettingsIcon,
+  Target,
+  Trash,
+  Cog,
+} from "lucide-react";
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";
 import { Navbar } from "../modules/navigation";
@@ -25,19 +36,23 @@ export default function Settings() {
           to="/trackers"
         />
 
-        {attrEnabled && <MenuItem
-          title="Trackers Attributes"
-          subtitle="Manage your tracking attributes"
-          icon={GitBranchIcon}
-          to="/trackers-attributes"
-        /> }
+        {attrEnabled && (
+          <MenuItem
+            title="Trackers Attributes"
+            subtitle="Manage your tracking attributes"
+            icon={GitBranchIcon}
+            to="/trackers-attributes"
+          />
+        )}
 
-        {attrEnabled && <MenuItem
-          title="Attribute Options"
-          subtitle="Manage your attribute options"
-          icon={List}
-          to="/attribute-options"
-        /> }
+        {attrEnabled && (
+          <MenuItem
+            title="Attribute Options"
+            subtitle="Manage your attribute options"
+            icon={List}
+            to="/attribute-options"
+          />
+        )}
 
         <MenuItem
           title="Goals"

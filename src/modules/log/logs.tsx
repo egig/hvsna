@@ -75,18 +75,18 @@ export default function Logs() {
   };
 
   const handleDeleteLog = async (log: Log) => {
-      try {
-        await deleteLog(log.id);
-        loadData();
-      } catch (err) {
-        console.error("Failed to delete log:", err);
-        alert("Failed to delete log entry. Please try again.");
-      }
-      setPopupOpened(false)
+    try {
+      await deleteLog(log.id);
+      loadData();
+    } catch (err) {
+      console.error("Failed to delete log:", err);
+      alert("Failed to delete log entry. Please try again.");
+    }
+    setPopupOpened(false);
   };
 
   const handleDeleteLogById = async (logId: string) => {
-    const log = logs.find(l => l.id === logId);
+    const log = logs.find((l) => l.id === logId);
     if (log) {
       await handleDeleteLog(log);
     }
@@ -122,8 +122,8 @@ export default function Logs() {
         }
       />
 
-        {!loading && !error && logs.length === 0 && (
-      <div className="p-4">
+      {!loading && !error && logs.length === 0 && (
+        <div className="p-4">
           <div className="text-center py-8">
             <FileText size={48} className="text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
@@ -140,27 +140,26 @@ export default function Logs() {
               Create Log Entry
             </button>
           </div>
-      </div>
-        )}
+        </div>
+      )}
 
-      
       {logs.length > 0 && (
-          <>
-            {logs.map((log) => (
-              <LogItem
-                key={log.id}
-                log={log}
-                trackers={trackers}
-                onEdit={openEditPopup}
-                getTrackerName={getTrackerName}
-                formatLogValue={formatLogValue}
-                formatTimestamp={formatTimestamp}
-                attributeOptions={attributeOptions}
-                trackerAttributes={trackerAttributes}
-              />
-            ))}
-          </>
-        )}
+        <>
+          {logs.map((log) => (
+            <LogItem
+              key={log.id}
+              log={log}
+              trackers={trackers}
+              onEdit={openEditPopup}
+              getTrackerName={getTrackerName}
+              formatLogValue={formatLogValue}
+              formatTimestamp={formatTimestamp}
+              attributeOptions={attributeOptions}
+              trackerAttributes={trackerAttributes}
+            />
+          ))}
+        </>
+      )}
 
       <Modal isOpen={popupOpened} onClose={closePopup}>
         <LogForm

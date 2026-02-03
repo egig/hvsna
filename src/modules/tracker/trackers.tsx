@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
 import { Plus, BarChart2, RefreshCw } from "lucide-react";
 import { formatValue } from "src/lib/format";
 import type { Tracker } from "./trackerStore";
 import TrackerForm from "./tracker-form";
 import { Modal } from "../navigation/modal";
-import { Button, Navbar, Page } from "../navigation";
+import { Navbar, Page } from "../navigation";
 import { useTrackers } from "./use-trackers";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
+import { ListItem } from "../../components/list-item";
 
 export default function Trackers() {
   const {
@@ -19,7 +19,7 @@ export default function Trackers() {
   } = useTrackers();
   const [popupOpened, setPopupOpened] = useState(false);
   const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
-  const attrEnabled = useFeatureFlag("TRACKER_ATTR")
+  const attrEnabled = useFeatureFlag("TRACKER_ATTR");
 
   const resetForm = () => {
     setEditingTrackerId(null);
@@ -59,18 +59,20 @@ export default function Trackers() {
   };
 
   const handleDeleteTracker = async (tracker: Tracker) => {
-    if (
-      confirm(
-        `Are you sure you want to delete "${tracker.name}"? This action cannot be undone.`,
-      )
-    ) {
-      try {
-        await deleteTracker(tracker.id);
-        loadTrackers();
-      } catch (err) {
-        console.error("Failed to delete tracker:", err);
-        alert("Failed to delete tracker. Please try again.");
-      }
+    try {
+      await deleteTracker(tracker.id);
+      loadTrackers();
+      setPopupOpened(false);
+    } catch (err) {
+      console.error("Failed to delete tracker:", err);
+      alert("Failed to delete tracker. Please try again.");
+    }
+  };
+
+  const handleDeleteTrackerById = async (trackerId: string) => {
+    const tracker = trackers.find((t) => t.id === trackerId);
+    if (tracker) {
+      await handleDeleteTracker(tracker);
     }
   };
 
@@ -88,8 +90,8 @@ export default function Trackers() {
           </button>
         }
       />
-      <div className="p-4">
-        {error && (
+      {error && (
+        <div className="p-4">
           <div className="space-y-4">
             <div className="text-red-600 dark:text-red-400">Error: {error}</div>
             <button
@@ -102,9 +104,11 @@ export default function Trackers() {
               Retry
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {!loading && !error && trackers.length === 0 && (
+      {!loading && !error && trackers.length === 0 && (
+        <div>
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <BarChart2 size={48} className="text-gray-400 mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
@@ -121,49 +125,35 @@ export default function Trackers() {
               Create Tracker
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {trackers.length > 0 && (
-          <div className="space-y-2">
-            {trackers.map((tracker) => (
-              <div
-                key={tracker.id}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between group hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 dark:text-white">
-                    {tracker.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Baseline: {formatValue(tracker.baseline, tracker.format)}{tracker.format !== "idr" && tracker.unit ? ` ${tracker.unit}` : ""}
-                  </p>
-                </div>
-                <div className="flex gap-2 group-hover:opacity-100 transition-opacity">
-                  {attrEnabled && <Button to={`/trackers/${tracker.id}`}>Detail</Button> }
+      {trackers.length > 0 && (
+        <>
+          {trackers.map((tracker) => (
+            <ListItem
+              key={tracker.id}
+              title={tracker.name}
+              subtitle={`Baseline: ${formatValue(tracker.baseline, tracker.format)}${tracker.format !== "idr" && tracker.unit ? ` ${tracker.unit}` : ""}`}
+              leftIcon={<BarChart2 size={24} className="text-gray-400" />}
+              onClick={() => openEditPopup(tracker)}
+              rightIcon={
+                attrEnabled ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      openEditPopup(tracker);
+                      window.location.href = `/trackers/${tracker.id}`;
                     }}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   >
-                    Edit
+                    Detail
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTracker(tracker);
-                    }}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+                ) : undefined
+              }
+            />
+          ))}
+        </>
+      )}
 
       <Modal
         isOpen={popupOpened}
@@ -175,6 +165,7 @@ export default function Trackers() {
           onSuccess={handleTrackerSuccess}
           onError={handleTrackerError}
           onCancel={handleTrackerCancel}
+          onDelete={handleDeleteTrackerById}
         />
       </Modal>
     </Page>

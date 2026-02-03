@@ -1,17 +1,21 @@
-import type { FeatureFlagConfig, Environment, FeatureFlags } from './types/featureFlags';
+import type {
+  FeatureFlagConfig,
+  Environment,
+  FeatureFlags,
+} from "./types/featureFlags";
 
 /**
  * Get current environment from import.meta.env or default to development
  */
 export const getCurrentEnvironment = (): Environment => {
-  const env = import.meta.env.MODE || 'development';
-  
+  const env = import.meta.env.MODE || "development";
+
   // Validate that it's a supported environment
-  if (['development', 'staging', 'production'].includes(env)) {
+  if (["development", "staging", "production"].includes(env)) {
     return env as Environment;
   }
-  
-  return 'development';
+
+  return "development";
 };
 
 /**
@@ -20,7 +24,7 @@ export const getCurrentEnvironment = (): Environment => {
  */
 export const featureFlagConfig: FeatureFlagConfig = {
   TRACKER_ATTR: [],
-  GOAL_RANGE: []
+  GOAL_RANGE: [],
 };
 
 /**
@@ -29,12 +33,14 @@ export const featureFlagConfig: FeatureFlagConfig = {
 export const getFeatureFlags = (): FeatureFlags => {
   const currentEnv = getCurrentEnvironment();
   const flags: FeatureFlags = {};
-  
+
   // Convert the feature-centric config to environment-centric flags
-  Object.entries(featureFlagConfig).forEach(([featureName, enabledEnvironments]) => {
-    flags[featureName] = enabledEnvironments.includes(currentEnv);
-  });
-  
+  Object.entries(featureFlagConfig).forEach(
+    ([featureName, enabledEnvironments]) => {
+      flags[featureName] = enabledEnvironments.includes(currentEnv);
+    },
+  );
+
   return flags;
 };
 

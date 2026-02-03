@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileText, MoreHorizontal } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 import { useAttributeOptions } from "../modules/option/use-options";
 import type { Tracker } from "../modules/tracker/trackerStore";
@@ -7,6 +7,7 @@ import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStor
 import type { AttributeOption } from "../modules/option/optionStore";
 import type { Log } from "src/lib/tracker/types";
 import { formatValue } from "src/lib/format";
+import { ListItem } from "./list-item";
 
 interface LogItemProps {
   log: Log;
@@ -100,69 +101,39 @@ export function LogItem({
   };
 
   return (
-    <div
-      className={`bg-white dark:bg-gray-800 border-b border-gray-200 p-4 transition-shadow ${
-        !compact && onEdit ? "cursor-pointer" : ""
-      }`}
+    <ListItem
+      title={getTrackerName(log.trackerId)}
+      subtitle={`${formatLogValue(log)} • ${formatTimestamp(log.timestamp)}`}
+      description={
+        !compact
+          ? `Created: ${new Date(log.createdAt).toLocaleDateString()}`
+          : undefined
+      }
+      leftIcon={<FileText size={compact ? 16 : 24} className="text-gray-400" />}
       onClick={handleItemClick}
+      compact={compact}
     >
-      <div className="flex items-start gap-3">
-        {/* Log Icon */}
-        <div className="flex-shrink-0 mt-1">
-          <FileText size={compact ? 16 : 24} className="text-gray-400" />
+      {/* Attributes */}
+      {log.attributes && Object.keys(log.attributes).length > 0 && (
+        <div
+          className={`text-gray-500 dark:text-gray-400 mt-2 ${
+            compact ? "text-xs" : "text-xs"
+          }`}
+        >
+          {Object.entries(log.attributes).map(([attributeId, value]) => (
+            <span key={attributeId} className="mr-3">
+              {getAttributeDisplayName(attributeId)}:{" "}
+              {formatAttributeValue(attributeId, value)}
+            </span>
+          ))}
         </div>
+      )}
 
-        {/* Log Content */}
-        <div className="flex-1 min-w-0">
-          <h3
-            className={`font-medium text-gray-900 dark:text-white truncate ${
-              !compact && onEdit
-                ? "hover:text-blue-600 dark:hover:text-blue-400"
-                : ""
-            }`}
-          >
-            {getTrackerName(log.trackerId)}
-          </h3>
-          <p
-            className={`text-gray-500 dark:text-gray-400 mt-1 ${
-              compact ? "text-xs" : "text-sm"
-            }`}
-          >
-            {formatLogValue(log)} •{" "}
-            {compact
-              ? new Date(log.timestamp).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : formatTimestamp(log.timestamp)}
-          </p>
-          {!compact && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Created: {new Date(log.createdAt).toLocaleDateString()}
-            </p>
-          )}
-
-          {/* Attributes */}
-          {log.attributes && Object.keys(log.attributes).length > 0 && (
-            <div
-              className={`text-gray-500 dark:text-gray-400 mt-2 ${
-                compact ? "text-xs" : "text-xs"
-              }`}
-            >
-              {Object.entries(log.attributes).map(([attributeId, value]) => (
-                <span key={attributeId} className="mr-3">
-                  {getAttributeDisplayName(attributeId)}:{" "}
-                  {formatAttributeValue(attributeId, value)}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {log.note && <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{log.note}</p>}
-        </div>
-      </div>
-    </div>
+      {log.note && (
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          {log.note}
+        </p>
+      )}
+    </ListItem>
   );
 }

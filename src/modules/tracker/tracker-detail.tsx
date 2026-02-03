@@ -170,7 +170,9 @@ export default function TrackerDetail() {
           </h1>
           <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
             <span>Unit: {tracker.format !== "idr" ? tracker.unit : "IDR"}</span>
-            <span>Baseline: {formatValue(tracker.baseline, tracker.format)}</span>
+            <span>
+              Baseline: {formatValue(tracker.baseline, tracker.format)}
+            </span>
           </div>
         </div>
 

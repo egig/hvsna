@@ -1,8 +1,8 @@
-export type Language = 'en' | 'id';
+export type Language = "en" | "id";
 
 export interface GeneralSettings {
   language: Language;
-  theme?: 'light' | 'dark' | 'system';
+  theme?: "light" | "dark" | "system";
   notifications?: boolean;
 }
 

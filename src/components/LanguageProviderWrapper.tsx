@@ -1,12 +1,14 @@
-import React, { useEffect, useState, type ReactNode } from 'react';
-import { LanguageProvider } from '../contexts/LanguageContext';
-import { useSettings } from '../hooks/useSettings';
+import React, { useEffect, useState, type ReactNode } from "react";
+import { LanguageProvider } from "../contexts/LanguageContext";
+import { useSettings } from "../hooks/useSettings";
 
 interface LanguageProviderWrapperProps {
   children: ReactNode;
 }
 
-export const LanguageProviderWrapper: React.FC<LanguageProviderWrapperProps> = ({ children }) => {
+export const LanguageProviderWrapper: React.FC<
+  LanguageProviderWrapperProps
+> = ({ children }) => {
   const { loading } = useSettings();
   const [isReady, setIsReady] = useState(false);
 
@@ -25,9 +27,5 @@ export const LanguageProviderWrapper: React.FC<LanguageProviderWrapperProps> = (
     );
   }
 
-  return (
-    <LanguageProvider>
-      {children}
-    </LanguageProvider>
-  );
+  return <LanguageProvider>{children}</LanguageProvider>;
 };

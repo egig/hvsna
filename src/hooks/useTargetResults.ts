@@ -46,12 +46,11 @@ export function useTargetResults() {
       calculation: GoalCalculation,
       trackerType: string,
     ): number => {
-
       function valueSum(sum: number, log: Log) {
-          if (log.negative) {
-            log.value = -1 * Math.abs(Number(log.value))
-          }
-          return sum + Number(log.value);
+        if (log.negative) {
+          log.value = -1 * Math.abs(Number(log.value));
+        }
+        return sum + Number(log.value);
       }
 
       if (logs.length === 0) return 0;
@@ -66,9 +65,7 @@ export function useTargetResults() {
         case "last":
           return Number(logs[logs.length - 1]?.value) || 0;
         case "avg":
-          return (
-            logs.reduce(valueSum, 0) / logs.length
-          );
+          return logs.reduce(valueSum, 0) / logs.length;
         case "min":
           return Math.min(...logs.map((log) => Number(log.value)));
         case "max":
@@ -189,9 +186,7 @@ export function useTargetResults() {
         );
 
         const filteredGoals = query.targetIds
-          ? goals.filter((goal: Goal) =>
-              query.targetIds!.includes(goal.id),
-            )
+          ? goals.filter((goal: Goal) => query.targetIds!.includes(goal.id))
           : goals;
 
         const results: TargetResultData[] = [];
@@ -209,11 +204,9 @@ export function useTargetResults() {
           );
 
           const tracker = await getTracker(goal.trackerId);
-          const currentValue = tracker.baseline + calculateValue(
-            logs,
-            goal.calculation,
-            tracker.type,
-          );
+          const currentValue =
+            tracker.baseline +
+            calculateValue(logs, goal.calculation, tracker.type);
           const result = calculateTargetResult(goal, currentValue);
           const percentage = calculatePercentage(goal, currentValue);
 

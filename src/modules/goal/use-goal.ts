@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useGoalStore } from "./goalStore";
-import type {
-  Goal,
-  GoalCreateInput,
-  GoalUpdateInput,
-} from "./goalStore";
+import type { Goal, GoalCreateInput, GoalUpdateInput } from "./goalStore";
 import type { UUID } from "crypto";
 import { usePouchDB } from "../..//pouchdb";
 

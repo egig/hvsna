@@ -1,10 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNote } from "./useNote";
-import type {
-  Note,
-  NoteCreateInput,
-  NoteUpdateInput,
-} from "../lib/types/note";
+import type { Note, NoteCreateInput, NoteUpdateInput } from "../lib/types/note";
 
 export function useDayNote(date: string) {
   const [fetched, setFetched] = useState(false);

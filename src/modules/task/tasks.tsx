@@ -61,8 +61,7 @@ function TaskItem({
     const targetName = goal?.name || "Unknown Goal";
     return (
       <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-        Goal: {targetName}{" "}
-        {task.targetValue && `(Value: ${task.targetValue})`}
+        Goal: {targetName} {task.targetValue && `(Value: ${task.targetValue})`}
       </p>
     );
   };

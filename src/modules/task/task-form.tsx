@@ -39,7 +39,7 @@ export default function TaskForm({
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
-  const {getTracker} = useTracker();
+  const { getTracker } = useTracker();
 
   useEffect(() => {
     if (error && onError) {
@@ -49,7 +49,6 @@ export default function TaskForm({
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
-
   }, [task]);
 
   useEffect(() => {
@@ -57,16 +56,14 @@ export default function TaskForm({
     setSelectedGoal(goal || null);
 
     if (goal) {
-      getTracker(goal?.trackerId as string).then(tr => {
-        setTracker(tr)
-      })
+      getTracker(goal?.trackerId as string).then((tr) => {
+        setTracker(tr);
+      });
     }
   }, [selectedTargetId, goals]);
 
   // Helper function to get attribute by ID
-  const getAttributeById = (
-    attributeId: string,
-  ): any | undefined => {
+  const getAttributeById = (attributeId: string): any | undefined => {
     return trackerAttributes.find((attr) => attr.id === attributeId);
   };
 
@@ -105,10 +102,10 @@ export default function TaskForm({
       }
 
       if (tracker?.negative) {
-        taskData.targetValue = -1 * (taskData.targetValue || 0)   
+        taskData.targetValue = -1 * (taskData.targetValue || 0);
       }
 
-      console.log(tracker)
+      console.log(tracker);
 
       const taskInput: any = {
         name: taskData.name.trim(),
@@ -196,16 +193,18 @@ export default function TaskForm({
 
           {selectedTargetId && (
             <>
-              {tracker?.type === "amount" && <FormInput
-                name="targetValue"
-                label="Target Value"
-                value={task?.targetValue?.toString() || ""}
-                placeholder="Enter target value"
-                type="number"
-                disabled={isSubmitting}
-                required={false}
-                className="text-base"
-              />}
+              {tracker?.type === "amount" && (
+                <FormInput
+                  name="targetValue"
+                  label="Target Value"
+                  value={task?.targetValue?.toString() || ""}
+                  placeholder="Enter target value"
+                  type="number"
+                  disabled={isSubmitting}
+                  required={false}
+                  className="text-base"
+                />
+              )}
 
               {selectedGoal?.scope?.map((attributeId, index) => {
                 const attribute = getAttributeById(attributeId);

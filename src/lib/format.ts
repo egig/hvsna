@@ -10,7 +10,7 @@ export function formatValue(value: number, format?: "plain" | "idr"): string {
       maximumFractionDigits: 0,
     }).format(value);
   }
-  
+
   // Default to plain number
   return value.toString();
 }
@@ -19,17 +19,17 @@ export function formatValue(value: number, format?: "plain" | "idr"): string {
  * Format value with unit according to tracker format
  */
 export function formatValueWithUnit(
-  value: number, 
-  unit: string, 
-  format?: "plain" | "idr"
+  value: number,
+  unit: string,
+  format?: "plain" | "idr",
 ): string {
   const formattedValue = formatValue(value, format);
-  
+
   if (format === "idr") {
     // IDR already includes the currency symbol, so just return the formatted value
     return formattedValue;
   }
-  
+
   // For plain format, append the unit if provided
   return unit ? `${formattedValue} ${unit}` : formattedValue;
 }

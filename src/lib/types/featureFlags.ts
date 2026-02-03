@@ -12,7 +12,7 @@ export interface FeatureFlags {
   [key: string]: boolean;
 }
 
-export type Environment = 'development' | 'staging' | 'production';
+export type Environment = "development" | "staging" | "production";
 
 export interface FeatureFlagConfig {
   [featureName: string]: Environment[];
