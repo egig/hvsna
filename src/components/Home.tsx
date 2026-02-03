@@ -18,6 +18,11 @@ import BlockTitle from "./block-title";
 import type { Tracker } from "../modules/tracker/trackerStore";
 import type { Task } from "../lib/types/task";
 import { CheckCircleIcon, CircleIcon, ClockIcon } from "lucide-react";
+import { HijriDate } from "src/lib/hijri";
+import {
+  GREGORIAN_MONTH_NAMES_EN,
+  HIJRI_MONTH_NAMES_EN,
+} from "src/lib/hijri-months";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -178,22 +183,17 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
                   : result.result === "on-track"
                     ? "→"
                     : "!"}{" "}
-                {result.result}
               </span>
             </div>
 
             <div className="space-y-2">
               <div className="flex justify-between gap-1">
-                <div className="w-[50%] text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="opacity-75">Current</span>
+                <div className="w-[50%] text-[0.6rem]">
+                  <div className="">
                     <span className="font-medium ">
                       {formatValue(result.currentValue, result.trackerFormat)}
                     </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm opacity-75">Target</span>
+                    /
                     <span className="font-medium">
                       {formatValue(result.targetValue, result.trackerFormat)}
                       {result.targetMax &&
@@ -251,6 +251,12 @@ export function Home() {
   const [error, setError] = useState<string | null>(null);
   const { attributeOptions } = useAttributeOptions();
   const { trackerAttributes } = useTrackerAttributes();
+
+  const _hijriDate = HijriDate.fromDate(new Date());
+  const [activeDate, setActiveDate] = useState(_hijriDate);
+  const gregorianDate = activeDate.toDate();
+  const pageTitle = `${activeDate.day} ${HIJRI_MONTH_NAMES_EN[activeDate.month - 1]} ${activeDate.year}`;
+  const subTitle = `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`;
 
   useEffect(() => {
     const loadHomeData = async () => {
@@ -319,7 +325,7 @@ export function Home() {
 
   return (
     <Page>
-      <Navbar title={"Home"} />
+      <Navbar title={pageTitle} subtitle={subTitle} />
 
       {/* Target Results Summary */}
       <Block>

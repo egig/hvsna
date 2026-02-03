@@ -101,7 +101,11 @@ export const useTasks = (): UseTasksReturn => {
         const recurringInstances: Task[] = [];
 
         for (const recurringTask of recurringTasks) {
-          const occurrences = getRecurringOccurrences(recurringTask, startOfDay, endOfDay);
+          const occurrences = getRecurringOccurrences(
+            recurringTask,
+            startOfDay,
+            endOfDay,
+          );
 
           for (const occurrence of occurrences) {
             // Check if this recurring task instance already exists
@@ -160,15 +164,17 @@ export const useTasks = (): UseTasksReturn => {
       id,
       {
         status,
-        hijriDate: currentTask.hijriDate || (() => {
-          const now = new Date();
-          const hijriNow = HijriDate.fromDate(now);
-          return {
-            year: hijriNow.year,
-            month: hijriNow.month,
-            day: hijriNow.day,
-          };
-        })(),
+        hijriDate:
+          currentTask.hijriDate ||
+          (() => {
+            const now = new Date();
+            const hijriNow = HijriDate.fromDate(now);
+            return {
+              year: hijriNow.year,
+              month: hijriNow.month,
+              day: hijriNow.day,
+            };
+          })(),
       },
       db,
     );
@@ -211,7 +217,7 @@ export const useTasks = (): UseTasksReturn => {
   const getRecurringOccurrences = (
     recurringTask: RecurringTask,
     startDate: Date,
-    endDate: Date
+    endDate: Date,
   ): Date[] => {
     const occurrences: Date[] = [];
     const baseHijriDate = HijriDate.fromDate(new Date(recurringTask.baseDate));
@@ -222,12 +228,19 @@ export const useTasks = (): UseTasksReturn => {
     switch (recurringTask.repeat) {
       case "daily":
         let currentDate = startHijriDate;
-        while (currentDate.year < endHijriDate.year || 
-               (currentDate.year === endHijriDate.year && currentDate.month < endHijriDate.month) ||
-               (currentDate.year === endHijriDate.year && currentDate.month === endHijriDate.month && currentDate.day <= endHijriDate.day)) {
-          
+        while (
+          currentDate.year < endHijriDate.year ||
+          (currentDate.year === endHijriDate.year &&
+            currentDate.month < endHijriDate.month) ||
+          (currentDate.year === endHijriDate.year &&
+            currentDate.month === endHijriDate.month &&
+            currentDate.day <= endHijriDate.day)
+        ) {
           // Check if this date matches or comes after the base date
-          if (currentDate.toDate().getTime() >= new Date(recurringTask.baseDate).getTime()) {
+          if (
+            currentDate.toDate().getTime() >=
+            new Date(recurringTask.baseDate).getTime()
+          ) {
             occurrences.push(currentDate.toDate());
           }
           currentDate = currentDate.next();
@@ -236,20 +249,32 @@ export const useTasks = (): UseTasksReturn => {
 
       case "monthly":
         // Generate monthly occurrences on the same Hijri day
-        let currentMonth = new HijriMonth(startHijriDate.year, startHijriDate.month);
-        
-        while (currentMonth.year < endHijriDate.year || 
-               (currentMonth.year === endHijriDate.year && currentMonth.month <= endHijriDate.month)) {
-          
+        let currentMonth = new HijriMonth(
+          startHijriDate.year,
+          startHijriDate.month,
+        );
+
+        while (
+          currentMonth.year < endHijriDate.year ||
+          (currentMonth.year === endHijriDate.year &&
+            currentMonth.month <= endHijriDate.month)
+        ) {
           // Ensure the day exists in this month (Hijri months have 29 or 30 days)
           const maxDay = currentMonth.getDaysInMonth();
           const targetDay = Math.min(baseHijriDate.day, maxDay);
-          const adjustedDate = new HijriDate(currentMonth.year, currentMonth.month, targetDay);
-          
-          if (adjustedDate.toDate().getTime() >= new Date(recurringTask.baseDate).getTime()) {
+          const adjustedDate = new HijriDate(
+            currentMonth.year,
+            currentMonth.month,
+            targetDay,
+          );
+
+          if (
+            adjustedDate.toDate().getTime() >=
+            new Date(recurringTask.baseDate).getTime()
+          ) {
             occurrences.push(adjustedDate.toDate());
           }
-          
+
           // Move to next month
           currentMonth = currentMonth.next();
         }
@@ -258,18 +283,25 @@ export const useTasks = (): UseTasksReturn => {
       case "yearly":
         // Generate yearly occurrences on the same Hijri month and day
         let currentYear = startHijriDate.year;
-        
+
         while (currentYear <= endHijriDate.year) {
           // Create HijriMonth to check if the day exists in this month
           const yearMonth = new HijriMonth(currentYear, baseHijriDate.month);
           const maxDay = yearMonth.getDaysInMonth();
           const targetDay = Math.min(baseHijriDate.day, maxDay);
-          const adjustedDate = new HijriDate(currentYear, baseHijriDate.month, targetDay);
-          
-          if (adjustedDate.toDate().getTime() >= new Date(recurringTask.baseDate).getTime()) {
+          const adjustedDate = new HijriDate(
+            currentYear,
+            baseHijriDate.month,
+            targetDay,
+          );
+
+          if (
+            adjustedDate.toDate().getTime() >=
+            new Date(recurringTask.baseDate).getTime()
+          ) {
             occurrences.push(adjustedDate.toDate());
           }
-          
+
           currentYear++;
         }
         break;
@@ -290,7 +322,11 @@ export const useTasks = (): UseTasksReturn => {
         const generatedTasks: Task[] = [];
 
         for (const recurringTask of recurringTasks) {
-          const occurrences = getRecurringOccurrences(recurringTask, startDate, endDate);
+          const occurrences = getRecurringOccurrences(
+            recurringTask,
+            startDate,
+            endDate,
+          );
 
           for (const occurrence of occurrences) {
             const occurrenceHijriDate = HijriDate.fromDate(occurrence);

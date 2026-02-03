@@ -9,6 +9,7 @@ interface NavbarProps {
   rightAction?: React.ReactNode;
   className?: string;
   modal?: boolean;
+  subtitle?: string;
 }
 
 const ROOT_PATHS = ["/"];
@@ -20,6 +21,7 @@ export function Navbar({
   rightAction,
   className = "",
   modal,
+  subtitle,
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
@@ -65,6 +67,8 @@ export function Navbar({
             {title}
           </h1>
         )}
+        {/* Subtitle */}
+        {subtitle && <div className="text-xs text-gray-500">{subtitle}</div>}
       </div>
 
       {/* Right: Action */}
