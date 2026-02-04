@@ -1,10 +1,10 @@
 import { useLocation } from "react-router";
 import { Button } from "./button";
-import { CheckSquare, Settings, Target, Calendar, ListFilter, List, SquareLibrary } from "lucide-react";
+import { CheckSquare, Settings, Target, Calendar, ListFilter, List, SquareLibrary, CalendarClock } from "lucide-react";
 
 const tabs = [
   { path: "/", label: "Today", icon: <Calendar /> },
-  { path: "/tasks", label: "Tasks", icon: <CheckSquare /> },
+  { path: "/upcoming", label: "Upcoming", icon: <CalendarClock /> },
   { path: "/browse", label: "Browse", icon: <SquareLibrary /> },
 ];
 

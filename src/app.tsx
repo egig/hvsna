@@ -6,6 +6,7 @@ import { PouchDBProvider } from "./pouchdb";
 import { NavigationProvider } from "./modules/navigation/context";
 import DroppableContext from "./components/droppable-context";
 import { LanguageProviderWrapper } from "./components/LanguageProviderWrapper";
+import PouchDB from "pouchdb";
 
 export interface AppConfig {
   basePath?: string;
@@ -23,11 +24,11 @@ export interface AppConfig {
   supabasePublishableKey?: string;
 }
 
-export default function Hvsna({ config }: { config: AppConfig }) {
+export default function Hvsna({ config, db }: { config: AppConfig; db: PouchDB.Database }) {
   return (
     <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
       <DroppableContext>
-        <PouchDBProvider dbName="hvsna-notes">
+        <PouchDBProvider dbInstance={db}>
           <LanguageProviderWrapper>
             <BrowserRouter basename={config.appBaseName || ""}>
               <NavigationProvider>

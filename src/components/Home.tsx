@@ -17,7 +17,8 @@ import Block from "./block";
 import BlockTitle from "./block-title";
 import type { Tracker } from "../modules/tracker/trackerStore";
 import type { Task } from "../lib/types/task";
-import { CheckCircleIcon, CircleIcon, ClockIcon } from "lucide-react";
+import TaskListItem from "./task-list-item";
+import { ClockIcon } from "lucide-react";
 import { HijriDate } from "src/lib/hijri";
 import {
   GREGORIAN_MONTH_NAMES_EN,
@@ -29,28 +30,6 @@ interface TodayTasksProps {
 }
 
 function TodayTasks({ tasks }: TodayTasksProps) {
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircleIcon size={16} className="text-green-500" />;
-      case "in_progress":
-        return <CircleIcon size={16} className="text-blue-500" />;
-      default:
-        return <CircleIcon size={16} className="text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "text-green-600 bg-green-50 border-green-200";
-      case "in_progress":
-        return "text-blue-600 bg-blue-50 border-blue-200";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
-    }
-  };
-
   if (tasks.length === 0) {
     return (
       <div className="text-center py-6">
@@ -65,27 +44,12 @@ function TodayTasks({ tasks }: TodayTasksProps) {
   return (
     <div className="space-y-2">
       {tasks.map((task) => (
-        <div
+        <TaskListItem
           key={task.id}
-          className={`flex items-center gap-3 p-3 rounded-lg border transition-all hover:shadow-sm ${getStatusColor(
-            task.status,
-          )}`}
-        >
-          <div className="flex-shrink-0">{getStatusIcon(task.status)}</div>
-          <div className="flex-1 min-w-0">
-            <div className="font-medium text-sm truncate">{task.name}</div>
-            {task.targetValue && (
-              <div className="text-xs opacity-75">
-                Target: {task.targetValue}
-              </div>
-            )}
-          </div>
-          <div className="flex-shrink-0">
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-white bg-opacity-60">
-              {task.status.replace("_", " ")}
-            </span>
-          </div>
-        </div>
+          task={task}
+          showGoalInfo={false}
+          className="border rounded-lg transition-all hover:shadow-sm"
+        />
       ))}
     </div>
   );
@@ -98,39 +62,6 @@ interface RecentLogsProps {
   trackerAttributes: TrackerAttribute[];
 }
 
-function RecentLogs({
-  logs,
-  trackers,
-  attributeOptions,
-  trackerAttributes,
-}: RecentLogsProps) {
-  if (logs.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <div className="text-gray-400 mb-2">No recent logs</div>
-        <div className="text-gray-500 text-sm">
-          Start tracking to see your recent activity
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {logs.map((log) => (
-        <LogItem
-          key={log.id}
-          log={log}
-          trackers={trackers}
-          compact={true}
-          showActions={false}
-          attributeOptions={attributeOptions}
-          trackerAttributes={trackerAttributes}
-        />
-      ))}
-    </div>
-  );
-}
 
 interface TargetResultsOverviewProps {
   results: TargetResultData[];
@@ -186,7 +117,7 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="xspace-y-2">
               <div className="flex justify-between gap-1">
                 <div className="w-[50%] text-[0.6rem]">
                   <div className="">
@@ -241,7 +172,7 @@ export function Home() {
   const { getTargetResults } = useTargetResults();
   const { getLogsFromDB } = useLogStore();
   const { getTrackers } = useTrackers();
-  const { getTasksByDate } = useTasks();
+  const { getTasksByHijriDate } = useTasks();
 
   const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
   const [recentLogs, setRecentLogs] = useState<Log[]>([]);
@@ -268,7 +199,10 @@ export function Home() {
 
         // Load target results (last 30 days)
         const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+        
+        // Format today's Hijri date as YYYYMMDD
+        const todayHijri = HijriDate.fromDate(new Date());
+        const formattedHijriDate = `${todayHijri.year.toString().padStart(4, '0')}${todayHijri.month.toString().padStart(2, '0')}${todayHijri.day.toString().padStart(2, '0')}`;
 
         const [results, logs, trackersData, tasks] = await Promise.all([
           getTargetResults(
@@ -280,7 +214,7 @@ export function Home() {
           ),
           getLogsFromDB({ limit: 10 }, db),
           getTrackers(),
-          getTasksByDate(today),
+          getTasksByHijriDate(formattedHijriDate),
         ]);
 
         setTargetResults(results);
@@ -328,10 +262,12 @@ export function Home() {
       <Navbar title={pageTitle} subtitle={subTitle} />
 
       {/* Target Results Summary */}
+      {targetResults.length > 0 &&
       <Block>
         <BlockTitle extra={"Summary"}>Where am I right now</BlockTitle>
         <TargetResultsOverview results={targetResults} />
       </Block>
+      }
 
       {/* Today's Tasks Section */}
       <Block>

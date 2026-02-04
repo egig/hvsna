@@ -145,6 +145,8 @@ export default function TaskForm({
         targetValue: taskData.targetValue,
         attributes: attr,
         hijriDate: taskData.hijriDate,
+        hour: taskData.hour,
+        minute: taskData.minute,
       };
 
       // Handle scheduledAt - convert date string to timestamp if provided
@@ -161,7 +163,6 @@ export default function TaskForm({
         taskInput.targetId = selectedTargetId;
       }
 
-      console.log("submitting", taskInput);
       let result: Task;
       if (taskId) {
         result = await updateTask(taskId, taskInput);

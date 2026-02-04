@@ -27,6 +27,7 @@ export interface UseTasksReturn {
   getTask: (id: string) => Promise<Task | null>;
   getTasks: (query?: TaskQuery) => Promise<Task[]>;
   getTasksByDate: (date: string) => Promise<Task[]>;
+  getTasksByHijriDate: (hijriDate: string) => Promise<Task[]>;
   loadMoreTasks: () => Promise<void>;
   refreshTasks: () => Promise<void>;
   updateStatus: (id: string, status: TaskStatus) => Promise<Task>;
@@ -142,6 +143,13 @@ export const useTasks = (): UseTasksReturn => {
       }
     },
     [store, db, getRecurringTasksFromHook],
+  );
+
+  const getTasksByHijriDate = useCallback(
+    async (hijriDate: string): Promise<Task[]> => {
+      return store.getTasksByHijriDate(hijriDate, db);
+    },
+    [store, db],
   );
 
   const refreshTasks = useCallback(async () => {
@@ -384,6 +392,7 @@ export const useTasks = (): UseTasksReturn => {
     getTask,
     getTasks,
     getTasksByDate,
+    getTasksByHijriDate,
     loadMoreTasks,
     refreshTasks,
     updateStatus,

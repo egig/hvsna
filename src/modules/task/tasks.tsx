@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTasks } from "./use-tasks";
-import { useGoal } from "../goal/use-goal";
 import {
-  CheckCircleIcon,
-  CircleIcon,
   PlusIcon,
   Plus,
   Check,
@@ -14,62 +11,8 @@ import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
 import { Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
-import { ListItem } from "src/components/list-item";
+import TaskListItem from "src/components/task-list-item";
 
-interface TaskListItemProps {
-  task: Task;
-  formatScheduledDate: (dateNumber?: number) => string;
-  getStatusIcon: (status: TaskStatus) => React.ReactNode;
-  getStatusColor: (status: TaskStatus) => string;
-  onStatusChange: (task: Task, newStatus: TaskStatus) => void;
-  onEdit: (task: Task) => void;
-  getTargetInfo: (goal: any) => string | null;
-}
-
-function TaskListItem({
-  task,
-  formatScheduledDate,
-  getStatusIcon,
-  getStatusColor,
-  onStatusChange,
-  onEdit,
-  getTargetInfo,
-}: TaskListItemProps) {
-  const { goal } = useGoal(task.targetId || undefined);
-
-  return (
-    <ListItem
-      key={task.id}
-      title={task.name}
-      subtitle={`Scheduled: ${formatScheduledDate(task.scheduledAt)}`}
-      description={getTargetInfo(goal) || undefined}
-      leftIcon={
-        <button
-          onClick={() => {
-            const nextStatus =
-              task.status === "pending"
-                ? "in_progress"
-                : task.status === "in_progress"
-                  ? "completed"
-                  : "pending";
-            onStatusChange(task, nextStatus);
-          }}
-          className="flex-shrink-0 mt-1 transition-transform hover:scale-110"
-        >
-          {getStatusIcon(task.status)}
-        </button>
-      }
-      onClick={() => onEdit(task)}
-      rightIcon={
-        <span
-          className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(task.status)} bg-opacity-10`}
-        >
-          {task.status.replace("_", " ")}
-        </span>
-      }
-    />
-  );
-}
 
 export default function Tasks() {
   const {
@@ -144,36 +87,6 @@ export default function Tasks() {
     }
   };
 
-  const formatScheduledDate = (dateNumber?: number) => {
-    if (!dateNumber) return "No date set";
-    return new Date(dateNumber).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const getStatusIcon = (status: TaskStatus) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircleIcon size={24} className="text-green-500" />;
-      case "in_progress":
-        return <CircleIcon size={24} className="text-blue-500" />;
-      default:
-        return <CircleIcon size={24} className="text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case "completed":
-        return "text-green-600";
-      case "in_progress":
-        return "text-blue-600";
-      default:
-        return "text-gray-600";
-    }
-  };
 
   const handleInfiniteScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (!allowInfinite.current) return;
@@ -256,26 +169,14 @@ export default function Tasks() {
 
         {!loading && !error && tasks.length > 0 && (
           <>
-            {tasks.map((task) => {
-              const getTargetInfo = (goal: any) => {
-                if (!task.targetId) return null;
-                const targetName = goal?.name || "Unknown Goal";
-                return `Goal: ${targetName}${task.targetValue ? ` (Value: ${task.targetValue})` : ""}`;
-              };
-
-              return (
-                <TaskListItem
-                  key={task.id}
-                  task={task}
-                  formatScheduledDate={formatScheduledDate}
-                  getStatusIcon={getStatusIcon}
-                  getStatusColor={getStatusColor}
-                  onStatusChange={handleStatusChange}
-                  onEdit={openEditPopup}
-                  getTargetInfo={getTargetInfo}
-                />
-              );
-            })}
+            {tasks.map((task) => (
+              <TaskListItem
+                key={task.id}
+                task={task}
+                onStatusChange={handleStatusChange}
+                onEdit={openEditPopup}
+              />
+            ))}
           </>
         )}
 

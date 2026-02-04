@@ -22,6 +22,7 @@ import { Home } from "./components/Home";
 import DataManagement from "./pages/data-management";
 import TrackerDetail from "./modules/tracker/tracker-detail";
 import Browse from "./pages/browse";
+import Upcoming from "./pages/upcoming";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -39,6 +40,7 @@ export const AppRoutes = () => {
           <Route path="settings" element={<Settings />} />
           <Route path="general-settings" element={<GeneralSettings />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="upcoming" element={<Upcoming />} />
           <Route path="about" element={<About />} />
           <Route path="wipe-local" element={<DataManagement />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />

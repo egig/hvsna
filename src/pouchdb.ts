@@ -4,7 +4,7 @@ import React, {
   type ReactNode,
   type Context,
 } from "react";
-import PouchDB from "pouchdb";
+import { db } from "./lib/pouchdb-singleton";
 
 export interface PouchDBContextType {
   db: PouchDB.Database;
@@ -22,10 +22,7 @@ export interface PouchDBProviderProps {
 
 export const PouchDBProvider: React.FC<PouchDBProviderProps> = ({
   children,
-  dbName = "hvsna-notes",
-  dbInstance,
 }) => {
-  const db = dbInstance || new PouchDB(dbName);
 
   return React.createElement(
     PouchDBContext.Provider,

@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 import {
   ChartArea,
+  CheckCheck,
   GitBranchIcon,
   List,
   Logs,
@@ -58,6 +59,13 @@ export default function Browse() {
           subtitle="Manage your logs"
           icon={Logs}
           to="/logs"
+        />
+        
+        <MenuItem
+          title="Tasks"
+          subtitle="Manage your tasks"
+          icon={CheckCheck}
+          to="/tasks"
         />
       </div>
     </Page>

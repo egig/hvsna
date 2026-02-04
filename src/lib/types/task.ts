@@ -64,4 +64,7 @@ export interface TaskChange {
 export type TaskQuery = {
   id?: string;
   status?: TaskStatus;
+  scheduledAt?: number;
+  targetId?: string;
+  hijriDate?: string;
 };

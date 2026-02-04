@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import PouchDB from "pouchdb";
+import "pouchdb-find";
 import type {
   Task,
   TaskCreateInput,
@@ -11,6 +13,7 @@ import type {
 interface PouchDBTaskDocument {
   _id: string;
   _rev?: string;
+  type: "task",
   userId?: string;
   name: string;
   status: TaskStatus;
@@ -62,6 +65,7 @@ interface TaskState {
   // Async actions for multiple tasks
   getTasks: (query?: TaskQuery, db?: any) => Promise<Task[]>;
   getTasksByDate: (date: string, db?: any) => Promise<Task[]>;
+  getTasksByHijriDate: (hijriDate: string, db?: any) => Promise<Task[]>;
   // refreshTasks: (db?: any) => Promise<void>;
   loadMoreTasks: (db?: any) => Promise<void>;
 }
@@ -140,6 +144,7 @@ export const useTaskStore = create<TaskState>()(
 
           const doc: PouchDBTaskDocument = {
             _id: taskId,
+            type: "task",
             userId: newTask.userId,
             name: newTask.name,
             status: newTask.status,
@@ -323,43 +328,50 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loading: true, error: null });
 
-          const result = await db.allDocs({
-            include_docs: true,
-            attachments: true,
-            startkey: "task_",
-            endkey: "task_\uffff",
-          });
+          // Build mango query
+          const mangoQuery: any = {
+            selector: {
+              type: "task"
+            },
+            sort: [{ _id: "asc" }]
+          };
 
-          let tasksList = result.rows
-            .filter((row: any) => row.doc && row.doc._id.startsWith("task_"))
-            .map((row: any) => {
-              const doc: PouchDBTaskDocument = row.doc;
-              return {
-                id: doc._id,
-                name: doc.name,
-                status: doc.status,
-                scheduledAt: doc.scheduledAt,
-                targetId: doc.targetId,
-                targetValue: doc.targetValue,
-                createdAt: doc.createdAt,
-                updatedAt: doc.updatedAt,
-                hijriDate: doc.hijriDate,
-                hour: doc.hour,
-                minute: doc.minute,
-              };
-            });
-
-          // Filter by id if provided
+          // Add filters to selector
           if (query?.id) {
-            tasksList = tasksList.filter((task: Task) => task.id === query.id);
+            mangoQuery.selector._id = query.id;
           }
 
-          // Filter by status if provided
           if (query?.status) {
-            tasksList = tasksList.filter(
-              (task: Task) => task.status === query.status,
-            );
+            mangoQuery.selector.status = query.status;
           }
+
+          if (query?.scheduledAt) {
+            mangoQuery.selector.scheduledAt = query.scheduledAt;
+          }
+
+          if (query?.targetId) {
+            mangoQuery.selector.targetId = query.targetId;
+          }
+
+          if (query?.hijriDate) {
+            mangoQuery.selector.hijriDate = query.hijriDate;
+          }
+
+          const result = await db.find(mangoQuery);
+
+          const tasksList = result.docs.map((doc: PouchDBTaskDocument) => ({
+            id: doc._id,
+            name: doc.name,
+            status: doc.status,
+            scheduledAt: doc.scheduledAt,
+            targetId: doc.targetId,
+            targetValue: doc.targetValue,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            hijriDate: doc.hijriDate,
+            hour: doc.hour,
+            minute: doc.minute,
+          }));
 
           set({ tasks: tasksList });
           return tasksList;
@@ -381,50 +393,102 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loading: true, error: null });
 
-          const result = await db.allDocs({
-            include_docs: true,
-            attachments: true,
-            startkey: "task_",
-            endkey: "task_\uffff",
-          });
+          // Convert date to timestamp range for the entire day
+          const startDate = new Date(date);
+          startDate.setHours(0, 0, 0, 0);
+          const endDate = new Date(date);
+          endDate.setHours(23, 59, 59, 999);
 
-          const tasksList = result.rows
-            .filter((row: any) => row.doc && row.doc._id.startsWith("task_"))
-            .map((row: any) => {
-              const doc: PouchDBTaskDocument = row.doc;
-              return {
-                id: doc._id,
-                userId: doc.userId,
-                name: doc.name,
-                status: doc.status,
-                scheduledAt: doc.scheduledAt,
-                targetId: doc.targetId,
-                targetValue: doc.targetValue,
-                createdAt: doc.createdAt,
-                updatedAt: doc.updatedAt,
-                hijriDate: doc.hijriDate,
-                hour: doc.hour,
-                minute: doc.minute,
-              };
-            });
+          const mangoQuery = {
+            selector: {
+              _id: { $regex: "^task_" },
+              scheduledAt: {
+                $gte: startDate.getTime(),
+                $lte: endDate.getTime()
+              }
+            },
+            sort: [{ scheduledAt: "asc" }]
+          };
 
-          // Filter by scheduled date
-          const filteredTasks = tasksList.filter((task: Task) => {
-            if (!task.scheduledAt) return false;
+          const result = await db.find(mangoQuery);
 
-            // Parse the scheduled date and compare with the provided date
-            const taskDate = new Date(task.scheduledAt)
-              .toISOString()
-              .split("T")[0];
-            const providedDate = new Date(date).toISOString().split("T")[0];
+          const tasksList = result.docs.map((doc: PouchDBTaskDocument) => ({
+            id: doc._id,
+            userId: doc.userId,
+            name: doc.name,
+            status: doc.status,
+            scheduledAt: doc.scheduledAt,
+            targetId: doc.targetId,
+            targetValue: doc.targetValue,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            hijriDate: doc.hijriDate,
+            hour: doc.hour,
+            minute: doc.minute,
+          }));
 
-            return taskDate === providedDate;
-          });
-
-          return filteredTasks;
+          return tasksList;
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to get tasks by date";
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      getTasksByHijriDate: async (hijriDate: string, db?: any): Promise<Task[]> => {
+        if (!db) {
+          throw new Error("Database instance is required");
+        }
+
+        try {
+          set({ loading: true, error: null });
+
+          await db.createIndex({
+            index: {
+              fields: ['type', 'hijriDate', 'hour', 'minute'],
+              ddoc: "tasks"
+            }
+          })
+          
+          const mangoQuery = {
+            selector: {
+              type: "task",
+              hijriDate: hijriDate,
+              hour: {
+                $gt: null
+              },
+              minute: {
+                $gt: null
+              }
+            },
+            sort: [{ hour: "asc" }, { minute: "asc" }],
+          };
+
+          const result = await db.find(mangoQuery);
+
+          const tasksList = result.docs.map((doc: PouchDBTaskDocument) => ({
+            id: doc._id,
+            userId: doc.userId,
+            name: doc.name,
+            status: doc.status,
+            scheduledAt: doc.scheduledAt,
+            targetId: doc.targetId,
+            targetValue: doc.targetValue,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            hijriDate: doc.hijriDate,
+            hour: doc.hour,
+            minute: doc.minute,
+          }));
+
+          return tasksList;
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to get tasks by Hijri date";
+            console.log(err)
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -446,39 +510,36 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loadingMore: true });
 
-          const result = await db.allDocs({
-            include_docs: true,
-            attachments: true,
-            skip: offset,
+          const mangoQuery = {
+            selector: {
+              _id: { $regex: "^task_" }
+            },
+            sort: [{ _id: "asc" }],
             limit: PAGE_SIZE,
-            startkey: "task_",
-            endkey: "task_\uffff",
-          });
+            skip: offset
+          };
 
-          const newTasks = result.rows
-            .filter((row: any) => row.doc && row.doc._id.startsWith("task_"))
-            .map((row: any) => {
-              const doc: PouchDBTaskDocument = row.doc;
-              return {
-                id: doc._id,
-                userId: doc.userId,
-                name: doc.name,
-                status: doc.status,
-                scheduledAt: doc.scheduledAt,
-                targetId: doc.targetId,
-                targetValue: doc.targetValue,
-                createdAt: doc.createdAt,
-                updatedAt: doc.updatedAt,
-                hijriDate: doc.hijriDate,
-                hour: doc.hour,
-                minute: doc.minute,
-              };
-            });
+          const result = await db.find(mangoQuery);
+
+          const newTasks = result.docs.map((doc: PouchDBTaskDocument) => ({
+            id: doc._id,
+            userId: doc.userId,
+            name: doc.name,
+            status: doc.status,
+            scheduledAt: doc.scheduledAt,
+            targetId: doc.targetId,
+            targetValue: doc.targetValue,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            hijriDate: doc.hijriDate,
+            hour: doc.hour,
+            minute: doc.minute,
+          }));
 
           const { tasks } = get();
           set({
             tasks: [...tasks, ...newTasks],
-            hasMore: result.rows.length >= PAGE_SIZE,
+            hasMore: result.docs.length >= PAGE_SIZE,
             offset: offset + PAGE_SIZE,
           });
         } catch (err) {
