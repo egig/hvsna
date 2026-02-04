@@ -294,8 +294,9 @@ export default function GoalForm({
               Calculation
             </label>
             <select
+              key={Math.random()}
               name="calculation"
-              value={goal?.calculation || "sum"}
+              defaultValue={goal?.calculation || "sum"}
               disabled={isSubmitting}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"
             >
@@ -314,6 +315,7 @@ export default function GoalForm({
               Type
             </label>
             <select
+              key={Math.random()}
               name="type"
               defaultValue={goal?.type || "static"}
               disabled={isSubmitting}
@@ -330,6 +332,7 @@ export default function GoalForm({
             Direction
           </label>
           <select
+            key={Math.random()}
             name="direction"
             defaultValue={goal?.direction || "increase"}
             disabled={isSubmitting}
@@ -346,8 +349,9 @@ export default function GoalForm({
             Period
           </label>
           <select
+            key={Math.random()}
             name="period"
-            value={selectedPeriod}
+            defaultValue={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value as GoalPeriod)}
             disabled={isSubmitting}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-opacity-50"

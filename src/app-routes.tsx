@@ -21,6 +21,7 @@ import { Goals } from "./modules/goal/goals";
 import { Home } from "./components/Home";
 import DataManagement from "./pages/data-management";
 import TrackerDetail from "./modules/tracker/tracker-detail";
+import Browse from "./pages/browse";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -43,6 +44,7 @@ export const AppRoutes = () => {
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
           <Route path="goals" element={<Goals />} />
+          <Route path="browse" element={<Browse />} />
         </Route>
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />

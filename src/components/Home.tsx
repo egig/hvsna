@@ -329,7 +329,7 @@ export function Home() {
 
       {/* Target Results Summary */}
       <Block>
-        <BlockTitle extra={"Latest"}>Summary</BlockTitle>
+        <BlockTitle extra={"Summary"}>Where am I right now</BlockTitle>
         <TargetResultsOverview results={targetResults} />
       </Block>
 

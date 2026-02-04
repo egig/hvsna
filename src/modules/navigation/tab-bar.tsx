@@ -1,12 +1,11 @@
 import { useLocation } from "react-router";
 import { Button } from "./button";
-import { CheckSquare, Home, Settings, Book, Target } from "lucide-react";
+import { CheckSquare, Settings, Target, Calendar, ListFilter, List, SquareLibrary } from "lucide-react";
 
 const tabs = [
-  { path: "/", label: "Home", icon: <Home /> },
-  { path: "/goals", label: "Goals", icon: <Target /> },
+  { path: "/", label: "Today", icon: <Calendar /> },
   { path: "/tasks", label: "Tasks", icon: <CheckSquare /> },
-  { path: "/settings", label: "Settings", icon: <Settings /> },
+  { path: "/browse", label: "Browse", icon: <SquareLibrary /> },
 ];
 
 export function TabBar() {

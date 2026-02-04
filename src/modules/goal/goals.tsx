@@ -123,7 +123,6 @@ export function Goals() {
   return (
     <Page>
       <Navbar
-        showBackButton={false}
         title="Goals"
         rightAction={
           <button
