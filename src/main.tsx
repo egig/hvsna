@@ -3,7 +3,10 @@ import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import type { AppConfig } from "src/app";
 import Hvsna from "src/app";
-import { createRequiredIndexes, getPouchDBInstance } from "src/lib/pouchdb-singleton";
+import {
+  createRequiredIndexes,
+  getPouchDBInstance,
+} from "src/lib/pouchdb-singleton";
 
 const config: AppConfig = {
   basePath: import.meta.env.VITE_API_BASE,

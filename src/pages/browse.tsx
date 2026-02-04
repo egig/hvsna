@@ -17,11 +17,15 @@ export default function Browse() {
   const attrEnabled = useFeatureFlag("TRACKER_ATTR");
   return (
     <Page>
-      <Navbar title="Browse" showBackButton={false} rightAction={
-        <Button to="/settings" navType="modal">
-          <Settings />
-        </Button>
-      } />
+      <Navbar
+        title="Browse"
+        showBackButton={false}
+        rightAction={
+          <Button to="/settings" navType="modal">
+            <Settings />
+          </Button>
+        }
+      />
       <div className="bg-white">
         <MenuItem
           title="Goals"
@@ -60,7 +64,7 @@ export default function Browse() {
           icon={Logs}
           to="/logs"
         />
-        
+
         <MenuItem
           title="Tasks"
           subtitle="Manage your tasks"

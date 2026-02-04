@@ -24,7 +24,13 @@ export interface AppConfig {
   supabasePublishableKey?: string;
 }
 
-export default function Hvsna({ config, db }: { config: AppConfig; db: PouchDB.Database }) {
+export default function Hvsna({
+  config,
+  db,
+}: {
+  config: AppConfig;
+  db: PouchDB.Database;
+}) {
   return (
     <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
       <DroppableContext>

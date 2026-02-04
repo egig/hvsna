@@ -1,6 +1,15 @@
 import { useLocation } from "react-router";
 import { Button } from "./button";
-import { CheckSquare, Settings, Target, Calendar, ListFilter, List, SquareLibrary, CalendarClock } from "lucide-react";
+import {
+  CheckSquare,
+  Settings,
+  Target,
+  Calendar,
+  ListFilter,
+  List,
+  SquareLibrary,
+  CalendarClock,
+} from "lucide-react";
 
 const tabs = [
   { path: "/", label: "Today", icon: <Calendar /> },

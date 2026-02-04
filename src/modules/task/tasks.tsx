@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTasks } from "./use-tasks";
-import {
-  PlusIcon,
-  Plus,
-  Check,
-} from "lucide-react";
+import { PlusIcon, Plus, Check } from "lucide-react";
 import type { Task, TaskStatus } from "src/lib/types/task";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
@@ -12,7 +8,6 @@ import TaskForm from "./task-form";
 import { Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
-
 
 export default function Tasks() {
   const {
@@ -86,7 +81,6 @@ export default function Tasks() {
       alert("Failed to update task status. Please try again.");
     }
   };
-
 
   const handleInfiniteScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (!allowInfinite.current) return;

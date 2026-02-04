@@ -62,7 +62,6 @@ interface RecentLogsProps {
   trackerAttributes: TrackerAttribute[];
 }
 
-
 interface TargetResultsOverviewProps {
   results: TargetResultData[];
 }
@@ -199,10 +198,10 @@ export function Home() {
 
         // Load target results (last 30 days)
         const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        
+
         // Format today's Hijri date as YYYYMMDD
         const todayHijri = HijriDate.fromDate(new Date());
-        const formattedHijriDate = `${todayHijri.year.toString().padStart(4, '0')}${todayHijri.month.toString().padStart(2, '0')}${todayHijri.day.toString().padStart(2, '0')}`;
+        const formattedHijriDate = `${todayHijri.year.toString().padStart(4, "0")}${todayHijri.month.toString().padStart(2, "0")}${todayHijri.day.toString().padStart(2, "0")}`;
 
         const [results, logs, trackersData, tasks] = await Promise.all([
           getTargetResults(
@@ -262,12 +261,12 @@ export function Home() {
       <Navbar title={pageTitle} subtitle={subTitle} />
 
       {/* Target Results Summary */}
-      {targetResults.length > 0 &&
-      <Block>
-        <BlockTitle extra={"Summary"}>Where am I right now</BlockTitle>
-        <TargetResultsOverview results={targetResults} />
-      </Block>
-      }
+      {targetResults.length > 0 && (
+        <Block>
+          <BlockTitle extra={"Summary"}>Where am I right now</BlockTitle>
+          <TargetResultsOverview results={targetResults} />
+        </Block>
+      )}
 
       {/* Today's Tasks Section */}
       <Block>

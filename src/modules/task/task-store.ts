@@ -13,7 +13,7 @@ import type {
 interface PouchDBTaskDocument {
   _id: string;
   _rev?: string;
-  type: "task",
+  type: "task";
   userId?: string;
   name: string;
   status: TaskStatus;
@@ -331,9 +331,9 @@ export const useTaskStore = create<TaskState>()(
           // Build mango query
           const mangoQuery: any = {
             selector: {
-              type: "task"
+              type: "task",
             },
-            sort: [{ _id: "asc" }]
+            sort: [{ _id: "asc" }],
           };
 
           // Add filters to selector
@@ -404,10 +404,10 @@ export const useTaskStore = create<TaskState>()(
               _id: { $regex: "^task_" },
               scheduledAt: {
                 $gte: startDate.getTime(),
-                $lte: endDate.getTime()
-              }
+                $lte: endDate.getTime(),
+              },
             },
-            sort: [{ scheduledAt: "asc" }]
+            sort: [{ scheduledAt: "asc" }],
           };
 
           const result = await db.find(mangoQuery);
@@ -438,7 +438,10 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      getTasksByHijriDate: async (hijriDate: string, db?: any): Promise<Task[]> => {
+      getTasksByHijriDate: async (
+        hijriDate: string,
+        db?: any,
+      ): Promise<Task[]> => {
         if (!db) {
           throw new Error("Database instance is required");
         }
@@ -448,21 +451,21 @@ export const useTaskStore = create<TaskState>()(
 
           await db.createIndex({
             index: {
-              fields: ['type', 'hijriDate', 'hour', 'minute'],
-              ddoc: "tasks"
-            }
-          })
-          
+              fields: ["type", "hijriDate", "hour", "minute"],
+              ddoc: "tasks",
+            },
+          });
+
           const mangoQuery = {
             selector: {
               type: "task",
               hijriDate: hijriDate,
               hour: {
-                $gt: null
+                $gt: null,
               },
               minute: {
-                $gt: null
-              }
+                $gt: null,
+              },
             },
             sort: [{ hour: "asc" }, { minute: "asc" }],
           };
@@ -487,8 +490,10 @@ export const useTaskStore = create<TaskState>()(
           return tasksList;
         } catch (err) {
           const errorMessage =
-            err instanceof Error ? err.message : "Failed to get tasks by Hijri date";
-            console.log(err)
+            err instanceof Error
+              ? err.message
+              : "Failed to get tasks by Hijri date";
+          console.log(err);
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -512,11 +517,11 @@ export const useTaskStore = create<TaskState>()(
 
           const mangoQuery = {
             selector: {
-              _id: { $regex: "^task_" }
+              _id: { $regex: "^task_" },
             },
             sort: [{ _id: "asc" }],
             limit: PAGE_SIZE,
-            skip: offset
+            skip: offset,
           };
 
           const result = await db.find(mangoQuery);

@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTasks } from "../modules/task/use-tasks";
-import {
-  CalendarIcon,
-} from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import type { Task } from "../lib/types/task";
 import { Navbar } from "../modules/navigation/navbar";
 import { Page } from "../modules/navigation";
 import { LoadingSpinner } from "../components/loader";
 import TaskListItem from "../components/task-list-item";
 import { HijriDate } from "../lib/hijri";
-
 
 export default function Upcoming() {
   const { tasks, loading, error, getTasks } = useTasks();
@@ -19,18 +16,18 @@ export default function Upcoming() {
     const filterUpcomingTasks = async () => {
       const allTasks = await getTasks();
       const today = HijriDate.fromDate(new Date());
-      const todayString = `${today.year.toString().padStart(4, '0')}${today.month.toString().padStart(2, '0')}${today.day.toString().padStart(2, '0')}`;
+      const todayString = `${today.year.toString().padStart(4, "0")}${today.month.toString().padStart(2, "0")}${today.day.toString().padStart(2, "0")}`;
 
       const filtered = allTasks.filter((task) => {
         // Include tasks that are:
         // 1. Not completed
         // 2. Either scheduled for today or future, or have no date (unscheduled)
         if (task.status === "completed") return false;
-        
+
         if (task.hijriDate) {
           return task.hijriDate >= todayString;
         }
-        
+
         // Include unscheduled pending/in_progress tasks
         return true;
       });
@@ -51,33 +48,92 @@ export default function Upcoming() {
 
   const formatScheduledDate = (hijriDate?: string) => {
     if (!hijriDate) return "No date set";
-    
+
     try {
       const year = parseInt(hijriDate.substring(0, 4));
       const month = parseInt(hijriDate.substring(4, 6));
       const day = parseInt(hijriDate.substring(6, 8));
       const date = new HijriDate(year, month, day);
-      return date.format("YYYY M DD")
+      return date.format("YYYY M DD");
     } catch {
       return hijriDate;
     }
   };
 
-  const groupTasksByDate = (tasks: Task[]) => {
-    const groups: { [key: string]: Task[] } = {};
-    
+  const groupTasksByTimePeriod = (tasks: Task[]) => {
+    const groups: { [key: string]: Task[] } = {
+      today: [],
+      tomorrow: [],
+      thisWeek: [],
+      thisMonth: [],
+      later: [],
+      unscheduled: [],
+    };
+
+    const today = HijriDate.fromDate(new Date());
+    const tomorrow = today.next();
+
     tasks.forEach((task) => {
-      const dateKey = task.hijriDate || "unscheduled";
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
+      if (!task.hijriDate) {
+        groups.unscheduled.push(task);
+        return;
       }
-      groups[dateKey].push(task);
+
+      try {
+        const year = parseInt(task.hijriDate.substring(0, 4));
+        const month = parseInt(task.hijriDate.substring(4, 6));
+        const day = parseInt(task.hijriDate.substring(6, 8));
+        const taskDate = new HijriDate(year, month, day);
+
+        // Calculate days difference
+        const todayGregorian = today.toDate();
+        const taskGregorian = taskDate.toDate();
+        const daysDiff = Math.floor(
+          (taskGregorian.getTime() - todayGregorian.getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
+
+        // Today
+        if (
+          taskDate.year === today.year &&
+          taskDate.month === today.month &&
+          taskDate.day === today.day
+        ) {
+          groups.today.push(task);
+        }
+        // Tomorrow
+        else if (
+          taskDate.year === tomorrow.year &&
+          taskDate.month === tomorrow.month &&
+          taskDate.day === tomorrow.day
+        ) {
+          groups.tomorrow.push(task);
+        }
+        // This week (next 6 days after today)
+        else if (daysDiff > 1 && daysDiff <= 6) {
+          groups.thisWeek.push(task);
+        }
+        // This month
+        else if (
+          taskDate.year === today.year &&
+          taskDate.month === today.month
+        ) {
+          groups.thisMonth.push(task);
+        }
+        // Later
+        else {
+          groups.later.push(task);
+        }
+      } catch (error) {
+        // If date parsing fails, put in unscheduled
+        groups.unscheduled.push(task);
+      }
     });
 
     return groups;
   };
 
-  const taskGroups = groupTasksByDate(upcomingTasks);
+  const taskGroups = groupTasksByTimePeriod(upcomingTasks);
 
   return (
     <Page>
@@ -114,22 +170,24 @@ export default function Upcoming() {
 
         {!loading && !error && upcomingTasks.length > 0 && (
           <div className="space-y-6 p-4">
-            {Object.entries(taskGroups)
-              .sort(([a], [b]) => {
-                if (a === "unscheduled") return 1;
-                if (b === "unscheduled") return -1;
-                return a.localeCompare(b);
-              })
-              .map(([dateKey, dateTasks]) => (
-                <div key={dateKey}>
+            {[
+              { key: "today", label: "Today" },
+              { key: "tomorrow", label: "Tomorrow" },
+              { key: "thisWeek", label: "This Week" },
+              { key: "thisMonth", label: "This Month" },
+              { key: "later", label: "Later" },
+              { key: "unscheduled", label: "Unscheduled" },
+            ]
+              .filter(
+                ({ key }) => taskGroups[key] && taskGroups[key].length > 0,
+              )
+              .map(({ key, label }) => (
+                <div key={key}>
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
-                    {dateKey === "unscheduled" 
-                      ? "Unscheduled" 
-                      : formatScheduledDate(dateKey)
-                    }
+                    {label}
                   </h3>
                   <div className="space-y-2">
-                    {dateTasks.map((task) => (
+                    {taskGroups[key].map((task: Task) => (
                       <TaskListItem
                         key={task.id}
                         task={task}

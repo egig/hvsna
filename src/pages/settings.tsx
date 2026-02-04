@@ -1,9 +1,5 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-import {
-  LogIn,
-  Trash,
-  Cog,
-} from "lucide-react";
+import { LogIn, Trash, Cog } from "lucide-react";
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";
 import { Navbar } from "../modules/navigation";

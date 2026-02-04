@@ -1,8 +1,8 @@
 import React from "react";
 import { CheckCircleIcon, CircleIcon } from "lucide-react";
 import type { Task, TaskStatus } from "src/lib/types/task";
-import { ListItem } from "src/components/list-item";
 import { useGoal } from "../modules/goal/use-goal";
+import { HijriDate } from "src/lib/hijri";
 
 interface TaskListItemProps {
   task: Task;
@@ -56,9 +56,16 @@ export function TaskListItem({
     }
   };
 
-  const formatScheduledDate = (hijriDate?: string) => {
-    if (!hijriDate) return "No date set";
-    return hijriDate;
+  const formatScheduledDate = (task: Task) => {
+    if (task.hijriDate) {
+      const date = new HijriDate(
+        parseInt(task.hijriDate.slice(0, 4)),
+        parseInt(task.hijriDate.slice(4, 6)),
+        parseInt(task.hijriDate.slice(6, 8)),
+      );
+      return date.format("DD MMMM");
+    }
+    return null;
   };
 
   const getTargetInfo = (goal: any) => {
@@ -82,38 +89,51 @@ export function TaskListItem({
   };
 
   return (
-    <ListItem
-      key={task.id}
-      title={task.name}
-      subtitle={`Scheduled: ${formatScheduledDate(task.hijriDate)}`}
-      description={getTargetInfo(goal) || undefined}
-      leftIcon={
-        onStatusChange ? (
+    <div
+      className={`w-full p-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
+      onClick={handleItemClick}
+    >
+      <div className="flex items-start gap-3">
+        {/* Checkbox/Status Button */}
+        {onStatusChange ? (
           <button
             onClick={handleStatusClick}
-            className="flex-shrink-0 mt-1 transition-transform hover:scale-110"
+            className="h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110"
             aria-label={`Change status from ${task.status}`}
           >
             {getStatusIcon(task.status)}
           </button>
         ) : (
-          <div className="flex-shrink-0 mt-1">
+          <div className="flex-shrink-0 mt-0.5">
             {getStatusIcon(task.status)}
           </div>
-        )
-      }
-      onClick={handleItemClick}
-      rightIcon={
-        <span
-          className={`text-sm font-medium px-2 py-1 rounded-full ${getStatusColor(
-            task.status
-          )} bg-opacity-10`}
-        >
-          {task.status.replace("_", " ")}
-        </span>
-      }
-      className={className}
-    />
+        )}
+
+        {/* Task Name and Description */}
+        <div className="flex-1 min-w-0">
+          {/* Task Name */}
+          <h3
+            className={`text-gray-900 truncate ${getStatusColor(task.status)}`}
+          >
+            {task.name}
+          </h3>
+
+          {/* Description (Goal Info) */}
+          {getTargetInfo(goal) && (
+            <p className="text-sm text-gray-500 mt-1 truncate">
+              {getTargetInfo(goal)}
+            </p>
+          )}
+
+          {/* Scheduled Date Display this in non-time context */}
+          {/* {formatScheduledDate(task) && (
+            <p className="text-xs text-gray-400 mt-1">
+              {formatScheduledDate(task)}
+            </p>
+          )} */}
+        </div>
+      </div>
+    </div>
   );
 }
 
