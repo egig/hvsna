@@ -17,7 +17,7 @@ interface PouchDBTaskDocument {
   userId?: string;
   name: string;
   status: TaskStatus;
-  scheduledAt?: number;
+  scheduledAtEpochMillis?: number;
   targetId?: string;
   targetValue?: number;
   createdAt?: number;
@@ -131,7 +131,7 @@ export const useTaskStore = create<TaskState>()(
             id: taskId,
             name: input.name,
             status: input.status || "pending",
-            scheduledAt: input.scheduledAt,
+            scheduledAtEpochMillis: input.scheduledAtEpochMillis,
             targetId: input.targetId,
             targetValue: input.targetValue,
             createdAt: now,
@@ -148,7 +148,7 @@ export const useTaskStore = create<TaskState>()(
             userId: newTask.userId,
             name: newTask.name,
             status: newTask.status,
-            scheduledAt: newTask.scheduledAt,
+            scheduledAtEpochMillis: newTask.scheduledAtEpochMillis,
             targetId: newTask.targetId,
             targetValue: newTask.targetValue,
             createdAt: newTask.createdAt,
@@ -199,8 +199,8 @@ export const useTaskStore = create<TaskState>()(
             updateData.status = input.status;
           }
 
-          if (input.scheduledAt !== undefined) {
-            updateData.scheduledAt = input.scheduledAt;
+          if (input.scheduledAtEpochMillis !== undefined) {
+            updateData.scheduledAtEpochMillis = input.scheduledAtEpochMillis;
           }
 
           if (input.targetId !== undefined) {
@@ -232,7 +232,7 @@ export const useTaskStore = create<TaskState>()(
             userId: updatedDoc.userId,
             name: updatedDoc.name,
             status: updatedDoc.status,
-            scheduledAt: updatedDoc.scheduledAt,
+            scheduledAtEpochMillis: updatedDoc.scheduledAtEpochMillis,
             targetId: updatedDoc.targetId,
             targetValue: updatedDoc.targetValue,
             createdAt: updatedDoc.createdAt,
@@ -292,7 +292,7 @@ export const useTaskStore = create<TaskState>()(
             id: doc._id,
             name: doc.name,
             status: doc.status,
-            scheduledAt: doc.scheduledAt,
+            scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
             targetId: doc.targetId,
             targetValue: doc.targetValue,
             createdAt: doc.createdAt,
@@ -328,12 +328,19 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loading: true, error: null });
 
+
+          await db.createIndex({
+            index: {
+              fields: ["type", "scheduledAtEpochMillis"],
+            },
+          });
+
           // Build mango query
           const mangoQuery: any = {
             selector: {
               type: "task",
             },
-            sort: [{ _id: "asc" }],
+            sort: [{type: "asc"}, { scheduledAtEpochMillis: "asc" }],
           };
 
           // Add filters to selector
@@ -345,8 +352,8 @@ export const useTaskStore = create<TaskState>()(
             mangoQuery.selector.status = query.status;
           }
 
-          if (query?.scheduledAt) {
-            mangoQuery.selector.scheduledAt = query.scheduledAt;
+          if (query?.scheduledAtEpochMillis) {
+            mangoQuery.selector.scheduledAtEpochMillis = query.scheduledAtEpochMillis;
           }
 
           if (query?.targetId) {
@@ -363,7 +370,7 @@ export const useTaskStore = create<TaskState>()(
             id: doc._id,
             name: doc.name,
             status: doc.status,
-            scheduledAt: doc.scheduledAt,
+            scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
             targetId: doc.targetId,
             targetValue: doc.targetValue,
             createdAt: doc.createdAt,
@@ -402,12 +409,12 @@ export const useTaskStore = create<TaskState>()(
           const mangoQuery = {
             selector: {
               _id: { $regex: "^task_" },
-              scheduledAt: {
+              scheduledAtEpochMillis: {
                 $gte: startDate.getTime(),
                 $lte: endDate.getTime(),
               },
             },
-            sort: [{ scheduledAt: "asc" }],
+            sort: [{ scheduledAtEpochMillis: "asc" }],
           };
 
           const result = await db.find(mangoQuery);
@@ -417,7 +424,7 @@ export const useTaskStore = create<TaskState>()(
             userId: doc.userId,
             name: doc.name,
             status: doc.status,
-            scheduledAt: doc.scheduledAt,
+            scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
             targetId: doc.targetId,
             targetValue: doc.targetValue,
             createdAt: doc.createdAt,
@@ -461,13 +468,13 @@ export const useTaskStore = create<TaskState>()(
               type: "task",
               hijriDate: hijriDate,
               hour: {
-                $gt: null,
+                $gt: 0,
               },
               minute: {
-                $gt: null,
+                $gt: 0,
               },
             },
-            sort: [{ hour: "asc" }, { minute: "asc" }],
+            sort: [{ type: "asc" }, {hijriDate: "desc"}, { hour: "asc" }, { minute: "asc" }],
           };
 
           const result = await db.find(mangoQuery);
@@ -477,7 +484,7 @@ export const useTaskStore = create<TaskState>()(
             userId: doc.userId,
             name: doc.name,
             status: doc.status,
-            scheduledAt: doc.scheduledAt,
+            scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
             targetId: doc.targetId,
             targetValue: doc.targetValue,
             createdAt: doc.createdAt,
@@ -531,7 +538,7 @@ export const useTaskStore = create<TaskState>()(
             userId: doc.userId,
             name: doc.name,
             status: doc.status,
-            scheduledAt: doc.scheduledAt,
+            scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
             targetId: doc.targetId,
             targetValue: doc.targetValue,
             createdAt: doc.createdAt,

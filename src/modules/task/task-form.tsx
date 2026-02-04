@@ -108,7 +108,7 @@ export default function TaskForm({
       taskData.hour = selectedHijriDate?.hour;
       taskData.minute = selectedHijriDate?.minute;
       // @ts-ignore
-      taskData.scheduledAt = selectedHijriDate?.toDate().valueOf();
+      taskData.scheduledAtEpochMillis = selectedHijriDate?.toDate().valueOf();
     }
 
     try {
@@ -142,9 +142,9 @@ export default function TaskForm({
         minute: taskData.minute,
       };
 
-      // Handle scheduledAt - convert date string to timestamp if provided
-      if (taskData.scheduledAt) {
-        taskInput.scheduledAt = new Date(taskData.scheduledAt).getTime();
+      // Handle scheduledAtEpochMillis - convert date string to timestamp if provided
+      if (taskData.scheduledAtEpochMillis) {
+        taskInput.scheduledAtEpochMillis = new Date(taskData.scheduledAtEpochMillis).getTime();
       }
 
       // Handle repeat - only include if not "none"
@@ -167,7 +167,7 @@ export default function TaskForm({
       if (
         taskData.repeat &&
         taskData.repeat !== "none" &&
-        taskInput.scheduledAt
+        taskInput.scheduledAtEpochMillis
       ) {
         try {
           await createRecurringTask({
@@ -176,7 +176,7 @@ export default function TaskForm({
             targetValue: taskInput.targetValue,
             attributes: taskInput.attributes,
             repeat: taskData.repeat,
-            baseDate: taskInput.scheduledAt,
+            baseDate: taskInput.scheduledAtEpochMillis,
           });
         } catch (recurringError) {
           console.error("Failed to create recurring task:", recurringError);
@@ -222,7 +222,7 @@ export default function TaskForm({
       />
 
       <HijriDateInput
-        name="scheduledAt"
+        name="scheduledAtEpochMillis"
         label="Scheduled Date & Time (Hijri)"
         value={selectedHijriDate as HijriDate}
         placeholder="Select Hijri date and time"

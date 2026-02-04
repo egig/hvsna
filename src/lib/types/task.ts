@@ -6,7 +6,7 @@ export interface Task {
   userId?: string;
   name: string;
   status: TaskStatus;
-  scheduledAt?: number;
+  scheduledAtEpochMillis?: number;
   repeat?: TaskRepeat;
   targetId?: string;
   hijriDate?: string;
@@ -25,7 +25,7 @@ export interface TaskCreateInput {
   id?: string;
   name: string;
   status?: TaskStatus;
-  scheduledAt?: number;
+  scheduledAtEpochMillis?: number;
   repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
@@ -40,7 +40,7 @@ export interface TaskCreateInput {
 export interface TaskUpdateInput {
   name?: string;
   status?: TaskStatus;
-  scheduledAt?: number;
+  scheduledAtEpochMillis?: number;
   repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
@@ -64,7 +64,7 @@ export interface TaskChange {
 export type TaskQuery = {
   id?: string;
   status?: TaskStatus;
-  scheduledAt?: number;
+  scheduledAtEpochMillis?: number;
   targetId?: string;
   hijriDate?: string;
 };

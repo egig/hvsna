@@ -42,9 +42,9 @@ export const useTasks = (): UseTasksReturn => {
   const { getGoal } = useGoal();
   const { getRecurringTasks: getRecurringTasksFromHook } = useRecurringTasks();
 
-  useEffect(() => {
-    getTasks();
-  }, []);
+  // useEffect(() => {
+  //   getTasks();
+  // }, []);
 
   const loadMoreTasks = useCallback(async () => {
     return store.loadMoreTasks(db);
@@ -113,7 +113,7 @@ export const useTasks = (): UseTasksReturn => {
             const exists = normalTasks.some(
               (task) =>
                 task.name === recurringTask.name &&
-                task.scheduledAt === occurrence.getTime(),
+                task.scheduledAtEpochMillis === occurrence.getTime(),
             );
 
             if (!exists) {
@@ -122,7 +122,7 @@ export const useTasks = (): UseTasksReturn => {
                 id: `recurring_${recurringTask.id}_${occurrence.getTime()}`,
                 name: recurringTask.name,
                 status: "pending",
-                scheduledAt: occurrence.getTime(),
+                scheduledAtEpochMillis: occurrence.getTime(),
                 targetId: recurringTask.targetId,
                 targetValue: recurringTask.targetValue,
                 attributes: recurringTask.attributes,
@@ -345,7 +345,7 @@ export const useTasks = (): UseTasksReturn => {
               targetId: recurringTask.targetId,
               targetValue: recurringTask.targetValue,
               attributes: recurringTask.attributes,
-              scheduledAt: occurrence.getTime(),
+              scheduledAtEpochMillis: occurrence.getTime(),
               hijriDate: `${year}${month}${day}`,
             };
 
@@ -356,7 +356,7 @@ export const useTasks = (): UseTasksReturn => {
             const exists = existingTasks.some(
               (task) =>
                 task.name === recurringTask.name &&
-                task.scheduledAt === occurrence.getTime(),
+                task.scheduledAtEpochMillis === occurrence.getTime(),
             );
 
             if (!exists) {
