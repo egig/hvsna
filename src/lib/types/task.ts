@@ -9,11 +9,7 @@ export interface Task {
   scheduledAt?: number;
   repeat?: TaskRepeat;
   targetId?: string;
-  hijriDate?: {
-    year: number;
-    month: number;
-    day: number;
-  };
+  hijriDate?: string;
   hour?: number;
   minute?: number;
   lat?: number;
@@ -34,11 +30,7 @@ export interface TaskCreateInput {
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
-  hijriDate: {
-    year: number;
-    month: number;
-    day: number;
-  };
+  hijriDate: string;
   hour?: number;
   minute?: number;
   lat?: number;
@@ -53,11 +45,7 @@ export interface TaskUpdateInput {
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
-  hijriDate: {
-    year: number;
-    month: number;
-    day: number;
-  };
+  hijriDate?: string;
 
   hour?: number;
   minute?: number;

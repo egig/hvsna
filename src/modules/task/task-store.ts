@@ -20,11 +20,7 @@ interface PouchDBTaskDocument {
   createdAt?: number;
   updatedAt?: number;
   attributes?: Record<string, any>;
-  hijriDate: {
-    year: number;
-    month: number;
-    day: number;
-  };
+  hijriDate?: string;
   hour?: number;
   minute?: number;
 }
@@ -237,6 +233,9 @@ export const useTaskStore = create<TaskState>()(
             createdAt: updatedDoc.createdAt,
             updatedAt: updatedDoc.updatedAt,
             attributes: updatedDoc.attributes,
+            hijriDate: updatedDoc.hijriDate,
+            hour: updatedDoc.hour,
+            minute: updatedDoc.minute,
           };
 
           return updatedTask;
@@ -395,14 +394,17 @@ export const useTaskStore = create<TaskState>()(
               const doc: PouchDBTaskDocument = row.doc;
               return {
                 id: doc._id,
-                user_id: doc.user_id,
+                userId: doc.userId,
                 name: doc.name,
                 status: doc.status,
                 scheduledAt: doc.scheduledAt,
                 targetId: doc.targetId,
                 targetValue: doc.targetValue,
-                created_at: doc.created_at,
-                updated_at: doc.updated_at,
+                createdAt: doc.createdAt,
+                updatedAt: doc.updatedAt,
+                hijriDate: doc.hijriDate,
+                hour: doc.hour,
+                minute: doc.minute,
               };
             });
 
@@ -459,14 +461,17 @@ export const useTaskStore = create<TaskState>()(
               const doc: PouchDBTaskDocument = row.doc;
               return {
                 id: doc._id,
-                user_id: doc.user_id,
+                userId: doc.userId,
                 name: doc.name,
                 status: doc.status,
                 scheduledAt: doc.scheduledAt,
                 targetId: doc.targetId,
                 targetValue: doc.targetValue,
-                created_at: doc.created_at,
-                updated_at: doc.updated_at,
+                createdAt: doc.createdAt,
+                updatedAt: doc.updatedAt,
+                hijriDate: doc.hijriDate,
+                hour: doc.hour,
+                minute: doc.minute,
               };
             });
 

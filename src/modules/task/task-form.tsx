@@ -42,15 +42,20 @@ export default function TaskForm({
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
   const [selectedHijriDate, setSelectedHijriDate] =
-    useState<Partial<HijriDate>>();
+    useState<HijriDate>();
 
   useEffect(() => {
     if (task?.hijriDate) {
+      // Parse YYYYMMDD format
+      const year = parseInt(task.hijriDate.substring(0, 4));
+      const month = parseInt(task.hijriDate.substring(4, 6));
+      const day = parseInt(task.hijriDate.substring(6, 8));
+      
       setSelectedHijriDate(
         new HijriDate(
-          task.hijriDate.year,
-          task.hijriDate.month,
-          task.hijriDate.day,
+          year,
+          month,
+          day,
           task.hour,
           task.minute,
         ),
@@ -102,11 +107,10 @@ export default function TaskForm({
     const taskData = Object.fromEntries(formData) as unknown as Task;
 
     if (selectedHijriDate) {
-      taskData.hijriDate = {
-        year: selectedHijriDate?.year as number,
-        month: selectedHijriDate?.month as number,
-        day: selectedHijriDate?.day as number,
-      };
+      const year = selectedHijriDate.year.toString().padStart(4, '0');
+      const month = selectedHijriDate.month.toString().padStart(2, '0');
+      const day = selectedHijriDate.day.toString().padStart(2, '0');
+      taskData.hijriDate = `${year}${month}${day}`;
 
       taskData.hour = selectedHijriDate?.hour;
       taskData.minute = selectedHijriDate?.minute;
@@ -140,11 +144,7 @@ export default function TaskForm({
         targetId: taskData.targetId,
         targetValue: taskData.targetValue,
         attributes: attr,
-        hijriDate: {
-          year: taskData.hijriDate?.year,
-          month: taskData.hijriDate?.month,
-          day: taskData.hijriDate?.day,
-        },
+        hijriDate: taskData.hijriDate,
       };
 
       // Handle scheduledAt - convert date string to timestamp if provided

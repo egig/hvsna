@@ -169,11 +169,10 @@ export const useTasks = (): UseTasksReturn => {
           (() => {
             const now = new Date();
             const hijriNow = HijriDate.fromDate(now);
-            return {
-              year: hijriNow.year,
-              month: hijriNow.month,
-              day: hijriNow.day,
-            };
+            const year = hijriNow.year.toString().padStart(4, '0');
+            const month = hijriNow.month.toString().padStart(2, '0');
+            const day = hijriNow.day.toString().padStart(2, '0');
+            return `${year}${month}${day}`;
           })(),
       },
       db,
@@ -330,17 +329,16 @@ export const useTasks = (): UseTasksReturn => {
 
           for (const occurrence of occurrences) {
             const occurrenceHijriDate = HijriDate.fromDate(occurrence);
+            const year = occurrenceHijriDate.year.toString().padStart(4, '0');
+            const month = occurrenceHijriDate.month.toString().padStart(2, '0');
+            const day = occurrenceHijriDate.day.toString().padStart(2, '0');
             const taskData: TaskCreateInput = {
               name: recurringTask.name,
               targetId: recurringTask.targetId,
               targetValue: recurringTask.targetValue,
               attributes: recurringTask.attributes,
               scheduledAt: occurrence.getTime(),
-              hijriDate: {
-                year: occurrenceHijriDate.year,
-                month: occurrenceHijriDate.month,
-                day: occurrenceHijriDate.day,
-              },
+              hijriDate: `${year}${month}${day}`,
             };
 
             // Check if task already exists for this date
