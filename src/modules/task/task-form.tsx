@@ -30,8 +30,19 @@ export default function TaskForm({
   onCancel,
   onDelete,
 }: TaskFormProps) {
-  const { task, editingTaskId, loading, error, createTask, updateTask, getTask, reset, closeTaskForm, deleteTask, setEditingTaskId } =
-    useTask(taskId || undefined);
+  const {
+    task,
+    editingTaskId,
+    loading,
+    error,
+    createTask,
+    updateTask,
+    getTask,
+    reset,
+    closeTaskForm,
+    deleteTask,
+    setEditingTaskId,
+  } = useTask(taskId || undefined);
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +58,7 @@ export default function TaskForm({
 
   useEffect(() => {
     setEditingTaskId(taskId || null);
-  }, [taskId]); 
+  }, [taskId]);
 
   useEffect(() => {
     if (task?.hijriDate) {
@@ -214,7 +225,7 @@ export default function TaskForm({
   };
 
   const handleDelete = () => {
-    if (taskId && onDelete && task) {
+    if (taskId && task) {
       if (
         confirm(
           `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
@@ -223,7 +234,7 @@ export default function TaskForm({
         deleteTask(taskId).then(() => {
           reset();
           closeTaskForm();
-          onDelete(taskId)
+          onDelete?.(taskId);
         });
       }
     }

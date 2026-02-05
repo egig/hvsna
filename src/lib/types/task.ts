@@ -25,14 +25,8 @@ export interface Task {
 }
 
 export interface TaskCreateInput {
-  id?: string;
   name: string;
   status?: TaskStatus;
-  scheduledAtEpochMillis?: number;
-  repeat?: TaskRepeat;
-  targetId?: string;
-  targetValue?: number;
-  attributes?: Record<string, string>;
   hijriDate: string;
   hijriDateYear?: number;
   hijriDateMonth?: number;
@@ -41,16 +35,15 @@ export interface TaskCreateInput {
   minute?: number;
   lat?: number;
   long?: number;
+  repeat?: TaskRepeat;
+  targetId?: string;
+  targetValue?: number;
+  attributes?: Record<string, string>;
 }
 
 export interface TaskUpdateInput {
   name?: string;
   status?: TaskStatus;
-  scheduledAtEpochMillis?: number;
-  repeat?: TaskRepeat;
-  targetId?: string;
-  targetValue?: number;
-  attributes?: Record<string, string>;
   hijriDate?: string;
   hijriDateYear?: number;
   hijriDateMonth?: number;
@@ -59,6 +52,10 @@ export interface TaskUpdateInput {
   minute?: number;
   lat?: number;
   long?: number;
+  repeat?: TaskRepeat;
+  targetId?: string;
+  targetValue?: number;
+  attributes?: Record<string, string>;
 }
 
 export interface TaskChange {

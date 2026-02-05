@@ -1,7 +1,5 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import PouchDB from "pouchdb";
-import "pouchdb-find";
 import type {
   Task,
   TaskCreateInput,
@@ -9,6 +7,7 @@ import type {
   TaskStatus,
   TaskQuery,
 } from "../../lib/types/task";
+import { HijriDate } from "src/lib/hijri";
 
 interface PouchDBTaskDocument {
   _id: string;
@@ -32,8 +31,6 @@ interface PouchDBTaskDocument {
 }
 
 interface TaskState {
-  // Single task state (for useTask hook)
-  task: Task | null;
   loading: boolean;
   error: string | null;
 
@@ -83,27 +80,43 @@ interface TaskState {
   loadMoreTasks: (db?: any) => Promise<void>;
 }
 
+function newTaskDoc(): PouchDBTaskDocument {
+  return {
+    _id: `task_${crypto.randomUUID()}`,
+    type: "task",
+    userId: "",
+    name: "",
+    status: "pending",
+    scheduledAtEpochMillis: 0,
+    targetId: "",
+    targetValue: 0,
+    createdAt: new Date().valueOf(),
+    updatedAt: new Date().valueOf(),
+    attributes: {},
+    hijriDate: "",
+    hour: 0,
+    hijriDateYear: 0,
+    hijriDateMonth: 0,
+    hijriDateDay: 0,
+    minute: 0,
+  };
+}
+
 export const useTaskStore = create<TaskState>()(
   devtools(
     (set, get) => ({
       loading: false,
       error: null,
-
-      // Form state
       editingTaskId: null,
       formOpen: false,
-
-      // Multiple tasks state
       tasks: [],
       loadingMore: false,
       hasMore: true,
       offset: 0,
 
-      // Actions for single task
-      setTask: (task: Task | null) => set({ task }),
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
-      reset: () => set({ task: null, loading: false, error: null }),
+      reset: () => set({ loading: false, error: null }),
 
       // Actions for form state
       setEditingTaskId: (editingTaskId) => set({ editingTaskId }),
@@ -149,13 +162,11 @@ export const useTaskStore = create<TaskState>()(
           set({ loading: true, error: null });
 
           const now = Date.now();
-          const taskId = input.id || `task_${crypto.randomUUID()}`;
 
           const newTask: Task = {
-            id: taskId,
+            id: `task_${crypto.randomUUID()}`,
             name: input.name,
             status: input.status || "pending",
-            scheduledAtEpochMillis: input.scheduledAtEpochMillis,
             targetId: input.targetId || "",
             targetValue: input.targetValue || 0,
             createdAt: now,
@@ -169,28 +180,30 @@ export const useTaskStore = create<TaskState>()(
             minute: input.minute || 0,
           };
 
-          const doc: PouchDBTaskDocument = {
-            _id: taskId,
-            type: "task",
-            userId: newTask.userId,
-            name: newTask.name,
-            status: newTask.status,
-            scheduledAtEpochMillis: newTask.scheduledAtEpochMillis,
-            targetId: newTask.targetId,
-            targetValue: newTask.targetValue,
-            createdAt: newTask.createdAt,
-            updatedAt: newTask.updatedAt,
-            attributes: newTask.attributes,
-            hijriDate: newTask.hijriDate,
-            hour: newTask.hour,
-            hijriDateYear: newTask.hijriDateYear,
-            hijriDateMonth: newTask.hijriDateMonth,
-            hijriDateDay: newTask.hijriDateDay,
-            minute: newTask.minute,
-          };
+          if (input.hijriDate) {
+            const year = parseInt(input.hijriDate.substring(0, 4));
+            const month = parseInt(input.hijriDate.substring(4, 6));
+            const day = parseInt(input.hijriDate.substring(6, 8));
+
+            console.log(year, month, day);
+
+            const hijriDate = new HijriDate(
+              year,
+              month,
+              day,
+              input.hour,
+              input.minute,
+              0,
+            );
+            newTask.hijriDateYear = hijriDate.year;
+            newTask.hijriDateMonth = hijriDate.month;
+            newTask.hijriDateDay = hijriDate.day;
+            newTask.scheduledAtEpochMillis = hijriDate.toDate().valueOf();
+          }
+
+          const doc = Object.assign(newTaskDoc(), newTask);
 
           await db.put(doc);
-          set({ task: newTask });
 
           // Also add to the tasks list
           get().addTask(newTask);
@@ -202,6 +215,7 @@ export const useTaskStore = create<TaskState>()(
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
+          get().getTasks(undefined, db);
           set({ loading: false });
         }
       },
@@ -227,10 +241,6 @@ export const useTaskStore = create<TaskState>()(
 
           if (input.status !== undefined) {
             updateData.status = input.status;
-          }
-
-          if (input.scheduledAtEpochMillis !== undefined) {
-            updateData.scheduledAtEpochMillis = input.scheduledAtEpochMillis;
           }
 
           if (input.targetId !== undefined) {
@@ -316,12 +326,6 @@ export const useTaskStore = create<TaskState>()(
           }
           await db.remove(doc as any);
 
-          // Clear the current task if it matches the deleted task
-          const { task } = get();
-          if (task && task.id === id) {
-            set({ task: null });
-          }
-
           // Also remove from the tasks list
           get().removeTaskFromList(id);
         } catch (err) {
@@ -357,7 +361,6 @@ export const useTaskStore = create<TaskState>()(
             minute: doc.minute,
           };
 
-          // set({ task: retrievedTask });
           return retrievedTask;
         } catch (err) {
           if ((err as any).status === 404) {
@@ -387,7 +390,6 @@ export const useTaskStore = create<TaskState>()(
               fields: [
                 "type",
                 "status",
-                "targetId",
                 "hijriDateYear",
                 "hijriDateMonth",
                 "hijriDateDay",
@@ -401,9 +403,6 @@ export const useTaskStore = create<TaskState>()(
             selector: {
               type: "task",
               status: "pending",
-              targetId: {
-                $gte: null,
-              },
               hijriDateYear: {
                 $gte: null,
               },
@@ -420,7 +419,6 @@ export const useTaskStore = create<TaskState>()(
             sort: [
               { type: "asc" },
               { status: "asc" },
-              { targetId: "asc" },
               { hijriDateYear: "asc" },
               { hijriDateMonth: "asc" },
               { hijriDateDay: "asc" },
@@ -546,10 +544,10 @@ export const useTaskStore = create<TaskState>()(
               type: "task",
               hijriDate: hijriDate,
               hour: {
-                $gt: 0,
+                $gte: null,
               },
               minute: {
-                $gt: 0,
+                $gte: null,
               },
             },
             sort: [

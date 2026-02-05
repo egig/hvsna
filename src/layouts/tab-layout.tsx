@@ -7,8 +7,7 @@ import TaskForm from "../modules/task/task-form";
 import { useTask } from "../modules/task/use-task";
 
 export default function TabLayout() {
-  const { formOpen, editingTaskId, openTaskForm, closeTaskForm } =
-    useTask();
+  const { formOpen, editingTaskId, openTaskForm, closeTaskForm } = useTask();
 
   const handleTaskSuccess = () => {
     closeTaskForm();
