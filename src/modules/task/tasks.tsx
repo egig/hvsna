@@ -8,7 +8,7 @@ import TaskForm from "./task-form";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
-import { useTaskStore } from "./task-store";
+import { useTask } from "./use-task";
 
 export default function Tasks() {
   const {
@@ -24,7 +24,7 @@ export default function Tasks() {
   } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
-  const { openTaskForm, setEditingTaskId } = useTaskStore();
+  const { openTaskForm, setEditingTaskId } = useTask();
 
   const openEditPopup = (task: Task) => {
     openTaskForm(task.id);

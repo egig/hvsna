@@ -5,7 +5,7 @@ import { useTargetResults } from "../hooks/useTargetResults";
 import { useLogStore } from "../modules/log/logStore";
 import { useTrackers } from "../modules/tracker/use-trackers";
 import { useTasks } from "../modules/task/use-tasks";
-import { useTaskStore } from "../modules/task/task-store";
+import { useTask } from "../modules/task/use-task";
 import { LogItem } from "./log-item";
 import type { TargetResultData } from "../hooks/useTargetResults";
 import type { Log } from "src/lib/tracker/types";
@@ -31,7 +31,7 @@ interface TodayTasksProps {
 }
 
 function TodayTasks({ tasks }: TodayTasksProps) {
-  const { openTaskForm } = useTaskStore();
+  const { openTaskForm } = useTask();
 
   const handleEditTask = (task: Task) => {
     openTaskForm(task.id);

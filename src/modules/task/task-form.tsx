@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useTask } from "./use-task";
-import { useTaskStore } from "./task-store";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -31,9 +30,8 @@ export default function TaskForm({
   onCancel,
   onDelete,
 }: TaskFormProps) {
-  const { task, loading, error, createTask, updateTask, getTask, reset } =
+  const { task, editingTaskId, loading, error, createTask, updateTask, getTask, reset, closeTaskForm, deleteTask, setEditingTaskId } =
     useTask(taskId || undefined);
-  const { closeTaskForm } = useTaskStore();
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +44,10 @@ export default function TaskForm({
   const { getTracker } = useTracker();
   const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate>();
   const goalEnabled = useFeatureFlag("TASk_GOAL");
+
+  useEffect(() => {
+    setEditingTaskId(taskId || null);
+  }, [taskId]); 
 
   useEffect(() => {
     if (task?.hijriDate) {
@@ -218,7 +220,11 @@ export default function TaskForm({
           `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
         )
       ) {
-        onDelete(taskId);
+        deleteTask(taskId).then(() => {
+          reset();
+          closeTaskForm();
+          onDelete(taskId)
+        });
       }
     }
   };

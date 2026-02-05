@@ -4,11 +4,11 @@ import { Plus } from "lucide-react";
 import { TabBar } from "../modules/navigation";
 import { Modal } from "../modules/navigation/modal";
 import TaskForm from "../modules/task/task-form";
-import { useTaskStore } from "../modules/task/task-store";
+import { useTask } from "../modules/task/use-task";
 
 export default function TabLayout() {
   const { formOpen, editingTaskId, openTaskForm, closeTaskForm } =
-    useTaskStore();
+    useTask();
 
   const handleTaskSuccess = () => {
     closeTaskForm();

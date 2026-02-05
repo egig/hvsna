@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTasks } from "../modules/task/use-tasks";
-import { useTaskStore } from "../modules/task/task-store";
+import { useTask } from "../modules/task/use-task";
 import { CalendarIcon } from "lucide-react";
 import type { Task } from "../lib/types/task";
 import { Navbar } from "../modules/navigation/navbar";
@@ -11,7 +11,7 @@ import { HijriDate } from "../lib/hijri";
 
 export default function Upcoming() {
   const { tasks, loading, error, getTasks } = useTasks();
-  const { openTaskForm } = useTaskStore();
+  const { openTaskForm } = useTask();
   const [upcomingTasks, setUpcomingTasks] = useState<Task[]>([]);
 
   const handleEditTask = (task: Task) => {

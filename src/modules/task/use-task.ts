@@ -18,6 +18,12 @@ export interface UseTaskReturn {
   deleteTask: (id: string) => Promise<void>;
   getTask: (id: string) => Promise<Task | null>;
   reset: () => void;
+  // Form state management
+  editingTaskId: string | null;
+  formOpen: boolean;
+  openTaskForm: (taskId?: string) => void;
+  closeTaskForm: () => void;
+  setEditingTaskId: (taskId: string | null) => void;
 }
 
 export const useTask = (taskId?: string): UseTaskReturn => {
@@ -94,5 +100,11 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     deleteTask: (id: string) => store.deleteTask(id, db),
     getTask: (id: string) => store.getTask(id, db),
     reset: () => setTask(null),
+    // Form state management
+    editingTaskId: store.editingTaskId,
+    formOpen: store.formOpen,
+    openTaskForm: store.openTaskForm,
+    closeTaskForm: store.closeTaskForm,
+    setEditingTaskId: store.setEditingTaskId,
   };
 };
