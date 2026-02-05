@@ -42,9 +42,9 @@ export const useTasks = (): UseTasksReturn => {
   const { getGoal } = useGoal();
   const { getRecurringTasks: getRecurringTasksFromHook } = useRecurringTasks();
 
-  // useEffect(() => {
-  //   getTasks();
-  // }, []);
+  useEffect(() => {
+    getTasks();
+  }, []);
 
   const loadMoreTasks = useCallback(async () => {
     return store.loadMoreTasks(db);

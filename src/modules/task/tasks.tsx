@@ -123,11 +123,6 @@ export default function Tasks() {
         className="h-[calc(100vh-160px)] overflow-y-auto"
         onScroll={handleInfiniteScroll}
       >
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <LoadingSpinner size="lg" text="Loading tasks..." />
-          </div>
-        )}
 
         {error && (
           <div className="text-center py-8">

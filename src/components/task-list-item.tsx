@@ -93,12 +93,12 @@ export function TaskListItem({
       className={`w-full p-3 border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
       onClick={handleItemClick}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         {/* Checkbox/Status Button */}
         {onStatusChange ? (
           <button
             onClick={handleStatusClick}
-            className="h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110"
+            className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
             aria-label={`Change status from ${task.status}`}
           >
             {getStatusIcon(task.status)}

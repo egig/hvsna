@@ -136,7 +136,7 @@ export const useTaskStore = create<TaskState>()(
             status: input.status || "pending",
             scheduledAtEpochMillis: input.scheduledAtEpochMillis,
             targetId: input.targetId || "",
-            targetValue: input.targetValue || 0,
+            targetValue: input.targetValue || 0, 
             createdAt: now,
             updatedAt: now,
             attributes: input.attributes || {},
@@ -358,6 +358,7 @@ export const useTaskStore = create<TaskState>()(
           throw new Error("Database instance is required");
         }
 
+
         try {
           set({ loading: true, error: null });
 
@@ -415,6 +416,7 @@ export const useTaskStore = create<TaskState>()(
             mangoQuery.selector.targetId = query.targetId;
           }
 
+          
           const result = await db.find(mangoQuery);
 
           const tasksList = result.docs.map((doc: PouchDBTaskDocument) => ({
@@ -531,12 +533,7 @@ export const useTaskStore = create<TaskState>()(
                 $gt: 0,
               },
             },
-            sort: [
-              { type: "asc" },
-              { hijriDate: "desc" },
-              { hour: "asc" },
-              { minute: "asc" },
-            ],
+            sort: [{ type: "asc" }, {hijriDate: "desc"}, { hour: "asc" }, { minute: "asc" }],
           };
 
           const result = await db.find(mangoQuery);
