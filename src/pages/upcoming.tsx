@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTasks } from "../modules/task/use-tasks";
+import { useTaskStore } from "../modules/task/task-store";
 import { CalendarIcon } from "lucide-react";
 import type { Task } from "../lib/types/task";
 import { Navbar } from "../modules/navigation/navbar";
@@ -10,7 +11,12 @@ import { HijriDate } from "../lib/hijri";
 
 export default function Upcoming() {
   const { tasks, loading, error, getTasks } = useTasks();
+  const { openTaskForm } = useTaskStore();
   const [upcomingTasks, setUpcomingTasks] = useState<Task[]>([]);
+
+  const handleEditTask = (task: Task) => {
+    openTaskForm(task.id);
+  };
 
   useEffect(() => {
     const filterUpcomingTasks = async () => {
@@ -191,6 +197,7 @@ export default function Upcoming() {
                       <TaskListItem
                         key={task.id}
                         task={task}
+                        onEdit={handleEditTask}
                         className="border rounded-lg transition-all hover:shadow-sm"
                       />
                     ))}

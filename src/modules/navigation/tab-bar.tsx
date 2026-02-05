@@ -14,7 +14,7 @@ import {
 const tabs = [
   { path: "/", label: "Today", icon: <Calendar /> },
   { path: "/upcoming", label: "Upcoming", icon: <CalendarClock /> },
-  { path: "/browse", label: "Browse", icon: <SquareLibrary /> },
+  { path: "/tasks", label: "Browse", icon: <SquareLibrary /> },
 ];
 
 export function TabBar() {

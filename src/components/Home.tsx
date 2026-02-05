@@ -5,6 +5,7 @@ import { useTargetResults } from "../hooks/useTargetResults";
 import { useLogStore } from "../modules/log/logStore";
 import { useTrackers } from "../modules/tracker/use-trackers";
 import { useTasks } from "../modules/task/use-tasks";
+import { useTaskStore } from "../modules/task/task-store";
 import { LogItem } from "./log-item";
 import type { TargetResultData } from "../hooks/useTargetResults";
 import type { Log } from "src/lib/tracker/types";
@@ -30,6 +31,12 @@ interface TodayTasksProps {
 }
 
 function TodayTasks({ tasks }: TodayTasksProps) {
+  const { openTaskForm } = useTaskStore();
+
+  const handleEditTask = (task: Task) => {
+    openTaskForm(task.id);
+  };
+
   if (tasks.length === 0) {
     return (
       <div className="text-center py-6">
@@ -47,6 +54,7 @@ function TodayTasks({ tasks }: TodayTasksProps) {
         <TaskListItem
           key={task.id}
           task={task}
+          onEdit={handleEditTask}
           showGoalInfo={false}
           className="border rounded-lg transition-all hover:shadow-sm"
         />

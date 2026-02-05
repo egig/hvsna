@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTask } from "./use-task";
+import { useTaskStore } from "./task-store";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -13,6 +14,7 @@ import type { Tracker } from "../tracker/trackerStore";
 import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 import { HijriDateInput } from "../../components/hijri-date-input";
 import { HijriDate } from "src/lib/hijri";
+import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -30,7 +32,8 @@ export default function TaskForm({
   onDelete,
 }: TaskFormProps) {
   const { task, loading, error, createTask, updateTask, getTask, reset } =
-    useTask(taskId as string);
+    useTask(taskId || undefined);
+  const { closeTaskForm } = useTaskStore();
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +45,7 @@ export default function TaskForm({
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
   const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate>();
+  const goalEnabled = useFeatureFlag("TASk_GOAL");
 
   useEffect(() => {
     if (task?.hijriDate) {
@@ -187,6 +191,7 @@ export default function TaskForm({
       }
 
       reset();
+      closeTaskForm();
 
       if (onSuccess) {
         onSuccess(result);
@@ -196,6 +201,13 @@ export default function TaskForm({
       // Error is handled by the hook and passed through onError
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCancel = () => {
+    closeTaskForm();
+    if (onCancel) {
+      onCancel();
     }
   };
 
@@ -236,26 +248,28 @@ export default function TaskForm({
         }}
       />
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Target (Optional)
-        </label>
-        <select
-          // HACK to set this re-render
-          key={Math.random()}
-          defaultValue={selectedTargetId}
-          onChange={(e) => setSelectedTargetId(e.target.value)}
-          disabled={isSubmitting}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-        >
-          <option value="">Select a goal</option>
-          {goals.map((goal) => (
-            <option key={goal.id} value={goal.id}>
-              {goal.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {goalEnabled && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Target (Optional)
+          </label>
+          <select
+            // HACK to set this re-render
+            key={Math.random()}
+            defaultValue={selectedTargetId}
+            onChange={(e) => setSelectedTargetId(e.target.value)}
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="">Select a goal</option>
+            {goals.map((goal) => (
+              <option key={goal.id} value={goal.id}>
+                {goal.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {selectedTargetId && (
         <>

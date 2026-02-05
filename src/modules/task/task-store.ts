@@ -37,6 +37,10 @@ interface TaskState {
   loading: boolean;
   error: string | null;
 
+  // Form state management
+  editingTaskId: string | null;
+  formOpen: boolean;
+
   // Multiple tasks state (for useTasks hook)
   tasks: Task[];
   loadingMore: boolean;
@@ -48,6 +52,12 @@ interface TaskState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   reset: () => void;
+
+  // Actions for form state
+  setEditingTaskId: (taskId: string | null) => void;
+  setFormOpen: (open: boolean) => void;
+  openTaskForm: (taskId?: string) => void;
+  closeTaskForm: () => void;
 
   // Actions for multiple tasks
   setTasks: (tasks: Task[]) => void;
@@ -79,6 +89,10 @@ export const useTaskStore = create<TaskState>()(
       loading: false,
       error: null,
 
+      // Form state
+      editingTaskId: null,
+      formOpen: false,
+
       // Multiple tasks state
       tasks: [],
       loadingMore: false,
@@ -90,6 +104,13 @@ export const useTaskStore = create<TaskState>()(
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
       reset: () => set({ task: null, loading: false, error: null }),
+
+      // Actions for form state
+      setEditingTaskId: (editingTaskId) => set({ editingTaskId }),
+      setFormOpen: (formOpen) => set({ formOpen }),
+      openTaskForm: (taskId) =>
+        set({ editingTaskId: taskId || null, formOpen: true }),
+      closeTaskForm: () => set({ editingTaskId: null, formOpen: false }),
 
       // Actions for multiple tasks
       setTasks: (tasks) => set({ tasks }),
@@ -136,7 +157,7 @@ export const useTaskStore = create<TaskState>()(
             status: input.status || "pending",
             scheduledAtEpochMillis: input.scheduledAtEpochMillis,
             targetId: input.targetId || "",
-            targetValue: input.targetValue || 0, 
+            targetValue: input.targetValue || 0,
             createdAt: now,
             updatedAt: now,
             attributes: input.attributes || {},
@@ -358,7 +379,6 @@ export const useTaskStore = create<TaskState>()(
           throw new Error("Database instance is required");
         }
 
-
         try {
           set({ loading: true, error: null });
 
@@ -416,7 +436,6 @@ export const useTaskStore = create<TaskState>()(
             mangoQuery.selector.targetId = query.targetId;
           }
 
-          
           const result = await db.find(mangoQuery);
 
           const tasksList = result.docs.map((doc: PouchDBTaskDocument) => ({
@@ -533,7 +552,12 @@ export const useTaskStore = create<TaskState>()(
                 $gt: 0,
               },
             },
-            sort: [{ type: "asc" }, {hijriDate: "desc"}, { hour: "asc" }, { minute: "asc" }],
+            sort: [
+              { type: "asc" },
+              { hijriDate: "desc" },
+              { hour: "asc" },
+              { minute: "asc" },
+            ],
           };
 
           const result = await db.find(mangoQuery);

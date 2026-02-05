@@ -10,10 +10,10 @@ export interface Task {
   repeat?: TaskRepeat;
   targetId?: string;
   hijriDate?: string;
-  hour?: number;
   hijriDateYear?: number;
   hijriDateMonth?: number;
   hijriDateDay?: number;
+  hour?: number;
   minute?: number;
   lat?: number;
   long?: number;

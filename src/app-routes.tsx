@@ -37,8 +37,6 @@ export const AppRoutes = () => {
       >
         <Route element={<TabLayout />}>
           <Route index element={<Home />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="general-settings" element={<GeneralSettings />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="upcoming" element={<Upcoming />} />
           <Route path="about" element={<About />} />
@@ -53,6 +51,8 @@ export const AppRoutes = () => {
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
         <Route path="attribute-options" element={<AttributeOptions />} />
         <Route path="logs" element={<Logs />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="general-settings" element={<GeneralSettings />} />
         <Route path="*" element={<p>Not Found</p>} />
       </Routes>
     </AnimatePresence>

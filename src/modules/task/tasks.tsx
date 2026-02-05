@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useTasks } from "./use-tasks";
-import { PlusIcon, Plus, Check } from "lucide-react";
+import { PlusIcon, Plus, Check, Settings } from "lucide-react";
 import type { Task, TaskStatus } from "src/lib/types/task";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
-import { Page } from "../navigation";
+import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
 
@@ -109,13 +109,9 @@ export default function Tasks() {
         showBackButton={false}
         title="Tasks"
         rightAction={
-          <button
-            onClick={openAddPopup}
-            className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-            aria-label="Add task"
-          >
-            <Plus size={20} />
-          </button>
+          <Button to="/settings" aria-label="Settings">
+            <Settings size={20} />
+          </Button>
         }
       />
 
@@ -123,7 +119,6 @@ export default function Tasks() {
         className="h-[calc(100vh-160px)] overflow-y-auto"
         onScroll={handleInfiniteScroll}
       >
-
         {error && (
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">Error: {error}</div>
@@ -183,16 +178,6 @@ export default function Tasks() {
           </div>
         )}
       </div>
-
-      <Modal isOpen={sheetOpened} onClose={closePopup}>
-        <TaskForm
-          taskId={editingTaskId}
-          onSuccess={handleTaskSuccess}
-          onError={handleTaskError}
-          onCancel={handleTaskCancel}
-          onDelete={handleDeleteTaskById}
-        />
-      </Modal>
     </Page>
   );
 }
