@@ -3,7 +3,7 @@ import { useTask } from "./use-task";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { Trash2 } from "lucide-react";
+import { ArrowUp, Trash2 } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import BaseForm from "src/components/base-form";
@@ -241,22 +241,32 @@ export default function TaskForm({
   };
 
   return (
-    <BaseForm title={taskId ? "Edit Task" : "New Task"} onSubmit={handleSubmit}>
-      <FormInput
+
+    <form
+      className="h-[100%]"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
+        await handleSubmit(formData);
+      }}
+    >
+      <input
         name="name"
-        label="Task Name"
-        value={task ? task.name : ""}
-        placeholder="Enter task name"
+        defaultValue={task ? task.name : ""}
+        placeholder="Task name"
         disabled={isSubmitting}
         required={true}
-        className="text-base"
+        className="text-base outline-none px-4 py-2 text-lg w-[100%]"
       />
+      <textarea placeholder="Description" className="text-sm px-4 py-2 w-[100%] outline-none">
+        
+      </textarea>
 
       <HijriDateInput
         name="scheduledAtEpochMillis"
         label="Scheduled Date & Time (Hijri)"
         value={selectedHijriDate as HijriDate}
-        placeholder="Select Hijri date and time"
+        placeholder="Date"
         disabled={isSubmitting}
         required={false}
         className="text-base"
@@ -341,6 +351,15 @@ export default function TaskForm({
           </button>
         </div>
       )}
-    </BaseForm>
+
+      <div className="flex justify-end p-4">
+        <button
+        className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+        aria-label="Add new task"
+        type="submit">
+          <ArrowUp/>
+        </button>
+      </div>
+    </form>
   );
 }

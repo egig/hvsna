@@ -354,23 +354,18 @@ export function HijriDateInput({
   };
 
   return (
-    <div className={`mb-4 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-
+    <div className={`mx-4 ${className}`}>
       <button
         type="button"
         onClick={handleButtonClick}
         disabled={disabled}
-        className={`w-full px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
+        className={`px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
           disabled
             ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-50"
             : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
         }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-1">
           <span
             className={
               selectedDate
@@ -395,10 +390,6 @@ export function HijriDateInput({
           </svg>
         </div>
       </button>
-
-      <p className="text-xs text-gray-500 mt-1">
-        Hijri Calendar - Using accurate conversion library
-      </p>
 
       <CalendarModal
         isOpen={isModalOpen}

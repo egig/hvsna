@@ -8,6 +8,7 @@ import type {
 } from "../../lib/types/task";
 import { usePouchDB } from "../../pouchdb";
 import { useTaskStore } from "./task-store";
+import { taskRepository } from "./task-repository";
 import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
 import { useRecurringTasks } from "../../hooks/useRecurringTasks";
@@ -47,49 +48,49 @@ export const useTasks = (): UseTasksReturn => {
   }, []);
 
   const loadMoreTasks = useCallback(async () => {
-    return store.loadMoreTasks(db);
-  }, [store, db]);
+    return store.loadMoreTasks();
+  }, [store]);
 
   const createTask = useCallback(
     async (input: TaskCreateInput): Promise<Task> => {
-      return store.createTask(input, db);
+      return store.createTask(input);
     },
-    [store, db],
+    [store],
   );
 
   const updateTask = useCallback(
     async (id: string, input: TaskUpdateInput): Promise<Task> => {
-      return store.updateTask(id, input, db);
+      return store.updateTask(id, input);
     },
-    [store, db],
+    [store],
   );
 
   const deleteTask = useCallback(
     async (id: string): Promise<void> => {
-      return store.deleteTask(id, db);
+      return store.deleteTask(id);
     },
-    [store, db],
+    [store],
   );
 
   const getTask = useCallback(
     async (id: string): Promise<Task | null> => {
-      return store.getTask(id, db);
+      return store.getTask(id);
     },
-    [store, db],
+    [store],
   );
 
   const getTasks = useCallback(
     async (query?: TaskQuery): Promise<Task[]> => {
-      return store.getTasks(query, db);
+      return store.getTasks(query);
     },
-    [store, db],
+    [store],
   );
 
   const getTasksByDate = useCallback(
     async (date: string): Promise<Task[]> => {
       try {
         // Get normal tasks for the date
-        const normalTasks = await store.getTasksByDate(date, db);
+        const normalTasks = await store.getTasksByDate(date);
 
         // Get recurring tasks and generate instances for this date
         const recurringTasks = await getRecurringTasksFromHook();
@@ -139,30 +140,30 @@ export const useTasks = (): UseTasksReturn => {
       } catch (error) {
         console.error("Failed to get tasks by date:", error);
         // Fallback to just normal tasks if recurring task generation fails
-        return store.getTasksByDate(date, db);
+        return store.getTasksByDate(date);
       }
     },
-    [store, db, getRecurringTasksFromHook],
+    [store, getRecurringTasksFromHook],
   );
 
   const getTasksByHijriDate = useCallback(
     async (hijriDate: string): Promise<Task[]> => {
-      return store.getTasksByHijriDate(hijriDate, db);
+      return store.getTasksByHijriDate(hijriDate);
     },
-    [store, db],
+    [store],
   );
 
   const refreshTasks = useCallback(async () => {
     store.resetTasks();
-    await store.getTasks({}, db);
-  }, [store, db]);
+    await store.getTasks({});
+  }, [store]);
 
   const updateStatus = async (
     id: string,
     status: TaskStatus,
   ): Promise<Task> => {
     // Get the current task before updating to check status change
-    const currentTask = await store.getTask(id, db);
+    const currentTask = await store.getTask(id);
     if (!currentTask) {
       throw new Error("updating not existing task: " + id);
     }
@@ -183,7 +184,6 @@ export const useTasks = (): UseTasksReturn => {
             return `${year}${month}${day}`;
           })(),
       },
-      db,
     );
 
     if (!updatedTask.targetId) {
@@ -345,7 +345,6 @@ export const useTasks = (): UseTasksReturn => {
               targetId: recurringTask.targetId,
               targetValue: recurringTask.targetValue,
               attributes: recurringTask.attributes,
-              scheduledAtEpochMillis: occurrence.getTime(),
               hijriDate: `${year}${month}${day}`,
             };
 

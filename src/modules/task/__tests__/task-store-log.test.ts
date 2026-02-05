@@ -1,19 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { useTaskStore } from "../task-store";
+import { taskRepository } from "../task-repository";
 
 // Mock crypto.randomUUID
 vi.stubGlobal("crypto", {
   randomUUID: vi.fn(() => "test-uuid-1234"),
 });
 
-describe("Task Store - Pure Task Operations (No Log Creation)", () => {
-  const mockDb = {
-    get: vi.fn(),
-    put: vi.fn(),
-    remove: vi.fn(),
-    allDocs: vi.fn(),
-  };
+// Mock PouchDB singleton
+const mockDb = {
+  get: vi.fn(),
+  put: vi.fn(),
+  remove: vi.fn(),
+  allDocs: vi.fn(),
+  createIndex: vi.fn(),
+  find: vi.fn(),
+};
 
+describe("Task Store - Pure Task Operations (No Log Creation)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset store state
@@ -28,8 +32,8 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
       user_id: "default-user",
       name: "Test Task",
       status: "pending",
-      created_at: Date.now() - 1000,
-      updated_at: Date.now() - 1000,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now() - 1000,
     };
 
     mockDb.get.mockResolvedValueOnce(existingTask);
@@ -39,7 +43,6 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     const updated = await store.updateTask(
       taskId,
       { status: "completed" },
-      mockDb,
     );
 
     expect(updated.status).toBe("completed");
@@ -62,8 +65,8 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
       user_id: "default-user",
       name: "Test Task",
       status: "pending",
-      created_at: Date.now() - 1000,
-      updated_at: Date.now() - 1000,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now() - 1000,
     };
 
     mockDb.get.mockResolvedValueOnce(existingTask);
@@ -73,7 +76,6 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     const updated = await store.updateTask(
       taskId,
       { name: "Updated Task" },
-      mockDb,
     );
 
     expect(updated.name).toBe("Updated Task");
@@ -97,8 +99,8 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
       name: "Test Task",
       status: "completed",
       targetValue: 100,
-      created_at: Date.now() - 1000,
-      updated_at: Date.now() - 1000,
+      createdAt: Date.now() - 1000,
+      updatedAt: Date.now() - 1000,
     };
 
     mockDb.get.mockResolvedValueOnce(existingTask);
@@ -108,7 +110,6 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     const updated = await store.updateTask(
       taskId,
       { status: "pending" },
-      mockDb,
     );
 
     expect(updated.status).toBe("pending");

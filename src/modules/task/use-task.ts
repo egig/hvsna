@@ -1,10 +1,9 @@
+import { useEffect, useState } from "react";
 import type {
   Task,
   TaskCreateInput,
   TaskUpdateInput,
 } from "../../lib/types/task";
-import { useEffect, useState } from "react";
-import { usePouchDB } from "../../pouchdb";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
@@ -27,7 +26,6 @@ export interface UseTaskReturn {
 }
 
 export const useTask = (taskId?: string): UseTaskReturn => {
-  const { db } = usePouchDB();
   const store = useTaskStore();
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
@@ -38,7 +36,7 @@ export const useTask = (taskId?: string): UseTaskReturn => {
 
   useEffect(() => {
     if (taskId) {
-      store.getTask(taskId, db).then((fetchedTask) => {
+      store.getTask(taskId).then((fetchedTask) => {
         if (fetchedTask) {
           setTask(fetchedTask);
           // Update targetId if task has one
@@ -55,10 +53,10 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     input: TaskUpdateInput,
   ): Promise<Task> => {
     // Get the current task before updating to check status change
-    const currentTask = await store.getTask(id, db);
+    const currentTask = await store.getTask(id);
 
     // Update the task
-    const updatedTask = await store.updateTask(id, input, db);
+    const updatedTask = await store.updateTask(id, input);
 
     if (!input.targetId) {
       return updatedTask;
@@ -95,10 +93,10 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     task,
     loading: store.loading,
     error: store.error,
-    createTask: (input: TaskCreateInput) => store.createTask(input, db),
+    createTask: (input: TaskCreateInput) => store.createTask(input),
     updateTask: updateTaskWithLog,
-    deleteTask: (id: string) => store.deleteTask(id, db),
-    getTask: (id: string) => store.getTask(id, db),
+    deleteTask: (id: string) => store.deleteTask(id),
+    getTask: (id: string) => store.getTask(id),
     reset: () => setTask(null),
     // Form state management
     editingTaskId: store.editingTaskId,
