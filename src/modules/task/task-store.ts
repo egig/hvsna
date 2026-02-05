@@ -25,6 +25,9 @@ interface PouchDBTaskDocument {
   attributes?: Record<string, any>;
   hijriDate?: string;
   hour?: number;
+  hijriDateYear?: number;
+  hijriDateMonth?: number;
+  hijriDateDay?: number;
   minute?: number;
 }
 
@@ -132,14 +135,17 @@ export const useTaskStore = create<TaskState>()(
             name: input.name,
             status: input.status || "pending",
             scheduledAtEpochMillis: input.scheduledAtEpochMillis,
-            targetId: input.targetId,
-            targetValue: input.targetValue,
+            targetId: input.targetId || "",
+            targetValue: input.targetValue || 0,
             createdAt: now,
             updatedAt: now,
-            attributes: input.attributes,
-            hijriDate: input.hijriDate,
-            hour: input.hour,
-            minute: input.minute,
+            attributes: input.attributes || {},
+            hijriDate: input.hijriDate || "",
+            hour: input.hour || 0,
+            hijriDateYear: input.hijriDateYear || 0,
+            hijriDateMonth: input.hijriDateMonth || 0,
+            hijriDateDay: input.hijriDateDay || 0,
+            minute: input.minute || 0,
           };
 
           const doc: PouchDBTaskDocument = {
@@ -156,6 +162,9 @@ export const useTaskStore = create<TaskState>()(
             attributes: newTask.attributes,
             hijriDate: newTask.hijriDate,
             hour: newTask.hour,
+            hijriDateYear: newTask.hijriDateYear,
+            hijriDateMonth: newTask.hijriDateMonth,
+            hijriDateDay: newTask.hijriDateDay,
             minute: newTask.minute,
           };
 
@@ -217,7 +226,25 @@ export const useTaskStore = create<TaskState>()(
 
           if (input.hijriDate !== undefined) {
             updateData.hijriDate = input.hijriDate;
+          }
+
+          if (input.hour !== undefined) {
             updateData.hour = input.hour;
+          }
+
+          if (input.hijriDateYear !== undefined) {
+            updateData.hijriDateYear = input.hijriDateYear;
+          }
+
+          if (input.hijriDateMonth !== undefined) {
+            updateData.hijriDateMonth = input.hijriDateMonth;
+          }
+
+          if (input.hijriDateDay !== undefined) {
+            updateData.hijriDateDay = input.hijriDateDay;
+          }
+
+          if (input.minute !== undefined) {
             updateData.minute = input.minute;
           }
 
@@ -240,6 +267,9 @@ export const useTaskStore = create<TaskState>()(
             attributes: updatedDoc.attributes,
             hijriDate: updatedDoc.hijriDate,
             hour: updatedDoc.hour,
+            hijriDateYear: updatedDoc.hijriDateYear,
+            hijriDateMonth: updatedDoc.hijriDateMonth,
+            hijriDateDay: updatedDoc.hijriDateDay,
             minute: updatedDoc.minute,
           };
 
@@ -300,6 +330,9 @@ export const useTaskStore = create<TaskState>()(
             attributes: doc.attributes,
             hijriDate: doc.hijriDate,
             hour: doc.hour,
+            hijriDateYear: doc.hijriDateYear,
+            hijriDateMonth: doc.hijriDateMonth,
+            hijriDateDay: doc.hijriDateDay,
             minute: doc.minute,
           };
 
@@ -328,10 +361,17 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loading: true, error: null });
 
-
           await db.createIndex({
             index: {
-              fields: ["type", "scheduledAtEpochMillis"],
+              fields: [
+                "type",
+                "status",
+                "targetId",
+                "hijriDateYear",
+                "hijriDateMonth",
+                "hijriDateDay",
+                "scheduledAtEpochMillis",
+              ],
             },
           });
 
@@ -339,29 +379,40 @@ export const useTaskStore = create<TaskState>()(
           const mangoQuery: any = {
             selector: {
               type: "task",
+              status: "pending",
+              targetId: {
+                $gte: null,
+              },
+              hijriDateYear: {
+                $gte: null,
+              },
+              hijriDateMonth: {
+                $gte: null,
+              },
+              hijriDateDay: {
+                $gte: null,
+              },
+              scheduledAtEpochMillis: {
+                $gte: null,
+              },
             },
-            sort: [{type: "asc"}, { scheduledAtEpochMillis: "asc" }],
+            sort: [
+              { type: "asc" },
+              { status: "asc" },
+              { targetId: "asc" },
+              { hijriDateYear: "asc" },
+              { hijriDateMonth: "asc" },
+              { hijriDateDay: "asc" },
+              { scheduledAtEpochMillis: "asc" },
+            ],
           };
-
-          // Add filters to selector
-          if (query?.id) {
-            mangoQuery.selector._id = query.id;
-          }
 
           if (query?.status) {
             mangoQuery.selector.status = query.status;
           }
 
-          if (query?.scheduledAtEpochMillis) {
-            mangoQuery.selector.scheduledAtEpochMillis = query.scheduledAtEpochMillis;
-          }
-
           if (query?.targetId) {
             mangoQuery.selector.targetId = query.targetId;
-          }
-
-          if (query?.hijriDate) {
-            mangoQuery.selector.hijriDate = query.hijriDate;
           }
 
           const result = await db.find(mangoQuery);
@@ -377,6 +428,9 @@ export const useTaskStore = create<TaskState>()(
             updatedAt: doc.updatedAt,
             hijriDate: doc.hijriDate,
             hour: doc.hour,
+            hijriDateYear: doc.hijriDateYear,
+            hijriDateMonth: doc.hijriDateMonth,
+            hijriDateDay: doc.hijriDateDay,
             minute: doc.minute,
           }));
 
@@ -431,6 +485,9 @@ export const useTaskStore = create<TaskState>()(
             updatedAt: doc.updatedAt,
             hijriDate: doc.hijriDate,
             hour: doc.hour,
+            hijriDateYear: doc.hijriDateYear,
+            hijriDateMonth: doc.hijriDateMonth,
+            hijriDateDay: doc.hijriDateDay,
             minute: doc.minute,
           }));
 
@@ -474,7 +531,12 @@ export const useTaskStore = create<TaskState>()(
                 $gt: 0,
               },
             },
-            sort: [{ type: "asc" }, {hijriDate: "desc"}, { hour: "asc" }, { minute: "asc" }],
+            sort: [
+              { type: "asc" },
+              { hijriDate: "desc" },
+              { hour: "asc" },
+              { minute: "asc" },
+            ],
           };
 
           const result = await db.find(mangoQuery);
@@ -491,6 +553,9 @@ export const useTaskStore = create<TaskState>()(
             updatedAt: doc.updatedAt,
             hijriDate: doc.hijriDate,
             hour: doc.hour,
+            hijriDateYear: doc.hijriDateYear,
+            hijriDateMonth: doc.hijriDateMonth,
+            hijriDateDay: doc.hijriDateDay,
             minute: doc.minute,
           }));
 

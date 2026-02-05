@@ -144,7 +144,9 @@ export default function TaskForm({
 
       // Handle scheduledAtEpochMillis - convert date string to timestamp if provided
       if (taskData.scheduledAtEpochMillis) {
-        taskInput.scheduledAtEpochMillis = new Date(taskData.scheduledAtEpochMillis).getTime();
+        taskInput.scheduledAtEpochMillis = new Date(
+          taskData.scheduledAtEpochMillis,
+        ).getTime();
       }
 
       // Handle repeat - only include if not "none"
@@ -233,23 +235,6 @@ export default function TaskForm({
           setSelectedHijriDate(hijriDate);
         }}
       />
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Repeat
-        </label>
-        <select
-          name="repeat"
-          defaultValue={task?.repeat || "none"}
-          disabled={isSubmitting}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-        >
-          <option value="none">No repeat</option>
-          <option value="daily">Daily at selected time</option>
-          <option value="monthly">Monthly at selected date and time</option>
-          <option value="yearly">Yearly at selected date and time</option>
-        </select>
-      </div>
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

@@ -11,6 +11,9 @@ export interface Task {
   targetId?: string;
   hijriDate?: string;
   hour?: number;
+  hijriDateYear?: number;
+  hijriDateMonth?: number;
+  hijriDateDay?: number;
   minute?: number;
   lat?: number;
   long?: number;
@@ -31,6 +34,9 @@ export interface TaskCreateInput {
   targetValue?: number;
   attributes?: Record<string, string>;
   hijriDate: string;
+  hijriDateYear?: number;
+  hijriDateMonth?: number;
+  hijriDateDay?: number;
   hour?: number;
   minute?: number;
   lat?: number;
@@ -46,7 +52,9 @@ export interface TaskUpdateInput {
   targetValue?: number;
   attributes?: Record<string, string>;
   hijriDate?: string;
-
+  hijriDateYear?: number;
+  hijriDateMonth?: number;
+  hijriDateDay?: number;
   hour?: number;
   minute?: number;
   lat?: number;
@@ -62,9 +70,10 @@ export interface TaskChange {
 }
 
 export type TaskQuery = {
-  id?: string;
   status?: TaskStatus;
-  scheduledAtEpochMillis?: number;
   targetId?: string;
-  hijriDate?: string;
+  hijriDateYear?: number;
+  hijriDateMonth?: number;
+  hijriDateDay?: number;
+  scheduledAtEpochMillis?: number;
 };

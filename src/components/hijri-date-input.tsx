@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { HijriDate, HijriMonth } from "../lib/hijri";
 import { Modal } from "../modules/navigation/modal";
+import { HIJRI_MONTH_NAMES_EN } from "src/lib/hijri-months";
 
 interface HijriDateInputProps {
   name: string;
@@ -250,6 +251,30 @@ function CalendarModal({
                   {i.toString().padStart(2, "0")}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Repeat
+            </label>
+            <select
+              name="repeat"
+              defaultValue={"none"}
+              disabled={false}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="none">No repeat</option>
+              <option value="daily">
+                Daily at {selectedHour}:{selectedMinute}
+              </option>
+              <option value="monthly">
+                Monthly on {tempSelectedDate?.day}
+              </option>
+              <option value="yearly">
+                Yearly on {tempSelectedDate?.day}{" "}
+                {HIJRI_MONTH_NAMES_EN[tempSelectedDate?.month || 0 - 1]}
+              </option>
             </select>
           </div>
         </div>
