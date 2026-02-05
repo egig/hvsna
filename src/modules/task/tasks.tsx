@@ -8,6 +8,7 @@ import TaskForm from "./task-form";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
+import { useTaskStore } from "./task-store";
 
 export default function Tasks() {
   const {
@@ -23,26 +24,13 @@ export default function Tasks() {
   } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-
-  const openAddPopup = () => {
-    // Reset form first, then open sheet
-    // Use setTimeout to ensure state is set before opening sheet
-    setEditingTaskId(null);
-    setTimeout(() => setSheetOpened(true), 0);
-  };
+  const { openTaskForm, setEditingTaskId } = useTaskStore();
 
   const openEditPopup = (task: Task) => {
-    setEditingTaskId(task.id);
-    setSheetOpened(true);
-  };
-
-  const closePopup = () => {
-    setSheetOpened(false);
+    openTaskForm(task.id);
   };
 
   const handleTaskSuccess = () => {
-    setSheetOpened(false);
     refreshTasks();
   };
 
@@ -51,16 +39,15 @@ export default function Tasks() {
   };
 
   const handleTaskCancel = () => {
-    setSheetOpened(false);
+    openTaskForm();
   };
 
   const handleDeleteTask = async (task: Task) => {
     try {
       await deleteTask(task.id);
       refreshTasks();
-      setSheetOpened(false);
+      setEditingTaskId(null);
     } catch (err) {
-      console.error("Failed to delete task:", err);
       alert("Failed to delete task. Please try again.");
     }
   };
@@ -141,13 +128,6 @@ export default function Tasks() {
             <p className="text-gray-500 dark:text-gray-500 mb-4">
               Create your first task to get started!
             </p>
-            <button
-              onClick={openAddPopup}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
-            >
-              <PlusIcon size={16} />
-              Create Task
-            </button>
           </div>
         )}
 

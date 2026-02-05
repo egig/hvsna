@@ -108,7 +108,7 @@ export const useTaskStore = create<TaskState>()(
       // Actions for form state
       setEditingTaskId: (editingTaskId) => set({ editingTaskId }),
       setFormOpen: (formOpen) => set({ formOpen }),
-      openTaskForm: (taskId) =>
+      openTaskForm: (taskId?: string) =>
         set({ editingTaskId: taskId || null, formOpen: true }),
       closeTaskForm: () => set({ editingTaskId: null, formOpen: false }),
 

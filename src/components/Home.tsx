@@ -49,17 +49,17 @@ function TodayTasks({ tasks }: TodayTasksProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <>
       {tasks.map((task) => (
         <TaskListItem
           key={task.id}
           task={task}
           onEdit={handleEditTask}
           showGoalInfo={false}
-          className="border rounded-lg transition-all hover:shadow-sm"
+          className="transition-all hover:shadow-sm"
         />
       ))}
-    </div>
+    </>
   );
 }
 
@@ -276,13 +276,7 @@ export function Home() {
         </Block>
       )}
 
-      {/* Today's Tasks Section */}
-      <Block>
-        <BlockTitle extra={<ClockIcon size={16} className="text-blue-500" />}>
-          Today's Tasks
-        </BlockTitle>
-        <TodayTasks tasks={todayTasks} />
-      </Block>
+      <TodayTasks tasks={todayTasks} />
     </Page>
   );
 }

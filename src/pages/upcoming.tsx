@@ -175,7 +175,7 @@ export default function Upcoming() {
         )}
 
         {!loading && !error && upcomingTasks.length > 0 && (
-          <div className="space-y-6 p-4">
+          <div className="space-y-6">
             {[
               { key: "today", label: "Today" },
               { key: "tomorrow", label: "Tomorrow" },
@@ -189,19 +189,18 @@ export default function Upcoming() {
               )
               .map(({ key, label }) => (
                 <div key={key}>
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-3">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
                     {label}
                   </h3>
-                  <div className="space-y-2">
+                  <>
                     {taskGroups[key].map((task: Task) => (
                       <TaskListItem
                         key={task.id}
                         task={task}
                         onEdit={handleEditTask}
-                        className="border rounded-lg transition-all hover:shadow-sm"
                       />
                     ))}
-                  </div>
+                  </>
                 </div>
               ))}
           </div>
