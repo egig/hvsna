@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTasks } from "../modules/task/use-tasks";
+import { useTasks } from "../hooks/use-tasks";
 import { useTask } from "../modules/task/use-task";
 import { CalendarIcon } from "lucide-react";
 import type { Task } from "../lib/types/task";

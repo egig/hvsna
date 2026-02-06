@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CheckCircleIcon, CircleIcon } from "lucide-react";
 import type { Task, TaskStatus } from "src/lib/types/task";
 import { useGoal } from "../modules/goal/use-goal";
 import { HijriDate } from "src/lib/hijri";
+import { useTaskListItem } from "src/modules/task/task-list-item-hook";
 
 interface TaskListItemProps {
   task: Task;
@@ -20,6 +21,8 @@ export function TaskListItem({
   className,
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
+
+  const { updateStatus } = useTaskListItem();
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
@@ -76,10 +79,12 @@ export function TaskListItem({
 
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onStatusChange) {
-      const nextStatus = getNextStatus(task.status);
-      onStatusChange(task, nextStatus);
-    }
+    const nextStatus = getNextStatus(task.status);
+    updateStatus(task.id, nextStatus).then(() => {
+      if (onStatusChange) {
+        onStatusChange(task, nextStatus);
+      }
+    });
   };
 
   const handleItemClick = () => {
@@ -93,21 +98,14 @@ export function TaskListItem({
       className={`w-full p-3 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
       onClick={handleItemClick}
     >
-      <div className="flex items-start gap-2">
-        {/* Checkbox/Status Button */}
-        {onStatusChange ? (
-          <button
-            onClick={handleStatusClick}
-            className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
-            aria-label={`Change status from ${task.status}`}
-          >
-            {getStatusIcon(task.status)}
-          </button>
-        ) : (
-          <div className="flex-shrink-0 mt-0.5">
-            {getStatusIcon(task.status)}
-          </div>
-        )}
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={handleStatusClick}
+          className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
+          aria-label={`Change status from ${task.status}`}
+        >
+          {getStatusIcon(task?.status || "pending")}
+        </button>
 
         {/* Task Name and Description */}
         <div className="flex-1 min-w-0">
@@ -117,6 +115,13 @@ export function TaskListItem({
           >
             {task.name}
           </h3>
+
+          {/* Description */}
+          {task.description && (
+            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+              {task.description}
+            </p>
+          )}
 
           {/* Description (Goal Info) */}
           {getTargetInfo(goal) && (

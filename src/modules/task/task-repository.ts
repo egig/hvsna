@@ -290,7 +290,7 @@ export class TaskRepository {
 
     const mangoQuery = {
       selector: {
-        _id: { $regex: "^task_" },
+        type: "task",
         scheduledAtEpochMillis: {
           $gte: startDate.getTime(),
           $lte: endDate.getTime(),
@@ -345,7 +345,7 @@ export class TaskRepository {
   ): Promise<Task[]> {
     const mangoQuery = {
       selector: {
-        _id: { $regex: "^task_" },
+        type: "task",
       },
       sort: [{ _id: "asc" }],
       limit,
@@ -371,6 +371,7 @@ export class TaskRepository {
   }
 
   async findTodayTasks(): Promise<Task[]> {
+    // TODO tomorrow is sunset or not ?
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);

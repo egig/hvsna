@@ -18,9 +18,12 @@ interface TaskState {
   formOpen: boolean;
 
   todayTasks: Task[];
+  upcommingTasks: Task[];
+  browseTasks: Task[];
 
   // Multiple tasks state (for useTasks hook)
   tasks: Task[];
+  taskCache: Record<string, Task>;
   loadingMore: boolean;
   hasMore: boolean;
   offset: number;
@@ -61,6 +64,8 @@ interface TaskState {
   loadMoreTasks: () => Promise<void>;
 
   loadTodayTasks: () => Promise<void>;
+  loadUpcommingTasks: () => Promise<void>;
+  loadBrowseTasks: () => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -75,6 +80,9 @@ export const useTaskStore = create<TaskState>()(
       hasMore: true,
       offset: 0,
       todayTasks: [],
+      upcommingTasks: [],
+      browseTasks: [],
+      taskCache: {},
 
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
@@ -143,7 +151,7 @@ export const useTaskStore = create<TaskState>()(
           set({ loading: true, error: null });
 
           const updatedTask = await taskRepository.update(id, input);
-          get().updateTaskInList(id, updatedTask);
+          get().loadTodayTasks();
 
           return updatedTask;
         } catch (err) {
@@ -162,6 +170,7 @@ export const useTaskStore = create<TaskState>()(
 
           await taskRepository.delete(id);
           get().removeTaskFromList(id);
+          get().loadTodayTasks();
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to delete task";
@@ -173,10 +182,17 @@ export const useTaskStore = create<TaskState>()(
       },
 
       getTask: async (id: string): Promise<Task | null> => {
+        let t = get().taskCache[id];
+        if (!!t) {
+          return t;
+        }
+
         try {
           set({ loading: true, error: null });
-
           const task = await taskRepository.findById(id);
+          let tc = Object.assign(get().taskCache, { [id]: task as Task });
+          set({ taskCache: tc });
+
           return task;
         } catch (err) {
           const errorMessage =
@@ -274,9 +290,29 @@ export const useTaskStore = create<TaskState>()(
       loadTodayTasks: async (): Promise<void> => {
         try {
           set({ loading: true, error: null });
-
           const todayTasksList = await taskRepository.findTodayTasks();
-          set({ todayTasks: todayTasksList });
+          let tc = Object.fromEntries(
+            todayTasksList.map((task) => [task.id, task]),
+          );
+          set({ todayTasks: todayTasksList, taskCache: tc });
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to load today's tasks";
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      loadUpcomingTasks: async (): Promise<void> => {
+        try {
+          set({ loading: true, error: null });
+          const todayTasksList = await taskRepository.findTodayTasks();
+          let tc = Object.fromEntries(
+            todayTasksList.map((task) => [task.id, task]),
+          );
+          set({ todayTasks: todayTasksList, taskCache: tc });
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to load today's tasks";

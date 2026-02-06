@@ -1,4 +1,3 @@
-import { useToday } from "../hooks/use-today";
 import { useTask } from "../modules/task/use-task";
 import { LogItem } from "./log-item";
 import type { Log } from "src/lib/tracker/types";
@@ -12,6 +11,7 @@ import type { Task } from "../lib/types/task";
 import TaskListItem from "./task-list-item";
 import { formatValue } from "src/lib/format";
 import type { TargetResultData } from "../hooks/useTargetResults";
+import { useToday } from "src/hooks/use-today";
 
 interface TodayTasksProps {
   tasks: Task[];

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useTasks } from "./use-tasks";
+import { useTasks } from "../../hooks/use-tasks";
 import { PlusIcon, Plus, Check, Settings } from "lucide-react";
-import type { Task, TaskStatus } from "src/lib/types/task";
+import type { Task } from "src/lib/types/task";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
@@ -20,7 +20,6 @@ export default function Tasks() {
     deleteTask,
     refreshTasks,
     loadMoreTasks,
-    updateStatus,
   } = useTasks();
   const allowInfinite = useRef(true);
   const [sheetOpened, setSheetOpened] = useState(false);
@@ -56,16 +55,6 @@ export default function Tasks() {
     const task = tasks.find((t) => t.id === taskId);
     if (task) {
       await handleDeleteTask(task);
-    }
-  };
-
-  const handleStatusChange = async (task: Task, newStatus: TaskStatus) => {
-    try {
-      await updateStatus(task.id, newStatus);
-      refreshTasks();
-    } catch (err) {
-      console.error("Failed to update task status:", err);
-      alert("Failed to update task status. Please try again.");
     }
   };
 
@@ -134,12 +123,7 @@ export default function Tasks() {
         {!loading && !error && tasks.length > 0 && (
           <>
             {tasks.map((task) => (
-              <TaskListItem
-                key={task.id}
-                task={task}
-                onStatusChange={handleStatusChange}
-                onEdit={openEditPopup}
-              />
+              <TaskListItem key={task.id} task={task} onEdit={openEditPopup} />
             ))}
           </>
         )}
