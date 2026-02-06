@@ -128,6 +128,7 @@ export const useTaskStore = create<TaskState>()(
 
           const newTask = await taskRepository.create(input);
           get().addTask(newTask);
+          get().loadTodayTasks()
 
           return newTask;
         } catch (err) {

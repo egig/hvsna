@@ -177,12 +177,10 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
 export function Home() {
   const { db } = usePouchDB();
   const { getTargetResults } = useTargetResults();
-  const { getLogsFromDB } = useLogStore();
   const { getTrackers } = useTrackers();
   const { getTasksByHijriDate } = useTasks();
 
   const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
-  const [recentLogs, setRecentLogs] = useState<Log[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +209,7 @@ export function Home() {
         const todayHijri = HijriDate.fromDate(new Date());
         const formattedHijriDate = `${todayHijri.year.toString().padStart(4, "0")}${todayHijri.month.toString().padStart(2, "0")}${todayHijri.day.toString().padStart(2, "0")}`;
 
-        const [results, logs, trackersData, tasks] = await Promise.all([
+        const [results, trackersData, tasks] = await Promise.all([
           getTargetResults(
             {
               from: thirtyDaysAgo,
@@ -219,13 +217,11 @@ export function Home() {
             },
             db,
           ),
-          getLogsFromDB({ limit: 10 }, db),
           getTrackers(),
           getTasksByHijriDate(formattedHijriDate),
         ]);
 
         setTargetResults(results);
-        setRecentLogs(logs);
         setTrackers(trackersData);
         setTodayTasks(tasks);
       } catch (err) {

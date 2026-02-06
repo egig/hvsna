@@ -1,12 +1,10 @@
-import { useState, useEffect } from "react";
-import { useTask } from "./use-task";
+import { useState, useEffect, useRef } from "react";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { ArrowUp, Trash2 } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
-import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import type { Tracker } from "../tracker/trackerStore";
@@ -14,6 +12,7 @@ import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 import { HijriDateInput } from "../../components/hijri-date-input";
 import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
+import { useTaskForm } from "./task-form-hook";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -31,72 +30,41 @@ export default function TaskForm({
   onDelete,
 }: TaskFormProps) {
   const {
-    task,
-    editingTaskId,
-    loading,
     error,
-    createTask,
-    updateTask,
-    getTask,
-    reset,
-    closeTaskForm,
-    deleteTask,
-    setEditingTaskId,
-  } = useTask(taskId || undefined);
+    task,
+    handleSubmit,
+    handleDelete,
+    selectedHijriDate,
+    setSelectedHijriDate,
+    selectedTargetId,
+    setSelectedTargetId,
+    isSubmitting,
+    selectedGoal,
+    trackerAttributes
+  } = useTaskForm(taskId || undefined, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
-  const { createRecurringTask } = useRecurringTasks();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>(
-    task?.targetId as string,
-  );
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [tracker, setTracker] = useState<Tracker | null>(null);
-  const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
-  const { getTracker } = useTracker();
-  const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate>();
-  const goalEnabled = useFeatureFlag("TASk_GOAL");
+  const { tracker } = useTracker(selectedGoal?.trackerId);
+  const goalEnabled = useFeatureFlag("TASK_GOAL");
+  
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setEditingTaskId(taskId || null);
-  }, [taskId]);
-
-  useEffect(() => {
-    if (task?.hijriDate) {
-      // Parse YYYYMMDD format
-      const year = parseInt(task.hijriDate.substring(0, 4));
-      const month = parseInt(task.hijriDate.substring(4, 6));
-      const day = parseInt(task.hijriDate.substring(6, 8));
-
-      setSelectedHijriDate(
-        new HijriDate(year, month, day, task.hour, task.minute),
-      );
+    // Focus the name input when the form opens
+    if (nameInputRef.current) {
+      nameInputRef.current.focus();
     }
-  }, [task]);
-
+  }, []);
+  
   useEffect(() => {
     if (error && onError) {
       onError(error);
     }
   }, [error, onError]);
 
-  useEffect(() => {
-    setSelectedTargetId(task?.targetId || "");
-  }, [task]);
-
-  useEffect(() => {
-    const goal = goals.find((g) => g.id === selectedTargetId);
-    setSelectedGoal(goal || null);
-
-    if (goal) {
-      getTracker(goal?.trackerId as string).then((tr) => {
-        setTracker(tr);
-      });
-    }
-  }, [selectedTargetId, goals]);
 
   // Helper function to get attribute by ID
-  const getAttributeById = (attributeId: string): any | undefined => {
-    return trackerAttributes.find((attr) => attr.id === attributeId);
+  const getAttributeById = (attributeId: string): any => {
+    return trackerAttributes.find((attr: any) => attr.id === attributeId);
   };
 
   // Helper function to render attribute input using CustomAttributeInput
@@ -113,135 +81,8 @@ export default function TaskForm({
     );
   };
 
-  const handleSubmit = async (formData: FormData) => {
-    const taskData = Object.fromEntries(formData) as unknown as Task;
-
-    if (selectedHijriDate) {
-      const year = selectedHijriDate.year.toString().padStart(4, "0");
-      const month = selectedHijriDate.month.toString().padStart(2, "0");
-      const day = selectedHijriDate.day.toString().padStart(2, "0");
-      taskData.hijriDate = `${year}${month}${day}`;
-
-      taskData.hour = selectedHijriDate?.hour;
-      taskData.minute = selectedHijriDate?.minute;
-      // @ts-ignore
-      taskData.scheduledAtEpochMillis = selectedHijriDate?.toDate().valueOf();
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      // Extract scope values from form data
-      var attr: Record<string, any> = {};
-      if (selectedGoal?.scope) {
-        for (let i = 0; i < selectedGoal.scope.length; i++) {
-          const attributeId = selectedGoal.scope[i];
-          let value = formData.get(attributeId) as string;
-          attr[attributeId] = value;
-        }
-      }
-
-      if (tracker?.type === "counter") {
-        taskData.targetValue = 1;
-      }
-
-      if (tracker?.negative) {
-        taskData.targetValue = -1 * (taskData.targetValue || 0);
-      }
-
-      const taskInput: any = {
-        name: taskData.name.trim(),
-        targetId: taskData.targetId,
-        targetValue: taskData.targetValue,
-        attributes: attr,
-        hijriDate: taskData.hijriDate,
-        hour: taskData.hour,
-        minute: taskData.minute,
-      };
-
-      // Handle scheduledAtEpochMillis - convert date string to timestamp if provided
-      if (taskData.scheduledAtEpochMillis) {
-        taskInput.scheduledAtEpochMillis = new Date(
-          taskData.scheduledAtEpochMillis,
-        ).getTime();
-      }
-
-      // Handle repeat - only include if not "none"
-      if (taskData.repeat && taskData.repeat !== "none") {
-        taskInput.repeat = taskData.repeat;
-      }
-
-      if (selectedTargetId) {
-        taskInput.targetId = selectedTargetId;
-      }
-
-      let result: Task;
-      if (taskId) {
-        result = await updateTask(taskId, taskInput);
-      } else {
-        result = await createTask(taskInput);
-      }
-
-      // Create recurring task if repeat is selected and not "none"
-      if (
-        taskData.repeat &&
-        taskData.repeat !== "none" &&
-        taskInput.scheduledAtEpochMillis
-      ) {
-        try {
-          await createRecurringTask({
-            name: taskInput.name,
-            targetId: taskInput.targetId,
-            targetValue: taskInput.targetValue,
-            attributes: taskInput.attributes,
-            repeat: taskData.repeat,
-            baseDate: taskInput.scheduledAtEpochMillis,
-          });
-        } catch (recurringError) {
-          console.error("Failed to create recurring task:", recurringError);
-          // Don't fail the main task creation if recurring task creation fails
-        }
-      }
-
-      reset();
-      closeTaskForm();
-
-      if (onSuccess) {
-        onSuccess(result);
-      }
-    } catch (err) {
-      console.error(err);
-      // Error is handled by the hook and passed through onError
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    closeTaskForm();
-    if (onCancel) {
-      onCancel();
-    }
-  };
-
-  const handleDelete = () => {
-    if (taskId && task) {
-      if (
-        confirm(
-          `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
-        )
-      ) {
-        deleteTask(taskId).then(() => {
-          reset();
-          closeTaskForm();
-          onDelete?.(taskId);
-        });
-      }
-    }
-  };
 
   return (
-
     <form
       className="h-[100%]"
       onSubmit={async (e) => {
@@ -251,16 +92,21 @@ export default function TaskForm({
       }}
     >
       <input
+        ref={nameInputRef}
         name="name"
         defaultValue={task ? task.name : ""}
         placeholder="Task name"
         disabled={isSubmitting}
         required={true}
-        className="text-base outline-none px-4 py-2 text-lg w-[100%]"
+        className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
       />
-      <textarea placeholder="Description" className="text-sm px-4 py-2 w-[100%] outline-none">
-        
-      </textarea>
+      <textarea 
+        name="attributes" 
+        placeholder="Description" 
+        className="text-sm px-4 h-[3rem] py-2 w-[100%] outline-none"
+        defaultValue={task?.attributes?.description || ""}
+        disabled={isSubmitting}
+      />
 
       <HijriDateInput
         name="scheduledAtEpochMillis"
@@ -313,7 +159,7 @@ export default function TaskForm({
             />
           )}
 
-          {selectedGoal?.scope?.map((attributeId, index) => {
+          {selectedGoal?.scope?.map((attributeId: string, index: number) => {
             const attribute = getAttributeById(attributeId);
             if (!attribute) {
               // Fallback to basic text input if attribute not found

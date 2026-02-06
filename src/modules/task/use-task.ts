@@ -27,6 +27,10 @@ export interface UseTaskReturn {
 
 export const useTask = (taskId?: string): UseTaskReturn => {
   const store = useTaskStore();
+  const getTask = useTaskStore(s => s.getTask);
+  const createTask = useTaskStore(s => s.getTask);
+  const updateTask = useTaskStore(s => s.updateTask);
+
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
@@ -36,7 +40,7 @@ export const useTask = (taskId?: string): UseTaskReturn => {
 
   useEffect(() => {
     if (taskId) {
-      store.getTask(taskId).then((fetchedTask) => {
+      getTask(taskId).then((fetchedTask) => {
         if (fetchedTask) {
           setTask(fetchedTask);
           // Update targetId if task has one
@@ -53,10 +57,10 @@ export const useTask = (taskId?: string): UseTaskReturn => {
     input: TaskUpdateInput,
   ): Promise<Task> => {
     // Get the current task before updating to check status change
-    const currentTask = await store.getTask(id);
+    const currentTask = await getTask(id);
 
     // Update the task
-    const updatedTask = await store.updateTask(id, input);
+    const updatedTask = await updateTask(id, input);
 
     if (!input.targetId) {
       return updatedTask;

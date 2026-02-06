@@ -91,7 +91,7 @@ export class TaskRepository {
   }
 
   async create(input: TaskCreateInput): Promise<Task> {
-    const now = Date.now();
+    const now = Date.now().valueOf();
 
     const newTask: Task = {
       id: `task_${crypto.randomUUID()}`,
@@ -302,8 +302,7 @@ export class TaskRepository {
   async findByHijriDate(hijriDate: string): Promise<Task[]> {
     await (db as any).createIndex({
       index: {
-        fields: ["type", "hijriDate", "hour", "minute"],
-        ddoc: "tasks",
+        fields: ["type", "hijriDate", "hour", "minute"]
       },
     });
 
@@ -366,16 +365,22 @@ export class TaskRepository {
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    await db.createIndex({
+      index: {
+        fields: ["type", "scheduledAtEpochMillis"]
+      }
+    })
 
     const mangoQuery = {
       selector: {
-        _id: { $regex: "^task_" },
+        type: "task",
         scheduledAtEpochMillis: {
           $gte: today.getTime(),
           $lt: tomorrow.getTime(),
         },
       },
-      sort: [{ scheduledAtEpochMillis: "asc" }],
+      sort: [{type: "asc"},{ scheduledAtEpochMillis: "asc" }],
     };
 
     const result = await (db as any).find(mangoQuery);
