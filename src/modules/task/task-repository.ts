@@ -433,6 +433,32 @@ export class TaskRepository {
       this.mapDocumentToTask(doc),
     );
   }
+
+  async findBrowsedTasks(): Promise<Task[]> {
+    // TODO filter by various params
+    await db.createIndex({
+      index: {
+        fields: ["type", "scheduledAtEpochMillis"],
+      },
+    });
+
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        status: { $gte: null },
+        scheduledAtEpochMillis: {
+          $gte: 0,
+        },
+      },
+      sort: [{ type: "asc" }, { scheduledAtEpochMillis: "asc" }],
+    };
+
+    const result = await (db as any).find(mangoQuery);
+
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      this.mapDocumentToTask(doc),
+    );
+  }
 }
 
 // Export singleton instance

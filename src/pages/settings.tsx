@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
-import { LogIn, Trash, Cog } from "lucide-react";
+import { LogIn, Trash, Cog, Info } from "lucide-react";
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";
 import { Navbar } from "../modules/navigation";
@@ -14,6 +14,13 @@ export default function Settings() {
           subtitle="General application settings"
           icon={Cog}
           to="/general-settings"
+        />
+
+        <MenuItem
+          title="About"
+          subtitle="About the app"
+          icon={Info}
+          to="/about"
         />
 
         <MenuItem

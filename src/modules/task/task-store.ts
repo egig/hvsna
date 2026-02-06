@@ -19,7 +19,7 @@ interface TaskState {
 
   todayTasks: Task[];
   upcommingTasks: Task[];
-  browseTasks: Task[];
+  browsedTasks: Task[];
 
   // Multiple tasks state (for useTasks hook)
   tasks: Task[];
@@ -65,7 +65,7 @@ interface TaskState {
 
   loadTodayTasks: () => Promise<void>;
   loadUpcommingTasks: () => Promise<void>;
-  loadBrowseTasks: () => Promise<void>;
+  loadBrowsedTasks: () => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -81,7 +81,7 @@ export const useTaskStore = create<TaskState>()(
       offset: 0,
       todayTasks: [],
       upcommingTasks: [],
-      browseTasks: [],
+      browsedTasks: [],
       taskCache: {},
 
       setLoading: (loading) => set({ loading }),
@@ -135,6 +135,7 @@ export const useTaskStore = create<TaskState>()(
           get().addTask(newTask);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
+          get().loadBrowsedTasks();
 
           return newTask;
         } catch (err) {
@@ -154,6 +155,7 @@ export const useTaskStore = create<TaskState>()(
           const updatedTask = await taskRepository.update(id, input);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
+          get().loadBrowsedTasks();
 
           return updatedTask;
         } catch (err) {
@@ -174,6 +176,7 @@ export const useTaskStore = create<TaskState>()(
           get().removeTaskFromList(id);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
+          get().loadBrowsedTasks();
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to delete task";
@@ -321,6 +324,24 @@ export const useTaskStore = create<TaskState>()(
             err instanceof Error
               ? err.message
               : "Failed to load upcoming tasks";
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      loadBrowsedTasks: async (): Promise<void> => {
+        try {
+          set({ loading: true, error: null });
+          const browsedTasksList = await taskRepository.findBrowsedTasks();
+          let tc = Object.fromEntries(
+            browsedTasksList.map((task) => [task.id, task]),
+          );
+          set({ browsedTasks: browsedTasksList, taskCache: tc });
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to load browsed tasks";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {

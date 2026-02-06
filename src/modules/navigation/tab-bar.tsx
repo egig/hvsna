@@ -9,6 +9,7 @@ import {
   List,
   SquareLibrary,
   CalendarClock,
+  Info,
 } from "lucide-react";
 
 const tabs = [

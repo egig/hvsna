@@ -1,14 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import { useTasks } from "../../hooks/use-tasks";
+import { useState } from "react";
 import { PlusIcon, Plus, Check, Settings } from "lucide-react";
-import type { Task } from "src/lib/types/task";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
-import { useTask } from "./use-task";
+import { useTasksState } from "./use-tasks-state";
 
 export default function Tasks() {
   const {
@@ -17,67 +15,16 @@ export default function Tasks() {
     loadingMore,
     error,
     hasMore,
-    deleteTask,
     refreshTasks,
-    loadMoreTasks,
-  } = useTasks();
-  const allowInfinite = useRef(true);
+    openEditPopup,
+    handleTaskSuccess,
+    handleTaskError,
+    handleTaskCancel,
+    handleDeleteTask,
+    handleDeleteTaskById,
+    handleInfiniteScroll,
+  } = useTasksState();
   const [sheetOpened, setSheetOpened] = useState(false);
-  const { openTaskForm, setEditingTaskId } = useTask();
-
-  const openEditPopup = (task: Task) => {
-    openTaskForm(task.id);
-  };
-
-  const handleTaskSuccess = () => {
-    refreshTasks();
-  };
-
-  const handleTaskError = (errorMessage: string) => {
-    alert(errorMessage);
-  };
-
-  const handleTaskCancel = () => {
-    openTaskForm();
-  };
-
-  const handleDeleteTask = async (task: Task) => {
-    try {
-      await deleteTask(task.id);
-      refreshTasks();
-      setEditingTaskId(null);
-    } catch (err) {
-      alert("Failed to delete task. Please try again.");
-    }
-  };
-
-  const handleDeleteTaskById = async (taskId: string) => {
-    const task = tasks.find((t) => t.id === taskId);
-    if (task) {
-      await handleDeleteTask(task);
-    }
-  };
-
-  const handleInfiniteScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (!allowInfinite.current) return;
-
-    // Don't load more if already loading or no more data
-    if (loadingMore || !hasMore) {
-      allowInfinite.current = false;
-      return;
-    }
-
-    const element = e.currentTarget;
-    const { scrollTop, scrollHeight, clientHeight } = element;
-
-    // Load more when user is within 100px of the bottom
-    if (scrollHeight - scrollTop - clientHeight < 100) {
-      allowInfinite.current = false;
-      loadMoreTasks().finally(() => {
-        allowInfinite.current = true;
-      });
-    }
-  };
 
   return (
     <Page>
