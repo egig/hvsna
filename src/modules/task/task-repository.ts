@@ -14,6 +14,7 @@ interface PouchDBTaskDocument {
   type: "task";
   userId?: string;
   name: string;
+  description?: string;
   status: TaskStatus;
   scheduledAtEpochMillis?: number;
   targetId?: string;
@@ -52,6 +53,7 @@ export class TaskRepository {
       id: doc._id,
       userId: doc.userId,
       name: doc.name,
+      description: doc.description,
       status: doc.status,
       scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
       targetId: doc.targetId,
@@ -96,6 +98,7 @@ export class TaskRepository {
     const newTask: Task = {
       id: `task_${crypto.randomUUID()}`,
       name: input.name,
+      description: input.description,
       status: input.status || "pending",
       targetId: input.targetId || "",
       targetValue: input.targetValue || 0,
@@ -146,6 +149,10 @@ export class TaskRepository {
 
     if (input.name !== undefined) {
       updateData.name = input.name;
+    }
+
+    if (input.description !== undefined) {
+      updateData.description = input.description;
     }
 
     if (input.status !== undefined) {
@@ -199,11 +206,11 @@ export class TaskRepository {
 
   async delete(id: string): Promise<void> {
     const doc: PouchDBTaskDocument = await (db as any).get(id);
-    
+
     if (!doc._rev) {
       throw new Error("Document revision is required for deletion");
     }
-    
+
     await (db as any).remove(doc as any);
   }
 
@@ -270,8 +277,8 @@ export class TaskRepository {
 
     const result = await (db as any).find(mangoQuery);
 
-    return (result as any).docs.map((doc: PouchDBTaskDocument) => 
-      this.mapDocumentToTask(doc)
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      this.mapDocumentToTask(doc),
     );
   }
 
@@ -294,15 +301,15 @@ export class TaskRepository {
 
     const result = await (db as any).find(mangoQuery);
 
-    return (result as any).docs.map((doc: PouchDBTaskDocument) => 
-      this.mapDocumentToTask(doc)
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      this.mapDocumentToTask(doc),
     );
   }
 
   async findByHijriDate(hijriDate: string): Promise<Task[]> {
     await (db as any).createIndex({
       index: {
-        fields: ["type", "hijriDate", "hour", "minute"]
+        fields: ["type", "hijriDate", "hour", "minute"],
       },
     });
 
@@ -327,12 +334,15 @@ export class TaskRepository {
 
     const result = await (db as any).find(mangoQuery);
 
-    return (result as any).docs.map((doc: PouchDBTaskDocument) => 
-      this.mapDocumentToTask(doc)
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      this.mapDocumentToTask(doc),
     );
   }
 
-  async findWithPagination(offset: number, limit: number = 20): Promise<Task[]> {
+  async findWithPagination(
+    offset: number,
+    limit: number = 20,
+  ): Promise<Task[]> {
     const mangoQuery = {
       selector: {
         _id: { $regex: "^task_" },
@@ -365,12 +375,12 @@ export class TaskRepository {
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     await db.createIndex({
       index: {
-        fields: ["type", "scheduledAtEpochMillis"]
-      }
-    })
+        fields: ["type", "scheduledAtEpochMillis"],
+      },
+    });
 
     const mangoQuery = {
       selector: {
@@ -380,13 +390,13 @@ export class TaskRepository {
           $lt: tomorrow.getTime(),
         },
       },
-      sort: [{type: "asc"},{ scheduledAtEpochMillis: "asc" }],
+      sort: [{ type: "asc" }, { scheduledAtEpochMillis: "asc" }],
     };
 
     const result = await (db as any).find(mangoQuery);
 
-    return (result as any).docs.map((doc: PouchDBTaskDocument) => 
-      this.mapDocumentToTask(doc)
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      this.mapDocumentToTask(doc),
     );
   }
 }

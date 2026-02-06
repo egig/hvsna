@@ -27,9 +27,9 @@ export interface UseTaskReturn {
 
 export const useTask = (taskId?: string): UseTaskReturn => {
   const store = useTaskStore();
-  const getTask = useTaskStore(s => s.getTask);
-  const createTask = useTaskStore(s => s.getTask);
-  const updateTask = useTaskStore(s => s.updateTask);
+  const getTask = useTaskStore((s) => s.getTask);
+  const createTask = useTaskStore((s) => s.getTask);
+  const updateTask = useTaskStore((s) => s.updateTask);
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);

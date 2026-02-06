@@ -40,10 +40,7 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     mockDb.put.mockResolvedValueOnce({ rev: "2-rev" });
 
     const store = useTaskStore.getState();
-    const updated = await store.updateTask(
-      taskId,
-      { status: "completed" },
-    );
+    const updated = await store.updateTask(taskId, { status: "completed" });
 
     expect(updated.status).toBe("completed");
 
@@ -73,10 +70,7 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     mockDb.put.mockResolvedValueOnce({ rev: "2-rev" });
 
     const store = useTaskStore.getState();
-    const updated = await store.updateTask(
-      taskId,
-      { name: "Updated Task" },
-    );
+    const updated = await store.updateTask(taskId, { name: "Updated Task" });
 
     expect(updated.name).toBe("Updated Task");
 
@@ -107,10 +101,7 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     mockDb.put.mockResolvedValueOnce({ rev: "2-rev" });
 
     const store = useTaskStore.getState();
-    const updated = await store.updateTask(
-      taskId,
-      { status: "pending" },
-    );
+    const updated = await store.updateTask(taskId, { status: "pending" });
 
     expect(updated.status).toBe("pending");
 

@@ -5,6 +5,7 @@ export interface Task {
   id: string;
   userId?: string;
   name: string;
+  description?: string;
   status: TaskStatus;
   scheduledAtEpochMillis?: number;
   repeat?: TaskRepeat;
@@ -26,6 +27,7 @@ export interface Task {
 
 export interface TaskCreateInput {
   name: string;
+  description?: string;
   status?: TaskStatus;
   hijriDate: string;
   hijriDateYear?: number;
@@ -43,6 +45,7 @@ export interface TaskCreateInput {
 
 export interface TaskUpdateInput {
   name?: string;
+  description?: string;
   status?: TaskStatus;
   hijriDate?: string;
   hijriDateYear?: number;

@@ -9,7 +9,6 @@ import type {
 } from "../../lib/types/task";
 import { taskRepository } from "./task-repository";
 
-
 interface TaskState {
   loading: boolean;
   error: string | null;
@@ -17,7 +16,7 @@ interface TaskState {
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
-  
+
   todayTasks: Task[];
 
   // Multiple tasks state (for useTasks hook)
@@ -60,11 +59,9 @@ interface TaskState {
   getTasksByHijriDate: (hijriDate: string) => Promise<Task[]>;
   // refreshTasks: () => Promise<void>;
   loadMoreTasks: () => Promise<void>;
-  
-  loadTodayTasks: () => Promise<void>;
-  
-}
 
+  loadTodayTasks: () => Promise<void>;
+}
 
 export const useTaskStore = create<TaskState>()(
   devtools(
@@ -128,7 +125,7 @@ export const useTaskStore = create<TaskState>()(
 
           const newTask = await taskRepository.create(input);
           get().addTask(newTask);
-          get().loadTodayTasks()
+          get().loadTodayTasks();
 
           return newTask;
         } catch (err) {
@@ -141,10 +138,7 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      updateTask: async (
-        id: string,
-        input: TaskUpdateInput,
-      ): Promise<Task> => {
+      updateTask: async (id: string, input: TaskUpdateInput): Promise<Task> => {
         try {
           set({ loading: true, error: null });
 
@@ -228,9 +222,7 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      getTasksByHijriDate: async (
-        hijriDate: string,
-      ): Promise<Task[]> => {
+      getTasksByHijriDate: async (hijriDate: string): Promise<Task[]> => {
         try {
           set({ loading: true, error: null });
 
@@ -258,8 +250,11 @@ export const useTaskStore = create<TaskState>()(
         try {
           set({ loadingMore: true });
 
-          const newTasks = await taskRepository.findWithPagination(offset, PAGE_SIZE);
-          
+          const newTasks = await taskRepository.findWithPagination(
+            offset,
+            PAGE_SIZE,
+          );
+
           const { tasks } = get();
           set({
             tasks: [...tasks, ...newTasks],

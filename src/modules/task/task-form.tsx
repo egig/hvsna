@@ -40,12 +40,12 @@ export default function TaskForm({
     setSelectedTargetId,
     isSubmitting,
     selectedGoal,
-    trackerAttributes
+    trackerAttributes,
   } = useTaskForm(taskId || undefined, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
-  
+
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -54,13 +54,12 @@ export default function TaskForm({
       nameInputRef.current.focus();
     }
   }, []);
-  
+
   useEffect(() => {
     if (error && onError) {
       onError(error);
     }
   }, [error, onError]);
-
 
   // Helper function to get attribute by ID
   const getAttributeById = (attributeId: string): any => {
@@ -81,7 +80,6 @@ export default function TaskForm({
     );
   };
 
-
   return (
     <form
       className="h-[100%]"
@@ -100,12 +98,13 @@ export default function TaskForm({
         required={true}
         className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
       />
-      <textarea 
-        name="attributes" 
-        placeholder="Description" 
-        className="text-sm px-4 h-[3rem] py-2 w-[100%] outline-none"
-        defaultValue={task?.attributes?.description || ""}
+      <textarea
+        name="description"
+        placeholder="Description"
+        className="text-sm px-4 h-[3rem] py-2 w-[100%] outline-none resize-none"
+        defaultValue={task?.description || ""}
         disabled={isSubmitting}
+        style={{ resize: "none" }}
       />
 
       <HijriDateInput
@@ -200,10 +199,11 @@ export default function TaskForm({
 
       <div className="flex justify-end p-4">
         <button
-        className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-        aria-label="Add new task"
-        type="submit">
-          <ArrowUp/>
+          className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+          aria-label="Add new task"
+          type="submit"
+        >
+          <ArrowUp />
         </button>
       </div>
     </form>

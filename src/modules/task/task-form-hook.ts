@@ -18,15 +18,15 @@ import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 export interface UseTaskFormReturn {
   task: Task | null;
   error: string | null;
-  selectedHijriDate: HijriDate | null,
-  isSubmitting: boolean,
-  setSelectedHijriDate: any
-  selectedTargetId: string
-  setSelectedTargetId: any,
-  selectedGoal: any,
-  trackerAttributes: any
-  handleSubmit: (f: FormData) => void,
-  handleDelete: () => void,
+  selectedHijriDate: HijriDate | null;
+  isSubmitting: boolean;
+  setSelectedHijriDate: any;
+  selectedTargetId: string;
+  setSelectedTargetId: any;
+  selectedGoal: any;
+  trackerAttributes: any;
+  handleSubmit: (f: FormData) => void;
+  handleDelete: () => void;
 }
 
 export const useTaskForm = (
@@ -34,24 +34,26 @@ export const useTaskForm = (
   onSuccess?: (task: Task) => void,
   onError?: (error: string) => void,
   onCancel?: () => void,
-  onDelete?: (taskId: string) => void
+  onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
-  const closeTaskForm = useTaskStore(s => s.closeTaskForm)
-  const createTask = useTaskStore(s => s.createTask);
-  const deleteTask = useTaskStore(s => s.deleteTask);
-  const editingTaskId = useTaskStore(s => s.editingTaskId);
-  const error = useTaskStore(s => s.error);
-  const formOpen = useTaskStore(s => s.formOpen);
-  const getTask = useTaskStore(s => s.getTask);
-  const openTaskForm = useTaskStore(s => s.openTaskForm);
-  const setEditingTaskId = useTaskStore(s => s.setEditingTaskId);
-  const updateTask = useTaskStore(s => s.updateTask);
+  const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
+  const createTask = useTaskStore((s) => s.createTask);
+  const deleteTask = useTaskStore((s) => s.deleteTask);
+  const editingTaskId = useTaskStore((s) => s.editingTaskId);
+  const error = useTaskStore((s) => s.error);
+  const formOpen = useTaskStore((s) => s.formOpen);
+  const getTask = useTaskStore((s) => s.getTask);
+  const openTaskForm = useTaskStore((s) => s.openTaskForm);
+  const setEditingTaskId = useTaskStore((s) => s.setEditingTaskId);
+  const updateTask = useTaskStore((s) => s.updateTask);
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | undefined>(undefined);
+  const [selectedHijriDate, setSelectedHijriDate] = useState<
+    HijriDate | undefined
+  >(undefined);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
 
   const { goals } = useGoals();
@@ -62,15 +64,12 @@ export const useTaskForm = (
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
 
-
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
-  
 
   useEffect(() => {
     setEditingTaskId(taskId || null);
   }, [taskId]);
-
 
   useEffect(() => {
     if (task?.hijriDate) {
@@ -84,7 +83,6 @@ export const useTaskForm = (
       );
     }
   }, [task]);
-
 
   useEffect(() => {
     if (taskId) {
@@ -100,7 +98,6 @@ export const useTaskForm = (
     }
   }, [taskId, currentTargetId]);
 
-
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
   }, [task]);
@@ -115,7 +112,6 @@ export const useTaskForm = (
       });
     }
   }, [selectedTargetId, goals]);
-
 
   const updateTaskWithLog = async (
     id: string,
@@ -158,7 +154,6 @@ export const useTaskForm = (
     return updatedTask;
   };
 
-
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
 
@@ -196,6 +191,7 @@ export const useTaskForm = (
 
       const taskInput: any = {
         name: taskData.name.trim(),
+        description: taskData.description?.trim() || undefined,
         targetId: taskData.targetId,
         targetValue: taskData.targetValue,
         attributes: attr,
@@ -248,7 +244,7 @@ export const useTaskForm = (
         }
       }
 
-      setTask(null)
+      setTask(null);
       closeTaskForm();
 
       if (onSuccess) {
@@ -261,7 +257,6 @@ export const useTaskForm = (
       setIsSubmitting(false);
     }
   };
-
 
   const handleCancel = () => {
     closeTaskForm();
@@ -286,7 +281,6 @@ export const useTaskForm = (
     }
   };
 
-
   const reset = () => {
     setTask(null);
     setLoading(false);
@@ -309,6 +303,6 @@ export const useTaskForm = (
     selectedGoal,
     trackerAttributes,
     handleSubmit,
-    handleDelete
+    handleDelete,
   };
 };

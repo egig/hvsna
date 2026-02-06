@@ -169,22 +169,19 @@ export const useTasks = (): UseTasksReturn => {
     }
 
     // Update the task
-    const updatedTask = await store.updateTask(
-      id,
-      {
-        status,
-        hijriDate:
-          currentTask.hijriDate ||
-          (() => {
-            const now = new Date();
-            const hijriNow = HijriDate.fromDate(now);
-            const year = hijriNow.year.toString().padStart(4, "0");
-            const month = hijriNow.month.toString().padStart(2, "0");
-            const day = hijriNow.day.toString().padStart(2, "0");
-            return `${year}${month}${day}`;
-          })(),
-      },
-    );
+    const updatedTask = await store.updateTask(id, {
+      status,
+      hijriDate:
+        currentTask.hijriDate ||
+        (() => {
+          const now = new Date();
+          const hijriNow = HijriDate.fromDate(now);
+          const year = hijriNow.year.toString().padStart(4, "0");
+          const month = hijriNow.month.toString().padStart(2, "0");
+          const day = hijriNow.day.toString().padStart(2, "0");
+          return `${year}${month}${day}`;
+        })(),
+    });
 
     if (!updatedTask.targetId) {
       return updatedTask;

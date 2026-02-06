@@ -1,30 +1,17 @@
-import { useState, useEffect } from "react";
-import { usePouchDB } from "../pouchdb";
-import { formatValue } from "src/lib/format";
-import { useTargetResults } from "../hooks/useTargetResults";
-import { useLogStore } from "../modules/log/logStore";
-import { useTrackers } from "../modules/tracker/use-trackers";
-import { useTasks } from "../modules/task/use-tasks";
+import { useToday } from "../hooks/use-today";
 import { useTask } from "../modules/task/use-task";
 import { LogItem } from "./log-item";
-import type { TargetResultData } from "../hooks/useTargetResults";
 import type { Log } from "src/lib/tracker/types";
 import type { AttributeOption } from "../modules/option/optionStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
-import { useAttributeOptions } from "../modules/option/use-options";
-import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 import { Navbar, Page } from "../modules/navigation";
 import Block from "./block";
 import BlockTitle from "./block-title";
 import type { Tracker } from "../modules/tracker/trackerStore";
 import type { Task } from "../lib/types/task";
 import TaskListItem from "./task-list-item";
-import { ClockIcon } from "lucide-react";
-import { HijriDate } from "src/lib/hijri";
-import {
-  GREGORIAN_MONTH_NAMES_EN,
-  HIJRI_MONTH_NAMES_EN,
-} from "src/lib/hijri-months";
+import { formatValue } from "src/lib/format";
+import type { TargetResultData } from "../hooks/useTargetResults";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -174,67 +161,9 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
   );
 }
 
-export function Home() {
-  const { db } = usePouchDB();
-  const { getTargetResults } = useTargetResults();
-  const { getTrackers } = useTrackers();
-  const { getTasksByHijriDate } = useTasks();
-
-  const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
-  const [trackers, setTrackers] = useState<Tracker[]>([]);
-  const [todayTasks, setTodayTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { attributeOptions } = useAttributeOptions();
-  const { trackerAttributes } = useTrackerAttributes();
-
-  const _hijriDate = HijriDate.fromDate(new Date());
-  const [activeDate, setActiveDate] = useState(_hijriDate);
-  const gregorianDate = activeDate.toDate();
-  const pageTitle = `${activeDate.day} ${HIJRI_MONTH_NAMES_EN[activeDate.month - 1]} ${activeDate.year}`;
-  const subTitle = `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`;
-
-  useEffect(() => {
-    const loadHomeData = async () => {
-      if (!db) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Load target results (last 30 days)
-        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-
-        // Format today's Hijri date as YYYYMMDD
-        const todayHijri = HijriDate.fromDate(new Date());
-        const formattedHijriDate = `${todayHijri.year.toString().padStart(4, "0")}${todayHijri.month.toString().padStart(2, "0")}${todayHijri.day.toString().padStart(2, "0")}`;
-
-        const [results, trackersData, tasks] = await Promise.all([
-          getTargetResults(
-            {
-              from: thirtyDaysAgo,
-              to: Date.now(),
-            },
-            db,
-          ),
-          getTrackers(),
-          getTasksByHijriDate(formattedHijriDate),
-        ]);
-
-        setTargetResults(results);
-        setTrackers(trackersData);
-        setTodayTasks(tasks);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load home data",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadHomeData();
-  }, [db]);
+export function Today() {
+  const { targetResults, todayTasks, loading, error, pageTitle, subTitle } =
+    useToday();
 
   if (loading) {
     return (

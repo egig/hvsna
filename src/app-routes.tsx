@@ -18,7 +18,7 @@ import Trackers from "./modules/tracker/trackers";
 import TrackersAttributes from "./modules/attribute/tracker-attributes";
 import AttributeOptions from "./modules/option/options";
 import { Goals } from "./modules/goal/goals";
-import { Home } from "./components/Home";
+import { Today } from "./components/today";
 import DataManagement from "./pages/data-management";
 import TrackerDetail from "./modules/tracker/tracker-detail";
 import Browse from "./pages/browse";
@@ -36,7 +36,7 @@ export const AppRoutes = () => {
         key={location.pathname}
       >
         <Route element={<TabLayout />}>
-          <Route index element={<Home />} />
+          <Route index element={<Today />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="upcoming" element={<Upcoming />} />
           <Route path="about" element={<About />} />
