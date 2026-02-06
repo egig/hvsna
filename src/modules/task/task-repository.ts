@@ -400,6 +400,39 @@ export class TaskRepository {
       this.mapDocumentToTask(doc),
     );
   }
+
+  async findUpcomingTasks(): Promise<Task[]> {
+    const today = HijriDate.fromDate(new Date());
+
+    await db.createIndex({
+      index: {
+        fields: ["type", "status", "scheduledAtEpochMillis"],
+      },
+    });
+
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        status: { $ne: "completed" },
+        scheduledAtEpochMillis: {
+          $gte: today.toDate().getTime(),
+        },
+      },
+      sort: [
+        { type: "asc" },
+        { status: "asc" },
+        { scheduledAtEpochMillis: "asc" },
+      ],
+    };
+
+    const result = await (db as any).find(mangoQuery);
+
+    console.log(result.docs, mangoQuery);
+
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      this.mapDocumentToTask(doc),
+    );
+  }
 }
 
 // Export singleton instance

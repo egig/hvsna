@@ -134,6 +134,7 @@ export const useTaskStore = create<TaskState>()(
           const newTask = await taskRepository.create(input);
           get().addTask(newTask);
           get().loadTodayTasks();
+          get().loadUpcommingTasks();
 
           return newTask;
         } catch (err) {
@@ -152,6 +153,7 @@ export const useTaskStore = create<TaskState>()(
 
           const updatedTask = await taskRepository.update(id, input);
           get().loadTodayTasks();
+          get().loadUpcommingTasks();
 
           return updatedTask;
         } catch (err) {
@@ -171,6 +173,7 @@ export const useTaskStore = create<TaskState>()(
           await taskRepository.delete(id);
           get().removeTaskFromList(id);
           get().loadTodayTasks();
+          get().loadUpcommingTasks();
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to delete task";
@@ -305,17 +308,19 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadUpcomingTasks: async (): Promise<void> => {
+      loadUpcommingTasks: async (): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          const todayTasksList = await taskRepository.findTodayTasks();
+          const upcomingTasksList = await taskRepository.findUpcomingTasks();
           let tc = Object.fromEntries(
-            todayTasksList.map((task) => [task.id, task]),
+            upcomingTasksList.map((task) => [task.id, task]),
           );
-          set({ todayTasks: todayTasksList, taskCache: tc });
+          set({ upcommingTasks: upcomingTasksList, taskCache: tc });
         } catch (err) {
           const errorMessage =
-            err instanceof Error ? err.message : "Failed to load today's tasks";
+            err instanceof Error
+              ? err.message
+              : "Failed to load upcoming tasks";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
