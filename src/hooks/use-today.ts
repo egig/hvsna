@@ -27,6 +27,7 @@ export function useToday() {
   const [targetResults, setTargetResults] = useState<TargetResultData[]>([]);
   const [trackers, setTrackers] = useState<Tracker[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initiated, setInitiated] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const _hijriDate = HijriDate.fromDate(new Date());
@@ -68,6 +69,7 @@ export function useToday() {
         );
       } finally {
         setLoading(false);
+        setInitiated(true);
       }
     };
 
@@ -80,6 +82,7 @@ export function useToday() {
     trackers,
     todayTasks,
     loading,
+    initiated,
     error,
     activeDate,
     setActiveDate,

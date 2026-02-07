@@ -24,17 +24,6 @@ function TodayTasks({ tasks }: TodayTasksProps) {
     openTaskForm(task.id);
   };
 
-  if (tasks.length === 0) {
-    return (
-      <div className="text-center py-6">
-        <div className="text-gray-400 mb-2">No tasks scheduled for today</div>
-        <div className="text-gray-500 text-sm">
-          Tasks scheduled for today will appear here
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
       {tasks.map((task) => (
@@ -162,23 +151,17 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
 }
 
 export function Today() {
-  const { targetResults, todayTasks, loading, error, pageTitle, subTitle } =
-    useToday();
+  const {
+    targetResults,
+    todayTasks,
+    loading,
+    initiated,
+    error,
+    pageTitle,
+    subTitle,
+  } = useToday();
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <div className="text-gray-600">Loading home dashboard...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (initiated && error) {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -199,6 +182,15 @@ export function Today() {
           <BlockTitle extra={"Summary"}>Where am I right now</BlockTitle>
           <TargetResultsOverview results={targetResults} />
         </Block>
+      )}
+
+      {initiated && todayTasks.length === 0 && (
+        <div className="text-center py-6">
+          <div className="text-gray-400 mb-2">No tasks scheduled for today</div>
+          <div className="text-gray-500 text-sm">
+            Tasks scheduled for today will appear here
+          </div>
+        </div>
       )}
 
       <TodayTasks tasks={todayTasks} />

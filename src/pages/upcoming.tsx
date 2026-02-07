@@ -9,7 +9,8 @@ import { useUpcoming } from "../hooks/use-upcoming";
 
 export default function Upcoming() {
   const { openTaskForm } = useTask();
-  const { upcomingTasks, taskGroups, loading, error } = useUpcoming();
+  const { upcomingTasks, taskGroups, loading, initiated, error } =
+    useUpcoming();
 
   const handleEditTask = (task: Task) => {
     openTaskForm(task.id);
@@ -24,19 +25,13 @@ export default function Upcoming() {
       />
 
       <div className="h-[calc(100vh-160px)] overflow-y-auto">
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <LoadingSpinner size="lg" text="Loading upcoming tasks..." />
-          </div>
-        )}
-
-        {error && (
+        {initiated && error && (
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">Error: {error}</div>
           </div>
         )}
 
-        {!loading && !error && upcomingTasks.length === 0 && (
+        {initiated && !loading && !error && upcomingTasks.length === 0 && (
           <div className="text-center py-8">
             <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
@@ -48,7 +43,7 @@ export default function Upcoming() {
           </div>
         )}
 
-        {!loading && !error && upcomingTasks.length > 0 && (
+        {initiated && !loading && !error && upcomingTasks.length > 0 && (
           <div className="space-y-6">
             {[
               { key: "today", label: "Today" },

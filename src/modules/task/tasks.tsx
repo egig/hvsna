@@ -12,6 +12,7 @@ export default function Tasks() {
   const {
     tasks,
     loading,
+    initiated,
     loadingMore,
     error,
     hasMore,
@@ -42,7 +43,7 @@ export default function Tasks() {
         className="h-[calc(100vh-160px)] overflow-y-auto"
         onScroll={handleInfiniteScroll}
       >
-        {error && (
+        {initiated && error && (
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">Error: {error}</div>
             <button
@@ -55,7 +56,7 @@ export default function Tasks() {
           </div>
         )}
 
-        {!loading && !error && tasks.length === 0 && (
+        {initiated && !loading && !error && tasks.length === 0 && (
           <div className="text-center py-8">
             <Check className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
@@ -67,7 +68,7 @@ export default function Tasks() {
           </div>
         )}
 
-        {!loading && !error && tasks.length > 0 && (
+        {initiated && !loading && !error && tasks.length > 0 && (
           <>
             {tasks.map((task) => (
               <TaskListItem key={task.id} task={task} onEdit={openEditPopup} />
@@ -75,7 +76,7 @@ export default function Tasks() {
           </>
         )}
 
-        {!hasMore && tasks.length > 0 && (
+        {initiated && !loading && !error && !hasMore && tasks.length > 0 && (
           <div className="text-center py-4">
             <p className="text-gray-500 dark:text-gray-500">
               No more tasks to load

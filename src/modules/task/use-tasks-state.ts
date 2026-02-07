@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTaskStore } from "./task-store";
 import { useTask } from "./use-task";
 import type { Task } from "src/lib/types/task";
@@ -6,11 +6,16 @@ import type { Task } from "src/lib/types/task";
 export function useTasksState() {
   const { browsedTasks, loading, error, deleteTask, loadBrowsedTasks } =
     useTaskStore();
+  const [initiated, setInitiated] = useState(false);
   const { openTaskForm, setEditingTaskId } = useTask();
 
   // Load browsed tasks on mount
   useEffect(() => {
-    loadBrowsedTasks();
+    const loadData = async () => {
+      setInitiated(true);
+      loadBrowsedTasks();
+    };
+    loadData();
   }, [loadBrowsedTasks]);
 
   const openEditPopup = useCallback(
@@ -59,6 +64,7 @@ export function useTasksState() {
     // Data
     tasks: browsedTasks,
     loading,
+    initiated,
     loadingMore: false,
     error,
     hasMore: false,

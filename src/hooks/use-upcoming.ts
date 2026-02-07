@@ -6,6 +6,7 @@ import type { Task } from "../lib/types/task";
 
 export function useUpcoming() {
   const { loading, error, upcommingTasks, loadUpcommingTasks } = useTaskStore();
+  const [initiated, setInitiated] = useState(false);
   const [groupedTasks, setGroupedTasks] = useState<{
     today: Task[];
     tomorrow: Task[];
@@ -23,7 +24,11 @@ export function useUpcoming() {
   });
 
   useEffect(() => {
-    loadUpcommingTasks();
+    const loadData = async () => {
+      setInitiated(true);
+      loadUpcommingTasks();
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -125,6 +130,7 @@ export function useUpcoming() {
     upcomingTasks: upcommingTasks,
     taskGroups: groupedTasks,
     loading,
+    initiated,
     error,
     formatScheduledDate,
     refreshTasks: loadUpcommingTasks,
