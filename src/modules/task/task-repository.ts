@@ -1,10 +1,11 @@
-import type {
-  Task,
-  TaskCreateInput,
-  TaskUpdateInput,
-  TaskStatus,
-  TaskQuery,
-} from "../../lib/types/task";
+import {
+  type Task,
+  type TaskCreateInput,
+  type TaskQuery,
+  type TaskStatus,
+  type TaskUpdateInput,
+} from "src/lib/types/task";
+import { generatePrefixedUUID } from "src/lib/uuid";
 import { HijriDate } from "../../lib/hijri/hijri-date";
 import { db } from "../../lib/pouchdb-singleton";
 
@@ -72,7 +73,7 @@ export class TaskRepository {
 
   private createTaskDocument(): PouchDBTaskDocument {
     return {
-      _id: `task_${crypto.randomUUID()}`,
+      _id: generatePrefixedUUID("task_"),
       type: "task",
       userId: "",
       name: "",
@@ -96,7 +97,7 @@ export class TaskRepository {
     const now = Date.now().valueOf();
 
     const newTask: Task = {
-      id: `task_${crypto.randomUUID()}`,
+      id: generatePrefixedUUID("task_"),
       name: input.name,
       description: input.description,
       status: input.status || "pending",
@@ -173,6 +174,22 @@ export class TaskRepository {
 
     if (input.hijriDate !== undefined) {
       updateData.hijriDate = input.hijriDate;
+      const year = parseInt(input.hijriDate.substring(0, 4));
+      const month = parseInt(input.hijriDate.substring(4, 6));
+      const day = parseInt(input.hijriDate.substring(6, 8));
+
+      const hijriDate = new HijriDate(
+        year,
+        month,
+        day,
+        input.hour,
+        input.minute,
+        0,
+      );
+      updateData.hijriDateYear = hijriDate.year;
+      updateData.hijriDateMonth = hijriDate.month;
+      updateData.hijriDateDay = hijriDate.day;
+      updateData.scheduledAtEpochMillis = hijriDate.toDate().valueOf();
     }
 
     if (input.hour !== undefined) {
@@ -371,27 +388,31 @@ export class TaskRepository {
   }
 
   async findTodayTasks(): Promise<Task[]> {
-    // TODO tomorrow is sunset or not ?
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const today = HijriDate.fromDate(new Date());
 
     await db.createIndex({
       index: {
-        fields: ["type", "scheduledAtEpochMillis"],
+        fields: ["type", "status", "hijriDate", "scheduledAtEpochMillis"],
       },
     });
 
     const mangoQuery = {
       selector: {
         type: "task",
+        status: {
+          $ne: "completed",
+        },
+        hijriDate: today.format("YYYYMMDD"),
         scheduledAtEpochMillis: {
-          $gte: today.getTime(),
-          $lt: tomorrow.getTime(),
+          $gte: today.toDate().valueOf(),
         },
       },
-      sort: [{ type: "asc" }, { scheduledAtEpochMillis: "asc" }],
+      sort: [
+        { type: "asc" },
+        { status: "asc" },
+        { hijriDate: "asc" },
+        { scheduledAtEpochMillis: "asc" },
+      ],
     };
 
     const result = await (db as any).find(mangoQuery);
@@ -426,9 +447,6 @@ export class TaskRepository {
     };
 
     const result = await (db as any).find(mangoQuery);
-
-    console.log(result.docs, mangoQuery);
-
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       this.mapDocumentToTask(doc),
     );
@@ -445,7 +463,7 @@ export class TaskRepository {
     const mangoQuery = {
       selector: {
         type: "task",
-        status: { $gte: null },
+        status: { $ne: "completed" },
         scheduledAtEpochMillis: {
           $gte: 0,
         },

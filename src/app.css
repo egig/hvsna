@@ -36,6 +36,10 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+  /* iOS Safari momentum scrolling improvements */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: scroll-position;
 }
 
 /* Disable text selection on UI elements */

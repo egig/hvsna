@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { CheckCircleIcon, CircleIcon } from "lucide-react";
 import type { Task, TaskStatus } from "src/lib/types/task";
 import { useGoal } from "../modules/goal/use-goal";
@@ -94,9 +95,17 @@ export function TaskListItem({
   };
 
   return (
-    <div
+    <motion.div
       className={`w-full p-3 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
       onClick={handleItemClick}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{
+        duration: 0.2,
+        ease: "easeOut",
+      }}
+      layout
     >
       <div className="flex items-center justify-center gap-2">
         <button
@@ -138,7 +147,7 @@ export function TaskListItem({
           )} */}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
