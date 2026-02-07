@@ -71,7 +71,12 @@ export default function Tasks() {
         {initiated && !loading && !error && tasks.length > 0 && (
           <>
             {tasks.map((task) => (
-              <TaskListItem key={task.id} task={task} onEdit={openEditPopup} />
+              <TaskListItem
+                key={task.id}
+                task={task}
+                onEdit={openEditPopup}
+                showDateTime={true}
+              />
             ))}
           </>
         )}

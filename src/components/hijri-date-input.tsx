@@ -137,7 +137,7 @@ function CalendarModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Select Hijri Date">
+    <Modal isOpen={isOpen} onClose={onClose} title="">
       <div className="p-4">
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-4">
@@ -316,7 +316,7 @@ export function HijriDateInput({
   name,
   label,
   value,
-  placeholder = "Select Hijri date",
+  placeholder = "",
   disabled = false,
   required = false,
   className = "",

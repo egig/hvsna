@@ -12,6 +12,7 @@ interface TaskListItemProps {
   onEdit?: (task: Task) => void;
   showGoalInfo?: boolean;
   className?: string;
+  showDateTime?: boolean;
 }
 
 export function TaskListItem({
@@ -20,6 +21,7 @@ export function TaskListItem({
   onEdit,
   showGoalInfo = true,
   className,
+  showDateTime = false,
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
 
@@ -61,15 +63,47 @@ export function TaskListItem({
   };
 
   const formatScheduledDate = (task: Task) => {
-    if (task.hijriDate) {
-      const date = new HijriDate(
+    if (!task.hijriDate) return null;
+
+    const today = HijriDate.fromDate(new Date());
+    const tomorrow = today.next();
+    const todayString = `${today.year.toString().padStart(4, "0")}${today.month.toString().padStart(2, "0")}${today.day.toString().padStart(2, "0")}`;
+    const tomorrowString = `${tomorrow.year.toString().padStart(4, "0")}${tomorrow.month.toString().padStart(2, "0")}${tomorrow.day.toString().padStart(2, "0")}`;
+
+    // Check if today
+    if (task.hijriDate === todayString) {
+      return "Today";
+    }
+
+    // Check if tomorrow
+    if (task.hijriDate === tomorrowString) {
+      return "Tomorrow";
+    }
+
+    // Check if within next 7 days
+    try {
+      const taskDate = new HijriDate(
         parseInt(task.hijriDate.slice(0, 4)),
         parseInt(task.hijriDate.slice(4, 6)),
         parseInt(task.hijriDate.slice(6, 8)),
       );
-      return date.format("DD MMMM");
+      const todayGregorian = today.toDate();
+      const taskGregorian = taskDate.toDate();
+      const daysDiff = Math.floor(
+        (taskGregorian.getTime() - todayGregorian.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+
+      // If within next 7 days (2-7 days from now)
+      if (daysDiff > 1 && daysDiff <= 7) {
+        return taskDate.format("dddd"); // Day name
+      }
+
+      // Otherwise show formatted date
+      return taskDate.format("D MMMM");
+    } catch {
+      return task.hijriDate;
     }
-    return null;
   };
 
   const getTargetInfo = (goal: any) => {
@@ -128,6 +162,13 @@ export function TaskListItem({
           {task.description && (
             <p className="text-sm text-gray-500 mt-1 line-clamp-2">
               {task.description}
+            </p>
+          )}
+
+          {/* Description */}
+          {showDateTime && !!task.hijriDate && (
+            <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+              {formatScheduledDate(task)}
             </p>
           )}
 
