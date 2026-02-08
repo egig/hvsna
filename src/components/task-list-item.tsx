@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CheckCircleIcon, CircleIcon } from "lucide-react";
-import type { Task, TaskStatus } from "src/lib/types/task";
+import { CircleIcon, CheckCircleIcon } from "lucide-react";
+import type { Task, TaskStatus } from "../lib/types/task";
 import { useGoal } from "../modules/goal/use-goal";
 import { HijriDate } from "src/lib/hijri";
 import { useTaskListItem } from "src/modules/task/task-list-item-hook";
+import { IoEllipseOutline } from "react-icons/io5";
+import toast from "react-hot-toast";
 
 interface TaskListItemProps {
   task: Task;
@@ -47,7 +49,7 @@ export function TaskListItem({
       case "in_progress":
         return <CircleIcon size={24} className="text-blue-500" />;
       default:
-        return <CircleIcon size={24} className="text-gray-400" />;
+        return <IoEllipseOutline size={24} className="text-gray-400" />;
     }
   };
 
@@ -115,11 +117,19 @@ export function TaskListItem({
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const nextStatus = getNextStatus(task.status);
-    updateStatus(task.id, nextStatus).then(() => {
-      if (onStatusChange) {
-        onStatusChange(task, nextStatus);
-      }
-    });
+
+    toast.promise(
+      updateStatus(task.id, nextStatus).then(() => {
+        if (onStatusChange) {
+          onStatusChange(task, nextStatus);
+        }
+      }),
+      {
+        loading: "Updating status...",
+        success: `Status changed to ${nextStatus.replace("_", " ")}`,
+        error: "Failed to update status",
+      },
+    );
   };
 
   const handleItemClick = () => {
@@ -140,14 +150,16 @@ export function TaskListItem({
       }}
       layout
     >
-      <div className="flex items-center justify-center gap-2">
-        <button
-          onClick={handleStatusClick}
-          className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
-          aria-label={`Change status from ${task.status}`}
-        >
-          {getStatusIcon(task?.status || "pending")}
-        </button>
+      <div className="flex justify-start gap-2">
+        <div>
+          <button
+            onClick={handleStatusClick}
+            className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
+            aria-label={`Change status from ${task.status}`}
+          >
+            {getStatusIcon(task?.status || "pending")}
+          </button>
+        </div>
 
         {/* Task Name and Description */}
         <div className="flex-1 min-w-0">

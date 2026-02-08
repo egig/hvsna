@@ -6,6 +6,7 @@ import { PouchDBProvider } from "./pouchdb";
 import { NavigationProvider } from "./modules/navigation/context";
 import DroppableContext from "./components/droppable-context";
 import { LanguageProviderWrapper } from "./components/LanguageProviderWrapper";
+import { Toaster } from "react-hot-toast";
 import PouchDB from "pouchdb";
 
 export interface AppConfig {
@@ -44,6 +45,12 @@ export default function Hvsna({
           </LanguageProviderWrapper>
         </PouchDBProvider>
       </DroppableContext>
+      <Toaster
+        containerStyle={{
+          bottom: 80,
+        }}
+        position="bottom-center"
+      />
     </ClerkProvider>
   );
 }

@@ -452,11 +452,10 @@ export class TaskRepository {
     );
   }
 
-  async findBrowsedTasks(): Promise<Task[]> {
-    // TODO filter by various params
+  async findBrowsedTasks(query?: any): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: ["type", "scheduledAtEpochMillis"],
+        fields: ["type", "status", "scheduledAtEpochMillis"],
       },
     });
 
@@ -470,6 +469,16 @@ export class TaskRepository {
       },
       sort: [{ type: "asc" }, { scheduledAtEpochMillis: "asc" }],
     };
+
+    // Apply custom filters if provided
+    if (query) {
+      if (query.status) {
+        mangoQuery.selector.status = query.status;
+      }
+      if (query.scheduledAtEpochMillis) {
+        mangoQuery.selector.scheduledAtEpochMillis = query.scheduledAtEpochMillis;
+      }
+    }
 
     const result = await (db as any).find(mangoQuery);
 

@@ -65,7 +65,10 @@ interface TaskState {
 
   loadTodayTasks: () => Promise<void>;
   loadUpcommingTasks: () => Promise<void>;
-  loadBrowsedTasks: () => Promise<void>;
+  loadBrowsedTasks: (filters?: {
+    status?: string;
+    dateRange?: string;
+  }) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -331,10 +334,53 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadBrowsedTasks: async (): Promise<void> => {
+      loadBrowsedTasks: async (filters?: {
+        status?: string;
+        dateRange?: string;
+      }): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          const browsedTasksList = await taskRepository.findBrowsedTasks();
+          
+          // Build query based on filters
+          let query: any = {};
+          
+          if (filters?.status && filters.status !== "all") {
+            query.status = filters.status as TaskStatus;
+          }
+          
+          if (filters?.dateRange && filters.dateRange !== "all") {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch (filters.dateRange) {
+              case "today":
+                query.scheduledAtEpochMillis = {
+                  $gte: today.getTime(),
+                  $lt: today.getTime() + 24 * 60 * 60 * 1000
+                };
+                break;
+              case "week":
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay());
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 7);
+                query.scheduledAtEpochMillis = {
+                  $gte: weekStart.getTime(),
+                  $lt: weekEnd.getTime()
+                };
+                break;
+              case "month":
+                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                query.scheduledAtEpochMillis = {
+                  $gte: monthStart.getTime(),
+                  $lt: monthEnd.getTime()
+                };
+                break;
+            }
+          }
+          
+          const browsedTasksList = await taskRepository.findBrowsedTasks(query);
           let tc = Object.fromEntries(
             browsedTasksList.map((task) => [task.id, task]),
           );

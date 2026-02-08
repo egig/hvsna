@@ -47,6 +47,8 @@
     "prosemirror-view": "^1.41.5",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.5.0",
     "react-router": "7.13.0",
     "react-swipeable": "^7.0.2",
     "suncalc": "^1.9.0",
