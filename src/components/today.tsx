@@ -12,6 +12,7 @@ import TaskListItem from "./task-list-item";
 import { formatValue } from "src/lib/format";
 import type { TargetResultData } from "../hooks/useTargetResults";
 import { useToday } from "src/hooks/use-today";
+import { LargeNavbar } from "src/modules/navigation/navbar";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -174,7 +175,7 @@ export function Today() {
 
   return (
     <Page>
-      <Navbar title={pageTitle} subtitle={subTitle} />
+      <LargeNavbar title={pageTitle} subtitle={subTitle} />
 
       {/* Target Results Summary */}
       {targetResults.length > 0 && (
