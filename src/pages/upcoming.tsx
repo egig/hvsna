@@ -18,11 +18,7 @@ export default function Upcoming() {
 
   return (
     <Page>
-      <Navbar
-        showBackButton={false}
-        title="Upcoming"
-        rightAction={<CalendarIcon size={24} className="text-gray-600" />}
-      />
+      <Navbar showBackButton={false} title="Upcoming" />
 
       <div className="h-[calc(100vh-160px)] overflow-y-auto">
         {initiated && error && (

@@ -45,13 +45,13 @@ export const AppRoutes = () => {
           <Route path="y/:year" element={<YearView />} />
           <Route path="goals" element={<Goals />} />
           <Route path="browse" element={<Browse />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
         <Route path="attribute-options" element={<AttributeOptions />} />
         <Route path="logs" element={<Logs />} />
-        <Route path="settings" element={<Settings />} />
         <Route path="general-settings" element={<GeneralSettings />} />
         <Route path="*" element={<p>Not Found</p>} />
       </Routes>

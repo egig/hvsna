@@ -292,6 +292,14 @@ export class TaskRepository {
       mangoQuery.selector.targetId = query.targetId;
     }
 
+    if (query?.searchText && query.searchText.trim()) {
+      const searchLower = query.searchText.toLowerCase().trim();
+      mangoQuery.selector.$or = [
+        { name: { $regex: searchLower } },
+        { description: { $regex: searchLower } },
+      ];
+    }
+
     const result = await (db as any).find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
@@ -459,17 +467,20 @@ export class TaskRepository {
       },
     });
 
-    const mangoQuery = {
+    const mangoQuery: any = {
       selector: {
         type: "task",
-        status: { $ne: "completed" },
+        status: { $gte: null },
         scheduledAtEpochMillis: {
           $gte: 0,
         },
       },
-      sort: [{ type: "asc" }, { scheduledAtEpochMillis: "asc" }],
+      sort: [
+        { type: "asc" },
+        { status: "asc" },
+        { scheduledAtEpochMillis: "asc" },
+      ],
     };
-
     // Apply custom filters if provided
     if (query) {
       if (query.status) {
@@ -479,8 +490,14 @@ export class TaskRepository {
         mangoQuery.selector.scheduledAtEpochMillis =
           query.scheduledAtEpochMillis;
       }
+      if (query.searchText && query.searchText.trim()) {
+        const searchLower = query.searchText.toLowerCase().trim();
+        mangoQuery.selector.$or = [
+          { name: { $regex: searchLower } },
+          { description: { $regex: searchLower } },
+        ];
+      }
     }
-
     const result = await (db as any).find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>

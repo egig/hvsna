@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { PlusIcon, Plus, Check, Settings, MoreVertical } from "lucide-react";
+import {
+  PlusIcon,
+  Plus,
+  Check,
+  Settings,
+  MoreVertical,
+  Filter,
+} from "lucide-react";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
@@ -30,8 +37,10 @@ export default function Tasks() {
     handleInfiniteScroll,
     statusFilter,
     dateRangeFilter,
+    searchTextFilter,
     setStatusFilter,
     setDateRangeFilter,
+    setSearchTextFilter,
     clearFilters,
   } = useTasksState();
 
@@ -45,18 +54,13 @@ export default function Tasks() {
         showBackButton={false}
         title="Tasks"
         rightAction={
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setFilterModalOpened(true)}
-              aria-label="Filter options"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <MoreVertical size={20} />
-            </Button>
-            <Button to="/settings" aria-label="Settings">
-              <Settings size={20} />
-            </Button>
-          </div>
+          <Button
+            onClick={() => setFilterModalOpened(true)}
+            aria-label="Filter options"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <Filter size={20} />
+          </Button>
         }
       />
 
@@ -128,8 +132,10 @@ export default function Tasks() {
           onClose={handleFilterModalClose}
           statusFilter={statusFilter}
           dateRangeFilter={dateRangeFilter}
+          searchTextFilter={searchTextFilter}
           onStatusFilterChange={setStatusFilter}
           onDateRangeFilterChange={setDateRangeFilter}
+          onSearchTextFilterChange={setSearchTextFilter}
           onClear={clearFilters}
         />
       </Modal>

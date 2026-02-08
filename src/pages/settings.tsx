@@ -7,7 +7,7 @@ import { Navbar } from "../modules/navigation";
 export default function Settings() {
   return (
     <Page>
-      <Navbar title="Settings" />
+      <Navbar title="Settings" showBackButton={false} />
       <div className="bg-white">
         <MenuItem
           title="General"

@@ -12,8 +12,10 @@ export function useTasksState() {
     loadBrowsedTasks,
     statusFilter,
     dateRangeFilter,
+    searchTextFilter,
     setStatusFilter,
     setDateRangeFilter,
+    setSearchTextFilter,
     clearFilters,
   } = useTaskStore();
   const [initiated, setInitiated] = useState(false);
@@ -79,6 +81,7 @@ export function useTasksState() {
     // Filter state
     statusFilter,
     dateRangeFilter,
+    searchTextFilter,
 
     // Handlers
     refreshTasks: () => loadBrowsedTasks(),
@@ -93,6 +96,7 @@ export function useTasksState() {
     // Filter actions
     setStatusFilter,
     setDateRangeFilter,
+    setSearchTextFilter,
     clearFilters,
   };
 }

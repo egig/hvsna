@@ -32,6 +32,7 @@ interface TaskState {
   // Filter state for browsed tasks
   statusFilter: string;
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
+  searchTextFilter: string;
 
   // Actions for single task
   setTask: (task: Task | null) => void;
@@ -60,6 +61,7 @@ interface TaskState {
   setDateRangeFilter: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
   ) => void;
+  setSearchTextFilter: (searchText: string) => void;
   clearFilters: () => void;
 
   // Async actions for single task
@@ -97,6 +99,7 @@ export const useTaskStore = create<TaskState>()(
       taskCache: {},
       statusFilter: "all",
       dateRangeFilter: null,
+      searchTextFilter: "",
 
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
@@ -150,8 +153,16 @@ export const useTaskStore = create<TaskState>()(
         set({ dateRangeFilter: dateRange });
         get().loadBrowsedTasks();
       },
+      setSearchTextFilter: (searchText) => {
+        set({ searchTextFilter: searchText });
+        get().loadBrowsedTasks();
+      },
       clearFilters: () => {
-        set({ statusFilter: "all", dateRangeFilter: null });
+        set({
+          statusFilter: "all",
+          dateRangeFilter: null,
+          searchTextFilter: "",
+        });
         get().loadBrowsedTasks();
       },
 
@@ -364,7 +375,7 @@ export const useTaskStore = create<TaskState>()(
           set({ loading: true, error: null });
 
           // Get current filter state
-          const { statusFilter, dateRangeFilter } = get();
+          const { statusFilter, dateRangeFilter, searchTextFilter } = get();
 
           // Build query based on filters
           let query: any = {};
@@ -383,11 +394,14 @@ export const useTaskStore = create<TaskState>()(
 
             // Set end date to end of day
             endDate.setHours(23, 59, 59, 999);
-
             query.scheduledAtEpochMillis = {
               $gte: startDate.getTime(),
               $lte: endDate.getTime(),
             };
+          }
+
+          if (searchTextFilter && searchTextFilter.trim()) {
+            query.searchText = searchTextFilter;
           }
 
           const browsedTasksList = await taskRepository.findBrowsedTasks(query);

@@ -76,4 +76,5 @@ export type TaskQuery = {
   hijriDateMonth?: number;
   hijriDateDay?: number;
   scheduledAtEpochMillis?: number;
+  searchText?: string;
 };
