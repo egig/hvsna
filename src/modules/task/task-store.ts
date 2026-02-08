@@ -8,6 +8,7 @@ import type {
   TaskQuery,
 } from "../../lib/types/task";
 import { taskRepository } from "./task-repository";
+import { HijriDate } from "../../lib/hijri";
 
 interface TaskState {
   loading: boolean;
@@ -27,6 +28,10 @@ interface TaskState {
   loadingMore: boolean;
   hasMore: boolean;
   offset: number;
+
+  // Filter state for browsed tasks
+  statusFilter: string;
+  dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
 
   // Actions for single task
   setTask: (task: Task | null) => void;
@@ -50,6 +55,13 @@ interface TaskState {
   removeTaskFromList: (id: string) => void;
   resetTasks: () => void;
 
+  // Actions for filters
+  setStatusFilter: (status: string) => void;
+  setDateRangeFilter: (
+    dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
+  ) => void;
+  clearFilters: () => void;
+
   // Async actions for single task
   createTask: (input: TaskCreateInput) => Promise<Task>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
@@ -65,10 +77,7 @@ interface TaskState {
 
   loadTodayTasks: () => Promise<void>;
   loadUpcommingTasks: () => Promise<void>;
-  loadBrowsedTasks: (filters?: {
-    status?: string;
-    dateRange?: string;
-  }) => Promise<void>;
+  loadBrowsedTasks: () => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -86,6 +95,8 @@ export const useTaskStore = create<TaskState>()(
       upcommingTasks: [],
       browsedTasks: [],
       taskCache: {},
+      statusFilter: "all",
+      dateRangeFilter: null,
 
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error }),
@@ -129,6 +140,20 @@ export const useTaskStore = create<TaskState>()(
           false,
           "resetTasks",
         ),
+
+      // Actions for filters
+      setStatusFilter: (status) => {
+        set({ statusFilter: status });
+        get().loadBrowsedTasks();
+      },
+      setDateRangeFilter: (dateRange) => {
+        set({ dateRangeFilter: dateRange });
+        get().loadBrowsedTasks();
+      },
+      clearFilters: () => {
+        set({ statusFilter: "all", dateRangeFilter: null });
+        get().loadBrowsedTasks();
+      },
 
       createTask: async (input: TaskCreateInput): Promise<Task> => {
         try {
@@ -334,52 +359,37 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadBrowsedTasks: async (filters?: {
-        status?: string;
-        dateRange?: string;
-      }): Promise<void> => {
+      loadBrowsedTasks: async (): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          
+
+          // Get current filter state
+          const { statusFilter, dateRangeFilter } = get();
+
           // Build query based on filters
           let query: any = {};
-          
-          if (filters?.status && filters.status !== "all") {
-            query.status = filters.status as TaskStatus;
+
+          if (statusFilter && statusFilter !== "all") {
+            query.status = statusFilter as TaskStatus;
           }
-          
-          if (filters?.dateRange && filters.dateRange !== "all") {
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            
-            switch (filters.dateRange) {
-              case "today":
-                query.scheduledAtEpochMillis = {
-                  $gte: today.getTime(),
-                  $lt: today.getTime() + 24 * 60 * 60 * 1000
-                };
-                break;
-              case "week":
-                const weekStart = new Date(today);
-                weekStart.setDate(today.getDate() - today.getDay());
-                const weekEnd = new Date(weekStart);
-                weekEnd.setDate(weekStart.getDate() + 7);
-                query.scheduledAtEpochMillis = {
-                  $gte: weekStart.getTime(),
-                  $lt: weekEnd.getTime()
-                };
-                break;
-              case "month":
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                query.scheduledAtEpochMillis = {
-                  $gte: monthStart.getTime(),
-                  $lt: monthEnd.getTime()
-                };
-                break;
-            }
+
+          if (
+            dateRangeFilter &&
+            dateRangeFilter.startDate &&
+            dateRangeFilter.endDate
+          ) {
+            const startDate = dateRangeFilter.startDate.toDate();
+            const endDate = dateRangeFilter.endDate.toDate();
+
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+
+            query.scheduledAtEpochMillis = {
+              $gte: startDate.getTime(),
+              $lte: endDate.getTime(),
+            };
           }
-          
+
           const browsedTasksList = await taskRepository.findBrowsedTasks(query);
           let tc = Object.fromEntries(
             browsedTasksList.map((task) => [task.id, task]),

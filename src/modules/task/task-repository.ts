@@ -476,7 +476,8 @@ export class TaskRepository {
         mangoQuery.selector.status = query.status;
       }
       if (query.scheduledAtEpochMillis) {
-        mangoQuery.selector.scheduledAtEpochMillis = query.scheduledAtEpochMillis;
+        mangoQuery.selector.scheduledAtEpochMillis =
+          query.scheduledAtEpochMillis;
       }
     }
 

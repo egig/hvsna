@@ -1,35 +1,39 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useTaskStore } from "./task-store";
 import { useTask } from "./use-task";
 import type { Task } from "src/lib/types/task";
 
-export function useTasksState(filters?: {
-  status?: string;
-  dateRange?: string;
-}) {
-  const { browsedTasks, loading, error, deleteTask, loadBrowsedTasks } =
-    useTaskStore();
+export function useTasksState() {
+  const {
+    browsedTasks,
+    loading,
+    error,
+    deleteTask,
+    loadBrowsedTasks,
+    statusFilter,
+    dateRangeFilter,
+    setStatusFilter,
+    setDateRangeFilter,
+    clearFilters,
+  } = useTaskStore();
   const [initiated, setInitiated] = useState(false);
   const { openTaskForm, setEditingTaskId } = useTask();
 
-  // Load browsed tasks on mount and when filters change
+  // Load browsed tasks on mount
   useEffect(() => {
     const loadData = async () => {
       setInitiated(true);
-      loadBrowsedTasks(filters);
+      loadBrowsedTasks();
     };
     loadData();
-  }, [loadBrowsedTasks]);
+  }, []);
 
-  const openEditPopup = useCallback(
-    (task: Task) => {
-      openTaskForm(task.id);
-    },
-    [openTaskForm],
-  );
+  const openEditPopup = useCallback((task: Task) => {
+    openTaskForm(task.id);
+  }, []);
 
   const handleTaskSuccess = useCallback(() => {
-    loadBrowsedTasks(filters);
+    loadBrowsedTasks();
   }, []);
 
   const handleTaskError = useCallback((errorMessage: string) => {
@@ -44,13 +48,13 @@ export function useTasksState(filters?: {
     async (task: Task) => {
       try {
         await deleteTask(task.id);
-        loadBrowsedTasks(filters);
+        loadBrowsedTasks();
         setEditingTaskId(null);
       } catch (err) {
         alert("Failed to delete task. Please try again.");
       }
     },
-    [deleteTask, loadBrowsedTasks, setEditingTaskId],
+    [deleteTask, setEditingTaskId],
   );
 
   const handleDeleteTaskById = useCallback(
@@ -72,8 +76,12 @@ export function useTasksState(filters?: {
     error,
     hasMore: false,
 
+    // Filter state
+    statusFilter,
+    dateRangeFilter,
+
     // Handlers
-    refreshTasks: () => loadBrowsedTasks(filters),
+    refreshTasks: () => loadBrowsedTasks(),
     openEditPopup,
     handleTaskSuccess,
     handleTaskError,
@@ -81,5 +89,10 @@ export function useTasksState(filters?: {
     handleDeleteTask,
     handleDeleteTaskById,
     handleInfiniteScroll: () => {}, // No-op since browsedTasks doesn't support pagination
+
+    // Filter actions
+    setStatusFilter,
+    setDateRangeFilter,
+    clearFilters,
   };
 }

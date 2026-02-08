@@ -3,6 +3,7 @@ import { PlusIcon, Plus, Check, Settings, MoreVertical } from "lucide-react";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskForm from "./task-form";
+import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
@@ -11,8 +12,6 @@ import { useTasksState } from "./use-tasks-state";
 export default function Tasks() {
   const [sheetOpened, setSheetOpened] = useState(false);
   const [filterModalOpened, setFilterModalOpened] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [dateRangeFilter, setDateRangeFilter] = useState<string>("all");
 
   const {
     tasks,
@@ -29,10 +28,16 @@ export default function Tasks() {
     handleDeleteTask,
     handleDeleteTaskById,
     handleInfiniteScroll,
-  } = useTasksState({
-    status: statusFilter,
-    dateRange: dateRangeFilter,
-  });
+    statusFilter,
+    dateRangeFilter,
+    setStatusFilter,
+    setDateRangeFilter,
+    clearFilters,
+  } = useTasksState();
+
+  const handleFilterModalClose = () => {
+    setFilterModalOpened(false);
+  };
 
   return (
     <Page>
@@ -113,100 +118,21 @@ export default function Tasks() {
       </div>
 
       {/* Filter Modal */}
-      {filterModalOpened && (
-        <Modal
+      <Modal
+        isOpen={filterModalOpened}
+        onClose={handleFilterModalClose}
+        title="Filter Tasks"
+      >
+        <TaskFilterModal
           isOpen={filterModalOpened}
-          onClose={() => setFilterModalOpened(false)}
-          title="Filter Tasks"
-        >
-          <div className="space-y-6">
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Status
-              </label>
-              <div className="space-y-2">
-                {[
-                  { value: "all", label: "All Tasks" },
-                  { value: "pending", label: "Pending" },
-                  { value: "in_progress", label: "In Progress" },
-                  { value: "completed", label: "Completed" },
-                ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="status"
-                      value={option.value}
-                      checked={statusFilter === option.value}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {option.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Date Range Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Date Range
-              </label>
-              <div className="space-y-2">
-                {[
-                  { value: "all", label: "All Time" },
-                  { value: "today", label: "Today" },
-                  { value: "week", label: "This Week" },
-                  { value: "month", label: "This Month" },
-                ].map((option) => (
-                  <label
-                    key={option.value}
-                    className="flex items-center space-x-3 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="dateRange"
-                      value={option.value}
-                      checked={dateRangeFilter === option.value}
-                      onChange={(e) => setDateRangeFilter(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {option.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <Button
-                onClick={() => {
-                  setStatusFilter("all");
-                  setDateRangeFilter("all");
-                  // Apply filters by triggering a refresh
-                  setTimeout(() => setFilterModalOpened(false), 100);
-                }}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-              >
-                Clear
-              </Button>
-              <Button
-                onClick={() => setFilterModalOpened(false)}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                Apply
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+          onClose={handleFilterModalClose}
+          statusFilter={statusFilter}
+          dateRangeFilter={dateRangeFilter}
+          onStatusFilterChange={setStatusFilter}
+          onDateRangeFilterChange={setDateRangeFilter}
+          onClear={clearFilters}
+        />
+      </Modal>
     </Page>
   );
 }
