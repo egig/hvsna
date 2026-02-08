@@ -4,6 +4,7 @@ import { Modal } from "../navigation/modal";
 import { ChevronRight, Check } from "lucide-react";
 import { HijriDate } from "../../lib/hijri";
 import { HijriDateInput } from "../../components/hijri-date-input";
+import Select from "../../components/form-select";
 
 interface TaskFilterModalProps {
   isOpen: boolean;
@@ -34,8 +35,8 @@ export default function TaskFilterModal({
   const [dateRangeModalOpen, setDateRangeModalOpen] = useState(false);
 
   const statusOptions = [
-    { value: "all", label: "All Tasks", color: "bg-gray-500" },
-    { value: "pending", label: "Pending", color: "bg-yellow-500" },
+    { value: "all", label: "All Status", color: "bg-gray-500" },
+    { value: "pending", label: "To Do", color: "bg-yellow-500" },
     { value: "in_progress", label: "In Progress", color: "bg-blue-500" },
     { value: "completed", label: "Completed", color: "bg-green-500" },
   ];
@@ -66,12 +67,10 @@ export default function TaskFilterModal({
 
   return (
     <div className="p-4">
-      <div className="space-y-4">
+      <div className="">
         {/* Search Text Input */}
-        <div className="w-full p-4 bg-white dark:bg-gray-800 border-b border-gray-200">
-          <label className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium block mb-2">
-            Search
-          </label>
+        <div className="w-full p-2 bg-white dark:bg-gray-800">
+          <label className="hidden">Search</label>
           <input
             type="text"
             value={searchTextFilter}
@@ -81,33 +80,21 @@ export default function TaskFilterModal({
           />
         </div>
 
-        {/* Status List Item */}
-        <button
-          onClick={() => setStatusModalOpen(true)}
-          className="w-full flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-3 h-3 rounded-full ${statusOptions.find((opt) => opt.value === statusFilter)?.color || "bg-gray-500"}`}
-            />
-            <div className="text-left">
-              <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">
-                Status
-              </p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                {currentStatusLabel}
-              </p>
-            </div>
-          </div>
-          <ChevronRight size={20} className="text-gray-400" />
-        </button>
+        {/* Status Select */}
+        <div className="p-2 bg-white dark:bg-gray-800">
+          <Select
+            name="status"
+            label="Status"
+            value={statusFilter}
+            options={statusOptions}
+            onChange={(e) => onStatusFilterChange(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-row gap-2 mt-2">
-        <div>
-          <label className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Start Date
-          </label>
+      <div className="p-2 flex flex-row gap-2 mt-2 items-center justify-between">
+        <div className="bg-white dark:bg-gray-800">
+          <label className="hidden">Start Date</label>
           <HijriDateInput
             name="startDate"
             label=""
@@ -119,11 +106,9 @@ export default function TaskFilterModal({
             placeholder="start date"
           />
         </div>
-
-        <div>
-          <label className="hidden text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            End Date
-          </label>
+        <div>to</div>
+        <div className="bg-white dark:bg-gray-800">
+          <label className="hidden">End Date</label>
           <HijriDateInput
             name="endDate"
             label=""

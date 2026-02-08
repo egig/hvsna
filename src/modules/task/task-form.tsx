@@ -107,18 +107,20 @@ export default function TaskForm({
         style={{ resize: "none" }}
       />
 
-      <HijriDateInput
-        name="scheduledAtEpochMillis"
-        label="Scheduled Date & Time (Hijri)"
-        value={selectedHijriDate as HijriDate}
-        placeholder="Date"
-        disabled={isSubmitting}
-        required={false}
-        className="text-base"
-        onChange={(hijriDate) => {
-          setSelectedHijriDate(hijriDate);
-        }}
-      />
+      <div className="mx-4">
+        <HijriDateInput
+          name="scheduledAtEpochMillis"
+          label="Scheduled Date & Time (Hijri)"
+          value={selectedHijriDate as HijriDate}
+          placeholder="Date"
+          disabled={isSubmitting}
+          required={false}
+          className="text-base"
+          onChange={(hijriDate) => {
+            setSelectedHijriDate(hijriDate);
+          }}
+        />
+      </div>
 
       {goalEnabled && (
         <div className="mb-4">

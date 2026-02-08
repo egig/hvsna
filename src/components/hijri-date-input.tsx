@@ -138,7 +138,7 @@ function CalendarModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
-      <div className="p-4">
+      <div className="px-4 pt-4 pb-[env(safe-area-inset-bottom)] mb-2">
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-4">
           <button
@@ -354,7 +354,7 @@ export function HijriDateInput({
   };
 
   return (
-    <div className={`mx-4 ${className}`}>
+    <div className={`${className}`}>
       <button
         type="button"
         onClick={handleButtonClick}
