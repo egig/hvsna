@@ -97,6 +97,9 @@ export default function TaskForm({
         disabled={isSubmitting}
         required={true}
         className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
       />
       <textarea
         name="description"
