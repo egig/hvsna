@@ -8,11 +8,12 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   unscheduled: number;
+  withoutTime: number;
   scheduledAtEpochMillis?: number;
-  targetId?: string;
-  hijriDate?: string;
   scheduledAtHour?: number;
   scheduledAtMinute?: number;
+  targetId?: string;
+  hijriDate?: string;
   lat?: number;
   long?: number;
   timezone?: string;

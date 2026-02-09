@@ -18,6 +18,7 @@ interface PouchDBTaskDocument {
   description?: string;
   status: TaskStatus;
   unscheduled: number;
+  withoutTime: number;
   scheduledAtEpochMillis?: number;
   targetId?: string;
   targetValue?: number;
@@ -60,6 +61,7 @@ export class TaskRepository {
       attributes: doc.attributes,
       hijriDate: doc.hijriDate,
       unscheduled: doc.unscheduled,
+      withoutTime: doc.withoutTime,
     };
   }
 
@@ -77,7 +79,8 @@ export class TaskRepository {
       updatedAt: new Date().valueOf(),
       attributes: {},
       hijriDate: "",
-      unscheduled: 0,
+      unscheduled: 1,
+      withoutTime: 1,
     };
   }
 
@@ -96,6 +99,7 @@ export class TaskRepository {
       attributes: input.attributes || {},
       hijriDate: input.hijriDate || "",
       unscheduled: 1,
+      withoutTime: 1,
     };
 
     if (input.hijriDate) {
