@@ -6,11 +6,12 @@ interface HijriDateInputProps {
   name: string;
   label: string;
   value?: HijriDate;
+  timeValue?: string;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
-  onChange?: (value: HijriDate | null) => void;
+  onChange?: (value: HijriDate | null, time: string | null) => void;
   onBlur?: () => void;
 }
 
@@ -18,6 +19,7 @@ export function HijriDateInput({
   name,
   label,
   value,
+  timeValue,
   placeholder = "",
   disabled = false,
   required = false,
@@ -27,6 +29,7 @@ export function HijriDateInput({
 }: HijriDateInputProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<HijriDate | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   // Initialize from Gregorian value
   useEffect(() => {
@@ -37,16 +40,17 @@ export function HijriDateInput({
     }
   }, [value]);
 
-  const handleDateSelect = (date: HijriDate | null) => {
+  const handleDateSelect = (date: HijriDate | null, time: string | null) => {
     setSelectedDate(date);
+    setSelectedTime(time);
     if (onChange) {
-      onChange(date);
+      onChange(date, time);
     }
   };
 
-  const formatDateDisplay = (date: HijriDate | null) => {
+  const formatDateDisplay = (date: HijriDate | null, t: string | null) => {
     if (!date) return placeholder;
-    return date.format("DD MMMM YYYY, HH:mm");
+    return date.format("DD MMMM YYYY") + (t ? `, ${t}` : "");
   };
 
   const handleButtonClick = () => {
@@ -75,7 +79,7 @@ export function HijriDateInput({
                 : "text-gray-500 dark:text-gray-400"
             }
           >
-            {formatDateDisplay(selectedDate)}
+            {formatDateDisplay(selectedDate, selectedTime)}
           </span>
           <svg
             className="w-5 h-5 text-gray-400"
@@ -97,6 +101,7 @@ export function HijriDateInput({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedDate={selectedDate}
+        selectedTime={selectedTime}
         onDateSelect={handleDateSelect}
       />
     </div>

@@ -19,8 +19,10 @@ export interface UseTaskFormReturn {
   task: Task | null;
   error: string | null;
   selectedHijriDate: HijriDate | null;
+  selectedTime: string | null;
   isSubmitting: boolean;
   setSelectedHijriDate: any;
+  setSelectedTime: any;
   selectedTargetId: string;
   setSelectedTargetId: any;
   selectedGoal: any;
@@ -54,6 +56,7 @@ export const useTaskForm = (
   const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | null>(
     null,
   );
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
 
   const { goals } = useGoals();
@@ -278,7 +281,8 @@ export const useTaskForm = (
     setTask(null);
     setLoading(false);
     setCurrentTargetId(null);
-    setSelectedHijriDate(undefined);
+    setSelectedHijriDate(null);
+    setSelectedTime(null);
     setSelectedTargetId("");
     setIsSubmitting(false);
     setSelectedGoal(null);
@@ -291,6 +295,8 @@ export const useTaskForm = (
     selectedHijriDate: selectedHijriDate || null,
     isSubmitting,
     setSelectedHijriDate,
+    selectedTime,
+    setSelectedTime,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,

@@ -36,12 +36,14 @@ export default function TaskForm({
     handleDelete,
     selectedHijriDate,
     setSelectedHijriDate,
+    selectedTime,
+    setSelectedTime,
     selectedTargetId,
     setSelectedTargetId,
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-  } = useTaskForm(taskId || undefined, onSuccess, onError, onCancel, onDelete);
+  } = useTaskForm(taskId || "", onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
@@ -115,12 +117,14 @@ export default function TaskForm({
           name="scheduledAtEpochMillis"
           label="Scheduled Date & Time (Hijri)"
           value={selectedHijriDate as HijriDate}
+          timeValue={selectedTime as string}
           placeholder="Date"
           disabled={isSubmitting}
           required={false}
           className="text-base"
-          onChange={(hijriDate: any) => {
+          onChange={(hijriDate: any, time: string | null) => {
             setSelectedHijriDate(hijriDate);
+            setSelectedTime(time);
           }}
         />
       </div>

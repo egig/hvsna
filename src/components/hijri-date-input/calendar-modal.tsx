@@ -12,13 +12,15 @@ interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: HijriDate | null;
-  onDateSelect: (date: HijriDate | null) => void;
+  selectedTime: string | null;
+  onDateSelect: (date: HijriDate | null, time: string | null) => void;
 }
 
 export function CalendarModal({
   isOpen,
   onClose,
   selectedDate,
+  selectedTime,
   onDateSelect,
 }: CalendarModalProps) {
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
@@ -28,12 +30,6 @@ export function CalendarModal({
           new Date().getFullYear(),
           new Date().getMonth() + 1,
         ),
-  );
-  const [selectedHour, setSelectedHour] = useState(
-    selectedDate?.toDate().getHours() || 0,
-  );
-  const [selectedMinute, setSelectedMinute] = useState(
-    selectedDate?.toDate().getMinutes() || 0,
   );
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
     selectedDate,
@@ -61,8 +57,6 @@ export function CalendarModal({
   useEffect(() => {
     if (selectedDate) {
       setCurrentMonth(new HijriMonth(selectedDate.year, selectedDate.month));
-      setSelectedHour(selectedDate.toDate().getHours());
-      setSelectedMinute(selectedDate.toDate().getMinutes());
       setTempSelectedDate(selectedDate);
     }
   }, [selectedDate]);
@@ -113,28 +107,26 @@ export function CalendarModal({
         tempSelectedDate.year,
         tempSelectedDate.month,
         tempSelectedDate.day,
-        selectedHour,
-        selectedMinute,
       );
-      onDateSelect(finalDate);
+      onDateSelect(finalDate, selectedTime);
       onClose();
     }
   };
 
   const handleTomorrow = () => {
     const h = HijriDate.fromDate(new Date());
-    onDateSelect(h.next());
+    onDateSelect(h.next(), null);
     onClose();
   };
 
   const handleToday = () => {
     const today = HijriDate.fromDate(new Date());
-    onDateSelect(today);
+    onDateSelect(today, null);
     onClose();
   };
 
   const handleNoDate = () => {
-    onDateSelect(null as any);
+    onDateSelect(null as any, null);
     onClose();
   };
 
@@ -143,8 +135,7 @@ export function CalendarModal({
   };
 
   const handleRemoveTime = () => {
-    setSelectedHour(0);
-    setSelectedMinute(0);
+    setSelectedTime(null);
     setEditMode("date");
   };
 
@@ -268,10 +259,7 @@ export function CalendarModal({
 
       {editMode == "time" && (
         <TimeSelectionModal
-          selectedHour={selectedHour}
-          selectedMinute={selectedMinute}
-          onHourChange={setSelectedHour}
-          onMinuteChange={setSelectedMinute}
+          selectedTime={selectedTime}
           onBack={() => setEditMode("date")}
           onConfirm={handleTimeConfirm}
           onRemoveTime={handleRemoveTime}
