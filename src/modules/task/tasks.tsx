@@ -1,15 +1,7 @@
 import { useState } from "react";
-import {
-  PlusIcon,
-  Plus,
-  Check,
-  Settings,
-  MoreVertical,
-  Filter,
-} from "lucide-react";
+import { Plus, Check, Filter } from "lucide-react";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
-import TaskForm from "./task-form";
 import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
@@ -17,7 +9,6 @@ import TaskListItem from "src/components/task-list-item";
 import { useTasks } from "./use-tasks";
 
 export default function Tasks() {
-  const [sheetOpened, setSheetOpened] = useState(false);
   const [filterModalOpened, setFilterModalOpened] = useState(false);
 
   const {
@@ -29,11 +20,6 @@ export default function Tasks() {
     hasMore,
     refreshTasks,
     openEditPopup,
-    handleTaskSuccess,
-    handleTaskError,
-    handleTaskCancel,
-    handleDeleteTask,
-    handleDeleteTaskById,
     handleInfiniteScroll,
     statusFilter,
     dateRangeFilter,

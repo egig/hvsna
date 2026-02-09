@@ -119,7 +119,7 @@ export default function TaskForm({
           disabled={isSubmitting}
           required={false}
           className="text-base"
-          onChange={(hijriDate) => {
+          onChange={(hijriDate: any) => {
             setSelectedHijriDate(hijriDate);
           }}
         />

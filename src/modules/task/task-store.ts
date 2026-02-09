@@ -30,7 +30,7 @@ interface TaskState {
   offset: number;
 
   // Filter state for browsed tasks
-  statusFilter: string;
+  statusFilter: number | "all";
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
 
@@ -56,7 +56,7 @@ interface TaskState {
   resetTasks: () => void;
 
   // Actions for filters
-  setStatusFilter: (status: string) => void;
+  setStatusFilter: (status: number | "all") => void;
   setDateRangeFilter: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
   ) => void;
@@ -96,7 +96,7 @@ export const useTaskStore = create<TaskState>()(
       upcommingTasks: [],
       browsedTasks: [],
       taskCache: {},
-      statusFilter: "all",
+      statusFilter: "all" as const,
       dateRangeFilter: null,
       searchTextFilter: "",
 
@@ -156,7 +156,7 @@ export const useTaskStore = create<TaskState>()(
       },
       clearFilters: () => {
         set({
-          statusFilter: "all",
+          statusFilter: "all" as const,
           dateRangeFilter: null,
           searchTextFilter: "",
         });
@@ -170,7 +170,7 @@ export const useTaskStore = create<TaskState>()(
           const newTask = await taskRepository.create(input);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
-          get().loadBrowsedTasks(true);
+          get().loadBrowsedTasks();
 
           return newTask;
         } catch (err) {

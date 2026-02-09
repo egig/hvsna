@@ -32,14 +32,14 @@ export const useTaskListItem = () => {
       return updatedTask;
     }
 
-    if (status === "in_progress") {
+    if (status === 0) {
       return updatedTask;
     }
 
     try {
       const goal = await getGoal(updatedTask.targetId as string);
       let v = updatedTask.targetValue || 0;
-      if (status !== "completed") {
+      if (status !== 1) {
         v = -1 * v;
       }
 

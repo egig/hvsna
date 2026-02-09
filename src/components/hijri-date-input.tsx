@@ -12,7 +12,7 @@ interface HijriDateInputProps {
   disabled?: boolean;
   required?: boolean;
   className?: string;
-  onChange?: (value: HijriDate) => void;
+  onChange?: (value: HijriDate | null) => void;
   onBlur?: () => void;
 }
 
@@ -20,7 +20,7 @@ interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: HijriDate | null;
-  onDateSelect: (date: HijriDate) => void;
+  onDateSelect: (date: HijriDate | null) => void;
 }
 
 function CalendarModal({
@@ -285,12 +285,22 @@ function CalendarModal({
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center">
-          <button
-            onClick={handleToday}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-          >
-            Today
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleToday}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => {
+                onDateSelect(null as any);
+              }}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+            >
+              No Date
+            </button>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={onClose}
@@ -335,7 +345,7 @@ export function HijriDateInput({
     }
   }, [value]);
 
-  const handleDateSelect = (date: HijriDate) => {
+  const handleDateSelect = (date: HijriDate | null) => {
     setSelectedDate(date);
     if (onChange) {
       onChange(date);

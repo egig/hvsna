@@ -31,7 +31,7 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
       _rev: "1-rev",
       user_id: "default-user",
       name: "Test Task",
-      status: "pending",
+      status: 0,
       createdAt: Date.now() - 1000,
       updatedAt: Date.now() - 1000,
     };
@@ -40,16 +40,16 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     mockDb.put.mockResolvedValueOnce({ rev: "2-rev" });
 
     const store = useTaskStore.getState();
-    const updated = await store.updateTask(taskId, { status: "completed" });
+    const updated = await store.updateTask(taskId, { status: 1 });
 
-    expect(updated.status).toBe("completed");
+    expect(updated.status).toBe(1);
 
     // Verify only task update was called (no log creation)
     expect(mockDb.put).toHaveBeenCalledTimes(1);
     expect(mockDb.put).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: taskId,
-        status: "completed",
+        status: 1,
       }),
     );
   });
@@ -61,7 +61,7 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
       _rev: "1-rev",
       user_id: "default-user",
       name: "Test Task",
-      status: "pending",
+      status: 0,
       createdAt: Date.now() - 1000,
       updatedAt: Date.now() - 1000,
     };
@@ -91,7 +91,7 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
       _rev: "1-rev",
       user_id: "default-user",
       name: "Test Task",
-      status: "completed",
+      status: 1,
       targetValue: 100,
       createdAt: Date.now() - 1000,
       updatedAt: Date.now() - 1000,
@@ -101,16 +101,16 @@ describe("Task Store - Pure Task Operations (No Log Creation)", () => {
     mockDb.put.mockResolvedValueOnce({ rev: "2-rev" });
 
     const store = useTaskStore.getState();
-    const updated = await store.updateTask(taskId, { status: "pending" });
+    const updated = await store.updateTask(taskId, { status: 0 });
 
-    expect(updated.status).toBe("pending");
+    expect(updated.status).toBe(0);
 
     // Verify only task update was called (no log creation)
     expect(mockDb.put).toHaveBeenCalledTimes(1);
     expect(mockDb.put).toHaveBeenCalledWith(
       expect.objectContaining({
         _id: taskId,
-        status: "pending",
+        status: 0,
       }),
     );
   });

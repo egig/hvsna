@@ -51,9 +51,9 @@ export const useTaskForm = (
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [selectedHijriDate, setSelectedHijriDate] = useState<
-    HijriDate | undefined
-  >(undefined);
+  const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | null>(
+    null,
+  );
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
 
   const { goals } = useGoals();
@@ -78,9 +78,7 @@ export const useTaskForm = (
       const month = parseInt(task.hijriDate.substring(4, 6));
       const day = parseInt(task.hijriDate.substring(6, 8));
 
-      setSelectedHijriDate(
-        new HijriDate(year, month, day, task.hour, task.minute),
-      );
+      setSelectedHijriDate(new HijriDate(year, month, day, 0, 0));
     }
   }, [task]);
 
@@ -157,16 +155,19 @@ export const useTaskForm = (
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as Task;
 
-    if (selectedHijriDate) {
+    if (!!selectedHijriDate) {
       const year = selectedHijriDate.year.toString().padStart(4, "0");
       const month = selectedHijriDate.month.toString().padStart(2, "0");
       const day = selectedHijriDate.day.toString().padStart(2, "0");
       taskData.hijriDate = `${year}${month}${day}`;
 
-      taskData.hour = selectedHijriDate?.hour;
-      taskData.minute = selectedHijriDate?.minute;
+      // taskData.hour = selectedHijriDate?.hour;
+      // taskData.minute = selectedHijriDate?.minute;
       // @ts-ignore
       taskData.scheduledAtEpochMillis = selectedHijriDate?.toDate().valueOf();
+    } else {
+      taskData.hijriDate = undefined;
+      taskData.scheduledAtEpochMillis = undefined;
     }
 
     try {
@@ -196,16 +197,8 @@ export const useTaskForm = (
         targetValue: taskData.targetValue,
         attributes: attr,
         hijriDate: taskData.hijriDate,
-        hour: taskData.hour,
-        minute: taskData.minute,
+        scheduledAtEpochMillis: taskData.scheduledAtEpochMillis,
       };
-
-      // Handle scheduledAtEpochMillis - convert date string to timestamp if provided
-      if (taskData.scheduledAtEpochMillis) {
-        taskInput.scheduledAtEpochMillis = new Date(
-          taskData.scheduledAtEpochMillis,
-        ).getTime();
-      }
 
       // Handle repeat - only include if not "none"
       if (taskData.repeat && taskData.repeat !== "none") {

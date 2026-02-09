@@ -121,7 +121,7 @@ export const useTasks = (): UseTasksReturn => {
               const virtualTask: Task = {
                 id: `recurring_${recurringTask.id}_${occurrence.getTime()}`,
                 name: recurringTask.name,
-                status: "pending",
+                status: 0,
                 scheduledAtEpochMillis: occurrence.getTime(),
                 targetId: recurringTask.targetId,
                 targetValue: recurringTask.targetValue,

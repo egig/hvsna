@@ -31,23 +31,21 @@ export function TaskListItem({
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
-      case "pending":
-        return "in_progress";
-      case "in_progress":
-        return "completed";
-      case "completed":
-        return "pending";
+      case 0:
+        return 1;
+      case 1:
+        return 0;
       default:
-        return "pending";
+        return 0;
     }
   };
 
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
-      case "completed":
+      case 1:
         return <CheckCircleIcon size={28} className="text-green-500" />;
-      case "in_progress":
-        return <CircleIcon size={28} className="text-blue-500" />;
+      case 0:
+        return <CircleIcon size={28} className="text-gray-500" />;
       default:
         return <IoEllipseOutline size={28} className="text-gray-400" />;
     }
@@ -55,10 +53,10 @@ export function TaskListItem({
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
-      case "completed":
+      case 1:
         return "text-green-600";
-      case "in_progress":
-        return "text-blue-600";
+      case 0:
+        return "text-gray-600";
       default:
         return "text-gray-600";
     }
@@ -126,7 +124,7 @@ export function TaskListItem({
       }),
       {
         loading: "Updating status...",
-        success: `Status changed to ${nextStatus.replace("_", " ")}`,
+        success: `Status changed to ${nextStatus === 1 ? "complete" : "pending"}`,
         error: "Failed to update status",
       },
     );
@@ -157,7 +155,7 @@ export function TaskListItem({
             className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
             aria-label={`Change status from ${task.status}`}
           >
-            {getStatusIcon(task?.status || "pending")}
+            {getStatusIcon(task?.status || 0)}
           </button>
         </div>
 

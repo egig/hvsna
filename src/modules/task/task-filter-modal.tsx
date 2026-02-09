@@ -9,10 +9,10 @@ import Select from "../../components/form-select";
 interface TaskFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  statusFilter: string;
+  statusFilter: number | "all";
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
-  onStatusFilterChange: (value: string) => void;
+  onStatusFilterChange: (value: number | "all") => void;
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
   ) => void;
@@ -35,10 +35,9 @@ export default function TaskFilterModal({
   const [dateRangeModalOpen, setDateRangeModalOpen] = useState(false);
 
   const statusOptions = [
-    { value: "all", label: "All Status", color: "bg-gray-500" },
-    { value: "pending", label: "To Do", color: "bg-yellow-500" },
-    { value: "in_progress", label: "In Progress", color: "bg-blue-500" },
-    { value: "completed", label: "Completed", color: "bg-green-500" },
+    { value: "all" as const, label: "All Status", color: "bg-gray-500" },
+    { value: 0, label: "To Do", color: "bg-yellow-500" },
+    { value: 1, label: "Completed", color: "bg-green-500" },
   ];
 
   const currentStatusLabel =
@@ -60,7 +59,7 @@ export default function TaskFilterModal({
     onClear();
   };
 
-  const handleStatusSelect = (value: string) => {
+  const handleStatusSelect = (value: number | "all") => {
     onStatusFilterChange(value);
     setStatusModalOpen(false);
   };
