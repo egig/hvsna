@@ -356,7 +356,12 @@ export class TaskRepository {
 
     await db.createIndex({
       index: {
-        fields: ["type", "status", "scheduledAtDateHijri", "scheduledAtEpochMillis"],
+        fields: [
+          "type",
+          "status",
+          "scheduledAtDateHijri",
+          "scheduledAtEpochMillis",
+        ],
       },
     });
 
@@ -421,7 +426,12 @@ export class TaskRepository {
   ): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: ["type", "status", "scheduledAtDateIsNone", "scheduledAtEpochMillis"],
+        fields: [
+          "type",
+          "status",
+          "scheduledAtDateIsNone",
+          "scheduledAtEpochMillis",
+        ],
       },
     });
 
@@ -432,8 +442,10 @@ export class TaskRepository {
     const mangoQuery: any = {
       selector: {
         type: "task",
-        status: 0,
-        scheduledAtDateIsNone: {$gte: 0},
+        status: {
+          $gte: 0,
+        },
+        scheduledAtDateIsNone: { $gte: 0 },
         scheduledAtEpochMillis: { $gte: 0 },
       },
       sort: [

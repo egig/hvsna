@@ -34,6 +34,8 @@ function TodayTasks({ tasks }: TodayTasksProps) {
           onEdit={handleEditTask}
           showGoalInfo={false}
           className="transition-all hover:shadow-sm"
+          showDateTime={true}
+          formatDate={(task) => task.scheduledAtTime as string}
         />
       ))}
     </>

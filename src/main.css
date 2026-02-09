@@ -8,6 +8,11 @@
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+:root {
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --tab-bar-height: 62px;
+}
+
 html,
 body {
   @apply bg-white dark:bg-gray-950;

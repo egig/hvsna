@@ -190,7 +190,7 @@ export const useTaskStore = create<TaskState>()(
           const updatedTask = await taskRepository.update(id, input);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
-          get().loadBrowsedTasks();
+          get().loadBrowsedTasks(true);
 
           return updatedTask;
         } catch (err) {
@@ -211,7 +211,7 @@ export const useTaskStore = create<TaskState>()(
           get().removeTaskFromList(id);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
-          get().loadBrowsedTasks();
+          get().loadBrowsedTasks(true);
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to delete task";

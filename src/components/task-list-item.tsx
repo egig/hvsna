@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { CircleIcon, CheckCircleIcon } from "lucide-react";
+import {
+  CircleIcon,
+  CheckCircleIcon,
+  Square,
+  CheckSquareIcon,
+  CheckSquare2,
+} from "lucide-react";
 import type { Task, TaskStatus } from "../lib/types/task";
 import { useGoal } from "../modules/goal/use-goal";
 import { HijriDate } from "src/lib/hijri";
@@ -15,6 +21,7 @@ interface TaskListItemProps {
   showGoalInfo?: boolean;
   className?: string;
   showDateTime?: boolean;
+  formatDate?: (task: Task) => string;
 }
 
 export function TaskListItem({
@@ -24,6 +31,7 @@ export function TaskListItem({
   showGoalInfo = true,
   className,
   showDateTime = false,
+  formatDate,
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
 
@@ -43,11 +51,11 @@ export function TaskListItem({
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
       case 1:
-        return <CheckCircleIcon size={28} className="text-green-500" />;
+        return (
+          <CheckSquare2 strokeWidth={1} size={24} className="text-green-500" />
+        );
       case 0:
-        return <CircleIcon size={28} className="text-gray-500" />;
-      default:
-        return <IoEllipseOutline size={28} className="text-gray-400" />;
+        return <Square strokeWidth={1} size={24} className="text-gray-500" />;
     }
   };
 
@@ -63,6 +71,10 @@ export function TaskListItem({
   };
 
   const formatScheduledDate = (task: Task) => {
+    if (typeof formatDate === "function") {
+      return formatDate(task);
+    }
+
     if (!task.scheduledAtDateHijri) return null;
 
     const today = HijriDate.fromDate(new Date());

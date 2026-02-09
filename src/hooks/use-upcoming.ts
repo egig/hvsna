@@ -74,27 +74,27 @@ export function useUpcoming() {
     const todayString = `${today.year.toString().padStart(4, "0")}${today.month.toString().padStart(2, "0")}${today.day.toString().padStart(2, "0")}`;
 
     tasks.forEach((task) => {
-      if (!task.hijriDate) {
+      if (!task.scheduledAtDateHijri) {
         groups.unscheduled.push(task);
         return;
       }
 
       try {
         // Early string comparison for today/tomorrow to avoid expensive date parsing
-        if (task.hijriDate === todayString) {
+        if (task.scheduledAtDateHijri === todayString) {
           groups.today.push(task);
           return;
         }
 
         const tomorrowString = `${tomorrow.year.toString().padStart(4, "0")}${tomorrow.month.toString().padStart(2, "0")}${tomorrow.day.toString().padStart(2, "0")}`;
-        if (task.hijriDate === tomorrowString) {
+        if (task.scheduledAtDateHijri === tomorrowString) {
           groups.tomorrow.push(task);
           return;
         }
 
-        const year = parseInt(task.hijriDate.substring(0, 4));
-        const month = parseInt(task.hijriDate.substring(4, 6));
-        const day = parseInt(task.hijriDate.substring(6, 8));
+        const year = parseInt(task.scheduledAtDateHijri.substring(0, 4));
+        const month = parseInt(task.scheduledAtDateHijri.substring(4, 6));
+        const day = parseInt(task.scheduledAtDateHijri.substring(6, 8));
         const taskDate = new HijriDate(year, month, day);
         const taskGregorian = taskDate.toDate();
         const daysDiff = Math.floor(
