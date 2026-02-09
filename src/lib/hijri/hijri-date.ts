@@ -322,16 +322,7 @@ export class HijriDate {
     const lat = this._latitude ?? DEFAULT_LATITUDE;
     const lng = this._longitude ?? DEFAULT_LONGITUDE;
 
-    const today = HijriDate.fromGregorian(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      new Date().getDate(),
-      0,
-      0,
-      0,
-      lat,
-      lng,
-    );
+    const today = HijriDate.fromDate(new Date(), lat, lng);
     return (
       this.year === today.year &&
       this.month === today.month &&

@@ -45,11 +45,11 @@ export function TaskListItem({
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
       case "completed":
-        return <CheckCircleIcon size={24} className="text-green-500" />;
+        return <CheckCircleIcon size={28} className="text-green-500" />;
       case "in_progress":
-        return <CircleIcon size={24} className="text-blue-500" />;
+        return <CircleIcon size={28} className="text-blue-500" />;
       default:
-        return <IoEllipseOutline size={24} className="text-gray-400" />;
+        return <IoEllipseOutline size={28} className="text-gray-400" />;
     }
   };
 

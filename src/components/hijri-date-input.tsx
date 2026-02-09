@@ -138,7 +138,7 @@ function CalendarModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
-      <div className="px-4 pt-4 pb-[env(safe-area-inset-bottom)] mb-2">
+      <div className="px-4 pt-4 pb-[env(safe-area-inset-bottom)] mb-6">
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-4">
           <button
