@@ -460,10 +460,14 @@ export class TaskRepository {
     );
   }
 
-  async findBrowsedTasks(query?: any): Promise<Task[]> {
+  async findBrowsedTasks(
+    query?: any,
+    offset: number = 0,
+    limit: number = 50,
+  ): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: ["type", "status", "scheduledAtEpochMillis"],
+        fields: ["type", "status", "createdAt", "scheduledAtEpochMillis"],
       },
     });
 
@@ -471,15 +475,19 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: { $gte: null },
+        createdAt: { $gte: 0 },
         scheduledAtEpochMillis: {
           $gte: 0,
         },
       },
       sort: [
-        { type: "asc" },
-        { status: "asc" },
+        { type: "desc" },
+        { status: "desc" },
+        { createdAt: "desc" },
         { scheduledAtEpochMillis: "asc" },
       ],
+      limit,
+      skip: offset,
     };
     // Apply custom filters if provided
     if (query) {
@@ -498,7 +506,9 @@ export class TaskRepository {
         ];
       }
     }
+    console.log(mangoQuery);
     const result = await (db as any).find(mangoQuery);
+    console.log(result);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       this.mapDocumentToTask(doc),

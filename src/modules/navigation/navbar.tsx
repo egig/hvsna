@@ -148,21 +148,17 @@ export function LargeNavbar({
           </div>
 
           {/* Center: Title */}
-          <div className={`flex-1 text-center transition-opacity duration-800 ${isScrolled ? "opacity-100" : "opacity-0"}`}>
+          <div
+            className={`flex-1 text-center transition-opacity duration-800 ${isScrolled ? "opacity-100" : "opacity-0"}`}
+          >
             {title && (
-              <h1
-                className={`text-lg font-semibold text-gray-900 truncate`}
-              >
+              <h1 className={`text-lg font-semibold text-gray-900 truncate`}>
                 {title}
               </h1>
             )}
             {/* Subtitle */}
             {subtitle && (
-              <div
-                className={`text-xs text-gray-500`}
-              >
-                {subtitle}
-              </div>
+              <div className={`text-xs text-gray-500`}>{subtitle}</div>
             )}
           </div>
 
@@ -172,7 +168,9 @@ export function LargeNavbar({
       </header>
 
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 h-24">
-        <div className={`h-full flex flex-col justify-end pb-4 transition-opacity duration-500 ${isScrolled ? "opacity-0" : "opacity-100"}`}>
+        <div
+          className={`h-full flex flex-col justify-end pb-4 transition-opacity duration-500 ${isScrolled ? "opacity-0" : "opacity-100"}`}
+        >
           {title && (
             <h1 className="text-2xl font-semibold text-gray-900 truncate">
               {title}

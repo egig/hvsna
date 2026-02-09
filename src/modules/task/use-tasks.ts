@@ -7,7 +7,9 @@ export function useTasks() {
   const {
     browsedTasks,
     loading,
+    loadingMore,
     error,
+    hasMore,
     deleteTask,
     loadBrowsedTasks,
     statusFilter,
@@ -25,7 +27,7 @@ export function useTasks() {
   useEffect(() => {
     const loadData = async () => {
       setInitiated(true);
-      loadBrowsedTasks();
+      loadBrowsedTasks(true); // Reset on initial load
     };
     loadData();
   }, []);
@@ -35,7 +37,7 @@ export function useTasks() {
   }, []);
 
   const handleTaskSuccess = useCallback(() => {
-    loadBrowsedTasks();
+    loadBrowsedTasks(true); // Reset when task is updated
   }, []);
 
   const handleTaskError = useCallback((errorMessage: string) => {
@@ -50,7 +52,7 @@ export function useTasks() {
     async (task: Task) => {
       try {
         await deleteTask(task.id);
-        loadBrowsedTasks();
+        loadBrowsedTasks(true); // Reset when task is deleted
         setEditingTaskId(null);
       } catch (err) {
         alert("Failed to delete task. Please try again.");
@@ -69,14 +71,20 @@ export function useTasks() {
     [browsedTasks, handleDeleteTask],
   );
 
+  const handleInfiniteScroll = useCallback(() => {
+    if (!loading && !loadingMore && hasMore) {
+      loadBrowsedTasks(false); // Don't reset for pagination
+    }
+  }, [loading, loadingMore, hasMore, loadBrowsedTasks]);
+
   return {
     // Data
     tasks: browsedTasks,
     loading,
     initiated,
-    loadingMore: false,
+    loadingMore,
     error,
-    hasMore: false,
+    hasMore,
 
     // Filter state
     statusFilter,
@@ -84,14 +92,14 @@ export function useTasks() {
     searchTextFilter,
 
     // Handlers
-    refreshTasks: () => loadBrowsedTasks(),
+    refreshTasks: () => loadBrowsedTasks(true),
     openEditPopup,
     handleTaskSuccess,
     handleTaskError,
     handleTaskCancel,
     handleDeleteTask,
     handleDeleteTaskById,
-    handleInfiniteScroll: () => {}, // No-op since browsedTasks doesn't support pagination
+    handleInfiniteScroll,
 
     // Filter actions
     setStatusFilter,

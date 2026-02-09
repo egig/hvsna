@@ -16,7 +16,7 @@ import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
 import { useTasks } from "./use-tasks";
 
-export default function Tasks() { 
+export default function Tasks() {
   const [sheetOpened, setSheetOpened] = useState(false);
   const [filterModalOpened, setFilterModalOpened] = useState(false);
 

@@ -35,7 +35,7 @@ interface TaskState {
   searchTextFilter: string;
 
   // Actions for single task
-  setTask: (task: Task | null) => void;
+  // setTask: (task: Task | null) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   reset: () => void;
@@ -51,7 +51,6 @@ interface TaskState {
   setLoadingMore: (loadingMore: boolean) => void;
   setHasMore: (hasMore: boolean) => void;
   setOffset: (offset: number) => void;
-  addTask: (task: Task) => void;
   updateTaskInList: (id: string, updates: Partial<Task>) => void;
   removeTaskFromList: (id: string) => void;
   resetTasks: () => void;
@@ -79,7 +78,7 @@ interface TaskState {
 
   loadTodayTasks: () => Promise<void>;
   loadUpcommingTasks: () => Promise<void>;
-  loadBrowsedTasks: () => Promise<void>;
+  loadBrowsedTasks: (reset?: boolean) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -117,8 +116,6 @@ export const useTaskStore = create<TaskState>()(
       setLoadingMore: (loadingMore) => set({ loadingMore }),
       setHasMore: (hasMore) => set({ hasMore }),
       setOffset: (offset) => set({ offset }),
-      addTask: (task) =>
-        set((state) => ({ tasks: [task, ...state.tasks] }), false, "addTask"),
       updateTaskInList: (id, updates) =>
         set(
           (state) => ({
@@ -147,15 +144,15 @@ export const useTaskStore = create<TaskState>()(
       // Actions for filters
       setStatusFilter: (status) => {
         set({ statusFilter: status });
-        get().loadBrowsedTasks();
+        get().loadBrowsedTasks(true);
       },
       setDateRangeFilter: (dateRange) => {
         set({ dateRangeFilter: dateRange });
-        get().loadBrowsedTasks();
+        get().loadBrowsedTasks(true);
       },
       setSearchTextFilter: (searchText) => {
         set({ searchTextFilter: searchText });
-        get().loadBrowsedTasks();
+        get().loadBrowsedTasks(true);
       },
       clearFilters: () => {
         set({
@@ -163,7 +160,7 @@ export const useTaskStore = create<TaskState>()(
           dateRangeFilter: null,
           searchTextFilter: "",
         });
-        get().loadBrowsedTasks();
+        get().loadBrowsedTasks(true);
       },
 
       createTask: async (input: TaskCreateInput): Promise<Task> => {
@@ -171,10 +168,9 @@ export const useTaskStore = create<TaskState>()(
           set({ loading: true, error: null });
 
           const newTask = await taskRepository.create(input);
-          get().addTask(newTask);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
-          get().loadBrowsedTasks();
+          get().loadBrowsedTasks(true);
 
           return newTask;
         } catch (err) {
@@ -370,9 +366,21 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadBrowsedTasks: async (): Promise<void> => {
+      loadBrowsedTasks: async (reset: boolean = false): Promise<void> => {
         try {
-          set({ loading: true, error: null });
+          const currentOffset = get().offset;
+          const currentBrowsedTasks = get().browsedTasks;
+
+          // Reset offset and browsedTasks if this is a fresh load
+          if (reset) {
+            set({ offset: 0, browsedTasks: [] });
+          }
+
+          set({
+            loading: reset ? true : false,
+            loadingMore: !reset,
+            error: null,
+          });
 
           // Get current filter state
           const { statusFilter, dateRangeFilter, searchTextFilter } = get();
@@ -404,18 +412,38 @@ export const useTaskStore = create<TaskState>()(
             query.searchText = searchTextFilter;
           }
 
-          const browsedTasksList = await taskRepository.findBrowsedTasks(query);
-          let tc = Object.fromEntries(
-            browsedTasksList.map((task) => [task.id, task]),
+          const offset = reset ? 0 : currentOffset;
+          const browsedTasksList = await taskRepository.findBrowsedTasks(
+            query,
+            offset,
+            10,
           );
-          set({ browsedTasks: browsedTasksList, taskCache: tc });
+          // Check if there are more tasks
+          const hasMore = browsedTasksList.length === 10;
+
+          // Update state
+          const newBrowsedTasks = reset
+            ? browsedTasksList
+            : [...currentBrowsedTasks, ...browsedTasksList];
+          const newOffset = offset + browsedTasksList.length;
+
+          let tc = Object.fromEntries(
+            newBrowsedTasks.map((task) => [task.id, task]),
+          );
+
+          set({
+            browsedTasks: newBrowsedTasks,
+            taskCache: tc,
+            offset: newOffset,
+            hasMore,
+          });
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to load browsed tasks";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
-          set({ loading: false });
+          set({ loading: false, loadingMore: false });
         }
       },
     }),
