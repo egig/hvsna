@@ -63,7 +63,7 @@ export function TaskListItem({
   };
 
   const formatScheduledDate = (task: Task) => {
-    if (!task.hijriDate) return null;
+    if (!task.scheduledAtDateHijri) return null;
 
     const today = HijriDate.fromDate(new Date());
     const tomorrow = today.next();
@@ -71,21 +71,21 @@ export function TaskListItem({
     const tomorrowString = `${tomorrow.year.toString().padStart(4, "0")}${tomorrow.month.toString().padStart(2, "0")}${tomorrow.day.toString().padStart(2, "0")}`;
 
     // Check if today
-    if (task.hijriDate === todayString) {
+    if (task.scheduledAtDateHijri === todayString) {
       return "Today";
     }
 
     // Check if tomorrow
-    if (task.hijriDate === tomorrowString) {
+    if (task.scheduledAtDateHijri === tomorrowString) {
       return "Tomorrow";
     }
 
     // Check if within next 7 days
     try {
       const taskDate = new HijriDate(
-        parseInt(task.hijriDate.slice(0, 4)),
-        parseInt(task.hijriDate.slice(4, 6)),
-        parseInt(task.hijriDate.slice(6, 8)),
+        parseInt(task.scheduledAtDateHijri.slice(0, 4)),
+        parseInt(task.scheduledAtDateHijri.slice(4, 6)),
+        parseInt(task.scheduledAtDateHijri.slice(6, 8)),
       );
       const todayGregorian = today.toDate();
       const taskGregorian = taskDate.toDate();
@@ -102,7 +102,7 @@ export function TaskListItem({
       // Otherwise show formatted date
       return taskDate.format("D MMMM");
     } catch {
-      return task.hijriDate;
+      return task.scheduledAtDateHijri;
     }
   };
 
@@ -176,7 +176,7 @@ export function TaskListItem({
           )}
 
           {/* Description */}
-          {showDateTime && !!task.hijriDate && (
+          {showDateTime && !!task.scheduledAtDateHijri && (
             <p className="text-xs text-gray-500 mt-1 line-clamp-2">
               {formatScheduledDate(task)}
             </p>

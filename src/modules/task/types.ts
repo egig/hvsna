@@ -7,13 +7,12 @@ export interface Task {
   name: string;
   description?: string;
   status: TaskStatus;
-  unscheduled: number;
-  withoutTime: number;
+  scheduledAtDateIsNone: number;
+  scheduledAtTimeIsNone: number;
+  scheduledAtDateHijri?: string;
+  scheduledAtTime?: string;
   scheduledAtEpochMillis?: number;
-  scheduledAtHour?: number;
-  scheduledAtMinute?: number;
   targetId?: string;
-  hijriDate?: string;
   lat?: number;
   long?: number;
   timezone?: string;
@@ -28,9 +27,9 @@ export interface TaskCreateInput {
   name: string;
   description?: string;
   status?: TaskStatus;
-  hijriDate: string;
-  scheduledAtHour?: number;
-  scheduledAtMinute?: number;
+  scheduledAtDateHijri: string;
+  scheduledAtTimeIsNone?: number;
+  scheduledAtTime?: string;
   lat?: number;
   long?: number;
   repeat?: TaskRepeat;
@@ -43,9 +42,10 @@ export interface TaskUpdateInput {
   name?: string;
   description?: string;
   status?: TaskStatus;
-  hijriDate?: string;
-  scheduledAtHour?: number;
-  scheduledAtMinute?: number;
+  scheduledAtDateHijri?: string;
+  scheduledAtDateIsNone?: boolean;
+  scheduledAtTimeIsNone?: boolean;
+  scheduledAtTime?: string;
   lat?: number;
   long?: number;
   repeat?: TaskRepeat;
@@ -65,9 +65,10 @@ export interface TaskChange {
 export type TaskQuery = {
   status?: TaskStatus;
   targetId?: string;
-  hijriDate?: string;
-  scheduledAtHour?: number;
-  scheduledAtMinute?: number;
+  scheduledAtDateHijri?: string;
+  scheduledAtDateIsNone?: boolean;
+  scheduledAtTimeIsNone?: boolean;
+  scheduledAtTime?: string;
   unscheduled?: number;
   searchText?: string;
 };

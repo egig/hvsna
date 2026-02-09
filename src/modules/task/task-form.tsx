@@ -102,6 +102,7 @@ export default function TaskForm({
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
+        aria-label="task name"
       />
       <textarea
         name="description"
@@ -164,6 +165,7 @@ export default function TaskForm({
               disabled={isSubmitting}
               required={false}
               className="text-base"
+              aria-label="target value"
             />
           )}
 
@@ -182,6 +184,7 @@ export default function TaskForm({
                   disabled={isSubmitting}
                   required={false}
                   className="text-base"
+                  aria-label={`scope attribute ${attributeId}`}
                 />
               );
             }

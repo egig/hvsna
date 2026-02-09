@@ -75,13 +75,17 @@ export const useTaskForm = (
   }, [taskId]);
 
   useEffect(() => {
-    if (task?.hijriDate) {
+    if (task?.scheduledAtDateHijri) {
       // Parse YYYYMMDD format
-      const year = parseInt(task.hijriDate.substring(0, 4));
-      const month = parseInt(task.hijriDate.substring(4, 6));
-      const day = parseInt(task.hijriDate.substring(6, 8));
+      const year = parseInt(task.scheduledAtDateHijri.substring(0, 4));
+      const month = parseInt(task.scheduledAtDateHijri.substring(4, 6));
+      const day = parseInt(task.scheduledAtDateHijri.substring(6, 8));
 
       setSelectedHijriDate(new HijriDate(year, month, day, 0, 0));
+    }
+
+    if (task?.scheduledAtTime) {
+      setSelectedTime(task.scheduledAtTime);
     }
   }, [task]);
 
@@ -162,14 +166,10 @@ export const useTaskForm = (
       const year = selectedHijriDate.year.toString().padStart(4, "0");
       const month = selectedHijriDate.month.toString().padStart(2, "0");
       const day = selectedHijriDate.day.toString().padStart(2, "0");
-      taskData.hijriDate = `${year}${month}${day}`;
-
-      // taskData.hour = selectedHijriDate?.hour;
-      // taskData.minute = selectedHijriDate?.minute;
-      // @ts-ignore
+      taskData.scheduledAtDateHijri = `${year}${month}${day}`;
       taskData.scheduledAtEpochMillis = selectedHijriDate?.toDate().valueOf();
     } else {
-      taskData.hijriDate = undefined;
+      taskData.scheduledAtDateHijri = undefined;
       taskData.scheduledAtEpochMillis = undefined;
     }
 
@@ -199,7 +199,7 @@ export const useTaskForm = (
         targetId: taskData.targetId,
         targetValue: taskData.targetValue,
         attributes: attr,
-        hijriDate: taskData.hijriDate,
+        scheduledAtDateHijri: taskData.scheduledAtDateHijri,
         scheduledAtEpochMillis: taskData.scheduledAtEpochMillis,
       };
 

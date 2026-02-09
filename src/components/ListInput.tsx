@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronRightIcon } from "lucide-react";
 
 interface ListInputProps {
   label: string;
@@ -46,20 +47,7 @@ export const ListInput: React.FC<ListInputProps> = ({
 
       {!rightContent && (
         <div className="flex-shrink-0 text-gray-400">
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
+          <ChevronRightIcon className="w-5 h-5" />
         </div>
       )}
     </button>

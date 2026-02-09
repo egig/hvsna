@@ -17,15 +17,16 @@ interface PouchDBTaskDocument {
   name: string;
   description?: string;
   status: TaskStatus;
-  unscheduled: number;
-  withoutTime: number;
+  scheduledAtDateHijri?: string;
+  scheduledAtDateIsNone: number;
+  scheduledAtTimeIsNone: number;
   scheduledAtEpochMillis?: number;
+  scheduledAtTime?: string;
   targetId?: string;
   targetValue?: number;
   createdAt?: number;
   updatedAt?: number;
   attributes?: Record<string, any>;
-  hijriDate?: string;
 }
 
 export class TaskRepository {
@@ -59,9 +60,10 @@ export class TaskRepository {
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
       attributes: doc.attributes,
-      hijriDate: doc.hijriDate,
-      unscheduled: doc.unscheduled,
-      withoutTime: doc.withoutTime,
+      scheduledAtDateHijri: doc.scheduledAtDateHijri,
+      scheduledAtDateIsNone: doc.scheduledAtDateIsNone,
+      scheduledAtTimeIsNone: doc.scheduledAtTimeIsNone,
+      scheduledAtTime: doc.scheduledAtTime,
     };
   }
 
@@ -78,9 +80,9 @@ export class TaskRepository {
       createdAt: new Date().valueOf(),
       updatedAt: new Date().valueOf(),
       attributes: {},
-      hijriDate: "",
-      unscheduled: 1,
-      withoutTime: 1,
+      scheduledAtDateHijri: "",
+      scheduledAtDateIsNone: 1,
+      scheduledAtTimeIsNone: 1,
     };
   }
 
@@ -97,28 +99,30 @@ export class TaskRepository {
       createdAt: now,
       updatedAt: now,
       attributes: input.attributes || {},
-      hijriDate: input.hijriDate || "",
-      unscheduled: 1,
-      withoutTime: 1,
+      scheduledAtDateHijri: input.scheduledAtDateHijri || "",
+      scheduledAtTime: input.scheduledAtTime || "",
+      scheduledAtDateIsNone: 1,
+      scheduledAtTimeIsNone: 1,
     };
 
-    if (input.hijriDate) {
-      const year = parseInt(input.hijriDate.substring(0, 4));
-      const month = parseInt(input.hijriDate.substring(4, 6));
-      const day = parseInt(input.hijriDate.substring(6, 8));
+    if (input.scheduledAtDateHijri) {
+      const year = parseInt(input.scheduledAtDateHijri.substring(0, 4));
+      const month = parseInt(input.scheduledAtDateHijri.substring(4, 6));
+      const day = parseInt(input.scheduledAtDateHijri.substring(6, 8));
 
       const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
       let gregDate = hijriDate.toDate();
+      const [h, m] = input.scheduledAtTime?.split(":") || ["0", "0"];
       newTask.scheduledAtEpochMillis = gregDate.setHours(
-        input.scheduledAtHour || 0,
-        input.scheduledAtMinute || 0,
+        parseInt(h),
+        parseInt(m),
         0,
         0,
       );
-      newTask.unscheduled = 0;
+      newTask.scheduledAtDateIsNone = 0;
     } else {
       newTask.scheduledAtEpochMillis = 0;
-      newTask.unscheduled = 1;
+      newTask.scheduledAtDateIsNone = 1;
     }
 
     const doc = Object.assign(this.createTaskDocument(), newTask);
@@ -160,25 +164,22 @@ export class TaskRepository {
       updateData.attributes = input.attributes;
     }
 
-    if (input.hijriDate !== undefined) {
-      updateData.hijriDate = input.hijriDate;
-      const year = parseInt(input.hijriDate.substring(0, 4));
-      const month = parseInt(input.hijriDate.substring(4, 6));
-      const day = parseInt(input.hijriDate.substring(6, 8));
+    if (input.scheduledAtDateHijri !== undefined) {
+      updateData.scheduledAtDateHijri = input.scheduledAtDateHijri;
+      const year = parseInt(input.scheduledAtDateHijri.substring(0, 4));
+      const month = parseInt(input.scheduledAtDateHijri.substring(4, 6));
+      const day = parseInt(input.scheduledAtDateHijri.substring(6, 8));
 
       const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
+      const [h, m] = input.scheduledAtTime?.split(":") || ["0", "0"];
+
       updateData.scheduledAtEpochMillis = hijriDate
         .toDate()
-        .setHours(
-          input.scheduledAtHour || 0,
-          input.scheduledAtMinute || 0,
-          0,
-          0,
-        );
-      updateData.unscheduled = 0;
+        .setHours(parseInt(h), parseInt(m), 0, 0);
+      updateData.scheduledAtDateIsNone = 0;
     } else {
       updateData.scheduledAtEpochMillis = 0;
-      updateData.unscheduled = 1;
+      updateData.scheduledAtDateIsNone = 1;
     }
 
     const response = await (db as any).put(updateData);
@@ -218,7 +219,7 @@ export class TaskRepository {
         fields: [
           "type",
           "status",
-          "unscheduled",
+          "scheduledAtDateIsNone",
           "hijriDate",
           "scheduledAtEpochMillis",
         ],
@@ -229,7 +230,7 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        unscheduled: { $gte: 0 },
+        scheduledAtDateIsNone: { $gte: 0 },
         scheduledAtEpochMillis: {
           $gte: null,
         },
@@ -237,7 +238,7 @@ export class TaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { unscheduled: "asc" },
+        { scheduledAtDateIsNone: "asc" },
         { hijriDate: "asc" },
         { scheduledAtEpochMillis: "asc" },
       ],
@@ -337,7 +338,7 @@ export class TaskRepository {
       targetValue: doc.targetValue,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      hijriDate: doc.hijriDate,
+      scheduledAtDateHijri: doc.scheduledAtDateHijri,
     }));
   }
 

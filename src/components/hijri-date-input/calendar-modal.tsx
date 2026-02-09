@@ -130,12 +130,13 @@ export function CalendarModal({
     onClose();
   };
 
-  const handleTimeConfirm = () => {
+  const handleTimeConfirm = (time: string) => {
+    onDateSelect(tempSelectedDate, time);
     setEditMode("date");
   };
 
   const handleRemoveTime = () => {
-    setSelectedTime(null);
+    onDateSelect(tempSelectedDate, null);
     setEditMode("date");
   };
 
@@ -233,9 +234,7 @@ export function CalendarModal({
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
                   <option value="none">No repeat</option>
-                  <option value="daily">
-                    Daily at {selectedHour}:{selectedMinute}
-                  </option>
+                  <option value="daily">Daily at {selectedTime}</option>
                   <option value="monthly">
                     Monthly on {tempSelectedDate?.day}
                   </option>
@@ -252,6 +251,13 @@ export function CalendarModal({
               onClick={() => {
                 setEditMode("time");
               }}
+              rightContent={
+                selectedTime ? (
+                  selectedTime
+                ) : (
+                  <span className="text-gray-600">None</span>
+                )
+              }
             />
           </div>
         </>

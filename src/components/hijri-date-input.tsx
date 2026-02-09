@@ -35,8 +35,10 @@ export function HijriDateInput({
   useEffect(() => {
     if (value) {
       setSelectedDate(value);
+      setSelectedTime(timeValue || null);
     } else {
       setSelectedDate(null);
+      setSelectedTime(null);
     }
   }, [value]);
 
