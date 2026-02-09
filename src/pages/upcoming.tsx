@@ -3,7 +3,6 @@ import { CalendarIcon } from "lucide-react";
 import type { Task } from "../lib/types/task";
 import { Navbar } from "../modules/navigation/navbar";
 import { Page } from "../modules/navigation";
-import { LoadingSpinner } from "../components/loader";
 import TaskListItem from "../components/task-list-item";
 import { useUpcoming } from "../hooks/use-upcoming";
 

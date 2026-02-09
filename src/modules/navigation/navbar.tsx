@@ -124,10 +124,10 @@ export function LargeNavbar({
   return (
     <>
       <header
-        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm ${isScrolled ? "border-b border-gray-200" : ""} safe-top ${className}`}
+        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm border-b ${isScrolled ? "border-gray-200" : "border-transparent"} safe-top ${className}`}
         style={{
           position: "-webkit-sticky",
-          scrollMarginTop: "64px",
+          scrollMarginTop: "62px",
         }}
       >
         <div className="flex items-center justify-between">
@@ -137,7 +137,7 @@ export function LargeNavbar({
               <button
                 onClick={handleBack}
                 className={`flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-all no-select active:scale-95 transition-transform ${
-                  isScrolled ? "w-10 h-10" : "w-12 h-24"
+                  isScrolled ? "w-10 h-10" : "w-12 h-20"
                 }`}
                 aria-label="Go back"
               >
@@ -148,12 +148,10 @@ export function LargeNavbar({
           </div>
 
           {/* Center: Title */}
-          <div className="flex-1 text-center">
+          <div className={`flex-1 text-center transition-opacity duration-800 ${isScrolled ? "opacity-100" : "opacity-0"}`}>
             {title && (
               <h1
-                className={`text-lg font-semibold text-gray-900 truncate transition-opacity duration-300 ${
-                  isScrolled ? "opacity-100" : "opacity-0"
-                }`}
+                className={`text-lg font-semibold text-gray-900 truncate`}
               >
                 {title}
               </h1>
@@ -161,9 +159,7 @@ export function LargeNavbar({
             {/* Subtitle */}
             {subtitle && (
               <div
-                className={`text-xs text-gray-500 transition-opacity duration-300 ${
-                  isScrolled ? "opacity-100" : "opacity-0"
-                }`}
+                className={`text-xs text-gray-500`}
               >
                 {subtitle}
               </div>
@@ -175,21 +171,18 @@ export function LargeNavbar({
         </div>
       </header>
 
-      {/* Large title element - only shown when not scrolled */}
-      {!isScrolled && (
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 h-24">
-          <div className="h-full flex flex-col justify-end pb-4">
-            {title && (
-              <h1 className="text-2xl font-semibold text-gray-900 truncate">
-                {title}
-              </h1>
-            )}
-            {subtitle && (
-              <div className="text-sm text-gray-500 truncate">{subtitle}</div>
-            )}
-          </div>
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 h-24">
+        <div className={`h-full flex flex-col justify-end pb-4 transition-opacity duration-500 ${isScrolled ? "opacity-0" : "opacity-100"}`}>
+          {title && (
+            <h1 className="text-2xl font-semibold text-gray-900 truncate">
+              {title}
+            </h1>
+          )}
+          {subtitle && (
+            <div className="text-sm text-gray-500 truncate">{subtitle}</div>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }

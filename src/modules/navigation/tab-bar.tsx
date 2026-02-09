@@ -30,8 +30,8 @@ export function TabBar() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 no-select">
-      <div className="flex justify-around items-center h-14 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed p-2 bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 no-select">
+      <div className="flex justify-around items-center pb-[env(safe-area-inset-bottom)]">
         {tabs.map((tab) => {
           const isActive = getIsActive(tab.path);
           return (

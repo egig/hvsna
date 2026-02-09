@@ -14,9 +14,9 @@ import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
-import { useTasksState } from "./use-tasks-state";
+import { useTasks } from "./use-tasks";
 
-export default function Tasks() {
+export default function Tasks() { 
   const [sheetOpened, setSheetOpened] = useState(false);
   const [filterModalOpened, setFilterModalOpened] = useState(false);
 
@@ -42,7 +42,7 @@ export default function Tasks() {
     setDateRangeFilter,
     setSearchTextFilter,
     clearFilters,
-  } = useTasksState();
+  } = useTasks();
 
   const handleFilterModalClose = () => {
     setFilterModalOpened(false);
