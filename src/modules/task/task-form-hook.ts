@@ -168,6 +168,10 @@ export const useTaskForm = (
       const day = selectedHijriDate.day.toString().padStart(2, "0");
       taskData.scheduledAtDateHijri = `${year}${month}${day}`;
       taskData.scheduledAtEpochMillis = selectedHijriDate?.toDate().valueOf();
+
+      if (!!selectedTime) {
+        taskData.scheduledAtTime = selectedTime;
+      }
     } else {
       taskData.scheduledAtDateHijri = undefined;
       taskData.scheduledAtEpochMillis = undefined;
@@ -200,7 +204,7 @@ export const useTaskForm = (
         targetValue: taskData.targetValue,
         attributes: attr,
         scheduledAtDateHijri: taskData.scheduledAtDateHijri,
-        scheduledAtEpochMillis: taskData.scheduledAtEpochMillis,
+        scheduledAtTime: taskData.scheduledAtTime,
       };
 
       // Handle repeat - only include if not "none"
@@ -223,7 +227,7 @@ export const useTaskForm = (
       if (
         taskData.repeat &&
         taskData.repeat !== "none" &&
-        taskInput.scheduledAtEpochMillis
+        taskInput.scheduledAtTime
       ) {
         try {
           await createRecurringTask({

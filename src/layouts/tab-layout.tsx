@@ -22,16 +22,17 @@ export default function TabLayout() {
       <div className="h-[calc(100%-70px)]">
         <Outlet />
       </div>
-      <TabBar />
 
       {/* FAB Button */}
       <button
         onClick={() => openTaskForm()}
-        className="fixed bottom-24 right-4 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+        className="fixed bottom-[calc(70px+1rem)] right-4 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
         aria-label="Add new task"
       >
         <Plus size={24} />
       </button>
+
+      <TabBar />
 
       {/* Task Form Modal */}
       <Modal isOpen={formOpen} onClose={handleTaskCancel}>
