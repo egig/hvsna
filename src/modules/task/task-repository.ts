@@ -1,13 +1,7 @@
-import {
-  type Task,
-  type TaskCreateInput,
-  type TaskQuery,
-  type TaskStatus,
-  type TaskUpdateInput,
-} from "src/lib/types/task";
-import { generatePrefixedUUID } from "src/lib/uuid";
-import { HijriDate } from "../../lib/hijri/hijri-date";
 import { db } from "../../lib/pouchdb-singleton";
+import { HijriDate } from "../../lib/hijri";
+import type { Task, TaskCreateInput, TaskQuery, TaskStatus, TaskUpdateInput } from "./types";
+import { generatePrefixedUUID } from "../../lib/uuid";
 
 interface PouchDBTaskDocument {
   _id: string;
@@ -17,11 +11,11 @@ interface PouchDBTaskDocument {
   name: string;
   description?: string;
   status: TaskStatus;
-  scheduledAtDateHijri?: string;
-  scheduledAtDateIsNone: number;
-  scheduledAtTimeIsNone: number;
-  scheduledAtEpochMillis?: number;
-  scheduledAtTime?: string;
+  atDateHijri?: string;
+  atDateIsNone: number;
+  atTimeIsNone: number;
+  atEpochMillis?: number;
+  atTime?: string;
   targetId?: string;
   targetValue?: number;
   createdAt?: number;
@@ -54,16 +48,16 @@ export class TaskRepository {
       name: doc.name,
       description: doc.description,
       status: doc.status,
-      scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
+      atEpochMillis: doc.atEpochMillis,
       targetId: doc.targetId,
       targetValue: doc.targetValue,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
       attributes: doc.attributes,
-      scheduledAtDateHijri: doc.scheduledAtDateHijri,
-      scheduledAtDateIsNone: doc.scheduledAtDateIsNone,
-      scheduledAtTimeIsNone: doc.scheduledAtTimeIsNone,
-      scheduledAtTime: doc.scheduledAtTime,
+      atDateHijri: doc.atDateHijri,
+      atDateIsNone: doc.atDateIsNone,
+      atTimeIsNone: doc.atTimeIsNone,
+      atTime: doc.atTime,
     };
   }
 
@@ -74,15 +68,15 @@ export class TaskRepository {
       userId: "",
       name: "",
       status: 0,
-      scheduledAtEpochMillis: 0,
+      atEpochMillis: 0,
       targetId: "",
       targetValue: 0,
       createdAt: new Date().valueOf(),
       updatedAt: new Date().valueOf(),
       attributes: {},
-      scheduledAtDateHijri: "",
-      scheduledAtDateIsNone: 1,
-      scheduledAtTimeIsNone: 1,
+      atDateHijri: "",
+      atDateIsNone: 1,
+      atTimeIsNone: 1,
     };
   }
 
@@ -94,10 +88,10 @@ export class TaskRepository {
       name: input.name,
       description: input.description,
       status: input.status || 0,
-      scheduledAtDateIsNone: 1,
-      scheduledAtTimeIsNone: 1,
-      scheduledAtDateHijri: input.scheduledAtDateHijri || "",
-      scheduledAtTime: input.scheduledAtTime || "",
+      atDateIsNone: 1,
+      atTimeIsNone: 1,
+      atDateHijri: input.atDateHijri || "",
+      atTime: input.atTime || "",
       createdAt: now,
       updatedAt: now,
       targetId: input.targetId || "",
@@ -105,24 +99,24 @@ export class TaskRepository {
       attributes: input.attributes || {},
     };
 
-    if (input.scheduledAtDateHijri) {
-      const year = parseInt(input.scheduledAtDateHijri.substring(0, 4));
-      const month = parseInt(input.scheduledAtDateHijri.substring(4, 6));
-      const day = parseInt(input.scheduledAtDateHijri.substring(6, 8));
+    if (input.atDateHijri) {
+      const year = parseInt(input.atDateHijri.substring(0, 4));
+      const month = parseInt(input.atDateHijri.substring(4, 6));
+      const day = parseInt(input.atDateHijri.substring(6, 8));
 
       const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
       let gregDate = hijriDate.toDate();
-      const [h, m] = input.scheduledAtTime?.split(":") || ["0", "0"];
-      newTask.scheduledAtEpochMillis = gregDate.setHours(
+      const [h, m] = input.atTime?.split(":") || ["0", "0"];
+      newTask.atEpochMillis = gregDate.setHours(
         parseInt(h),
         parseInt(m),
         0,
         0,
       );
-      newTask.scheduledAtDateIsNone = 0;
+      newTask.atDateIsNone = 0;
     } else {
-      newTask.scheduledAtEpochMillis = 0;
-      newTask.scheduledAtDateIsNone = 1;
+      newTask.atEpochMillis = 0;
+      newTask.atDateIsNone = 1;
     }
 
     const doc = Object.assign(this.createTaskDocument(), newTask);
@@ -166,29 +160,29 @@ export class TaskRepository {
       updateData.attributes = input.attributes;
     }
 
-    if (!!input.scheduledAtDateHijri) {
-      updateData.scheduledAtDateHijri = input.scheduledAtDateHijri;
-      const year = parseInt(input.scheduledAtDateHijri.substring(0, 4));
-      const month = parseInt(input.scheduledAtDateHijri.substring(4, 6));
-      const day = parseInt(input.scheduledAtDateHijri.substring(6, 8));
+    if (!!input.atDateHijri) {
+      updateData.atDateHijri = input.atDateHijri;
+      const year = parseInt(input.atDateHijri.substring(0, 4));
+      const month = parseInt(input.atDateHijri.substring(4, 6));
+      const day = parseInt(input.atDateHijri.substring(6, 8));
 
       const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
-      updateData.scheduledAtEpochMillis = hijriDate.toDate().valueOf();
+      updateData.atEpochMillis = hijriDate.toDate().valueOf();
 
-      if (!!input.scheduledAtTime) {
-        const [h, m] = input.scheduledAtTime?.split(":") || ["0", "0"];
-        updateData.scheduledAtEpochMillis = hijriDate
+      if (!!input.atTime) {
+        const [h, m] = input.atTime?.split(":") || ["0", "0"];
+        updateData.atEpochMillis = hijriDate
           .toDate()
           .setHours(parseInt(h), parseInt(m), 0, 0);
-        updateData.scheduledAtDateIsNone = 0;
+        updateData.atDateIsNone = 0;
 
-        updateData.scheduledAtTime = input.scheduledAtTime;
-        updateData.scheduledAtTimeIsNone = 0;
+        updateData.atTime = input.atTime;
+        updateData.atTimeIsNone = 0;
       }
     } else {
-      updateData.scheduledAtEpochMillis = 0;
-      updateData.scheduledAtDateIsNone = 1;
-      updateData.scheduledAtTimeIsNone = 1;
+      updateData.atEpochMillis = 0;
+      updateData.atDateIsNone = 1;
+      updateData.atTimeIsNone = 1;
     }
 
     const response = await (db as any).put(updateData);
@@ -228,9 +222,9 @@ export class TaskRepository {
         fields: [
           "type",
           "status",
-          "scheduledAtDateIsNone",
-          "scheduledAtDateHijri",
-          "scheduledAtEpochMillis",
+          "atDateIsNone",
+          "atDateHijri",
+          "atEpochMillis",
         ],
       },
     });
@@ -239,17 +233,17 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        scheduledAtDateIsNone: { $gte: 0 },
-        scheduledAtEpochMillis: {
+        atDateIsNone: { $gte: 0 },
+        atEpochMillis: {
           $gte: null,
         },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { scheduledAtDateIsNone: "asc" },
-        { scheduledAtDateHijri: "asc" },
-        { scheduledAtEpochMillis: "asc" },
+        { atDateIsNone: "asc" },
+        { atDateHijri: "asc" },
+        { atEpochMillis: "asc" },
       ],
     };
 
@@ -285,12 +279,12 @@ export class TaskRepository {
     const mangoQuery = {
       selector: {
         type: "task",
-        scheduledAtEpochMillis: {
+        atEpochMillis: {
           $gte: startDate.getTime(),
           $lte: endDate.getTime(),
         },
       },
-      sort: [{ scheduledAtEpochMillis: "asc" }],
+      sort: [{ atEpochMillis: "asc" }],
     };
 
     const result = await (db as any).find(mangoQuery);
@@ -342,12 +336,12 @@ export class TaskRepository {
       userId: doc.userId,
       name: doc.name,
       status: doc.status,
-      scheduledAtEpochMillis: doc.scheduledAtEpochMillis,
+      atEpochMillis: doc.atEpochMillis,
       targetId: doc.targetId,
       targetValue: doc.targetValue,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      scheduledAtDateHijri: doc.scheduledAtDateHijri,
+      atDateHijri: doc.atDateHijri,
     }));
   }
 
@@ -359,8 +353,8 @@ export class TaskRepository {
         fields: [
           "type",
           "status",
-          "scheduledAtDateHijri",
-          "scheduledAtEpochMillis",
+          "atDateHijri",
+          "atEpochMillis",
         ],
       },
     });
@@ -369,16 +363,16 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        scheduledAtDateHijri: today.format("YYYYMMDD"),
-        scheduledAtEpochMillis: {
+        atDateHijri: today.format("YYYYMMDD"),
+        atEpochMillis: {
           $gte: today.toDate().valueOf(),
         },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { scheduledAtDateHijri: "asc" },
-        { scheduledAtEpochMillis: "asc" },
+        { atDateHijri: "asc" },
+        { atEpochMillis: "asc" },
       ],
     };
 
@@ -394,7 +388,7 @@ export class TaskRepository {
 
     await db.createIndex({
       index: {
-        fields: ["type", "status", "scheduledAtEpochMillis"],
+        fields: ["type", "status", "atEpochMillis"],
       },
     });
 
@@ -402,14 +396,14 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        scheduledAtEpochMillis: {
+        atEpochMillis: {
           $gte: today.toDate().getTime(),
         },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { scheduledAtEpochMillis: "asc" },
+        { atEpochMillis: "asc" },
       ],
     };
 
@@ -429,8 +423,8 @@ export class TaskRepository {
         fields: [
           "type",
           "status",
-          "scheduledAtDateIsNone",
-          "scheduledAtEpochMillis",
+          "atDateIsNone",
+          "atEpochMillis",
         ],
       },
     });
@@ -445,14 +439,14 @@ export class TaskRepository {
         status: {
           $gte: 0,
         },
-        scheduledAtDateIsNone: { $gte: 0 },
-        scheduledAtEpochMillis: { $gte: 0 },
+        atDateIsNone: { $gte: 0 },
+        atEpochMillis: { $gte: 0 },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { scheduledAtDateIsNone: "asc" },
-        { scheduledAtEpochMillis: "asc" },
+        { atDateIsNone: "asc" },
+        { atEpochMillis: "asc" },
       ],
       limit,
       skip: offset,
@@ -462,9 +456,9 @@ export class TaskRepository {
       if (query.status) {
         mangoQuery.selector.status = query.status;
       }
-      if (query.scheduledAtEpochMillis) {
-        mangoQuery.selector.scheduledAtEpochMillis =
-          query.scheduledAtEpochMillis;
+      if (query.atEpochMillis) {
+        mangoQuery.selector.atEpochMillis =
+          query.atEpochMillis;
       }
       if (query.searchText && query.searchText.trim()) {
         const searchLower = query.searchText.toLowerCase().trim();

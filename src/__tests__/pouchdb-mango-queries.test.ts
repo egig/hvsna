@@ -404,28 +404,28 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
           _id: "doc1",
           type: "foo",
           hijriDate: "2023-01-01",
-          scheduledAtEpochMillis: 1672531200000,
+          atEpochMillis: 1672531200000,
           name: "Task 1",
         },
         {
           _id: "doc2",
           type: "foo",
           hijriDate: "2023-01-01",
-          scheduledAtEpochMillis: 1672617600000,
+          atEpochMillis: 1672617600000,
           name: "Task 2",
         },
         {
           _id: "doc3",
           type: "foo",
           hijriDate: "2023-01-02",
-          scheduledAtEpochMillis: 1672704000000,
+          atEpochMillis: 1672704000000,
           name: "Task 3",
         },
         {
           _id: "doc4",
           type: "bar",
           hijriDate: "2023-01-01",
-          scheduledAtEpochMillis: 1672790400000,
+          atEpochMillis: 1672790400000,
           name: "Task 4",
         },
       ]);
@@ -435,7 +435,7 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
       // Create the exact index the user mentioned
       await db.createIndex({
         index: {
-          fields: ["type", "hijriDate", "scheduledAtEpochMillis"],
+          fields: ["type", "hijriDate", "atEpochMillis"],
         },
       });
 
@@ -449,7 +449,7 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
         sort: [
           { type: "asc" },
           { hijriDate: "asc" },
-          { scheduledAtEpochMillis: "asc" },
+          { atEpochMillis: "asc" },
         ],
       };
 
@@ -463,9 +463,9 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
         ),
       ).toBe(true);
 
-      // Should be sorted by scheduledAtEpochMillis ascending (within the type+hijriDate group)
+      // Should be sorted by atEpochMillis ascending (within the type+hijriDate group)
       const scheduledTimes = result.docs.map(
-        (doc) => doc.scheduledAtEpochMillis,
+        (doc) => doc.atEpochMillis,
       );
       expect(scheduledTimes).toEqual(scheduledTimes.sort((a, b) => a - b));
 
@@ -475,10 +475,10 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
     });
 
     it("should show alternative: create index specifically for the desired sort", async () => {
-      // Create index specifically for sorting by scheduledAtEpochMillis
+      // Create index specifically for sorting by atEpochMillis
       await db.createIndex({
         index: {
-          fields: ["type", "hijriDate", "scheduledAtEpochMillis"],
+          fields: ["type", "hijriDate", "atEpochMillis"],
         },
       });
 
@@ -487,12 +487,12 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
         selector: {
           type: "foo",
           hijriDate: "2023-01-01",
-          scheduledAtEpochMillis: { $gte: 0 }, // Range query to enable sorting
+          atEpochMillis: { $gte: 0 }, // Range query to enable sorting
         },
         sort: [
           { type: "asc" },
           { hijriDate: "asc" },
-          { scheduledAtEpochMillis: "asc" },
+          { atEpochMillis: "asc" },
         ],
       });
 
@@ -505,53 +505,53 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
 
       // Verify sorting
       const scheduledTimes = result.docs.map(
-        (doc) => doc.scheduledAtEpochMillis,
+        (doc) => doc.atEpochMillis,
       );
       expect(scheduledTimes).toEqual(scheduledTimes.sort((a, b) => a - b));
     });
 
     it("should demonstrate why the sort field must be part of the index prefix", async () => {
-      // Create index where scheduledAtEpochMillis is NOT in the prefix
+      // Create index where atEpochMillis is NOT in the prefix
       await db.createIndex({
         index: {
-          fields: ["type", "hijriDate", "name"], // scheduledAtEpochMillis is missing
+          fields: ["type", "hijriDate", "name"], // atEpochMillis is missing
         },
       });
 
-      // This query will fail because scheduledAtEpochMillis is not in the index prefix
+      // This query will fail because atEpochMillis is not in the index prefix
       await expect(
         db.find({
           selector: {
             type: "foo",
             hijriDate: "2023-01-01",
           },
-          sort: [{ scheduledAtEpochMillis: "asc" }],
+          sort: [{ atEpochMillis: "asc" }],
         }),
-      ).rejects.toThrow(/Cannot sort on field\(s\) "scheduledAtEpochMillis"/);
+      ).rejects.toThrow(/Cannot sort on field\(s\) "atEpochMillis"/);
     });
 
     it("should work when sort field is included in index prefix", async () => {
-      // Create index where scheduledAtEpochMillis IS in the prefix
+      // Create index where atEpochMillis IS in the prefix
       await db.createIndex({
         index: {
-          fields: ["type", "scheduledAtEpochMillis", "hijriDate"],
+          fields: ["type", "atEpochMillis", "hijriDate"],
         },
       });
 
-      // This query will work because scheduledAtEpochMillis is in the index prefix
+      // This query will work because atEpochMillis is in the index prefix
       const result = await db.find({
         selector: {
           type: "foo",
         },
-        sort: [{ type: "asc" }, { scheduledAtEpochMillis: "asc" }],
+        sort: [{ type: "asc" }, { atEpochMillis: "asc" }],
       });
 
       expect(result.docs).toHaveLength(3); // All 'foo' type documents
       expect(result.docs.every((doc) => doc.type === "foo")).toBe(true);
 
-      // Should be sorted by scheduledAtEpochMillis within each type
+      // Should be sorted by atEpochMillis within each type
       const fooDocs = result.docs.filter((doc) => doc.type === "foo");
-      const scheduledTimes = fooDocs.map((doc) => doc.scheduledAtEpochMillis);
+      const scheduledTimes = fooDocs.map((doc) => doc.atEpochMillis);
       expect(scheduledTimes).toEqual(scheduledTimes.sort((a, b) => a - b));
     });
   });

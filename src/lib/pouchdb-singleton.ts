@@ -39,11 +39,11 @@ export const createRequiredIndexes = async (
       },
     });
 
-    // Create index for tasks by scheduledAtEpochMillis (for date-based queries)
+    // Create index for tasks by atEpochMillis (for date-based queries)
     await db.createIndex({
       index: {
-        fields: ["_id", "scheduledAtEpochMillis"],
-        name: "tasks-by-scheduled-at-epoch-millis-index",
+        fields: ["_id", "atEpochMillis"],
+        name: "tasks-by-at-epoch-millis-index",
         ddoc: "tasks",
       },
     });

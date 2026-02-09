@@ -41,7 +41,7 @@ export function Navbar({
 
   return (
     <header
-      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm border-b border-gray-200 safe-top ${className}`}
+      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm safe-top ${className}`}
       style={{
         position: "-webkit-sticky",
         scrollMarginTop: "64px",
@@ -124,7 +124,7 @@ export function LargeNavbar({
   return (
     <>
       <header
-        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm border-b ${isScrolled ? "border-gray-200" : "border-transparent"} safe-top ${className}`}
+        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm safe-top ${className}`}
         style={{
           position: "-webkit-sticky",
           scrollMarginTop: "62px",
@@ -167,7 +167,7 @@ export function LargeNavbar({
         </div>
       </header>
 
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-4 h-24">
+      <div className="bg-white/80 backdrop-blur-sm px-4 h-20">
         <div
           className={`h-full flex flex-col justify-end pb-4 transition-opacity duration-500 ${isScrolled ? "opacity-0" : "opacity-100"}`}
         >

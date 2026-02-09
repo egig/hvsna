@@ -115,7 +115,7 @@ export default function TaskForm({
 
       <div className="mx-4">
         <HijriDateInput
-          name="scheduledAtEpochMillis"
+          name="atEpochMillis"
           label="Scheduled Date & Time (Hijri)"
           value={selectedHijriDate as HijriDate}
           timeValue={selectedTime as string}

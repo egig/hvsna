@@ -113,7 +113,7 @@ export const useTasks = (): UseTasksReturn => {
             const exists = normalTasks.some(
               (task) =>
                 task.name === recurringTask.name &&
-                task.scheduledAtEpochMillis === occurrence.getTime(),
+                task.atEpochMillis === occurrence.getTime(),
             );
 
             if (!exists) {
@@ -122,7 +122,9 @@ export const useTasks = (): UseTasksReturn => {
                 id: `recurring_${recurringTask.id}_${occurrence.getTime()}`,
                 name: recurringTask.name,
                 status: 0,
-                scheduledAtEpochMillis: occurrence.getTime(),
+                atDateIsNone: 0,
+                atTimeIsNone: 0,
+                atEpochMillis: occurrence.getTime(),
                 targetId: recurringTask.targetId,
                 targetValue: recurringTask.targetValue,
                 attributes: recurringTask.attributes,
@@ -282,7 +284,7 @@ export const useTasks = (): UseTasksReturn => {
               targetId: recurringTask.targetId,
               targetValue: recurringTask.targetValue,
               attributes: recurringTask.attributes,
-              hijriDate: `${year}${month}${day}`,
+              atDateHijri: `${year}${month}${day}`,
             };
 
             // Check if task already exists for this date
@@ -292,7 +294,7 @@ export const useTasks = (): UseTasksReturn => {
             const exists = existingTasks.some(
               (task) =>
                 task.name === recurringTask.name &&
-                task.scheduledAtEpochMillis === occurrence.getTime(),
+                task.atEpochMillis === occurrence.getTime(),
             );
 
             if (!exists) {

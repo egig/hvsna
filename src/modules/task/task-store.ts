@@ -170,7 +170,7 @@ export const useTaskStore = create<TaskState>()(
           const newTask = await taskRepository.create(input);
           get().loadTodayTasks();
           get().loadUpcommingTasks();
-          get().loadBrowsedTasks();
+          get().loadBrowsedTasks(true);
 
           return newTask;
         } catch (err) {
@@ -402,7 +402,7 @@ export const useTaskStore = create<TaskState>()(
 
             // Set end date to end of day
             endDate.setHours(23, 59, 59, 999);
-            query.scheduledAtEpochMillis = {
+            query.atEpochMillis = {
               $gte: startDate.getTime(),
               $lte: endDate.getTime(),
             };

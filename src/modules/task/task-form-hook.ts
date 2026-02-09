@@ -75,17 +75,17 @@ export const useTaskForm = (
   }, [taskId]);
 
   useEffect(() => {
-    if (task?.scheduledAtDateHijri) {
+    if (task?.atDateHijri) {
       // Parse YYYYMMDD format
-      const year = parseInt(task.scheduledAtDateHijri.substring(0, 4));
-      const month = parseInt(task.scheduledAtDateHijri.substring(4, 6));
-      const day = parseInt(task.scheduledAtDateHijri.substring(6, 8));
+      const year = parseInt(task.atDateHijri.substring(0, 4));
+      const month = parseInt(task.atDateHijri.substring(4, 6));
+      const day = parseInt(task.atDateHijri.substring(6, 8));
 
       setSelectedHijriDate(new HijriDate(year, month, day, 0, 0));
     }
 
-    if (task?.scheduledAtTime) {
-      setSelectedTime(task.scheduledAtTime);
+    if (task?.atTime) {
+      setSelectedTime(task.atTime);
     }
   }, [task]);
 
@@ -166,15 +166,15 @@ export const useTaskForm = (
       const year = selectedHijriDate.year.toString().padStart(4, "0");
       const month = selectedHijriDate.month.toString().padStart(2, "0");
       const day = selectedHijriDate.day.toString().padStart(2, "0");
-      taskData.scheduledAtDateHijri = `${year}${month}${day}`;
-      taskData.scheduledAtEpochMillis = selectedHijriDate?.toDate().valueOf();
+      taskData.atDateHijri = `${year}${month}${day}`;
+      taskData.atEpochMillis = selectedHijriDate?.toDate().valueOf();
 
       if (!!selectedTime) {
-        taskData.scheduledAtTime = selectedTime;
+        taskData.atTime = selectedTime;
       }
     } else {
-      taskData.scheduledAtDateHijri = undefined;
-      taskData.scheduledAtEpochMillis = undefined;
+      taskData.atDateHijri = undefined;
+      taskData.atEpochMillis = undefined;
     }
 
     try {
@@ -203,8 +203,8 @@ export const useTaskForm = (
         targetId: taskData.targetId,
         targetValue: taskData.targetValue,
         attributes: attr,
-        scheduledAtDateHijri: taskData.scheduledAtDateHijri,
-        scheduledAtTime: taskData.scheduledAtTime,
+        atDateHijri: taskData.atDateHijri,
+        atTime: taskData.atTime,
       };
 
       // Handle repeat - only include if not "none"
@@ -227,7 +227,7 @@ export const useTaskForm = (
       if (
         taskData.repeat &&
         taskData.repeat !== "none" &&
-        taskInput.scheduledAtTime
+        taskInput.atTime
       ) {
         try {
           await createRecurringTask({
@@ -236,7 +236,7 @@ export const useTaskForm = (
             targetValue: taskInput.targetValue,
             attributes: taskInput.attributes,
             repeat: taskData.repeat,
-            baseDate: taskInput.scheduledAtEpochMillis,
+            baseDate: taskInput.atEpochMillis,
           });
         } catch (recurringError) {
           console.error("Failed to create recurring task:", recurringError);
