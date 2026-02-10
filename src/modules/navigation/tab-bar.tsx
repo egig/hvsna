@@ -11,16 +11,18 @@ import {
   CalendarClock,
   Info,
 } from "lucide-react";
-
-const tabs = [
-  { path: "/", label: "Today", icon: <Calendar /> },
-  { path: "/upcoming", label: "Upcoming", icon: <CalendarClock /> },
-  { path: "/tasks", label: "Browse", icon: <SquareLibrary /> },
-  { path: "/settings", label: "Settings", icon: <Settings /> },
-];
+import { useLanguageContext } from "../../contexts/LanguageContext";
 
 export function TabBar() {
+  const { t } = useLanguageContext();
   const location = useLocation();
+
+  const tabs = [
+    { path: "/", label: t("today"), icon: <Calendar /> },
+    { path: "/upcoming", label: t("upcoming"), icon: <CalendarClock /> },
+    { path: "/tasks", label: t("browse"), icon: <SquareLibrary /> },
+    { path: "/settings", label: t("settings"), icon: <Settings /> },
+  ];
 
   const getIsActive = (tabPath: string) => {
     const isRootTab = tabPath === "/";

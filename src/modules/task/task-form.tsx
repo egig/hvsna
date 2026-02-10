@@ -13,6 +13,7 @@ import { HijriDateInput } from "../../components/hijri-date-input";
 import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { useTaskForm } from "./task-form-hook";
+import { useLanguageContext } from "../../contexts/LanguageContext";
 
 interface TaskFormProps {
   taskId?: string | null;
@@ -29,6 +30,7 @@ export default function TaskForm({
   onCancel,
   onDelete,
 }: TaskFormProps) {
+  const { t } = useLanguageContext();
   const {
     error,
     task,
@@ -95,18 +97,18 @@ export default function TaskForm({
         ref={nameInputRef}
         name="taskName"
         defaultValue={task ? task.name : ""}
-        placeholder="Task name"
+        placeholder={t("task_name")}
         disabled={isSubmitting}
         required={true}
         className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
-        aria-label="task name"
+        aria-label={t("task_name")}
       />
       <textarea
         name="taskDescription"
-        placeholder="Description"
+        placeholder={t("description")}
         className="text-sm px-4 h-[3rem] py-2 w-[100%] outline-none resize-none"
         defaultValue={task?.description || ""}
         disabled={isSubmitting}
@@ -116,10 +118,10 @@ export default function TaskForm({
       <div className="mx-4">
         <HijriDateInput
           name="atEpochMillis"
-          label="Scheduled Date & Time (Hijri)"
+          label={t("scheduled_date_time_hijri")}
           value={selectedHijriDate as HijriDate}
           timeValue={selectedTime as string}
-          placeholder="Date"
+          placeholder={t("date")}
           disabled={isSubmitting}
           required={false}
           className="text-base"
@@ -133,7 +135,7 @@ export default function TaskForm({
       {goalEnabled && (
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Target (Optional)
+            {t("target_optional")}
           </label>
           <select
             // HACK to set this re-render
@@ -143,7 +145,7 @@ export default function TaskForm({
             disabled={isSubmitting}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           >
-            <option value="">Select a goal</option>
+            <option value="">{t("select_a_goal")}</option>
             {goals.map((goal) => (
               <option key={goal.id} value={goal.id}>
                 {goal.name}
@@ -158,14 +160,14 @@ export default function TaskForm({
           {tracker?.type === "amount" && (
             <FormInput
               name="targetValue"
-              label="Target Value"
+              label={t("target_value")}
               value={task?.targetValue?.toString() || ""}
-              placeholder="Enter target value"
+              placeholder={t("enter_target_value")}
               type="number"
               disabled={isSubmitting}
               required={false}
               className="text-base"
-              aria-label="target value"
+              aria-label={t("target_value")}
             />
           )}
 
@@ -177,14 +179,16 @@ export default function TaskForm({
                 <FormInput
                   key={`${index}`}
                   name={`${attributeId}`}
-                  label={`Scope: ${attributeId}`}
+                  label={`${t("scope")}: ${attributeId}`}
                   value={task?.attributes?.[index]?.toString() || ""}
-                  placeholder={`Enter value for ${attributeId}`}
+                  placeholder={t("enter_value_for_attribute", {
+                    attribute: attributeId,
+                  })}
                   type="text"
                   disabled={isSubmitting}
                   required={false}
                   className="text-base"
-                  aria-label={`scope attribute ${attributeId}`}
+                  aria-label={`${t("scope_attribute")} ${attributeId}`}
                 />
               );
             }
@@ -204,7 +208,7 @@ export default function TaskForm({
             className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Trash2 size={18} />
-            Delete Task
+            {t("delete_task")}
           </button>
         </div>
       )}
@@ -212,7 +216,7 @@ export default function TaskForm({
       <div className="flex justify-end p-4">
         <button
           className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-          aria-label="Add new task"
+          aria-label={t("add_new_task")}
           type="submit"
         >
           <ArrowUp />

@@ -2,17 +2,17 @@ import { useState } from "react";
 import { Database, Trash2, AlertTriangle } from "lucide-react";
 import { usePouchDB } from "../pouchdb";
 import { Navbar, Page } from "../modules/navigation";
+import { useLanguageContext } from "../contexts/LanguageContext";
 
 export default function DataManagement() {
+  const { t } = useLanguageContext();
   const { db } = usePouchDB();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleWipePouchDB = async () => {
     if (isDeleting) return;
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete the entire PouchDB database? This will remove all stored data and cannot be undone.",
-    );
+    const confirmed = window.confirm(t("confirm_delete_database"));
 
     if (!confirmed) return;
 
@@ -22,15 +22,13 @@ export default function DataManagement() {
       // Destroy the entire database
       await db.destroy();
 
-      alert(
-        "PouchDB database has been successfully deleted. The app will need to be restarted to create a fresh database.",
-      );
+      alert(t("database_deleted"));
 
       // Optionally redirect or reload
       window.location.reload();
     } catch (error) {
       console.error("Error destroying database:", error);
-      alert("An error occurred while deleting the database. Please try again.");
+      alert(t("error_deleting_database"));
     } finally {
       setIsDeleting(false);
     }
@@ -38,7 +36,7 @@ export default function DataManagement() {
 
   return (
     <Page>
-      <Navbar title="Wipe local data" showBackButton />
+      <Navbar title={t("wipe_local")} showBackButton />
 
       <main className="max-w-[520px] mx-auto px-4 py-6">
         {/* Warning Section */}
@@ -47,14 +45,13 @@ export default function DataManagement() {
             <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="font-semibold text-orange-900 dark:text-orange-100 mb-1">
-                Warning
+                {t("warning")}
               </h3>
               <p className="text-sm text-orange-800 dark:text-orange-200 mb-2">
-                Data deletion is permanent
+                {t("data_deletion_permanent")}
               </p>
               <p className="text-xs text-orange-700 dark:text-orange-300">
-                These actions cannot be undone. Please make sure you have
-                backups if needed.
+                {t("actions_cannot_be_undone")}
               </p>
             </div>
           </div>
@@ -65,13 +62,12 @@ export default function DataManagement() {
           <div className="flex items-center space-x-3 mb-4">
             <Database className="w-6 h-6 text-gray-600 dark:text-gray-400" />
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Database Management
+              {t("database_management")}
             </h2>
           </div>
 
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            This will permanently delete all notes, tasks, and other data stored
-            in the local database.
+            {t("delete_all_data")}
           </p>
 
           <button
@@ -80,7 +76,7 @@ export default function DataManagement() {
             className="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
           >
             <Trash2 className="w-5 h-5" />
-            <span>{isDeleting ? "Deleting..." : "Wipe All Data"}</span>
+            <span>{isDeleting ? t("deleting") : t("wipe_all_data")}</span>
           </button>
         </div>
       </main>

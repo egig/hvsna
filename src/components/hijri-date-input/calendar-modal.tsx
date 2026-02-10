@@ -7,6 +7,7 @@ import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Navbar } from "src/modules/navigation";
 import { TimeSelectionModal } from "./time-selection-modal";
 import { ListInput } from "../ListInput";
+import { useLanguageContext } from "../../contexts/LanguageContext";
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function CalendarModal({
   selectedTime,
   onDateSelect,
 }: CalendarModalProps) {
+  const { t } = useLanguageContext();
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? new HijriMonth(selectedDate.year, selectedDate.month)
@@ -145,7 +147,7 @@ export function CalendarModal({
       {editMode === "date" && (
         <>
           <Navbar
-            title="Select Date"
+            title={t("select_date")}
             rightAction={
               <button
                 onClick={handleConfirm}
@@ -157,9 +159,9 @@ export function CalendarModal({
             }
           />
           <div className="flex flex-col">
-            <ListInput onClick={handleToday} label="Today" />
-            <ListInput onClick={handleTomorrow} label="Tomorrow" />
-            <ListInput onClick={handleNoDate} label="No Date" />
+            <ListInput onClick={handleToday} label={t("today")} />
+            <ListInput onClick={handleTomorrow} label={t("tomorrow")} />
+            <ListInput onClick={handleNoDate} label={t("no_date")} />
           </div>
           <div className="pb-[env(safe-area-inset-bottom)]">
             {/* Month Navigation */}
@@ -225,7 +227,7 @@ export function CalendarModal({
             {repeatEnabled && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Repeat
+                  {t("repeat")}
                 </label>
                 <select
                   name="repeat"
@@ -233,21 +235,26 @@ export function CalendarModal({
                   disabled={false}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                  <option value="none">No repeat</option>
-                  <option value="daily">Daily at {selectedTime}</option>
+                  <option value="none">{t("no_repeat")}</option>
+                  <option value="daily">
+                    {t("daily_at_time", { time: selectedTime || "" })}
+                  </option>
                   <option value="monthly">
-                    Monthly on {tempSelectedDate?.day}
+                    {t("monthly_on_day", { day: tempSelectedDate?.day || 1 })}
                   </option>
                   <option value="yearly">
-                    Yearly on {tempSelectedDate?.day}{" "}
-                    {HIJRI_MONTH_NAMES_EN[tempSelectedDate?.month || 0 - 1]}
+                    {t("yearly_on_day_month", {
+                      day: tempSelectedDate?.day || 1,
+                      month:
+                        HIJRI_MONTH_NAMES_EN[tempSelectedDate?.month || 1 - 1],
+                    })}
                   </option>
                 </select>
               </div>
             )}
 
             <ListInput
-              label="Time"
+              label={t("time")}
               onClick={() => {
                 setEditMode("time");
               }}
@@ -255,7 +262,7 @@ export function CalendarModal({
                 selectedTime ? (
                   selectedTime
                 ) : (
-                  <span className="text-gray-600">None</span>
+                  <span className="text-gray-600">{t("none")}</span>
                 )
               }
             />

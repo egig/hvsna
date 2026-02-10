@@ -8,3 +8,4 @@ export { Modal } from "./modal";
 export { PageTransition } from "./page-transition";
 export { Page } from "./page";
 export { MenuItem } from "../../components/MenuItem";
+export { LargeNavbar } from "./navbar";

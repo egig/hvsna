@@ -160,7 +160,10 @@ export const useTaskForm = (
   };
 
   const handleSubmit = async (formData: FormData) => {
-    const taskData = Object.fromEntries(formData) as unknown as {taskName: string, taskDescription: string } & Partial<Task>;
+    const taskData = Object.fromEntries(formData) as unknown as {
+      taskName: string;
+      taskDescription: string;
+    } & Partial<Task>;
 
     if (!!selectedHijriDate) {
       const year = selectedHijriDate.year.toString().padStart(4, "0");

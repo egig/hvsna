@@ -137,7 +137,7 @@ export function LargeNavbar({
               <button
                 onClick={handleBack}
                 className={`flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-all no-select active:scale-95 transition-transform ${
-                  isScrolled ? "w-10 h-10" : "w-12 h-20"
+                  isScrolled ? "w-10 h-10" : "w-12 h-12"
                 }`}
                 aria-label="Go back"
               >

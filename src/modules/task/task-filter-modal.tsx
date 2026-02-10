@@ -5,6 +5,7 @@ import { ChevronRight, Check } from "lucide-react";
 import { HijriDate } from "../../lib/hijri";
 import { HijriDateInput } from "../../components/hijri-date-input";
 import Select from "../../components/form-select";
+import { useLanguageContext } from "../../contexts/LanguageContext";
 
 interface TaskFilterModalProps {
   isOpen: boolean;
@@ -31,18 +32,19 @@ export default function TaskFilterModal({
   onSearchTextFilterChange,
   onClear,
 }: TaskFilterModalProps) {
+  const { t } = useLanguageContext();
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [dateRangeModalOpen, setDateRangeModalOpen] = useState(false);
 
   const statusOptions = [
-    { value: "all" as const, label: "All Status", color: "bg-gray-500" },
-    { value: 0, label: "To Do", color: "bg-yellow-500" },
-    { value: 1, label: "Completed", color: "bg-green-500" },
+    { value: "all" as const, label: t("all_status"), color: "bg-gray-500" },
+    { value: 0, label: t("to_do"), color: "bg-yellow-500" },
+    { value: 1, label: t("completed"), color: "bg-green-500" },
   ];
 
   const currentStatusLabel =
     statusOptions.find((opt) => opt.value === statusFilter)?.label ||
-    "All Tasks";
+    t("all_tasks");
 
   const formatDateForDisplay = (date: HijriDate) => {
     return date.format("DD MMMM YYYY");
@@ -50,7 +52,7 @@ export default function TaskFilterModal({
 
   const currentDateRangeLabel = dateRangeFilter
     ? `${formatDateForDisplay(dateRangeFilter.startDate)} - ${formatDateForDisplay(dateRangeFilter.endDate)}`
-    : "All Time";
+    : t("all_time");
 
   const handleClear = () => {
     onStatusFilterChange("all");
@@ -69,12 +71,12 @@ export default function TaskFilterModal({
       <div className="">
         {/* Search Text Input */}
         <div className="w-full p-2 bg-white dark:bg-gray-800">
-          <label className="hidden">Search</label>
+          <label className="hidden">{t("search")}</label>
           <input
             type="text"
             value={searchTextFilter}
             onChange={(e) => onSearchTextFilterChange(e.target.value)}
-            placeholder="Search title or description..."
+            placeholder={t("search_title_or_description")}
             className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -83,7 +85,7 @@ export default function TaskFilterModal({
         <div className="p-2 bg-white dark:bg-gray-800">
           <Select
             name="status"
-            label="Status"
+            label={t("status")}
             value={statusFilter}
             options={statusOptions}
             onChange={(e) => onStatusFilterChange(e.target.value)}
@@ -93,7 +95,7 @@ export default function TaskFilterModal({
 
       <div className="p-2 flex flex-row gap-2 mt-2 items-center justify-between">
         <div className="bg-white dark:bg-gray-800">
-          <label className="hidden">Start Date</label>
+          <label className="hidden">{t("start_date")}</label>
           <HijriDateInput
             name="startDate"
             label=""
@@ -102,12 +104,12 @@ export default function TaskFilterModal({
               const endDate = dateRangeFilter?.endDate || startDate;
               onDateRangeFilterChange({ startDate, endDate });
             }}
-            placeholder="start date"
+            placeholder={t("start_date")}
           />
         </div>
-        <div>to</div>
+        <div>{t("to")}</div>
         <div className="bg-white dark:bg-gray-800">
-          <label className="hidden">End Date</label>
+          <label className="hidden">{t("end_date")}</label>
           <HijriDateInput
             name="endDate"
             label=""
@@ -116,7 +118,7 @@ export default function TaskFilterModal({
               const startDate = dateRangeFilter?.startDate || endDate;
               onDateRangeFilterChange({ startDate, endDate });
             }}
-            placeholder="End date"
+            placeholder={t("end_date")}
           />
         </div>
       </div>
@@ -126,7 +128,7 @@ export default function TaskFilterModal({
             onClick={() => onDateRangeFilterChange(null)}
             className="w-full px-4 py-2 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           >
-            Clear Date Range
+            {t("clear_date_range")}
           </button>
         )}
       </div>
@@ -137,13 +139,13 @@ export default function TaskFilterModal({
           onClick={handleClear}
           className="px-6 py-2.5 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
         >
-          Clear
+          {t("clear")}
         </Button>
         <Button
           onClick={onClose}
           className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
         >
-          Apply
+          {t("apply")}
         </Button>
       </div>
 
@@ -151,7 +153,7 @@ export default function TaskFilterModal({
       <Modal
         isOpen={statusModalOpen}
         onClose={() => setStatusModalOpen(false)}
-        title="Select Status"
+        title={t("select_status")}
       >
         <div className="space-y-2">
           {statusOptions.map((option) => (

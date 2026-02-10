@@ -18,7 +18,7 @@ export default function GeneralSettings() {
       <Navbar title={t("general")} showBackButton={true} />
       <div className="bg-white p-4">
         <div className="space-y-4">
-          <div className="border-b pb-4">
+          <div className="pb-4">
             <h2 className="text-lg font-semibold mb-2">
               {t("general_settings")}
             </h2>
@@ -57,16 +57,6 @@ export default function GeneralSettings() {
                   {t("bahasa")}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span>{t("theme")}</span>
-              <span className="text-gray-500">{t("coming_soon")}</span>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <span>{t("notifications")}</span>
-              <span className="text-gray-500">{t("coming_soon")}</span>
             </div>
           </div>
         </div>

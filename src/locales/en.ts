@@ -38,7 +38,115 @@ export const translations: Translations = {
   },
   tasks: {
     en: "Tasks",
-    id: "Tugas",
+    id: "Daftar Tugas",
+  },
+  task_name: {
+    en: "Task name",
+    id: "Nama Tugas",
+  },
+  all_tasks: {
+    en: "All Tasks",
+    id: "Semua Tugas",
+  },
+  all_status: {
+    en: "All Status",
+    id: "Semua Status",
+  },
+  to_do: {
+    en: "To Do",
+    id: "To Do",
+  },
+  completed: {
+    en: "Completed",
+    id: "Selesai",
+  },
+  all_time: {
+    en: "All Time",
+    id: "Semua Waktu",
+  },
+  search_title_or_description: {
+    en: "Search title or description...",
+    id: "Cari judul atau deskripsi...",
+  },
+  start_date: {
+    en: "Start Date",
+    id: "Tanggal Mulai",
+  },
+  end_date: {
+    en: "End Date",
+    id: "Tanggal Selesai",
+  },
+  clear_date_range: {
+    en: "Clear Date Range",
+    id: "Hapus Rentang Tanggal",
+  },
+  apply: {
+    en: "Apply",
+    id: "Terapkan",
+  },
+  select_status: {
+    en: "Select Status",
+    id: "Pilih Status",
+  },
+  add_new_task: {
+    en: "Add new task",
+    id: "Tambah tugas baru",
+  },
+  description: {
+    en: "Description",
+    id: "Deskripsi",
+  },
+  select_date: {
+    en: "Select Date",
+    id: "Pilih Tanggal",
+  },
+  no_date: {
+    en: "No Date",
+    id: "Tanpa Tanggal",
+  },
+  repeat: {
+    en: "Repeat",
+    id: "Ulangi",
+  },
+  no_repeat: {
+    en: "No repeat",
+    id: "Tidak ada pengulangan",
+  },
+  daily_at_time: {
+    en: "Daily at {time}",
+    id: "Harian pada {time}",
+  },
+  monthly_on_day: {
+    en: "Monthly on {day}",
+    id: "Bulanan pada tanggal {day}",
+  },
+  yearly_on_day_month: {
+    en: "Yearly on {day} {month}",
+    id: "Tahunan pada {day} {month}",
+  },
+  time: {
+    en: "Time",
+    id: "Waktu",
+  },
+  select_time: {
+    en: "Select Time",
+    id: "Pilih Waktu",
+  },
+  remove_time: {
+    en: "Remove time",
+    id: "Hapus waktu",
+  },
+  none: {
+    en: "None",
+    id: "Tidak Ada",
+  },
+  upcoming: {
+    en: "Upcoming",
+    id: "Akan Datang",
+  },
+  browse: {
+    en: "Browse",
+    id: "Jelajahi",
   },
   reports: {
     en: "Reports",
@@ -57,6 +165,14 @@ export const translations: Translations = {
   general_settings_subtitle: {
     en: "Configure your general application preferences",
     id: "Konfigurasi preferensi aplikasi umum Anda",
+  },
+  general_application_settings: {
+    en: "General application settings",
+    id: "Pengaturan aplikasi umum",
+  },
+  about_app: {
+    en: "About app",
+    id: "Tentang aplikasi",
   },
 
   // Language settings
@@ -172,9 +288,29 @@ export const translations: Translations = {
     en: "Create some targets to see your progress",
     id: "Buat beberapa target untuk melihat kemajuan Anda",
   },
+  create_targets_to_see_progress: {
+    en: "Create some targets to see your progress",
+    id: "Buat beberapa target untuk melihat kemajuan Anda",
+  },
   showing_targets: {
     en: "Showing 6 of {count} targets",
     id: "Menampilkan 6 dari {count} target",
+  },
+  showing_x_of_y_targets: {
+    en: "Showing {first} of {total} targets",
+    id: "Menampilkan {first} dari {total} target",
+  },
+  where_am_i_right_now: {
+    en: "Where am I right now",
+    id: "Di mana saya sekarang",
+  },
+  no_tasks_scheduled_for_today: {
+    en: "No tasks scheduled for today",
+    id: "Tidak ada tugas dijadwalkan untuk hari ini",
+  },
+  tasks_scheduled_for_today_will_appear_here: {
+    en: "Tasks scheduled for today will appear here",
+    id: "Tugas yang dijadwalkan untuk hari ini akan muncul di sini",
   },
   current: {
     en: "Current",
@@ -195,6 +331,10 @@ export const translations: Translations = {
   error: {
     en: "Error",
     id: "Kesalahan",
+  },
+  error_colon: {
+    en: "Error: {error}",
+    id: "Kesalahan: {error}",
   },
 
   // Log form
@@ -272,11 +412,35 @@ export const translations: Translations = {
     en: "An error occurred while deleting the database. Please try again.",
     id: "Terjadi kesalahan saat menghapus database. Silakan coba lagi.",
   },
+  failed_to_delete_note: {
+    en: "Failed to delete note. Please try again.",
+    id: "Gagal menghapus catatan. Silakan coba lagi.",
+  },
+  failed_to_delete_goal: {
+    en: "Failed to delete goal. Please try again.",
+    id: "Gagal menghapus tujuan. Silakan coba lagi.",
+  },
+  failed_to_delete_log_entry: {
+    en: "Failed to delete log entry. Please try again.",
+    id: "Gagal menghapus entri log. Silakan coba lagi.",
+  },
+  failed_to_delete_attribute_option: {
+    en: "Failed to delete attribute option. Please try again.",
+    id: "Gagal menghapus opsi atribut. Silakan coba lagi.",
+  },
+  failed_to_delete_tracker: {
+    en: "Failed to delete tracker. Please try again.",
+    id: "Gagal menghapus pelacak. Silakan coba lagi.",
+  },
+  failed_to_delete_tracker_attribute: {
+    en: "Failed to delete tracker attribute. Please try again.",
+    id: "Gagal menghapus atribut pelacak. Silakan coba lagi.",
+  },
 
   // About page
   about_description: {
-    en: "This is an opinionated logging app that helps you to be productive.",
-    id: "Ini adalah aplikasi logging yang beropini untuk membantu Anda menjadi produktif.",
+    en: "This is an opinionated app that helps you to be productive.",
+    id: "Ini adalah aplikasi pengelola tugas untuk membantu Anda menjadi produktif.",
   },
 
   // Common actions
@@ -308,11 +472,75 @@ export const translations: Translations = {
     en: "Loading...",
     id: "Memuat...",
   },
+  today: {
+    en: "Today",
+    id: "Hari Ini",
+  },
+  tomorrow: {
+    en: "Tomorrow",
+    id: "Besok",
+  },
+  this_week: {
+    en: "This Week",
+    id: "Minggu Ini",
+  },
+  this_month: {
+    en: "This Month",
+    id: "Bulan Ini",
+  },
+  later: {
+    en: "Later",
+    id: "Nanti",
+  },
+  unscheduled: {
+    en: "Unscheduled",
+    id: "Tidak Terjadwal",
+  },
+  no_upcoming_tasks: {
+    en: "No upcoming tasks",
+    id: "Tidak ada tugas yang akan datang",
+  },
+  all_tasks_completed_or_no_pending: {
+    en: "All your tasks are completed or there are no pending tasks",
+    id: "Semua tugas Anda selesai atau tidak ada tugas yang tertunda",
+  },
+  filter_options: {
+    en: "Filter options",
+    id: "Opsi filter",
+  },
+  retry: {
+    en: "Retry",
+    id: "Coba Lagi",
+  },
+  no_tasks_yet: {
+    en: "No tasks yet",
+    id: "Belum ada tugas",
+  },
+  create_first_task_to_get_started: {
+    en: "Create your first task to get started!",
+    id: "Buat tugas pertama Anda untuk memulai!",
+  },
+  no_more_tasks_to_load: {
+    en: "No more tasks to load",
+    id: "Tidak ada lagi tugas yang dimuat",
+  },
+  filter_tasks: {
+    en: "Filter Tasks",
+    id: "Filter Tugas",
+  },
 
   // Form validation
   required_field: {
     en: "This field is required",
     id: "Field ini wajib diisi",
+  },
+  name_and_type_fields_are_required: {
+    en: "Name and type fields are required",
+    id: "Field nama dan tipe wajib diisi",
+  },
+  name_tracker_and_attribute_are_required: {
+    en: "Name, tracker, and attribute are required",
+    id: "Nama, pelacak, dan atribut wajib diisi",
   },
 
   // Navigation

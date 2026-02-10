@@ -13,6 +13,7 @@ import { formatValue } from "src/lib/format";
 import type { TargetResultData } from "../hooks/useTargetResults";
 import { useToday } from "src/hooks/use-today";
 import { LargeNavbar } from "src/modules/navigation/navbar";
+import { useLanguageContext } from "../contexts/LanguageContext";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -54,12 +55,14 @@ interface TargetResultsOverviewProps {
 }
 
 function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
+  const { t } = useLanguageContext();
+
   if (results.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className="text-gray-400 mb-2">No targets found</div>
+        <div className="text-gray-400 mb-2">{t("no_targets_found")}</div>
         <div className="text-gray-500 text-sm">
-          Create some targets to see your progress
+          {t("create_targets_to_see_progress")}
         </div>
       </div>
     );
@@ -145,7 +148,10 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
       {results.length > 6 && (
         <div className="text-center">
           <div className="text-sm text-gray-500">
-            Showing 6 of {results.length} targets
+            {t("showing_x_of_y_targets", {
+              first: "6",
+              total: results.length.toString(),
+            })}
           </div>
         </div>
       )}
@@ -154,6 +160,7 @@ function TargetResultsOverview({ results }: TargetResultsOverviewProps) {
 }
 
 export function Today() {
+  const { t } = useLanguageContext();
   const {
     targetResults,
     todayTasks,
@@ -168,7 +175,7 @@ export function Today() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="text-red-800 font-medium">Error</div>
+          <div className="text-red-800 font-medium">{t("error")}</div>
           <div className="text-red-600 text-sm mt-1">{error}</div>
         </div>
       </div>
@@ -182,16 +189,20 @@ export function Today() {
       {/* Target Results Summary */}
       {targetResults.length > 0 && (
         <Block>
-          <BlockTitle extra={"Summary"}>Where am I right now</BlockTitle>
+          <BlockTitle extra={t("summary")}>
+            {t("where_am_i_right_now")}
+          </BlockTitle>
           <TargetResultsOverview results={targetResults} />
         </Block>
       )}
 
       {initiated && todayTasks.length === 0 && (
         <div className="text-center py-6">
-          <div className="text-gray-400 mb-2">No tasks scheduled for today</div>
+          <div className="text-gray-400 mb-2">
+            {t("no_tasks_scheduled_for_today")}
+          </div>
           <div className="text-gray-500 text-sm">
-            Tasks scheduled for today will appear here
+            {t("tasks_scheduled_for_today_will_appear_here")}
           </div>
         </div>
       )}

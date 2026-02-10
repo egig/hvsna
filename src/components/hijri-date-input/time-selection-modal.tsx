@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Navbar } from "src/modules/navigation";
+import { useLanguageContext } from "../../contexts/LanguageContext";
 
 interface TimeSelectionModalProps {
   selectedTime: string | null;
@@ -15,6 +16,7 @@ export function TimeSelectionModal({
   onConfirm,
   onRemoveTime,
 }: TimeSelectionModalProps) {
+  const { t } = useLanguageContext();
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
 
@@ -29,7 +31,7 @@ export function TimeSelectionModal({
   return (
     <div className="h-[50vh]">
       <Navbar
-        title="Select Time"
+        title={t("select_time")}
         showBackButton={true}
         customBackAction={onBack}
         rightAction={
@@ -79,7 +81,7 @@ export function TimeSelectionModal({
           disabled={false}
           className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
-          Remove time
+          {t("remove_time")}
         </button>
       </div>
     </div>
