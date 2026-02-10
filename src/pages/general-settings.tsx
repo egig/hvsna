@@ -41,7 +41,9 @@ export default function GeneralSettings() {
               <div className="flex gap-2">
                 <select
                   value={settings.language}
-                  onChange={(e) => handleLanguageChange(e.target.value as "en" | "id")}
+                  onChange={(e) =>
+                    handleLanguageChange(e.target.value as "en" | "id")
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-transparent"
                   disabled={loading}
                 >

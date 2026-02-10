@@ -1,22 +1,19 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
-import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { ArrowUp, Trash2 } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import { FormInput } from "src/components/form-input";
 import { useTracker } from "../tracker/use-tracker";
-import type { Tracker } from "../tracker/trackerStore";
-import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 import { HijriDateInput } from "../../components/hijri-date-input";
 import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
-import { useTaskForm } from "./task-form-hook";
+import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../../contexts/LanguageContext";
 
-interface TaskFormProps {
-  taskId?: string | null;
+interface TaskFormEditProps {
+  taskId: string;
   onSuccess?: (task: Task) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
@@ -29,7 +26,7 @@ export default function TaskFormEdit({
   onError,
   onCancel,
   onDelete,
-}: TaskFormProps) {
+}: TaskFormEditProps) {
   const { t } = useLanguageContext();
   const {
     error,
@@ -45,7 +42,7 @@ export default function TaskFormEdit({
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-  } = useTaskForm(taskId || "", onSuccess, onError, onCancel, onDelete);
+  } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");

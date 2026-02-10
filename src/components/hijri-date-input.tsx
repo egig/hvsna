@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { HijriDate } from "../lib/hijri";
 import { CalendarModal } from "./hijri-date-input/calendar-modal";
 import { CalendarIcon } from "lucide-react";
+import { useLanguageContext } from "../contexts/LanguageContext";
 
 interface HijriDateInputProps {
   name: string;
@@ -31,6 +32,7 @@ export function HijriDateInput({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<HijriDate | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const { t } = useLanguageContext();
 
   // Initialize from Gregorian value
   useEffect(() => {
@@ -51,15 +53,18 @@ export function HijriDateInput({
     }
   };
 
-  const formatDateDisplay = (date: HijriDate | null, t: string | null) => {
+  const formatDateDisplay = (date: HijriDate | null, time: string | null) => {
     if (!date) return placeholder;
 
     if (date.isToday()) {
-      // TODO Translate
-      return "Today";
+      return t("today");
     }
 
-    return date.format("DD MMMM") + (t ? `, ${t}` : "");
+    if (date.isTomorrow()) {
+      return t("tomorrow");
+    }
+
+    return date.format("DD MMMM") + (time ? `, ${time}` : "");
   };
 
   const handleButtonClick = () => {
@@ -90,7 +95,7 @@ export function HijriDateInput({
           >
             {formatDateDisplay(selectedDate, selectedTime)}
           </span>
-          <CalendarIcon className="w-5 h-5 text-gray-400" />  
+          <CalendarIcon className="w-5 h-5 text-gray-400" />
         </div>
       </button>
 

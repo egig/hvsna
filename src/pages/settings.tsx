@@ -12,7 +12,6 @@ export default function Settings() {
     <Page>
       <Navbar title={t("settings")} showBackButton={false} />
       <div className="bg-white">
-
         <SignedIn>
           <MenuItem
             title={t("sign_out")}
@@ -53,7 +52,6 @@ export default function Settings() {
           icon={Info}
           to="/about"
         />
-
       </div>
     </Page>
   );

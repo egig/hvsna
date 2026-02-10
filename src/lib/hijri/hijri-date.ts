@@ -330,6 +330,22 @@ export class HijriDate {
     );
   }
 
+  isTomorrow(): boolean {
+    const lat = this._latitude ?? DEFAULT_LATITUDE;
+    const lng = this._longitude ?? DEFAULT_LONGITUDE;
+
+    const tomorrow = HijriDate.fromDate(
+      new Date(Date.now() + 86400000),
+      lat,
+      lng,
+    );
+    return (
+      this.year === tomorrow.year &&
+      this.month === tomorrow.month &&
+      this.day === tomorrow.day
+    );
+  }
+
   getWeekDates(): HijriDate[] {
     const sow = this.startOfWeek();
     const weekDates = [sow];

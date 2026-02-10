@@ -27,32 +27,29 @@ export default function TabLayout() {
 
       {/* FAB Button */}
       {location.state.context !== "settings" && (
-      <button
-        onClick={() => openTaskForm()}
-        className="fixed bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-        aria-label="Add new task"
-      >
-        <Plus size={24} />
-      </button>
+        <button
+          onClick={() => openTaskForm()}
+          className="fixed bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+          aria-label="Add new task"
+        >
+          <Plus size={24} />
+        </button>
       )}
 
       <TabBar />
 
       {/* Task Form Modal */}
       <Modal isOpen={formOpen} onClose={handleTaskCancel}>
-        {editingTaskId &&
-        <TaskFormEdit
-          taskId={editingTaskId}
-          onSuccess={handleTaskSuccess}
-          onCancel={handleTaskCancel}
-        />
-        }
-        {!editingTaskId &&
-        <TaskForm
-          onSuccess={handleTaskSuccess}
-          onCancel={handleTaskCancel}
-        />
-        }
+        {editingTaskId && (
+          <TaskFormEdit
+            taskId={editingTaskId}
+            onSuccess={handleTaskSuccess}
+            onCancel={handleTaskCancel}
+          />
+        )}
+        {!editingTaskId && (
+          <TaskForm onSuccess={handleTaskSuccess} onCancel={handleTaskCancel} />
+        )}
       </Modal>
     </div>
   );

@@ -34,7 +34,6 @@ export default function TaskForm({
     error,
     task,
     handleSubmit,
-    handleDelete,
     selectedHijriDate,
     setSelectedHijriDate,
     selectedTime,
@@ -44,7 +43,7 @@ export default function TaskForm({
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-  } = useTaskForm("", onSuccess, onError, onCancel, onDelete);
+  } = useTaskForm(onSuccess, onError, onCancel);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
@@ -56,12 +55,11 @@ export default function TaskForm({
     if (nameInputRef.current) {
       nameInputRef.current.focus();
     }
-
   }, []);
 
   useEffect(() => {
-    console.log(location.state)
-    if(["today", "upcoming"].includes(location.state?.context)) {
+    console.log(location.state);
+    if (["today", "upcoming"].includes(location.state?.context)) {
       setSelectedHijriDate(HijriDate.fromDate(new Date()));
     }
   }, [location.state]);
@@ -204,7 +202,6 @@ export default function TaskForm({
           })}
         </>
       )}
-
 
       <div className="flex justify-end p-4">
         <button

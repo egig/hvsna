@@ -1,9 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type {
-  Task,
-  TaskCreateInput,
-  TaskUpdateInput,
-} from "../../lib/types/task";
+import type { Task, TaskUpdateInput } from "../../lib/types/task";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
@@ -28,12 +24,15 @@ export interface UseTaskFormReturn {
   selectedGoal: any;
   trackerAttributes: any;
   handleSubmit: (f: FormData) => void;
+  handleDelete: () => void;
 }
 
-export const useTaskForm = (
+export const useTaskFormEdit = (
+  taskId: string,
   onSuccess?: (task: Task) => void,
   onError?: (error: string) => void,
   onCancel?: () => void,
+  onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
   const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
   const createTask = useTaskStore((s) => s.createTask);
@@ -68,6 +67,10 @@ export const useTaskForm = (
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
   useEffect(() => {
+    setEditingTaskId(taskId || null);
+  }, [taskId]);
+
+  useEffect(() => {
     if (task?.atDateHijri) {
       // Parse YYYYMMDD format
       const year = parseInt(task.atDateHijri.substring(0, 4));
@@ -81,6 +84,20 @@ export const useTaskForm = (
       setSelectedTime(task.atTime);
     }
   }, [task]);
+
+  useEffect(() => {
+    if (taskId) {
+      getTask(taskId).then((fetchedTask) => {
+        if (fetchedTask) {
+          setTask(fetchedTask);
+          // Update targetId if task has one
+          if (fetchedTask.targetId !== currentTargetId) {
+            setCurrentTargetId(fetchedTask.targetId || null);
+          }
+        }
+      });
+    }
+  }, [taskId, currentTargetId]);
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
@@ -198,7 +215,7 @@ export const useTaskForm = (
         taskInput.targetId = selectedTargetId;
       }
 
-      let result = await createTask(taskInput);
+      let result = await updateTask(taskId, taskInput);
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
@@ -238,6 +255,22 @@ export const useTaskForm = (
     }
   };
 
+  const handleDelete = async () => {
+    if (taskId && task) {
+      if (
+        confirm(
+          `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
+        )
+      ) {
+        deleteTask(taskId).then(() => {
+          setTask(null);
+          closeTaskForm();
+          onDelete?.(taskId);
+        });
+      }
+    }
+  };
+
   const reset = () => {
     setTask(null);
     setLoading(false);
@@ -263,5 +296,6 @@ export const useTaskForm = (
     selectedGoal,
     trackerAttributes,
     handleSubmit,
+    handleDelete,
   };
 };

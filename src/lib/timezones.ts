@@ -1,7 +1,7 @@
 export const ALL_TIMEZONES = [
   // UTC
   "UTC",
-  
+
   // Africa
   "Africa/Algiers",
   "Africa/Cairo",
@@ -11,7 +11,7 @@ export const ALL_TIMEZONES = [
   "Africa/Lagos",
   "Africa/Nairobi",
   "Africa/Tripoli",
-  
+
   // America
   "America/Adak",
   "America/Anchorage",
@@ -158,7 +158,7 @@ export const ALL_TIMEZONES = [
   "America/Winnipeg",
   "America/Yakutat",
   "America/Yellowknife",
-  
+
   // Antarctica
   "Antarctica/Casey",
   "Antarctica/Davis",
@@ -171,10 +171,10 @@ export const ALL_TIMEZONES = [
   "Antarctica/Syowa",
   "Antarctica/Troll",
   "Antarctica/Vostok",
-  
+
   // Arctic
   "Arctic/Longyearbyen",
-  
+
   // Asia
   "Asia/Aden",
   "Asia/Almaty",
@@ -262,7 +262,7 @@ export const ALL_TIMEZONES = [
   "Asia/Yangon",
   "Asia/Yekaterinburg",
   "Asia/Yerevan",
-  
+
   // Atlantic
   "Atlantic/Azores",
   "Atlantic/Bermuda",
@@ -274,7 +274,7 @@ export const ALL_TIMEZONES = [
   "Atlantic/South_Georgia",
   "Atlantic/St_Helena",
   "Atlantic/Stanley",
-  
+
   // Australia
   "Australia/Adelaide",
   "Australia/Brisbane",
@@ -288,7 +288,7 @@ export const ALL_TIMEZONES = [
   "Australia/Melbourne",
   "Australia/Perth",
   "Australia/Sydney",
-  
+
   // Europe
   "Europe/Amsterdam",
   "Europe/Andorra",
@@ -348,7 +348,7 @@ export const ALL_TIMEZONES = [
   "Europe/Warsaw",
   "Europe/Zagreb",
   "Europe/Zurich",
-  
+
   // Indian
   "Indian/Antananarivo",
   "Indian/Chagos",
@@ -361,7 +361,7 @@ export const ALL_TIMEZONES = [
   "Indian/Mauritius",
   "Indian/Mayotte",
   "Indian/Reunion",
-  
+
   // Pacific
   "Pacific/Apia",
   "Pacific/Auckland",
@@ -399,7 +399,7 @@ export const ALL_TIMEZONES = [
   "Pacific/Tarawa",
   "Pacific/Tongatapu",
   "Pacific/Wake",
-  "Pacific/Wallis"
+  "Pacific/Wallis",
 ];
 
 export const COMMON_TIMEZONES = [
