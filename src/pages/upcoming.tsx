@@ -20,8 +20,7 @@ export default function Upcoming() {
   return (
     <Page>
       <Navbar showBackButton={false} title={t("upcoming")} />
-
-      <div className="h-[calc(100vh-160px)] overflow-y-auto">
+      <div className="h-[calc(100vh-var(--tab-bar-height)-60px)] overflow-y-auto">
         {initiated && error && (
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">

@@ -15,7 +15,6 @@ export default function Settings() {
         <SignedIn>
           <MenuItem
             title={t("sign_out")}
-            subtitle={t("sign_out_subtitle")}
             icon={LogIn}
             onClick={() => {
               // Handle sign out logic here
@@ -26,7 +25,6 @@ export default function Settings() {
         <SignedOut>
           <MenuItem
             title={t("sign_in")}
-            subtitle={t("sign_in_subtitle")}
             icon={LogIn}
           >
             <SignInButton mode="modal">
@@ -36,19 +34,16 @@ export default function Settings() {
         </SignedOut>
         <MenuItem
           title={t("general")}
-          subtitle={t("general_application_settings")}
           icon={Cog}
           to="/general-settings"
         />
         <MenuItem
           title={t("wipe_local")}
-          subtitle={t("wipe_local_subtitle")}
           icon={Trash}
           to="/wipe-local"
         />
         <MenuItem
           title={t("about")}
-          subtitle={t("about_app")}
           icon={Info}
           to="/about"
         />

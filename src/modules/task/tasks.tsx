@@ -53,7 +53,7 @@ export default function Tasks() {
       />
 
       <div
-        className="h-[calc(100vh-160px)] overflow-y-auto"
+        className="h-[calc(100vh-var(--tab-bar-height)-60px)] overflow-y-auto"
         onScroll={handleInfiniteScroll}
       >
         {initiated && error && (

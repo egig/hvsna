@@ -11,6 +11,7 @@
 :root {
   --safe-area-inset-bottom: env(safe-area-inset-bottom);
   --tab-bar-height: 62px;
+  --hvsna-content-h: calc(100vh - var(--tab-bar-height) - var(--safe-area-inset-bottom));
   --hvsna-primary-color: #2e335a;
   --hvsna-primary-color-hover: #232347;
   --hvsna-primary-color-pressed: #1a1a34;

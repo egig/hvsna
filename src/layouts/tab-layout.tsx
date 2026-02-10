@@ -21,7 +21,7 @@ export default function TabLayout() {
 
   return (
     <div className="m-auto h-[100%] relative">
-      <div className="h-[calc(100%-70px)]">
+      <div className="h-[var(--hvsna-content-h)]">
         <Outlet />
       </div>
 
