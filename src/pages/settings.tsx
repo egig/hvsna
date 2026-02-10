@@ -23,30 +23,15 @@ export default function Settings() {
         </SignedIn>
 
         <SignedOut>
-          <MenuItem
-            title={t("sign_in")}
-            icon={LogIn}
-          >
+          <MenuItem title={t("sign_in")} icon={LogIn}>
             <SignInButton mode="modal">
               <button className="w-full h-full"></button>
             </SignInButton>
           </MenuItem>
         </SignedOut>
-        <MenuItem
-          title={t("general")}
-          icon={Cog}
-          to="/general-settings"
-        />
-        <MenuItem
-          title={t("wipe_local")}
-          icon={Trash}
-          to="/wipe-local"
-        />
-        <MenuItem
-          title={t("about")}
-          icon={Info}
-          to="/about"
-        />
+        <MenuItem title={t("general")} icon={Cog} to="/general-settings" />
+        <MenuItem title={t("wipe_local")} icon={Trash} to="/wipe-local" />
+        <MenuItem title={t("about")} icon={Info} to="/about" />
       </div>
     </Page>
   );

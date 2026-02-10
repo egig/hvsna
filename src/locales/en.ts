@@ -472,6 +472,10 @@ export const translations: Translations = {
     en: "Update",
     id: "Perbarui",
   },
+  delete_task: {
+    en: "Delete Task",
+    id: "Hapus Tugas",
+  },
   loading: {
     en: "Loading...",
     id: "Memuat...",

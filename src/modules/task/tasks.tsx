@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Check, Filter } from "lucide-react";
+import { Plus, Check, Filter, FilterX } from "lucide-react";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskFilterModal from "./task-filter-modal";
@@ -36,6 +36,12 @@ export default function Tasks() {
     setFilterModalOpened(false);
   };
 
+  const hasFilter = () => {
+    return (
+      searchTextFilter !== "" || statusFilter !== "all" || !!dateRangeFilter
+    );
+  };
+
   return (
     <Page>
       <Navbar
@@ -47,6 +53,9 @@ export default function Tasks() {
             aria-label={t("filter_options")}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500"
           >
+            {hasFilter() && (
+              <div className="absolute w-2 h-2 bg-[var(--hvsna-primary-color)] opacity-[0.8] rounded-full" />
+            )}
             <Filter size={20} />
           </Button>
         }

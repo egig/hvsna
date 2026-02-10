@@ -57,11 +57,11 @@ export function HijriDateInput({
     if (!date) return placeholder;
 
     if (date.isToday()) {
-      return t("today");
+      return t("today") + (time ? `, ${time}` : "");
     }
 
     if (date.isTomorrow()) {
-      return t("tomorrow");
+      return t("tomorrow") + (time ? `, ${time}` : "");
     }
 
     return date.format("DD MMMM") + (time ? `, ${time}` : "");
