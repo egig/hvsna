@@ -93,7 +93,7 @@ export default function TaskForm({
     >
       <input
         ref={nameInputRef}
-        name="name"
+        name="taskName"
         defaultValue={task ? task.name : ""}
         placeholder="Task name"
         disabled={isSubmitting}
@@ -105,7 +105,7 @@ export default function TaskForm({
         aria-label="task name"
       />
       <textarea
-        name="description"
+        name="taskDescription"
         placeholder="Description"
         className="text-sm px-4 h-[3rem] py-2 w-[100%] outline-none resize-none"
         defaultValue={task?.description || ""}
