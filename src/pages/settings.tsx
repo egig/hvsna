@@ -12,26 +12,6 @@ export default function Settings() {
     <Page>
       <Navbar title={t("settings")} showBackButton={false} />
       <div className="bg-white">
-        <MenuItem
-          title={t("general")}
-          subtitle={t("general_application_settings")}
-          icon={Cog}
-          to="/general-settings"
-        />
-
-        <MenuItem
-          title={t("about")}
-          subtitle={t("about_app")}
-          icon={Info}
-          to="/about"
-        />
-
-        <MenuItem
-          title={t("wipe_local")}
-          subtitle={t("wipe_local_subtitle")}
-          icon={Trash}
-          to="/wipe-local"
-        />
 
         <SignedIn>
           <MenuItem
@@ -55,6 +35,25 @@ export default function Settings() {
             </SignInButton>
           </MenuItem>
         </SignedOut>
+        <MenuItem
+          title={t("general")}
+          subtitle={t("general_application_settings")}
+          icon={Cog}
+          to="/general-settings"
+        />
+        <MenuItem
+          title={t("wipe_local")}
+          subtitle={t("wipe_local_subtitle")}
+          icon={Trash}
+          to="/wipe-local"
+        />
+        <MenuItem
+          title={t("about")}
+          subtitle={t("about_app")}
+          icon={Info}
+          to="/about"
+        />
+
       </div>
     </Page>
   );

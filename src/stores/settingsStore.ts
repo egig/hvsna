@@ -5,6 +5,7 @@ import type { Language } from "../lib/types/language";
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   language: "en",
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   theme: "system",
   notifications: true,
 };

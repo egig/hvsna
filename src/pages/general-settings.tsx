@@ -2,6 +2,7 @@ import { Page } from "../modules/navigation";
 import { Navbar } from "../modules/navigation";
 import { useSettings } from "../hooks/useSettings";
 import { useLanguageContext } from "../contexts/LanguageContext";
+import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../lib/timezones";
 
 export default function GeneralSettings() {
   const { settings, setLanguage, loading, updateSettings } = useSettings();
@@ -11,6 +12,10 @@ export default function GeneralSettings() {
     // console.log(newLanguage)
     await updateSettings({ language: newLanguage });
     // await setLanguage(newLanguage);
+  };
+
+  const handleTimezoneChange = async (newTimezone: string) => {
+    await updateSettings({ timezone: newTimezone });
   };
 
   return (
@@ -57,6 +62,27 @@ export default function GeneralSettings() {
                   {t("bahasa")}
                 </button>
               </div>
+            </div>
+
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">{t("timezone")}</span>
+                {loading && (
+                  <span className="text-sm text-gray-500">Loading...</span>
+                )}
+              </div>
+              <select
+                value={settings.timezone}
+                onChange={(e) => handleTimezoneChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-transparent"
+                disabled={loading}
+              >
+                {ALL_TIMEZONES.map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

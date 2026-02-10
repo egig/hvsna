@@ -8,6 +8,7 @@ const SETTINGS_DOC_ID = "general_settings";
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   language: "en",
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   theme: "system",
   notifications: true,
 };
