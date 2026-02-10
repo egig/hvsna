@@ -18,10 +18,10 @@ export function TabBar() {
   const location = useLocation();
 
   const tabs = [
-    { path: "/", label: t("today"), icon: <Calendar /> },
-    { path: "/upcoming", label: t("upcoming"), icon: <CalendarClock /> },
-    { path: "/tasks", label: t("browse"), icon: <SquareLibrary /> },
-    { path: "/settings", label: t("settings"), icon: <Settings /> },
+    { path: "/", label: t("today"), icon: <Calendar />, context: "today" },
+    { path: "/upcoming", label: t("upcoming"), icon: <CalendarClock />, context: "upcoming" },
+    { path: "/tasks", label: t("browse"), icon: <SquareLibrary />, context: "all" },
+    { path: "/settings", label: t("settings"), icon: <Settings />, context: "settings" },
   ];
 
   const getIsActive = (tabPath: string) => {
@@ -48,6 +48,7 @@ export function TabBar() {
               }`}
               aria-label={tab.label}
               aria-current={isActive ? "page" : undefined}
+              state={{context: tab.context}}
             >
               <span className="text-2xl mb-1">{tab.icon}</span>
               <span className="text-xs font-medium">{tab.label}</span>

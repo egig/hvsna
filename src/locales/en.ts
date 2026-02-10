@@ -100,6 +100,10 @@ export const translations: Translations = {
     en: "Select Date",
     id: "Pilih Tanggal",
   },
+  date: {
+    en: "Date",
+    id: "Tanggal",
+  },
   no_date: {
     en: "No Date",
     id: "Tanpa Tanggal",

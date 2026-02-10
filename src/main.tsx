@@ -26,7 +26,6 @@ const db = getPouchDBInstance();
   root.render(<Hvsna config={config} db={db} />);
   // @ts-ignore
   window.__dtMounted = true;
-  window.document.title = "HVSNA";
 })();
 
 registerSW({

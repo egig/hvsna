@@ -14,16 +14,17 @@ import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../../contexts/LanguageContext";
-import { useLocation } from "react-router";
 
 interface TaskFormProps {
+  taskId?: string | null;
   onSuccess?: (task: Task) => void;
   onError?: (error: string) => void;
   onCancel?: () => void;
   onDelete?: (taskId: string) => void;
 }
 
-export default function TaskForm({
+export default function TaskFormEdit({
+  taskId,
   onSuccess,
   onError,
   onCancel,
@@ -44,11 +45,10 @@ export default function TaskForm({
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-  } = useTaskForm("", onSuccess, onError, onCancel, onDelete);
+  } = useTaskForm(taskId || "", onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
-  const location = useLocation();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -56,15 +56,7 @@ export default function TaskForm({
     if (nameInputRef.current) {
       nameInputRef.current.focus();
     }
-
   }, []);
-
-  useEffect(() => {
-    console.log(location.state)
-    if(["today", "upcoming"].includes(location.state?.context)) {
-      setSelectedHijriDate(HijriDate.fromDate(new Date()));
-    }
-  }, [location.state]);
 
   useEffect(() => {
     if (error && onError) {
@@ -205,6 +197,20 @@ export default function TaskForm({
         </>
       )}
 
+      {/* Delete Button - Only show for existing tasks */}
+      {taskId && (
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isSubmitting}
+            className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Trash2 size={18} />
+            {t("delete_task")}
+          </button>
+        </div>
+      )}
 
       <div className="flex justify-end p-4">
         <button

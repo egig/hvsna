@@ -11,6 +11,7 @@ interface ButtonProps {
   className?: string;
   onClick?: () => void;
   disabled?: boolean;
+  state?: any;
 }
 
 export function Button({
@@ -20,24 +21,18 @@ export function Button({
   className = "",
   onClick,
   disabled = false,
+  state,
 }: ButtonProps) {
   const { navigate } = useAppNavigation();
 
   const handleClick = (e: React.MouseEvent) => {
-    if (disabled) return;
-
-    if (to) {
-      e.preventDefault();
-      navigate(to, navType);
-    }
-
     onClick?.();
   };
 
   return (
     <Link
       to={to as string}
-      state={{ navType }}
+      state={{ navType, ...state }}
       onClick={handleClick}
       className={className}
     >
