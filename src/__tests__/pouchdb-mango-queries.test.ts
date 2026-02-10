@@ -446,11 +446,7 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
           hijriDate: "2023-01-01",
           // Note: We don't need to include scheduledAtEpochMillis in selector for range queries
         },
-        sort: [
-          { type: "asc" },
-          { hijriDate: "asc" },
-          { atEpochMillis: "asc" },
-        ],
+        sort: [{ type: "asc" }, { hijriDate: "asc" }, { atEpochMillis: "asc" }],
       };
 
       const result = await db.find(mangoQuery);
@@ -464,9 +460,7 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
       ).toBe(true);
 
       // Should be sorted by atEpochMillis ascending (within the type+hijriDate group)
-      const scheduledTimes = result.docs.map(
-        (doc) => doc.atEpochMillis,
-      );
+      const scheduledTimes = result.docs.map((doc) => doc.atEpochMillis);
       expect(scheduledTimes).toEqual(scheduledTimes.sort((a, b) => a - b));
 
       // Verify the specific documents
@@ -489,11 +483,7 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
           hijriDate: "2023-01-01",
           atEpochMillis: { $gte: 0 }, // Range query to enable sorting
         },
-        sort: [
-          { type: "asc" },
-          { hijriDate: "asc" },
-          { atEpochMillis: "asc" },
-        ],
+        sort: [{ type: "asc" }, { hijriDate: "asc" }, { atEpochMillis: "asc" }],
       });
 
       expect(result.docs).toHaveLength(2);
@@ -504,9 +494,7 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
       ).toBe(true);
 
       // Verify sorting
-      const scheduledTimes = result.docs.map(
-        (doc) => doc.atEpochMillis,
-      );
+      const scheduledTimes = result.docs.map((doc) => doc.atEpochMillis);
       expect(scheduledTimes).toEqual(scheduledTimes.sort((a, b) => a - b));
     });
 

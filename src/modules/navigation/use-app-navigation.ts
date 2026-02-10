@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from "react-router";
-import { useNavigation } from "./context";
 
 type NavType = "forward" | "back" | "tab" | "modal";
 
@@ -14,15 +13,12 @@ interface NavigateOptions {
 export function useAppNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setNavType } = useNavigation();
 
   const navigateWithNavType = (
     to: string | number,
     navType: NavType = "forward",
     options?: NavigateOptions,
   ) => {
-    setNavType(navType);
-
     const navOptions: NavigateOptions = {
       ...options,
       state: {

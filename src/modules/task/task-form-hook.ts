@@ -224,11 +224,7 @@ export const useTaskForm = (
       }
 
       // Create recurring task if repeat is selected and not "none"
-      if (
-        taskData.repeat &&
-        taskData.repeat !== "none" &&
-        taskInput.atTime
-      ) {
+      if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
         try {
           await createRecurringTask({
             name: taskInput.name,

@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { useLocation } from "react-router";
-import { useEffect, type ReactNode } from "react";
-import { useNavigation } from "./context";
+import { type ReactNode } from "react";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -9,25 +8,8 @@ interface PageTransitionProps {
 
 export function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation();
-  const { navType, setNavType } = useNavigation();
   const stateNavType = (location.state as { navType?: string })?.navType;
-
-  // Use context navType, but allow location state to override for tab switches and modals
-  const currentNavType =
-    stateNavType === "tab"
-      ? "tab"
-      : stateNavType === "modal"
-        ? "modal"
-        : navType;
-
-  // Reset navType to forward after animation completes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setNavType("forward");
-    }, 300); // Match animation duration
-
-    return () => clearTimeout(timer);
-  }, [location.pathname, setNavType]);
+  let currentNavType = stateNavType || "tab";
 
   // Animation variants based on navigation type
   const variants = {
@@ -38,7 +20,9 @@ export function PageTransition({ children }: PageTransitionProps) {
       exit: { x: "-20%", opacity: 0 },
       duration: 0.3,
     },
-    // Back navigation
+    // TODO find a way to use back navigation
+    // currently using navigate(-1) or browser back button does not carry new state
+    // using custom state make it crash in back navigation, may store it in zustand ?
     back: {
       initial: { x: "-20%", opacity: 0 },
       animate: { x: 0, opacity: 1 },

@@ -1,6 +1,12 @@
 import { db } from "../../lib/pouchdb-singleton";
 import { HijriDate } from "../../lib/hijri";
-import type { Task, TaskCreateInput, TaskQuery, TaskStatus, TaskUpdateInput } from "./types";
+import type {
+  Task,
+  TaskCreateInput,
+  TaskQuery,
+  TaskStatus,
+  TaskUpdateInput,
+} from "./types";
 import { generatePrefixedUUID } from "../../lib/uuid";
 
 interface PouchDBTaskDocument {
@@ -107,12 +113,7 @@ export class TaskRepository {
       const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
       let gregDate = hijriDate.toDate();
       const [h, m] = input.atTime?.split(":") || ["0", "0"];
-      newTask.atEpochMillis = gregDate.setHours(
-        parseInt(h),
-        parseInt(m),
-        0,
-        0,
-      );
+      newTask.atEpochMillis = gregDate.setHours(parseInt(h), parseInt(m), 0, 0);
       newTask.atDateIsNone = 0;
     } else {
       newTask.atEpochMillis = 0;
@@ -350,12 +351,7 @@ export class TaskRepository {
 
     await db.createIndex({
       index: {
-        fields: [
-          "type",
-          "status",
-          "atDateHijri",
-          "atEpochMillis",
-        ],
+        fields: ["type", "status", "atDateHijri", "atEpochMillis"],
       },
     });
 
@@ -400,11 +396,7 @@ export class TaskRepository {
           $gte: today.toDate().getTime(),
         },
       },
-      sort: [
-        { type: "asc" },
-        { status: "asc" },
-        { atEpochMillis: "asc" },
-      ],
+      sort: [{ type: "asc" }, { status: "asc" }, { atEpochMillis: "asc" }],
     };
 
     const result = await (db as any).find(mangoQuery);
@@ -420,12 +412,7 @@ export class TaskRepository {
   ): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: [
-          "type",
-          "status",
-          "atDateIsNone",
-          "atEpochMillis",
-        ],
+        fields: ["type", "status", "atDateIsNone", "atEpochMillis"],
       },
     });
 
@@ -457,8 +444,7 @@ export class TaskRepository {
         mangoQuery.selector.status = query.status;
       }
       if (query.atEpochMillis) {
-        mangoQuery.selector.atEpochMillis =
-          query.atEpochMillis;
+        mangoQuery.selector.atEpochMillis = query.atEpochMillis;
       }
       if (query.searchText && query.searchText.trim()) {
         const searchLower = query.searchText.toLowerCase().trim();

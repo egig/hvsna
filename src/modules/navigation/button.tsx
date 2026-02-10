@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import { useAppNavigation } from "./use-app-navigation";
 import { type ReactNode } from "react";
 
@@ -10,7 +11,6 @@ interface ButtonProps {
   className?: string;
   onClick?: () => void;
   disabled?: boolean;
-  type?: "button" | "submit" | "reset";
 }
 
 export function Button({
@@ -20,7 +20,6 @@ export function Button({
   className = "",
   onClick,
   disabled = false,
-  type = "button",
 }: ButtonProps) {
   const { navigate } = useAppNavigation();
 
@@ -36,13 +35,13 @@ export function Button({
   };
 
   return (
-    <button
-      type={type}
+    <Link
+      to={to as string}
+      state={{ navType }}
       onClick={handleClick}
-      disabled={disabled}
       className={className}
     >
       {children}
-    </button>
+    </Link>
   );
 }

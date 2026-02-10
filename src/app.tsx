@@ -3,11 +3,9 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { AppRoutes } from "src/app-routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
-import { NavigationProvider } from "./modules/navigation/context";
 import DroppableContext from "./components/droppable-context";
 import { LanguageProviderWrapper } from "./components/LanguageProviderWrapper";
 import { Toaster } from "react-hot-toast";
-import PouchDB from "pouchdb";
 
 export interface AppConfig {
   basePath?: string;
@@ -38,9 +36,7 @@ export default function Hvsna({
         <PouchDBProvider dbInstance={db}>
           <LanguageProviderWrapper>
             <BrowserRouter basename={config.appBaseName || ""}>
-              <NavigationProvider>
-                <AppRoutes />
-              </NavigationProvider>
+              <AppRoutes />
             </BrowserRouter>
           </LanguageProviderWrapper>
         </PouchDBProvider>
