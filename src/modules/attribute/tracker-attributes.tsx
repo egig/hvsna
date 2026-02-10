@@ -105,7 +105,7 @@ export default function TrackerAttributes() {
         rightAction={
           <button
             onClick={openAddPopup}
-            className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+            className="flex items-center justify-center w-10 h-10 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full transition-colors"
             aria-label="Add tracker attribute"
           >
             <Plus size={20} />

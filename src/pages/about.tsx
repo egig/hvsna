@@ -12,7 +12,7 @@ export default function About() {
       <LargeNavbar title={t("about")} showBackButton={true} />
       <div className="prose prose-sm p-4">
         <div className="flex items-center gap-3 mb-6">
-          <Info className="text-blue-600" size={32} />
+          <Info className="text-[var(--hvsna-primary-color)]" size={32} />
           <h1 className="m-0">{t("about")}</h1>
         </div>
 

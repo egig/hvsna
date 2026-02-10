@@ -98,7 +98,7 @@ export default function Notes() {
             </div>
             <button
               onClick={refreshNotes}
-              className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
+              className="flex items-center space-x-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Retry</span>
@@ -136,7 +136,7 @@ export default function Notes() {
                       <div className="flex-1 min-w-0">
                         <button
                           onClick={() => navigate(`/note/${note.id}`)}
-                          className="block w-full text-left"
+                          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${"bg-[var(--hvsna-primary-color)] text-white"}`}
                         >
                           <h3 className="font-medium text-gray-900 dark:text-white truncate mb-1">
                             {getNotePreview(note.content)}

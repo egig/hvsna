@@ -143,7 +143,7 @@ export default function TaskForm({
             defaultValue={selectedTargetId}
             onChange={(e) => setSelectedTargetId(e.target.value)}
             disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-[var(--hvsna-primary-color)] dark:bg-gray-700 dark:text-white"
           >
             <option value="">{t("select_a_goal")}</option>
             {goals.map((goal) => (
@@ -215,7 +215,7 @@ export default function TaskForm({
 
       <div className="flex justify-end p-4">
         <button
-          className="w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+          className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
           aria-label={t("add_new_task")}
           type="submit"
         >

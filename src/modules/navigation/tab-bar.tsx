@@ -43,7 +43,7 @@ export function TabBar() {
               navType="tab"
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors ${
                 isActive
-                  ? "text-blue-600 dark:text-blue-400"
+                  ? "text-[var(--hvsna-primary-color)] dark:text-[var(--hvsna-primary-color)]"
                   : "text-gray-600 dark:text-gray-400"
               }`}
               aria-label={tab.label}

@@ -152,7 +152,7 @@ export function CalendarModal({
               <button
                 onClick={handleConfirm}
                 disabled={!tempSelectedDate}
-                className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 <Check />
               </button>

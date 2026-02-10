@@ -11,6 +11,15 @@
 :root {
   --safe-area-inset-bottom: env(safe-area-inset-bottom);
   --tab-bar-height: 62px;
+  --hvsna-primary-color: #2e335a;
+  --hvsna-primary-color-hover: #232347;
+  --hvsna-primary-color-pressed: #1a1a34;
+  --hvsna-danger-color: #dc2626;
+  --hvsna-danger-color-hover: #b91c1c;
+  --hvsna-danger-color-pressed: #991b1b;
+  --hvsna-warning-color: #f59e0b;
+  --hvsna-warning-color-hover: #d97706;
+  --hvsna-warning-color-pressed: #b45309;
 }
 
 html,

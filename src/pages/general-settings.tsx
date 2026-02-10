@@ -38,7 +38,7 @@ export default function GeneralSettings() {
                   onClick={() => handleLanguageChange("en")}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     settings.language === "en"
-                      ? "bg-blue-500 text-white"
+                      ? "bg-[var(--hvsna-primary-color)] text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                   disabled={loading}
@@ -49,7 +49,7 @@ export default function GeneralSettings() {
                   onClick={() => handleLanguageChange("id")}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     settings.language === "id"
-                      ? "bg-blue-500 text-white"
+                      ? "bg-[var(--hvsna-primary-color)] text-white"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                   }`}
                   disabled={loading}

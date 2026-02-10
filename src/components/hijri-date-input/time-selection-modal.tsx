@@ -41,7 +41,7 @@ export function TimeSelectionModal({
                 `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
               );
             }}
-            className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors"
+            className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] transition-colors"
           >
             <Check />
           </button>
