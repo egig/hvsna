@@ -135,8 +135,6 @@ export class TaskRepository {
       updatedAt: Date.now(),
     };
 
-    console.log("updateData", input);
-
     if (input.name !== undefined) {
       updateData.name = input.name;
     }
@@ -361,7 +359,7 @@ export class TaskRepository {
         status: 0,
         atDateHijri: today.format("YYYYMMDD"),
         atEpochMillis: {
-          $gte: today.toDate().valueOf(),
+          $gte: null,
         },
       },
       sort: [
@@ -393,7 +391,7 @@ export class TaskRepository {
         type: "task",
         status: 0,
         atEpochMillis: {
-          $gte: today.toDate().getTime(),
+          $gte: null,
         },
       },
       sort: [{ type: "asc" }, { status: "asc" }, { atEpochMillis: "asc" }],

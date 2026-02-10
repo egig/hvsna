@@ -39,28 +39,15 @@ export default function GeneralSettings() {
                 )}
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => handleLanguageChange("en")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    settings.language === "en"
-                      ? "bg-[var(--hvsna-primary-color)] text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
+                <select
+                  value={settings.language}
+                  onChange={(e) => handleLanguageChange(e.target.value as "en" | "id")}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-transparent"
                   disabled={loading}
                 >
-                  {t("english")}
-                </button>
-                <button
-                  onClick={() => handleLanguageChange("id")}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    settings.language === "id"
-                      ? "bg-[var(--hvsna-primary-color)] text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}
-                  disabled={loading}
-                >
-                  {t("bahasa")}
-                </button>
+                  <option value="en">{t("english")}</option>
+                  <option value="id">{t("bahasa")}</option>
+                </select>
               </div>
             </div>
 
