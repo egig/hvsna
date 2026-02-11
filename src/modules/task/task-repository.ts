@@ -361,6 +361,9 @@ export class TaskRepository {
     }));
   }
 
+  // Today tasks should list:
+  // Not-completed
+  // Past due
   async findTodayTasks(): Promise<Task[]> {
     const today = HijriDate.fromDate(new Date());
 
@@ -380,9 +383,7 @@ export class TaskRepository {
     const mangoQuery = {
       selector: {
         type: "task",
-        status: {
-          $gte: 0,
-        },
+        status: 0,
         atDateIsNone: 0,
         atDateHijri: {
           $gt: null,

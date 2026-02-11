@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/clerk-react";
 import { LogIn, Trash, Cog, Info } from "lucide-react";
 import { Page } from "../modules/navigation";
 import { MenuItem } from "../components/MenuItem";
@@ -11,17 +11,12 @@ export default function Settings() {
   return (
     <Page>
       <Navbar title={t("settings")} showBackButton={false} />
+      <SignedIn>
+          <div className="flex justify-center align-center">
+            <UserButton />
+          </div>
+      </SignedIn>
       <div className="bg-white">
-        <SignedIn>
-          <MenuItem
-            title={t("sign_out")}
-            icon={LogIn}
-            onClick={() => {
-              // Handle sign out logic here
-            }}
-          />
-        </SignedIn>
-
         <SignedOut>
           <MenuItem title={t("sign_in")} icon={LogIn}>
             <SignInButton mode="modal">
