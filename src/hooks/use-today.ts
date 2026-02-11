@@ -26,7 +26,8 @@ export function useToday() {
   const [initiated, setInitiated] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { activeDate, setActiveDate, gregorianDate, pageTitle, subTitle } = useDateFormatter();
+  const { activeDate, setActiveDate, gregorianDate, pageTitle, subTitle } =
+    useDateFormatter();
 
   useEffect(() => {
     loadTodayTasks();

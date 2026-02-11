@@ -13,6 +13,7 @@ import { HijriDate } from "src/lib/hijri";
 import { useTaskListItem } from "src/modules/task/task-list-item-hook";
 import { IoEllipseOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
+import { CustomToast } from "./custom-toast";
 
 interface TaskListItemProps {
   task: Task;
@@ -34,7 +35,6 @@ export function TaskListItem({
   formatDate,
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
-
   const { updateStatus } = useTaskListItem();
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
@@ -127,17 +127,29 @@ export function TaskListItem({
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     const nextStatus = getNextStatus(task.status);
+    const updatePromise = updateStatus(task.id, nextStatus).then(() => {
+      if (onStatusChange) {
+        onStatusChange(task, nextStatus);
+      }
+    });
 
-    toast.promise(
-      updateStatus(task.id, nextStatus).then(() => {
-        if (onStatusChange) {
-          onStatusChange(task, nextStatus);
-        }
-      }),
+    const statusText = nextStatus === 1 ? "complete" : "pending";
+
+    toast(
+      (t) => (
+        <CustomToast
+          message={`Status changed to ${statusText}`}
+          onUndo={() => {
+            updateStatus(task.id, task.status).then(() => {
+              //..
+            });
+            toast.dismiss(t.id);
+          }}
+          onDismiss={() => toast.dismiss(t.id)}
+        />
+      ),
       {
-        loading: "Updating status...",
-        success: `Status changed to ${nextStatus === 1 ? "complete" : "pending"}`,
-        error: "Failed to update status",
+        duration: 5000,
       },
     );
   };

@@ -19,11 +19,15 @@ export interface DateFormatterReturn {
   weekDays: string[];
 }
 
-export function useDateFormatter(options: UseDateFormatterOptions = {}): DateFormatterReturn {
+export function useDateFormatter(
+  options: UseDateFormatterOptions = {},
+): DateFormatterReturn {
   const { t } = useLanguageContext();
   const { initialDate = new Date() } = options;
 
-  const [activeDate, setActiveDate] = useState(() => HijriDate.fromDate(initialDate));
+  const [activeDate, setActiveDate] = useState(() =>
+    HijriDate.fromDate(initialDate),
+  );
 
   const gregorianDate = activeDate.toDate();
 

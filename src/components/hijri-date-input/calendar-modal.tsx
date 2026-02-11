@@ -26,7 +26,7 @@ export function CalendarModal({
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
   const { hijriMonthNames, weekDays } = useDateFormatter();
-  
+
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? new HijriMonth(selectedDate.year, selectedDate.month)
@@ -230,7 +230,8 @@ export function CalendarModal({
                   <option value="yearly">
                     {t("yearly_on_day_month", {
                       day: tempSelectedDate?.day || 1,
-                      month: hijriMonthNames[(tempSelectedDate?.month || 1) - 1],
+                      month:
+                        hijriMonthNames[(tempSelectedDate?.month || 1) - 1],
                     })}
                   </option>
                 </select>
