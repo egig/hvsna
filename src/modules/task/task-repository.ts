@@ -105,20 +105,13 @@ export class TaskRepository {
       attributes: input.attributes || {},
     };
 
-    if (input.atDateHijri) {
-      const year = parseInt(input.atDateHijri.substring(0, 4));
-      const month = parseInt(input.atDateHijri.substring(4, 6));
-      const day = parseInt(input.atDateHijri.substring(6, 8));
-
-      const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
-      let gregDate = hijriDate.toDate();
-      const [h, m] = input.atTime?.split(":") || ["0", "0"];
-      newTask.atEpochMillis = gregDate.setHours(parseInt(h), parseInt(m), 0, 0);
-      newTask.atDateIsNone = 0;
-    } else {
-      newTask.atEpochMillis = 0;
-      newTask.atDateIsNone = 1;
-    }
+    const { atDateHijri, atDateIsNone, atTime, atTimeIsNone, atEpochMillis } =
+      this._parseDateTimeInput(input);
+    newTask.atDateHijri = atDateHijri;
+    newTask.atDateIsNone = atDateIsNone;
+    newTask.atTime = atTime;
+    newTask.atTimeIsNone = atTimeIsNone;
+    newTask.atEpochMillis = atEpochMillis;
 
     const doc = Object.assign(this.createTaskDocument(), newTask);
 
@@ -160,28 +153,13 @@ export class TaskRepository {
     }
 
     if (!!input.atDateHijri) {
-      updateData.atDateHijri = input.atDateHijri;
-      const year = parseInt(input.atDateHijri.substring(0, 4));
-      const month = parseInt(input.atDateHijri.substring(4, 6));
-      const day = parseInt(input.atDateHijri.substring(6, 8));
-
-      const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
-      updateData.atEpochMillis = hijriDate.toDate().valueOf();
-
-      if (!!input.atTime) {
-        const [h, m] = input.atTime?.split(":") || ["0", "0"];
-        updateData.atEpochMillis = hijriDate
-          .toDate()
-          .setHours(parseInt(h), parseInt(m), 0, 0);
-        updateData.atDateIsNone = 0;
-
-        updateData.atTime = input.atTime;
-        updateData.atTimeIsNone = 0;
-      }
-    } else {
-      updateData.atEpochMillis = 0;
-      updateData.atDateIsNone = 1;
-      updateData.atTimeIsNone = 1;
+      const { atDateHijri, atDateIsNone, atTime, atTimeIsNone, atEpochMillis } =
+        this._parseDateTimeInput(input);
+      updateData.atDateHijri = atDateHijri;
+      updateData.atDateIsNone = atDateIsNone;
+      updateData.atTime = atTime;
+      updateData.atTimeIsNone = atTimeIsNone;
+      updateData.atEpochMillis = atEpochMillis;
     }
 
     const response = await (db as any).put(updateData);
@@ -191,6 +169,45 @@ export class TaskRepository {
     };
 
     return this.mapDocumentToTask(updatedDoc);
+  }
+
+  _parseDateTimeInput(input: TaskCreateInput | TaskUpdateInput): {
+    atDateHijri: string;
+    atTime: string;
+    atDateIsNone: number;
+    atTimeIsNone: number;
+    atEpochMillis: number;
+  } {
+    let result = {
+      atDateHijri: "",
+      atTime: "",
+      atDateIsNone: 1,
+      atTimeIsNone: 1,
+      atEpochMillis: null,
+    } as any;
+
+    if (!input.atDateHijri) {
+      return result;
+    }
+
+    result.atDateHijri = input.atDateHijri;
+    result.atDateIsNone = 0;
+    const year = parseInt(input.atDateHijri.substring(0, 4));
+    const month = parseInt(input.atDateHijri.substring(4, 6));
+    const day = parseInt(input.atDateHijri.substring(6, 8));
+
+    const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
+    result.atEpochMillis = hijriDate.toDate().valueOf();
+
+    if (input.atTime) {
+      result.atTime = input.atTime;
+      result.atTimeIsNone = 0;
+      const [h, m] = input.atTime.split(":");
+      result.atEpochMillis = hijriDate
+        .toDate()
+        .setHours(parseInt(h), parseInt(m), 0, 0);
+    }
+    return result;
   }
 
   async delete(id: string): Promise<void> {
@@ -349,29 +366,45 @@ export class TaskRepository {
 
     await db.createIndex({
       index: {
-        fields: ["type", "status", "atDateHijri", "atEpochMillis"],
+        fields: [
+          "type",
+          "atDateHijri",
+          "status",
+          "atDateIsNone",
+          "atTimeIsNone",
+          "atEpochMillis",
+        ],
       },
     });
 
     const mangoQuery = {
       selector: {
         type: "task",
-        status: 0,
         atDateHijri: today.format("YYYYMMDD"),
+        status: {
+          $gte: 0,
+        },
+        atDateIsNone: {
+          $gte: 0,
+        },
+        atTimeIsNone: {
+          $gte: 0,
+        },
         atEpochMillis: {
           $gte: null,
         },
       },
       sort: [
         { type: "asc" },
-        { status: "asc" },
         { atDateHijri: "asc" },
+        { status: "asc" },
+        { atDateIsNone: "asc" },
+        { atTimeIsNone: "asc" },
         { atEpochMillis: "asc" },
       ],
     };
 
     const result = await (db as any).find(mangoQuery);
-
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       this.mapDocumentToTask(doc),
     );
@@ -382,7 +415,7 @@ export class TaskRepository {
 
     await db.createIndex({
       index: {
-        fields: ["type", "status", "atEpochMillis"],
+        fields: ["type", "status", "atDateIsNone", "atEpochMillis"],
       },
     });
 
@@ -390,11 +423,17 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
+        atDateIsNone: 0,
         atEpochMillis: {
           $gte: null,
         },
       },
-      sort: [{ type: "asc" }, { status: "asc" }, { atEpochMillis: "asc" }],
+      sort: [
+        { type: "asc" },
+        { status: "asc" },
+        { atDateIsNone: 0 },
+        { atEpochMillis: "asc" },
+      ],
     };
 
     const result = await (db as any).find(mangoQuery);
@@ -425,7 +464,7 @@ export class TaskRepository {
           $gte: 0,
         },
         atDateIsNone: { $gte: 0 },
-        atEpochMillis: { $gte: 0 },
+        atEpochMillis: { $gte: null },
       },
       sort: [
         { type: "asc" },
@@ -454,6 +493,7 @@ export class TaskRepository {
     }
 
     const result = await (db as any).find(mangoQuery);
+    console.log(result);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       this.mapDocumentToTask(doc),
     );

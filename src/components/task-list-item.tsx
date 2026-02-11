@@ -52,7 +52,7 @@ export function TaskListItem({
     switch (status) {
       case 1:
         return (
-          <CheckSquare2 strokeWidth={1} size={24} className="text-green-500" />
+          <CheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
         );
       case 0:
         return <Square strokeWidth={1} size={24} className="text-gray-500" />;
@@ -62,11 +62,11 @@ export function TaskListItem({
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
       case 1:
-        return "text-green-600";
+        return "line-through text-gray-400";
       case 0:
-        return "text-gray-600";
+        return "text-gray-800";
       default:
-        return "text-gray-600";
+        return "text-gray-800";
     }
   };
 
@@ -174,9 +174,7 @@ export function TaskListItem({
         {/* Task Name and Description */}
         <div className="flex-1 min-w-0">
           {/* Task Name */}
-          <h3
-            className={`text-gray-900 truncate ${getStatusColor(task.status)}`}
-          >
+          <h3 className={`truncate ${getStatusColor(task.status)}`}>
             {task.name}
           </h3>
 
