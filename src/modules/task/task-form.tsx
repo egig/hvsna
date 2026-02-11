@@ -58,7 +58,6 @@ export default function TaskForm({
   }, []);
 
   useEffect(() => {
-    console.log(location.state);
     if (["today", "upcoming"].includes(location.state?.context)) {
       setSelectedHijriDate(HijriDate.fromDate(new Date()));
     }

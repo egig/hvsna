@@ -368,9 +368,9 @@ export class TaskRepository {
       index: {
         fields: [
           "type",
-          "atDateHijri",
           "status",
           "atDateIsNone",
+          "atDateHijri",
           "atTimeIsNone",
           "atEpochMillis",
         ],
@@ -380,25 +380,27 @@ export class TaskRepository {
     const mangoQuery = {
       selector: {
         type: "task",
-        atDateHijri: today.format("YYYYMMDD"),
         status: {
           $gte: 0,
         },
-        atDateIsNone: {
-          $gte: 0,
+        atDateIsNone: 0,
+        atDateHijri: {
+          $gt: null,
         },
         atTimeIsNone: {
           $gte: 0,
         },
         atEpochMillis: {
-          $gte: null,
+          // date is less that tomorrow
+          // includes "overdue" tasks
+          $lt: today.next().toDate().valueOf(),
         },
       },
       sort: [
         { type: "asc" },
-        { atDateHijri: "asc" },
         { status: "asc" },
         { atDateIsNone: "asc" },
+        { atDateHijri: "asc" },
         { atTimeIsNone: "asc" },
         { atEpochMillis: "asc" },
       ],
@@ -425,7 +427,7 @@ export class TaskRepository {
         status: 0,
         atDateIsNone: 0,
         atEpochMillis: {
-          $gte: null,
+          $gte: today.toDate().valueOf(),
         },
       },
       sort: [
@@ -493,7 +495,6 @@ export class TaskRepository {
     }
 
     const result = await (db as any).find(mangoQuery);
-    console.log(result);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       this.mapDocumentToTask(doc),
     );

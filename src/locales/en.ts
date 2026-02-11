@@ -488,6 +488,10 @@ export const translations: Translations = {
     en: "Tomorrow",
     id: "Besok",
   },
+  yesterday: {
+    en: "Yesterday",
+    id: "Kemarin",
+  },
   this_week: {
     en: "This Week",
     id: "Minggu Ini",

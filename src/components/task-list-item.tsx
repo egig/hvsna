@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, time } from "framer-motion";
 import {
   CircleIcon,
   CheckCircleIcon,
@@ -14,6 +14,8 @@ import { useTaskListItem } from "src/modules/task/task-list-item-hook";
 import { IoEllipseOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { CustomToast } from "./custom-toast";
+import { useLocation } from "react-router";
+import { useLanguageContext } from "src/contexts/LanguageContext";
 
 interface TaskListItemProps {
   task: Task;
@@ -36,6 +38,8 @@ export function TaskListItem({
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
   const { updateStatus } = useTaskListItem();
+  const location = useLocation();
+  const { t } = useLanguageContext();
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
@@ -70,7 +74,10 @@ export function TaskListItem({
     }
   };
 
-  const formatScheduledDate = (task: Task) => {
+  const formatScheduledDate = (
+    task: Task,
+    timeContext: "today" | "upcoming",
+  ) => {
     if (typeof formatDate === "function") {
       return formatDate(task);
     }
@@ -78,18 +85,28 @@ export function TaskListItem({
     if (!task.atDateHijri) return null;
 
     const today = HijriDate.fromDate(new Date());
+    const yesterday = today.previous().format("YYYYMMDD");
     const tomorrow = today.next();
-    const todayString = `${today.year.toString().padStart(4, "0")}${today.month.toString().padStart(2, "0")}${today.day.toString().padStart(2, "0")}`;
-    const tomorrowString = `${tomorrow.year.toString().padStart(4, "0")}${tomorrow.month.toString().padStart(2, "0")}${tomorrow.day.toString().padStart(2, "0")}`;
+    const todayString = today.format("YYYYMMDD");
+    const tomorrowString = tomorrow.format("YYYYMMDD");
+    const time = task.atTime;
+
+    // Check if today
+    if (task.atDateHijri === yesterday) {
+      return t("yesterday") + (time ? `, ${time}` : "");
+    }
 
     // Check if today
     if (task.atDateHijri === todayString) {
-      return "Today";
+      if (timeContext === "today") {
+        return time ? time : "";
+      }
+      return t("today") + (time ? `, ${time}` : "");
     }
 
     // Check if tomorrow
     if (task.atDateHijri === tomorrowString) {
-      return "Tomorrow";
+      return t("tomorrow") + (time ? `, ${time}` : "");
     }
 
     // Check if within next 7 days
@@ -108,11 +125,11 @@ export function TaskListItem({
 
       // If within next 7 days (2-7 days from now)
       if (daysDiff > 1 && daysDiff <= 7) {
-        return taskDate.format("dddd"); // Day name
+        return taskDate.format("dddd") + (time ? `, ${time}` : "");
       }
 
       // Otherwise show formatted date
-      return taskDate.format("D MMMM");
+      return taskDate.format("D MMMM") + (time ? `, ${time}` : "");
     } catch {
       return task.atDateHijri;
     }
@@ -160,6 +177,14 @@ export function TaskListItem({
     }
   };
 
+  const isOverdue = () => {
+    return (
+      !!task.atEpochMillis &&
+      task.atEpochMillis > 0 &&
+      new Date().valueOf() > task.atEpochMillis
+    );
+  };
+
   return (
     <motion.div
       className={`w-full p-3 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
@@ -183,40 +208,30 @@ export function TaskListItem({
           </button>
         </div>
 
-        {/* Task Name and Description */}
         <div className="flex-1 min-w-0">
-          {/* Task Name */}
           <h3 className={`truncate ${getStatusColor(task.status)}`}>
             {task.name}
           </h3>
 
-          {/* Description */}
           {task.description && (
             <p className="text-sm text-gray-500 mt-1 line-clamp-2">
               {task.description}
             </p>
           )}
 
-          {/* Description */}
           {showDateTime && !!task.atDateHijri && (
-            <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-              {formatScheduledDate(task)}
+            <p
+              className={`text-xs ${isOverdue() ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
+            >
+              {formatScheduledDate(task, location.state?.context)}
             </p>
           )}
 
-          {/* Description (Goal Info) */}
           {getTargetInfo(goal) && (
             <p className="text-sm text-gray-500 mt-1 truncate">
               {getTargetInfo(goal)}
             </p>
           )}
-
-          {/* Scheduled Date Display this in non-time context */}
-          {/* {formatScheduledDate(task) && (
-            <p className="text-xs text-gray-400 mt-1">
-              {formatScheduledDate(task)}
-            </p>
-          )} */}
         </div>
       </div>
     </motion.div>

@@ -36,7 +36,6 @@ function TodayTasks({ tasks }: TodayTasksProps) {
           showGoalInfo={false}
           className="transition-all hover:shadow-sm"
           showDateTime={true}
-          formatDate={(task) => task.atTime as string}
         />
       ))}
     </>
