@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { HijriDate, HijriMonth } from "../../lib/hijri";
 import { Modal } from "../../modules/navigation/modal";
-import { HIJRI_MONTH_NAMES_EN } from "src/lib/hijri-months";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Navbar } from "src/modules/navigation";
 import { TimeSelectionModal } from "./time-selection-modal";
 import { ListInput } from "../ListInput";
 import { useLanguageContext } from "../../contexts/LanguageContext";
+import { useDateFormatter } from "../../hooks/use-date-formatter";
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -25,6 +25,8 @@ export function CalendarModal({
   onDateSelect,
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
+  const { hijriMonthNames, weekDays } = useDateFormatter();
+  
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? new HijriMonth(selectedDate.year, selectedDate.month)
@@ -38,23 +40,6 @@ export function CalendarModal({
   );
   const repeatEnabled = useFeatureFlag("TASK_REPEAT");
   const [editMode, setEditMode] = useState<"date" | "time" | "repeat">("date");
-
-  const hijriMonthNames = [
-    "Muharram",
-    "Safar",
-    "Rabi al-Awwal",
-    "Rabi al-Thani",
-    "Jumada al-Awwal",
-    "Jumada al-Thani",
-    "Rajab",
-    "Shaaban",
-    "Ramadan",
-    "Shawwal",
-    "Dhu al-Qidah",
-    "Dhu al-Hijjah",
-  ];
-
-  const weekDays = ["Fri", "Sat", "Sun", "Mon", "Tue", "Wed", "Thu"];
 
   useEffect(() => {
     if (selectedDate) {
@@ -245,8 +230,7 @@ export function CalendarModal({
                   <option value="yearly">
                     {t("yearly_on_day_month", {
                       day: tempSelectedDate?.day || 1,
-                      month:
-                        HIJRI_MONTH_NAMES_EN[tempSelectedDate?.month || 1 - 1],
+                      month: hijriMonthNames[(tempSelectedDate?.month || 1) - 1],
                     })}
                   </option>
                 </select>
