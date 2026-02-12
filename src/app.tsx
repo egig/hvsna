@@ -6,6 +6,7 @@ import { PouchDBProvider } from "./pouchdb";
 import DroppableContext from "./components/droppable-context";
 import { LanguageProviderWrapper } from "./components/LanguageProviderWrapper";
 import { Toaster } from "react-hot-toast";
+import { SyncProvider } from "./lib/sync";
 
 export interface AppConfig {
   basePath?: string;
@@ -34,11 +35,13 @@ export default function Hvsna({
     <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
       <DroppableContext>
         <PouchDBProvider dbInstance={db}>
-          <LanguageProviderWrapper>
-            <BrowserRouter basename={config.appBaseName || ""}>
-              <AppRoutes />
-            </BrowserRouter>
-          </LanguageProviderWrapper>
+          <SyncProvider>
+            <LanguageProviderWrapper>
+              <BrowserRouter basename={config.appBaseName || ""}>
+                <AppRoutes />
+              </BrowserRouter>
+            </LanguageProviderWrapper>
+          </SyncProvider>
         </PouchDBProvider>
       </DroppableContext>
       <Toaster

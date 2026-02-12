@@ -5,99 +5,102 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import PouchDB from "pouchdb";
 import { usePouchDB } from "../pouchdb";
+import { useAuth } from "src/hooks/useAuth";
 import { useSession } from "@clerk/clerk-react";
-import type { Note } from "./types/note";
-
-export default async function sync(
-  localDb: PouchDB.Database,
-  remoteUrl: string,
-  userID: string,
-) {
-  const remoteDb = new PouchDB(remoteUrl, {
-    auth: {
-      username: userID,
-      password: "", // Will be set with proper auth token
-    },
-  });
-
-  const replication = PouchDB.sync(localDb, remoteDb, {
-    live: true,
-    retry: true,
-    filter: function (doc: any) {
-      return doc.user_id === userID;
-    },
-  });
-
-  return replication;
-}
+import PouchDB from "pouchdb";
 
 // Database Context
 type SyncContextType = {
   replication: any | null;
+  lastSyncTime: Date | null;
+  isSyncing: boolean;
 };
 
 const SyncContext = createContext<SyncContextType | undefined>(undefined);
 
 export const SyncProvider = ({
   children,
-  couchUrl,
 }: {
   children: ReactNode;
-  couchUrl: string;
 }) => {
   const { db } = usePouchDB();
+  const { user, isSignedIn } = useAuth();
   const { session } = useSession();
   const [syncInitialized, setSyncInitialized] = useState(false);
   const [replication, setReplication] = useState<any | null>(null);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     const initializeSync = async () => {
-      if (!!db && session?.user?.id && !syncInitialized && couchUrl) {
+      if (!isSignedIn || !user?.syncURL || !db) {
+        if (replication) {
+          replication.cancel();
+          setReplication(null);
+          setSyncInitialized(false);
+        }
+        return;
+      }
+
+      if (!syncInitialized) {
         try {
-          const r = sync(db, `${couchUrl}/notes`, session?.user?.id);
-          setReplication(r);
+          setIsSyncing(true);
           setSyncInitialized(true);
+          
+          const token = await session?.getToken();
+          
+          const remoteDB = new PouchDB(user.syncURL, {
+            fetch: function (url: string | Request, options: any) {
+              if (token) {
+                options.headers.set('Authorization', `Bearer ${token}`);
+              }
+              return PouchDB.fetch(url, options);
+            }
+          }) 
 
-          // Handle sync events
-          r.then((syncResult: any) => {
-            syncResult.on("change", (info: any) => {
+          const syncReplication = db.sync(remoteDB, {
+            live: true,
+            retry: true,
+          }).on("change", (info: any) => {
               console.log("[sync] change:", info);
-            });
-
-            syncResult.on("paused", (err: any) => {
+              setLastSyncTime(new Date());
+            }).on("paused", (err: any) => {
               console.log("[sync] paused:", err);
-            });
-
-            syncResult.on("active", () => {
+              // setIsSyncing(false);
+            }).on("active", () => {
               console.log("[sync] active");
-            });
-
-            syncResult.on("denied", (err: any) => {
+              // setIsSyncing(true);
+            }).on("denied", (err: any) => {
               console.error("[sync] denied:", err);
-            });
-
-            syncResult.on("complete", (info: any) => {
+              // setIsSyncing(false);
+            }).on("complete", (info: any) => {
               console.log("[sync] complete:", info);
+              setLastSyncTime(new Date());
+              // setIsSyncing(false);
+            }).on("error", (err: any) => {
+              console.error("[sync] error:", err);
+              // setIsSyncing(false);
             });
 
-            syncResult.on("error", (err: any) => {
-              console.error("[sync] error:", err);
-            });
-          });
+          // Store the replication reference for cleanup
+          setReplication(syncReplication);
+
         } catch (error) {
           console.error("sync error", error);
+          setIsSyncing(false);
         }
       }
     };
 
-    initializeSync();
-  }, [db, session?.user?.id, syncInitialized, couchUrl]);
+    if (!!db && !!isSignedIn && !!user) {
+      initializeSync();
+    }
+  }, [db, isSignedIn, user, session]);
 
   return React.createElement(
     SyncContext.Provider,
-    { value: { replication: replication } },
+    { value: { replication, lastSyncTime, isSyncing } },
     children,
   );
 };

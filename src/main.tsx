@@ -18,11 +18,9 @@ const config: AppConfig = {
 
 const root = createRoot(document.getElementById("root") as Container);
 
-// Create singleton PouchDB instance
 const db = getPouchDBInstance();
 
 (async () => {
-  // console.log((new Clerk()).session?.getToken())
   root.render(<Hvsna config={config} db={db} />);
   // @ts-ignore
   window.__dtMounted = true;
