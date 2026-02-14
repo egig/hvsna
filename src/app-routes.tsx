@@ -25,6 +25,7 @@ import Browse from "./pages/browse";
 import Upcoming from "./pages/upcoming";
 import SignInPage from "./pages/signin";
 import SignUpPage from "./pages/signup";
+import SyncPage from "./pages/sync";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -52,6 +53,7 @@ export const AppRoutes = () => {
         <Route path="signin" element={<SignInPage />} />
         <Route path="signin/:action" element={<SignInPage />} />
         <Route path="signup" element={<SignUpPage />} />
+        <Route path="sync" element={<SyncPage />} />
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />
         <Route path="trackers-attributes" element={<TrackersAttributes />} />
