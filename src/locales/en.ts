@@ -385,16 +385,12 @@ export const translations: Translations = {
     id: "Penghapusan data bersifat permanen",
   },
   actions_cannot_be_undone: {
-    en: "These actions cannot be undone. Please make sure you have backups if needed.",
-    id: "Tindakan ini tidak dapat dibatalkan. Pastikan Anda memiliki cadangan jika diperlukan.",
-  },
-  database_management: {
-    en: "Database Management",
-    id: "Manajemen Database",
+    en: "These actions cannot be undone.",
+    id: "Tindakan ini tidak dapat dibatalkan.",
   },
   delete_all_data: {
-    en: "This will permanently delete all notes, tasks, and other data stored in the local database.",
-    id: "Ini akan menghapus permanen semua catatan, tugas, dan data lain yang disimpan dalam database lokal.",
+    en: "This will permanently delete all tasks, and other data stored in this device.",
+    id: "Ini akan menghapus permanen semua tugas, dan data lain yang disimpan dalam database perangkat.",
   },
   deleting: {
     en: "Deleting...",

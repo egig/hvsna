@@ -19,7 +19,7 @@ import TrackersAttributes from "./modules/attribute/tracker-attributes";
 import AttributeOptions from "./modules/option/options";
 import { Goals } from "./modules/goal/goals";
 import { Today } from "./components/today";
-import DataManagement from "./pages/data-management";
+import WipeData from "./pages/wipe-data";
 import TrackerDetail from "./modules/tracker/tracker-detail";
 import Browse from "./pages/browse";
 import Upcoming from "./pages/upcoming";
@@ -43,7 +43,7 @@ export const AppRoutes = () => {
           <Route path="tasks" element={<Tasks />} />
           <Route path="upcoming" element={<Upcoming />} />
           <Route path="about" element={<About />} />
-          <Route path="wipe-local" element={<DataManagement />} />
+          <Route path="wipe-local" element={<WipeData />} />
           <Route path="y/:year/m/:month" element={<MonthView />} />
           <Route path="y/:year" element={<YearView />} />
           <Route path="goals" element={<Goals />} />
