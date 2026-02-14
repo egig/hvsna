@@ -29,7 +29,8 @@ export function useDateFormatter(
     HijriDate.fromDate(initialDate),
   );
 
-  const gregorianDate = activeDate.toDate();
+  // TODO use timezone
+  const gregorianDate = (new Date());
 
   const formattedData = useMemo(() => {
     // Get localized day names
@@ -93,7 +94,7 @@ export function useDateFormatter(
     const pageTitle = `${activeDate.day} ${hijriMonthNames[activeDate.month - 1]} ${activeDate.year}`;
 
     // Format subtitle: "DayName, Day Month Year" (Gregorian)
-    const subTitle = `${dayNames[dayOfWeek]}, ${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`;
+    const subTitle = `${dayNames[dayOfWeek]}, ${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
 
     return {
       pageTitle,

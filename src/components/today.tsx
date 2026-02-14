@@ -3,7 +3,7 @@ import { LogItem } from "./log-item";
 import type { Log } from "src/lib/tracker/types";
 import type { AttributeOption } from "../modules/option/optionStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
-import { Navbar, Page } from "../modules/navigation";
+import { Page } from "../modules/navigation";
 import Block from "./block";
 import BlockTitle from "./block-title";
 import type { Tracker } from "../modules/tracker/trackerStore";
