@@ -53,6 +53,7 @@ export const AppRoutes = () => {
         <Route path="signin" element={<SignInPage />} />
         <Route path="signin/:action" element={<SignInPage />} />
         <Route path="signup" element={<SignUpPage />} />
+        <Route path="signup/:action" element={<SignUpPage />} />
         <Route path="sync" element={<SyncPage />} />
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />
