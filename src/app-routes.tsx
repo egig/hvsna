@@ -23,6 +23,8 @@ import DataManagement from "./pages/data-management";
 import TrackerDetail from "./modules/tracker/tracker-detail";
 import Browse from "./pages/browse";
 import Upcoming from "./pages/upcoming";
+import SignInPage from "./pages/signin";
+import SignUpPage from "./pages/signup";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -47,6 +49,9 @@ export const AppRoutes = () => {
           <Route path="browse" element={<Browse />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+        <Route path="signin" element={<SignInPage />} />
+        <Route path="signin/:action" element={<SignInPage />} />
+        <Route path="signup" element={<SignUpPage />} />
         <Route path="trackers" element={<Trackers />} />
         <Route path="trackers/:trackerId" element={<TrackerDetail />} />
         <Route path="trackers-attributes" element={<TrackersAttributes />} />

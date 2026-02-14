@@ -19,11 +19,7 @@ type SyncContextType = {
 
 const SyncContext = createContext<SyncContextType | undefined>(undefined);
 
-export const SyncProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const { db } = usePouchDB();
   const { user, isSignedIn } = useAuth();
   const { session } = useSession();
@@ -47,45 +43,51 @@ export const SyncProvider = ({
         try {
           setIsSyncing(true);
           setSyncInitialized(true);
-          
+
           const token = await session?.getToken();
-          
+
           const remoteDB = new PouchDB(user.syncURL, {
             fetch: function (url: string | Request, options: any) {
               if (token) {
-                options.headers.set('Authorization', `Bearer ${token}`);
+                options.headers.set("Authorization", `Bearer ${token}`);
               }
               return PouchDB.fetch(url, options);
-            }
-          }) 
+            },
+          });
 
-          const syncReplication = db.sync(remoteDB, {
-            live: true,
-            retry: true,
-          }).on("change", (info: any) => {
+          const syncReplication = db
+            .sync(remoteDB, {
+              live: true,
+              retry: true,
+            })
+            .on("change", (info: any) => {
               console.log("[sync] change:", info);
               setLastSyncTime(new Date());
-            }).on("paused", (err: any) => {
+            })
+            .on("paused", (err: any) => {
               console.log("[sync] paused:", err);
               // setIsSyncing(false);
-            }).on("active", () => {
+            })
+            .on("active", () => {
               console.log("[sync] active");
               // setIsSyncing(true);
-            }).on("denied", (err: any) => {
+            })
+            .on("denied", (err: any) => {
               console.error("[sync] denied:", err);
               // setIsSyncing(false);
-            }).on("complete", (info: any) => {
+            })
+            .on("complete", (info: any) => {
               console.log("[sync] complete:", info);
               setLastSyncTime(new Date());
               // setIsSyncing(false);
-            }).on("error", (err: any) => {
+            })
+            .on("error", (err: any) => {
               console.error("[sync] error:", err);
               // setIsSyncing(false);
             });
 
           // Store the replication reference for cleanup
           setReplication(syncReplication);
-
         } catch (error) {
           console.error("sync error", error);
           setIsSyncing(false);
