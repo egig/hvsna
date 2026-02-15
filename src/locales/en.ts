@@ -788,4 +788,8 @@ export const translations: Translations = {
     en: "{count} days ago",
     id: "{count} hari yang lalu",
   },
+  timezone: {
+    en: "Timezone",
+    id: "Zona waktu",
+  },
 };

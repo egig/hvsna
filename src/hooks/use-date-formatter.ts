@@ -30,7 +30,7 @@ export function useDateFormatter(
   );
 
   // TODO use timezone
-  const gregorianDate = (new Date());
+  const gregorianDate = new Date();
 
   const formattedData = useMemo(() => {
     // Get localized day names

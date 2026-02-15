@@ -9,17 +9,19 @@ import { RefreshCw, CheckCircle, AlertCircle, Clock } from "lucide-react";
 export default function Sync() {
   const { t } = useLanguageContext();
   const { lastSyncTime, isSyncing } = useSync();
-  const [manualSyncStatus, setManualSyncStatus] = useState<"idle" | "success" | "error">("idle");
+  const [manualSyncStatus, setManualSyncStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const handleManualSync = async () => {
     setManualSyncStatus("idle");
     setErrorMessage(undefined);
-    
+
     try {
       // Trigger manual sync - the SyncProvider handles the actual sync
       // We can simulate a manual trigger here if needed
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setManualSyncStatus("success");
     } catch (error) {
       setManualSyncStatus("error");
@@ -29,7 +31,7 @@ export default function Sync() {
 
   const formatLastSyncTime = (date: Date | null) => {
     if (!date) return t("never");
-    
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -40,7 +42,7 @@ export default function Sync() {
     if (diffMins < 60) return t("minutes_ago", { count: diffMins });
     if (diffHours < 24) return t("hours_ago", { count: diffHours });
     if (diffDays < 7) return t("days_ago", { count: diffDays });
-    
+
     return date.toLocaleDateString();
   };
 
@@ -48,30 +50,30 @@ export default function Sync() {
     if (isSyncing) {
       return <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />;
     }
-    
+
     if (manualSyncStatus === "success") {
       return <CheckCircle className="h-5 w-5 text-green-600" />;
     }
-    
+
     if (manualSyncStatus === "error") {
       return <AlertCircle className="h-5 w-5 text-red-600" />;
     }
-    
+
     if (lastSyncTime) {
       return <CheckCircle className="h-5 w-5 text-green-600" />;
     }
-    
+
     return <Clock className="h-5 w-5 text-gray-600" />;
   };
 
   const getStatusText = () => {
     if (isSyncing) return t("syncing");
-    
+
     if (manualSyncStatus === "success") return t("sync_successful");
     if (manualSyncStatus === "error") return errorMessage || t("sync_failed");
-    
+
     if (lastSyncTime) return t("sync_successful");
-    
+
     return t("sync_idle");
   };
 
@@ -88,7 +90,7 @@ export default function Sync() {
               </h3>
               {getStatusIcon()}
             </div>
-            
+
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t("last_sync")}:</span>
@@ -96,14 +98,19 @@ export default function Sync() {
                   {formatLastSyncTime(lastSyncTime)}
                 </span>
               </div>
-              
+
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t("status")}:</span>
-                <span className={`text-sm font-medium ${
-                  (manualSyncStatus === "success" || (lastSyncTime && manualSyncStatus === "idle")) ? "text-green-600" :
-                  manualSyncStatus === "error" ? "text-red-600" :
-                  "text-gray-600"
-                }`}>
+                <span
+                  className={`text-sm font-medium ${
+                    manualSyncStatus === "success" ||
+                    (lastSyncTime && manualSyncStatus === "idle")
+                      ? "text-green-600"
+                      : manualSyncStatus === "error"
+                        ? "text-red-600"
+                        : "text-gray-600"
+                  }`}
+                >
                   {getStatusText()}
                 </span>
               </div>
@@ -138,9 +145,7 @@ export default function Sync() {
             <h4 className="text-sm font-medium text-blue-900 mb-2">
               {t("sync_info")}
             </h4>
-            <p className="text-sm text-blue-700">
-              {t("sync_description")}
-            </p>
+            <p className="text-sm text-blue-700">{t("sync_description")}</p>
           </div>
         </div>
       </Block>

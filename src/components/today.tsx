@@ -196,7 +196,7 @@ export function Today() {
       )}
 
       {initiated && todayTasks.length === 0 && (
-        <div className="text-center py-6">
+        <div className="p-4">
           <div className="text-gray-400 mb-2">
             {t("no_tasks_scheduled_for_today")}
           </div>
