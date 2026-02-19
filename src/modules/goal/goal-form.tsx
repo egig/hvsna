@@ -12,7 +12,7 @@ import BaseForm from "src/components/base-form";
 import { FormInput } from "src/components/form-input";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { Trash2 } from "lucide-react";
-import { useRecurringTasks } from "../../hooks/useRecurringTasks";
+import { useRecurringTasks } from "../task/useRecurringTasks";
 
 interface GoalFormProps {
   goalId?: string | null;

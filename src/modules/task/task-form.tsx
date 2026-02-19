@@ -1,20 +1,16 @@
-import { useState, useEffect, useRef } from "react";
-import type { Task } from "src/lib/types/task";
-import type { Goal } from "../goal/goalStore";
-import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { ArrowUp, Trash2 } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { ArrowUp } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import { FormInput } from "src/components/form-input";
 import { useTracker } from "../tracker/use-tracker";
-import type { Tracker } from "../tracker/trackerStore";
-import { useRecurringTasks } from "../../hooks/useRecurringTasks";
 import { HijriDateInput } from "../../components/hijri-date-input";
 import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../../contexts/LanguageContext";
 import { useLocation } from "react-router";
+import type { Task } from "./types";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;

@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import type { Task, TaskUpdateInput } from "../../lib/types/task";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate } from "src/lib/hijri";
 import { useGoals } from "../goal/use-goals";
-import { useRecurringTasks } from "src/hooks/useRecurringTasks";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
+import type { Task, TaskUpdateInput } from "./types";
+import { useRecurringTasks } from "./useRecurringTasks";
 
 export interface UseTaskFormReturn {
   task: Task | null;
