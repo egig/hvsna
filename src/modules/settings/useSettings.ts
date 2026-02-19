@@ -36,16 +36,15 @@ export function useSettings() {
   } = useSettingsStore();
 
   // TODO this is causing too many re-render, many be because the puuchdb sync ?
-  // useEffect(() => {
-  //   loadSettings();
-  // }, []);
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
   const loadSettings = useCallback(async (): Promise<void> => {
     setLoading(true);
     clearError();
 
     try {
-      // Try to load from PouchDB first
       try {
         const doc = (await db.get(SETTINGS_DOC_ID)) as any;
 
