@@ -1,6 +1,6 @@
 import { SignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../modules/auth/use-auth";
 import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
 import Block from "src/components/block";

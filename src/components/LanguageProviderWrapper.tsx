@@ -1,6 +1,6 @@
 import React, { useEffect, useState, type ReactNode } from "react";
 import { LanguageProvider } from "../contexts/LanguageContext";
-import { useSettings } from "../hooks/useSettings";
+import { useSettings } from "../modules/settings/useSettings";
 
 interface LanguageProviderWrapperProps {
   children: ReactNode;

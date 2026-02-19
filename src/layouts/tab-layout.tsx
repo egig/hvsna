@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { Plus } from "lucide-react";
 import { TabBar } from "../modules/navigation";

@@ -1,12 +1,12 @@
 import { useCallback, useEffect } from "react";
-import { useSettingsStore } from "../stores/settingsStore";
+import { useSettingsStore } from "./settingsStore";
 import type {
   GeneralSettings,
   Coordinate,
   LocationResolveType,
-} from "../lib/types/settings";
-import type { Language } from "../lib/types/language";
-import { usePouchDB } from "../pouchdb";
+} from "../../lib/types/settings";
+import type { Language } from "../../lib/types/language";
+import { usePouchDB } from "../../pouchdb";
 
 const SETTINGS_DOC_ID = "general_settings";
 

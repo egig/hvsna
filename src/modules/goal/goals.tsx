@@ -12,7 +12,7 @@ import {
   useTargetResults,
   type TargetResult,
   type TargetResultData,
-} from "src/hooks/useTargetResults";
+} from "./useTargetResults";
 import BlockTitle from "../../components/block-title";
 import { GoalResultItem } from "src/modules/goal/goal-result-item";
 import { GoalResultsSummary } from "src/modules/goal/goal-result-summary";

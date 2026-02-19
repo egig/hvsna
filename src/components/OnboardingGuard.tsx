@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Navigate } from "react-router";
-import { useSettings } from "../hooks/useSettings";
+import { useSettings } from "../modules/settings/useSettings";
 
 interface OnboardingGuardProps {
   children: React.ReactNode;

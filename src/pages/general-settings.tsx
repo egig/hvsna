@@ -1,6 +1,6 @@
 import { Page } from "../modules/navigation";
 import { Navbar } from "../modules/navigation";
-import { useSettings } from "../hooks/useSettings";
+import { useSettings } from "../modules/settings/useSettings";
 import { useLanguageContext } from "../contexts/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../lib/timezones";
 import { ListInputSelect } from "../components/ListInputSelect";

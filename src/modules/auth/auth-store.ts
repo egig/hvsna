@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
-import type { User, AuthState, AuthActions } from "../lib/types/user";
+import type { User, AuthState, AuthActions } from "./user";
 
 const initialState: AuthState = {
   user: null,

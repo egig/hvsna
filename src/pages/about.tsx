@@ -1,6 +1,5 @@
 import { Page } from "../modules/navigation";
 import packageInfo from "../../package.json";
-import { Info } from "lucide-react";
 import { useLanguageContext } from "../contexts/LanguageContext";
 import { LargeNavbar } from "../modules/navigation";
 

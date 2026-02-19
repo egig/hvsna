@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import type { Language } from "../lib/types/language";
 import { translations } from "../locales";
-import { useSettings } from "../hooks/useSettings";
+import { useSettings } from "../modules/settings/useSettings";
 
 interface LanguageContextType {
   language: Language;
@@ -35,11 +35,7 @@ interface LanguageProviderProps {
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({
   children,
 }) => {
-  const { settings, setLanguage, loadSettings } = useSettings();
-
-  useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+  const { settings, setLanguage } = useSettings();
 
   const t = (key: string, params?: Record<string, string | number>): string => {
     const translation = translations[key]?.[settings.language] || key;

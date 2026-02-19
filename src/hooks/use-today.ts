@@ -1,15 +1,12 @@
 import { useState, useEffect } from "react";
 import { usePouchDB } from "../pouchdb";
-import { useTargetResults } from "./useTargetResults";
 import { useTrackers } from "../modules/tracker/use-trackers";
-import { useTasks } from "./use-tasks";
 import { useAttributeOptions } from "../modules/option/use-options";
 import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
 import { useDateFormatter } from "./use-date-formatter";
-import type { TargetResultData } from "./useTargetResults";
 import type { Tracker } from "../modules/tracker/trackerStore";
-import type { Task } from "../lib/types/task";
 import { useTaskStore } from "src/modules/task/task-store";
+import { useTargetResults, type TargetResultData } from "src/modules/goal/useTargetResults";
 
 export function useToday() {
   const { db } = usePouchDB();

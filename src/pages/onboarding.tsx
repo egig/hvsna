@@ -3,7 +3,7 @@ import { MapPin, Globe, ChevronRight } from "lucide-react";
 import { Page } from "../modules/navigation";
 import { Navbar } from "../modules/navigation";
 import { Button } from "../modules/navigation";
-import { useSettings } from "../hooks/useSettings";
+import { useSettings } from "../modules/settings/useSettings";
 import { useLanguageContext } from "../contexts/LanguageContext";
 import { COMMON_TIMEZONES } from "../lib/timezones";
 import type { Coordinate, LocationResolveType } from "../lib/types/settings";

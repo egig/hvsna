@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { HijriDate } from "../lib/hijri";
 import { useLanguageContext } from "../contexts/LanguageContext";
-import { useSettings } from "./useSettings";
+import { useSettings } from "../modules/settings/useSettings";
 
 export interface UseDateFormatterOptions {
   initialDate?: Date;

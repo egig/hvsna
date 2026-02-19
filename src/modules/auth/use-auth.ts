@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useAuthStore } from "../stores/authStore";
+import { useAuthStore } from "./auth-store";
 import { useSession } from "@clerk/clerk-react";
 
 export const useAuth = () => {

@@ -1,15 +1,9 @@
 import { useCallback } from "react";
-import { useGoalStore } from "../modules/goal/goalStore";
-import { useLogStore } from "../modules/log/logStore";
-import type {
-  Goal,
-  GoalCalculation,
-  GoalDirection,
-  GoalPeriod,
-} from "../modules/goal/goalStore";
 import type { Log } from "src/lib/tracker/types";
 import type { EpochTime } from "src/lib/tracker/types";
-import { useTracker } from "../modules/tracker/use-tracker";
+import { useGoalStore, type Goal, type GoalCalculation, type GoalDirection, type GoalPeriod } from "./goalStore";
+import { useLogStore } from "../log/logStore";
+import { useTracker } from "../tracker/use-tracker";
 
 export type TargetResult = "on-track" | "succeed" | "exceed";
 

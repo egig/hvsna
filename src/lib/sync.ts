@@ -6,7 +6,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { usePouchDB } from "../pouchdb";
-import { useAuth } from "src/hooks/useAuth";
+import { useAuth } from "src/modules/auth/use-auth";
 import { useSession } from "@clerk/clerk-react";
 import PouchDB from "pouchdb";
 

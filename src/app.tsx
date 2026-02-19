@@ -1,6 +1,6 @@
 import { BrowserRouter } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
-import { AppRoutes } from "src/app-routes";
+import { AppRoutes } from "src/routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
 import DroppableContext from "./components/droppable-context";
