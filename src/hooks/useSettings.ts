@@ -31,6 +31,8 @@ export function useSettings() {
     setSettings,
     updateSettings: updateSettingsInStore,
     clearError,
+    initiated,
+    setInitiated
   } = useSettingsStore();
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export function useSettings() {
       setError(error.message || "Failed to load settings");
     } finally {
       setLoading(false);
+      setInitiated(true)
     }
   }, [db, setLoading, clearError, setSettings, setError]);
 
@@ -418,6 +421,7 @@ export function useSettings() {
   return {
     settings,
     loading,
+    initiated,
     error,
     loadSettings,
     updateSettings,

@@ -15,9 +15,11 @@ interface SettingsState {
   settings: GeneralSettings;
   loading: boolean;
   error: string | null;
+  initiated: boolean;
 
   // Actions
   setLoading: (loading: boolean) => void;
+  setInitiated: (i: boolean) => void;
   setError: (error: string | null) => void;
   setSettings: (settings: GeneralSettings) => void;
   updateSettings: (updates: Partial<GeneralSettings>) => void;
@@ -30,8 +32,10 @@ export const useSettingsStore = create<SettingsState>()(
       settings: DEFAULT_SETTINGS,
       loading: false,
       error: null,
+      initiated: false,
 
       setLoading: (loading) => set({ loading }, false, "setLoading"),
+      setInitiated: (initiated) => set({ initiated}, false, "setInitiated"),
 
       setError: (error) => set({ error }, false, "setError"),
 

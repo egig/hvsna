@@ -21,6 +21,7 @@ export interface GeneralSettings {
   locationResolvedAt?: string;
   locationResolveType?: LocationResolveType;
   coordinate?: Coordinate | null;
+  onboardedAt?: number;
 }
 
 export interface SettingsState {

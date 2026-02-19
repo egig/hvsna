@@ -26,6 +26,8 @@ import Upcoming from "./pages/upcoming";
 import SignInPage from "./pages/signin";
 import SignUpPage from "./pages/signup";
 import SyncPage from "./pages/sync";
+import Onboarding from "./pages/onboarding";
+import { OnboardingGuard } from "./components/OnboardingGuard";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -38,7 +40,14 @@ export const AppRoutes = () => {
         location={settingsBackgroundLocation || location}
         key={location.pathname}
       >
-        <Route element={<TabLayout />}>
+        <Route path="onboarding" element={<Onboarding />} />
+        <Route
+          element={
+            <OnboardingGuard>
+              <TabLayout />
+            </OnboardingGuard>
+          }
+        >
           <Route index element={<Today />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="upcoming" element={<Upcoming />} />
