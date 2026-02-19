@@ -1,11 +1,26 @@
 import type { Language } from "./language";
 
+export interface Coordinate {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  altitude?: number;
+  altitudeAccuracy?: number;
+  heading?: number;
+  speed?: number;
+}
+
+export type LocationResolveType = "manual" | "auto";
+
 export interface GeneralSettings {
   language: Language;
   timezone: string;
   manualDateOffset?: number;
   theme?: "light" | "dark" | "system";
   notifications?: boolean;
+  locationResolvedAt?: string;
+  locationResolveType?: LocationResolveType;
+  coordinate?: Coordinate | null;
 }
 
 export interface SettingsState {
