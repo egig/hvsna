@@ -413,6 +413,7 @@ export const useTaskStore = create<TaskState>()(
           }
 
           const offset = reset ? 0 : currentOffset;
+
           const browsedTasksList = await taskRepository.findBrowsedTasks(
             query,
             offset,

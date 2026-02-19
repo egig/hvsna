@@ -49,7 +49,7 @@ export default function GeneralSettings() {
               label: tz,
             }))}
           />
-
+          {/* TODO How about upcoming date, should I adjust created tasks */}
           <ListInputSelect
             label={t("manual_date_offset")}
             value={settings.manualDateOffset?.toString() || "0"}

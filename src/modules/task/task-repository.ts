@@ -481,7 +481,7 @@ export class TaskRepository {
     // Apply custom filters if provided
     if (query) {
       if (query.status) {
-        mangoQuery.selector.status = query.status;
+        mangoQuery.selector.status = Number(query.status);
       }
       if (query.atEpochMillis) {
         mangoQuery.selector.atEpochMillis = query.atEpochMillis;
@@ -492,6 +492,10 @@ export class TaskRepository {
           { name: { $regex: searchLower } },
           { description: { $regex: searchLower } },
         ];
+      }
+
+      if (query.atEpochMillis) {
+        mangoQuery.selector.atEpochMillis = query.atEpochMillis;
       }
     }
 
