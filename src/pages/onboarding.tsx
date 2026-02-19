@@ -4,9 +4,9 @@ import { Page } from "../modules/navigation";
 import { Navbar } from "../modules/navigation";
 import { Button } from "../modules/navigation";
 import { useSettings } from "../modules/settings/useSettings";
-import { useLanguageContext } from "../contexts/LanguageContext";
 import { COMMON_TIMEZONES } from "../lib/timezones";
-import type { Coordinate, LocationResolveType } from "../lib/types/settings";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
+import type { Coordinate } from "src/modules/settings/settings";
 
 export default function Onboarding() {
   const { t } = useLanguageContext();

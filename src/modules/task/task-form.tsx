@@ -4,11 +4,11 @@ import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/components/custom-attribute-input";
 import { FormInput } from "src/components/form-input";
 import { useTracker } from "../tracker/use-tracker";
-import { HijriDateInput } from "../../components/hijri-date-input";
+import { HijriDateInput } from "../calendar/hijri-date-input";
 import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { useTaskForm } from "./task-form-hook";
-import { useLanguageContext } from "../../contexts/LanguageContext";
+import { useLanguageContext } from "../common/LanguageContext";
 import { useLocation } from "react-router";
 import type { Task } from "./types";
 

@@ -1,12 +1,11 @@
 import { SignIn } from "@clerk/clerk-react";
 import { useNavigate } from "react-router";
-import { useEffect } from "react";
-import { useAuth } from "../modules/auth/use-auth";
 import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
 import Block from "src/components/block";
 
 import "./signin.css";
+import { useAuth } from "../use-auth";
 
 export default function SignInPage() {
   const navigate = useNavigate();

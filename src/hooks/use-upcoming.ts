@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTaskStore } from "../modules/task/task-store";
 import { HijriDate } from "../lib/hijri";
 import { HijriMonth } from "../lib/hijri/hijri-month";
-import type { Task } from "../lib/types/task";
+import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
   const { loading, error, upcommingTasks, loadUpcommingTasks } = useTaskStore();

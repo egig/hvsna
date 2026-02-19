@@ -3,7 +3,7 @@ import type {
   Goal as GoalType,
   GoalType as GoalTypeEnum,
   GoalPeriod,
-} from "src/lib/tracker/types";
+} from "src/modules/tracker/types";
 import { useGoal, type GoalDirection, type GoalCalculation } from "./use-goal";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";

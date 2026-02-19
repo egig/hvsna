@@ -7,7 +7,7 @@ import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/components/loader";
 import TaskListItem from "src/components/task-list-item";
 import { useTasks } from "./use-tasks";
-import { useLanguageContext } from "../../contexts/LanguageContext";
+import { useLanguageContext } from "../common/LanguageContext";
 
 export default function Tasks() {
   const { t } = useLanguageContext();

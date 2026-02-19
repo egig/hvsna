@@ -2,7 +2,7 @@ import { useState, useEffect, use } from "react";
 import { useLog } from "./use-log";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import type { Log } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
 import BaseForm from "src/components/base-form";
 import { LoadingSpinner } from "src/components/loader";
 import { FormInput } from "src/components/form-input";

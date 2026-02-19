@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { FileText } from "lucide-react";
-import { useTrackerAttributes } from "../modules/attribute/use-tracker-attributes";
-import { useAttributeOptions } from "../modules/option/use-options";
-import type { Tracker } from "../modules/tracker/trackerStore";
-import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
-import type { AttributeOption } from "../modules/option/optionStore";
-import type { Log } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
 import { formatValue } from "src/lib/format";
-import { ListItem } from "./list-item";
+import type { Tracker } from "../tracker/trackerStore";
+import type { AttributeOption } from "../option/optionStore";
+import { ListItem } from "src/components/list-item";
+import type { TrackerAttribute } from "../attribute/trackerAttributeStore";
 
 interface LogItemProps {
   log: Log;

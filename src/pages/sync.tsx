@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Page } from "../modules/navigation";
 import { Navbar } from "../modules/navigation";
 import Block from "../components/block";
-import { useLanguageContext } from "../contexts/LanguageContext";
-import { useSync } from "../lib/sync";
 import { RefreshCw, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
+import { useSync } from "src/modules/sync/sync";
 
 export default function Sync() {
   const { t } = useLanguageContext();

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { usePouchDB } from "../../pouchdb";
 import { useLogStore } from "./logStore";
 import type { LogCreateInput, LogUpdateInput, LogQuery } from "./logStore";
-import type { Log } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
 
 export function useLog(logId?: string) {
   const { db } = usePouchDB();

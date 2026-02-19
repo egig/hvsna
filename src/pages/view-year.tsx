@@ -1,8 +1,8 @@
-import { GREGORIAN_MONTH_NAMES_EN } from "src/lib/hijri-months";
 import { Link, useParams } from "react-router";
 import { HijriDate } from "src/lib/hijri/hijri-date";
 import PrevNext from "../components/prev-next";
 import YearView from "src/components/year-view";
+import { GREGORIAN_MONTH_NAMES_EN } from "src/modules/calendar/hijri-months";
 
 export default function YearPage() {
   const data = {

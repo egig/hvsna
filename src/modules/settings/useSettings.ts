@@ -4,8 +4,8 @@ import type {
   GeneralSettings,
   Coordinate,
   LocationResolveType,
-} from "../../lib/types/settings";
-import type { Language } from "../../lib/types/language";
+} from "./settings";
+import type { Language } from "../common/language";
 import { usePouchDB } from "../../pouchdb";
 
 const SETTINGS_DOC_ID = "general_settings";

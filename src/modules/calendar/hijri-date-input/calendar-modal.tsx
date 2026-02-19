@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { HijriDate, HijriMonth } from "../../lib/hijri";
-import { Modal } from "../../modules/navigation/modal";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { Navbar } from "src/modules/navigation";
+import { Modal, Navbar } from "src/modules/navigation";
 import { TimeSelectionModal } from "./time-selection-modal";
-import { ListInput } from "../ListInput";
-import { useLanguageContext } from "../../contexts/LanguageContext";
-import { useDateFormatter } from "../../hooks/use-date-formatter";
+import { HijriDate, HijriMonth } from "src/lib/hijri";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
+import { useDateFormatter } from "src/hooks/use-date-formatter";
+import { ListInput } from "src/components/ListInput";
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -173,7 +172,7 @@ export function CalendarModal({
             {/* Calendar Grid */}
             <div className="p-2 border-y border-gray-200">
               <div className="grid grid-cols-7 gap-1 text-center">
-                {weekDays.map((day) => (
+                {weekDays.map((day: string) => (
                   <div
                     key={day}
                     className="text-xs font-medium text-gray-500 dark:text-gray-400"

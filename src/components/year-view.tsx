@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import {
   HIJRI_MONTH_NAMES_EN,
   HIJRI_MONTH_NAMES_EN_SHORT,
-} from "src/lib/hijri-months";
+} from "src/modules/calendar/hijri-months";
 import MonthViewSmall from "./month-view-small";
 
 export default function YearView({ year }: { year: number }) {

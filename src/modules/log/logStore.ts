@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { EpochTime, Log } from "src/lib/tracker/types";
+import type { EpochTime, Log } from "src/modules/tracker/types";
 
 export type UUID = string;
 

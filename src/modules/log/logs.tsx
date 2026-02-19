@@ -3,16 +3,16 @@ import { useLogs } from "./useLogs";
 import { useLog } from "./use-log";
 import { Plus, FileText } from "lucide-react";
 import { formatValue } from "src/lib/format";
-import type { Log } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
 import type { Tracker } from "../tracker/trackerStore";
 import LogForm from "./log-form";
-import { LogItem } from "../../components/log-item";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { useTrackers } from "../tracker/use-trackers";
 import { Page } from "../navigation";
 import { useAttributeOptions } from "../option/use-options";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
+import { LogItem } from "./log-item";
 
 export default function Logs() {
   const { loading, error, getLogs, refreshLogs, logs } = useLogs();

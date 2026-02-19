@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Target as GoalIcon, Plus, Target } from "lucide-react";
 import { formatValue } from "src/lib/format";
-import type { Goal as GoalType } from "src/lib/tracker/types";
+import type { Goal as GoalType } from "src/modules/tracker/types";
 import GoalForm from "./goal-form";
 import { Page } from "../navigation/page";
 import { Navbar } from "../navigation/navbar";

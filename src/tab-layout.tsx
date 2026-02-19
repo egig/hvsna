@@ -1,10 +1,10 @@
 import { Outlet, useLocation } from "react-router";
 import { Plus } from "lucide-react";
-import { TabBar } from "../modules/navigation";
-import { Modal } from "../modules/navigation/modal";
-import TaskForm from "../modules/task/task-form";
-import TaskFormEdit from "../modules/task/task-form-edit";
-import { useTask } from "../modules/task/use-task";
+import { TabBar } from "./modules/navigation";
+import { Modal } from "./modules/navigation/modal";
+import TaskForm from "./modules/task/task-form";
+import TaskFormEdit from "./modules/task/task-form-edit";
+import { useTask } from "./modules/task/use-task";
 
 export default function TabLayout() {
   const { formOpen, editingTaskId, openTaskForm, closeTaskForm } = useTask();

@@ -2,7 +2,7 @@ import { usePouchDB } from "../../pouchdb";
 import { Modal, Navbar, Page } from "../navigation";
 import Block from "../../components/block";
 import { useEffect, useState } from "react";
-import type { Goal } from "src/lib/tracker/types";
+import type { Goal } from "src/modules/tracker/types";
 import GoalForm from "src/modules/goal/goal-form";
 import { useGoals } from "src/modules/goal/use-goals";
 import { useGoal } from "src/modules/goal/use-goal";

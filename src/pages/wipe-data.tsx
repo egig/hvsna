@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Database, Trash2, AlertTriangle } from "lucide-react";
 import { usePouchDB } from "../pouchdb";
 import { Navbar, Page } from "../modules/navigation";
-import { useLanguageContext } from "../contexts/LanguageContext";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
 
 export default function WipeData() {
   const { t } = useLanguageContext();

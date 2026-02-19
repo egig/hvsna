@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import type { EpochTime } from "src/lib/tracker/types";
+import type { EpochTime } from "src/modules/tracker/types";
 
 export interface TrackerAttribute {
   id: string;

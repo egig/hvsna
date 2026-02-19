@@ -1,5 +1,5 @@
 import React, { useEffect, useState, type ReactNode } from "react";
-import { LanguageProvider } from "../contexts/LanguageContext";
+import { LanguageProvider } from "../modules/common/LanguageContext";
 import { useSettings } from "../modules/settings/useSettings";
 
 interface LanguageProviderWrapperProps {

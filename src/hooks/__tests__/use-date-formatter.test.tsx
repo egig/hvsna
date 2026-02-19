@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { LanguageProvider } from "../../contexts/LanguageContext";
+import { LanguageProvider } from "../../modules/common/LanguageContext";
 import { useDateFormatter } from "../use-date-formatter";
 
 // Mock the PouchDBContext

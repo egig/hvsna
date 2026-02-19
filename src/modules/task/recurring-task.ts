@@ -1,4 +1,4 @@
-import type { TaskRepeat } from "./task";
+import type { TaskRepeat } from "./locale";
 
 export interface RecurringTask {
   id: string;

@@ -15,7 +15,7 @@ import { IoEllipseOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { CustomToast } from "./custom-toast";
 import { useLocation } from "react-router";
-import { useLanguageContext } from "src/contexts/LanguageContext";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
 
 interface TaskListItemProps {
   task: Task;

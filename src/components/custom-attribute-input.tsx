@@ -1,5 +1,5 @@
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
-import type { Log } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
 import type { AttributeOption } from "../modules/option/optionStore";
 import { useAttributeOptions } from "../modules/option/use-options";
 import { useEffect, useState } from "react";

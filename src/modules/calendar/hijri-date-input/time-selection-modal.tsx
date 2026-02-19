@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
 import { Navbar } from "src/modules/navigation";
-import { useLanguageContext } from "../../contexts/LanguageContext";
 
 interface TimeSelectionModalProps {
   selectedTime: string | null;

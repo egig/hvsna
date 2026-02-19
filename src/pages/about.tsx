@@ -1,7 +1,7 @@
 import { Page } from "../modules/navigation";
 import packageInfo from "../../package.json";
-import { useLanguageContext } from "../contexts/LanguageContext";
 import { LargeNavbar } from "../modules/navigation";
+import { useLanguageContext } from "src/modules/common/LanguageContext";
 
 export default function About() {
   const { t } = useLanguageContext();

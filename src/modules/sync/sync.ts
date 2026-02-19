@@ -5,10 +5,10 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import { usePouchDB } from "../pouchdb";
 import { useAuth } from "src/modules/auth/use-auth";
 import { useSession } from "@clerk/clerk-react";
 import PouchDB from "pouchdb";
+import { usePouchDB } from "src/pouchdb";
 
 // Database Context
 type SyncContextType = {

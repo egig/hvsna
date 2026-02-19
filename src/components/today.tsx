@@ -1,19 +1,18 @@
 import { useTask } from "../modules/task/use-task";
-import { LogItem } from "./log-item";
-import type { Log } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
 import type { AttributeOption } from "../modules/option/optionStore";
 import type { TrackerAttribute } from "../modules/attribute/trackerAttributeStore";
 import { Page } from "../modules/navigation";
 import Block from "./block";
 import BlockTitle from "./block-title";
 import type { Tracker } from "../modules/tracker/trackerStore";
-import type { Task } from "../lib/types/task";
 import TaskListItem from "./task-list-item";
 import { formatValue } from "src/lib/format";
-import type { TargetResultData } from "../hooks/useTargetResults";
 import { useToday } from "src/hooks/use-today";
 import { LargeNavbar } from "src/modules/navigation/navbar";
-import { useLanguageContext } from "../contexts/LanguageContext";
+import { useLanguageContext } from "../modules/common/LanguageContext";
+import type { Task } from "src/modules/task/types";
+import type { TargetResultData } from "src/modules/goal/useTargetResults";
 
 interface TodayTasksProps {
   tasks: Task[];

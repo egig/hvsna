@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { Log } from "src/lib/tracker/types";
-import type { EpochTime } from "src/lib/tracker/types";
+import type { Log } from "src/modules/tracker/types";
+import type { EpochTime } from "src/modules/tracker/types";
 import {
   useGoalStore,
   type Goal,

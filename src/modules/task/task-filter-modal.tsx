@@ -3,9 +3,9 @@ import { Button } from "../navigation";
 import { Modal } from "../navigation/modal";
 import { ChevronRight, Check } from "lucide-react";
 import { HijriDate } from "../../lib/hijri";
-import { HijriDateInput } from "../../components/hijri-date-input";
+import { HijriDateInput } from "../calendar/hijri-date-input";
 import Select from "../../components/form-select";
-import { useLanguageContext } from "../../contexts/LanguageContext";
+import { useLanguageContext } from "../common/LanguageContext";
 
 interface TaskFilterModalProps {
   isOpen: boolean;

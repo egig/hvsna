@@ -7,10 +7,10 @@ import {
 } from "react-router";
 import MonthView from "./pages/view-month";
 import YearView from "./pages/view-year";
-import TabLayout from "./layouts/tab-layout";
+import TabLayout from "./tab-layout";
 import About from "./pages/about";
-import Settings from "./pages/settings";
-import GeneralSettings from "./pages/general-settings";
+import Settings from "./modules/settings/pages/settings";
+import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
 import Logs from "./modules/log/logs";
@@ -23,11 +23,11 @@ import WipeData from "./pages/wipe-data";
 import TrackerDetail from "./modules/tracker/tracker-detail";
 import Browse from "./pages/browse";
 import Upcoming from "./pages/upcoming";
-import SignInPage from "./pages/signin";
-import SignUpPage from "./pages/signup";
 import SyncPage from "./pages/sync";
 import Onboarding from "./pages/onboarding";
 import { OnboardingGuard } from "./components/OnboardingGuard";
+import SignInPage from "./modules/auth/pages/signin";
+import SignUpPage from "./modules/auth/pages/signup";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/

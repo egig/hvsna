@@ -6,10 +6,13 @@ import { PouchDBProvider } from "./pouchdb";
 import DroppableContext from "./components/droppable-context";
 import { LanguageProviderWrapper } from "./components/LanguageProviderWrapper";
 import { Toaster } from "react-hot-toast";
-import { SyncProvider } from "./lib/sync";
 import { BreakpointWrapper } from "./components/BreakpointWrapper";
-import type { Coordinate, LocationResolveType } from "./lib/types/settings";
+import type {
+  Coordinate,
+  LocationResolveType,
+} from "./modules/settings/settings";
 import { Provider, ErrorBoundary } from "@rollbar/react";
+import { SyncProvider } from "./modules/sync/sync";
 
 export interface AppConfig {
   basePath?: string;

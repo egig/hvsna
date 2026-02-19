@@ -1,11 +1,11 @@
-import {
-  GREGORIAN_MONTH_NAMES_EN,
-  HIJRI_MONTH_NAMES_EN,
-} from "src/lib/hijri-months";
 import { Link, useParams } from "react-router";
 import { HijriMonth } from "src/lib/hijri/hijri-month";
 import PrevNext from "../components/prev-next";
 import MonthView from "src/components/month-view";
+import {
+  GREGORIAN_MONTH_NAMES_EN,
+  HIJRI_MONTH_NAMES_EN,
+} from "src/modules/calendar/hijri-months";
 
 export default function MonthViewPage() {
   const params = useParams();

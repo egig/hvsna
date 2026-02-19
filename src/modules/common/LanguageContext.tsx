@@ -4,9 +4,9 @@ import React, {
   type ReactNode,
   useEffect,
 } from "react";
-import type { Language } from "../lib/types/language";
-import { translations } from "../locales";
-import { useSettings } from "../modules/settings/useSettings";
+import type { Language } from "./language";
+import { translations } from "../../locales";
+import { useSettings } from "../settings/useSettings";
 
 interface LanguageContextType {
   language: Language;
