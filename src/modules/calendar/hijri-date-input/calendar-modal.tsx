@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Modal, Navbar } from "src/modules/navigation";
 import { TimeSelectionModal } from "./time-selection-modal";
-import { HijriDate, HijriMonth } from "src/lib/hijri";
-import { useLanguageContext } from "src/modules/common/LanguageContext";
-import { useDateFormatter } from "src/hooks/use-date-formatter";
-import { ListInput } from "src/components/ListInput";
+import { HijriDate, HijriMonth } from "src/modules/calendar/hijri";
+import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
+import { ListInput } from "src/ui/ListInput";
+import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
+import { useLanguageContext } from "../../i18n/LanguageContext";
 
 interface CalendarModalProps {
   isOpen: boolean;

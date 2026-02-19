@@ -6,9 +6,9 @@ import {
 } from "@clerk/clerk-react";
 import { LogIn, Trash, Cog, Info, RefreshCw } from "lucide-react";
 import { Page } from "../../navigation";
-import { MenuItem } from "../../../components/MenuItem";
+import { MenuItem } from "../../../ui/MenuItem";
 import { Navbar } from "../../navigation";
-import { useLanguageContext } from "../../common/LanguageContext";
+import { useLanguageContext } from "../../i18n/LanguageContext";
 
 export default function Settings() {
   const { t } = useLanguageContext();

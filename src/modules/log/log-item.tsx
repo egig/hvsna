@@ -4,7 +4,7 @@ import type { Log } from "src/modules/tracker/types";
 import { formatValue } from "src/lib/format";
 import type { Tracker } from "../tracker/trackerStore";
 import type { AttributeOption } from "../option/optionStore";
-import { ListItem } from "src/components/list-item";
+import { ListItem } from "src/ui/list-item";
 import type { TrackerAttribute } from "../attribute/trackerAttributeStore";
 
 interface LogItemProps {

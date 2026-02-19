@@ -1,11 +1,11 @@
 export { Button } from "./button";
 export { Link } from "./link";
-export { CardButton } from "../../components/CardButton";
-export { FeatureCard } from "../../components/FeatureCard";
+export { CardButton } from "../../ui/CardButton";
+export { FeatureCard } from "../../ui/FeatureCard";
 export { Navbar } from "./navbar";
 export { TabBar } from "./tab-bar";
 export { Modal } from "./modal";
 export { PageTransition } from "./page-transition";
 export { Page } from "./page";
-export { MenuItem } from "../../components/MenuItem";
+export { MenuItem } from "../../ui/MenuItem";
 export { LargeNavbar } from "./navbar";

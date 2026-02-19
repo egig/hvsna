@@ -8,7 +8,7 @@ import type {
   TaskQuery,
 } from "../../lib/types/task";
 import { taskRepository } from "./task-repository";
-import { HijriDate } from "../../lib/hijri";
+import { HijriDate } from "../calendar/hijri";
 
 interface TaskState {
   loading: boolean;

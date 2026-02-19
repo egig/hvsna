@@ -1,5 +1,5 @@
 import { db } from "../../lib/pouchdb-singleton";
-import { HijriDate } from "../../lib/hijri";
+import { HijriDate } from "../calendar/hijri";
 import type {
   Task,
   TaskCreateInput,

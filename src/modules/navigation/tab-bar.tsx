@@ -11,7 +11,7 @@ import {
   CalendarClock,
   Info,
 } from "lucide-react";
-import { useLanguageContext } from "../common/LanguageContext";
+import { useLanguageContext } from "../i18n/LanguageContext";
 
 export function TabBar() {
   const { t } = useLanguageContext();

@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "react";
-import type { Task } from "src/lib/types/task";
 import type { Goal } from "../goal/goalStore";
 import { ArrowUp, Trash2 } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
-import CustomAttributeInput from "src/components/custom-attribute-input";
-import { FormInput } from "src/components/form-input";
+import CustomAttributeInput from "src/ui/custom-attribute-input";
+import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { HijriDateInput } from "../calendar/hijri-date-input";
-import { HijriDate } from "src/lib/hijri";
-import { useFeatureFlag } from "src/hooks/useFeatureFlags";
+import { HijriDate } from "src/modules/calendar/hijri";
 import { useTaskFormEdit } from "./task-form-edit-hook";
-import { useLanguageContext } from "../common/LanguageContext";
+import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
+import type { Task } from "./types";
+import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 interface TaskFormEditProps {
   taskId: string;

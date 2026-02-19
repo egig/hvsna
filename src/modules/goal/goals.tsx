@@ -1,6 +1,6 @@
 import { usePouchDB } from "../../pouchdb";
 import { Modal, Navbar, Page } from "../navigation";
-import Block from "../../components/block";
+import Block from "../../ui/block";
 import { useEffect, useState } from "react";
 import type { Goal } from "src/modules/tracker/types";
 import GoalForm from "src/modules/goal/goal-form";
@@ -13,7 +13,7 @@ import {
   type TargetResult,
   type TargetResultData,
 } from "./useTargetResults";
-import BlockTitle from "../../components/block-title";
+import BlockTitle from "../../ui/block-title";
 import { GoalResultItem } from "src/modules/goal/goal-result-item";
 import { GoalResultsSummary } from "src/modules/goal/goal-result-summary";
 

@@ -1,9 +1,9 @@
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { useSettings } from "../useSettings";
-import { useLanguageContext } from "../../common/LanguageContext";
+import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../../lib/timezones";
-import { ListInputSelect } from "../../../components/ListInputSelect";
+import { ListInputSelect } from "../../../ui/ListInputSelect";
 
 export default function GeneralSettings() {
   const {

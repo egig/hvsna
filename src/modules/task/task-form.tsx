@@ -1,16 +1,16 @@
 import { useEffect, useRef } from "react";
 import { ArrowUp } from "lucide-react";
 import { useGoals } from "../goal/use-goals";
-import CustomAttributeInput from "src/components/custom-attribute-input";
-import { FormInput } from "src/components/form-input";
+import CustomAttributeInput from "src/ui/custom-attribute-input";
+import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { HijriDateInput } from "../calendar/hijri-date-input";
-import { HijriDate } from "src/lib/hijri";
-import { useFeatureFlag } from "src/hooks/useFeatureFlags";
+import { HijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
-import { useLanguageContext } from "../common/LanguageContext";
+import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
 import type { Task } from "./types";
+import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;

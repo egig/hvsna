@@ -3,10 +3,10 @@ import { useLog } from "./use-log";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import type { Log } from "src/modules/tracker/types";
-import BaseForm from "src/components/base-form";
-import { LoadingSpinner } from "src/components/loader";
-import { FormInput } from "src/components/form-input";
-import CustomAttributeInput from "src/components/custom-attribute-input";
+import BaseForm from "src/ui/base-form";
+import { LoadingSpinner } from "src/ui/loader";
+import { FormInput } from "src/ui/form-input";
+import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { Trash2 } from "lucide-react";
 
 interface LogFormProps {

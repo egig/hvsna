@@ -6,8 +6,8 @@ import TrackerForm from "./tracker-form";
 import { Modal } from "../navigation/modal";
 import { Navbar, Page } from "../navigation";
 import { useTrackers } from "./use-trackers";
-import { useFeatureFlag } from "src/hooks/useFeatureFlags";
-import { ListItem } from "../../components/list-item";
+import { ListItem } from "../../ui/list-item";
+import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 export default function Trackers() {
   const {

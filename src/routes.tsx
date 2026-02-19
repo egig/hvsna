@@ -5,10 +5,8 @@ import {
   useLocation,
   useNavigationType,
 } from "react-router";
-import MonthView from "./pages/view-month";
-import YearView from "./pages/view-year";
 import TabLayout from "./tab-layout";
-import About from "./pages/about";
+import About from "./modules/common/about";
 import Settings from "./modules/settings/pages/settings";
 import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
@@ -18,16 +16,18 @@ import Trackers from "./modules/tracker/trackers";
 import TrackersAttributes from "./modules/attribute/tracker-attributes";
 import AttributeOptions from "./modules/option/options";
 import { Goals } from "./modules/goal/goals";
-import { Today } from "./components/today";
-import WipeData from "./pages/wipe-data";
+import { Today } from "./modules/common/today";
+import WipeData from "./modules/settings/wipe-data";
 import TrackerDetail from "./modules/tracker/tracker-detail";
-import Browse from "./pages/browse";
-import Upcoming from "./pages/upcoming";
-import SyncPage from "./pages/sync";
-import Onboarding from "./pages/onboarding";
-import { OnboardingGuard } from "./components/OnboardingGuard";
+import Browse from "./modules/task/browse";
+import Upcoming from "./modules/common/upcoming";
+import SyncPage from "./modules/sync/sync";
+import Onboarding from "./modules/onboarding/onboarding";
+import { OnboardingGuard } from "./modules/onboarding/OnboardingGuard";
 import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
+import MonthView from "./modules/calendar/month-view";
+import YearView from "./ui/year-view";
 
 export const AppRoutes = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/

@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import type { TrackerAttribute } from "./trackerAttributeStore";
 import { useTrackerAttribute } from "./use-tracker-attribute";
 import { useTrackers } from "../tracker/use-trackers";
-import BaseForm from "src/components/base-form";
-import { FormInput } from "src/components/form-input";
+import BaseForm from "src/ui/base-form";
+import { FormInput } from "src/ui/form-input";
 
 interface TrackerAttributeFormProps {
   trackerAttributeId?: string | null;

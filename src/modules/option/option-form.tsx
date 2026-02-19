@@ -3,8 +3,8 @@ import type { AttributeOption } from "./optionStore";
 import { useAttributeOption } from "./use-option";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTrackers } from "../tracker/use-trackers";
-import BaseForm from "src/components/base-form";
-import { FormInput } from "src/components/form-input";
+import BaseForm from "src/ui/base-form";
+import { FormInput } from "src/ui/form-input";
 
 interface AttributeOptionFormProps {
   attributeOptionId?: string | null;

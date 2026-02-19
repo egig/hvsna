@@ -3,16 +3,16 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { AppRoutes } from "src/routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
-import DroppableContext from "./components/droppable-context";
-import { LanguageProviderWrapper } from "./components/LanguageProviderWrapper";
+import DroppableContext from "./ui/droppable-context";
 import { Toaster } from "react-hot-toast";
-import { BreakpointWrapper } from "./components/BreakpointWrapper";
+import { BreakpointWrapper } from "./ui/BreakpointWrapper";
 import type {
   Coordinate,
   LocationResolveType,
 } from "./modules/settings/settings";
 import { Provider, ErrorBoundary } from "@rollbar/react";
-import { SyncProvider } from "./modules/sync/sync";
+import { SyncProvider } from "./modules/sync/context";
+import { LanguageProviderWrapper } from "./modules/i18n/LanguageProviderWrapper";
 
 export interface AppConfig {
   basePath?: string;

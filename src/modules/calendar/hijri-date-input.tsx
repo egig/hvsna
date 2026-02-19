@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { HijriDate } from "../../lib/hijri";
+import { HijriDate } from "./hijri";
 import { CalendarModal } from "./hijri-date-input/calendar-modal";
 import { CalendarIcon } from "lucide-react";
-import { useLanguageContext } from "../common/LanguageContext";
+import { useLanguageContext } from "../i18n/LanguageContext";
 
 interface HijriDateInputProps {
   name: string;

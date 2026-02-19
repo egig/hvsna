@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTracker } from "./use-tracker";
-import BaseForm from "src/components/base-form";
-import Select from "src/components/form-select";
-import { FormInput } from "src/components/form-input";
+import BaseForm from "src/ui/base-form";
+import Select from "src/ui/form-select";
+import { FormInput } from "src/ui/form-input";
 import { Trash2 } from "lucide-react";
 
 interface TrackerFormProps {

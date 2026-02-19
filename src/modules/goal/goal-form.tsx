@@ -8,11 +8,11 @@ import { useGoal, type GoalDirection, type GoalCalculation } from "./use-goal";
 import { useTrackers } from "../tracker/use-trackers";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import type { Tracker } from "../tracker/trackerStore";
-import BaseForm from "src/components/base-form";
-import { FormInput } from "src/components/form-input";
-import { useFeatureFlag } from "src/hooks/useFeatureFlags";
+import BaseForm from "src/ui/base-form";
+import { FormInput } from "src/ui/form-input";
 import { Trash2 } from "lucide-react";
 import { useRecurringTasks } from "../task/useRecurringTasks";
+import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 interface GoalFormProps {
   goalId?: string | null;

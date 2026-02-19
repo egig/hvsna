@@ -4,10 +4,10 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
-import { LoadingSpinner } from "src/components/loader";
-import TaskListItem from "src/components/task-list-item";
+import { LoadingSpinner } from "src/ui/loader";
+import TaskListItem from "src/ui/task-list-item";
 import { useTasks } from "./use-tasks";
-import { useLanguageContext } from "../common/LanguageContext";
+import { useLanguageContext } from "../i18n/LanguageContext";
 
 export default function Tasks() {
   const { t } = useLanguageContext();

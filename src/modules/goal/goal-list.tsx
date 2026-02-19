@@ -10,8 +10,8 @@ import { useTrackers } from "../tracker/use-trackers";
 import { useGoals } from "./use-goals";
 import { useGoal } from "./use-goal";
 import type { Tracker } from "../tracker/trackerStore";
-import { LoadingSpinner } from "src/components/loader";
-import { ListItem } from "../../components/list-item";
+import { LoadingSpinner } from "src/ui/loader";
+import { ListItem } from "../../ui/list-item";
 
 export default function GoalList() {
   const { loading, error, goals, getGoals } = useGoals();

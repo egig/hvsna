@@ -1,5 +1,3 @@
-import type { JSONContent } from "@tiptap/react";
-
 export function textContent(node: JSONContent) {
   let text = node.text || "";
 
