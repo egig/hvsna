@@ -10,6 +10,45 @@ import { useSession } from "@clerk/clerk-react";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 
+// Helper functions for syncTime persistence
+interface SyncTimeDocument {
+  _id: string;
+  _rev?: string;
+  lastSyncTime: string;
+}
+
+const getSyncTimeFromDB = async (db: PouchDB.Database): Promise<Date | null> => {
+  try {
+    const doc = await db.get("_local/syncTime") as SyncTimeDocument;
+    return doc.lastSyncTime ? new Date(doc.lastSyncTime) : null;
+  } catch (error) {
+    // Document doesn't exist yet, return null
+    return null;
+  }
+};
+
+const storeSyncTimeToDB = async (db: PouchDB.Database, syncTime: Date): Promise<void> => {
+  try {
+    const doc = await db.get("_local/syncTime").catch(() => null) as SyncTimeDocument | null;
+    
+    if (doc) {
+      // Update existing document
+      await db.put({
+        ...doc,
+        lastSyncTime: syncTime.toISOString(),
+      });
+    } else {
+      // Create new document
+      await db.put({
+        _id: "_local/syncTime",
+        lastSyncTime: syncTime.toISOString(),
+      });
+    }
+  } catch (error) {
+    console.error("[sync] Failed to store syncTime:", error);
+  }
+};
+
 // Database Context
 type SyncContextType = {
   replication: any | null;
@@ -28,6 +67,18 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
+  // Load syncTime from DB on component mount
+  useEffect(() => {
+    const loadSyncTime = async () => {
+      if (db) {
+        const storedSyncTime = await getSyncTimeFromDB(db);
+        setLastSyncTime(storedSyncTime);
+      }
+    };
+
+    loadSyncTime();
+  }, [db]);
+
   useEffect(() => {
     const initializeSync = async () => {
       if (!isSignedIn || !user?.syncURL || !db) {
@@ -39,59 +90,65 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      if (!syncInitialized) {
-        try {
-          setIsSyncing(true);
-          setSyncInitialized(true);
+      if (syncInitialized) {
+        return;
+      }
 
-          const token = await session?.getToken();
+      try {
+        setIsSyncing(true);
+        setSyncInitialized(true);
 
-          const remoteDB = new PouchDB(user.syncURL, {
-            fetch: function (url: string | Request, options: any) {
-              if (token) {
-                options.headers.set("Authorization", `Bearer ${token}`);
-              }
-              return PouchDB.fetch(url, options);
-            },
+        const token = await session?.getToken();
+
+        const remoteDB = new PouchDB(user.syncURL, {
+          fetch: function (url: string | Request, options: any) {
+            if (token) {
+              options.headers.set("Authorization", `Bearer ${token}`);
+            }
+            return PouchDB.fetch(url, options);
+          },
+        });
+
+        const syncReplication = db
+          .sync(remoteDB, {
+            live: true,
+            retry: true,
+          })
+          .on("change", async (info: any) => {
+            console.log("[sync] change:", info);
+            const now = new Date();
+            setLastSyncTime(now);
+            await storeSyncTimeToDB(db, now);
+          })
+          .on("paused", (err: any) => {
+            console.log("[sync] paused:", err);
+            // setIsSyncing(false);
+          })
+          .on("active", () => {
+            console.log("[sync] active");
+            // setIsSyncing(true);
+          })
+          .on("denied", (err: any) => {
+            console.error("[sync] denied:", err);
+            // setIsSyncing(false);
+          })
+          .on("complete", async (info: any) => {
+            console.log("[sync] complete:", info);
+            const now = new Date();
+            setLastSyncTime(now);
+            await storeSyncTimeToDB(db, now);
+            // setIsSyncing(false);
+          })
+          .on("error", (err: any) => {
+            console.error("[sync] error:", err);
+            // setIsSyncing(false);
           });
 
-          const syncReplication = db
-            .sync(remoteDB, {
-              live: true,
-              retry: true,
-            })
-            .on("change", (info: any) => {
-              console.log("[sync] change:", info);
-              setLastSyncTime(new Date());
-            })
-            .on("paused", (err: any) => {
-              console.log("[sync] paused:", err);
-              // setIsSyncing(false);
-            })
-            .on("active", () => {
-              console.log("[sync] active");
-              // setIsSyncing(true);
-            })
-            .on("denied", (err: any) => {
-              console.error("[sync] denied:", err);
-              // setIsSyncing(false);
-            })
-            .on("complete", (info: any) => {
-              console.log("[sync] complete:", info);
-              setLastSyncTime(new Date());
-              // setIsSyncing(false);
-            })
-            .on("error", (err: any) => {
-              console.error("[sync] error:", err);
-              // setIsSyncing(false);
-            });
-
-          // Store the replication reference for cleanup
-          setReplication(syncReplication);
-        } catch (error) {
-          console.error("sync error", error);
-          setIsSyncing(false);
-        }
+        // Store the replication reference for cleanup
+        setReplication(syncReplication);
+      } catch (error) {
+        console.error("sync error", error);
+        setIsSyncing(false);
       }
     };
 

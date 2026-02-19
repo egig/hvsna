@@ -1,4 +1,4 @@
-import type { Language } from "src/modules/common/language";
+import type { Language } from "../i18n/language";
 
 export interface Coordinate {
   latitude: number;
