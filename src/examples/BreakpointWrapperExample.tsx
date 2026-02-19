@@ -1,19 +1,19 @@
-import React from 'react';
-import { BreakpointWrapper } from '../components/BreakpointWrapper';
+import React from "react";
+import { BreakpointWrapper } from "../components/BreakpointWrapper";
 
 /**
  * Example usage of BreakpointWrapper component
- * 
+ *
  * This example shows how to wrap your main application content
  * with the BreakpointWrapper to handle desktop and tablet screen sizes.
  */
 export const AppWithBreakpointWrapper: React.FC = () => {
   const handleClose = () => {
-    console.log('Breakpoint wrapper closed');
+    console.log("Breakpoint wrapper closed");
   };
 
   return (
-    <BreakpointWrapper 
+    <BreakpointWrapper
       onClose={handleClose}
       showCloseButton={true}
       className="custom-breakpoint-wrapper"

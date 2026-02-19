@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { XIcon, SmartphoneIcon } from 'lucide-react';
-import { useSystemStore } from '../stores/systemStore';
+import React, { useEffect } from "react";
+import { XIcon, SmartphoneIcon } from "lucide-react";
+import { useSystemStore } from "../stores/systemStore";
 
 interface BreakpointWrapperProps {
   children: React.ReactNode;
@@ -11,9 +11,10 @@ interface BreakpointWrapperProps {
 export const BreakpointWrapper: React.FC<BreakpointWrapperProps> = ({
   children,
   onClose,
-  className = '',
+  className = "",
 }) => {
-  const { isBreakpointWrapperVisible, setBreakpointWrapperVisible } = useSystemStore();
+  const { isBreakpointWrapperVisible, setBreakpointWrapperVisible } =
+    useSystemStore();
   const [shouldShow, setShouldShow] = React.useState(false);
 
   useEffect(() => {
@@ -23,9 +24,9 @@ export const BreakpointWrapper: React.FC<BreakpointWrapperProps> = ({
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   const handleClose = () => {
@@ -38,7 +39,9 @@ export const BreakpointWrapper: React.FC<BreakpointWrapperProps> = ({
   }
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${className}`}>
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 ${className}`}
+    >
       <div className="bg-white rounded-xl shadow-lg max-w-sm w-full mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
@@ -56,12 +59,14 @@ export const BreakpointWrapper: React.FC<BreakpointWrapperProps> = ({
 
         <div className="text-center mb-6">
           <p className="text-gray-600 mb-3">
-            This app is optimized for mobile devices. Desktop and tablet support is coming soon!
+            This app is optimized for mobile devices. Desktop and tablet support
+            is coming soon!
           </p>
-          
+
           <div className="bg-blue-50 rounded-lg p-3">
             <p className="text-sm text-blue-700">
-              For the best experience, use your mobile device or resize your browser to mobile width.
+              For the best experience, use your mobile device or resize your
+              browser to mobile width.
             </p>
           </div>
         </div>

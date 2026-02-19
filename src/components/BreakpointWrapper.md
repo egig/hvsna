@@ -20,8 +20,8 @@ The component is already included in your project at `src/components/BreakpointW
 ### Basic Usage
 
 ```tsx
-import React from 'react';
-import { BreakpointWrapper } from './components/BreakpointWrapper';
+import React from "react";
+import { BreakpointWrapper } from "./components/BreakpointWrapper";
 
 function App() {
   return (
@@ -37,7 +37,7 @@ function App() {
 ```tsx
 function App() {
   const handleClose = () => {
-    console.log('User closed the breakpoint warning');
+    console.log("User closed the breakpoint warning");
     // Perform any cleanup or tracking here
   };
 
@@ -75,12 +75,12 @@ function App() {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `React.ReactNode` | **Required** | The content to render on mobile screens |
-| `onClose` | `() => void` | `undefined` | Callback function called when the warning is closed |
-| `showCloseButton` | `boolean` | `true` | Whether to show the close button in the header |
-| `className` | `string` | `''` | Additional CSS classes to apply to the wrapper |
+| Prop              | Type              | Default      | Description                                         |
+| ----------------- | ----------------- | ------------ | --------------------------------------------------- |
+| `children`        | `React.ReactNode` | **Required** | The content to render on mobile screens             |
+| `onClose`         | `() => void`      | `undefined`  | Callback function called when the warning is closed |
+| `showCloseButton` | `boolean`         | `true`       | Whether to show the close button in the header      |
+| `className`       | `string`          | `''`         | Additional CSS classes to apply to the wrapper      |
 
 ## Breakpoints
 
@@ -91,6 +91,7 @@ function App() {
 ## Component Structure
 
 The component displays:
+
 1. **Header**: Gradient background with icons and optional close button
 2. **Content**: Warning message with tips for better experience
 3. **Actions**: "Continue Anyway" and "Close" buttons
@@ -99,6 +100,7 @@ The component displays:
 ## Styling
 
 The component uses Tailwind CSS classes and includes:
+
 - Responsive design patterns
 - Hover states and transitions
 - Gradient backgrounds
@@ -108,6 +110,7 @@ The component uses Tailwind CSS classes and includes:
 ## Testing
 
 The component includes comprehensive tests covering:
+
 - Mobile content rendering
 - Desktop/tablet warning display
 - Close button functionality
@@ -116,6 +119,7 @@ The component includes comprehensive tests covering:
 - Custom styling application
 
 Run tests with:
+
 ```bash
 npm test -- src/components/__tests__/BreakpointWrapper.test.tsx
 ```
@@ -135,6 +139,7 @@ See `src/examples/BreakpointWrapperExample.tsx` for complete usage examples.
 ## Browser Support
 
 The component works in all modern browsers that support:
+
 - CSS Grid and Flexbox
 - CSS custom properties
 - ES6+ JavaScript features

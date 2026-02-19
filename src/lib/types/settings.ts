@@ -3,6 +3,7 @@ import type { Language } from "./language";
 export interface GeneralSettings {
   language: Language;
   timezone: string;
+  manualDateOffset?: number;
   theme?: "light" | "dark" | "system";
   notifications?: boolean;
 }

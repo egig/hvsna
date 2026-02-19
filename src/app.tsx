@@ -33,15 +33,12 @@ export default function Hvsna({
   db: PouchDB.Database;
 }) {
   const handleBreakpointClose = () => {
-    console.log('Breakpoint wrapper closed by user');
+    console.log("Breakpoint wrapper closed by user");
     // You can add analytics tracking or other logic here
   };
 
   return (
-    <BreakpointWrapper 
-      onClose={handleBreakpointClose}
-      showCloseButton={true}
-    >
+    <BreakpointWrapper onClose={handleBreakpointClose} showCloseButton={true}>
       <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
         <DroppableContext>
           <PouchDBProvider dbInstance={db}>

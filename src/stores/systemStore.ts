@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface SystemState {
   isBreakpointWrapperVisible: boolean;
@@ -14,13 +14,15 @@ export const useSystemStore = create<SystemState>()(
       setBreakpointWrapperVisible: (visible: boolean) =>
         set({ isBreakpointWrapperVisible: visible }),
       toggleBreakpointWrapper: () =>
-        set((state) => ({ isBreakpointWrapperVisible: !state.isBreakpointWrapperVisible })),
+        set((state) => ({
+          isBreakpointWrapperVisible: !state.isBreakpointWrapperVisible,
+        })),
     }),
     {
-      name: 'system-storage',
+      name: "system-storage",
       partialize: (state) => ({
         isBreakpointWrapperVisible: state.isBreakpointWrapperVisible,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { HijriDate } from "../lib/hijri";
 import { useLanguageContext } from "../contexts/LanguageContext";
+import { useSettings } from "./useSettings";
 
 export interface UseDateFormatterOptions {
   initialDate?: Date;
@@ -23,13 +24,34 @@ export function useDateFormatter(
   options: UseDateFormatterOptions = {},
 ): DateFormatterReturn {
   const { t } = useLanguageContext();
+  const { settings } = useSettings();
   const { initialDate = new Date() } = options;
 
-  const [activeDate, setActiveDate] = useState(() =>
-    HijriDate.fromDate(initialDate),
+  // Apply manual date offset to initial date
+  const getInitialDate = () => {
+    const offset = settings.manualDateOffset || 0;
+    const offsetDate = new Date(initialDate);
+    offsetDate.setDate(initialDate.getDate() + offset);
+    return HijriDate.fromDate(offsetDate);
+  };
+
+  const [activeDate, setActiveDate] = useState(getInitialDate);
+
+  // Update activeDate when manualDateOffset changes
+  const [previousOffset, setPreviousOffset] = useState(
+    settings.manualDateOffset || 0,
   );
 
-  // TODO use timezone
+  if (settings.manualDateOffset !== previousOffset) {
+    const newOffset = settings.manualDateOffset || 0;
+    const offsetDiff = newOffset - previousOffset;
+    const updatedDate = new Date(activeDate.toDate());
+    updatedDate.setDate(updatedDate.getDate() + offsetDiff);
+    setActiveDate(HijriDate.fromDate(updatedDate));
+    setPreviousOffset(newOffset);
+  }
+
+  // Apply manual date offset to current date
   const gregorianDate = new Date();
 
   const formattedData = useMemo(() => {
@@ -104,7 +126,7 @@ export function useDateFormatter(
       dayNames,
       weekDays,
     };
-  }, [activeDate, gregorianDate, t]);
+  }, [activeDate, gregorianDate, t, settings.manualDateOffset]);
 
   return {
     activeDate,

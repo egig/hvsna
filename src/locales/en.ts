@@ -792,4 +792,28 @@ export const translations: Translations = {
     en: "Timezone",
     id: "Zona waktu",
   },
+  manual_date_offset: {
+    en: "Manual offset",
+    id: "Offset tanggal manual",
+  },
+  days_offset_negative: {
+    en: "-{count} days",
+    id: "-{count} hari",
+  },
+  day_offset_negative: {
+    en: "-1 day",
+    id: "-1 hari",
+  },
+  no_offset: {
+    en: "No offset",
+    id: "Tidak ada offset",
+  },
+  day_offset_positive: {
+    en: "+1 day",
+    id: "+1 hari",
+  },
+  days_offset_positive: {
+    en: "+{count} days",
+    id: "+{count} hari",
+  },
 };
