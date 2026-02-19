@@ -3,7 +3,7 @@ import { Navbar } from "../../navigation";
 import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../../lib/timezones";
-import { ListInputSelect } from "../../../ui/ListInputSelect";
+import { ListInputSelect } from "../../../ui/list-input-select";
 
 export default function GeneralSettings() {
   const {

@@ -9,7 +9,7 @@ import {
   Target,
 } from "lucide-react";
 import { Button, Page } from "../navigation";
-import { MenuItem } from "../../ui/MenuItem";
+import { MenuItem } from "../../ui/menu-item";
 import { Navbar } from "../navigation";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 

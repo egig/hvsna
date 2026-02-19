@@ -8,7 +8,7 @@ import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
 import type { Task, TaskUpdateInput } from "./types";
-import { useRecurringTasks } from "./useRecurringTasks";
+import { useRecurringTasks } from "./use-recurring-tasks";
 
 export interface UseTaskFormReturn {
   task: Task | null;

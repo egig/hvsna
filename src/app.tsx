@@ -5,7 +5,7 @@ import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
 import DroppableContext from "./ui/droppable-context";
 import { Toaster } from "react-hot-toast";
-import { BreakpointWrapper } from "./ui/BreakpointWrapper";
+import { BreakpointWrapper } from "./ui/breakpoint-wrapper";
 import type {
   Coordinate,
   LocationResolveType,

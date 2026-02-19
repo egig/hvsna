@@ -6,7 +6,7 @@ import {
 } from "@clerk/clerk-react";
 import { LogIn, Trash, Cog, Info, RefreshCw } from "lucide-react";
 import { Page } from "../../navigation";
-import { MenuItem } from "../../../ui/MenuItem";
+import { MenuItem } from "../../../ui/menu-item";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 

@@ -23,7 +23,7 @@ import Browse from "./modules/task/browse";
 import Upcoming from "./modules/common/upcoming";
 import SyncPage from "./modules/sync/sync";
 import Onboarding from "./modules/onboarding/onboarding";
-import { OnboardingGuard } from "./modules/onboarding/OnboardingGuard";
+import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
 import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
 import MonthView from "./modules/calendar/month-view";

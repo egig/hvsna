@@ -11,7 +11,7 @@ import type { Tracker } from "../tracker/trackerStore";
 import BaseForm from "src/ui/base-form";
 import { FormInput } from "src/ui/form-input";
 import { Trash2 } from "lucide-react";
-import { useRecurringTasks } from "../task/useRecurringTasks";
+import { useRecurringTasks } from "../task/use-recurring-tasks";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 interface GoalFormProps {

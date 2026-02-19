@@ -4,7 +4,7 @@ import { Modal, Navbar } from "src/modules/navigation";
 import { TimeSelectionModal } from "./time-selection-modal";
 import { HijriDate, HijriMonth } from "src/modules/calendar/hijri";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
-import { ListInput } from "src/ui/ListInput";
+import { ListInput } from "src/ui/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 
