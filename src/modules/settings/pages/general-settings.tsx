@@ -36,18 +36,12 @@ export default function GeneralSettings() {
     await updateSettings({ manualDateOffset: newOffset });
   };
 
-  const handleGetCurrentLocation = async () => {
+  const handleGetLocation = async () => {
     const coordinate = await getCurrentLocation();
     if (coordinate) {
       await updateLocation(coordinate, "auto");
-    }
-  };
-
-  const handleUpdateTimezoneFromLocation = async () => {
-    const success = await updateTimezoneFromLocation();
-    if (success) {
-      // Show success message or toast
-      console.log("Timezone updated based on location");
+      // Also update timezone after getting location
+      await updateTimezoneFromLocation();
     }
   };
 
@@ -79,7 +73,7 @@ export default function GeneralSettings() {
                     settings.coordinate ? "text-green-600" : "text-gray-500"
                   }`}
                 >
-                  {settings.coordinate ? "Set" : "Not set"}
+                  {settings.coordinate ? `${settings.coordinate.latitude.toFixed(3)},${settings.coordinate.longitude.toFixed(3)}` : "Not set"}
                 </div>
               </div>
             )}
@@ -96,28 +90,12 @@ export default function GeneralSettings() {
         {settings.coordinate && (
           <div className="mt-3 p-3 bg-gray-50 rounded text-xs">
             <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Latitude:</span>
-                <span className="font-mono">
-                  {settings.coordinate.latitude.toFixed(6)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Longitude:</span>
-                <span className="font-mono">
-                  {settings.coordinate.longitude.toFixed(6)}
-                </span>
-              </div>
               {settings.coordinate.accuracy && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Accuracy:</span>
                   <span>±{settings.coordinate.accuracy}m</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span className="text-gray-600">Type:</span>
-                <span>{settings.locationResolveType || "Unknown"}</span>
-              </div>
               {settings.locationResolvedAt && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Updated:</span>
@@ -136,36 +114,70 @@ export default function GeneralSettings() {
             <button
               onClick={requestLocationPermission}
               disabled={loading}
-              className="px-3 py-1.5 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500 touch-manipulation"
+              className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+              style={{
+                backgroundColor: 'var(--hvsna-primary-color)',
+                '--hover-bg': 'var(--hvsna-primary-color-hover)',
+                '--focus-ring-color': 'var(--hvsna-primary-color)'
+              } as React.CSSProperties}
+              onMouseEnter={(e) => {
+                const target = e.currentTarget as HTMLElement;
+                target.style.backgroundColor = 'var(--hvsna-primary-color-hover)';
+              }}
+              onMouseLeave={(e) => {
+                const target = e.currentTarget as HTMLElement;
+                target.style.backgroundColor = 'var(--hvsna-primary-color)';
+              }}
             >
               Enable Location
             </button>
           ) : (
             <>
               <button
-                onClick={handleGetCurrentLocation}
+                onClick={handleGetLocation}
                 disabled={loading}
-                className="px-3 py-1.5 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500 touch-manipulation"
+                className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                style={{
+                  backgroundColor: 'var(--hvsna-primary-color)',
+                  '--hover-bg': 'var(--hvsna-primary-color-hover)',
+                  '--focus-ring-color': 'var(--hvsna-primary-color)'
+                } as React.CSSProperties}
+                onMouseEnter={(e) => {
+                  const target = e.currentTarget as HTMLElement;
+                  target.style.backgroundColor = 'var(--hvsna-primary-color-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  const target = e.currentTarget as HTMLElement;
+                  target.style.backgroundColor = 'var(--hvsna-primary-color)';
+                }}
               >
-                Get Current Location
+                Get Location
               </button>
               {settings.coordinate && (
-                <>
-                  <button
-                    onClick={handleUpdateTimezoneFromLocation}
-                    disabled={loading}
-                    className="px-3 py-1.5 bg-green-500 text-white rounded-md text-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-500 touch-manipulation"
-                  >
-                    Update Timezone
-                  </button>
-                  <button
-                    onClick={clearLocation}
-                    disabled={loading}
-                    className="px-3 py-1.5 bg-red-500 text-white rounded-md text-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500 touch-manipulation"
-                  >
-                    Clear Location
-                  </button>
-                </>
+                <button
+                  onClick={clearLocation}
+                  disabled={loading}
+                  className="px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: 'var(--hvsna-primary-color)',
+                    borderColor: 'var(--hvsna-primary-color)',
+                    borderWidth: '1px',
+                    borderStyle: 'solid'
+                  } as React.CSSProperties}
+                  onMouseEnter={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.backgroundColor = 'var(--hvsna-primary-color)';
+                    target.style.color = 'white';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.backgroundColor = 'transparent';
+                    target.style.color = 'var(--hvsna-primary-color)';
+                  }}
+                >
+                  Clear Location
+                </button>
               )}
             </>
           )}
