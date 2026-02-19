@@ -14,6 +14,8 @@ const config: AppConfig = {
   clerkPublishableKey: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY!,
   supabaseURL: import.meta.env.VITE_SUPABASE_URL!,
   supabasePublishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
+  rollbarAccessToken: import.meta.env.VITE_ROLLBAR_ACCESS_TOKEN!,
+  rollbarEnv: import.meta.env.VITE_ROLLBAR_ENV!,
 };
 
 const root = createRoot(document.getElementById("root") as Container);

@@ -9,7 +9,7 @@ import { Toaster } from "react-hot-toast";
 import { SyncProvider } from "./lib/sync";
 import { BreakpointWrapper } from "./components/BreakpointWrapper";
 import type { Coordinate, LocationResolveType } from "./lib/types/settings";
-import { useEffect, useRef } from "react";
+import { Provider, ErrorBoundary } from "@rollbar/react";
 
 export interface AppConfig {
   basePath?: string;
@@ -43,26 +43,35 @@ export default function Hvsna({
   };
 
   return (
-    <BreakpointWrapper onClose={handleBreakpointClose} showCloseButton={true}>
-      <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
-        <DroppableContext>
-          <PouchDBProvider dbInstance={db}>
-            <SyncProvider>
-              <LanguageProviderWrapper>
-                <BrowserRouter basename={config.appBaseName || ""}>
-                  <AppRoutes />
-                </BrowserRouter>
-              </LanguageProviderWrapper>
-            </SyncProvider>
-          </PouchDBProvider>
-        </DroppableContext>
-        <Toaster
-          containerStyle={{
-            bottom: 80,
-          }}
-          position="bottom-center"
-        />
-      </ClerkProvider>
-    </BreakpointWrapper>
+    <Provider
+      config={{
+        accessToken: config.rollbarAccessToken,
+        environment: config.rollbarEnv,
+      }}
+    >
+      <ErrorBoundary>
+        <BreakpointWrapper onClose={handleBreakpointClose}>
+          <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
+            <DroppableContext>
+              <PouchDBProvider dbInstance={db}>
+                <SyncProvider>
+                  <LanguageProviderWrapper>
+                    <BrowserRouter basename={config.appBaseName || ""}>
+                      <AppRoutes />
+                    </BrowserRouter>
+                  </LanguageProviderWrapper>
+                </SyncProvider>
+              </PouchDBProvider>
+            </DroppableContext>
+            <Toaster
+              containerStyle={{
+                bottom: 80,
+              }}
+              position="bottom-center"
+            />
+          </ClerkProvider>
+        </BreakpointWrapper>
+      </ErrorBoundary>
+    </Provider>
   );
 }
