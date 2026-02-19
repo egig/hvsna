@@ -32,7 +32,7 @@ export function useSettings() {
     updateSettings: updateSettingsInStore,
     clearError,
     initiated,
-    setInitiated
+    setInitiated,
   } = useSettingsStore();
 
   // TODO this is causing too many re-render, many be because the puuchdb sync ?
@@ -61,7 +61,7 @@ export function useSettings() {
       setError(error.message || "Failed to load settings");
     } finally {
       setLoading(false);
-      setInitiated(true)
+      setInitiated(true);
     }
   }, [db, setLoading, clearError, setSettings, setError]);
 

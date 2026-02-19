@@ -13,20 +13,21 @@ export default function Onboarding() {
   const { updateSettings } = useSettings();
   const [loading, setLoading] = useState(false);
   const [selectedTimezone, setSelectedTimezone] = useState(
-    Intl.DateTimeFormat().resolvedOptions().timeZone
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
   );
 
-  
   const handleLocationPermission = async () => {
     setLoading(true);
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        });
-      });
+      const position = await new Promise<GeolocationPosition>(
+        (resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+        },
+      );
 
       const coordinate: Coordinate = {
         latitude: position.coords.latitude,
@@ -79,14 +80,14 @@ export default function Onboarding() {
   return (
     <Page>
       <Navbar title={t("welcome") || "Welcome"} showBackButton={false} />
-      
+
       <div className="p-6 space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-gray-900">
             {t("setup_location") || "Setup Location"}
           </h1>
           <p className="text-gray-600">
-            {t("location_setup_description") || 
+            {t("location_setup_description") ||
               "Choose how you want to set your timezone for accurate scheduling"}
           </p>
         </div>
@@ -108,7 +109,8 @@ export default function Onboarding() {
                     {t("use_current_location") || "Use Current Location"}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {t("auto_detect_timezone") || "Auto-detect timezone from your location"}
+                    {t("auto_detect_timezone") ||
+                      "Auto-detect timezone from your location"}
                   </p>
                 </div>
               </div>
@@ -150,17 +152,16 @@ export default function Onboarding() {
               disabled={loading}
               className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading 
-                ? (t("setting_up") || "Setting up...") 
-                : (t("continue") || "Continue")
-              }
+              {loading
+                ? t("setting_up") || "Setting up..."
+                : t("continue") || "Continue"}
             </button>
           </div>
         </div>
 
         <div className="text-center text-sm text-gray-500">
           <p>
-            {t("location_privacy_note") || 
+            {t("location_privacy_note") ||
               "Your location is only used to set timezone and is stored locally"}
           </p>
         </div>

@@ -34,7 +34,7 @@ export const useSettingsStore = create<SettingsState>()(
       initiated: false,
 
       setLoading: (loading) => set({ loading }, false, "setLoading"),
-      setInitiated: (initiated) => set({ initiated}, false, "setInitiated"),
+      setInitiated: (initiated) => set({ initiated }, false, "setInitiated"),
 
       setError: (error) => set({ error }, false, "setError"),
 

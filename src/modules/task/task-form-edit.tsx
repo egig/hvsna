@@ -11,6 +11,7 @@ import { HijriDate } from "src/lib/hijri";
 import { useFeatureFlag } from "src/hooks/useFeatureFlags";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../../contexts/LanguageContext";
+import { Navbar } from "../navigation";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -89,6 +90,19 @@ export default function TaskFormEdit({
         await handleSubmit(formData);
       }}
     >
+      <Navbar
+        title="Edit Task"
+        showBackButton={false}
+        rightAction={
+          <button
+            className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+            aria-label={t("add_new_task")}
+            type="submit"
+          >
+            <ArrowUp />
+          </button>
+        }
+      />
       <input
         ref={nameInputRef}
         name="taskName"
@@ -194,28 +208,15 @@ export default function TaskFormEdit({
         </>
       )}
 
-      {/* Delete Button - Only show for existing tasks */}
-      {taskId && (
-        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isSubmitting}
-            className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Trash2 size={18} />
-            {t("delete_task")}
-          </button>
-        </div>
-      )}
-
-      <div className="flex justify-end p-4">
+      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
-          className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-          aria-label={t("add_new_task")}
-          type="submit"
+          type="button"
+          onClick={handleDelete}
+          disabled={isSubmitting}
+          className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
-          <ArrowUp />
+          <Trash2 size={18} />
+          {t("delete_task")}
         </button>
       </div>
     </form>

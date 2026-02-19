@@ -6,7 +6,10 @@ import { useTrackerAttributes } from "../modules/attribute/use-tracker-attribute
 import { useDateFormatter } from "./use-date-formatter";
 import type { Tracker } from "../modules/tracker/trackerStore";
 import { useTaskStore } from "src/modules/task/task-store";
-import { useTargetResults, type TargetResultData } from "src/modules/goal/useTargetResults";
+import {
+  useTargetResults,
+  type TargetResultData,
+} from "src/modules/goal/useTargetResults";
 
 export function useToday() {
   const { db } = usePouchDB();

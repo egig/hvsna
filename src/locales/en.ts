@@ -15,7 +15,7 @@ import { logTranslations } from "./modules/log";
 export const translations: Translations = {
   // Common translations (shared across modules)
   ...commonTranslations,
-  
+
   // Module-specific translations
   ...authTranslations,
   ...taskTranslations,

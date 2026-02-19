@@ -1,7 +1,13 @@
 import { useCallback } from "react";
 import type { Log } from "src/lib/tracker/types";
 import type { EpochTime } from "src/lib/tracker/types";
-import { useGoalStore, type Goal, type GoalCalculation, type GoalDirection, type GoalPeriod } from "./goalStore";
+import {
+  useGoalStore,
+  type Goal,
+  type GoalCalculation,
+  type GoalDirection,
+  type GoalPeriod,
+} from "./goalStore";
 import { useLogStore } from "../log/logStore";
 import { useTracker } from "../tracker/use-tracker";
 
