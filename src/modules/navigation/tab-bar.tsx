@@ -64,7 +64,7 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
               aria-label="Add new task"
             >
               <Plus size={20} />
-              <span className="font-medium">Add Task</span>
+              <span className="font-medium">{t("add_new_task")}</span>
             </button>
           </div>
         )}

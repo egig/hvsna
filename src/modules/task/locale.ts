@@ -54,7 +54,7 @@ export const taskTranslations = {
   // Task creation and editing
   add_new_task: {
     en: "Add new task",
-    id: "Tambah tugas baru",
+    id: "Tugas baru",
   },
   select_date: {
     en: "Select Date",

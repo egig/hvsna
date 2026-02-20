@@ -192,9 +192,9 @@ export function CalendarModal({
                           date.year === tempSelectedDate.year &&
                           date.month === tempSelectedDate.month &&
                           date.day === tempSelectedDate.day
-                            ? "bg-blue-500 text-white"
+                            ? "bg-[var(--hvsna-primary-color)] text-white"
                             : date.isToday()
-                              ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                              ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-blue-600 dark:text-blue-300"
                               : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                         }`}
                       >
