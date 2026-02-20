@@ -73,7 +73,9 @@ export default function GeneralSettings() {
                     settings.coordinate ? "text-green-600" : "text-gray-500"
                   }`}
                 >
-                  {settings.coordinate ? `${settings.coordinate.latitude.toFixed(3)},${settings.coordinate.longitude.toFixed(3)}` : "Not set"}
+                  {settings.coordinate
+                    ? `${settings.coordinate.latitude.toFixed(3)},${settings.coordinate.longitude.toFixed(3)}`
+                    : "Not set"}
                 </div>
               </div>
             )}
@@ -115,18 +117,21 @@ export default function GeneralSettings() {
               onClick={requestLocationPermission}
               disabled={loading}
               className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-              style={{
-                backgroundColor: 'var(--hvsna-primary-color)',
-                '--hover-bg': 'var(--hvsna-primary-color-hover)',
-                '--focus-ring-color': 'var(--hvsna-primary-color)'
-              } as React.CSSProperties}
+              style={
+                {
+                  backgroundColor: "var(--hvsna-primary-color)",
+                  "--hover-bg": "var(--hvsna-primary-color-hover)",
+                  "--focus-ring-color": "var(--hvsna-primary-color)",
+                } as React.CSSProperties
+              }
               onMouseEnter={(e) => {
                 const target = e.currentTarget as HTMLElement;
-                target.style.backgroundColor = 'var(--hvsna-primary-color-hover)';
+                target.style.backgroundColor =
+                  "var(--hvsna-primary-color-hover)";
               }}
               onMouseLeave={(e) => {
                 const target = e.currentTarget as HTMLElement;
-                target.style.backgroundColor = 'var(--hvsna-primary-color)';
+                target.style.backgroundColor = "var(--hvsna-primary-color)";
               }}
             >
               Enable Location
@@ -137,18 +142,21 @@ export default function GeneralSettings() {
                 onClick={handleGetLocation}
                 disabled={loading}
                 className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                style={{
-                  backgroundColor: 'var(--hvsna-primary-color)',
-                  '--hover-bg': 'var(--hvsna-primary-color-hover)',
-                  '--focus-ring-color': 'var(--hvsna-primary-color)'
-                } as React.CSSProperties}
+                style={
+                  {
+                    backgroundColor: "var(--hvsna-primary-color)",
+                    "--hover-bg": "var(--hvsna-primary-color-hover)",
+                    "--focus-ring-color": "var(--hvsna-primary-color)",
+                  } as React.CSSProperties
+                }
                 onMouseEnter={(e) => {
                   const target = e.currentTarget as HTMLElement;
-                  target.style.backgroundColor = 'var(--hvsna-primary-color-hover)';
+                  target.style.backgroundColor =
+                    "var(--hvsna-primary-color-hover)";
                 }}
                 onMouseLeave={(e) => {
                   const target = e.currentTarget as HTMLElement;
-                  target.style.backgroundColor = 'var(--hvsna-primary-color)';
+                  target.style.backgroundColor = "var(--hvsna-primary-color)";
                 }}
               >
                 Get Location
@@ -158,22 +166,24 @@ export default function GeneralSettings() {
                   onClick={clearLocation}
                   disabled={loading}
                   className="px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
-                  style={{
-                    backgroundColor: 'transparent',
-                    color: 'var(--hvsna-primary-color)',
-                    borderColor: 'var(--hvsna-primary-color)',
-                    borderWidth: '1px',
-                    borderStyle: 'solid'
-                  } as React.CSSProperties}
+                  style={
+                    {
+                      backgroundColor: "transparent",
+                      color: "var(--hvsna-primary-color)",
+                      borderColor: "var(--hvsna-primary-color)",
+                      borderWidth: "1px",
+                      borderStyle: "solid",
+                    } as React.CSSProperties
+                  }
                   onMouseEnter={(e) => {
                     const target = e.currentTarget as HTMLElement;
-                    target.style.backgroundColor = 'var(--hvsna-primary-color)';
-                    target.style.color = 'white';
+                    target.style.backgroundColor = "var(--hvsna-primary-color)";
+                    target.style.color = "white";
                   }}
                   onMouseLeave={(e) => {
                     const target = e.currentTarget as HTMLElement;
-                    target.style.backgroundColor = 'transparent';
-                    target.style.color = 'var(--hvsna-primary-color)';
+                    target.style.backgroundColor = "transparent";
+                    target.style.color = "var(--hvsna-primary-color)";
                   }}
                 >
                   Clear Location

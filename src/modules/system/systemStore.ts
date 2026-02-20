@@ -2,26 +2,31 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface SystemState {
-  isBreakpointWrapperVisible: boolean;
-  setBreakpointWrapperVisible: (visible: boolean) => void;
-  toggleBreakpointWrapper: () => void;
+  isScreenSizeOverlayVisible: boolean;
+  isDesktop: boolean;
+  setScreenSizeOverlayVisible: (visible: boolean) => void;
+  setDesktop: (isDesktop: boolean) => void;
+  toggleScreenSizeOverlay: () => void;
 }
 
 export const useSystemStore = create<SystemState>()(
   persist(
     (set) => ({
-      isBreakpointWrapperVisible: true,
-      setBreakpointWrapperVisible: (visible: boolean) =>
-        set({ isBreakpointWrapperVisible: visible }),
-      toggleBreakpointWrapper: () =>
+      isScreenSizeOverlayVisible: true,
+      isDesktop: true,
+      setScreenSizeOverlayVisible: (visible: boolean) =>
+        set({ isScreenSizeOverlayVisible: visible }),
+      setDesktop: (isDesktop: boolean) => set({ isDesktop }),
+      toggleScreenSizeOverlay: () =>
         set((state) => ({
-          isBreakpointWrapperVisible: !state.isBreakpointWrapperVisible,
+          isScreenSizeOverlayVisible: !state.isScreenSizeOverlayVisible,
         })),
     }),
     {
       name: "system-storage",
       partialize: (state) => ({
-        isBreakpointWrapperVisible: state.isBreakpointWrapperVisible,
+        isScreenSizeOverlayVisible: state.isScreenSizeOverlayVisible,
+        isDesktop: state.isDesktop,
       }),
     },
   ),

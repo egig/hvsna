@@ -22,20 +22,22 @@ export default function SignInPage() {
     <Page>
       <Navbar title="" />
       <Block>
-        <SignIn
-          path="/signin"
-          routing="path"
-          signUpUrl="/signup"
-          appearance={{
-            layout: {
-              socialButtonsVariant: "blockButton",
-              showOptionalFields: false,
-            },
-            variables: {
-              colorPrimary: "var(--hvsna-primary-color)",
-            },
-          }}
-        />
+        <div className="mx-auto w-fit">
+          <SignIn
+            path="/signin"
+            routing="path"
+            signUpUrl="/signup"
+            appearance={{
+              layout: {
+                socialButtonsVariant: "blockButton",
+                showOptionalFields: false,
+              },
+              variables: {
+                colorPrimary: "var(--hvsna-primary-color)",
+              },
+            }}
+          />
+        </div>
       </Block>
     </Page>
   );

@@ -1,4 +1,3 @@
-
 // Import module-specific translations
 import { taskTranslations } from "../../task/locale";
 import { settingsTranslations } from "../../settings/locale";

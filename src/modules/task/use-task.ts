@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import type {
-  Task,
-  TaskCreateInput,
-  TaskUpdateInput,
-} from "../../lib/types/task";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
+import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 
 export interface UseTaskReturn {
   task: Task | null;

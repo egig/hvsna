@@ -5,7 +5,7 @@ import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
 import DroppableContext from "./ui/droppable-context";
 import { Toaster } from "react-hot-toast";
-import { BreakpointWrapper } from "./ui/breakpoint-wrapper";
+import { ScreenSizeProvider } from "./ui/screen-size-wrapper";
 import type {
   Coordinate,
   LocationResolveType,
@@ -53,7 +53,7 @@ export default function Hvsna({
       }}
     >
       <ErrorBoundary>
-        <BreakpointWrapper onClose={handleBreakpointClose}>
+        <ScreenSizeProvider onClose={handleBreakpointClose}>
           <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
             <DroppableContext>
               <PouchDBProvider dbInstance={db}>
@@ -73,7 +73,7 @@ export default function Hvsna({
               position="bottom-center"
             />
           </ClerkProvider>
-        </BreakpointWrapper>
+        </ScreenSizeProvider>
       </ErrorBoundary>
     </Provider>
   );

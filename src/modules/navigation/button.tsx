@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { useAppNavigation } from "./use-app-navigation";
 import { type ReactNode } from "react";
 
-type NavType = "forward" | "back" | "tab" | "modal";
+type NavType = "forward" | "back" | "tab" | "modal" | "sidebar";
 
 interface ButtonProps {
   to?: string;

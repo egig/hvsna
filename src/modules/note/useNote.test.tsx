@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import type {
-  Note,
-  NoteCreateInput,
-  NoteUpdateInput,
-} from "./note";
+import type { Note, NoteCreateInput, NoteUpdateInput } from "./note";
 
 // Mock the PouchDBContext
 vi.mock("../../pouchdb", () => ({

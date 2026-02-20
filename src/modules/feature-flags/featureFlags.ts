@@ -1,8 +1,4 @@
-import type {
-  FeatureFlagConfig,
-  Environment,
-  FeatureFlags,
-} from "./types";
+import type { FeatureFlagConfig, Environment, FeatureFlags } from "./types";
 
 /**
  * Get current environment from import.meta.env or default to development

@@ -17,9 +17,11 @@ interface SyncTimeDocument {
   lastSyncTime: string;
 }
 
-const getSyncTimeFromDB = async (db: PouchDB.Database): Promise<Date | null> => {
+const getSyncTimeFromDB = async (
+  db: PouchDB.Database,
+): Promise<Date | null> => {
   try {
-    const doc = await db.get("_local/syncTime") as SyncTimeDocument;
+    const doc = (await db.get("_local/syncTime")) as SyncTimeDocument;
     return doc.lastSyncTime ? new Date(doc.lastSyncTime) : null;
   } catch (error) {
     // Document doesn't exist yet, return null
@@ -27,10 +29,15 @@ const getSyncTimeFromDB = async (db: PouchDB.Database): Promise<Date | null> => 
   }
 };
 
-const storeSyncTimeToDB = async (db: PouchDB.Database, syncTime: Date): Promise<void> => {
+const storeSyncTimeToDB = async (
+  db: PouchDB.Database,
+  syncTime: Date,
+): Promise<void> => {
   try {
-    const doc = await db.get("_local/syncTime").catch(() => null) as SyncTimeDocument | null;
-    
+    const doc = (await db
+      .get("_local/syncTime")
+      .catch(() => null)) as SyncTimeDocument | null;
+
     if (doc) {
       // Update existing document
       await db.put({

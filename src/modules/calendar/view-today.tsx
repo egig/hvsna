@@ -11,7 +11,10 @@ import "swiper/css";
 import DayNote from "../modules/note/day-note";
 import Block from "../components/block";
 import { Navbar, Page } from "../modules/navigation";
-import { GREGORIAN_MONTH_NAMES_EN, HIJRI_MONTH_NAMES_EN } from "src/modules/calendar/hijri-months";
+import {
+  GREGORIAN_MONTH_NAMES_EN,
+  HIJRI_MONTH_NAMES_EN,
+} from "src/modules/calendar/hijri-months";
 
 // Helper function to generate multiple weeks
 function generateWeeks(
