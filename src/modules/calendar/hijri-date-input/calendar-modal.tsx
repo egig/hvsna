@@ -194,7 +194,7 @@ export function CalendarModal({
                           date.day === tempSelectedDate.day
                             ? "bg-[var(--hvsna-primary-color)] text-white"
                             : date.isToday()
-                              ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-blue-600 dark:text-blue-300"
+                              ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
                               : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                         }`}
                       >

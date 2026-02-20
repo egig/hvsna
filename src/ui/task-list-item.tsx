@@ -11,11 +11,10 @@ import { useGoal } from "../modules/goal/use-goal";
 import { HijriDate } from "src/modules/calendar/hijri";
 import { useTaskListItem } from "src/modules/task/task-list-item-hook";
 import { IoEllipseOutline } from "react-icons/io5";
-import toast from "react-hot-toast";
-import { CustomToast } from "./custom-toast";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import type { Task, TaskStatus } from "src/modules/task/types";
+import { useSnackbar } from "./snackbar-provider";
 
 interface TaskListItemProps {
   task: Task;
@@ -31,8 +30,8 @@ export function TaskListItem({
   task,
   onStatusChange,
   onEdit,
-  showGoalInfo = true,
-  className,
+  showGoalInfo = false,
+  className = "",
   showDateTime = false,
   formatDate,
 }: TaskListItemProps) {
@@ -40,6 +39,7 @@ export function TaskListItem({
   const { updateStatus } = useTaskListItem();
   const location = useLocation();
   const { t } = useLanguageContext();
+  const { showSnackbar, hideSnackbar } = useSnackbar();
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
@@ -152,23 +152,35 @@ export function TaskListItem({
 
     const statusText = nextStatus === 1 ? t("complete") : t("pending");
 
-    toast(
-      (toastId) => (
-        <CustomToast
-          message={`${t("status_changed_to")} ${statusText}`}
-          undoText={t("undo")}
-          onUndo={() => {
+    const snackbarId = showSnackbar(
+      <div className="flex items-center justify-between w-full">
+        <span>{`${t("status_changed_to")} ${statusText}`}</span>
+        <button
+          onClick={() => {
             updateStatus(task.id, task.status).then(() => {
               //..
+              hideSnackbar(snackbarId);
             });
-            toast.dismiss(toastId.id);
           }}
-          onDismiss={() => toast.dismiss(toastId.id)}
-        />
-      ),
-      {
-        duration: 5000,
-      },
+          className="flex items-center gap-1 px-1 py-1 text-xs bg-white/20 hover:bg-white/30 rounded transition-colors ml-4"
+        >
+          <svg
+            className="w-3 h-3"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          {t("undo")}
+        </button>
+      </div>,
+      { autoHideDuration: 5000 },
     );
   };
 

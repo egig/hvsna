@@ -4,7 +4,6 @@ import { AppRoutes } from "src/routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
 import DroppableContext from "./ui/droppable-context";
-import { Toaster } from "react-hot-toast";
 import { ScreenSizeProvider } from "./ui/screen-size-wrapper";
 import type {
   Coordinate,
@@ -13,6 +12,7 @@ import type {
 import { Provider, ErrorBoundary } from "@rollbar/react";
 import { SyncProvider } from "./modules/sync/context";
 import { LanguageProviderWrapper } from "./modules/i18n/LanguageProviderWrapper";
+import { SnackbarProvider } from "./ui/snackbar-provider";
 
 export interface AppConfig {
   basePath?: string;
@@ -49,31 +49,30 @@ export default function Hvsna({
     <Provider
       config={{
         accessToken: config.rollbarAccessToken,
-        environment: config.rollbarEnv,
+        environment: import.meta.env.MODE,
+        code_version: "1.0.0",
+        captureUncaught: true,
+        captureUnhandledRejections: true,
       }}
     >
       <ErrorBoundary>
-        <ScreenSizeProvider onClose={handleBreakpointClose}>
-          <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
-            <DroppableContext>
-              <PouchDBProvider dbInstance={db}>
-                <SyncProvider>
-                  <LanguageProviderWrapper>
-                    <BrowserRouter basename={config.appBaseName || ""}>
-                      <AppRoutes />
-                    </BrowserRouter>
-                  </LanguageProviderWrapper>
-                </SyncProvider>
-              </PouchDBProvider>
-            </DroppableContext>
-            <Toaster
-              containerStyle={{
-                bottom: 80,
-              }}
-              position="bottom-center"
-            />
-          </ClerkProvider>
-        </ScreenSizeProvider>
+        <SnackbarProvider>
+          <ScreenSizeProvider onClose={handleBreakpointClose}>
+            <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
+              <DroppableContext>
+                <PouchDBProvider dbInstance={db}>
+                  <SyncProvider>
+                    <LanguageProviderWrapper>
+                      <BrowserRouter basename={config.appBaseName || ""}>
+                        <AppRoutes />
+                      </BrowserRouter>
+                    </LanguageProviderWrapper>
+                  </SyncProvider>
+                </PouchDBProvider>
+              </DroppableContext>
+            </ClerkProvider>
+          </ScreenSizeProvider>
+        </SnackbarProvider>
       </ErrorBoundary>
     </Provider>
   );
