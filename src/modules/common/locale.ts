@@ -72,6 +72,10 @@ export const commonTranslations = {
     en: "To Do",
     id: "To Do",
   },
+  complete: {
+    en: "Complete",
+    id: "Selesai",
+  },
   in_progress: {
     en: "In Progress",
     id: "Sedang Berjalan",
@@ -79,6 +83,10 @@ export const commonTranslations = {
   completed: {
     en: "Completed",
     id: "Selesai",
+  },
+  status_changed_to: {
+    en: "Status changed to",
+    id: "Status diubah menjadi",
   },
 
   // Form validation

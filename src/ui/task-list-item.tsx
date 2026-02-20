@@ -150,19 +150,19 @@ export function TaskListItem({
       }
     });
 
-    const statusText = nextStatus === 1 ? "complete" : "pending";
+    const statusText = nextStatus === 1 ? t("complete") : t("pending");
 
     toast(
-      (t) => (
+      (toastId) => (
         <CustomToast
-          message={`Status changed to ${statusText}`}
+          message={`${t("status_changed_to")} ${statusText}`}
           onUndo={() => {
             updateStatus(task.id, task.status).then(() => {
               //..
             });
-            toast.dismiss(t.id);
+            toast.dismiss(toastId.id);
           }}
-          onDismiss={() => toast.dismiss(t.id)}
+          onDismiss={() => toast.dismiss(toastId.id)}
         />
       ),
       {
