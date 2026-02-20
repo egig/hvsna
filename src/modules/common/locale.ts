@@ -62,6 +62,10 @@ export const commonTranslations = {
     en: "Retry",
     id: "Coba Lagi",
   },
+  undo: {
+    en: "Undo",
+    id: "Batal",
+  },
   browse: {
     en: "Browse",
     id: "Jelajahi",

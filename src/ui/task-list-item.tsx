@@ -156,6 +156,7 @@ export function TaskListItem({
       (toastId) => (
         <CustomToast
           message={`${t("status_changed_to")} ${statusText}`}
+          undoText={t("undo")}
           onUndo={() => {
             updateStatus(task.id, task.status).then(() => {
               //..

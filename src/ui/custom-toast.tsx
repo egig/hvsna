@@ -6,9 +6,10 @@ interface CustomToastProps {
   type?: "success" | "error" | "loading";
   onUndo?: () => void;
   onDismiss?: () => void;
+  undoText?: string;
 }
 
-export function CustomToast({ message, onUndo, onDismiss }: CustomToastProps) {
+export function CustomToast({ message, onUndo, onDismiss, undoText }: CustomToastProps) {
   return (
     <div className="flex">
       <div className="flex-1 mr-3">
@@ -22,7 +23,7 @@ export function CustomToast({ message, onUndo, onDismiss }: CustomToastProps) {
             className="flex items-center gap-1 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded transition-colors"
           >
             <RotateCcw size={12} />
-            Undo
+            {undoText || "Undo"}
           </button>
         )}
 
