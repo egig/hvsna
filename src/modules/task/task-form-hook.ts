@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate } from "src/modules/calendar/hijri";
+import { HijriDate } from "../calendar/hijri/hijri-date";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
 import type { Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
+import { useSnackbar } from "../../ui/snackbar-provider";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -32,14 +34,11 @@ export const useTaskForm = (
 ): UseTaskFormReturn => {
   const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
   const createTask = useTaskStore((s) => s.createTask);
-  const deleteTask = useTaskStore((s) => s.deleteTask);
-  const editingTaskId = useTaskStore((s) => s.editingTaskId);
   const error = useTaskStore((s) => s.error);
-  const formOpen = useTaskStore((s) => s.formOpen);
   const getTask = useTaskStore((s) => s.getTask);
-  const openTaskForm = useTaskStore((s) => s.openTaskForm);
-  const setEditingTaskId = useTaskStore((s) => s.setEditingTaskId);
   const updateTask = useTaskStore((s) => s.updateTask);
+  const location = useLocation();
+  const { showSnackbar } = useSnackbar();
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
@@ -217,6 +216,13 @@ export const useTaskForm = (
 
       if (onSuccess) {
         onSuccess(result);
+      }
+
+      if (
+        location.state?.context === "today" &&
+        !selectedHijriDate?.isToday()
+      ) {
+        showSnackbar("Task is not listed in this page");
       }
     } catch (err) {
       console.error(err);
