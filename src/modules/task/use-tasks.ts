@@ -76,20 +76,20 @@ export function useTasks() {
     (e: React.UIEvent<HTMLDivElement>) => {
       const element = e.currentTarget;
       const { scrollTop, scrollHeight, clientHeight } = element;
-      
+
       // Check if content is scrollable
       const scrollable = scrollHeight > clientHeight;
       setIsScrollable(scrollable);
-      
+
       // If content is not scrollable and we have more tasks, load them
       if (!scrollable && hasMore && !loading && !loadingMore) {
         loadBrowsedTasks(false);
         return;
       }
-      
+
       // Check if user has scrolled within 200px of the bottom
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
-      
+
       if (!loading && !loadingMore && hasMore && isNearBottom) {
         loadBrowsedTasks(false); // Don't reset for pagination
       }
@@ -102,19 +102,19 @@ export function useTasks() {
     if (initiated && !loading && browsedTasks.length > 0) {
       // Trigger a scroll check after a short delay to let DOM update
       const timer = setTimeout(() => {
-        const scrollElement = document.querySelector('.tasks-scroll-container');
+        const scrollElement = document.querySelector(".tasks-scroll-container");
         if (scrollElement) {
           const { scrollHeight, clientHeight } = scrollElement;
           const scrollable = scrollHeight > clientHeight;
           setIsScrollable(scrollable);
-          
+
           // If not scrollable and has more tasks, load more
           if (!scrollable && hasMore && !loadingMore) {
             loadBrowsedTasks(false);
           }
         }
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [browsedTasks.length, loading, initiated, hasMore, loadingMore]);
@@ -123,19 +123,19 @@ export function useTasks() {
   useEffect(() => {
     if (initiated && !loading && !loadingMore) {
       const timer = setTimeout(() => {
-        const scrollElement = document.querySelector('.tasks-scroll-container');
+        const scrollElement = document.querySelector(".tasks-scroll-container");
         if (scrollElement) {
           const { scrollHeight, clientHeight } = scrollElement;
           const scrollable = scrollHeight > clientHeight;
           setIsScrollable(scrollable);
-          
+
           // If not scrollable and has more tasks, load more
           if (!scrollable && hasMore) {
             loadBrowsedTasks(false);
           }
         }
       }, 100);
-      
+
       return () => clearTimeout(timer);
     }
   }, [loading, loadingMore, initiated, hasMore]);

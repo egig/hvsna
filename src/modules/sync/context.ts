@@ -78,14 +78,16 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   // Manual sync function
   const manualSync = async () => {
     if (!isSignedIn || !user?.syncURL || !db) {
-      throw new Error("Sync not available - user not signed in or sync URL not configured");
+      throw new Error(
+        "Sync not available - user not signed in or sync URL not configured",
+      );
     }
 
     try {
       setIsSyncing(true);
-      
+
       const token = await session?.getToken();
-      
+
       const remoteDB = new PouchDB(user.syncURL, {
         fetch: function (url: string | Request, options: any) {
           if (token) {
@@ -97,12 +99,11 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
       // Perform one-time sync
       await db.sync(remoteDB);
-      
+
       // Update last sync time
       const now = new Date();
       setLastSyncTime(now);
       await storeSyncTimeToDB(db, now);
-      
     } catch (error) {
       console.error("[sync] Manual sync failed:", error);
       throw error;

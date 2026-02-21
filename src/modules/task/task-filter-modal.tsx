@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "../navigation";
 import { Modal } from "../navigation/modal";
+import { Navbar } from "../navigation/navbar";
 import { ChevronRight, Check } from "lucide-react";
 import { HijriDate } from "../calendar/hijri";
-import { HijriDateInput } from "../calendar/hijri-date-input";
+import { SimpleHijriDateInput } from "../calendar/simple-hijri-date-input";
 import Select from "../../ui/form-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
@@ -59,6 +60,7 @@ export default function TaskFilterModal({
     onDateRangeFilterChange(null);
     onSearchTextFilterChange("");
     onClear();
+    onClose();
   };
 
   const handleStatusSelect = (value: number | "all") => {
@@ -67,8 +69,21 @@ export default function TaskFilterModal({
   };
 
   return (
-    <div className="p-4">
-      <div className="">
+    <div className="h-full flex flex-col">
+      <Navbar
+        title={t("filter_tasks")}
+        customBackAction={handleClear}
+        rightAction={
+          <Button
+            onClick={onClose}
+            className="w-10 h-10 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full transition-colors font-medium shadow-sm flex items-center justify-center"
+          >
+            <Check size={16} />
+          </Button>
+        }
+        modal={true}
+      />
+      <div className="flex-1 mb-2 pb-[env(safe-area-inset-bottom)]">
         {/* Search Text Input */}
         <div className="w-full p-2 bg-white dark:bg-gray-800">
           <label className="hidden">{t("search")}</label>
@@ -96,13 +111,13 @@ export default function TaskFilterModal({
       <div className="p-2 flex flex-row gap-2 mt-2 items-center justify-between">
         <div className="bg-white dark:bg-gray-800">
           <label className="hidden">{t("start_date")}</label>
-          <HijriDateInput
-            name="startDate"
-            label=""
+          <SimpleHijriDateInput
             value={dateRangeFilter?.startDate}
             onChange={(startDate) => {
-              const endDate = dateRangeFilter?.endDate || startDate;
-              onDateRangeFilterChange({ startDate, endDate });
+              if (startDate) {
+                const endDate = dateRangeFilter?.endDate || startDate;
+                onDateRangeFilterChange({ startDate, endDate });
+              }
             }}
             placeholder={t("start_date")}
           />
@@ -110,19 +125,19 @@ export default function TaskFilterModal({
         <div>{t("to")}</div>
         <div className="bg-white dark:bg-gray-800">
           <label className="hidden">{t("end_date")}</label>
-          <HijriDateInput
-            name="endDate"
-            label=""
+          <SimpleHijriDateInput
             value={dateRangeFilter?.endDate}
             onChange={(endDate) => {
-              const startDate = dateRangeFilter?.startDate || endDate;
-              onDateRangeFilterChange({ startDate, endDate });
+              if (endDate) {
+                const startDate = dateRangeFilter?.startDate || endDate;
+                onDateRangeFilterChange({ startDate, endDate });
+              }
             }}
             placeholder={t("end_date")}
           />
         </div>
       </div>
-      <div className="mt-2">
+      <div className="my-2 px-2">
         {dateRangeFilter && (
           <button
             onClick={() => onDateRangeFilterChange(null)}
@@ -131,22 +146,6 @@ export default function TaskFilterModal({
             {t("clear_date_range")}
           </button>
         )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex justify-end space-x-3 pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
-        <Button
-          onClick={handleClear}
-          className="px-6 py-2.5 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
-        >
-          {t("clear")}
-        </Button>
-        <Button
-          onClick={onClose}
-          className="px-6 py-2.5 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-lg transition-colors font-medium shadow-sm"
-        >
-          {t("apply")}
-        </Button>
       </div>
 
       {/* Status Selection Modal */}
