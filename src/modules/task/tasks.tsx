@@ -47,7 +47,10 @@ export default function Tasks() {
     <Page>
       <Navbar
         showBackButton={false}
-        title={t("tasks")}
+        showSearch={true}
+        searchValue={searchTextFilter}
+        onSearchChange={setSearchTextFilter}
+        searchPlaceholder={t("search_tasks")}
         rightAction={
           <Button
             onClick={() => setFilterModalOpened(true)}
@@ -104,14 +107,6 @@ export default function Tasks() {
               />
             ))}
           </>
-        )}
-
-        {initiated && !loading && !error && !hasMore && tasks.length > 0 && (
-          <div className="text-center py-4">
-            <p className="text-gray-500 dark:text-gray-500">
-              {t("no_more_tasks_to_load")}
-            </p>
-          </div>
         )}
 
         {loadingMore && hasMore && (

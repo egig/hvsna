@@ -17,7 +17,7 @@ export function Snackbar({
   children,
   showCloseButton = true,
   className = "",
-}: SnackbarProps)     {
+}: SnackbarProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
 

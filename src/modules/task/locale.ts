@@ -26,6 +26,10 @@ export const taskTranslations = {
   },
 
   // Task filtering and search
+  search_tasks: {
+    en: "Search tasks...",
+    id: "Cari tugas...",
+  },
   search_title_or_description: {
     en: "Search title or description...",
     id: "Cari judul atau deskripsi...",
@@ -152,11 +156,6 @@ export const taskTranslations = {
     en: "Create your first task to get started!",
     id: "Buat tugas pertama Anda untuk memulai!",
   },
-  no_more_tasks_to_load: {
-    en: "No more tasks to load",
-    id: "Tidak ada lagi tugas yang dimuat",
-  },
-
   // Task actions
   delete_task: {
     en: "Delete Task",

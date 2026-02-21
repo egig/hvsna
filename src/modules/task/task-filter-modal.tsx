@@ -58,7 +58,6 @@ export default function TaskFilterModal({
     onClose();
   };
 
-
   return (
     <div className="h-full flex flex-col mb-[env(safe-area-inset-bottom)]">
       <Navbar
@@ -75,18 +74,6 @@ export default function TaskFilterModal({
         modal={true}
       />
       <div className="flex-1">
-        {/* Search Text Input */}
-        <div className="w-full p-2 bg-white dark:bg-gray-800">
-          <label className="hidden">{t("search")}</label>
-          <input
-            type="text"
-            value={searchTextFilter}
-            onChange={(e) => onSearchTextFilterChange(e.target.value)}
-            placeholder={t("search_title_or_description")}
-            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
         {/* Status Select */}
         <div className="p-2 bg-white dark:bg-gray-800">
           <Select

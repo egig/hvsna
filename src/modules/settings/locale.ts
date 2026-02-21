@@ -123,8 +123,8 @@ export const settingsTranslations = {
 
   // About page
   about_description: {
-    en: "This is an muslim-opinionated app that helps you to be productive.",
-    id: "Ini adalah aplikasi pengelola tugas untuk membantu Anda menjadi produktif dengan alur kerha muslim.",
+    en: "Hvsna is a muslim-opinionated app that helps you to be productive.",
+    id: "Hvsna adalah aplikasi pengelola tugas untuk membantu Anda menjadi produktif dengan alur kerja muslim.",
   },
   about: {
     en: "About",

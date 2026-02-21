@@ -232,8 +232,12 @@ export default function Onboarding() {
 
   return (
     <Page>
-      <Navbar 
-        title={currentStep === 1 ? (t("welcome") || "Welcome") : (t("setup_location") || "Setup Location")} 
+      <Navbar
+        title={
+          currentStep === 1
+            ? t("welcome") || "Welcome"
+            : t("setup_location") || "Setup Location"
+        }
         showBackButton={currentStep === 2}
         customBackAction={() => setCurrentStep(1)}
       />
@@ -241,21 +245,29 @@ export default function Onboarding() {
       <div className="p-6 space-y-6">
         {/* Step Indicator */}
         <div className="flex items-center justify-center space-x-2">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            currentStep === 1 
-              ? "bg-[var(--hvsna-primary-color)] text-white" 
-              : "bg-[var(--hvsna-primary-color)] text-white"
-          }`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              currentStep === 1
+                ? "bg-[var(--hvsna-primary-color)] text-white"
+                : "bg-[var(--hvsna-primary-color)] text-white"
+            }`}
+          >
             1
           </div>
-          <div className={`w-16 h-1 ${
-            currentStep === 2 ? "bg-[var(--hvsna-primary-color)]" : "bg-gray-300"
-          }`}></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-            currentStep === 2 
-              ? "bg-[var(--hvsna-primary-color)] text-white" 
-              : "bg-gray-300 text-gray-600"
-          }`}>
+          <div
+            className={`w-16 h-1 ${
+              currentStep === 2
+                ? "bg-[var(--hvsna-primary-color)]"
+                : "bg-gray-300"
+            }`}
+          ></div>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              currentStep === 2
+                ? "bg-[var(--hvsna-primary-color)] text-white"
+                : "bg-gray-300 text-gray-600"
+            }`}
+          >
             2
           </div>
         </div>

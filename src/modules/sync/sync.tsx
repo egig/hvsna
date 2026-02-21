@@ -47,7 +47,11 @@ export default function Sync() {
 
   const getStatusIcon = () => {
     if (isSyncing) {
-      return <span className="text-sm text-blue-600 font-medium">{t("auto_syncing")}</span>;
+      return (
+        <span className="text-sm text-blue-600 font-medium">
+          {t("auto_syncing")}
+        </span>
+      );
     }
 
     if (manualSyncStatus === "success") {

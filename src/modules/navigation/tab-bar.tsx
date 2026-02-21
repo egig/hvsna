@@ -2,7 +2,17 @@ import { useLocation } from "react-router";
 import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../../ui/screen-size-wrapper";
-import {TbCalendar, TbCalendarFilled, TbCalendarMonth, TbCalendarMonthFilled, TbLayoutList, TbLayoutListFilled, TbSettings, TbSettingsFilled, TbPlus} from "react-icons/tb";
+import {
+  TbCalendar,
+  TbCalendarFilled,
+  TbCalendarMonth,
+  TbCalendarMonthFilled,
+  TbLayoutList,
+  TbLayoutListFilled,
+  TbSettings,
+  TbSettingsFilled,
+  TbPlus,
+} from "react-icons/tb";
 
 export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
   const { t } = useLanguageContext();
@@ -10,12 +20,12 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
   const { isDesktop } = useScreenSize();
 
   const tabs = [
-    { 
-      path: "/", 
-      label: t("today"), 
+    {
+      path: "/",
+      label: t("today"),
       icon: <TbCalendar />,
       activeIcon: <TbCalendarFilled />,
-      context: "today" 
+      context: "today",
     },
     {
       path: "/upcoming",
@@ -84,7 +94,9 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
                 aria-current={isActive ? "page" : undefined}
                 state={{ context: tab.context }}
               >
-                <span className="text-xl">{isActive ? tab.activeIcon : tab.icon}</span>
+                <span className="text-xl">
+                  {isActive ? tab.activeIcon : tab.icon}
+                </span>
                 <span className="font-medium">{tab.label}</span>
               </Button>
             );
@@ -114,7 +126,9 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
               aria-current={isActive ? "page" : undefined}
               state={{ context: tab.context }}
             >
-              <span className="text-2xl mb-1">{isActive ? tab.activeIcon : tab.icon}</span>
+              <span className="text-2xl mb-1">
+                {isActive ? tab.activeIcon : tab.icon}
+              </span>
               <span className="text-xs font-medium">{tab.label}</span>
             </Button>
           );

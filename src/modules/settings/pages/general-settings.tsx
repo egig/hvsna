@@ -68,8 +68,7 @@ export default function GeneralSettings() {
               <div className="text-xs text-gray-500">Loading...</div>
             ) : (
               <div className="text-sm text-gray-600 text-right">
-                <div
-                  className={`text-xs text-gray-600`}>
+                <div className={`text-xs text-gray-600`}>
                   {settings.coordinate
                     ? `${settings.coordinate.latitude.toFixed(3)},${settings.coordinate.longitude.toFixed(3)}`
                     : "Not set"}

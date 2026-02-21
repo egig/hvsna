@@ -1,4 +1,4 @@
-import { ChevronLeft, X } from "lucide-react";
+import { ChevronLeft, X, Search } from "lucide-react";
 import { useAppNavigation } from "./use-app-navigation";
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";
@@ -11,6 +11,11 @@ interface NavbarProps {
   className?: string;
   modal?: boolean;
   subtitle?: string;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  onSearchSubmit?: (value: string) => void;
 }
 
 const ROOT_PATHS = ["/"];
@@ -23,6 +28,11 @@ export function Navbar({
   className = "",
   modal,
   subtitle,
+  showSearch,
+  searchPlaceholder = "Search...",
+  searchValue = "",
+  onSearchChange,
+  onSearchSubmit,
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
@@ -48,7 +58,7 @@ export function Navbar({
       }}
     >
       {/* Left: Back Button */}
-      <div className="w-16 flex justify-start">
+      <div className="flex justify-start">
         {shouldShowBackButton && (
           <button
             onClick={handleBack}
@@ -61,19 +71,50 @@ export function Navbar({
         )}
       </div>
 
-      {/* Center: Title */}
+      {/* Center: Title or Search */}
       <div className="flex-1 text-center">
-        {title && (
-          <h1 className="text-lg font-semibold text-gray-900 truncate">
-            {title}
-          </h1>
+        {showSearch ? (
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onSearchSubmit?.(searchValue);
+                }
+              }}
+              placeholder={searchPlaceholder}
+              className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            {searchValue && (
+              <button
+                onClick={() => onSearchChange?.("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {title && (
+              <h1 className="text-lg font-semibold text-gray-900 truncate">
+                {title}
+              </h1>
+            )}
+            {/* Subtitle */}
+            {subtitle && (
+              <div className="text-xs text-gray-500">{subtitle}</div>
+            )}
+          </>
         )}
-        {/* Subtitle */}
-        {subtitle && <div className="text-xs text-gray-500">{subtitle}</div>}
       </div>
 
       {/* Right: Action */}
-      <div className="w-16 flex justify-end">{rightAction}</div>
+      <div className="flex justify-end">{rightAction}</div>
     </header>
   );
 }
@@ -86,6 +127,11 @@ export function LargeNavbar({
   className = "",
   modal,
   subtitle,
+  showSearch,
+  searchPlaceholder = "Search...",
+  searchValue = "",
+  onSearchChange,
+  onSearchSubmit,
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
@@ -132,7 +178,7 @@ export function LargeNavbar({
       >
         <div className="flex items-center justify-between">
           {/* Left: Back Button */}
-          <div className="w-16 flex justify-start">
+          <div className="flex justify-start">
             {shouldShowBackButton && (
               <button
                 onClick={handleBack}
@@ -147,23 +193,54 @@ export function LargeNavbar({
             )}
           </div>
 
-          {/* Center: Title */}
+          {/* Center: Title or Search */}
           <div
             className={`flex-1 text-center transition-opacity duration-800 ${isScrolled ? "opacity-100" : "opacity-0"}`}
           >
-            {title && (
-              <h1 className={`text-lg font-semibold text-gray-900 truncate`}>
-                {title}
-              </h1>
-            )}
-            {/* Subtitle */}
-            {subtitle && (
-              <div className={`text-xs text-gray-500`}>{subtitle}</div>
+            {showSearch ? (
+              <div className="relative max-w-md mx-auto">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => onSearchChange?.(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      onSearchSubmit?.(searchValue);
+                    }
+                  }}
+                  placeholder={searchPlaceholder}
+                  className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                {searchValue && (
+                  <button
+                    onClick={() => onSearchChange?.("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {title && (
+                  <h1
+                    className={`text-lg font-semibold text-gray-900 truncate`}
+                  >
+                    {title}
+                  </h1>
+                )}
+                {/* Subtitle */}
+                {subtitle && (
+                  <div className={`text-xs text-gray-500`}>{subtitle}</div>
+                )}
+              </>
             )}
           </div>
 
           {/* Right: Action */}
-          <div className="w-16 flex justify-end">{rightAction}</div>
+          <div className="flex justify-end">{rightAction}</div>
         </div>
       </header>
 
@@ -171,13 +248,42 @@ export function LargeNavbar({
         <div
           className={`h-full flex flex-col justify-end pb-4 transition-opacity duration-500 ${isScrolled ? "opacity-0" : "opacity-100"}`}
         >
-          {title && (
-            <h1 className="text-2xl font-semibold text-gray-900 truncate">
-              {title}
-            </h1>
-          )}
-          {subtitle && (
-            <div className="text-sm text-gray-500 truncate">{subtitle}</div>
+          {showSearch ? (
+            <div className="relative max-w-lg mx-auto">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                value={searchValue}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onSearchSubmit?.(searchValue);
+                  }
+                }}
+                placeholder={searchPlaceholder}
+                className="w-full pl-12 pr-12 py-3 bg-gray-100 border border-gray-200 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {searchValue && (
+                <button
+                  onClick={() => onSearchChange?.("")}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              {title && (
+                <h1 className="text-2xl font-semibold text-gray-900 truncate">
+                  {title}
+                </h1>
+              )}
+              {subtitle && (
+                <div className="text-sm text-gray-500 truncate">{subtitle}</div>
+              )}
+            </>
           )}
         </div>
       </div>
