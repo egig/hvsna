@@ -58,7 +58,7 @@ export function Snackbar({
         flex items-center justify-between
         bg-gray-900 text-white
         rounded-lg shadow-lg
-        px-4 py-3
+        pt-2 pb-[env(safe-area-inset-bottom)]
         transition-all duration-300 ease-out
         transform
         ${

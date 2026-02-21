@@ -16,6 +16,10 @@ export const syncTranslations = {
     en: "Syncing...",
     id: "Mensinkronkan...",
   },
+  auto_syncing: {
+    en: "Auto-syncing",
+    id: "Otomatis sinkron",
+  },
   sync_successful: {
     en: "Sync successful",
     id: "Sinkronisasi berhasil",

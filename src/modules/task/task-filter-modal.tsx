@@ -62,7 +62,7 @@ export default function TaskFilterModal({
 
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col mb-[env(safe-area-inset-bottom)]">
       <Navbar
         title={t("filter_tasks")}
         customBackAction={handleClear}
@@ -76,7 +76,7 @@ export default function TaskFilterModal({
         }
         modal={true}
       />
-      <div className="flex-1 mb-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex-1">
         {/* Search Text Input */}
         <div className="w-full p-2 bg-white dark:bg-gray-800">
           <label className="hidden">{t("search")}</label>
@@ -101,7 +101,7 @@ export default function TaskFilterModal({
         </div>
       </div>
 
-      <div className="p-2 flex flex-row gap-2 mt-2 items-center justify-between">
+      <div className="p-2 flex flex-row gap-2 items-center justify-between">
         <div className="bg-white dark:bg-gray-800">
           <label className="hidden">{t("start_date")}</label>
           <SimpleHijriDateInput

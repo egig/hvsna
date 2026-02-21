@@ -68,8 +68,12 @@ export class HijriDate {
       (this._latitude = latitude));
     this._longitude = longitude;
 
+    // Use Jakarta coordinates as default if not provided
+    const lat = latitude ?? DEFAULT_LATITUDE;
+    const lng = longitude ?? DEFAULT_LONGITUDE;
+
     let d = hijriToGregorian(this);
-    this._rawGregorianDate = new Date(
+    let gregorianDate = new Date(
       d.year,
       d.month - 1,
       d.day,
@@ -77,6 +81,9 @@ export class HijriDate {
       minute || 0,
       second || 0,
     );
+
+    // Apply sunset adjustment to the Gregorian date
+    this._rawGregorianDate = HijriDate.adjustForSunset(gregorianDate, lat, lng);
     this.dayOfWeek = Days.indexOf(this.format("dd").toLowerCase());
   }
 

@@ -47,7 +47,7 @@ export default function Sync() {
 
   const getStatusIcon = () => {
     if (isSyncing) {
-      return <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />;
+      return <span className="text-sm text-blue-600 font-medium">{t("auto_syncing")}</span>;
     }
 
     if (manualSyncStatus === "success") {
