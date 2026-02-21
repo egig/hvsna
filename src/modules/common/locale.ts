@@ -68,7 +68,7 @@ export const commonTranslations = {
   },
   browse: {
     en: "Browse",
-    id: "Jelajahi",
+    id: "Telusur",
   },
 
   // Status states

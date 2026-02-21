@@ -38,6 +38,6 @@ export const onboardingTranslations = {
   },
   location_privacy_note: {
     en: "Your location is only used to set timezone and is stored locally",
-    id: "Lokasi Anda hanya digunakan untuk mengatur zona waktu dan disimpan secara lokal",
+    id: "Lokasi anda hanya digunakan untuk mengatur zona waktu dan disimpan secara lokal",
   },
 };

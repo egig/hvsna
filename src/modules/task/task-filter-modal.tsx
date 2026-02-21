@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { Button } from "../navigation";
-import { Modal } from "../navigation/modal";
 import { Navbar } from "../navigation/navbar";
-import { ChevronRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { HijriDate } from "../calendar/hijri";
 import { SimpleHijriDateInput } from "../calendar/simple-hijri-date-input";
 import Select from "../../ui/form-select";
@@ -129,16 +127,6 @@ export default function TaskFilterModal({
             placeholder={t("end_date")}
           />
         </div>
-      </div>
-      <div className="my-2 px-2">
-        {dateRangeFilter && (
-          <button
-            onClick={() => onDateRangeFilterChange(null)}
-            className="w-full px-4 py-2 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-          >
-            {t("clear_date_range")}
-          </button>
-        )}
       </div>
     </div>
   );

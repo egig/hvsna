@@ -100,8 +100,8 @@ export default function Onboarding() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 p-2 rounded-lg">
-                  <MapPin className="w-5 h-5 text-blue-600" />
+                <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
+                  <MapPin className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
                 </div>
                 <div className="text-left">
                   <h3 className="font-semibold text-gray-900">
@@ -120,8 +120,8 @@ export default function Onboarding() {
           {/* Manual Timezone Selection */}
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="bg-green-100 p-2 rounded-lg">
-                <Globe className="w-5 h-5 text-green-600" />
+              <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
+                <Globe className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">
@@ -136,7 +136,7 @@ export default function Onboarding() {
             <select
               value={selectedTimezone}
               onChange={(e) => setSelectedTimezone(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-[var(--hvsna-primary-color)]"
               disabled={loading}
             >
               {COMMON_TIMEZONES.map((tz) => (
@@ -149,7 +149,7 @@ export default function Onboarding() {
             <button
               onClick={handleManualTimezone}
               disabled={loading}
-              className="w-full mt-4 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-4 bg-[var(--hvsna-primary-color)] text-white py-3 rounded-lg font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading
                 ? t("setting_up") || "Setting up..."
