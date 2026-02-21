@@ -17,7 +17,7 @@ export function Snackbar({
   children,
   showCloseButton = true,
   className = "",
-}: SnackbarProps) {
+}: SnackbarProps)     {
   const [isVisible, setIsVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -58,7 +58,7 @@ export function Snackbar({
         flex items-center justify-between
         bg-gray-900 text-white
         rounded-lg shadow-lg
-        pt-2 pb-[env(safe-area-inset-bottom)]
+        px-4 py-2
         transition-all duration-300 ease-out
         transform
         ${

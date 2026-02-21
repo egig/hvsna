@@ -106,7 +106,7 @@ export function SnackbarProvider({
       value={{ showSnackbar, createSnackbar, hideSnackbar }}
     >
       {children}
-      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-auto sm:max-w-md z-50 flex flex-col gap-2">
+      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-auto sm:max-w-md z-50 flex flex-col gap-2 pb-[env(safe-area-inset-bottom)]">
         {snackbars.map((snackbar, index) => (
           <Snackbar
             key={snackbar.id}
