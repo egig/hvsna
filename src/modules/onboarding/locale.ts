@@ -4,6 +4,14 @@ export const onboardingTranslations = {
     en: "Welcome",
     id: "Selamat Datang",
   },
+  select_language: {
+    en: "Select Language",
+    id: "Pilih Bahasa",
+  },
+  language_selection_description: {
+    en: "Choose your preferred language for the app",
+    id: "Pilih bahasa yang Anda inginkan untuk aplikasi",
+  },
   setup_location: {
     en: "Setup Location",
     id: "Atur Lokasi",
