@@ -7,14 +7,14 @@ import {
   CheckSquareIcon,
   CheckSquare2,
 } from "lucide-react";
-import { useGoal } from "../modules/goal/use-goal";
-import { HijriDate } from "src/modules/calendar/hijri";
-import { useTaskListItem } from "src/modules/task/task-list-item-hook";
+import { useGoal } from "../goal/use-goal";
+import { HijriDate } from "../calendar/hijri";
 import { IoEllipseOutline } from "react-icons/io5";
 import { useLocation } from "react-router";
-import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import type { Task, TaskStatus } from "src/modules/task/types";
-import { useSnackbar } from "./snackbar-provider";
+import { useLanguageContext } from "../i18n/LanguageContext";
+import { useSnackbar } from "../../ui/snackbar-provider";
+import type { Task, TaskStatus } from "./types";
+import { useTaskListItem } from "./task-list-item-hook";
 
 interface TaskListItemProps {
   task: Task;

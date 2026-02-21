@@ -8,7 +8,7 @@ import { useSync } from "src/modules/sync/context";
 
 export default function Sync() {
   const { t } = useLanguageContext();
-  const { lastSyncTime, isSyncing } = useSync();
+  const { lastSyncTime, isSyncing, manualSync } = useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
@@ -19,9 +19,8 @@ export default function Sync() {
     setErrorMessage(undefined);
 
     try {
-      // Trigger manual sync - the SyncProvider handles the actual sync
-      // We can simulate a manual trigger here if needed
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Trigger manual sync and update lastSyncTime
+      await manualSync();
       setManualSyncStatus("success");
     } catch (error) {
       setManualSyncStatus("error");

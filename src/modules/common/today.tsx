@@ -6,7 +6,7 @@ import { Page } from "../navigation";
 import Block from "../../ui/block";
 import BlockTitle from "../../ui/block-title";
 import type { Tracker } from "../tracker/trackerStore";
-import TaskListItem from "../../ui/task-list-item";
+import TaskListItem from "../task/task-list-item";
 import { formatValue } from "src/lib/format";
 import { useToday } from "src/modules/common/use-today";
 import { LargeNavbar } from "src/modules/navigation/navbar";

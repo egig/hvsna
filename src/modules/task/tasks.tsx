@@ -5,7 +5,7 @@ import { Modal } from "../navigation/modal";
 import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
 import { LoadingSpinner } from "src/ui/loader";
-import TaskListItem from "src/ui/task-list-item";
+import TaskListItem from "src/modules/task/task-list-item";
 import { useTasks } from "./use-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
@@ -20,6 +20,7 @@ export default function Tasks() {
     loadingMore,
     error,
     hasMore,
+    isScrollable,
     refreshTasks,
     openEditPopup,
     handleInfiniteScroll,
@@ -62,7 +63,7 @@ export default function Tasks() {
       />
 
       <div
-        className="h-[calc(100vh-var(--tab-bar-height)-60px)] overflow-y-auto"
+        className="tasks-scroll-container h-[calc(100vh-var(--tab-bar-height)-65px)] overflow-y-auto min-h-[400px]"
         onScroll={handleInfiniteScroll}
       >
         {initiated && error && (
