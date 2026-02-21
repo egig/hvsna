@@ -234,7 +234,7 @@ export function TaskListItem({
 
           {showDateTime && !!task.atDateHijri && (
             <p
-              className={`text-xs ${isOverdue() ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
+              className={`text-xs ${isOverdue() && task.status !== 1 ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
             >
               {formatScheduledDate(task, location.state?.context)}
             </p>

@@ -371,7 +371,7 @@ describe("HijriDate", () => {
           }
         } catch (error) {
           // Skip invalid dates
-          console.log(`Skipping invalid date: ${year}-${month}-${day}`);
+          // console.log(`Skipping invalid date: ${year}-${month}-${day}`);
         }
       });
     });

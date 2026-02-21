@@ -218,11 +218,8 @@ export const useTaskForm = (
         onSuccess(result);
       }
 
-      if (
-        location.state?.context === "today" &&
-        !selectedHijriDate?.isToday()
-      ) {
-        showSnackbar("Task is not listed in this page");
+      if (!isMatchLocationContext(location, selectedHijriDate)) {
+        showSnackbar("Task created but not listed in this page");
       }
     } catch (err) {
       console.error(err);
@@ -266,3 +263,19 @@ export const useTaskForm = (
     handleSubmit,
   };
 };
+
+function isMatchLocationContext(location: any, selectedHijriDate: any) {
+  if (location.state.context === "all") {
+    return true;
+  }
+
+  if (!selectedHijriDate) {
+    return ["today", "upcoming"].indexOf(location.state?.context) == -1;
+  }
+
+  if (selectedHijriDate.isToday()) {
+    return ["today", "upcoming"].indexOf(location.state?.context) !== -1;
+  }
+
+  return location.state?.context === "upcoming";
+}

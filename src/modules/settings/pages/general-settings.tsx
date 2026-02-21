@@ -95,7 +95,7 @@ export default function GeneralSettings() {
               {settings.coordinate.accuracy && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">Accuracy:</span>
-                  <span>±{settings.coordinate.accuracy}m</span>
+                  <span>±{settings.coordinate.accuracy.toFixed(2)}m</span>
                 </div>
               )}
               {settings.locationResolvedAt && (

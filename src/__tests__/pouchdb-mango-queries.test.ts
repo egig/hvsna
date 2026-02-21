@@ -248,12 +248,6 @@ describe("PouchDB Mango Queries - Index and Selector Relationship", () => {
       expect(indexes.indexes).toBeDefined();
       expect(indexes.indexes.length).toBeGreaterThan(1); // At least the default _id index
 
-      // Debug: log the structure to understand the format
-      console.log(
-        "Indexes structure:",
-        JSON.stringify(indexes.indexes[0], null, 2),
-      );
-
       // Check that we have indexes beyond the default
       const customIndexes = indexes.indexes.filter(
         (idx: any) => idx.name && idx.name !== "_all_docs",
