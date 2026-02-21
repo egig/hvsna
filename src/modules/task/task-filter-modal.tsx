@@ -34,9 +34,6 @@ export default function TaskFilterModal({
   onClear,
 }: TaskFilterModalProps) {
   const { t } = useLanguageContext();
-  const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [dateRangeModalOpen, setDateRangeModalOpen] = useState(false);
-
   const statusOptions = [
     { value: "all" as const, label: t("all_status"), color: "bg-gray-500" },
     { value: 0, label: t("to_do"), color: "bg-yellow-500" },
@@ -63,10 +60,6 @@ export default function TaskFilterModal({
     onClose();
   };
 
-  const handleStatusSelect = (value: number | "all") => {
-    onStatusFilterChange(value);
-    setStatusModalOpen(false);
-  };
 
   return (
     <div className="h-full flex flex-col">
@@ -147,43 +140,6 @@ export default function TaskFilterModal({
           </button>
         )}
       </div>
-
-      {/* Status Selection Modal */}
-      <Modal
-        isOpen={statusModalOpen}
-        onClose={() => setStatusModalOpen(false)}
-        title={t("select_status")}
-      >
-        <div className="space-y-2">
-          {statusOptions.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleStatusSelect(option.value)}
-              className={`w-full flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-200 transition-colors ${
-                statusFilter === option.value
-                  ? "hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-700"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${option.color}`} />
-                <span
-                  className={`font-medium ${
-                    statusFilter === option.value
-                      ? "text-blue-900 dark:text-blue-100"
-                      : "text-gray-700 dark:text-gray-300"
-                  }`}
-                >
-                  {option.label}
-                </span>
-              </div>
-              {statusFilter === option.value && (
-                <Check size={20} className="text-blue-600" />
-              )}
-            </button>
-          ))}
-        </div>
-      </Modal>
     </div>
   );
 }

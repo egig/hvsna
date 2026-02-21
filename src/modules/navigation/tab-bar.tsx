@@ -1,19 +1,8 @@
 import { useLocation } from "react-router";
 import { Button } from "./button";
-import {
-  CheckSquare,
-  Settings,
-  Target,
-  Calendar,
-  ListFilter,
-  List,
-  SquareLibrary,
-  CalendarClock,
-  Info,
-  Plus,
-} from "lucide-react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../../ui/screen-size-wrapper";
+import {TbCalendar, TbCalendarFilled, TbCalendarMonth, TbCalendarMonthFilled, TbLayoutList, TbLayoutListFilled, TbSettings, TbSettingsFilled, TbPlus} from "react-icons/tb";
 
 export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
   const { t } = useLanguageContext();
@@ -21,23 +10,32 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
   const { isDesktop } = useScreenSize();
 
   const tabs = [
-    { path: "/", label: t("today"), icon: <Calendar />, context: "today" },
+    { 
+      path: "/", 
+      label: t("today"), 
+      icon: <TbCalendar />,
+      activeIcon: <TbCalendarFilled />,
+      context: "today" 
+    },
     {
       path: "/upcoming",
       label: t("upcoming"),
-      icon: <CalendarClock />,
+      icon: <TbCalendarMonth />,
+      activeIcon: <TbCalendarMonthFilled />,
       context: "upcoming",
     },
     {
       path: "/tasks",
       label: t("browse"),
-      icon: <SquareLibrary />,
+      icon: <TbLayoutList />,
+      activeIcon: <TbLayoutListFilled />,
       context: "all",
     },
     {
       path: "/settings",
       label: t("settings"),
-      icon: <Settings />,
+      icon: <TbSettings />,
+      activeIcon: <TbSettingsFilled />,
       context: "settings",
     },
   ];
@@ -63,7 +61,7 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
               className="flex items-center space-x-3 w-full px-3 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] text-white rounded-lg transition-colors"
               aria-label="Add new task"
             >
-              <Plus size={20} />
+              <TbPlus size={20} />
               <span className="font-medium">{t("add_new_task")}</span>
             </button>
           </div>
@@ -86,7 +84,7 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
                 aria-current={isActive ? "page" : undefined}
                 state={{ context: tab.context }}
               >
-                <span className="text-xl">{tab.icon}</span>
+                <span className="text-xl">{isActive ? tab.activeIcon : tab.icon}</span>
                 <span className="font-medium">{tab.label}</span>
               </Button>
             );
@@ -116,7 +114,7 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
               aria-current={isActive ? "page" : undefined}
               state={{ context: tab.context }}
             >
-              <span className="text-2xl mb-1">{tab.icon}</span>
+              <span className="text-2xl mb-1">{isActive ? tab.activeIcon : tab.icon}</span>
               <span className="text-xs font-medium">{tab.label}</span>
             </Button>
           );
