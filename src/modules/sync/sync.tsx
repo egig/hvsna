@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { Page } from "../navigation";
 import { Navbar } from "../navigation";
 import Block from "../../ui/block";
-import { RefreshCw, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { RefreshCw, CheckCircle, AlertCircle, Clock, Info } from "lucide-react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useSync } from "src/modules/sync/context";
 
 export default function Sync() {
   const { t } = useLanguageContext();
-  const { lastSyncTime, isSyncing, manualSync } = useSync();
+  const { lastSyncTime, isSyncing, manualSync, isManualSyncing } = useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
@@ -48,14 +48,22 @@ export default function Sync() {
   const getStatusIcon = () => {
     if (isSyncing) {
       return (
-        <span className="text-sm text-blue-600 font-medium">
+        <span
+          className="text-sm font-medium"
+          style={{ color: "var(--hvsna-primary-color)" }}
+        >
           {t("auto_syncing")}
         </span>
       );
     }
 
     if (manualSyncStatus === "success") {
-      return <CheckCircle className="h-5 w-5 text-green-600" />;
+      return (
+        <CheckCircle
+          className="h-5 w-5"
+          style={{ color: "var(--hvsna-primary-color)" }}
+        />
+      );
     }
 
     if (manualSyncStatus === "error") {
@@ -63,14 +71,19 @@ export default function Sync() {
     }
 
     if (lastSyncTime) {
-      return <CheckCircle className="h-5 w-5 text-green-600" />;
+      return (
+        <CheckCircle
+          className="h-5 w-5"
+          style={{ color: "var(--hvsna-primary-color)" }}
+        />
+      );
     }
 
-    return <Clock className="h-5 w-5 text-gray-600" />;
+    return <Clock className="h-5 w-5 text-gray-400" />;
   };
 
   const getStatusText = () => {
-    if (isSyncing) return t("syncing");
+    if (isSyncing) return t("auto_syncing");
 
     if (manualSyncStatus === "success") return t("sync_successful");
     if (manualSyncStatus === "error") return errorMessage || t("sync_failed");
@@ -85,15 +98,12 @@ export default function Sync() {
       <Navbar title={t("sync")} />
       <Block>
         <div className="space-y-6">
-          {/* Sync Status Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                {t("sync_status")}
-              </h3>
-              {getStatusIcon()}
-            </div>
+          <div className="rounded-lg p-4 bg-gray-200">
+            <p className="text-sm text-gray-600">{t("sync_description")}</p>
+          </div>
 
+          {/* Sync Status Card */}
+          <div className="rounded-lg border-gray-200 border p-6 bg-white">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t("last_sync")}:</span>
@@ -123,14 +133,22 @@ export default function Sync() {
           {/* Manual Sync Button */}
           <button
             onClick={handleManualSync}
-            disabled={isSyncing}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
-              isSyncing
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={isManualSyncing}
+            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center gap-2 border ${
+              isManualSyncing
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
+                : "text-white hover:opacity-90"
             }`}
+            style={{
+              backgroundColor: isManualSyncing
+                ? undefined
+                : "var(--hvsna-primary-color)",
+              borderColor: isManualSyncing
+                ? undefined
+                : "var(--hvsna-primary-color)",
+            }}
           >
-            {isSyncing ? (
+            {isManualSyncing ? (
               <>
                 <RefreshCw className="h-4 w-4 animate-spin" />
                 {t("syncing")}
@@ -142,14 +160,6 @@ export default function Sync() {
               </>
             )}
           </button>
-
-          {/* Sync Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-blue-900 mb-2">
-              {t("sync_info")}
-            </h4>
-            <p className="text-sm text-blue-700">{t("sync_description")}</p>
-          </div>
         </div>
       </Block>
     </Page>

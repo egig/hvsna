@@ -61,6 +61,7 @@ type SyncContextType = {
   replication: any | null;
   lastSyncTime: Date | null;
   isSyncing: boolean;
+  isManualSyncing: boolean;
   manualSync: () => Promise<void>;
 };
 
@@ -74,17 +75,21 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [replication, setReplication] = useState<any | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isManualSyncing, setIsManualSyncing] = useState(false);
 
   // Manual sync function
   const manualSync = async () => {
+    console.log("debug 123");
     if (!isSignedIn || !user?.syncURL || !db) {
       throw new Error(
         "Sync not available - user not signed in or sync URL not configured",
       );
     }
 
+    console.log("debug 4545");
+    console.log("[sync] Manual sync started");
     try {
-      setIsSyncing(true);
+      setIsManualSyncing(true);
 
       const token = await session?.getToken();
 
@@ -108,7 +113,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       console.error("[sync] Manual sync failed:", error);
       throw error;
     } finally {
-      setIsSyncing(false);
+      setIsManualSyncing(false);
     }
   };
 
@@ -204,7 +209,15 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   return React.createElement(
     SyncContext.Provider,
-    { value: { replication, lastSyncTime, isSyncing, manualSync } },
+    {
+      value: {
+        replication,
+        lastSyncTime,
+        isSyncing,
+        isManualSyncing,
+        manualSync,
+      },
+    },
     children,
   );
 };

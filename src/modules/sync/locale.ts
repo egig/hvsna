@@ -42,6 +42,6 @@ export const syncTranslations = {
   },
   sync_description: {
     en: "Your data is automatically synced when you're online. You can also manually trigger a sync to ensure all your latest changes are saved.",
-    id: "Data Anda otomatis disinkronkan saat Anda online. Anda juga dapat memicu sinkronisasi manual untuk memastikan semua perubahan terbaru Anda tersimpan.",
+    id: "Data anda otomatis disinkronkan saat anda online. Anda juga dapat memicu sinkronisasi manual untuk memastikan semua perubahan terbaru anda tersimpan.",
   },
 };
