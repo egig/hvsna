@@ -6,6 +6,7 @@ import {
   HijriDate,
   HijriMonth,
   isSameHijriDate,
+  useHijriCalendar,
 } from "src/modules/calendar/hijri";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -49,6 +50,7 @@ export function HijriDateRangeModal({
 }: HijriDateRangeModalProps) {
   const { t } = useLanguageContext();
   const { hijriMonthNames, weekDays } = useDateFormatter();
+  const { getToday, createHijriDate } = useHijriCalendar();
 
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedRange?.startDate
@@ -57,7 +59,7 @@ export function HijriDateRangeModal({
           selectedRange.startDate.month,
         )
       : (() => {
-          const today = HijriDate.fromDate(new Date());
+          const today = getToday();
           return new HijriMonth(today.year, today.month);
         })(),
   );
@@ -105,17 +107,7 @@ export function HijriDateRangeModal({
 
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const gregorianDate = hijriToGregorian({
-        year: currentMonth.year,
-        month: currentMonth.month,
-        day,
-      });
-      const date = new Date(
-        gregorianDate.year,
-        gregorianDate.month - 1,
-        gregorianDate.day,
-      );
-      days.push(HijriDate.fromDate(date));
+      days.push(createHijriDate(currentMonth.year, currentMonth.month, day));
     }
 
     return days;

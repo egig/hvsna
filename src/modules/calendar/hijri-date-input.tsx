@@ -3,6 +3,7 @@ import { HijriDate } from "./hijri";
 import { CalendarModal } from "./hijri-date-input/calendar-modal";
 import { CalendarIcon } from "lucide-react";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useHijriCalendar } from "./hijri/useHijriCalendar";
 
 interface HijriDateInputProps {
   name: string;
@@ -29,6 +30,7 @@ export function HijriDateInput({
   onChange,
   onBlur,
 }: HijriDateInputProps) {
+  const { isToday, isTomorrow, formatDate } = useHijriCalendar();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<HijriDate | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -56,15 +58,15 @@ export function HijriDateInput({
   const formatDateDisplay = (date: HijriDate | null, time: string | null) => {
     if (!date) return placeholder;
 
-    if (date.isToday()) {
+    if (isToday(date)) {
       return t("today") + (time ? `, ${time}` : "");
     }
 
-    if (date.isTomorrow()) {
+    if (isTomorrow(date)) {
       return t("tomorrow") + (time ? `, ${time}` : "");
     }
 
-    return date.format("DD MMMM") + (time ? `, ${time}` : "");
+    return formatDate(date, "DD MMMM") + (time ? `, ${time}` : "");
   };
 
   const handleButtonClick = () => {

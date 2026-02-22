@@ -16,6 +16,7 @@ import { useSnackbar } from "../../ui/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useSettings } from "src/modules/settings/useSettings";
+import { useHijriCalendar } from "src/modules/calendar/hijri";
 
 interface TaskListItemProps {
   task: Task;
@@ -41,8 +42,7 @@ export function TaskListItem({
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
-  const { settings } = useSettings();
-  const offset = settings.manualDateOffset || 0;
+  const { getToday, createHijriDate } = useHijriCalendar();
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
@@ -87,9 +87,7 @@ export function TaskListItem({
 
     if (!task.atDateHijri) return null;
 
-    const today = HijriDate.fromDate(new Date(), undefined, undefined, {
-      offset,
-    });
+    const today = getToday();
     const yesterday = today.previous().format("YYYYMMDD");
     const tomorrow = today.next();
     const todayString = today.format("YYYYMMDD");
@@ -116,15 +114,10 @@ export function TaskListItem({
 
     // Check if within next 7 days
     try {
-      const taskDate = HijriDate.fromDate(
-        new Date(
-          parseInt(task.atDateHijri.slice(0, 4)),
-          parseInt(task.atDateHijri.slice(4, 6)) - 1,
-          parseInt(task.atDateHijri.slice(6, 8)),
-        ),
-        undefined,
-        undefined,
-        { offset },
+      const taskDate = createHijriDate(
+        parseInt(task.atDateHijri.slice(0, 4)),
+        parseInt(task.atDateHijri.slice(4, 6)) - 1,
+        parseInt(task.atDateHijri.slice(6, 8)),
       );
       const todayGregorian = today.toDate();
       const taskGregorian = taskDate.toDate();

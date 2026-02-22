@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -79,6 +79,7 @@ export const useTaskFormEdit = (
 
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
+  const { getToday, createHijriDate } = useHijriCalendar();
 
   useEffect(() => {
     setEditingTaskId(taskId || null);
@@ -100,20 +101,7 @@ export const useTaskFormEdit = (
         minute = parseInt(timeParts[1]) || 0;
       }
 
-      // Use HijriDate.hijriToJsDate to convert Hijri date to JavaScript Date with time
-      const jsDate = HijriDate.hijriToJsDate(
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        undefined,
-        undefined,
-        { offset },
-      );
-      setSelectedHijriDate(
-        HijriDate.fromDate(jsDate, undefined, undefined, { offset }),
-      );
+      setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
     }
 
     if (task?.atTime) {
@@ -210,7 +198,6 @@ export const useTaskFormEdit = (
     } & Partial<Task>;
 
     if (!!selectedHijriDate) {
-      console.log("selectedHijriDate", selectedHijriDate);
       const year = selectedHijriDate.year.toString().padStart(4, "0");
       const month = selectedHijriDate.month.toString().padStart(2, "0");
       const day = selectedHijriDate.day.toString().padStart(2, "0");

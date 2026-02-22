@@ -390,8 +390,8 @@ export class TaskRepository {
   // Not-completed
   // Past due
   async findTodayTasks(): Promise<Task[]> {
+    // TODO include offset calculation
     const today = HijriDate.fromDate(new Date());
-
     await db.createIndex({
       index: {
         fields: [

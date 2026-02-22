@@ -61,6 +61,27 @@ export class HijriDate {
   }
 
   /**
+   * Get the actual number of days in a Hijri month
+   * @param year Hijri year
+   * @param month Hijri month (1-12)
+   * @returns Number of days in the month (29 or 30)
+   */
+  static getDaysInMonth(year: number, month: number): number {
+    // Check different days to find the maximum valid day in this month
+    let maxDay = 30;
+    for (let day = 30; day >= 1; day--) {
+      try {
+        hijriToGregorian({ year, month, day });
+        maxDay = day;
+        break;
+      } catch (error) {
+        // Day is invalid, continue checking
+      }
+    }
+    return maxDay;
+  }
+
+  /**
    * Convert Hijri date components to JavaScript Date object with sunset calculation
    * @param year Hijri year
    * @param month Hijri month (1-12)
@@ -97,9 +118,10 @@ export class HijriDate {
       adjustedDay = day - offset; // Reverse logic: subtract offset instead of add
 
       // Handle day overflow/underflow
-      while (adjustedDay > 30) {
-        // Simplified - should get actual month length
-        adjustedDay -= 30;
+      while (
+        adjustedDay > HijriDate.getDaysInMonth(adjustedYear, adjustedMonth)
+      ) {
+        adjustedDay -= HijriDate.getDaysInMonth(adjustedYear, adjustedMonth);
         adjustedMonth++;
         if (adjustedMonth > 12) {
           adjustedMonth = 1;
@@ -108,7 +130,10 @@ export class HijriDate {
       }
 
       while (adjustedDay < 1) {
-        adjustedDay += 30; // Simplified - should get actual month length
+        adjustedDay += HijriDate.getDaysInMonth(
+          adjustedYear,
+          adjustedMonth - 1,
+        );
         adjustedMonth--;
         if (adjustedMonth < 1) {
           adjustedMonth = 12;
@@ -181,7 +206,10 @@ export class HijriDate {
       if (sunset && date >= sunset) {
         // Advance to next Hijri day
         const nextHijri = hijriDate.day + 1;
-        const maxDaysInMonth = 30; // Simplified - should get actual month length
+        const maxDaysInMonth = HijriDate.getDaysInMonth(
+          hijriDate.year,
+          hijriDate.month,
+        );
 
         if (nextHijri > maxDaysInMonth) {
           // Move to next month
@@ -210,9 +238,10 @@ export class HijriDate {
       let adjustedYear = hijriDate.year;
 
       // Handle day overflow/underflow
-      while (adjustedDay > 30) {
-        // Simplified - should get actual month length
-        adjustedDay -= 30;
+      while (
+        adjustedDay > HijriDate.getDaysInMonth(adjustedYear, adjustedMonth)
+      ) {
+        adjustedDay -= HijriDate.getDaysInMonth(adjustedYear, adjustedMonth);
         adjustedMonth++;
         if (adjustedMonth > 12) {
           adjustedMonth = 1;
@@ -221,7 +250,10 @@ export class HijriDate {
       }
 
       while (adjustedDay < 1) {
-        adjustedDay += 30; // Simplified - should get actual month length
+        adjustedDay += HijriDate.getDaysInMonth(
+          adjustedYear,
+          adjustedMonth - 1,
+        );
         adjustedMonth--;
         if (adjustedMonth < 1) {
           adjustedMonth = 12;

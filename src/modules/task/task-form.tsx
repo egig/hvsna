@@ -6,7 +6,7 @@ import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { DatePrayerInput } from "./date-prayer-input";
 import { TimeSelectionModal } from "../calendar/hijri-date-input/time-selection-modal";
-import { HijriDate } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
@@ -52,6 +52,7 @@ export default function TaskForm({
   const location = useLocation();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
+  const { getToday } = useHijriCalendar();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -63,9 +64,7 @@ export default function TaskForm({
 
   useEffect(() => {
     if (["today", "upcoming"].includes(location.state?.context)) {
-      setSelectedHijriDate(
-        HijriDate.fromDate(new Date(), undefined, undefined, { offset }),
-      );
+      setSelectedHijriDate(getToday());
     }
   }, [location.state]);
 

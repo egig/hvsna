@@ -3,13 +3,13 @@ import { usePouchDB } from "../../pouchdb";
 import { useTrackers } from "../tracker/use-trackers";
 import { useAttributeOptions } from "../option/use-options";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { useDateFormatter } from "../calendar/use-date-formatter";
 import type { Tracker } from "../tracker/trackerStore";
 import {
   useTargetResults,
   type TargetResultData,
 } from "src/modules/goal/useTargetResults";
 import { useTaskStore } from "../task/task-store";
+import { useDateFormatter } from "../calendar/use-date-formatter";
 
 export function useToday() {
   const { db } = usePouchDB();

@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -73,6 +73,7 @@ export const useTaskForm = (
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
+  const { getToday, createHijriDate } = useHijriCalendar();
 
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
@@ -104,9 +105,7 @@ export const useTaskForm = (
         undefined,
         { offset },
       );
-      setSelectedHijriDate(
-        HijriDate.fromDate(jsDate, undefined, undefined, { offset }),
-      );
+      setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
     }
 
     if (task?.atTime) {
@@ -274,7 +273,7 @@ export const useTaskForm = (
         onSuccess(result);
       }
 
-      if (!isMatchLocationContext(location, selectedHijriDate, offset)) {
+      if (!isMatchLocationContext(location, selectedHijriDate, getToday())) {
         showSnackbar("Task created but not listed in this page");
       }
     } catch (err) {
@@ -331,7 +330,7 @@ export const useTaskForm = (
 function isMatchLocationContext(
   location: any,
   selectedHijriDate: any,
-  offset: number,
+  today: HijriDate,
 ) {
   if (location.state.context === "all") {
     return true;
@@ -341,9 +340,6 @@ function isMatchLocationContext(
     return ["today", "upcoming"].indexOf(location.state?.context) == -1;
   }
 
-  const today = HijriDate.fromDate(new Date(), undefined, undefined, {
-    offset,
-  });
   const todayTimestamp = today.toDate().valueOf();
   const selectedTimestamp = selectedHijriDate.toDate().valueOf();
 

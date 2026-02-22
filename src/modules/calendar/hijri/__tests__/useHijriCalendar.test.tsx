@@ -24,7 +24,7 @@ describe("useHijriCalendar", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Default mock settings
     mockUseSettings.mockReturnValue({
       settings: {
@@ -56,7 +56,9 @@ describe("useHijriCalendar", () => {
     } as any;
 
     mockHijriDate.fromDate.mockReturnValue(mockHijriDateInstance);
-    mockHijriDate.hijriToJsDate.mockReturnValue(new Date("2024-05-23T12:30:00"));
+    mockHijriDate.hijriToJsDate.mockReturnValue(
+      new Date("2024-05-23T12:30:00"),
+    );
   });
 
   it("should return current hijri date with default options", () => {
@@ -74,23 +76,25 @@ describe("useHijriCalendar", () => {
 
   it("should use provided date option", () => {
     const customDate = new Date("2024-06-01T10:00:00");
-    
+
     renderHook(() => useHijriCalendar({ date: customDate }));
 
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       customDate,
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
   it("should use provided hijri date components", () => {
-    renderHook(() => useHijriCalendar({
-      hijriYear: 1446,
-      hijriMonth: 1,
-      hijriDay: 1,
-    }));
+    renderHook(() =>
+      useHijriCalendar({
+        hijriYear: 1446,
+        hijriMonth: 1,
+        hijriDay: 1,
+      }),
+    );
 
     expect(mockHijriDate.hijriToJsDate).toHaveBeenCalledWith(
       1446,
@@ -100,7 +104,7 @@ describe("useHijriCalendar", () => {
       0,
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -133,7 +137,7 @@ describe("useHijriCalendar", () => {
       testDate,
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -155,7 +159,7 @@ describe("useHijriCalendar", () => {
       expect.any(Date),
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -168,7 +172,7 @@ describe("useHijriCalendar", () => {
       expect.any(Date),
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -181,7 +185,7 @@ describe("useHijriCalendar", () => {
       expect.any(Date),
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -253,7 +257,7 @@ describe("useHijriCalendar", () => {
       30,
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -270,7 +274,7 @@ describe("useHijriCalendar", () => {
       0,
       -6.2088,
       106.8456,
-      { offset: 0 }
+      { offset: 0 },
     );
   });
 
@@ -332,7 +336,7 @@ describe("useHijriCalendar", () => {
       expect.any(Date),
       -6.2088,
       106.8456,
-      { offset: 2 }
+      { offset: 2 },
     );
 
     result.current.createHijriDate(1446, 1, 1);
@@ -344,7 +348,7 @@ describe("useHijriCalendar", () => {
       0,
       -6.2088,
       106.8456,
-      { offset: 2 }
+      { offset: 2 },
     );
   });
 

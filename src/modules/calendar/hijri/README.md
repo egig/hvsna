@@ -16,7 +16,7 @@ A React hook that provides comprehensive Hijri calendar functionality with timez
 ## Usage
 
 ```tsx
-import { useHijriCalendar } from './modules/calendar/hijri';
+import { useHijriCalendar } from "./modules/calendar/hijri";
 
 function MyComponent() {
   const {
@@ -47,9 +47,13 @@ function MyComponent() {
 
   return (
     <div>
-      <h1>Current Hijri Date: {formatDate(currentHijriDate, 'dddd, D MMMM YYYY')}</h1>
+      <h1>
+        Current Hijri Date: {formatDate(currentHijriDate, "dddd, D MMMM YYYY")}
+      </h1>
       <p>Timezone: {timezone}</p>
-      <p>Location: {latitude}, {longitude}</p>
+      <p>
+        Location: {latitude}, {longitude}
+      </p>
       <p>Manual Offset: {manualOffset} days</p>
     </div>
   );
@@ -63,7 +67,7 @@ The hook accepts optional configuration:
 ```tsx
 const { currentHijriDate } = useHijriCalendar({
   date: new Date(), // Use specific Gregorian date
-  hijriYear: 1446,  // Or use specific Hijri date components
+  hijriYear: 1446, // Or use specific Hijri date components
   hijriMonth: 1,
   hijriDay: 1,
 });
@@ -72,6 +76,7 @@ const { currentHijriDate } = useHijriCalendar({
 ## Return Values
 
 ### Current State
+
 - `currentHijriDate: HijriDate` - Current Hijri date based on options or current time
 - `timezone: string` - User's configured timezone
 - `latitude?: number` - Latitude from settings (if available)
@@ -79,31 +84,38 @@ const { currentHijriDate } = useHijriCalendar({
 - `manualOffset?: number` - Manual date offset in days
 
 ### Date Conversion
+
 - `toHijriDate(date: Date): HijriDate` - Convert Gregorian date to Hijri
 - `fromHijriDate(hijriDate: HijriDate): Date` - Convert Hijri date to Gregorian
 - `toGregorianDate(hijriDate: HijriDate): Date` - Alias for fromHijriDate
 
 ### Date Navigation
+
 - `getToday(): HijriDate` - Get today's Hijri date
 - `getTomorrow(): HijriDate` - Get tomorrow's Hijri date
 - `getYesterday(): HijriDate` - Get yesterday's Hijri date
 
 ### Date Utilities
+
 - `isToday(hijriDate: HijriDate): boolean` - Check if date is today
 - `isTomorrow(hijriDate: HijriDate): boolean` - Check if date is tomorrow
 - `isSameDay(date1: HijriDate, date2: HijriDate): boolean` - Check if dates are same day
 
 ### Week Utilities
+
 - `getWeekDates(hijriDate: HijriDate): HijriDate[]` - Get all dates in the week
 - `getStartOfWeek(hijriDate: HijriDate): HijriDate` - Get start of week (Friday)
 
 ### Formatting
+
 - `formatDate(hijriDate: HijriDate, format: string): string` - Format date with pattern
 
 ### Creation
+
 - `createHijriDate(year, month, day, hour?, minute?): HijriDate` - Create specific Hijri date
 
 ### State
+
 - `loading: boolean` - Settings loading state
 - `error: string | null` - Error state
 - `initiated: boolean` - Hook initialization state
@@ -136,35 +148,39 @@ The `formatDate` function supports various patterns:
 ## Examples
 
 ### Basic Usage
+
 ```tsx
 const { currentHijriDate, formatDate } = useHijriCalendar();
-const formatted = formatDate(currentHijriDate, 'dddd, D MMMM YYYY');
+const formatted = formatDate(currentHijriDate, "dddd, D MMMM YYYY");
 // Result: "Friday, 15 Ramadan 1445"
 ```
 
 ### Date Conversion
+
 ```tsx
 const { toHijriDate, formatDate } = useHijriCalendar();
-const gregorianDate = new Date('2024-03-22');
+const gregorianDate = new Date("2024-03-22");
 const hijriDate = toHijriDate(gregorianDate);
-const formatted = formatDate(hijriDate, 'D MMMM YYYY');
+const formatted = formatDate(hijriDate, "D MMMM YYYY");
 // Result: "15 Ramadan 1445"
 ```
 
 ### Custom Date Creation
+
 ```tsx
 const { createHijriDate, formatDate } = useHijriCalendar();
 const customDate = createHijriDate(1446, 1, 1, 12, 30);
-const formatted = formatDate(customDate, 'dddd, D MMMM YYYY HH:mm');
+const formatted = formatDate(customDate, "dddd, D MMMM YYYY HH:mm");
 // Result: "Friday, 1 Muharram 1446 12:30"
 ```
 
 ### Week Navigation
+
 ```tsx
 const { getWeekDates, formatDate } = useHijriCalendar();
 const weekDates = getWeekDates(currentHijriDate);
-weekDates.forEach(date => {
-  console.log(formatDate(date, 'ddd: D MMMM'));
+weekDates.forEach((date) => {
+  console.log(formatDate(date, "ddd: D MMMM"));
 });
 // Output:
 // Fri: 13 Ramadan
@@ -179,6 +195,7 @@ weekDates.forEach(date => {
 ## Dependencies
 
 The hook depends on:
+
 - `useSettings` hook for configuration
 - `HijriDate` class for core functionality
 - `@tabby_ai/hijri-converter` for conversion algorithms
