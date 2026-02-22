@@ -1,9 +1,9 @@
 import { Button } from "../navigation";
 import { Navbar } from "../navigation/navbar";
 import { Check } from "lucide-react";
-import { HijriDate } from "../calendar/hijri";
-import { SimpleHijriDateInput } from "../calendar/simple-hijri-date-input";
-import Select from "../../ui/form-select";
+import { HijriDate } from "../calendar/hijri/hijri-date";
+import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
+import { ListInputSelect } from "../../ui/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
 interface TaskFilterModalProps {
@@ -75,44 +75,35 @@ export default function TaskFilterModal({
       />
       <div className="flex-1">
         {/* Status Select */}
-        <div className="p-2 bg-white dark:bg-gray-800">
-          <Select
-            name="status"
-            label={t("status")}
-            value={statusFilter}
-            options={statusOptions}
-            onChange={(e) => onStatusFilterChange(e.target.value)}
-          />
-        </div>
+        <ListInputSelect
+          label={t("status")}
+          value={statusFilter.toString()}
+          onValueChange={(value) =>
+            onStatusFilterChange(value === "all" ? "all" : parseInt(value))
+          }
+          options={statusOptions.map((opt) => ({
+            value: opt.value.toString(),
+            label: opt.label,
+          }))}
+        />
       </div>
 
-      <div className="p-2 flex flex-row gap-2 items-center justify-between">
-        <div className="bg-white dark:bg-gray-800">
-          <label className="hidden">{t("start_date")}</label>
-          <SimpleHijriDateInput
-            value={dateRangeFilter?.startDate}
-            onChange={(startDate) => {
-              if (startDate) {
-                const endDate = dateRangeFilter?.endDate || startDate;
-                onDateRangeFilterChange({ startDate, endDate });
-              }
-            }}
-            placeholder={t("start_date")}
-          />
-        </div>
-        <div>{t("to")}</div>
-        <div className="bg-white dark:bg-gray-800">
-          <label className="hidden">{t("end_date")}</label>
-          <SimpleHijriDateInput
-            value={dateRangeFilter?.endDate}
-            onChange={(endDate) => {
-              if (endDate) {
-                const startDate = dateRangeFilter?.startDate || endDate;
-                onDateRangeFilterChange({ startDate, endDate });
-              }
-            }}
-            placeholder={t("end_date")}
-          />
+      <div className="p-2 border-b border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3 flex-1 min-w-0 pr-2">
+            <span className="text-gray-900 font-semibold text-left truncate">
+              {t("select_date_range")}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2 flex-shrink-0 max-w-[50%] min-w-0">
+            <HijriDateRangeInput
+              value={dateRangeFilter}
+              onChange={onDateRangeFilterChange}
+              placeholder={t("select_date_range")}
+              className="w-full min-w-0"
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -175,4 +175,18 @@ export const taskTranslations = {
     en: "Failed to delete task. Please try again.",
     id: "Gagal menghapus tugas. Silakan coba lagi.",
   },
+
+  // Date range picker
+  select_date_range: {
+    en: "Date Range",
+    id: "Rentang Tanggal",
+  },
+  clear: {
+    en: "Clear",
+    id: "Hapus",
+  },
+  status: {
+    en: "Status",
+    id: "Status",
+  },
 };
