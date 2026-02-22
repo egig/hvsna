@@ -55,23 +55,34 @@ export default function GeneralSettings() {
     <Page>
       <Navbar title={t("general")} showBackButton={true} />
 
+      <ListInputSelect
+        label={t("language")}
+        value={settings.language}
+        onValueChange={handleLanguageChange}
+        disabled={loading}
+        options={[
+          { value: "en", label: t("english") },
+          { value: "id", label: t("bahasa") },
+        ]}
+      />
+
       <div className="p-2 border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1 min-w-0">
             <span className="text-gray-900 font-semibold text-left truncate">
-              Location
+              {t("location")}
             </span>
           </div>
 
           <div className="flex items-center space-x-2 flex-shrink-0 min-w-0 max-w-[50%]">
             {loading ? (
-              <div className="text-xs text-gray-500">Loading...</div>
+              <div className="text-xs text-gray-500">{t("loading")}</div>
             ) : (
               <div className="text-sm text-gray-600 text-right">
                 <div className={`text-xs text-gray-600`}>
                   {settings.coordinate
                     ? `${settings.coordinate.latitude.toFixed(3)},${settings.coordinate.longitude.toFixed(3)}`
-                    : "Not set"}
+                    : t("not_set")}
                 </div>
               </div>
             )}
@@ -84,19 +95,18 @@ export default function GeneralSettings() {
           </div>
         )}
 
-        {/* Location Details */}
         {settings.coordinate && (
           <div className="mt-3 p-3 bg-gray-50 rounded text-xs">
             <div className="space-y-2">
               {settings.coordinate.accuracy && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Accuracy:</span>
+                  <span className="text-gray-600">{t("accuracy")}</span>
                   <span>±{settings.coordinate.accuracy.toFixed(2)}m</span>
                 </div>
               )}
               {settings.locationResolvedAt && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Updated:</span>
+                  <span className="text-gray-600">{t("updated")}</span>
                   <span>
                     {new Date(settings.locationResolvedAt).toLocaleString()}
                   </span>
@@ -106,7 +116,6 @@ export default function GeneralSettings() {
           </div>
         )}
 
-        {/* Location Actions */}
         <div className="mt-3 flex flex-wrap gap-2">
           {!hasLocationPermission ? (
             <button
@@ -130,7 +139,7 @@ export default function GeneralSettings() {
                 target.style.backgroundColor = "var(--hvsna-primary-color)";
               }}
             >
-              Enable Location
+              {t("enable_location")}
             </button>
           ) : (
             <>
@@ -155,7 +164,7 @@ export default function GeneralSettings() {
                   target.style.backgroundColor = "var(--hvsna-primary-color)";
                 }}
               >
-                Get Location
+                {t("get_location")}
               </button>
               {settings.coordinate && (
                 <button
@@ -182,7 +191,7 @@ export default function GeneralSettings() {
                     target.style.color = "var(--hvsna-primary-color)";
                   }}
                 >
-                  Clear Location
+                  {t("clear_location")}
                 </button>
               )}
             </>
@@ -201,24 +210,11 @@ export default function GeneralSettings() {
             label: tz,
           }))}
           helpText={
-            isTimezoneFromLocation
-              ? "Timezone automatically set from location"
-              : undefined
+            isTimezoneFromLocation ? t("timezone_from_location") : undefined
           }
         />
 
         <div className="space-y-4">
-          <ListInputSelect
-            label={t("language")}
-            value={settings.language}
-            onValueChange={handleLanguageChange}
-            disabled={loading}
-            options={[
-              { value: "en", label: t("english") },
-              { value: "id", label: t("bahasa") },
-            ]}
-          />
-
           {/* TODO How about upcoming date, should I adjust created tasks */}
           <ListInputSelect
             label={t("manual_date_offset")}
@@ -232,7 +228,7 @@ export default function GeneralSettings() {
               { value: "1", label: t("day_offset_positive") },
               { value: "2", label: t("days_offset_positive", { count: 2 }) },
             ]}
-            helpText="Hijri calendar manual offset"
+            helpText={t("hijri_calendar_offset")}
           />
         </div>
       </div>

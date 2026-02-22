@@ -74,13 +74,13 @@ export const settingsTranslations = {
     en: "Manage your logs",
     id: "Kelola catatan Anda",
   },
-  wipe_local: {
-    en: "Wipe Local data",
-    id: "Hapus Data Lokal",
+  reset_device_data: {
+    en: "Reset Device Data",
+    id: "Reset Data Perangkat",
   },
-  wipe_local_subtitle: {
-    en: "Delete all local data",
-    id: "Hapus semua data lokal",
+  reset_device_data_subtitle: {
+    en: "Delete all local data (synced data will not be deleted)",
+    id: "Hapus semua data lokal (data yang disinkronkan tidak akan dihapus)",
   },
 
   // Data management specific to settings
@@ -129,5 +129,121 @@ export const settingsTranslations = {
   about: {
     en: "About",
     id: "Tentang",
+  },
+
+  // Location settings
+  location: {
+    en: "Location",
+    id: "Lokasi",
+  },
+  loading: {
+    en: "Loading...",
+    id: "Memuat...",
+  },
+  not_set: {
+    en: "Not set",
+    id: "Tidak diatur",
+  },
+  accuracy: {
+    en: "Accuracy:",
+    id: "Akurasi:",
+  },
+  updated: {
+    en: "Updated:",
+    id: "Diperbarui:",
+  },
+  enable_location: {
+    en: "Enable Location",
+    id: "Aktifkan Lokasi",
+  },
+  get_location: {
+    en: "Get Location",
+    id: "Dapatkan Lokasi",
+  },
+  clear_location: {
+    en: "Clear Location",
+    id: "Hapus Lokasi",
+  },
+  timezone_from_location: {
+    en: "Timezone automatically set from location",
+    id: "Zona waktu secara otomatis diatur dari lokasi",
+  },
+  hijri_calendar_offset: {
+    en: "Hijri calendar manual offset",
+    id: "Offset manual kalender Hijri",
+  },
+
+  // Missing translations
+  settings: {
+    en: "Settings",
+    id: "Pengaturan",
+  },
+  sync: {
+    en: "Sync",
+    id: "Sinkronisasi",
+  },
+  sign_in: {
+    en: "Sign In",
+    id: "Masuk",
+  },
+  general: {
+    en: "General",
+    id: "Umum",
+  },
+  warning: {
+    en: "Warning !",
+    id: "Peringatan !",
+  },
+  data_deletion_permanent: {
+    en: "Data deletion is permanent.",
+    id: "Penghapusan data bersifat permanen.",
+  },
+  actions_cannot_be_undone: {
+    en: "These actions cannot be undone.",
+    id: "Tindakan ini tidak dapat dibatalkan.",
+  },
+  delete_all_data: {
+    en: "This will delete all local data stored on this device.",
+    id: "Ini akan menghapus semua data lokal yang tersimpan di perangkat ini.",
+  },
+  deleting: {
+    en: "Deleting...",
+    id: "Menghapus...",
+  },
+  wipe_all_data: {
+    en: "Reset All Data",
+    id: "Reset Semua Data",
+  },
+  language: {
+    en: "Language",
+    id: "Bahasa",
+  },
+  timezone: {
+    en: "Timezone",
+    id: "Zona Waktu",
+  },
+  manual_date_offset: {
+    en: "Manual Date Offset",
+    id: "Offset Tanggal Manual",
+  },
+  days_offset_negative: {
+    en: "-{{count}} days",
+    id: "-{{count}} hari",
+  },
+  day_offset_negative: {
+    en: "-1 day",
+    id: "-1 hari",
+  },
+  no_offset: {
+    en: "No offset",
+    id: "Tidak ada offset",
+  },
+  day_offset_positive: {
+    en: "+1 day",
+    id: "+1 hari",
+  },
+  days_offset_positive: {
+    en: "+{{count}} days",
+    id: "+{{count}} hari",
   },
 };

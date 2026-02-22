@@ -36,7 +36,7 @@ export default function WipeData() {
 
   return (
     <Page>
-      <Navbar title={t("wipe_local")} showBackButton />
+      <Navbar title={t("reset_device_data")} showBackButton />
 
       <main className="max-w-[520px] mx-auto px-4 py-6">
         {/* Warning Section */}
@@ -59,6 +59,9 @@ export default function WipeData() {
 
         {/* Action Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            {t("reset_device_data_subtitle")}
+          </p>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
             {t("delete_all_data")}
           </p>

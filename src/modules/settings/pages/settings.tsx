@@ -27,7 +27,11 @@ export default function Settings() {
           <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
         </SignedOut>
         <MenuItem title={t("general")} icon={Cog} to="/general-settings" />
-        <MenuItem title={t("wipe_local")} icon={Trash} to="/wipe-local" />
+        <MenuItem
+          title={t("reset_device_data")}
+          icon={Trash}
+          to="/wipe-local"
+        />
         <MenuItem title={t("about")} icon={Info} to="/about" />
       </div>
     </Page>
