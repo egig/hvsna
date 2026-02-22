@@ -9,10 +9,11 @@ import type {
   Coordinate,
   LocationResolveType,
 } from "./modules/settings/settings";
-import { Provider, ErrorBoundary } from "@rollbar/react";
+import { Provider } from "@rollbar/react";
 import { SyncProvider } from "./modules/sync/context";
 import { LanguageProviderWrapper } from "./modules/i18n/LanguageProviderWrapper";
 import { SnackbarProvider } from "./ui/snackbar-provider";
+import { ErrorBoundary } from "./components/error-boundary";
 
 export interface AppConfig {
   basePath?: string;

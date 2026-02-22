@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePouchDB } from "../../pouchdb";
 import { useTrackers } from "../tracker/use-trackers";
 import { useAttributeOptions } from "../option/use-options";
@@ -29,45 +29,45 @@ export function useToday() {
   const { activeDate, setActiveDate, gregorianDate, pageTitle, subTitle } =
     useDateFormatter();
 
+  const loadHomeData = useCallback(async () => {
+    if (!db) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Load target results (last 30 days)
+      const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const [results, trackersData] = await Promise.all([
+        getTargetResults(
+          {
+            from: thirtyDaysAgo,
+            to: Date.now(),
+          },
+          db,
+        ),
+        getTrackers(),
+      ]);
+
+      setTargetResults(results);
+      setTrackers(trackersData);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load home data",
+      );
+    } finally {
+      setLoading(false);
+      setInitiated(true);
+    }
+  }, [db, getTargetResults, getTrackers]);
+
   useEffect(() => {
     loadTodayTasks();
-  }, []);
+  }, [loadTodayTasks]);
 
   useEffect(() => {
-    const loadHomeData = async () => {
-      if (!db) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Load target results (last 30 days)
-        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const [results, trackersData] = await Promise.all([
-          getTargetResults(
-            {
-              from: thirtyDaysAgo,
-              to: Date.now(),
-            },
-            db,
-          ),
-          getTrackers(),
-        ]);
-
-        setTargetResults(results);
-        setTrackers(trackersData);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load home data",
-        );
-      } finally {
-        setLoading(false);
-        setInitiated(true);
-      }
-    };
-
     loadHomeData();
-  }, [db]);
+  }, [loadHomeData]);
 
   return {
     // State

@@ -14,6 +14,7 @@ import type { Task, PrayerTime } from "src/modules/task/types";
 import type { TargetResultData } from "src/modules/goal/useTargetResults";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Clock } from "lucide-react";
+import { useMemo, useCallback } from "react";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -23,16 +24,15 @@ function TodayTasks({ tasks }: TodayTasksProps) {
   const { openTaskForm } = useTask();
   const { t } = useLanguageContext();
 
-  const handleEditTask = (task: Task) => {
+  const handleEditTask = useCallback((task: Task) => {
     openTaskForm(task.id);
-  };
+  }, [openTaskForm]);
 
-  // Group tasks by prayer time
-  const groupTasksByPrayerTime = (tasks: Task[]) => {
+  // Memoize task grouping to prevent unnecessary recalculations
+  const taskGroups = useMemo(() => {
     const groups: {
       prayer: PrayerTime | null;
       tasks: Task[];
-      offset?: number;
     }[] = [];
 
     // Separate prayer-based tasks and regular tasks
@@ -71,9 +71,8 @@ function TodayTasks({ tasks }: TodayTasksProps) {
         groups.push({
           prayer,
           tasks: prayerGroups[prayer].sort(
-            (a, b) => (a.prayerOffset || 0) - (b.prayerOffset || 0),
+            (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
           ),
-          offset: prayerGroups[prayer][0]?.prayerOffset,
         });
       }
     });
@@ -89,15 +88,11 @@ function TodayTasks({ tasks }: TodayTasksProps) {
     }
 
     return groups;
-  };
+  }, [tasks]);
 
-  const taskGroups = groupTasksByPrayerTime(tasks);
-
-  const getPrayerTimeDisplay = (prayer: PrayerTime, offset?: number) => {
-    const offsetText =
-      offset && offset !== 0 ? ` ${offset > 0 ? "+" : ""}${offset}min` : "";
-    return `${t(prayer.toLowerCase())}${offsetText}`;
-  };
+  const getPrayerTimeDisplay = useCallback((prayer: PrayerTime) => {
+    return t(prayer.toLowerCase());
+  }, [t]);
 
   return (
     <div className="space-y-6 px-2">
@@ -107,7 +102,7 @@ function TodayTasks({ tasks }: TodayTasksProps) {
             <div className="flex items-center gap-2 mb-4 px-2">
               <Clock className="w-4 h-4 text-[var(--hvsna-primary-color)]" />
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                {getPrayerTimeDisplay(group.prayer, group.offset)}
+                {getPrayerTimeDisplay(group.prayer)}
               </h3>
               <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
             </div>
