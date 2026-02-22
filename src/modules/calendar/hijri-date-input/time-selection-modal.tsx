@@ -3,16 +3,19 @@ import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { Navbar } from "src/modules/navigation";
 import * as SunCalc from "suncalc";
+import type { PrayerTime } from "src/modules/task/types";
 
 interface TimeSelectionModalProps {
   selectedTime: string | null;
+  selectedPrayerTime?: PrayerTime;
   onBack: () => void;
-  onConfirm: (time: string) => void;
+  onConfirm: (time: string, prayerTime?: PrayerTime | string) => void;
   onRemoveTime: () => void;
 }
 
 export function TimeSelectionModal({
   selectedTime,
+  selectedPrayerTime,
   onBack,
   onConfirm,
   onRemoveTime,
@@ -21,14 +24,22 @@ export function TimeSelectionModal({
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
   const [sortedHours, setSortedHours] = useState<number[]>([]);
+  const [selectedPrayer, setSelectedPrayer] = useState<PrayerTime | "">(selectedPrayerTime || "");
+  const [inputMode, setInputMode] = useState<"prayer" | "custom">(selectedPrayerTime ? "prayer" : "custom");
 
+  const prayerTimes: PrayerTime[] = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
   useEffect(() => {
-    if (selectedTime) {
+    if (selectedTime && !selectedPrayerTime) {
       const [h, m] = selectedTime?.split(":") || [0, 0];
       setHour(parseInt(h));
       setMinute(parseInt(m));
     }
-  }, [selectedTime]);
+  }, [selectedTime, selectedPrayerTime]);
+
+  useEffect(() => {
+    // Update input mode when selectedPrayerTime changes
+    setInputMode(selectedPrayerTime ? "prayer" : "custom");
+  }, [selectedPrayerTime]);
 
   useEffect(() => {
     // Calculate sunset and sunrise times for today
@@ -66,7 +77,21 @@ export function TimeSelectionModal({
 
   const handleCustomTimeConfirm = () => {
     const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-    onConfirm(time);
+    onConfirm(time, "");
+  };
+
+  const handlePrayerTimeConfirm = () => {
+    if (selectedPrayer) {
+      onConfirm("", selectedPrayer);
+    }
+  };
+
+  const handleConfirm = () => {
+    if (inputMode === "prayer" && selectedPrayer) {
+      handlePrayerTimeConfirm();
+    } else if (inputMode === "custom") {
+      handleCustomTimeConfirm();
+    }
   };
 
   return (
@@ -77,52 +102,116 @@ export function TimeSelectionModal({
         customBackAction={onBack}
         rightAction={
           <button
-            onClick={handleCustomTimeConfirm}
-            className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] transition-colors"
+            onClick={handleConfirm}
+            disabled={inputMode === "prayer" ? !selectedPrayer : false}
+            className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             <Check />
           </button>
         }
       />
 
-      {/* Custom Time Selection */}
+      {/* Mode Selection */}
       <div className="p-4">
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-4">
           <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
           <span className="text-xs text-gray-500 dark:text-gray-400">
-            {t("custom_time") || "Custom Time"}
+            {t("time_selection_mode") || "Time Selection Mode"}
           </span>
           <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
         </div>
 
-        <div className="flex gap-2">
-          <select
-            value={hour.toString()}
-            onChange={(e) => setHour(parseInt(e.target.value))}
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setInputMode("prayer")}
+            className={`flex-1 px-3 py-2 rounded-md transition-colors ${
+              inputMode === "prayer"
+                ? "bg-[var(--hvsna-primary-color)] text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            }`}
           >
-            {sortedHours.map((i) => (
-              <option key={i} value={i}>
-                {i.toString().padStart(2, "0")}
-              </option>
-            ))}
-          </select>
-          <span className="flex items-center text-gray-500 dark:text-gray-400">
-            :
-          </span>
-          <select
-            value={minute.toString()}
-            onChange={(e) => setMinute(parseInt(e.target.value))}
-            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            {t("prayer_time") || "Prayer Time"}
+          </button>
+          <button
+            onClick={() => setInputMode("custom")}
+            className={`flex-1 px-3 py-2 rounded-md transition-colors ${
+              inputMode === "custom"
+                ? "bg-[var(--hvsna-primary-color)] text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            }`}
           >
-            {Array.from({ length: 60 }, (_, i) => (
-              <option key={i} value={i}>
-                {i.toString().padStart(2, "0")}
+            {t("custom_time") || "Custom Time"}
+          </button>
+        </div>
+      </div>
+
+      {/* Prayer Time Selection */}
+      {inputMode === "prayer" && (
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {t("prayer_times") || "Prayer Times"}
+            </span>
+            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+          </div>
+
+          <select
+            value={selectedPrayer}
+            onChange={(e) => setSelectedPrayer(e.target.value as PrayerTime | "")}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="">{t("select_prayer_time") || "Select Prayer Time"}</option>
+            {prayerTimes.map((prayer) => (
+              <option key={prayer} value={prayer}>
+                {t(prayer.toLowerCase())}
               </option>
             ))}
           </select>
         </div>
-      </div>
+      )}
+
+      {/* Custom Time Selection */}
+      {inputMode === "custom" && (
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {t("custom_time") || "Custom Time"}
+            </span>
+            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+          </div>
+
+          <div className="flex gap-2">
+            <select
+              value={hour.toString()}
+              onChange={(e) => setHour(parseInt(e.target.value))}
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              {sortedHours.map((i) => (
+                <option key={i} value={i}>
+                  {i.toString().padStart(2, "0")}
+                </option>
+              ))}
+            </select>
+            <span className="flex items-center text-gray-500 dark:text-gray-400">
+              :
+            </span>
+            <select
+              value={minute.toString()}
+              onChange={(e) => setMinute(parseInt(e.target.value))}
+              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              {Array.from({ length: 60 }, (_, i) => (
+                <option key={i} value={i}>
+                  {i.toString().padStart(2, "0")}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
           type="button"

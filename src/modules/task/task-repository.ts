@@ -53,25 +53,29 @@ export class TaskRepository {
   }
 
   private mapDocumentToTask(doc: PouchDBTaskDocument): Task {
+    if (!doc) {
+      throw new Error("Document is null or undefined");
+    }
+    
     return {
-      id: doc._id,
-      userId: doc.userId,
-      name: doc.name,
-      description: doc.description,
-      status: doc.status,
-      atEpochMillis: doc.atEpochMillis,
-      targetId: doc.targetId,
-      targetValue: doc.targetValue,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-      attributes: doc.attributes,
-      atDateHijri: doc.atDateHijri,
-      atDateIsNone: doc.atDateIsNone,
-      atTimeIsNone: doc.atTimeIsNone,
-      atTime: doc.atTime,
+      id: doc._id || "",
+      userId: doc.userId || "",
+      name: doc.name || "",
+      description: doc.description || "",
+      status: doc.status || 0,
+      atEpochMillis: doc.atEpochMillis || 0,
+      targetId: doc.targetId || "",
+      targetValue: doc.targetValue || 0,
+      createdAt: doc.createdAt || 0,
+      updatedAt: doc.updatedAt || 0,
+      attributes: doc.attributes || {},
+      atDateHijri: doc.atDateHijri || "",
+      atDateIsNone: doc.atDateIsNone || 1,
+      atTimeIsNone: doc.atTimeIsNone || 1,
+      atTime: doc.atTime || "",
       // Prayer time fields
       prayerTime: doc.prayerTime,
-      usePrayerTime: doc.usePrayerTime,
+      usePrayerTime: doc.usePrayerTime || false,
     };
   }
 

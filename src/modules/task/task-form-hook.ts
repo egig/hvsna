@@ -109,8 +109,19 @@ export const useTaskForm = (
       setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
     }
 
-    if (task?.atTime) {
+    // Initialize time and prayer time state from existing task
+    if (task?.atTime && !task.usePrayerTime) {
+      // Task has custom time
       setSelectedTime(task.atTime);
+      setSelectedPrayerTime(""); // Clear prayer time for custom time
+    } else if (task?.prayerTime && task.usePrayerTime) {
+      // Task has prayer time
+      setSelectedPrayerTime(task.prayerTime);
+      setSelectedTime(null); // Clear custom time for prayer time
+    } else {
+      // Task has no time or prayer time
+      setSelectedTime(null);
+      setSelectedPrayerTime("");
     }
   }, [task, offset]);
 

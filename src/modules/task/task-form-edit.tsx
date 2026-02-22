@@ -47,6 +47,7 @@ export default function TaskFormEdit({
     selectedPrayerTime,
     selectedPrayerOffset,
     handleTimeSelection,
+    setSelectedPrayerTime
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
@@ -134,11 +135,11 @@ export default function TaskFormEdit({
         selectedTime={selectedTime}
         selectedPrayerTime={selectedPrayerTime}
         isSubmitting={isSubmitting}
-        onDateChange={(hijriDate, time) => {
+        onDateChange={(hijriDate, time, prayerTime) => {
           setSelectedHijriDate(hijriDate);
           setSelectedTime(time);
+          setSelectedPrayerTime(prayerTime);
         }}
-        onPrayerTimeChange={handleTimeSelection}
       />
 
       {goalEnabled && (

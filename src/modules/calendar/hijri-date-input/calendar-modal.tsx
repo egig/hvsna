@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Modal, Navbar } from "src/modules/navigation";
-import { TimeSelectionModal } from "./time-selection-modal";
 import { HijriDate } from "../hijri/hijri-date";
 import { HijriMonth } from "../hijri/hijri-month";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
@@ -16,15 +15,13 @@ interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: HijriDate | null;
-  selectedTime: string | null;
-  onDateSelect: (date: HijriDate | null, time: string | null) => void;
+  onDateSelect: (date: HijriDate | null) => void;
 }
 
 export function CalendarModal({
   isOpen,
   onClose,
   selectedDate,
-  selectedTime,
   onDateSelect,
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
@@ -45,7 +42,7 @@ export function CalendarModal({
     selectedDate,
   );
   const repeatEnabled = useFeatureFlag("TASK_REPEAT");
-  const [editMode, setEditMode] = useState<"date" | "time" | "repeat">("date");
+  const [editMode, setEditMode] = useState<"date" | "repeat">("date");
 
   useEffect(() => {
     if (selectedDate) {
@@ -101,42 +98,26 @@ export function CalendarModal({
         tempSelectedDate.month,
         tempSelectedDate.day,
       );
-      onDateSelect(finalDate, selectedTime);
+      onDateSelect(finalDate);
       onClose();
     }
   };
 
   const handleTomorrow = () => {
     const h = getToday();
-    onDateSelect(h.next(), null);
+    onDateSelect(h.next());
     onClose();
   };
 
   const handleToday = () => {
     const today = getToday();
-    onDateSelect(today, null);
+    onDateSelect(today);
     onClose();
   };
 
   const handleNoDate = () => {
-    onDateSelect(null as any, null);
+    onDateSelect(null);
     onClose();
-  };
-
-  const handleTimeConfirm = (
-    time: string,
-    prayerTime?: string,
-    prayerOffset?: number,
-  ) => {
-    // For prayer time, display "after <prayer time>" instead of empty time
-    const displayTime = prayerTime ? `after ${prayerTime}` : time;
-    onDateSelect(tempSelectedDate, displayTime);
-    setEditMode("date");
-  };
-
-  const handleRemoveTime = () => {
-    onDateSelect(tempSelectedDate, null);
-    setEditMode("date");
   };
 
   return (
@@ -234,7 +215,7 @@ export function CalendarModal({
                 >
                   <option value="none">{t("no_repeat")}</option>
                   <option value="daily">
-                    {t("daily_at_time", { time: selectedTime || "" })}
+                    {t("daily_at_time", { time: "" })}
                   </option>
                   <option value="monthly">
                     {t("monthly_on_day", { day: tempSelectedDate?.day || 1 })}
@@ -249,31 +230,8 @@ export function CalendarModal({
                 </select>
               </div>
             )}
-
-            <ListInput
-              label={t("time")}
-              onClick={() => {
-                setEditMode("time");
-              }}
-              rightContent={
-                selectedTime ? (
-                  selectedTime
-                ) : (
-                  <span className="text-gray-600">{t("none")}</span>
-                )
-              }
-            />
           </div>
         </>
-      )}
-
-      {editMode == "time" && (
-        <TimeSelectionModal
-          selectedTime={selectedTime}
-          onBack={() => setEditMode("date")}
-          onConfirm={handleTimeConfirm}
-          onRemoveTime={handleRemoveTime}
-        />
       )}
     </Modal>
   );

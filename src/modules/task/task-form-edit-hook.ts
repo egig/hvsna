@@ -95,14 +95,18 @@ export const useTaskFormEdit = (
       setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
     }
 
-    if (task?.atTime) {
+    // Initialize time and prayer time state from existing task
+    if (task?.atTime && !task.usePrayerTime) {
+      // Task has custom time
       setSelectedTime(task.atTime);
-    }
-
-    // Initialize prayer time fields from existing task
-    if (task?.usePrayerTime) {
-      setSelectedPrayerTime(task.prayerTime || "");
+      setSelectedPrayerTime(""); // Clear prayer time for custom time
+    } else if (task?.prayerTime && task.usePrayerTime) {
+      // Task has prayer time
+      setSelectedPrayerTime(task.prayerTime);
+      setSelectedTime(null); // Clear custom time for prayer time
     } else {
+      // Task has no time or prayer time
+      setSelectedTime(null);
       setSelectedPrayerTime("");
     }
   }, [task, offset]);
@@ -251,7 +255,7 @@ export const useTaskFormEdit = (
         taskInput.targetId = selectedTargetId;
       }
 
-      let result = await updateTask(taskId, taskInput);
+      let result = await updateTask(taskId, taskInput, () => refreshAllTaskLists(getToday()));
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
@@ -298,7 +302,9 @@ export const useTaskFormEdit = (
           `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
         )
       ) {
-        deleteTask(taskId).then(() => {
+        deleteTask(taskId, () => {
+          refreshAllTaskLists(getToday());
+        }).then(() => {
           setTask(null);
           closeTaskForm();
           onDelete?.(taskId);

@@ -4,17 +4,17 @@ import { CalendarModal } from "./hijri-date-input/calendar-modal";
 import { CalendarIcon } from "lucide-react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useHijriCalendar } from "./hijri/useHijriCalendar";
+import { TimeInput } from "./time-input";
 
 interface HijriDateInputProps {
   name: string;
   label: string;
   value?: HijriDate;
-  timeValue?: string;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
-  onChange?: (value: HijriDate | null, time: string | null) => void;
+  onChange?: (value: HijriDate | null) => void;
   onBlur?: () => void;
 }
 
@@ -22,7 +22,6 @@ export function HijriDateInput({
   name,
   label,
   value,
-  timeValue,
   placeholder = "",
   disabled = false,
   required = false,
@@ -33,40 +32,36 @@ export function HijriDateInput({
   const { isToday, isTomorrow, formatDate } = useHijriCalendar();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<HijriDate | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const { t } = useLanguageContext();
 
   // Initialize from Gregorian value
   useEffect(() => {
     if (value) {
       setSelectedDate(value);
-      setSelectedTime(timeValue || null);
     } else {
       setSelectedDate(null);
-      setSelectedTime(null);
     }
   }, [value]);
 
-  const handleDateSelect = (date: HijriDate | null, time: string | null) => {
+  const handleDateSelect = (date: HijriDate | null) => {
     setSelectedDate(date);
-    setSelectedTime(time);
     if (onChange) {
-      onChange(date, time);
+      onChange(date);
     }
   };
 
-  const formatDateDisplay = (date: HijriDate | null, time: string | null) => {
+  const formatDateDisplay = (date: HijriDate | null) => {
     if (!date) return placeholder;
 
     if (isToday(date)) {
-      return t("today") + (time ? `, ${time}` : "");
+      return t("today");
     }
 
     if (isTomorrow(date)) {
-      return t("tomorrow") + (time ? `, ${time}` : "");
+      return t("tomorrow");
     }
 
-    return formatDate(date, "DD MMMM") + (time ? `, ${time}` : "");
+    return formatDate(date, "DD MMMM");
   };
 
   const handleButtonClick = () => {
@@ -95,7 +90,7 @@ export function HijriDateInput({
                 : "text-gray-500 dark:text-gray-400"
             }
           >
-            {formatDateDisplay(selectedDate, selectedTime)}
+            {formatDateDisplay(selectedDate)}
           </span>
           <CalendarIcon className="w-5 h-5 text-gray-400" />
         </div>
@@ -105,7 +100,6 @@ export function HijriDateInput({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedDate={selectedDate}
-        selectedTime={selectedTime}
         onDateSelect={handleDateSelect}
       />
     </div>

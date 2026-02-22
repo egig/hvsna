@@ -5,12 +5,11 @@ import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { DatePrayerInput } from "./date-prayer-input";
-import { TimeSelectionModal } from "../calendar/hijri-date-input/time-selection-modal";
-import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
+import { useHijriCalendar } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
-import type { Task } from "./types";
+import type { PrayerTime, Task } from "./types";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 import { useSettings } from "src/modules/settings/useSettings";
 
@@ -44,6 +43,7 @@ export default function TaskForm({
     // Prayer time fields
     selectedPrayerTime,
     selectedPrayerOffset,
+    setSelectedPrayerTime,
     handleTimeSelection,
   } = useTaskForm(onSuccess, onError, onCancel);
   const { goals } = useGoals();
@@ -129,11 +129,11 @@ export default function TaskForm({
         selectedTime={selectedTime}
         selectedPrayerTime={selectedPrayerTime}
         isSubmitting={isSubmitting}
-        onDateChange={(hijriDate, time) => {
+        onDateChange={(hijriDate, time, prayerTime) => {
           setSelectedHijriDate(hijriDate);
           setSelectedTime(time);
+          setSelectedPrayerTime(prayerTime as PrayerTime);
         }}
-        onPrayerTimeChange={handleTimeSelection}
       />
 
       {goalEnabled && (

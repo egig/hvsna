@@ -55,7 +55,7 @@ function TodayTasks({ tasks }: TodayTasksProps) {
     };
 
     prayerTasks.forEach((task) => {
-      if (task.prayerTime) {
+      if (task.prayerTime && prayerGroups[task.prayerTime]) {
         prayerGroups[task.prayerTime].push(task);
       }
     });
