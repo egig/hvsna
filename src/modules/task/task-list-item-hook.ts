@@ -1,13 +1,16 @@
 import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
 import { useTaskStore } from "./task-store";
-import type { Task, TaskStatus } from "../../lib/types/task";
+import type { Task, TaskStatus } from "./types";
+import { useHijriCalendar } from "../calendar/hijri";
 
 export const useTaskListItem = () => {
   const getTask = useTaskStore((s) => s.getTask);
   const updateTask = useTaskStore((s) => s.updateTask);
+  const refreshAllTaskLists = useTaskStore((s) => s.refreshAllTaskLists);
   const { createLog } = useLog();
   const { getGoal } = useGoal();
+  const { getToday } = useHijriCalendar();
 
   const updateStatus = async (
     id: string,
@@ -20,9 +23,15 @@ export const useTaskListItem = () => {
     }
 
     // Update the task
-    const updatedTask = await updateTask(id, {
-      status,
-    });
+    const updatedTask = await updateTask(
+      id,
+      {
+        status,
+      },
+      () => {
+        refreshAllTaskLists(getToday());
+      },
+    );
 
     if (!updatedTask.targetId) {
       return updatedTask;

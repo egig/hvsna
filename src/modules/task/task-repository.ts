@@ -389,9 +389,7 @@ export class TaskRepository {
   // Today tasks should list:
   // Not-completed
   // Past due
-  async findTodayTasks(): Promise<Task[]> {
-    // TODO include offset calculation
-    const today = HijriDate.fromDate(new Date());
+  async findTodayTasks(todayHijri: HijriDate): Promise<Task[]> {
     await db.createIndex({
       index: {
         fields: [
@@ -419,7 +417,7 @@ export class TaskRepository {
         atEpochMillis: {
           // date is less that tomorrow
           // includes "overdue" tasks
-          $lt: today.next().toDate().valueOf(),
+          $lt: todayHijri.next().toDate().valueOf(),
         },
       },
       sort: [
@@ -438,9 +436,7 @@ export class TaskRepository {
     );
   }
 
-  async findUpcomingTasks(): Promise<Task[]> {
-    const today = HijriDate.fromDate(new Date());
-
+  async findUpcomingTasks(todayHijri: HijriDate): Promise<Task[]> {
     await db.createIndex({
       index: {
         fields: ["type", "status", "atDateIsNone", "atEpochMillis"],
@@ -453,7 +449,7 @@ export class TaskRepository {
         status: 0,
         atDateIsNone: 0,
         atEpochMillis: {
-          $gte: today.toDate().valueOf(),
+          $gte: todayHijri.toDate().valueOf(),
         },
       },
       sort: [

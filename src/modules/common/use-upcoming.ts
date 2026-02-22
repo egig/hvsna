@@ -28,7 +28,7 @@ export function useUpcoming() {
   useEffect(() => {
     const loadData = async () => {
       setInitiated(true);
-      loadUpcommingTasks();
+      loadUpcommingTasks(getToday());
     };
     loadData();
   }, []);

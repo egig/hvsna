@@ -64,9 +64,13 @@ interface TaskState {
   clearFilters: () => void;
 
   // Async actions for single task
-  createTask: (input: TaskCreateInput) => Promise<Task>;
-  updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
-  deleteTask: (id: string) => Promise<void>;
+  createTask: (input: TaskCreateInput, onSuccess?: () => void) => Promise<Task>;
+  updateTask: (
+    id: string,
+    input: TaskUpdateInput,
+    onSuccess?: () => void,
+  ) => Promise<Task>;
+  deleteTask: (id: string, onSuccess?: () => void) => Promise<void>;
   getTask: (id: string) => Promise<Task | null>;
 
   // Async actions for multiple tasks
@@ -76,9 +80,12 @@ interface TaskState {
   // refreshTasks: () => Promise<void>;
   loadMoreTasks: () => Promise<void>;
 
-  loadTodayTasks: () => Promise<void>;
-  loadUpcommingTasks: () => Promise<void>;
+  loadTodayTasks: (today: HijriDate) => Promise<void>;
+  loadUpcommingTasks: (d: HijriDate) => Promise<void>;
   loadBrowsedTasks: (reset?: boolean) => Promise<void>;
+
+  // Reusable function to refresh all task lists
+  refreshAllTaskLists: (today: HijriDate) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -163,15 +170,15 @@ export const useTaskStore = create<TaskState>()(
         get().loadBrowsedTasks(true);
       },
 
-      createTask: async (input: TaskCreateInput): Promise<Task> => {
+      createTask: async (
+        input: TaskCreateInput,
+        onSuccess?: () => void,
+      ): Promise<Task> => {
         try {
           set({ loading: true, error: null });
 
           const newTask = await taskRepository.create(input);
-          get().loadTodayTasks();
-          get().loadUpcommingTasks();
-          get().loadBrowsedTasks(true);
-
+          onSuccess?.();
           return newTask;
         } catch (err) {
           const errorMessage =
@@ -183,15 +190,16 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      updateTask: async (id: string, input: TaskUpdateInput): Promise<Task> => {
+      updateTask: async (
+        id: string,
+        input: TaskUpdateInput,
+        onSuccess?: () => void,
+      ): Promise<Task> => {
         try {
           set({ loading: true, error: null });
 
           const updatedTask = await taskRepository.update(id, input);
-          get().loadTodayTasks();
-          get().loadUpcommingTasks();
-          get().loadBrowsedTasks(true);
-
+          onSuccess?.();
           return updatedTask;
         } catch (err) {
           const errorMessage =
@@ -203,15 +211,13 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      deleteTask: async (id: string): Promise<void> => {
+      deleteTask: async (id: string, onSuccess?: () => void): Promise<void> => {
         try {
           set({ loading: true, error: null });
 
           await taskRepository.delete(id);
           get().removeTaskFromList(id);
-          get().loadTodayTasks();
-          get().loadUpcommingTasks();
-          get().loadBrowsedTasks(true);
+          onSuccess?.();
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to delete task";
@@ -328,10 +334,10 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadTodayTasks: async (): Promise<void> => {
+      loadTodayTasks: async (d: HijriDate): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          const todayTasksList = await taskRepository.findTodayTasks();
+          const todayTasksList = await taskRepository.findTodayTasks(d);
           let tc = Object.fromEntries(
             todayTasksList.map((task) => [task.id, task]),
           );
@@ -346,10 +352,10 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadUpcommingTasks: async (): Promise<void> => {
+      loadUpcommingTasks: async (d: HijriDate): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          const upcomingTasksList = await taskRepository.findUpcomingTasks();
+          const upcomingTasksList = await taskRepository.findUpcomingTasks(d);
           let tc = Object.fromEntries(
             upcomingTasksList.map((task) => [task.id, task]),
           );
@@ -446,6 +452,14 @@ export const useTaskStore = create<TaskState>()(
         } finally {
           set({ loading: false, loadingMore: false });
         }
+      },
+
+      refreshAllTaskLists: async (today: HijriDate): Promise<void> => {
+        await Promise.all([
+          get().loadTodayTasks(today),
+          get().loadUpcommingTasks(today),
+          get().loadBrowsedTasks(true),
+        ]);
       },
     }),
     {

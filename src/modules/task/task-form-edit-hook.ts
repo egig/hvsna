@@ -45,19 +45,14 @@ export const useTaskFormEdit = (
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
   const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
-  const createTask = useTaskStore((s) => s.createTask);
   const deleteTask = useTaskStore((s) => s.deleteTask);
-  const editingTaskId = useTaskStore((s) => s.editingTaskId);
   const error = useTaskStore((s) => s.error);
-  const formOpen = useTaskStore((s) => s.formOpen);
   const getTask = useTaskStore((s) => s.getTask);
-  const openTaskForm = useTaskStore((s) => s.openTaskForm);
-  const setEditingTaskId = useTaskStore((s) => s.setEditingTaskId);
   const updateTask = useTaskStore((s) => s.updateTask);
+  const refreshAllTaskLists = useTaskStore((s) => s.refreshAllTaskLists);
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
   const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | null>(
     null,
@@ -80,10 +75,6 @@ export const useTaskFormEdit = (
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
   const { getToday, createHijriDate } = useHijriCalendar();
-
-  useEffect(() => {
-    setEditingTaskId(taskId || null);
-  }, [taskId]);
 
   useEffect(() => {
     if (task?.atDateHijri) {
@@ -153,7 +144,9 @@ export const useTaskFormEdit = (
     const currentTask = await getTask(id);
 
     // Update the task
-    const updatedTask = await updateTask(id, input);
+    const updatedTask = await updateTask(id, input, () => {
+      refreshAllTaskLists(getToday());
+    });
 
     if (!input.targetId) {
       return updatedTask;
@@ -312,19 +305,6 @@ export const useTaskFormEdit = (
         });
       }
     }
-  };
-
-  const reset = () => {
-    setTask(null);
-    setLoading(false);
-    setCurrentTargetId(null);
-    setSelectedHijriDate(null);
-    setSelectedTime(null);
-    setSelectedTargetId("");
-    setIsSubmitting(false);
-    setSelectedGoal(null);
-    setTracker(null);
-    setSelectedPrayerTime("");
   };
 
   return {

@@ -48,6 +48,7 @@ export const useTaskForm = (
   const error = useTaskStore((s) => s.error);
   const getTask = useTaskStore((s) => s.getTask);
   const updateTask = useTaskStore((s) => s.updateTask);
+  const refreshAllTaskLists = useTaskStore((s) => s.refreshAllTaskLists);
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
@@ -247,7 +248,9 @@ export const useTaskForm = (
         taskInput.targetId = selectedTargetId;
       }
 
-      let result = await createTask(taskInput);
+      let result = await createTask(taskInput, () => {
+        refreshAllTaskLists(getToday());
+      });
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {

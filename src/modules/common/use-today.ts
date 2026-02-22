@@ -10,6 +10,7 @@ import {
 } from "src/modules/goal/useTargetResults";
 import { useTaskStore } from "../task/task-store";
 import { useDateFormatter } from "../calendar/use-date-formatter";
+import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
 
 export function useToday() {
   const { db } = usePouchDB();
@@ -28,6 +29,7 @@ export function useToday() {
 
   const { activeDate, setActiveDate, gregorianDate, pageTitle, subTitle } =
     useDateFormatter();
+  const { getToday } = useHijriCalendar();
 
   const loadHomeData = useCallback(async () => {
     if (!db) return;
@@ -60,7 +62,7 @@ export function useToday() {
   }, [db, getTargetResults, getTrackers]);
 
   useEffect(() => {
-    loadTodayTasks();
+    loadTodayTasks(getToday());
   }, [loadTodayTasks]);
 
   useEffect(() => {
