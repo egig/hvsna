@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { Navbar } from "src/modules/navigation";
+import * as SunCalc from "suncalc";
 
 interface TimeSelectionModalProps {
   selectedTime: string | null;
@@ -19,6 +20,7 @@ export function TimeSelectionModal({
   const { t } = useLanguageContext();
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
+  const [sortedHours, setSortedHours] = useState<number[]>([]);
 
   useEffect(() => {
     if (selectedTime) {
@@ -27,6 +29,37 @@ export function TimeSelectionModal({
       setMinute(parseInt(m));
     }
   }, [selectedTime]);
+
+  useEffect(() => {
+    // Calculate sunset and sunrise times for today
+    // Use Jakarta coordinates as default (same as HijriDate)
+    const lat = -6.2088;
+    const lng = 106.8456;
+    
+    try {
+      const today = new Date();
+      const times = SunCalc.getTimes(today, lat, lng);
+      
+      if (times.sunset && times.sunrise) {
+        const sunsetHour = times.sunset.getHours();
+        const sunriseHour = times.sunrise.getHours();
+        
+        // Create array of hours sorted from sunset to next sunset
+        // Evening hours (sunset to 23) first, then all remaining hours (0 to sunset-1)
+        const eveningHours = Array.from({ length: 24 - sunsetHour }, (_, i) => (sunsetHour + i) % 24);
+        const remainingHours = Array.from({ length: sunsetHour }, (_, i) => i);
+        
+        setSortedHours([...eveningHours, ...remainingHours]);
+      } else {
+        // Fallback to regular 0-23 order if calculation fails
+        setSortedHours(Array.from({ length: 24 }, (_, i) => i));
+      }
+    } catch (error) {
+      console.warn("SunCalc calculation failed in TimeSelectionModal:", error);
+      // Fallback to regular 0-23 order
+      setSortedHours(Array.from({ length: 24 }, (_, i) => i));
+    }
+  }, []);
 
   const handleCustomTimeConfirm = () => {
     const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
@@ -65,7 +98,7 @@ export function TimeSelectionModal({
             onChange={(e) => setHour(parseInt(e.target.value))}
             className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
           >
-            {Array.from({ length: 24 }, (_, i) => (
+            {sortedHours.map((i) => (
               <option key={i} value={i}>
                 {i.toString().padStart(2, "0")}
               </option>
