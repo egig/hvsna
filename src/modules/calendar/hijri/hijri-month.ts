@@ -74,12 +74,34 @@ export class HijriMonth {
   }
 
   getFirstDay(): HijriDate {
-    return new HijriDate(this.year, this.month, 1);
+    // Create a Gregorian date for the first day of this Hijri month
+    const gregorianDate = hijriToGregorian({
+      year: this.year,
+      month: this.month,
+      day: 1,
+    });
+    const date = new Date(
+      gregorianDate.year,
+      gregorianDate.month - 1,
+      gregorianDate.day,
+    );
+    return HijriDate.fromDate(date);
   }
 
   getLastDay(): HijriDate {
     const daysInMonth = this.getDaysInMonth();
-    return new HijriDate(this.year, this.month, daysInMonth);
+    // Create a Gregorian date for the last day of this Hijri month
+    const gregorianDate = hijriToGregorian({
+      year: this.year,
+      month: this.month,
+      day: daysInMonth,
+    });
+    const date = new Date(
+      gregorianDate.year,
+      gregorianDate.month - 1,
+      gregorianDate.day,
+    );
+    return HijriDate.fromDate(date);
   }
 
   toString(): string {

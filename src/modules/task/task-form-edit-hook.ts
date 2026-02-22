@@ -3,6 +3,7 @@ import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate } from "src/modules/calendar/hijri";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -65,7 +66,6 @@ export const useTaskFormEdit = (
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
   // Prayer time state
   const [selectedPrayerTime, setSelectedPrayerTime] = useState<string>("");
-  const [selectedPrayerOffset, setSelectedPrayerOffset] = useState<number>(0);
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
@@ -89,7 +89,14 @@ export const useTaskFormEdit = (
       const month = parseInt(task.atDateHijri.substring(4, 6));
       const day = parseInt(task.atDateHijri.substring(6, 8));
 
-      setSelectedHijriDate(new HijriDate(year, month, day, 0, 0));
+      // Convert Hijri date to Gregorian date first
+      const gregorianDate = hijriToGregorian({ year, month, day });
+      const jsDate = new Date(
+        gregorianDate.year,
+        gregorianDate.month - 1,
+        gregorianDate.day,
+      );
+      setSelectedHijriDate(HijriDate.fromDate(jsDate));
     }
 
     if (task?.atTime) {
@@ -99,10 +106,8 @@ export const useTaskFormEdit = (
     // Initialize prayer time fields from existing task
     if (task?.usePrayerTime) {
       setSelectedPrayerTime(task.prayerTime || "");
-      setSelectedPrayerOffset(task.prayerOffset || 0);
     } else {
       setSelectedPrayerTime("");
-      setSelectedPrayerOffset(0);
     }
   }, [task]);
 
@@ -176,14 +181,9 @@ export const useTaskFormEdit = (
     return updatedTask;
   };
 
-  const handleTimeSelection = (
-    time: string,
-    prayerTime?: string,
-    prayerOffset?: number,
-  ) => {
+  const handleTimeSelection = (time: string, prayerTime?: string) => {
     setSelectedTime(time);
     setSelectedPrayerTime(prayerTime || "");
-    setSelectedPrayerOffset(prayerOffset || 0);
   };
 
   const handleSubmit = async (formData: FormData) => {
@@ -238,7 +238,6 @@ export const useTaskFormEdit = (
         // Prayer time fields
         usePrayerTime: !!selectedPrayerTime,
         prayerTime: selectedPrayerTime || undefined,
-        prayerOffset: selectedPrayerOffset,
         // Add location coordinates for prayer time calculation
         lat: -6.2088, // Default Jakarta coordinates
         long: 106.8456,
@@ -321,7 +320,6 @@ export const useTaskFormEdit = (
     setSelectedGoal(null);
     setTracker(null);
     setSelectedPrayerTime("");
-    setSelectedPrayerOffset(0);
   };
 
   return {
@@ -338,9 +336,7 @@ export const useTaskFormEdit = (
     trackerAttributes,
     // Prayer time fields
     selectedPrayerTime,
-    selectedPrayerOffset,
     setSelectedPrayerTime,
-    setSelectedPrayerOffset,
     handleTimeSelection,
     handleSubmit,
     handleDelete,

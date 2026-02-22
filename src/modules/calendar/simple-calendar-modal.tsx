@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Modal, Navbar } from "src/modules/navigation";
-import { HijriDate, HijriMonth } from "src/modules/calendar/hijri";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
+import { HijriDate } from "./hijri/hijri-date";
+import { HijriMonth } from "./hijri/hijri-month";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
@@ -62,7 +64,17 @@ export function SimpleCalendarModal({
 
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new HijriDate(currentMonth.year, currentMonth.month, day));
+      const gregorianDate = hijriToGregorian({
+        year: currentMonth.year,
+        month: currentMonth.month,
+        day,
+      });
+      const date = new Date(
+        gregorianDate.year,
+        gregorianDate.month - 1,
+        gregorianDate.day,
+      );
+      days.push(HijriDate.fromDate(date));
     }
 
     return days;

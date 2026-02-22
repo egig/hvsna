@@ -7,6 +7,7 @@ import type {
   TaskCreateInput,
   TaskUpdateInput,
   TaskQuery,
+  TaskStatus,
 } from "./types";
 
 interface TaskState {

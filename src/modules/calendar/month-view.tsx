@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { HijriDate } from "src/modules/calendar/hijri/hijri-date";
 import { HijriMonth } from "src/modules/calendar/hijri/hijri-month";
 import { Link } from "react-router";
@@ -59,9 +60,15 @@ export default function MonthView({
         {Array.from({ length: startDay }, (_, i) => i + 1).map(() =>
           EmptyDayItem(),
         )}
-        {Array.from({ length: days }, (_, i) => i + 1).map((day) =>
-          DayItem(new HijriDate(year, month, day)),
-        )}
+        {Array.from({ length: days }, (_, i) => i + 1).map((day) => {
+          const gregorianDate = hijriToGregorian({ year, month, day });
+          const date = new Date(
+            gregorianDate.year,
+            gregorianDate.month - 1,
+            gregorianDate.day,
+          );
+          return DayItem(HijriDate.fromDate(date));
+        })}
       </div>
     </div>
   );

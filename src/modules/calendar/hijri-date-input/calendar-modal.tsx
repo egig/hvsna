@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Modal, Navbar } from "src/modules/navigation";
 import { TimeSelectionModal } from "./time-selection-modal";
-import { HijriDate, HijriMonth } from "src/modules/calendar/hijri";
+import { HijriDate } from "../hijri/hijri-date";
+import { HijriMonth } from "../hijri/hijri-month";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { ListInput } from "src/ui/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
@@ -69,7 +71,17 @@ export function CalendarModal({
 
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push(new HijriDate(currentMonth.year, currentMonth.month, day));
+      const gregorianDate = hijriToGregorian({
+        year: currentMonth.year,
+        month: currentMonth.month,
+        day,
+      });
+      const date = new Date(
+        gregorianDate.year,
+        gregorianDate.month - 1,
+        gregorianDate.day,
+      );
+      days.push(HijriDate.fromDate(date));
     }
 
     return days;
@@ -89,11 +101,17 @@ export function CalendarModal({
 
   const handleConfirm = () => {
     if (tempSelectedDate) {
-      const finalDate = new HijriDate(
-        tempSelectedDate.year,
-        tempSelectedDate.month,
-        tempSelectedDate.day,
+      const gregorianDate = hijriToGregorian({
+        year: tempSelectedDate.year,
+        month: tempSelectedDate.month,
+        day: tempSelectedDate.day,
+      });
+      const date = new Date(
+        gregorianDate.year,
+        gregorianDate.month - 1,
+        gregorianDate.day,
       );
+      const finalDate = HijriDate.fromDate(date);
       onDateSelect(finalDate, selectedTime);
       onClose();
     }

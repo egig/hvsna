@@ -152,7 +152,7 @@ describe("Prayer Time Service", () => {
 
       (getPrayerTimes as any).mockResolvedValue(mockResponse);
 
-      const hijriDate = new HijriDate(1445, 1, 1);
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 6)); // Approximate date for testing
       const prayerTime: PrayerTime = "Dhuhr";
       const offsetMinutes = 15;
 

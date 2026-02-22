@@ -111,10 +111,12 @@ export function TaskListItem({
 
     // Check if within next 7 days
     try {
-      const taskDate = new HijriDate(
-        parseInt(task.atDateHijri.slice(0, 4)),
-        parseInt(task.atDateHijri.slice(4, 6)),
-        parseInt(task.atDateHijri.slice(6, 8)),
+      const taskDate = HijriDate.fromDate(
+        new Date(
+          parseInt(task.atDateHijri.slice(0, 4)),
+          parseInt(task.atDateHijri.slice(4, 6)) - 1,
+          parseInt(task.atDateHijri.slice(6, 8)),
+        ),
       );
       const todayGregorian = today.toDate();
       const taskGregorian = taskDate.toDate();

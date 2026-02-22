@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTaskStore } from "../task/task-store";
-import { HijriDate } from "../calendar/hijri";
-import { HijriMonth } from "../calendar/hijri/hijri-month";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
+import { HijriDate } from "../calendar/hijri/hijri-date";
 import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
@@ -42,8 +42,14 @@ export function useUpcoming() {
       const year = parseInt(hijriDate.substring(0, 4));
       const month = parseInt(hijriDate.substring(4, 6));
       const day = parseInt(hijriDate.substring(6, 8));
-      const date = new HijriDate(year, month, day);
-      return date.format("YYYY M DD");
+      const gregorianDate = hijriToGregorian({ year, month, day });
+      const date = new Date(
+        gregorianDate.year,
+        gregorianDate.month - 1,
+        gregorianDate.day,
+      );
+      const hijriDateObj = HijriDate.fromDate(date);
+      return hijriDateObj.format("YYYY M DD");
     } catch {
       return hijriDate;
     }
@@ -95,7 +101,13 @@ export function useUpcoming() {
         const year = parseInt(task.atDateHijri.substring(0, 4));
         const month = parseInt(task.atDateHijri.substring(4, 6));
         const day = parseInt(task.atDateHijri.substring(6, 8));
-        const taskDate = new HijriDate(year, month, day);
+        const gregorianDate = hijriToGregorian({ year, month, day });
+        const date = new Date(
+          gregorianDate.year,
+          gregorianDate.month - 1,
+          gregorianDate.day,
+        );
+        const taskDate = HijriDate.fromDate(date);
         const taskGregorian = taskDate.toDate();
         const daysDiff = Math.floor(
           (taskGregorian.getTime() - todayGregorian.getTime()) /

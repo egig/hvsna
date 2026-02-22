@@ -27,11 +27,17 @@ function generateWeeks(
 
   // Generate weeks before
   for (let i = weeksBefore; i > 0; i--) {
-    const weekStart = new HijriDate(
-      startWeek.year,
-      startWeek.month,
-      startWeek.day,
+    const gregorianDate = hijriToGregorian({
+      year: startWeek.year,
+      month: startWeek.month,
+      day: startWeek.day - i * 7,
+    });
+    const date = new Date(
+      gregorianDate.year,
+      gregorianDate.month - 1,
+      gregorianDate.day,
     );
+    const weekStart = HijriDate.fromDate(date);
     for (let j = 0; j < i * 7; j++) {
       weekStart._rawGregorianDate.setDate(
         weekStart._rawGregorianDate.getDate() - 1,
@@ -45,11 +51,17 @@ function generateWeeks(
 
   // Generate weeks after
   for (let i = 1; i <= weeksAfter; i++) {
-    const weekStart = new HijriDate(
-      startWeek.year,
-      startWeek.month,
-      startWeek.day,
+    const gregorianDate = hijriToGregorian({
+      year: startWeek.year,
+      month: startWeek.month,
+      day: startWeek.day + i * 7,
+    });
+    const date = new Date(
+      gregorianDate.year,
+      gregorianDate.month - 1,
+      gregorianDate.day,
     );
+    const weekStart = HijriDate.fromDate(date);
     for (let j = 0; j < i * 7; j++) {
       weekStart._rawGregorianDate.setDate(
         weekStart._rawGregorianDate.getDate() + 1,

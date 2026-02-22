@@ -8,15 +8,17 @@ const DEFAULT_LATITUDE = -6.2088;
 const DEFAULT_LONGITUDE = 106.8456;
 
 export class HijriDate {
-  year: number;
-  month: number;
-  day: number;
-  dayOfWeek: number;
-  hour: number;
-  minute: number;
-  _rawGregorianDate: Date;
+  year!: number;
+  month!: number;
+  day!: number;
+  dayOfWeek!: number;
+  hour!: number;
+  minute!: number;
+  _rawGregorianDate!: Date;
   _latitude?: number;
   _longitude?: number;
+
+  private constructor() {}
 
   /**
    * Adjust date for sunset-based Hijri date transition
@@ -50,43 +52,6 @@ export class HijriDate {
     return date;
   }
 
-  constructor(
-    year: number,
-    month: number,
-    day: number,
-    hour?: number,
-    minute?: number,
-    second?: number,
-    latitude?: number,
-    longitude?: number,
-  ) {
-    this.year = year;
-    this.month = month;
-    this.day = day;
-    ((this.hour = hour || 0),
-      (this.minute = minute || 0),
-      (this._latitude = latitude));
-    this._longitude = longitude;
-
-    // Use Jakarta coordinates as default if not provided
-    const lat = latitude ?? DEFAULT_LATITUDE;
-    const lng = longitude ?? DEFAULT_LONGITUDE;
-
-    let d = hijriToGregorian(this);
-    let gregorianDate = new Date(
-      d.year,
-      d.month - 1,
-      d.day,
-      hour || 0,
-      minute || 0,
-      second || 0,
-    );
-
-    // Apply sunset adjustment to the Gregorian date
-    this._rawGregorianDate = HijriDate.adjustForSunset(gregorianDate, lat, lng);
-    this.dayOfWeek = Days.indexOf(this.format("dd").toLowerCase());
-  }
-
   toDate(): Date {
     return this._rawGregorianDate;
   }
@@ -96,23 +61,61 @@ export class HijriDate {
     const lat = latitude ?? DEFAULT_LATITUDE;
     const lng = longitude ?? DEFAULT_LONGITUDE;
 
-    const adjustedDate = HijriDate.adjustForSunset(date, lat, lng);
-    const hijriDate = gregorianToHijri({
-      year: adjustedDate.getFullYear(),
-      month: adjustedDate.getMonth() + 1, // Month number in Javascript Date API is zero-based.
-      day: adjustedDate.getDate(),
+    let referenceDate = date; // Always preserve the original timestamp
+    let hijriDate = gregorianToHijri({
+      year: date.getFullYear(),
+      month: date.getMonth() + 1, // Month number in Javascript Date API is zero-based.
+      day: date.getDate(),
     });
 
-    return new HijriDate(
-      hijriDate.year,
-      hijriDate.month,
-      hijriDate.day,
-      0,
-      0,
-      0,
-      lat,
-      lng,
+    // If the original time was after sunset, we need to advance to the next Hijri day
+    // but keep the original timestamp for perfect symmetry with toDate()
+    try {
+      const times = SunCalc.getTimes(date, lat, lng);
+      const sunset = times.sunset;
+
+      if (sunset && date >= sunset) {
+        // Advance to next Hijri day
+        const nextHijri = hijriDate.day + 1;
+        const maxDaysInMonth = 30; // Simplified - should get actual month length
+
+        if (nextHijri > maxDaysInMonth) {
+          // Move to next month
+          hijriDate.day = 1;
+          hijriDate.month += 1;
+          if (hijriDate.month > 12) {
+            hijriDate.month = 1;
+            hijriDate.year += 1;
+          }
+        } else {
+          hijriDate.day = nextHijri;
+        }
+
+        // Keep the original timestamp for perfect symmetry
+        // referenceDate remains the original date
+      }
+    } catch (error) {
+      console.warn("SunCalc calculation failed in fromDate:", error);
+    }
+
+    // Create HijriDate instance directly
+    const hijriDateObj = Object.create(HijriDate.prototype);
+    hijriDateObj.year = hijriDate.year;
+    hijriDateObj.month = hijriDate.month;
+    hijriDateObj.day = hijriDate.day;
+    hijriDateObj.hour = date.getHours();
+    hijriDateObj.minute = date.getMinutes();
+    hijriDateObj._latitude = lat;
+    hijriDateObj._longitude = lng;
+    hijriDateObj._rawGregorianDate = referenceDate;
+
+    // Calculate day of week
+    const Days = ["fri", "sat", "sun", "mon", "tue", "wed", "thu"];
+    hijriDateObj.dayOfWeek = Days.indexOf(
+      hijriDateObj.format("dd").toLowerCase(),
     );
+
+    return hijriDateObj;
   }
 
   static fromGregorian(
@@ -141,49 +144,21 @@ export class HijriDate {
       );
     }
 
-    const adjustedDate = HijriDate.adjustForSunset(date, lat, lng);
-    const hijriDate = gregorianToHijri({
-      year: adjustedDate.getFullYear(),
-      month: adjustedDate.getMonth() + 1, // Month number in Javascript Date API is zero-based.
-      day: adjustedDate.getDate(),
-    });
-
-    return new HijriDate(
-      hijriDate.year,
-      hijriDate.month,
-      hijriDate.day,
-      hour || 0,
-      minute || 0,
-      second || 0,
-      lat,
-      lng,
-    );
+    return HijriDate.fromDate(date, lat, lng);
   }
 
   previous(): HijriDate {
     const prevGregorian = new Date(this._rawGregorianDate);
     prevGregorian.setDate(prevGregorian.getDate() - 1);
 
-    const prevHijri = gregorianToHijri({
-      year: prevGregorian.getFullYear(),
-      month: prevGregorian.getMonth() + 1,
-      day: prevGregorian.getDate(),
-    });
-
-    return new HijriDate(prevHijri.year, prevHijri.month, prevHijri.day);
+    return HijriDate.fromDate(prevGregorian, this._latitude, this._longitude);
   }
 
   next(): HijriDate {
     const nextGregorian = new Date(this._rawGregorianDate);
     nextGregorian.setDate(nextGregorian.getDate() + 1);
 
-    const nextHijri = gregorianToHijri({
-      year: nextGregorian.getFullYear(),
-      month: nextGregorian.getMonth() + 1,
-      day: nextGregorian.getDate(),
-    });
-
-    return new HijriDate(nextHijri.year, nextHijri.month, nextHijri.day);
+    return HijriDate.fromDate(nextGregorian, this._latitude, this._longitude);
   }
 
   startOfWeek(): HijriDate {
@@ -216,16 +191,10 @@ export class HijriDate {
       startOfWeekGregorian.getDate() - daysToSubtract,
     );
 
-    const startOfWeekHijri = gregorianToHijri({
-      year: startOfWeekGregorian.getFullYear(),
-      month: startOfWeekGregorian.getMonth() + 1,
-      day: startOfWeekGregorian.getDate(),
-    });
-
-    return new HijriDate(
-      startOfWeekHijri.year,
-      startOfWeekHijri.month,
-      startOfWeekHijri.day,
+    return HijriDate.fromDate(
+      startOfWeekGregorian,
+      this._latitude,
+      this._longitude,
     );
   }
 

@@ -3,7 +3,8 @@ import { useLocation } from "react-router";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate } from "../calendar/hijri/hijri-date";
+import { HijriDate } from "src/modules/calendar/hijri";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -81,7 +82,14 @@ export const useTaskForm = (
       const month = parseInt(task.atDateHijri.substring(4, 6));
       const day = parseInt(task.atDateHijri.substring(6, 8));
 
-      setSelectedHijriDate(new HijriDate(year, month, day, 0, 0));
+      // Convert Hijri date to Gregorian date first
+      const gregorianDate = hijriToGregorian({ year, month, day });
+      const jsDate = new Date(
+        gregorianDate.year,
+        gregorianDate.month - 1,
+        gregorianDate.day,
+      );
+      setSelectedHijriDate(HijriDate.fromDate(jsDate));
     }
 
     if (task?.atTime) {
@@ -312,7 +320,11 @@ function isMatchLocationContext(location: any, selectedHijriDate: any) {
     return ["today", "upcoming"].indexOf(location.state?.context) == -1;
   }
 
-  if (selectedHijriDate.isToday()) {
+  const today = HijriDate.fromDate(new Date());
+  const todayTimestamp = today.toDate().valueOf();
+  const selectedTimestamp = selectedHijriDate.toDate().valueOf();
+
+  if (selectedTimestamp <= todayTimestamp) {
     return ["today", "upcoming"].indexOf(location.state?.context) !== -1;
   }
 

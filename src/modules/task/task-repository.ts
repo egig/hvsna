@@ -1,5 +1,6 @@
 import { db } from "../../lib/pouchdb-singleton";
 import { HijriDate } from "../calendar/hijri";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import type {
   Task,
   TaskCreateInput,
@@ -217,7 +218,14 @@ export class TaskRepository {
     const month = parseInt(input.atDateHijri.substring(4, 6));
     const day = parseInt(input.atDateHijri.substring(6, 8));
 
-    const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
+    // Convert Hijri date to Gregorian date first
+    const gregorianDate = hijriToGregorian({ year, month, day });
+    const jsDate = new Date(
+      gregorianDate.year,
+      gregorianDate.month - 1,
+      gregorianDate.day,
+    );
+    const hijriDate = HijriDate.fromDate(jsDate);
     result.atEpochMillis = hijriDate.toDate().valueOf();
 
     // Manual time handling
