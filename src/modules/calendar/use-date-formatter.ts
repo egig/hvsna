@@ -27,12 +27,10 @@ export function useDateFormatter(
   const { settings } = useSettings();
   const { initialDate = new Date() } = options;
 
-  // Apply manual date offset to initial date
+  // Apply manual date offset to initial date using the new offset option
   const getInitialDate = () => {
     const offset = settings.manualDateOffset || 0;
-    const offsetDate = new Date(initialDate);
-    offsetDate.setDate(initialDate.getDate() + offset);
-    return HijriDate.fromDate(offsetDate);
+    return HijriDate.fromDate(initialDate, undefined, undefined, { offset });
   };
 
   const [activeDate, setActiveDate] = useState(getInitialDate);
@@ -43,11 +41,13 @@ export function useDateFormatter(
   );
 
   if (settings.manualDateOffset !== previousOffset) {
+    // Simply recreate the activeDate with the new offset
     const newOffset = settings.manualDateOffset || 0;
-    const offsetDiff = newOffset - previousOffset;
-    const updatedDate = new Date(activeDate.toDate());
-    updatedDate.setDate(updatedDate.getDate() + offsetDiff);
-    setActiveDate(HijriDate.fromDate(updatedDate));
+    setActiveDate(
+      HijriDate.fromDate(activeDate.toDate(), undefined, undefined, {
+        offset: newOffset,
+      }),
+    );
     setPreviousOffset(newOffset);
   }
 

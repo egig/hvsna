@@ -3,13 +3,13 @@ import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate } from "src/modules/calendar/hijri";
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
 import type { Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
+import { useSettings } from "src/modules/settings/useSettings";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -69,6 +69,8 @@ export const useTaskFormEdit = (
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
+  const { settings } = useSettings();
+  const offset = settings.manualDateOffset || 0;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [tracker, setTracker] = useState<Tracker | null>(null);
@@ -89,14 +91,29 @@ export const useTaskFormEdit = (
       const month = parseInt(task.atDateHijri.substring(4, 6));
       const day = parseInt(task.atDateHijri.substring(6, 8));
 
-      // Convert Hijri date to Gregorian date first
-      const gregorianDate = hijriToGregorian({ year, month, day });
-      const jsDate = new Date(
-        gregorianDate.year,
-        gregorianDate.month - 1,
-        gregorianDate.day,
+      // Parse time if available
+      let hour = 0;
+      let minute = 0;
+      if (task?.atTime) {
+        const timeParts = task.atTime.split(":");
+        hour = parseInt(timeParts[0]) || 0;
+        minute = parseInt(timeParts[1]) || 0;
+      }
+
+      // Use HijriDate.hijriToJsDate to convert Hijri date to JavaScript Date with time
+      const jsDate = HijriDate.hijriToJsDate(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        undefined,
+        undefined,
+        { offset },
       );
-      setSelectedHijriDate(HijriDate.fromDate(jsDate));
+      setSelectedHijriDate(
+        HijriDate.fromDate(jsDate, undefined, undefined, { offset }),
+      );
     }
 
     if (task?.atTime) {
@@ -109,7 +126,7 @@ export const useTaskFormEdit = (
     } else {
       setSelectedPrayerTime("");
     }
-  }, [task]);
+  }, [task, offset]);
 
   useEffect(() => {
     if (taskId) {
@@ -193,6 +210,7 @@ export const useTaskFormEdit = (
     } & Partial<Task>;
 
     if (!!selectedHijriDate) {
+      console.log("selectedHijriDate", selectedHijriDate);
       const year = selectedHijriDate.year.toString().padStart(4, "0");
       const month = selectedHijriDate.month.toString().padStart(2, "0");
       const day = selectedHijriDate.day.toString().padStart(2, "0");

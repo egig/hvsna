@@ -9,6 +9,7 @@ import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { ListInput } from "src/ui/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
+import { useSettings } from "src/modules/settings/useSettings";
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -27,12 +28,16 @@ export function CalendarModal({
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
   const { hijriMonthNames, weekDays } = useDateFormatter();
+  const { settings } = useSettings();
+  const offset = settings.manualDateOffset || 0;
 
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? new HijriMonth(selectedDate.year, selectedDate.month)
       : (() => {
-          const today = HijriDate.fromDate(new Date());
+          const today = HijriDate.fromDate(new Date(), undefined, undefined, {
+            offset,
+          });
           return new HijriMonth(today.year, today.month);
         })(),
   );
@@ -81,7 +86,7 @@ export function CalendarModal({
         gregorianDate.month - 1,
         gregorianDate.day,
       );
-      days.push(HijriDate.fromDate(date));
+      days.push(HijriDate.fromDate(date, undefined, undefined, { offset }));
     }
 
     return days;
@@ -101,30 +106,35 @@ export function CalendarModal({
 
   const handleConfirm = () => {
     if (tempSelectedDate) {
-      const gregorianDate = hijriToGregorian({
-        year: tempSelectedDate.year,
-        month: tempSelectedDate.month,
-        day: tempSelectedDate.day,
-      });
-      const date = new Date(
-        gregorianDate.year,
-        gregorianDate.month - 1,
-        gregorianDate.day,
+      // Use HijriDate.hijriToJsDate to convert Hijri date to JavaScript Date
+      const date = HijriDate.hijriToJsDate(
+        tempSelectedDate.year,
+        tempSelectedDate.month,
+        tempSelectedDate.day,
+        0, // hour
+        0, // minute
+        undefined, // latitude
+        undefined, // longitude
+        { offset }, // apply offset
       );
-      const finalDate = HijriDate.fromDate(date);
+      const finalDate = HijriDate.fromDate(date, undefined, undefined, {
+        offset,
+      });
       onDateSelect(finalDate, selectedTime);
       onClose();
     }
   };
 
   const handleTomorrow = () => {
-    const h = HijriDate.fromDate(new Date());
+    const h = HijriDate.fromDate(new Date(), undefined, undefined, { offset });
     onDateSelect(h.next(), null);
     onClose();
   };
 
   const handleToday = () => {
-    const today = HijriDate.fromDate(new Date());
+    const today = HijriDate.fromDate(new Date(), undefined, undefined, {
+      offset,
+    });
     onDateSelect(today, null);
     onClose();
   };

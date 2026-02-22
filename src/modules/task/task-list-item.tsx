@@ -15,6 +15,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
+import { useSettings } from "src/modules/settings/useSettings";
 
 interface TaskListItemProps {
   task: Task;
@@ -40,6 +41,8 @@ export function TaskListItem({
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
+  const { settings } = useSettings();
+  const offset = settings.manualDateOffset || 0;
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
@@ -84,7 +87,9 @@ export function TaskListItem({
 
     if (!task.atDateHijri) return null;
 
-    const today = HijriDate.fromDate(new Date());
+    const today = HijriDate.fromDate(new Date(), undefined, undefined, {
+      offset,
+    });
     const yesterday = today.previous().format("YYYYMMDD");
     const tomorrow = today.next();
     const todayString = today.format("YYYYMMDD");
@@ -117,6 +122,9 @@ export function TaskListItem({
           parseInt(task.atDateHijri.slice(4, 6)) - 1,
           parseInt(task.atDateHijri.slice(6, 8)),
         ),
+        undefined,
+        undefined,
+        { offset },
       );
       const todayGregorian = today.toDate();
       const taskGregorian = taskDate.toDate();

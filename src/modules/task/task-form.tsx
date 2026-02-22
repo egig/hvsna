@@ -12,6 +12,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
 import type { Task } from "./types";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
+import { useSettings } from "src/modules/settings/useSettings";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -49,6 +50,8 @@ export default function TaskForm({
   const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
   const location = useLocation();
+  const { settings } = useSettings();
+  const offset = settings.manualDateOffset || 0;
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -60,7 +63,9 @@ export default function TaskForm({
 
   useEffect(() => {
     if (["today", "upcoming"].includes(location.state?.context)) {
-      setSelectedHijriDate(HijriDate.fromDate(new Date()));
+      setSelectedHijriDate(
+        HijriDate.fromDate(new Date(), undefined, undefined, { offset }),
+      );
     }
   }, [location.state]);
 

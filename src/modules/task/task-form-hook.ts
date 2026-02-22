@@ -4,7 +4,6 @@ import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate } from "src/modules/calendar/hijri";
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -12,6 +11,7 @@ import { useTracker } from "../tracker/use-tracker";
 import type { Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
+import { useSettings } from "src/modules/settings/useSettings";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -50,6 +50,8 @@ export const useTaskForm = (
   const updateTask = useTaskStore((s) => s.updateTask);
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
+  const { settings } = useSettings();
+  const offset = settings.manualDateOffset || 0;
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
@@ -82,20 +84,35 @@ export const useTaskForm = (
       const month = parseInt(task.atDateHijri.substring(4, 6));
       const day = parseInt(task.atDateHijri.substring(6, 8));
 
-      // Convert Hijri date to Gregorian date first
-      const gregorianDate = hijriToGregorian({ year, month, day });
-      const jsDate = new Date(
-        gregorianDate.year,
-        gregorianDate.month - 1,
-        gregorianDate.day,
+      // Parse time if available
+      let hour = 0;
+      let minute = 0;
+      if (task?.atTime) {
+        const timeParts = task.atTime.split(":");
+        hour = parseInt(timeParts[0]) || 0;
+        minute = parseInt(timeParts[1]) || 0;
+      }
+
+      // Use HijriDate.hijriToJsDate to convert Hijri date to JavaScript Date with time
+      const jsDate = HijriDate.hijriToJsDate(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        undefined,
+        undefined,
+        { offset },
       );
-      setSelectedHijriDate(HijriDate.fromDate(jsDate));
+      setSelectedHijriDate(
+        HijriDate.fromDate(jsDate, undefined, undefined, { offset }),
+      );
     }
 
     if (task?.atTime) {
       setSelectedTime(task.atTime);
     }
-  }, [task]);
+  }, [task, offset]);
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
@@ -257,7 +274,7 @@ export const useTaskForm = (
         onSuccess(result);
       }
 
-      if (!isMatchLocationContext(location, selectedHijriDate)) {
+      if (!isMatchLocationContext(location, selectedHijriDate, offset)) {
         showSnackbar("Task created but not listed in this page");
       }
     } catch (err) {
@@ -311,7 +328,11 @@ export const useTaskForm = (
   };
 };
 
-function isMatchLocationContext(location: any, selectedHijriDate: any) {
+function isMatchLocationContext(
+  location: any,
+  selectedHijriDate: any,
+  offset: number,
+) {
   if (location.state.context === "all") {
     return true;
   }
@@ -320,7 +341,9 @@ function isMatchLocationContext(location: any, selectedHijriDate: any) {
     return ["today", "upcoming"].indexOf(location.state?.context) == -1;
   }
 
-  const today = HijriDate.fromDate(new Date());
+  const today = HijriDate.fromDate(new Date(), undefined, undefined, {
+    offset,
+  });
   const todayTimestamp = today.toDate().valueOf();
   const selectedTimestamp = selectedHijriDate.toDate().valueOf();
 
