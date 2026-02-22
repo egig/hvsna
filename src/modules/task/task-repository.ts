@@ -218,24 +218,18 @@ export class TaskRepository {
     const month = parseInt(input.atDateHijri.substring(4, 6));
     const day = parseInt(input.atDateHijri.substring(6, 8));
 
-    // Convert Hijri date to Gregorian date first
-    const gregorianDate = hijriToGregorian({ year, month, day });
-    const jsDate = new Date(
-      gregorianDate.year,
-      gregorianDate.month - 1,
-      gregorianDate.day,
-    );
-    const hijriDate = HijriDate.fromDate(jsDate);
-    result.atEpochMillis = hijriDate.toDate().valueOf();
+    // Handle time components
+    const hour = input.atTime ? parseInt(input.atTime.split(":")[0]) : 0;
+    const minute = input.atTime ? parseInt(input.atTime.split(":")[1]) : 0;
 
-    // Manual time handling
+    // Convert Hijri date components to JavaScript Date with sunset calculation
+    const jsDate = HijriDate.hijriToJsDate(year, month, day, hour, minute);
+    result.atEpochMillis = jsDate.valueOf();
+
+    // Store time if provided
     if (input.atTime) {
       result.atTime = input.atTime;
       result.atTimeIsNone = 0;
-      const [h, m] = input.atTime.split(":");
-      result.atEpochMillis = hijriDate
-        .toDate()
-        .setHours(parseInt(h), parseInt(m), 0, 0);
     }
 
     return result;

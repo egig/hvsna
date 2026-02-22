@@ -13,21 +13,6 @@ export class HijriMonth {
     this._rawGregorianDate = new Date(d.year, d.month - 1, d.day);
   }
 
-  static fromGregorian(year: number, month?: number, day?: number) {
-    let date = new Date();
-    if (!!month && !!year && !!day) {
-      date = new Date(year, month - 1, day);
-    }
-
-    const hijriDate = gregorianToHijri({
-      year: date.getFullYear(),
-      month: date.getMonth() + 1, // Month number in Javascript Date API is zero-based.
-      day: date.getDate(),
-    });
-
-    return new HijriMonth(hijriDate.year, hijriDate.month);
-  }
-
   previous(): HijriMonth {
     // Use the raw Gregorian date to calculate previous month
     // Subtract approximately 29 days to get to previous Hijri month

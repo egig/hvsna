@@ -26,10 +26,10 @@ export function SimpleCalendarModal({
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? new HijriMonth(selectedDate.year, selectedDate.month)
-      : HijriMonth.fromGregorian(
-          new Date().getFullYear(),
-          new Date().getMonth() + 1,
-        ),
+      : (() => {
+          const today = HijriDate.fromDate(new Date());
+          return new HijriMonth(today.year, today.month);
+        })(),
   );
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
     selectedDate,

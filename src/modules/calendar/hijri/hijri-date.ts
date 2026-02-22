@@ -20,12 +20,62 @@ export class HijriDate {
 
   private constructor() {}
 
+  toDate(): Date {
+    // Convert Hijri date back to Gregorian
+    const gregorian = hijriToGregorian({
+      year: this.year,
+      month: this.month,
+      day: this.day,
+    });
+
+    // Create Date object with the converted Gregorian date
+    const result = new Date(gregorian.year, gregorian.month - 1, gregorian.day);
+
+    // Set the time components
+    result.setHours(this.hour, this.minute, 0, 0);
+
+    // Use Jakarta coordinates as default if not available
+    const lat = this._latitude ?? DEFAULT_LATITUDE;
+    const lng = this._longitude ?? DEFAULT_LONGITUDE;
+
+    // Reverse the sunset adjustment logic
+    // If the original time was after sunset, we need to subtract one day
+    // to get back to the original Gregorian date
+    try {
+      const times = SunCalc.getTimes(result, lat, lng);
+      const sunset = times.sunset;
+
+      if (sunset && result >= sunset) {
+        // The current time is after sunset, so we need to go back one day
+        // to get the original Gregorian date that was used in fromDate
+        result.setDate(result.getDate() - 1);
+        // Preserve the time components
+        result.setHours(this.hour, this.minute, 0, 0);
+      }
+    } catch (error) {
+      console.warn("SunCalc calculation failed in toDate:", error);
+    }
+
+    return result;
+  }
+
   /**
-   * Adjust date for sunset-based Hijri date transition
-   * If current time is after sunset, the Hijri date has already changed to the next day
+   * Convert Hijri date components to JavaScript Date object with sunset calculation
+   * @param year Hijri year
+   * @param month Hijri month (1-12)
+   * @param day Hijri day
+   * @param hour Hour (0-23, defaults to 0)
+   * @param minute Minute (0-59, defaults to 0)
+   * @param latitude Latitude for sunset calculation (defaults to Jakarta)
+   * @param longitude Longitude for sunset calculation (defaults to Jakarta)
+   * @returns JavaScript Date object
    */
-  static adjustForSunset(
-    date: Date,
+  static hijriToJsDate(
+    year: number,
+    month: number,
+    day: number,
+    hour: number = 0,
+    minute: number = 0,
     latitude?: number,
     longitude?: number,
   ): Date {
@@ -33,27 +83,39 @@ export class HijriDate {
     const lat = latitude ?? DEFAULT_LATITUDE;
     const lng = longitude ?? DEFAULT_LONGITUDE;
 
+    // Convert Hijri date to Gregorian date
+    const gregorian = hijriToGregorian({ year, month, day });
+
+    // Create Date object with time components
+    const result = new Date(
+      gregorian.year,
+      gregorian.month - 1,
+      gregorian.day,
+      hour,
+      minute,
+      0,
+      0,
+    );
+
+    // Apply sunset adjustment logic (same as in fromDate)
     try {
-      const times = SunCalc.getTimes(date, lat, lng);
+      const times = SunCalc.getTimes(result, lat, lng);
       const sunset = times.sunset;
 
-      // If sunset time is available and current time is after sunset
-      if (sunset && date >= sunset) {
-        // Move to next day for Hijri calendar calculation
-        const nextDay = new Date(date);
-        nextDay.setDate(nextDay.getDate() + 1);
-        return nextDay;
+      // If the time is after sunset, the Hijri date has already changed to the next day
+      // So we need to adjust the Gregorian date to the previous day to match the Hijri date
+      if (sunset && result >= sunset) {
+        // Move to previous day because evening belongs to next Hijri day
+        const previousDay = new Date(result);
+        previousDay.setDate(previousDay.getDate() - 1);
+        return previousDay;
       }
     } catch (error) {
       // If SunCalc fails (e.g., invalid coordinates), fall back to original date
-      console.warn("SunCalc calculation failed:", error);
+      console.warn("SunCalc calculation failed in hijriToJsDate:", error);
     }
 
-    return date;
-  }
-
-  toDate(): Date {
-    return this._rawGregorianDate;
+    return result;
   }
 
   static fromDate(date: Date, latitude?: number, longitude?: number) {
@@ -116,35 +178,6 @@ export class HijriDate {
     );
 
     return hijriDateObj;
-  }
-
-  static fromGregorian(
-    year: number,
-    month?: number,
-    day?: number,
-    hour?: number,
-    minute?: number,
-    second?: number,
-    latitude?: number,
-    longitude?: number,
-  ) {
-    // Use Jakarta coordinates as default if not provided
-    const lat = latitude ?? DEFAULT_LATITUDE;
-    const lng = longitude ?? DEFAULT_LONGITUDE;
-
-    let date = new Date();
-    if (!!month && !!year && !!day) {
-      date = new Date(
-        year,
-        month - 1,
-        day,
-        hour || 0,
-        minute || 0,
-        second || 0,
-      );
-    }
-
-    return HijriDate.fromDate(date, lat, lng);
   }
 
   previous(): HijriDate {
@@ -337,16 +370,7 @@ export function isTodayHijriDate(hijriDate: HijriDate): boolean {
   const lat = hijriDate._latitude ?? DEFAULT_LATITUDE;
   const lng = hijriDate._longitude ?? DEFAULT_LONGITUDE;
 
-  const today = HijriDate.fromGregorian(
-    new Date().getFullYear(),
-    new Date().getMonth() + 1,
-    new Date().getDate(),
-    0,
-    0,
-    0,
-    lat,
-    lng,
-  );
+  const today = HijriDate.fromDate(new Date(), lat, lng);
   return (
     hijriDate.year === today.year &&
     hijriDate.month === today.month &&

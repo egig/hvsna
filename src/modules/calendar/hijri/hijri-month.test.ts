@@ -17,10 +17,11 @@ describe("HijriMonth", () => {
     });
   });
 
-  describe("fromGregorian", () => {
+  describe("fromDate", () => {
     it("should create HijriMonth from current Gregorian date when only year provided", () => {
       const currentYear = new Date().getFullYear();
-      const hijriMonth = HijriMonth.fromGregorian(currentYear);
+      const hijriDate = HijriDate.fromDate(new Date(currentYear, 0, 1));
+      const hijriMonth = new HijriMonth(hijriDate.year, hijriDate.month);
       expect(hijriMonth.year).toBeGreaterThan(1400);
       expect(hijriMonth.month).toBeGreaterThanOrEqual(1);
       expect(hijriMonth.month).toBeLessThanOrEqual(12);
@@ -28,7 +29,8 @@ describe("HijriMonth", () => {
 
     it("should create HijriMonth from specific Gregorian date", () => {
       // Known conversion: July 6, 2023 corresponds to 18 Dhu al-Hijjah 1444
-      const hijriMonth = HijriMonth.fromGregorian(2023, 7, 6);
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 6));
+      const hijriMonth = new HijriMonth(hijriDate.year, hijriDate.month);
       expect(hijriMonth.year).toBe(1444);
       expect(hijriMonth.month).toBe(12);
     });
@@ -46,11 +48,10 @@ describe("HijriMonth", () => {
       ];
 
       testCases.forEach(({ gregorian, expected }) => {
-        const hijriMonth = HijriMonth.fromGregorian(
-          gregorian.year,
-          gregorian.month,
-          gregorian.day,
+        const hijriDate = HijriDate.fromDate(
+          new Date(gregorian.year, gregorian.month - 1, gregorian.day),
         );
+        const hijriMonth = new HijriMonth(hijriDate.year, hijriDate.month);
         expect(hijriMonth.year).toBe(expected.year);
         expect(hijriMonth.month).toBe(expected.month);
       });

@@ -56,10 +56,10 @@ export function HijriDateRangeModal({
           selectedRange.startDate.year,
           selectedRange.startDate.month,
         )
-      : HijriMonth.fromGregorian(
-          new Date().getFullYear(),
-          new Date().getMonth() + 1,
-        ),
+      : (() => {
+          const today = HijriDate.fromDate(new Date());
+          return new HijriMonth(today.year, today.month);
+        })(),
   );
 
   const [tempStartDate, setTempStartDate] = useState<HijriDate | null>(
