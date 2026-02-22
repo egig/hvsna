@@ -6,6 +6,7 @@ import type {
   TaskQuery,
   TaskStatus,
   TaskUpdateInput,
+  PrayerTime,
 } from "./types";
 import { generatePrefixedUUID } from "../../lib/uuid";
 
@@ -27,6 +28,9 @@ interface PouchDBTaskDocument {
   createdAt?: number;
   updatedAt?: number;
   attributes?: Record<string, any>;
+  // Prayer time scheduling fields
+  prayerTime?: PrayerTime;
+  usePrayerTime?: boolean;
 }
 
 export class TaskRepository {
@@ -64,6 +68,9 @@ export class TaskRepository {
       atDateIsNone: doc.atDateIsNone,
       atTimeIsNone: doc.atTimeIsNone,
       atTime: doc.atTime,
+      // Prayer time fields
+      prayerTime: doc.prayerTime,
+      usePrayerTime: doc.usePrayerTime,
     };
   }
 
@@ -83,6 +90,9 @@ export class TaskRepository {
       atDateHijri: "",
       atDateIsNone: 1,
       atTimeIsNone: 1,
+      // Prayer time fields
+      prayerTime: undefined,
+      usePrayerTime: false,
     };
   }
 
@@ -103,10 +113,13 @@ export class TaskRepository {
       targetId: input.targetId || "",
       targetValue: input.targetValue || 0,
       attributes: input.attributes || {},
+      // Prayer time fields
+      prayerTime: input.prayerTime,
+      usePrayerTime: input.usePrayerTime || false,
     };
 
     const { atDateHijri, atDateIsNone, atTime, atTimeIsNone, atEpochMillis } =
-      this._parseDateTimeInput(input);
+      await this._parseDateTimeInput(input);
     newTask.atDateHijri = atDateHijri;
     newTask.atDateIsNone = atDateIsNone;
     newTask.atTime = atTime;
@@ -152,9 +165,17 @@ export class TaskRepository {
       updateData.attributes = input.attributes;
     }
 
+    // Handle prayer time fields
+    if (input.prayerTime !== undefined) {
+      updateData.prayerTime = input.prayerTime;
+    }
+    if (input.usePrayerTime !== undefined) {
+      updateData.usePrayerTime = input.usePrayerTime;
+    }
+
     if (!!input.atDateHijri) {
       const { atDateHijri, atDateIsNone, atTime, atTimeIsNone, atEpochMillis } =
-        this._parseDateTimeInput(input);
+        await this._parseDateTimeInput(input);
       updateData.atDateHijri = atDateHijri;
       updateData.atDateIsNone = atDateIsNone;
       updateData.atTime = atTime;
@@ -171,13 +192,13 @@ export class TaskRepository {
     return this.mapDocumentToTask(updatedDoc);
   }
 
-  _parseDateTimeInput(input: TaskCreateInput | TaskUpdateInput): {
+  async _parseDateTimeInput(input: TaskCreateInput | TaskUpdateInput): Promise<{
     atDateHijri: string;
     atTime: string;
     atDateIsNone: number;
     atTimeIsNone: number;
     atEpochMillis: number;
-  } {
+  }> {
     let result = {
       atDateHijri: "",
       atTime: "",
@@ -199,6 +220,8 @@ export class TaskRepository {
     const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
     result.atEpochMillis = hijriDate.toDate().valueOf();
 
+
+    // Manual time handling
     if (input.atTime) {
       result.atTime = input.atTime;
       result.atTimeIsNone = 0;
@@ -207,6 +230,7 @@ export class TaskRepository {
         .toDate()
         .setHours(parseInt(h), parseInt(m), 0, 0);
     }
+
     return result;
   }
 

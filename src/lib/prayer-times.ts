@@ -114,8 +114,8 @@ export async function getPrayerTimes(
     longitude,
     method = 20,
     shafaq = "general",
-    tune = "5,3,5,7,9,-1,0,8,-6",
-    timezonestring = "UTC",
+    tune = "0,0,0,0,0,0,0,0,0",
+    timezonestring = "Asia/Jakarta",
     calendarMethod = "UAQ",
   } = params;
 

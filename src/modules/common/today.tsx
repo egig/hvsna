@@ -10,9 +10,10 @@ import TaskListItem from "../task/task-list-item";
 import { formatValue } from "src/lib/format";
 import { useToday } from "src/modules/common/use-today";
 import { LargeNavbar } from "src/modules/navigation/navbar";
-import type { Task } from "src/modules/task/types";
+import type { Task, PrayerTime } from "src/modules/task/types";
 import type { TargetResultData } from "src/modules/goal/useTargetResults";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { Clock } from "lucide-react";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -20,24 +21,113 @@ interface TodayTasksProps {
 
 function TodayTasks({ tasks }: TodayTasksProps) {
   const { openTaskForm } = useTask();
+  const { t } = useLanguageContext();
 
   const handleEditTask = (task: Task) => {
     openTaskForm(task.id);
   };
 
+  // Group tasks by prayer time
+  const groupTasksByPrayerTime = (tasks: Task[]) => {
+    const groups: {
+      prayer: PrayerTime | null;
+      tasks: Task[];
+      offset?: number;
+    }[] = [];
+
+    // Separate prayer-based tasks and regular tasks
+    const prayerTasks = tasks.filter(
+      (task) => task.usePrayerTime && task.prayerTime,
+    );
+    const regularTasks = tasks.filter((task) => !task.usePrayerTime);
+
+    // Group prayer tasks by prayer time
+    const prayerGroups: Record<PrayerTime, Task[]> = {
+      Fajr: [],
+      Sunrise: [],
+      Dhuhr: [],
+      Asr: [],
+      Maghrib: [],
+      Isha: [],
+    };
+
+    prayerTasks.forEach((task) => {
+      if (task.prayerTime) {
+        prayerGroups[task.prayerTime].push(task);
+      }
+    });
+
+    // Add prayer groups in chronological order starting from Maghrib
+    const prayerOrder: PrayerTime[] = [
+      "Maghrib",
+      "Isha",
+      "Fajr",
+      "Sunrise",
+      "Dhuhr",
+      "Asr",
+    ];
+    prayerOrder.forEach((prayer) => {
+      if (prayerGroups[prayer].length > 0) {
+        groups.push({
+          prayer,
+          tasks: prayerGroups[prayer].sort(
+            (a, b) => (a.prayerOffset || 0) - (b.prayerOffset || 0),
+          ),
+          offset: prayerGroups[prayer][0]?.prayerOffset,
+        });
+      }
+    });
+
+    // Add regular tasks at the end
+    if (regularTasks.length > 0) {
+      groups.push({
+        prayer: null,
+        tasks: regularTasks.sort(
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        ),
+      });
+    }
+
+    return groups;
+  };
+
+  const taskGroups = groupTasksByPrayerTime(tasks);
+
+  const getPrayerTimeDisplay = (prayer: PrayerTime, offset?: number) => {
+    const offsetText =
+      offset && offset !== 0 ? ` ${offset > 0 ? "+" : ""}${offset}min` : "";
+    return `${t(prayer.toLowerCase())}${offsetText}`;
+  };
+
   return (
-    <>
-      {tasks.map((task) => (
-        <TaskListItem
-          key={task.id}
-          task={task}
-          onEdit={handleEditTask}
-          showGoalInfo={false}
-          className="transition-all hover:shadow-sm"
-          showDateTime={true}
-        />
+    <div className="space-y-6 px-2">
+      {taskGroups.map((group, groupIndex) => (
+        <div key={group.prayer || `regular-${groupIndex}`}>
+          {group.prayer && (
+            <div className="flex items-center gap-2 mb-4 px-2">
+              <Clock className="w-4 h-4 text-[var(--hvsna-primary-color)]" />
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {getPrayerTimeDisplay(group.prayer, group.offset)}
+              </h3>
+              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {group.tasks.map((task) => (
+              <TaskListItem
+                key={task.id}
+                task={task}
+                onEdit={handleEditTask}
+                showGoalInfo={false}
+                className="transition-all hover:shadow-sm"
+                showDateTime={true}
+              />
+            ))}
+          </div>
+        </div>
       ))}
-    </>
+    </div>
   );
 }
 

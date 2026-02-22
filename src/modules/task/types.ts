@@ -1,5 +1,12 @@
 export type TaskStatus = 0 | 1;
 export type TaskRepeat = "none" | "daily" | "monthly" | "yearly";
+export type PrayerTime =
+  | "Fajr"
+  | "Sunrise"
+  | "Dhuhr"
+  | "Asr"
+  | "Maghrib"
+  | "Isha";
 
 export interface Task {
   id: string;
@@ -21,6 +28,9 @@ export interface Task {
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
+  // Prayer time scheduling fields
+  prayerTime?: PrayerTime;
+  usePrayerTime?: boolean;
 }
 
 export interface TaskCreateInput {
@@ -36,6 +46,9 @@ export interface TaskCreateInput {
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
+  // Prayer time scheduling fields
+  prayerTime?: PrayerTime;
+  usePrayerTime?: boolean;
 }
 
 export interface TaskUpdateInput {
@@ -52,6 +65,9 @@ export interface TaskUpdateInput {
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
+  // Prayer time scheduling fields
+  prayerTime?: PrayerTime;
+  usePrayerTime?: boolean;
 }
 
 export interface TaskChange {

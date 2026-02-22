@@ -5,7 +5,7 @@ import { useGoals } from "../goal/use-goals";
 import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
-import { HijriDateInput } from "../calendar/hijri-date-input";
+import { DatePrayerInput } from "./date-prayer-input";
 import { HijriDate } from "src/modules/calendar/hijri";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -43,6 +43,10 @@ export default function TaskFormEdit({
     isSubmitting,
     selectedGoal,
     trackerAttributes,
+    // Prayer time fields
+    selectedPrayerTime,
+    selectedPrayerOffset,
+    handleTimeSelection,
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
@@ -125,22 +129,17 @@ export default function TaskFormEdit({
         style={{ resize: "none" }}
       />
 
-      <div className="mx-4">
-        <HijriDateInput
-          name="atEpochMillis"
-          label={t("scheduled_date_time_hijri")}
-          value={selectedHijriDate as HijriDate}
-          timeValue={selectedTime as string}
-          placeholder={t("date")}
-          disabled={isSubmitting}
-          required={false}
-          className="text-base"
-          onChange={(hijriDate: any, time: string | null) => {
-            setSelectedHijriDate(hijriDate);
-            setSelectedTime(time);
-          }}
-        />
-      </div>
+      <DatePrayerInput
+        selectedHijriDate={selectedHijriDate}
+        selectedTime={selectedTime}
+        selectedPrayerTime={selectedPrayerTime}
+        isSubmitting={isSubmitting}
+        onDateChange={(hijriDate, time) => {
+          setSelectedHijriDate(hijriDate);
+          setSelectedTime(time);
+        }}
+        onPrayerTimeChange={handleTimeSelection}
+      />
 
       {goalEnabled && (
         <div className="mb-4">

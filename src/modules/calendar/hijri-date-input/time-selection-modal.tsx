@@ -28,51 +28,64 @@ export function TimeSelectionModal({
     }
   }, [selectedTime]);
 
+  const handleCustomTimeConfirm = () => {
+    const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    onConfirm(time);
+  };
+
   return (
-    <div className="h-[50vh]">
+    <div className="">
       <Navbar
         title={t("select_time")}
         showBackButton={true}
         customBackAction={onBack}
         rightAction={
           <button
-            onClick={() => {
-              onConfirm(
-                `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`,
-              );
-            }}
+            onClick={handleCustomTimeConfirm}
             className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] transition-colors"
           >
             <Check />
           </button>
         }
       />
-      <div className="flex p-2 gap-2">
-        <select
-          value={hour.toString()}
-          onChange={(e) => setHour(parseInt(e.target.value))}
-          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-        >
-          {Array.from({ length: 24 }, (_, i) => (
-            <option key={i} value={i}>
-              {i.toString().padStart(2, "0")}
-            </option>
-          ))}
-        </select>
-        <span className="flex items-center text-gray-500 dark:text-gray-400">
-          :
-        </span>
-        <select
-          value={minute.toString()}
-          onChange={(e) => setMinute(parseInt(e.target.value))}
-          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-        >
-          {Array.from({ length: 60 }, (_, i) => (
-            <option key={i} value={i}>
-              {i.toString().padStart(2, "0")}
-            </option>
-          ))}
-        </select>
+
+      {/* Custom Time Selection */}
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {t("custom_time") || "Custom Time"}
+          </span>
+          <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
+        </div>
+
+        <div className="flex gap-2">
+          <select
+            value={hour.toString()}
+            onChange={(e) => setHour(parseInt(e.target.value))}
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          >
+            {Array.from({ length: 24 }, (_, i) => (
+              <option key={i} value={i}>
+                {i.toString().padStart(2, "0")}
+              </option>
+            ))}
+          </select>
+          <span className="flex items-center text-gray-500 dark:text-gray-400">
+            :
+          </span>
+          <select
+            value={minute.toString()}
+            onChange={(e) => setMinute(parseInt(e.target.value))}
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          >
+            {Array.from({ length: 60 }, (_, i) => (
+              <option key={i} value={i}>
+                {i.toString().padStart(2, "0")}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
@@ -81,7 +94,7 @@ export function TimeSelectionModal({
           disabled={false}
           className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
-          {t("remove_time")}
+          {t("remove_time") || "Remove Time"}
         </button>
       </div>
     </div>

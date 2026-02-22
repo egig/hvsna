@@ -1,14 +1,13 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { taskRepository } from "./task-repository";
+import { HijriDate } from "../calendar/hijri";
 import type {
   Task,
   TaskCreateInput,
   TaskUpdateInput,
-  TaskStatus,
   TaskQuery,
-} from "../../lib/types/task";
-import { taskRepository } from "./task-repository";
-import { HijriDate } from "../calendar/hijri";
+} from "./types";
 
 interface TaskState {
   loading: boolean;

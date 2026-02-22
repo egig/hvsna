@@ -24,6 +24,16 @@ export interface UseTaskFormReturn {
   setSelectedTargetId: any;
   selectedGoal: any;
   trackerAttributes: any;
+  // Prayer time fields
+  selectedPrayerTime?: string;
+  selectedPrayerOffset?: number;
+  setSelectedPrayerTime?: any;
+  setSelectedPrayerOffset?: any;
+  handleTimeSelection: (
+    time: string,
+    prayerTime?: string,
+    prayerOffset?: number,
+  ) => void;
   handleSubmit: (f: FormData) => void;
 }
 
@@ -49,6 +59,9 @@ export const useTaskForm = (
   );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
+  // Prayer time state
+  const [selectedPrayerTime, setSelectedPrayerTime] = useState<string>("");
+  const [selectedPrayerOffset, setSelectedPrayerOffset] = useState<number>(0);
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
@@ -132,6 +145,16 @@ export const useTaskForm = (
     return updatedTask;
   };
 
+  const handleTimeSelection = (
+    time: string,
+    prayerTime?: string,
+    prayerOffset?: number,
+  ) => {
+    setSelectedTime(time);
+    setSelectedPrayerTime(prayerTime || "");
+    setSelectedPrayerOffset(prayerOffset || 0);
+  };
+
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
       taskName: string;
@@ -181,6 +204,14 @@ export const useTaskForm = (
         attributes: attr,
         atDateHijri: taskData.atDateHijri,
         atTime: taskData.atTime,
+        // Prayer time fields
+        usePrayerTime: !!selectedPrayerTime,
+        prayerTime: selectedPrayerTime || undefined,
+        prayerOffset: selectedPrayerOffset,
+        // Add location coordinates for prayer time calculation
+        lat: -6.2088, // Default Jakarta coordinates
+        long: 106.8456,
+        timezone: "Asia/Jakarta",
       };
 
       // Handle repeat - only include if not "none"
@@ -246,6 +277,8 @@ export const useTaskForm = (
     setIsSubmitting(false);
     setSelectedGoal(null);
     setTracker(null);
+    setSelectedPrayerTime("");
+    setSelectedPrayerOffset(0);
   };
 
   return {
@@ -260,6 +293,12 @@ export const useTaskForm = (
     setSelectedTargetId,
     selectedGoal,
     trackerAttributes,
+    // Prayer time fields
+    selectedPrayerTime,
+    selectedPrayerOffset,
+    setSelectedPrayerTime,
+    setSelectedPrayerOffset,
+    handleTimeSelection,
     handleSubmit,
   };
 };

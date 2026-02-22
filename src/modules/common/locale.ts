@@ -218,4 +218,58 @@ export const commonTranslations = {
     en: "Template",
     id: "Template",
   },
+
+  // Prayer Times
+  prayer_times: {
+    en: "Prayer Times",
+    id: "Waktu Sholat",
+  },
+  fajr: {
+    en: "Fajr",
+    id: "Subuh",
+  },
+  sunrise: {
+    en: "Sunrise",
+    id: "Dhuha",
+  },
+  dhuhr: {
+    en: "Dhuhr",
+    id: "Dzuhur",
+  },
+  asr: {
+    en: "Asr",
+    id: "Ashar",
+  },
+  maghrib: {
+    en: "Maghrib",
+    id: "Maghrib",
+  },
+  isha: {
+    en: "Isha",
+    id: "Isya",
+  },
+  prayer_time: {
+    en: "Prayer Time",
+    id: "Waktu Sholat",
+  },
+  select_prayer_time: {
+    en: "After...",
+    id: "Ba'da...",
+  },
+  failed_to_load_prayer_times: {
+    en: "Failed to load prayer times",
+    id: "Gagal memuat waktu sholat",
+  },
+  custom_time: {
+    en: "Custom Time",
+    id: "Waktu Kustom",
+  },
+  select_time: {
+    en: "Select Time",
+    id: "Pilih Waktu",
+  },
+  remove_time: {
+    en: "Remove Time",
+    id: "Hapus Waktu",
+  },
 };

@@ -116,8 +116,14 @@ export function CalendarModal({
     onClose();
   };
 
-  const handleTimeConfirm = (time: string) => {
-    onDateSelect(tempSelectedDate, time);
+  const handleTimeConfirm = (
+    time: string,
+    prayerTime?: string,
+    prayerOffset?: number,
+  ) => {
+    // For prayer time, display "after <prayer time>" instead of empty time
+    const displayTime = prayerTime ? `after ${prayerTime}` : time;
+    onDateSelect(tempSelectedDate, displayTime);
     setEditMode("date");
   };
 
