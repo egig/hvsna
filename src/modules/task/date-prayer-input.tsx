@@ -35,8 +35,8 @@ export function DatePrayerInput({
   };
 
   return (
-    <div className="mx-4 flex gap-2">
-      <div className="flex gap-2">
+    <div className="mx-4">
+      <div className="flex flex-wrap gap-3 items-center">
         <HijriDateInput
           name="atEpochMillis"
           label={t("scheduled_date_time_hijri")}
@@ -45,7 +45,7 @@ export function DatePrayerInput({
           placeholder={t("date")}
           disabled={isSubmitting}
           required={false}
-          className="text-base"
+          className="text-base h-[38px]"
           onChange={(hijriDate: any, time: string | null) => {
             onDateChange(hijriDate, time);
           }}
@@ -54,7 +54,7 @@ export function DatePrayerInput({
           value={selectedPrayerTime || ""}
           onChange={handlePrayerTimeChange}
           disabled={isSubmitting}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-[var(--hvsna-primary-color)] dark:bg-gray-700 dark:text-white"
+          className="h-[38px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-[var(--hvsna-primary-color)] dark:bg-gray-700 dark:text-white whitespace-nowrap"
         >
           <option value="">{t("select_prayer_time")}</option>
           <option value="Fajr">{t("fajr")}</option>

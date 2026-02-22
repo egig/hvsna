@@ -220,7 +220,6 @@ export class TaskRepository {
     const hijriDate = new HijriDate(year, month, day, 0, 0, 0);
     result.atEpochMillis = hijriDate.toDate().valueOf();
 
-
     // Manual time handling
     if (input.atTime) {
       result.atTime = input.atTime;

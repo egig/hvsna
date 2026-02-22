@@ -52,9 +52,7 @@ export function useToday() {
       setTargetResults(results);
       setTrackers(trackersData);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load home data",
-      );
+      setError(err instanceof Error ? err.message : "Failed to load home data");
     } finally {
       setLoading(false);
       setInitiated(true);

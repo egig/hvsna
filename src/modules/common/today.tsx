@@ -24,9 +24,12 @@ function TodayTasks({ tasks }: TodayTasksProps) {
   const { openTaskForm } = useTask();
   const { t } = useLanguageContext();
 
-  const handleEditTask = useCallback((task: Task) => {
-    openTaskForm(task.id);
-  }, [openTaskForm]);
+  const handleEditTask = useCallback(
+    (task: Task) => {
+      openTaskForm(task.id);
+    },
+    [openTaskForm],
+  );
 
   // Memoize task grouping to prevent unnecessary recalculations
   const taskGroups = useMemo(() => {
@@ -90,9 +93,12 @@ function TodayTasks({ tasks }: TodayTasksProps) {
     return groups;
   }, [tasks]);
 
-  const getPrayerTimeDisplay = useCallback((prayer: PrayerTime) => {
-    return t(prayer.toLowerCase());
-  }, [t]);
+  const getPrayerTimeDisplay = useCallback(
+    (prayer: PrayerTime) => {
+      return t(prayer.toLowerCase());
+    },
+    [t],
+  );
 
   return (
     <div className="space-y-6 px-2">

@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
-import type { ReactNode } from 'react';
-import { ErrorBoundary as RollbarErrorBoundary } from '@rollbar/react';
+import React, { useState, useCallback } from "react";
+import type { ReactNode } from "react";
+import { ErrorBoundary as RollbarErrorBoundary } from "@rollbar/react";
 
 interface Props {
   children: ReactNode;
@@ -28,8 +28,8 @@ function ErrorBoundaryContent({ children, fallback }: Props) {
     });
 
     // Log error to console in development
-    if (process.env.NODE_ENV !== 'production') {
-      console.error('Error caught by ErrorBoundary:', error, errorInfo);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Error caught by ErrorBoundary:", error, errorInfo);
     }
   }, []);
 
@@ -47,7 +47,7 @@ function ErrorBoundaryContent({ children, fallback }: Props) {
       return fallback;
     }
 
-    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const isDevelopment = process.env.NODE_ENV !== "production";
 
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -67,15 +67,15 @@ function ErrorBoundaryContent({ children, fallback }: Props) {
               />
             </svg>
           </div>
-          
+
           <h1 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
             Something went wrong
           </h1>
-          
+
           <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
             {isDevelopment
-              ? 'An unexpected error occurred. Check the console for details.'
-              : 'An unexpected error occurred. Please try refreshing the page.'}
+              ? "An unexpected error occurred. Check the console for details."
+              : "An unexpected error occurred. Please try refreshing the page."}
           </p>
 
           {isDevelopment && errorState.error && (
@@ -86,15 +86,19 @@ function ErrorBoundaryContent({ children, fallback }: Props) {
                 </summary>
                 <div className="mt-2 text-xs">
                   <div className="mb-2">
-                    <strong className="text-gray-700 dark:text-gray-300">Error:</strong>
+                    <strong className="text-gray-700 dark:text-gray-300">
+                      Error:
+                    </strong>
                     <pre className="mt-1 p-2 bg-red-50 dark:bg-red-900/20 rounded text-red-800 dark:text-red-400 overflow-auto">
                       {errorState.error.toString()}
                     </pre>
                   </div>
-                  
+
                   {errorState.errorInfo && (
                     <div>
-                      <strong className="text-gray-700 dark:text-gray-300">Component Stack:</strong>
+                      <strong className="text-gray-700 dark:text-gray-300">
+                        Component Stack:
+                      </strong>
                       <pre className="mt-1 p-2 bg-red-50 dark:bg-red-900/20 rounded text-red-800 dark:text-red-400 overflow-auto">
                         {errorState.errorInfo.componentStack}
                       </pre>
@@ -112,7 +116,7 @@ function ErrorBoundaryContent({ children, fallback }: Props) {
             >
               Try Again
             </button>
-            
+
             <button
               onClick={() => window.location.reload()}
               className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
