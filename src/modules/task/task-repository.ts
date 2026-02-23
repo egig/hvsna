@@ -10,28 +10,97 @@ import type {
   PrayerTime,
 } from "./types";
 import { generatePrefixedUUID } from "../../lib/uuid";
+import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 
-interface PouchDBTaskDocument {
-  _id: string;
-  _rev?: string;
-  type: "task";
+class PouchDBTaskDocument {
+  _id?: string;
+  _rev?: string | undefined;
+  type: "task" = "task";
   userId?: string;
-  name: string;
+  name?: string;
   description?: string;
-  status: TaskStatus;
-  atDateHijri?: string;
-  atDateIsNone: number;
-  atTimeIsNone: number;
-  atEpochMillis?: number;
-  atTime?: string;
-  targetId?: string;
-  targetValue?: number;
-  createdAt?: number;
-  updatedAt?: number;
-  attributes?: Record<string, any>;
-  // Prayer time scheduling fields
+  status?: TaskStatus = 0;
+  atDateHijri?: string = "";
+  atDateIsNone?: number = 1;
+  atTimeIsNone?: number = 1;
+  atEpochMillis?: number | null = null;
+  atTime?: string = "";
+  targetId?: string = "";
+  targetValue?: number = 0;
+  createdAt: number = new Date().valueOf();
+  updatedAt: number = new Date().valueOf();
+  attributes?: Record<string, any> = {};
   prayerTime?: PrayerTime;
-  usePrayerTime?: boolean;
+  usePrayerTime?: boolean = false;
+  lat?: number;
+  long?: number;
+  timezone?: string;
+
+  constructor(o: any) {
+    Object.assign(this, o);
+  }
+
+  toTaskItem(): Task {
+    return {
+      id: this._id || "",
+      rev: this._rev,
+      userId: this.userId || "",
+      name: this.name || "",
+      description: this.description || "",
+      status: this.status || 0,
+      atEpochMillis: this.atEpochMillis || 0,
+      targetId: this.targetId || "",
+      targetValue: this.targetValue || 0,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      attributes: this.attributes || {},
+      atDateHijri: this.atDateHijri || "",
+      atDateIsNone: this.atDateIsNone || 1,
+      atTimeIsNone: this.atTimeIsNone || 1,
+      atTime: this.atTime || "",
+      prayerTime: this.prayerTime,
+      usePrayerTime: this.usePrayerTime || false,
+      lat: this.lat,
+      long: this.long,
+      timezone: this.timezone,
+    };
+  }
+
+  static fromTaskItem(t: Task) {
+    let a = new PouchDBTaskDocument(t);
+
+    a._id = t.id;
+    a._rev = t.rev;
+    a.usePrayerTime = !!t.prayerTime;
+    a.atTimeIsNone = !!t.atTime ? 0 : 1;
+    a.atDateIsNone = !!t.atDateHijri ? 0 : 1;
+
+    if (!!t.atDateHijri) {
+      const { year, month, day } = parseHijriDateString(t.atDateHijri);
+      let hour = undefined;
+      let minute = undefined;
+      if (t.atTime) {
+        const timeParts = parseTimeString(t.atTime);
+        hour = timeParts.hour;
+        minute = timeParts.minute;
+      }
+
+      a.atEpochMillis = HijriDate.hijriToJsDate(
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        t.lat,
+        t.long,
+        {
+          offset: t.hijriDateOffset || 0,
+        },
+      ).valueOf();
+    }
+
+    return a;
+  }
 }
 
 export class TaskRepository {
@@ -52,55 +121,6 @@ export class TaskRepository {
     TaskRepository.instance = null as any;
   }
 
-  private mapDocumentToTask(doc: PouchDBTaskDocument): Task {
-    if (!doc) {
-      throw new Error("Document is null or undefined");
-    }
-
-    return {
-      id: doc._id || "",
-      userId: doc.userId || "",
-      name: doc.name || "",
-      description: doc.description || "",
-      status: doc.status || 0,
-      atEpochMillis: doc.atEpochMillis || 0,
-      targetId: doc.targetId || "",
-      targetValue: doc.targetValue || 0,
-      createdAt: doc.createdAt || 0,
-      updatedAt: doc.updatedAt || 0,
-      attributes: doc.attributes || {},
-      atDateHijri: doc.atDateHijri || "",
-      atDateIsNone: doc.atDateIsNone || 1,
-      atTimeIsNone: doc.atTimeIsNone || 1,
-      atTime: doc.atTime || "",
-      // Prayer time fields
-      prayerTime: doc.prayerTime,
-      usePrayerTime: doc.usePrayerTime || false,
-    };
-  }
-
-  private createTaskDocument(): PouchDBTaskDocument {
-    return {
-      _id: generatePrefixedUUID("task_"),
-      type: "task",
-      userId: "",
-      name: "",
-      status: 0,
-      atEpochMillis: 0,
-      targetId: "",
-      targetValue: 0,
-      createdAt: new Date().valueOf(),
-      updatedAt: new Date().valueOf(),
-      attributes: {},
-      atDateHijri: "",
-      atDateIsNone: 1,
-      atTimeIsNone: 1,
-      // Prayer time fields
-      prayerTime: undefined,
-      usePrayerTime: false,
-    };
-  }
-
   async create(input: TaskCreateInput): Promise<Task> {
     const now = Date.now().valueOf();
 
@@ -109,8 +129,6 @@ export class TaskRepository {
       name: input.name,
       description: input.description,
       status: input.status || 0,
-      atDateIsNone: 1,
-      atTimeIsNone: 1,
       atDateHijri: input.atDateHijri || "",
       atTime: input.atTime || "",
       createdAt: now,
@@ -118,125 +136,45 @@ export class TaskRepository {
       targetId: input.targetId || "",
       targetValue: input.targetValue || 0,
       attributes: input.attributes || {},
-      // Prayer time fields
       prayerTime: input.prayerTime,
-      usePrayerTime: input.usePrayerTime || false,
+      lat: input.lat,
+      long: input.long,
+      timezone: input.timezone,
     };
 
-    const { atDateHijri, atDateIsNone, atTime, atTimeIsNone, atEpochMillis } =
-      await this._parseDateTimeInput(input);
-    newTask.atDateHijri = atDateHijri;
-    newTask.atDateIsNone = atDateIsNone;
-    newTask.atTime = atTime;
-    newTask.atTimeIsNone = atTimeIsNone;
-    newTask.atEpochMillis = atEpochMillis;
-
-    const doc = Object.assign(this.createTaskDocument(), newTask);
-
+    const doc = PouchDBTaskDocument.fromTaskItem(newTask);
+    delete doc._rev;
+    console.log(doc);
     await (db as any).put(doc);
 
     return newTask;
   }
 
   async update(id: string, input: TaskUpdateInput): Promise<Task> {
-    const existingDoc: PouchDBTaskDocument = await (db as any).get(id);
+    const existingDoc = await (db as any).get(id);
 
-    const updateData: PouchDBTaskDocument = {
+    const updateData = new PouchDBTaskDocument({
       ...existingDoc,
       updatedAt: Date.now(),
-    };
+    }).toTaskItem();
 
-    if (input.name !== undefined) {
-      updateData.name = input.name;
-    }
+    // Check if field are inputted / undefined
+    // TODO handle remove time or
+    Object.assign(
+      updateData,
+      Object.fromEntries(
+        Object.entries(input).filter(([_, v]) => v !== undefined),
+      ),
+    );
 
-    if (input.description !== undefined) {
-      updateData.description = input.description;
-    }
-
-    if (input.status !== undefined) {
-      updateData.status = input.status;
-    }
-
-    if (input.targetId !== undefined) {
-      updateData.targetId = input.targetId;
-    }
-
-    if (input.targetValue !== undefined) {
-      updateData.targetValue = input.targetValue;
-    }
-
-    if (input.attributes !== undefined) {
-      updateData.attributes = input.attributes;
-    }
-
-    // Handle prayer time fields
-    if (input.prayerTime !== undefined) {
-      updateData.prayerTime = input.prayerTime;
-    }
-    if (input.usePrayerTime !== undefined) {
-      updateData.usePrayerTime = input.usePrayerTime;
-    }
-
-    if (!!input.atDateHijri) {
-      const { atDateHijri, atDateIsNone, atTime, atTimeIsNone, atEpochMillis } =
-        await this._parseDateTimeInput(input);
-      updateData.atDateHijri = atDateHijri;
-      updateData.atDateIsNone = atDateIsNone;
-      updateData.atTime = atTime;
-      updateData.atTimeIsNone = atTimeIsNone;
-      updateData.atEpochMillis = atEpochMillis;
-    }
-
-    const response = await (db as any).put(updateData);
-    const updatedDoc: PouchDBTaskDocument = {
+    let ud = PouchDBTaskDocument.fromTaskItem(updateData);
+    const response = await (db as any).put(ud);
+    const updatedDoc = new PouchDBTaskDocument({
       ...updateData,
       _rev: response.rev,
-    };
+    });
 
-    return this.mapDocumentToTask(updatedDoc);
-  }
-
-  async _parseDateTimeInput(input: TaskCreateInput | TaskUpdateInput): Promise<{
-    atDateHijri: string;
-    atTime: string;
-    atDateIsNone: number;
-    atTimeIsNone: number;
-    atEpochMillis: number;
-  }> {
-    let result = {
-      atDateHijri: "",
-      atTime: "",
-      atDateIsNone: 1,
-      atTimeIsNone: 1,
-      atEpochMillis: null,
-    } as any;
-
-    if (!input.atDateHijri) {
-      return result;
-    }
-
-    result.atDateHijri = input.atDateHijri;
-    result.atDateIsNone = 0;
-    const year = parseInt(input.atDateHijri.substring(0, 4));
-    const month = parseInt(input.atDateHijri.substring(4, 6));
-    const day = parseInt(input.atDateHijri.substring(6, 8));
-
-    // Handle time components
-    const hour = input.atTime ? parseInt(input.atTime.split(":")[0]) : 0;
-    const minute = input.atTime ? parseInt(input.atTime.split(":")[1]) : 0;
-
-    // Convert Hijri date components to JavaScript Date with sunset calculation
-    const jsDate = HijriDate.hijriToJsDate(year, month, day, hour, minute);
-    result.atEpochMillis = jsDate.valueOf();
-
-    // Store time if provided
-    if (input.atTime) {
-      result.atTime = input.atTime;
-      result.atTimeIsNone = 0;
-    }
-
-    return result;
+    return updatedDoc.toTaskItem();
   }
 
   async delete(id: string): Promise<void> {
@@ -252,7 +190,7 @@ export class TaskRepository {
   async findById(id: string): Promise<Task | null> {
     try {
       const doc: PouchDBTaskDocument = await (db as any).get(id);
-      return this.mapDocumentToTask(doc);
+      return new PouchDBTaskDocument(doc).toTaskItem();
     } catch (err) {
       if ((err as any).status === 404) {
         return null;
@@ -311,7 +249,7 @@ export class TaskRepository {
     const result = await (db as any).find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      this.mapDocumentToTask(doc),
+      new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
 
@@ -335,7 +273,7 @@ export class TaskRepository {
     const result = await (db as any).find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      this.mapDocumentToTask(doc),
+      new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
 
@@ -357,7 +295,7 @@ export class TaskRepository {
     const result = await (db as any).find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      this.mapDocumentToTask(doc),
+      new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
 
@@ -436,7 +374,7 @@ export class TaskRepository {
 
     const result = await (db as any).find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      this.mapDocumentToTask(doc),
+      new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
 
@@ -466,7 +404,7 @@ export class TaskRepository {
 
     const result = await (db as any).find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      this.mapDocumentToTask(doc),
+      new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
 
@@ -526,7 +464,7 @@ export class TaskRepository {
 
     const result = await (db as any).find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      this.mapDocumentToTask(doc),
+      new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
 }

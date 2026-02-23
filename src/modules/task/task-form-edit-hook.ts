@@ -192,16 +192,14 @@ export const useTaskFormEdit = (
       taskData.atDateHijri = formatHijriDateString(
         selectedHijriDate.year,
         selectedHijriDate.month,
-        selectedHijriDate.day
+        selectedHijriDate.day,
       );
-      taskData.atEpochMillis = selectedHijriDate?.toDate().valueOf();
 
       if (!!selectedTime) {
         taskData.atTime = selectedTime;
       }
     } else {
       taskData.atDateHijri = undefined;
-      taskData.atEpochMillis = undefined;
     }
 
     try {
@@ -232,11 +230,9 @@ export const useTaskFormEdit = (
         attributes: attr,
         atDateHijri: taskData.atDateHijri,
         atTime: taskData.atTime,
-        // Prayer time fields
         usePrayerTime: !!selectedPrayerTime,
         prayerTime: selectedPrayerTime || undefined,
-        // Add location coordinates for prayer time calculation
-        lat: -6.2088, // Default Jakarta coordinates
+        lat: -6.2088,
         long: 106.8456,
         timezone: "Asia/Jakarta",
       };

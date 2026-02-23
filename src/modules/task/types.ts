@@ -10,12 +10,13 @@ export type PrayerTime =
 
 export interface Task {
   id: string;
+  rev?: string;
   userId?: string;
   name: string;
   description?: string;
   status: TaskStatus;
-  atDateIsNone: number;
-  atTimeIsNone: number;
+  atDateIsNone?: number;
+  atTimeIsNone?: number;
   atDateHijri?: string;
   atTime?: string;
   atEpochMillis?: number;
@@ -28,9 +29,9 @@ export interface Task {
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
-  // Prayer time scheduling fields
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean;
+  hijriDateOffset?: number;
 }
 
 export interface TaskCreateInput {
@@ -38,17 +39,15 @@ export interface TaskCreateInput {
   description?: string;
   status?: TaskStatus;
   atDateHijri: string;
-  atTimeIsNone?: number;
   atTime?: string;
   lat?: number;
   long?: number;
+  timezone?: string;
   repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
-  // Prayer time scheduling fields
   prayerTime?: PrayerTime;
-  usePrayerTime?: boolean;
 }
 
 export interface TaskUpdateInput {
@@ -56,18 +55,15 @@ export interface TaskUpdateInput {
   description?: string;
   status?: TaskStatus;
   atDateHijri?: string;
-  atDateIsNone?: number;
-  atTimeIsNone?: number;
   atTime?: string;
   lat?: number;
   long?: number;
+  timezone?: string;
   repeat?: TaskRepeat;
   targetId?: string;
   targetValue?: number;
   attributes?: Record<string, string>;
-  // Prayer time scheduling fields
   prayerTime?: PrayerTime;
-  usePrayerTime?: boolean;
 }
 
 export interface TaskChange {

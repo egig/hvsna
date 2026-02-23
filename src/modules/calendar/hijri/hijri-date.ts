@@ -178,7 +178,10 @@ export class HijriDate {
         // If SunCalc fails, fall back to 0:00
         finalHour = finalHour ?? 0;
         finalMinute = finalMinute ?? 0;
-        console.warn("SunCalc calculation failed for default time in hijriToJsDate:", error);
+        console.warn(
+          "SunCalc calculation failed for default time in hijriToJsDate:",
+          error,
+        );
       }
     }
 
