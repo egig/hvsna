@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { Navbar } from "src/modules/navigation";
+import { useSettings } from "src/modules/settings/useSettings";
 import * as SunCalc from "suncalc";
 import type { PrayerTime } from "src/modules/task/types";
 
@@ -21,31 +22,28 @@ export function TimeSelectionModal({
   onRemoveTime,
 }: TimeSelectionModalProps) {
   const { t } = useLanguageContext();
+  const { settings } = useSettings();
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
   const [sortedHours, setSortedHours] = useState<number[]>([]);
   const [selectedPrayer, setSelectedPrayer] = useState<PrayerTime | "">(selectedPrayerTime || "");
-  const [inputMode, setInputMode] = useState<"prayer" | "custom">(selectedPrayerTime ? "prayer" : "custom");
+  const [inputMode, setInputMode] = useState<"prayer" | "custom">(selectedTime ? "custom" : "prayer");
 
   const prayerTimes: PrayerTime[] = ["Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha"];
   useEffect(() => {
-    if (selectedTime && !selectedPrayerTime) {
+    if (selectedTime) {
       const [h, m] = selectedTime?.split(":") || [0, 0];
       setHour(parseInt(h));
       setMinute(parseInt(m));
     }
-  }, [selectedTime, selectedPrayerTime]);
+  }, [selectedTime]);
 
-  useEffect(() => {
-    // Update input mode when selectedPrayerTime changes
-    setInputMode(selectedPrayerTime ? "prayer" : "custom");
-  }, [selectedPrayerTime]);
 
   useEffect(() => {
     // Calculate sunset and sunrise times for today
-    // Use Jakarta coordinates as default (same as HijriDate)
-    const lat = -6.2088;
-    const lng = 106.8456;
+    // Use coordinates from settings, fallback to Jakarta coordinates if not available
+    const lat = settings.coordinate?.latitude ?? -6.2088;
+    const lng = settings.coordinate?.longitude ?? 106.8456;
 
     try {
       const today = new Date();
@@ -73,7 +71,7 @@ export function TimeSelectionModal({
       // Fallback to regular 0-23 order
       setSortedHours(Array.from({ length: 24 }, (_, i) => i));
     }
-  }, []);
+  }, [settings.coordinate]);
 
   const handleCustomTimeConfirm = () => {
     const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;

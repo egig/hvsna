@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
@@ -12,6 +12,7 @@ import type { Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "src/modules/settings/useSettings";
+import { parseHijriDateString, parseTimeString, formatHijriDateString } from "./task-form-helpers";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -27,13 +28,10 @@ export interface UseTaskFormReturn {
   trackerAttributes: any;
   // Prayer time fields
   selectedPrayerTime?: string;
-  selectedPrayerOffset?: number;
   setSelectedPrayerTime?: any;
-  setSelectedPrayerOffset?: any;
   handleTimeSelection: (
     time: string,
     prayerTime?: string,
-    prayerOffset?: number,
   ) => void;
   handleSubmit: (f: FormData) => void;
 }
@@ -53,6 +51,8 @@ export const useTaskForm = (
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
+  const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
+  const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
@@ -65,7 +65,6 @@ export const useTaskForm = (
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
   // Prayer time state
   const [selectedPrayerTime, setSelectedPrayerTime] = useState<string>("");
-  const [selectedPrayerOffset, setSelectedPrayerOffset] = useState<number>(0);
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
@@ -81,18 +80,16 @@ export const useTaskForm = (
 
   useEffect(() => {
     if (task?.atDateHijri) {
-      // Parse YYYYMMDD format
-      const year = parseInt(task.atDateHijri.substring(0, 4));
-      const month = parseInt(task.atDateHijri.substring(4, 6));
-      const day = parseInt(task.atDateHijri.substring(6, 8));
+      // Parse YYYYMMDD format using helper function
+      const { year, month, day } = parseHijriDateString(task.atDateHijri);
 
-      // Parse time if available
+      // Parse time if available using helper function
       let hour = 0;
       let minute = 0;
       if (task?.atTime) {
-        const timeParts = task.atTime.split(":");
-        hour = parseInt(timeParts[0]) || 0;
-        minute = parseInt(timeParts[1]) || 0;
+        const timeParts = parseTimeString(task.atTime);
+        hour = timeParts.hour;
+        minute = timeParts.minute;
       }
 
       // Use HijriDate.hijriToJsDate to convert Hijri date to JavaScript Date with time
@@ -184,11 +181,9 @@ export const useTaskForm = (
   const handleTimeSelection = (
     time: string,
     prayerTime?: string,
-    prayerOffset?: number,
   ) => {
     setSelectedTime(time);
     setSelectedPrayerTime(prayerTime || "");
-    setSelectedPrayerOffset(prayerOffset || 0);
   };
 
   const handleSubmit = async (formData: FormData) => {
@@ -198,10 +193,11 @@ export const useTaskForm = (
     } & Partial<Task>;
 
     if (!!selectedHijriDate) {
-      const year = selectedHijriDate.year.toString().padStart(4, "0");
-      const month = selectedHijriDate.month.toString().padStart(2, "0");
-      const day = selectedHijriDate.day.toString().padStart(2, "0");
-      taskData.atDateHijri = `${year}${month}${day}`;
+      taskData.atDateHijri = formatHijriDateString(
+        selectedHijriDate.year,
+        selectedHijriDate.month,
+        selectedHijriDate.day
+      );
       taskData.atEpochMillis = selectedHijriDate?.toDate().valueOf();
 
       if (!!selectedTime) {
@@ -243,11 +239,10 @@ export const useTaskForm = (
         // Prayer time fields
         usePrayerTime: !!selectedPrayerTime,
         prayerTime: selectedPrayerTime || undefined,
-        prayerOffset: selectedPrayerOffset,
         // Add location coordinates for prayer time calculation
-        lat: -6.2088, // Default Jakarta coordinates
-        long: 106.8456,
-        timezone: "Asia/Jakarta",
+        lat: latitude,
+        long: longitude,
+        timezone: settings.timezone || "Asia/Jakarta",
       };
 
       // Handle repeat - only include if not "none"
@@ -298,26 +293,6 @@ export const useTaskForm = (
     }
   };
 
-  const handleCancel = () => {
-    closeTaskForm();
-    if (onCancel) {
-      onCancel();
-    }
-  };
-
-  const reset = () => {
-    setTask(null);
-    setLoading(false);
-    setCurrentTargetId(null);
-    setSelectedHijriDate(null);
-    setSelectedTime(null);
-    setSelectedTargetId("");
-    setIsSubmitting(false);
-    setSelectedGoal(null);
-    setTracker(null);
-    setSelectedPrayerTime("");
-    setSelectedPrayerOffset(0);
-  };
 
   return {
     task,
@@ -333,9 +308,7 @@ export const useTaskForm = (
     trackerAttributes,
     // Prayer time fields
     selectedPrayerTime,
-    selectedPrayerOffset,
     setSelectedPrayerTime,
-    setSelectedPrayerOffset,
     handleTimeSelection,
     handleSubmit,
   };

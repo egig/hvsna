@@ -1,7 +1,6 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import * as SunCalc from "suncalc";
 
-const Days = ["fri", "sat", "sun", "mon", "tue", "wed", "thu"];
 
 // Jakarta coordinates (default location)
 const DEFAULT_LATITUDE = -6.2088;

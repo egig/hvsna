@@ -213,7 +213,7 @@ export default function TaskFormEdit({
           type="button"
           onClick={handleDelete}
           disabled={isSubmitting}
-          className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
+          className="w-full px-4 py-3 hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           <Trash2 size={18} />
           {t("delete_task")}

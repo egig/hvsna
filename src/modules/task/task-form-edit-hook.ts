@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
@@ -10,6 +10,7 @@ import { useTracker } from "../tracker/use-tracker";
 import type { Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "src/modules/settings/useSettings";
+import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -25,13 +26,10 @@ export interface UseTaskFormReturn {
   trackerAttributes: any;
   // Prayer time fields
   selectedPrayerTime?: string;
-  selectedPrayerOffset?: number;
   setSelectedPrayerTime?: any;
-  setSelectedPrayerOffset?: any;
   handleTimeSelection: (
     time: string,
     prayerTime?: string,
-    prayerOffset?: number,
   ) => void;
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
@@ -78,18 +76,16 @@ export const useTaskFormEdit = (
 
   useEffect(() => {
     if (task?.atDateHijri) {
-      // Parse YYYYMMDD format
-      const year = parseInt(task.atDateHijri.substring(0, 4));
-      const month = parseInt(task.atDateHijri.substring(4, 6));
-      const day = parseInt(task.atDateHijri.substring(6, 8));
+      // Parse YYYYMMDD format using helper function
+      const { year, month, day } = parseHijriDateString(task.atDateHijri);
 
-      // Parse time if available
+      // Parse time if available using helper function
       let hour = 0;
       let minute = 0;
       if (task?.atTime) {
-        const timeParts = task.atTime.split(":");
-        hour = parseInt(timeParts[0]) || 0;
-        minute = parseInt(timeParts[1]) || 0;
+        const timeParts = parseTimeString(task.atTime);
+        hour = timeParts.hour;
+        minute = timeParts.minute;
       }
 
       setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
@@ -285,13 +281,6 @@ export const useTaskFormEdit = (
       // Error is handled by the hook and passed through onError
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    closeTaskForm();
-    if (onCancel) {
-      onCancel();
     }
   };
 
