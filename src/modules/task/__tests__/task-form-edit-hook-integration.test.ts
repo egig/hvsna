@@ -6,7 +6,7 @@ describe("task-form-edit-hook integration", () => {
     // Simulate the edit form parsing logic
     const mockTask = {
       atDateHijri: "14450815",
-      atTime: "14:30"
+      atTime: "14:30",
     };
 
     // Parse YYYYMMDD format using helper function
@@ -31,7 +31,7 @@ describe("task-form-edit-hook integration", () => {
   it("should handle task without time", () => {
     const mockTask = {
       atDateHijri: "14450815",
-      atTime: undefined
+      atTime: undefined,
     };
 
     const { year, month, day } = parseHijriDateString(mockTask.atDateHijri);

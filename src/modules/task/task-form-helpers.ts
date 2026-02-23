@@ -15,7 +15,7 @@ export function parseHijriDateString(hijriDateString: string): {
 } {
   if (!hijriDateString || hijriDateString.length !== 8) {
     throw new Error(
-      `Invalid Hijri date format: ${hijriDateString}. Expected YYYYMMDD format.`
+      `Invalid Hijri date format: ${hijriDateString}. Expected YYYYMMDD format.`,
     );
   }
 
@@ -25,20 +25,18 @@ export function parseHijriDateString(hijriDateString: string): {
 
   // Validate the parsed values
   if (isNaN(year) || isNaN(month) || isNaN(day)) {
-    throw new Error(
-      `Invalid Hijri date components in: ${hijriDateString}`
-    );
+    throw new Error(`Invalid Hijri date components in: ${hijriDateString}`);
   }
 
   if (month < 1 || month > 12) {
     throw new Error(
-      `Invalid month ${month} in Hijri date: ${hijriDateString}. Month must be 1-12.`
+      `Invalid month ${month} in Hijri date: ${hijriDateString}. Month must be 1-12.`,
     );
   }
 
   if (day < 1 || day > 30) {
     throw new Error(
-      `Invalid day ${day} in Hijri date: ${hijriDateString}. Day must be 1-30.`
+      `Invalid day ${day} in Hijri date: ${hijriDateString}. Day must be 1-30.`,
     );
   }
 
@@ -55,12 +53,12 @@ export function parseHijriDateString(hijriDateString: string): {
 export function formatHijriDateString(
   year: number,
   month: number,
-  day: number
+  day: number,
 ): string {
   const yearStr = year.toString().padStart(4, "0");
   const monthStr = month.toString().padStart(2, "0");
   const dayStr = day.toString().padStart(2, "0");
-  
+
   return `${yearStr}${monthStr}${dayStr}`;
 }
 
@@ -90,13 +88,13 @@ export function parseTimeString(timeString: string): {
   // Validate the parsed values
   if (hour < 0 || hour > 23) {
     throw new Error(
-      `Invalid hour ${hour} in time: ${timeString}. Hour must be 0-23.`
+      `Invalid hour ${hour} in time: ${timeString}. Hour must be 0-23.`,
     );
   }
 
   if (minute < 0 || minute > 59) {
     throw new Error(
-      `Invalid minute ${minute} in time: ${timeString}. Minute must be 0-59.`
+      `Invalid minute ${minute} in time: ${timeString}. Minute must be 0-59.`,
     );
   }
 

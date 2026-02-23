@@ -445,7 +445,7 @@ export const useTaskStore = create<TaskState>()(
             hasMore,
           });
         } catch (err) {
-          console.error(err)
+          console.error(err);
           const errorMessage =
             err instanceof Error ? err.message : "Failed to load browsed tasks";
           set({ error: errorMessage });

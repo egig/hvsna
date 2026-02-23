@@ -75,12 +75,12 @@ export const settingsTranslations = {
     id: "Kelola catatan Anda",
   },
   reset_device_data: {
-    en: "Reset Device Data",
-    id: "Reset Data Perangkat",
+    en: "Reset Data",
+    id: "Reset Data",
   },
   reset_device_data_subtitle: {
-    en: "Delete all local data (synced data will not be deleted)",
-    id: "Hapus semua data lokal (data yang disinkronkan tidak akan dihapus)",
+    en: "Delete all device data (synced data will not be deleted.",
+    id: "Hapus semua data perangkat (data yang disinkronkan tidak akan dihapus).",
   },
 
   // Data management specific to settings
@@ -195,16 +195,16 @@ export const settingsTranslations = {
     id: "Peringatan !",
   },
   data_deletion_permanent: {
-    en: "Data deletion is permanent.",
-    id: "Penghapusan data bersifat permanen.",
+    en: "Data deletion is permanent for the local data. Make sure to sync your data as needed.",
+    id: "Penghapusan data bersifat permanen untuk data perangkat. Pastikan untuk menyinkronkan data Anda sesuai kebutuhan.",
   },
   actions_cannot_be_undone: {
     en: "These actions cannot be undone.",
     id: "Tindakan ini tidak dapat dibatalkan.",
   },
   delete_all_data: {
-    en: "This will delete all local data stored on this device.",
-    id: "Ini akan menghapus semua data lokal yang tersimpan di perangkat ini.",
+    en: "This will delete all data stored on this device.",
+    id: "Ini akan menghapus semua data yang tersimpan di perangkat ini.",
   },
   deleting: {
     en: "Deleting...",
@@ -245,5 +245,37 @@ export const settingsTranslations = {
   days_offset_positive: {
     en: "+{{count}} days",
     id: "+{{count}} hari",
+  },
+  account: {
+    en: "Account",
+    id: "Akun",
+  },
+  user: {
+    en: "User",
+    id: "Pengguna",
+  },
+  email: {
+    en: "Email",
+    id: "Email",
+  },
+  phone: {
+    en: "Phone",
+    id: "Telepon",
+  },
+  member_since: {
+    en: "Member Since",
+    id: "Anggota Sejak",
+  },
+  user_id: {
+    en: "User ID",
+    id: "ID Pengguna",
+  },
+  sign_in_to_view_profile: {
+    en: "Sign in to view profile",
+    id: "Masuk untuk melihat profil",
+  },
+  sign_in_message: {
+    en: "Please sign in to view your profile information",
+    id: "Silakan masuk untuk melihat informasi profil Anda",
   },
 };

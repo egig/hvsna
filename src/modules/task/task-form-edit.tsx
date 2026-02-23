@@ -47,7 +47,7 @@ export default function TaskFormEdit({
     selectedPrayerTime,
     selectedPrayerOffset,
     handleTimeSelection,
-    setSelectedPrayerTime
+    setSelectedPrayerTime,
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);

@@ -1,4 +1,5 @@
 import { Content, Drawer } from "vaul";
+import { Dialog } from "@base-ui/react/dialog";
 import { type ReactNode } from "react";
 import { useScreenSize } from "../../ui/screen-size-wrapper";
 
@@ -12,50 +13,50 @@ interface ModalProps {
 export function Modal({ isOpen, onClose, children, title }: ModalProps) {
   const { isDesktop } = useScreenSize();
 
-  // Desktop Modal - centered modal with backdrop
+  // Desktop Modal - centered modal with backdrop using Base UI Dialog
   if (isDesktop) {
-    if (!isOpen) return null;
-
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        {/* Backdrop */}
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-          onClick={onClose}
-        />
+      <Dialog.Root
+        open={isOpen}
+        onOpenChange={(open: boolean) => !open && onClose()}
+      >
+        <Dialog.Portal>
+          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+          <Dialog.Viewport>
+            <Dialog.Popup className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-auto outline-none">
+              {/* Header */}
+              {title && (
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {title}
+                  </h2>
+                  <Dialog.Close
+                    className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                    aria-label="Close modal"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </Dialog.Close>
+                </div>
+              )}
 
-        {/* Modal Content */}
-        <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-auto">
-          {/* Header */}
-          {title && (
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-              <button
-                onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
-                aria-label="Close modal"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-          )}
-
-          {/* Modal Body */}
-          <div className="p-2">{children}</div>
-        </div>
-      </div>
+              {/* Modal Body */}
+              <div className="p-2">{children}</div>
+            </Dialog.Popup>
+          </Dialog.Viewport>
+        </Dialog.Portal>
+      </Dialog.Root>
     );
   }
 

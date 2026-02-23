@@ -56,7 +56,7 @@ export class TaskRepository {
     if (!doc) {
       throw new Error("Document is null or undefined");
     }
-    
+
     return {
       id: doc._id || "",
       userId: doc.userId || "",

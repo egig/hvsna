@@ -12,7 +12,11 @@ import type { Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "src/modules/settings/useSettings";
-import { parseHijriDateString, parseTimeString, formatHijriDateString } from "./task-form-helpers";
+import {
+  parseHijriDateString,
+  parseTimeString,
+  formatHijriDateString,
+} from "./task-form-helpers";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -29,10 +33,7 @@ export interface UseTaskFormReturn {
   // Prayer time fields
   selectedPrayerTime?: string;
   setSelectedPrayerTime?: any;
-  handleTimeSelection: (
-    time: string,
-    prayerTime?: string,
-  ) => void;
+  handleTimeSelection: (time: string, prayerTime?: string) => void;
   handleSubmit: (f: FormData) => void;
 }
 
@@ -178,10 +179,7 @@ export const useTaskForm = (
     return updatedTask;
   };
 
-  const handleTimeSelection = (
-    time: string,
-    prayerTime?: string,
-  ) => {
+  const handleTimeSelection = (time: string, prayerTime?: string) => {
     setSelectedTime(time);
     setSelectedPrayerTime(prayerTime || "");
   };
@@ -196,7 +194,7 @@ export const useTaskForm = (
       taskData.atDateHijri = formatHijriDateString(
         selectedHijriDate.year,
         selectedHijriDate.month,
-        selectedHijriDate.day
+        selectedHijriDate.day,
       );
       taskData.atEpochMillis = selectedHijriDate?.toDate().valueOf();
 
@@ -292,7 +290,6 @@ export const useTaskForm = (
       setIsSubmitting(false);
     }
   };
-
 
   return {
     task,

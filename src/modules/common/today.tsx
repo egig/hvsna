@@ -105,12 +105,10 @@ function TodayTasks({ tasks }: TodayTasksProps) {
       {taskGroups.map((group, groupIndex) => (
         <div key={group.prayer || `regular-${groupIndex}`}>
           {group.prayer && (
-            <div className="flex items-center gap-2 mb-4 px-2">
-              <Clock className="w-4 h-4 text-[var(--hvsna-primary-color)]" />
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <div className="flex items-center gap-2 mb-2 px-2">
+              <h3 className="text-sm font-bold  text-gray-700 dark:text-gray-300">
                 {getPrayerTimeDisplay(group.prayer)}
               </h3>
-              <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
             </div>
           )}
 

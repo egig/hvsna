@@ -1,7 +1,6 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import * as SunCalc from "suncalc";
 
-
 // Jakarta coordinates (default location)
 const DEFAULT_LATITUDE = -6.2088;
 const DEFAULT_LONGITUDE = 106.8456;

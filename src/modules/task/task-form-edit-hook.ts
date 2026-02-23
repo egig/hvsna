@@ -27,10 +27,7 @@ export interface UseTaskFormReturn {
   // Prayer time fields
   selectedPrayerTime?: string;
   setSelectedPrayerTime?: any;
-  handleTimeSelection: (
-    time: string,
-    prayerTime?: string,
-  ) => void;
+  handleTimeSelection: (time: string, prayerTime?: string) => void;
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
 }
@@ -251,7 +248,9 @@ export const useTaskFormEdit = (
         taskInput.targetId = selectedTargetId;
       }
 
-      let result = await updateTask(taskId, taskInput, () => refreshAllTaskLists(getToday()));
+      let result = await updateTask(taskId, taskInput, () =>
+        refreshAllTaskLists(getToday()),
+      );
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {

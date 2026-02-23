@@ -9,7 +9,11 @@ interface DatePrayerInputProps {
   selectedTime: string | null;
   selectedPrayerTime?: PrayerTime | string;
   isSubmitting: boolean;
-  onDateChange: (hijriDate: HijriDate | null, time: string | null, prayerTime?: PrayerTime | string) => void;
+  onDateChange: (
+    hijriDate: HijriDate | null,
+    time: string | null,
+    prayerTime?: PrayerTime | string,
+  ) => void;
 }
 
 export function DatePrayerInput({
@@ -21,7 +25,10 @@ export function DatePrayerInput({
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
 
-  const handleTimeChange = (time: string | null, prayerTime?: PrayerTime | string) => {
+  const handleTimeChange = (
+    time: string | null,
+    prayerTime?: PrayerTime | string,
+  ) => {
     onDateChange(selectedHijriDate, time, prayerTime);
   };
 

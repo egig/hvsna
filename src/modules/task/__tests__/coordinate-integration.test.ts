@@ -6,7 +6,7 @@ describe("task-form-hook coordinate integration", () => {
     const mockSettings = {
       coordinate: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       timezone: "America/New_York",
     };
@@ -16,7 +16,7 @@ describe("task-form-hook coordinate integration", () => {
     const timezone = mockSettings.timezone || "Asia/Jakarta";
 
     expect(latitude).toBe(40.7128);
-    expect(longitude).toBe(-74.0060);
+    expect(longitude).toBe(-74.006);
     expect(timezone).toBe("America/New_York");
   });
 

@@ -39,14 +39,20 @@ export function TimeInput({
     setSelectedTime(customTime || null);
   }, [customTime]);
 
-  const handleTimeSelect = (time: string | null, selectedPrayerTime?: PrayerTime) => {
+  const handleTimeSelect = (
+    time: string | null,
+    selectedPrayerTime?: PrayerTime,
+  ) => {
     setSelectedTime(time);
     if (onChange) {
       onChange(time, selectedPrayerTime);
     }
   };
 
-  const handleTimeConfirm = (time: string, selectedPrayerTime?: PrayerTime | string) => {
+  const handleTimeConfirm = (
+    time: string,
+    selectedPrayerTime?: PrayerTime | string,
+  ) => {
     handleTimeSelect(time, selectedPrayerTime as PrayerTime);
     setIsModalOpen(false);
   };
@@ -64,7 +70,7 @@ export function TimeInput({
 
   const formatTimeDisplay = (time: string | null, prayer?: PrayerTime) => {
     if (prayer) {
-      return `after ${prayer}`;
+      return `${prayer}`;
     }
     if (!time) return placeholder;
     return time;
@@ -81,7 +87,7 @@ export function TimeInput({
         type="button"
         onClick={handleButtonClick}
         disabled={disabled}
-        className={`w-full px-3 py-2 text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
+        className={`h-[100%] px-2 w-full text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
           disabled
             ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-50"
             : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
@@ -101,7 +107,11 @@ export function TimeInput({
         </div>
       </button>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="">
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title=""
+      >
         <TimeSelectionModal
           selectedTime={selectedTime}
           selectedPrayerTime={prayerTime}
