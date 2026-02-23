@@ -84,8 +84,8 @@ export class HijriDate {
    * @param year Hijri year
    * @param month Hijri month (1-12)
    * @param day Hijri day
-   * @param hour Hour (0-23, defaults to 0)
-   * @param minute Minute (0-59, defaults to 0)
+   * @param hour Hour (0-23, defaults to sunset time if not provided)
+   * @param minute Minute (0-59, defaults to sunset time if not provided)
    * @param latitude Latitude for sunset calculation (defaults to Jakarta)
    * @param longitude Longitude for sunset calculation (defaults to Jakarta)
    * @param options Optional configuration
@@ -96,8 +96,8 @@ export class HijriDate {
     year: number,
     month: number,
     day: number,
-    hour: number = 0,
-    minute: number = 0,
+    hour?: number,
+    minute?: number,
     latitude?: number,
     longitude?: number,
     options?: { offset?: number },
@@ -147,13 +147,48 @@ export class HijriDate {
       day: adjustedDay,
     });
 
+    // Determine hour and minute - use sunset time as default if not provided
+    let finalHour = hour;
+    let finalMinute = minute;
+
+    if (finalHour === undefined || finalMinute === undefined) {
+      try {
+        // Create a temporary date to calculate sunset time
+        const tempDate = new Date(
+          gregorian.year,
+          gregorian.month - 1,
+          gregorian.day,
+          12, // Use noon as default time for sunset calculation
+          0,
+          0,
+          0,
+        );
+        const times = SunCalc.getTimes(tempDate, lat, lng);
+        const sunset = times.sunset;
+
+        if (sunset) {
+          finalHour = finalHour ?? sunset.getHours();
+          finalMinute = finalMinute ?? sunset.getMinutes();
+        } else {
+          // Fallback to 0:00 if sunset calculation fails
+          finalHour = finalHour ?? 0;
+          finalMinute = finalMinute ?? 0;
+        }
+      } catch (error) {
+        // If SunCalc fails, fall back to 0:00
+        finalHour = finalHour ?? 0;
+        finalMinute = finalMinute ?? 0;
+        console.warn("SunCalc calculation failed for default time in hijriToJsDate:", error);
+      }
+    }
+
     // Create Date object with time components
     let result = new Date(
       gregorian.year,
       gregorian.month - 1,
       gregorian.day,
-      hour,
-      minute,
+      finalHour,
+      finalMinute,
       0,
       0,
     );

@@ -47,15 +47,17 @@ export function DatePrayerInput({
             onDateChange(hijriDate, selectedTime, selectedPrayerTime);
           }}
         />
-        <TimeInput
-          name="time"
-          customTime={selectedTime as string}
-          prayerTime={selectedPrayerTime as PrayerTime}
-          placeholder={t("time")}
-          disabled={isSubmitting}
-          className="text-base h-[38px]"
-          onChange={handleTimeChange}
-        />
+        {selectedHijriDate && (
+          <TimeInput
+            name="time"
+            customTime={selectedTime as string}
+            prayerTime={selectedPrayerTime as PrayerTime}
+            placeholder={t("time")}
+            disabled={isSubmitting}
+            className="text-base h-[38px]"
+            onChange={handleTimeChange}
+          />
+        )}
       </div>
     </div>
   );

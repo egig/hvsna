@@ -40,11 +40,8 @@ export default function TaskForm({
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-    // Prayer time fields
     selectedPrayerTime,
-    selectedPrayerOffset,
     setSelectedPrayerTime,
-    handleTimeSelection,
   } = useTaskForm(onSuccess, onError, onCancel);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);

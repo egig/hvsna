@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatHijriDateString } from "./task-form-helpers";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
@@ -77,8 +78,8 @@ export const useTaskFormEdit = (
       const { year, month, day } = parseHijriDateString(task.atDateHijri);
 
       // Parse time if available using helper function
-      let hour = 0;
-      let minute = 0;
+      let hour: number | undefined = undefined;
+      let minute: number | undefined = undefined;
       if (task?.atTime) {
         const timeParts = parseTimeString(task.atTime);
         hour = timeParts.hour;
@@ -188,10 +189,11 @@ export const useTaskFormEdit = (
     } & Partial<Task>;
 
     if (!!selectedHijriDate) {
-      const year = selectedHijriDate.year.toString().padStart(4, "0");
-      const month = selectedHijriDate.month.toString().padStart(2, "0");
-      const day = selectedHijriDate.day.toString().padStart(2, "0");
-      taskData.atDateHijri = `${year}${month}${day}`;
+      taskData.atDateHijri = formatHijriDateString(
+        selectedHijriDate.year,
+        selectedHijriDate.month,
+        selectedHijriDate.day
+      );
       taskData.atEpochMillis = selectedHijriDate?.toDate().valueOf();
 
       if (!!selectedTime) {

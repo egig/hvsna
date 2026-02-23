@@ -58,7 +58,7 @@ export function TimeInput({
   };
 
   const handleRemoveTime = () => {
-    handleTimeSelect(null);
+    handleTimeSelect(null, undefined);
     setIsModalOpen(false);
   };
 

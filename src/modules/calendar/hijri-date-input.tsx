@@ -4,7 +4,6 @@ import { CalendarModal } from "./hijri-date-input/calendar-modal";
 import { CalendarIcon } from "lucide-react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useHijriCalendar } from "./hijri/useHijriCalendar";
-import { TimeInput } from "./time-input";
 
 interface HijriDateInputProps {
   name: string;

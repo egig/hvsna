@@ -186,8 +186,8 @@ export function useHijriCalendar(
       year: number,
       month: number,
       day: number,
-      hour: number = 0,
-      minute: number = 0,
+      hour: number | undefined = undefined,
+      minute: number | undefined = undefined,
     ): HijriDate => {
       const jsDate = HijriDate.hijriToJsDate(
         year,

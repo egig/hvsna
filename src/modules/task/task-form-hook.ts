@@ -57,7 +57,6 @@ export const useTaskForm = (
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
   const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | null>(
     null,
@@ -85,25 +84,14 @@ export const useTaskForm = (
       const { year, month, day } = parseHijriDateString(task.atDateHijri);
 
       // Parse time if available using helper function
-      let hour = 0;
-      let minute = 0;
+      let hour = undefined;
+      let minute = undefined;
       if (task?.atTime) {
         const timeParts = parseTimeString(task.atTime);
         hour = timeParts.hour;
         minute = timeParts.minute;
       }
 
-      // Use HijriDate.hijriToJsDate to convert Hijri date to JavaScript Date with time
-      const jsDate = HijriDate.hijriToJsDate(
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        undefined,
-        undefined,
-        { offset },
-      );
       setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
     }
 
@@ -234,10 +222,8 @@ export const useTaskForm = (
         attributes: attr,
         atDateHijri: taskData.atDateHijri,
         atTime: taskData.atTime,
-        // Prayer time fields
         usePrayerTime: !!selectedPrayerTime,
         prayerTime: selectedPrayerTime || undefined,
-        // Add location coordinates for prayer time calculation
         lat: latitude,
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",

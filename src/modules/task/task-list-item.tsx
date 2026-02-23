@@ -131,7 +131,7 @@ export function TaskListItem({
       // Otherwise show formatted date
       return taskDate.format("D MMMM") + (time ? `, ${time}` : "");
     } catch {
-      return task.atDateHijri;
+      return "";
     }
   };
 
