@@ -170,7 +170,7 @@ export class HijriDate {
     let finalMinute = minute;
 
     if (finalHour === undefined || finalMinute === undefined) {
-      const startOfDay = HijriDate.startOfDay(
+      const startOfDay = HijriDate.startOfDayInJsDate(
         adjustedYear,
         adjustedMonth,
         adjustedDay,
@@ -502,7 +502,7 @@ export class HijriDate {
    * @param longitude Longitude for sunset calculation (defaults to Jakarta)
    * @returns JavaScript Date object representing the start of the Hijri day (sunset time)
    */
-  static startOfDay(
+  static startOfDayInJsDate(
     year: number,
     month: number,
     day: number,
@@ -559,13 +559,13 @@ export class HijriDate {
    * Get the start of the Hijri day in JavaScript Date format
    * @returns JavaScript Date object representing the start of the Hijri day (sunset time)
    */
-  startOfDay(): Date {
+  startOfDay(): HijriDate {
     // Use Jakarta coordinates as default if not available
     const lat = this._latitude ?? DEFAULT_LATITUDE;
     const lng = this._longitude ?? DEFAULT_LONGITUDE;
 
     // Delegate to static method
-    return HijriDate.startOfDay(this.year, this.month, this.day, lat, lng);
+    return HijriDate.fromDate(HijriDate.startOfDayInJsDate(this.year, this.month, this.day, lat, lng));
   }
 }
 

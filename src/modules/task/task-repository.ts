@@ -372,7 +372,6 @@ export class TaskRepository {
     };
 
     const result = await (db as any).find(mangoQuery);
-    console.log("today", result);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );
@@ -403,7 +402,6 @@ export class TaskRepository {
     };
 
     const result = await (db as any).find(mangoQuery);
-    console.log("upcoming", result);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );

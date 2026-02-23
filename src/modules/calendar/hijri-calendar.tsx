@@ -142,7 +142,7 @@ export function HijriCalendar() {
   const getCurrentDayStart = () => {
     try {
       const today = getToday();
-      return today.startOfDay();
+      return today.startOfDay().toDate();
     } catch (error) {
       return new Date();
     }

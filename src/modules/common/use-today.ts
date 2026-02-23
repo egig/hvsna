@@ -62,7 +62,7 @@ export function useToday() {
   }, [db, getTargetResults, getTrackers]);
 
   useEffect(() => {
-    loadTodayTasks(getToday());
+    loadTodayTasks(getToday().startOfDay());
   }, [loadTodayTasks, getToday]);
 
   useEffect(() => {
