@@ -32,7 +32,7 @@ export default function TabLayout() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col relative">
+        <div className="flex-1 flex flex-col relative border-r border-gray-200">
           <div className="flex-1 overflow-auto">
             <Outlet />
           </div>

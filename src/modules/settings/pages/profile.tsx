@@ -10,10 +10,7 @@ export default function Profile() {
     <Page>
       <Navbar title={t("account")} showBackButton={true} />
       <div className="w-fit m-auto">
-        <UserProfile 
-          path="/profile"
-          routing="path"
-        />
+        <UserProfile path="/profile" routing="path" />
       </div>
     </Page>
   );

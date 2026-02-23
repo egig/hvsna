@@ -12,6 +12,8 @@ import {
   TbSettings,
   TbSettingsFilled,
   TbPlus,
+  TbSquarePlus,
+  TbSquareRoundedPlusFilled,
 } from "react-icons/tb";
 
 export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
@@ -63,15 +65,15 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
       <nav className="flex flex-col h-full">
         {/* Add Task Button at top */}
         {openTaskForm && (
-          <div className="p-4 border-b border-gray-200">
+          <div className="pt-4 px-4">
             <button
               onClick={() => {
                 openTaskForm();
               }}
-              className="flex items-center space-x-3 w-full px-3 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] text-white rounded-lg transition-colors"
+              className="flex items-center space-x-3 w-full px-3 py-2 font-bold text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               aria-label="Add new task"
             >
-              <TbPlus size={20} />
+              <TbSquareRoundedPlusFilled size={20} />
               <span className="font-medium">{t("add_new_task")}</span>
             </button>
           </div>
@@ -85,10 +87,8 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
                 key={tab.path}
                 to={tab.path}
                 navType="sidebar"
-                className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg transition-colors ${
-                  isActive
-                    ? "bg-[var(--hvsna-primary-color-active-tab)] text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                className={`flex text-[var(--hvsna-primary-color)] items-center space-x-3 w-full px-3 py-2 rounded-lg transition-colors ${
+                  isActive ? "bg-gray-100" : "hover:bg-gray-100"
                 }`}
                 aria-label={tab.label}
                 aria-current={isActive ? "page" : undefined}

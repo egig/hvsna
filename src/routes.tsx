@@ -52,12 +52,12 @@ export const AppRoutes = () => {
           <Route index element={<Today />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="upcoming" element={<Upcoming />} />
-          <Route path="about" element={<About />} />
-          <Route path="wipe-local" element={<WipeData />} />
           <Route path="goals" element={<Goals />} />
           <Route path="browse" element={<Browse />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+        <Route path="about" element={<About />} />
+        <Route path="wipe-local" element={<WipeData />} />
         <Route path="signin" element={<SignInPage />} />
         <Route path="signin/:action" element={<SignInPage />} />
         <Route path="signup" element={<SignUpPage />} />

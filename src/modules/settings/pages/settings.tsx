@@ -1,8 +1,4 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignOutButton,
-} from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/clerk-react";
 import { LogIn, Trash, Cog, Info, RefreshCw, User, LogOut } from "lucide-react";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../../ui/menu-item";

@@ -119,7 +119,6 @@ export function TimeSelectionModal({
         }
       />
 
-      {/* Mode Selection */}
       <div className="p-2">
         <div className="flex justify-center gap-1 mb-1 border-b border-gray-200 dark:border-gray-600">
           <button
@@ -145,17 +144,8 @@ export function TimeSelectionModal({
         </div>
       </div>
 
-      {/* Prayer Time Selection */}
       {inputMode === "prayer" && (
         <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {t("prayer_times") || "Prayer Times"}
-            </span>
-            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
-          </div>
-
           <select
             value={selectedPrayer}
             onChange={(e) =>
@@ -175,17 +165,8 @@ export function TimeSelectionModal({
         </div>
       )}
 
-      {/* Custom Time Selection */}
       {inputMode === "custom" && (
         <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {t("custom_time") || "Custom Time"}
-            </span>
-            <div className="w-4 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
-          </div>
-
           <div className="flex gap-2">
             <select
               value={hour.toString()}

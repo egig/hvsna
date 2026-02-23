@@ -92,14 +92,12 @@ export function TaskListItem({
     const tomorrow = today.next();
     const todayString = today.format("YYYYMMDD");
     const tomorrowString = tomorrow.format("YYYYMMDD");
-    const time = task.atTime;
+    const time = task.atTime || task.prayerTime;
 
-    // Check if today
     if (task.atDateHijri === yesterday) {
       return t("yesterday") + (time ? `, ${time}` : "");
     }
 
-    // Check if today
     if (task.atDateHijri === todayString) {
       if (timeContext === "today") {
         return time ? time : "";
@@ -107,7 +105,6 @@ export function TaskListItem({
       return t("today") + (time ? `, ${time}` : "");
     }
 
-    // Check if tomorrow
     if (task.atDateHijri === tomorrowString) {
       return t("tomorrow") + (time ? `, ${time}` : "");
     }
