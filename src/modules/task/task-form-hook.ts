@@ -8,7 +8,12 @@ import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
-import type { Task, TaskUpdateInput } from "./types";
+import type {
+  PrayerTime,
+  Task,
+  TaskCreateInput,
+  TaskUpdateInput,
+} from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "src/modules/settings/useSettings";
@@ -214,19 +219,19 @@ export const useTaskForm = (
         taskData.targetValue = -1 * (taskData.targetValue || 0);
       }
 
-      const taskInput: any = {
+      const taskInput: TaskCreateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
         targetId: taskData.targetId,
         targetValue: taskData.targetValue,
         attributes: attr,
-        atDateHijri: taskData.atDateHijri,
+        atDateHijri: taskData.atDateHijri as string,
         atTime: taskData.atTime,
-        usePrayerTime: !!selectedPrayerTime,
-        prayerTime: selectedPrayerTime || undefined,
+        prayerTime: selectedPrayerTime as PrayerTime,
         lat: latitude,
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
+        hijriDateOffset: offset,
       };
 
       // Handle repeat - only include if not "none"
@@ -245,14 +250,15 @@ export const useTaskForm = (
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
         try {
-          await createRecurringTask({
-            name: taskInput.name,
-            targetId: taskInput.targetId,
-            targetValue: taskInput.targetValue,
-            attributes: taskInput.attributes,
-            repeat: taskData.repeat,
-            baseDate: taskInput.atEpochMillis,
-          });
+          // TODO
+          // await createRecurringTask({
+          //   name: taskInput.name,
+          //   targetId: taskInput.targetId,
+          //   targetValue: taskInput.targetValue,
+          //   attributes: taskInput.attributes,
+          //   repeat: taskData.repeat,
+          //   baseDate: taskInput.atEpochMillis,
+          // });
         } catch (recurringError) {
           console.error("Failed to create recurring task:", recurringError);
           // Don't fail the main task creation if recurring task creation fails

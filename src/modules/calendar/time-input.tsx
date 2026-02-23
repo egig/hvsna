@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { ClockIcon } from "lucide-react";
 import { Modal } from "src/modules/navigation";
-import { useLanguageContext } from "../i18n/LanguageContext";
 import { TimeSelectionModal } from "./hijri-date-input/time-selection-modal";
 import type { PrayerTime } from "src/modules/task/types";
 
@@ -30,7 +29,6 @@ export function TimeInput({
   onChange,
   onBlur,
 }: TimeInputProps) {
-  const { t } = useLanguageContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
@@ -45,6 +43,7 @@ export function TimeInput({
   ) => {
     setSelectedTime(time);
     if (onChange) {
+      console.log(time, selectedPrayerTime);
       onChange(time, selectedPrayerTime);
     }
   };

@@ -6,6 +6,40 @@ import { useSettings } from "src/modules/settings/useSettings";
 import * as SunCalc from "suncalc";
 import type { PrayerTime } from "src/modules/task/types";
 
+/**
+ * Generates an array of hours sorted from sunset to next sunset based on geographic coordinates
+ * @param lat Latitude for sunset calculation
+ * @param lng Longitude for sunset calculation
+ * @returns Array of hours (0-23) sorted starting from sunset hour
+ */
+function getSunsetBasedSortedHours(lat: number, lng: number): number[] {
+  try {
+    const today = new Date();
+    const times = SunCalc.getTimes(today, lat, lng);
+
+    if (times.sunset && times.sunrise) {
+      const sunsetHour = times.sunset.getHours();
+      const eveningHours = Array.from(
+        { length: 24 - sunsetHour },
+        (_, i) => (sunsetHour + i) % 24,
+      );
+      const remainingHours = Array.from({ length: sunsetHour }, (_, i) => i);
+
+      return [...eveningHours, ...remainingHours];
+    } else {
+      // Fallback to regular 0-23 order if calculation fails
+      return Array.from({ length: 24 }, (_, i) => i);
+    }
+  } catch (error) {
+    console.warn(
+      "SunCalc calculation failed in getSunsetBasedSortedHours:",
+      error,
+    );
+    // Fallback to regular 0-23 order
+    return Array.from({ length: 24 }, (_, i) => i);
+  }
+}
+
 interface TimeSelectionModalProps {
   selectedTime: string | null;
   selectedPrayerTime?: PrayerTime;
@@ -50,37 +84,9 @@ export function TimeSelectionModal({
   }, [selectedTime]);
 
   useEffect(() => {
-    // Calculate sunset and sunrise times for today
-    // Use coordinates from settings, fallback to Jakarta coordinates if not available
     const lat = settings.coordinate?.latitude ?? -6.2088;
     const lng = settings.coordinate?.longitude ?? 106.8456;
-
-    try {
-      const today = new Date();
-      const times = SunCalc.getTimes(today, lat, lng);
-
-      if (times.sunset && times.sunrise) {
-        const sunsetHour = times.sunset.getHours();
-        const sunriseHour = times.sunrise.getHours();
-
-        // Create array of hours sorted from sunset to next sunset
-        // Evening hours (sunset to 23) first, then all remaining hours (0 to sunset-1)
-        const eveningHours = Array.from(
-          { length: 24 - sunsetHour },
-          (_, i) => (sunsetHour + i) % 24,
-        );
-        const remainingHours = Array.from({ length: sunsetHour }, (_, i) => i);
-
-        setSortedHours([...eveningHours, ...remainingHours]);
-      } else {
-        // Fallback to regular 0-23 order if calculation fails
-        setSortedHours(Array.from({ length: 24 }, (_, i) => i));
-      }
-    } catch (error) {
-      console.warn("SunCalc calculation failed in TimeSelectionModal:", error);
-      // Fallback to regular 0-23 order
-      setSortedHours(Array.from({ length: 24 }, (_, i) => i));
-    }
+    setSortedHours(getSunsetBasedSortedHours(lat, lng));
   }, [settings.coordinate]);
 
   const handleCustomTimeConfirm = () => {

@@ -48,6 +48,7 @@ export interface TaskCreateInput {
   targetValue?: number;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
+  hijriDateOffset?: number;
 }
 
 export interface TaskUpdateInput {
@@ -64,6 +65,7 @@ export interface TaskUpdateInput {
   targetValue?: number;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
+  hijriDateOffset?: number;
 }
 
 export interface TaskChange {

@@ -55,13 +55,11 @@ export const useTaskFormEdit = (
   );
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
-  // Prayer time state
   const [selectedPrayerTime, setSelectedPrayerTime] = useState<string>("");
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
   const { settings } = useSettings();
-  const offset = settings.manualDateOffset || 0;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [tracker, setTracker] = useState<Tracker | null>(null);
@@ -71,6 +69,10 @@ export const useTaskFormEdit = (
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
   const { getToday, createHijriDate } = useHijriCalendar();
+
+  const offset = settings.manualDateOffset || 0;
+  const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
+  const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
 
   useEffect(() => {
     if (task?.atDateHijri) {
@@ -222,7 +224,7 @@ export const useTaskFormEdit = (
         taskData.targetValue = -1 * (taskData.targetValue || 0);
       }
 
-      const taskInput: any = {
+      const taskInput: TaskUpdateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
         targetId: taskData.targetId,
@@ -230,11 +232,10 @@ export const useTaskFormEdit = (
         attributes: attr,
         atDateHijri: taskData.atDateHijri,
         atTime: taskData.atTime,
-        usePrayerTime: !!selectedPrayerTime,
-        prayerTime: selectedPrayerTime || undefined,
-        lat: -6.2088,
-        long: 106.8456,
-        timezone: "Asia/Jakarta",
+        lat: latitude,
+        long: longitude,
+        timezone: settings.timezone || "Asia/Jakarta",
+        hijriDateOffset: offset,
       };
 
       // Handle repeat - only include if not "none"
