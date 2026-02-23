@@ -122,14 +122,14 @@ export default function TaskForm({
       />
 
       <DatePrayerInput
-        selectedHijriDate={selectedHijriDate}
-        selectedTime={selectedTime}
-        selectedPrayerTime={selectedPrayerTime}
+        atDateHijri={selectedHijriDate?.format("YYYYMMDD") || ""}
+        atTime={selectedTime || ""}
+        prayerTime={selectedPrayerTime || ""}
         isSubmitting={isSubmitting}
         onDateChange={(hijriDate, time, prayerTime) => {
           setSelectedHijriDate(hijriDate);
           setSelectedTime(time);
-          setSelectedPrayerTime(prayerTime as PrayerTime);
+          setSelectedPrayerTime(prayerTime);
         }}
       />
 

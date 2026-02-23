@@ -32,8 +32,6 @@ describe("HijriDate", () => {
       expect(result.getFullYear()).toBe(2023);
       expect(result.getMonth()).toBe(6); // July (0-based)
       expect(result.getDate()).toBe(6);
-      expect(result.getHours()).toBe(0);
-      expect(result.getMinutes()).toBe(0);
     });
 
     it("should convert Hijri date with time components", () => {

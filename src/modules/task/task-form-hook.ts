@@ -78,43 +78,10 @@ export const useTaskForm = (
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
-  const { getToday, createHijriDate } = useHijriCalendar();
+  const { getToday } = useHijriCalendar();
 
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
-
-  useEffect(() => {
-    if (task?.atDateHijri) {
-      // Parse YYYYMMDD format using helper function
-      const { year, month, day } = parseHijriDateString(task.atDateHijri);
-
-      // Parse time if available using helper function
-      let hour = undefined;
-      let minute = undefined;
-      if (task?.atTime) {
-        const timeParts = parseTimeString(task.atTime);
-        hour = timeParts.hour;
-        minute = timeParts.minute;
-      }
-
-      setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
-    }
-
-    // Initialize time and prayer time state from existing task
-    if (task?.atTime && !task.usePrayerTime) {
-      // Task has custom time
-      setSelectedTime(task.atTime);
-      setSelectedPrayerTime(""); // Clear prayer time for custom time
-    } else if (task?.prayerTime && task.usePrayerTime) {
-      // Task has prayer time
-      setSelectedPrayerTime(task.prayerTime);
-      setSelectedTime(null); // Clear custom time for prayer time
-    } else {
-      // Task has no time or prayer time
-      setSelectedTime(null);
-      setSelectedPrayerTime("");
-    }
-  }, [task, offset]);
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");

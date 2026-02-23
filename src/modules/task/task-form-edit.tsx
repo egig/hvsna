@@ -128,9 +128,9 @@ export default function TaskFormEdit({
       />
 
       <DatePrayerInput
-        selectedHijriDate={selectedHijriDate}
-        selectedTime={selectedTime}
-        selectedPrayerTime={selectedPrayerTime}
+        atDateHijri={task?.atDateHijri || ""}
+        atTime={task?.atTime || ""}
+        prayerTime={task?.prayerTime || ""}
         isSubmitting={isSubmitting}
         onDateChange={(hijriDate, time, prayerTime) => {
           setSelectedHijriDate(hijriDate);

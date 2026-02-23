@@ -335,6 +335,7 @@ export const useTaskStore = create<TaskState>()(
       },
 
       loadTodayTasks: async (d: HijriDate): Promise<void> => {
+        console.log("loadTodayTasks", d);
         try {
           set({ loading: true, error: null });
           const todayTasksList = await taskRepository.findTodayTasks(d);

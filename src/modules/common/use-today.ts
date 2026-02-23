@@ -63,7 +63,7 @@ export function useToday() {
 
   useEffect(() => {
     loadTodayTasks(getToday());
-  }, [loadTodayTasks]);
+  }, [loadTodayTasks, getToday]);
 
   useEffect(() => {
     loadHomeData();

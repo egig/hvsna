@@ -5,6 +5,52 @@ import * as SunCalc from "suncalc";
 const DEFAULT_LATITUDE = -6.2088;
 const DEFAULT_LONGITUDE = 106.8456;
 
+/**
+ * Applies day offset to Hijri date components, handling month/year overflow/underflow
+ * @param year - Hijri year
+ * @param month - Hijri month (1-12)
+ * @param day - Hijri day
+ * @param offset - Number of days to adjust (positive = subtract days, negative = add days)
+ * @returns Adjusted Hijri date components
+ */
+function applyHijriDateOffset(
+  year: number,
+  month: number,
+  day: number,
+  offset: number,
+): { year: number; month: number; day: number } {
+  let adjustedYear = year;
+  let adjustedMonth = month;
+  let adjustedDay = day;
+
+  if (offset !== 0) {
+    adjustedDay = day + offset;
+
+    // Handle day overflow/underflow
+    while (
+      adjustedDay > HijriDate.getDaysInMonth(adjustedYear, adjustedMonth)
+    ) {
+      adjustedDay -= HijriDate.getDaysInMonth(adjustedYear, adjustedMonth);
+      adjustedMonth++;
+      if (adjustedMonth > 12) {
+        adjustedMonth = 1;
+        adjustedYear++;
+      }
+    }
+
+    while (adjustedDay < 1) {
+      adjustedDay += HijriDate.getDaysInMonth(adjustedYear, adjustedMonth - 1);
+      adjustedMonth--;
+      if (adjustedMonth < 1) {
+        adjustedMonth = 12;
+        adjustedYear--;
+      }
+    }
+  }
+
+  return { year: adjustedYear, month: adjustedMonth, day: adjustedDay };
+}
+
 export class HijriDate {
   year!: number;
   month!: number;
@@ -102,45 +148,17 @@ export class HijriDate {
     longitude?: number,
     options?: { offset?: number },
   ): Date {
-    // Use Jakarta coordinates as default if not provided
     const lat = latitude ?? DEFAULT_LATITUDE;
     const lng = longitude ?? DEFAULT_LONGITUDE;
-
-    // Apply offset to Hijri date if provided (reverse logic of fromDate)
     const offset = options?.offset ?? 0;
-    let adjustedYear = year;
-    let adjustedMonth = month;
-    let adjustedDay = day;
 
-    if (offset !== 0) {
-      adjustedDay = day - offset; // Reverse logic: subtract offset instead of add
+    // Reverse logic: subtract offset instead of add so we times offset with -1
+    const {
+      year: adjustedYear,
+      month: adjustedMonth,
+      day: adjustedDay,
+    } = applyHijriDateOffset(year, month, day, -1 * offset);
 
-      // Handle day overflow/underflow
-      while (
-        adjustedDay > HijriDate.getDaysInMonth(adjustedYear, adjustedMonth)
-      ) {
-        adjustedDay -= HijriDate.getDaysInMonth(adjustedYear, adjustedMonth);
-        adjustedMonth++;
-        if (adjustedMonth > 12) {
-          adjustedMonth = 1;
-          adjustedYear++;
-        }
-      }
-
-      while (adjustedDay < 1) {
-        adjustedDay += HijriDate.getDaysInMonth(
-          adjustedYear,
-          adjustedMonth - 1,
-        );
-        adjustedMonth--;
-        if (adjustedMonth < 1) {
-          adjustedMonth = 12;
-          adjustedYear--;
-        }
-      }
-    }
-
-    // Convert Hijri date to Gregorian date (with offset applied)
     const gregorian = hijriToGregorian({
       year: adjustedYear,
       month: adjustedMonth,
@@ -152,37 +170,15 @@ export class HijriDate {
     let finalMinute = minute;
 
     if (finalHour === undefined || finalMinute === undefined) {
-      try {
-        // Create a temporary date to calculate sunset time
-        const tempDate = new Date(
-          gregorian.year,
-          gregorian.month - 1,
-          gregorian.day,
-          12, // Use noon as default time for sunset calculation
-          0,
-          0,
-          0,
-        );
-        const times = SunCalc.getTimes(tempDate, lat, lng);
-        const sunset = times.sunset;
-
-        if (sunset) {
-          finalHour = finalHour ?? sunset.getHours();
-          finalMinute = finalMinute ?? sunset.getMinutes();
-        } else {
-          // Fallback to 0:00 if sunset calculation fails
-          finalHour = finalHour ?? 0;
-          finalMinute = finalMinute ?? 0;
-        }
-      } catch (error) {
-        // If SunCalc fails, fall back to 0:00
-        finalHour = finalHour ?? 0;
-        finalMinute = finalMinute ?? 0;
-        console.warn(
-          "SunCalc calculation failed for default time in hijriToJsDate:",
-          error,
-        );
-      }
+      const startOfDay = HijriDate.startOfDay(
+        adjustedYear,
+        adjustedMonth,
+        adjustedDay,
+        lat,
+        lng,
+      );
+      finalHour = finalHour ?? startOfDay.getHours();
+      finalMinute = finalMinute ?? startOfDay.getMinutes();
     }
 
     // Create Date object with time components
@@ -196,7 +192,6 @@ export class HijriDate {
       0,
     );
 
-    // Apply sunset adjustment logic (same as in fromDate)
     try {
       const times = SunCalc.getTimes(result, lat, lng);
       const sunset = times.sunset;
@@ -269,33 +264,16 @@ export class HijriDate {
     // Apply offset to Hijri date if provided
     const offset = options?.offset ?? 0;
     if (offset !== 0) {
-      let adjustedDay = hijriDate.day + offset;
-      let adjustedMonth = hijriDate.month;
-      let adjustedYear = hijriDate.year;
-
-      // Handle day overflow/underflow
-      while (
-        adjustedDay > HijriDate.getDaysInMonth(adjustedYear, adjustedMonth)
-      ) {
-        adjustedDay -= HijriDate.getDaysInMonth(adjustedYear, adjustedMonth);
-        adjustedMonth++;
-        if (adjustedMonth > 12) {
-          adjustedMonth = 1;
-          adjustedYear++;
-        }
-      }
-
-      while (adjustedDay < 1) {
-        adjustedDay += HijriDate.getDaysInMonth(
-          adjustedYear,
-          adjustedMonth - 1,
-        );
-        adjustedMonth--;
-        if (adjustedMonth < 1) {
-          adjustedMonth = 12;
-          adjustedYear--;
-        }
-      }
+      const {
+        year: adjustedYear,
+        month: adjustedMonth,
+        day: adjustedDay,
+      } = applyHijriDateOffset(
+        hijriDate.year,
+        hijriDate.month,
+        hijriDate.day,
+        offset,
+      );
 
       hijriDate.day = adjustedDay;
       hijriDate.month = adjustedMonth;
@@ -513,6 +491,81 @@ export class HijriDate {
       weekDates.push(weekDates[i].next());
     }
     return weekDates;
+  }
+
+  /**
+   * Get the start of the Hijri day in JavaScript Date format (static version)
+   * @param year Hijri year
+   * @param month Hijri month (1-12)
+   * @param day Hijri day
+   * @param latitude Latitude for sunset calculation (defaults to Jakarta)
+   * @param longitude Longitude for sunset calculation (defaults to Jakarta)
+   * @returns JavaScript Date object representing the start of the Hijri day (sunset time)
+   */
+  static startOfDay(
+    year: number,
+    month: number,
+    day: number,
+    latitude?: number,
+    longitude?: number,
+  ): Date {
+    // Use Jakarta coordinates as default if not provided
+    const lat = latitude ?? DEFAULT_LATITUDE;
+    const lng = longitude ?? DEFAULT_LONGITUDE;
+
+    // Convert Hijri date to Gregorian date
+    const gregorian = hijriToGregorian({
+      year,
+      month,
+      day,
+    });
+
+    // Create a date object at noon for sunset calculation
+    const noonDate = new Date(
+      gregorian.year,
+      gregorian.month - 1,
+      gregorian.day,
+      12,
+      0,
+      0,
+      0,
+    );
+
+    try {
+      // Get sunset time for this date
+      const times = SunCalc.getTimes(noonDate, lat, lng);
+      const sunset = times.sunset;
+
+      if (sunset && !isNaN(sunset.getTime())) {
+        return sunset;
+      }
+    } catch (error) {
+      console.warn("SunCalc calculation failed in startOfDay:", error);
+    }
+
+    // Fallback to midnight if sunset calculation fails
+    return new Date(
+      gregorian.year,
+      gregorian.month - 1,
+      gregorian.day,
+      0,
+      0,
+      0,
+      0,
+    );
+  }
+
+  /**
+   * Get the start of the Hijri day in JavaScript Date format
+   * @returns JavaScript Date object representing the start of the Hijri day (sunset time)
+   */
+  startOfDay(): Date {
+    // Use Jakarta coordinates as default if not available
+    const lat = this._latitude ?? DEFAULT_LATITUDE;
+    const lng = this._longitude ?? DEFAULT_LONGITUDE;
+
+    // Delegate to static method
+    return HijriDate.startOfDay(this.year, this.month, this.day, lat, lng);
   }
 }
 

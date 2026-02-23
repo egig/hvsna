@@ -140,11 +140,11 @@ export class TaskRepository {
       lat: input.lat,
       long: input.long,
       timezone: input.timezone,
+      hijriDateOffset: input.hijriDateOffset || 0,
     };
 
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
     delete doc._rev;
-    console.log(doc);
     await (db as any).put(doc);
 
     return newTask;
@@ -152,14 +152,12 @@ export class TaskRepository {
 
   async update(id: string, input: TaskUpdateInput): Promise<Task> {
     const existingDoc = await (db as any).get(id);
-
     const updateData = new PouchDBTaskDocument({
       ...existingDoc,
       updatedAt: Date.now(),
     }).toTaskItem();
 
     // Check if field are inputted / undefined
-    // TODO handle remove time or
     Object.assign(
       updateData,
       Object.fromEntries(
@@ -168,6 +166,7 @@ export class TaskRepository {
     );
 
     let ud = PouchDBTaskDocument.fromTaskItem(updateData);
+
     const response = await (db as any).put(ud);
     const updatedDoc = new PouchDBTaskDocument({
       ...updateData,
@@ -373,6 +372,7 @@ export class TaskRepository {
     };
 
     const result = await (db as any).find(mangoQuery);
+    console.log("today", result);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );
@@ -403,6 +403,7 @@ export class TaskRepository {
     };
 
     const result = await (db as any).find(mangoQuery);
+    console.log("upcoming", result);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );

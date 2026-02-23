@@ -75,39 +75,6 @@ export const useTaskFormEdit = (
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
 
   useEffect(() => {
-    if (task?.atDateHijri) {
-      // Parse YYYYMMDD format using helper function
-      const { year, month, day } = parseHijriDateString(task.atDateHijri);
-
-      // Parse time if available using helper function
-      let hour: number | undefined = undefined;
-      let minute: number | undefined = undefined;
-      if (task?.atTime) {
-        const timeParts = parseTimeString(task.atTime);
-        hour = timeParts.hour;
-        minute = timeParts.minute;
-      }
-
-      setSelectedHijriDate(createHijriDate(year, month, day, hour, minute));
-    }
-
-    // Initialize time and prayer time state from existing task
-    if (task?.atTime && !task.usePrayerTime) {
-      // Task has custom time
-      setSelectedTime(task.atTime);
-      setSelectedPrayerTime(""); // Clear prayer time for custom time
-    } else if (task?.prayerTime && task.usePrayerTime) {
-      // Task has prayer time
-      setSelectedPrayerTime(task.prayerTime);
-      setSelectedTime(null); // Clear custom time for prayer time
-    } else {
-      // Task has no time or prayer time
-      setSelectedTime(null);
-      setSelectedPrayerTime("");
-    }
-  }, [task, offset]);
-
-  useEffect(() => {
     if (taskId) {
       getTask(taskId).then((fetchedTask) => {
         if (fetchedTask) {
@@ -119,7 +86,7 @@ export const useTaskFormEdit = (
         }
       });
     }
-  }, [taskId, currentTargetId]);
+  }, [taskId, getTask, currentTargetId]);
 
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
@@ -254,14 +221,15 @@ export const useTaskFormEdit = (
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
         try {
-          await createRecurringTask({
-            name: taskInput.name,
-            targetId: taskInput.targetId,
-            targetValue: taskInput.targetValue,
-            attributes: taskInput.attributes,
-            repeat: taskData.repeat,
-            baseDate: taskInput.atEpochMillis,
-          });
+          // TODO: implement recurring task creation
+          // await createRecurringTask({
+          //   name: taskInput.name,
+          //   targetId: taskInput.targetId,
+          //   targetValue: taskInput.targetValue,
+          //   attributes: taskInput.attributes,
+          //   repeat: taskData.repeat,
+          //   baseDate: taskInput.atEpochMillis,
+          // });
         } catch (recurringError) {
           console.error("Failed to create recurring task:", recurringError);
           // Don't fail the main task creation if recurring task creation fails

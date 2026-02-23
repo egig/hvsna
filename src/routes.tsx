@@ -28,6 +28,7 @@ import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
 import MonthView from "./modules/calendar/month-view";
 import YearView from "./ui/year-view";
+import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 
 export const AppRoutes = () => {
@@ -69,6 +70,7 @@ export const AppRoutes = () => {
         <Route path="attribute-options" element={<AttributeOptions />} />
         <Route path="logs" element={<Logs />} />
         <Route path="general-settings" element={<GeneralSettings />} />
+        <Route path="hijri-calendar" element={<HijriCalendar />} />
         <Route path="profile" element={<Profile />} />
         <Route path="profile/:action" element={<Profile />} />
         <Route path="*" element={<p>Not Found</p>} />
