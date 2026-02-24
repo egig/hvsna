@@ -184,9 +184,12 @@ export class TaskRepository {
       updateData.prayerTime = input.prayerTime;
       updateData.usePrayerTime = true;
       updateData.atTime = "";
+    } else if (input.removeTime) {
+      updateData.prayerTime = undefined;
+      updateData.usePrayerTime = false;
+      updateData.atTime = "";
     }
 
-    console.log("updateData", updateData);
     let ud = PouchDBTaskDocument.fromTaskItem(updateData);
 
     const response = await (db as any).put(ud);

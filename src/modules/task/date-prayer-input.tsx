@@ -49,6 +49,7 @@ export function DatePrayerInput({
             disabled={isSubmitting}
             className="text-base h-[38px]"
             onChange={(time, prayerTime) => {
+              console.log("removeTime", time, prayerTime);
               onChange(hijriDate, time, prayerTime);
             }}
           />

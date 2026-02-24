@@ -58,7 +58,6 @@ export const useTaskFormEdit = (
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
 
-  // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
   const { getToday, createHijriDate } = useHijriCalendar();
   const [removeTime, setRemoveTime] = useState(false);
@@ -180,8 +179,6 @@ export const useTaskFormEdit = (
       taskDescription: string;
     } & Partial<Task>;
 
-    console.log("selectedScheduleAt", selectedScheduleAt);
-
     if (!!selectedScheduleAt?.dateHijri) {
       taskData.atDateHijri = formatHijriDateString(
         selectedScheduleAt.dateHijri.year,
@@ -229,6 +226,7 @@ export const useTaskFormEdit = (
         timezone: settings.timezone || "Asia/Jakarta",
         hijriDateOffset: offset,
         prayerTime: selectedScheduleAt?.prayerTime as PrayerTime,
+        removeTime: removeTime,
       };
 
       // Handle repeat - only include if not "none"

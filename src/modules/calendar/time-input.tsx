@@ -39,6 +39,7 @@ export function TimeInput({
 
   const handleRemoveTime = () => {
     onChange(null, undefined);
+    setIsModalOpen(false);
   };
 
   const handleButtonClick = () => {
