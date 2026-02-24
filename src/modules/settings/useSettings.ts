@@ -5,8 +5,9 @@ import type {
   Coordinate,
   LocationResolveType,
 } from "./settings";
-import type { Language } from "../common/language";
 import { usePouchDB } from "../../pouchdb";
+import type { Language } from "../i18n/language";
+import { CapacitorGeolocation } from "../../lib/capacitor";
 
 const SETTINGS_DOC_ID = "general_settings";
 
@@ -270,6 +271,156 @@ export function useSettings() {
     });
   }, [updateSettings]);
 
+  // Capacitor-specific location functions
+  const requestNativeLocationPermission =
+    useCallback(async (): Promise<boolean> => {
+      if (!CapacitorGeolocation.isNativePlatform()) {
+        setError(
+          "Native location services are only available on mobile devices",
+        );
+        return false;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const permissionResult = await CapacitorGeolocation.checkPermissions();
+
+        if (permissionResult.state === "granted") {
+          setLoading(false);
+          return true;
+        }
+
+        if (permissionResult.state === "denied") {
+          setError(
+            "Location permission denied. Please enable in device settings.",
+          );
+          setLoading(false);
+          return false;
+        }
+
+        // Request permission
+        const requestResult = await CapacitorGeolocation.requestPermissions();
+
+        if (requestResult.state === "granted") {
+          setLoading(false);
+          return true;
+        } else {
+          setError(requestResult.message || "Location permission denied");
+          setLoading(false);
+          return false;
+        }
+      } catch (err) {
+        setLoading(false);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to request native location permission",
+        );
+        return false;
+      }
+    }, [setLoading, setError]);
+
+  const getCurrentNativeLocation =
+    useCallback(async (): Promise<Coordinate | null> => {
+      if (!CapacitorGeolocation.isNativePlatform()) {
+        setError(
+          "Native location services are only available on mobile devices",
+        );
+        return null;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const position = await CapacitorGeolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 300000, // 5 minutes
+        });
+
+        const coordinate: Coordinate = {
+          latitude: position.latitude,
+          longitude: position.longitude,
+          accuracy: position.accuracy,
+          altitude: position.altitude,
+          altitudeAccuracy: position.altitudeAccuracy,
+          heading: position.heading,
+          speed: position.speed,
+        };
+
+        setLoading(false);
+        return coordinate;
+      } catch (err) {
+        setLoading(false);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to get current native location",
+        );
+        return null;
+      }
+    }, [setLoading, setError]);
+
+  const requestNativeLocationAndUpdate =
+    useCallback(async (): Promise<boolean> => {
+      // First check/request permissions
+      const hasPermission = await requestNativeLocationPermission();
+      if (!hasPermission) {
+        return false;
+      }
+
+      // Get current location
+      const coordinate = await getCurrentNativeLocation();
+      if (!coordinate) {
+        return false;
+      }
+
+      // Update settings
+      await updateSettings({
+        coordinate,
+        locationResolvedAt: new Date().toISOString(),
+        locationResolveType: "capacitor_native",
+      });
+
+      return true;
+    }, [
+      requestNativeLocationPermission,
+      getCurrentNativeLocation,
+      updateSettings,
+    ]);
+
+  // Enhanced getCurrentLocation that tries Capacitor first on native platforms
+  const getBestCurrentLocation =
+    useCallback(async (): Promise<Coordinate | null> => {
+      if (CapacitorGeolocation.isNativePlatform()) {
+        // Try native location first
+        const nativeLocation = await getCurrentNativeLocation();
+        if (nativeLocation) {
+          return nativeLocation;
+        }
+
+        // Fallback to browser if native fails
+        setError("Native location failed, trying browser location...");
+      }
+
+      // Use browser location as fallback
+      return getCurrentLocation();
+    }, [getCurrentNativeLocation, getCurrentLocation, setError]);
+
+  // Enhanced request permission that works on both platforms
+  const requestBestLocationPermission =
+    useCallback(async (): Promise<boolean> => {
+      if (CapacitorGeolocation.isNativePlatform()) {
+        return requestNativeLocationPermission();
+      }
+
+      // Use browser permission request
+      return requestLocationPermission();
+    }, [requestNativeLocationPermission, requestLocationPermission]);
+
   const hasLocationPermission = !!(
     settings.coordinate &&
     settings.locationResolvedAt &&
@@ -434,6 +585,12 @@ export function useSettings() {
     setManualLocation,
     clearLocation,
     hasLocationPermission,
+    // Enhanced Capacitor location functions
+    requestNativeLocationPermission,
+    getCurrentNativeLocation,
+    requestNativeLocationAndUpdate,
+    getBestCurrentLocation,
+    requestBestLocationPermission,
     // Timezone functions
     getTimezoneFromCoordinates,
     updateTimezoneFromLocation,

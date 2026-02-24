@@ -10,7 +10,7 @@ export interface Coordinate {
   speed?: number;
 }
 
-export type LocationResolveType = "manual" | "auto";
+export type LocationResolveType = "manual" | "auto" | "capacitor_native";
 
 export interface GeneralSettings {
   language: Language;

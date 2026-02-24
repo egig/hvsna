@@ -4,6 +4,7 @@ import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../../lib/timezones";
 import { ListInputSelect } from "../../../ui/list-input-select";
+import { CapacitorGeolocation } from "../../../lib/capacitor";
 
 export default function GeneralSettings() {
   const {
@@ -19,6 +20,12 @@ export default function GeneralSettings() {
     clearLocation,
     hasLocationPermission,
     updateTimezoneFromLocation,
+    // Enhanced Capacitor functions
+    requestNativeLocationPermission,
+    getCurrentNativeLocation,
+    requestNativeLocationAndUpdate,
+    getBestCurrentLocation,
+    requestBestLocationPermission,
   } = useSettings();
   const { t } = useLanguageContext();
 
@@ -37,19 +44,35 @@ export default function GeneralSettings() {
   };
 
   const handleGetLocation = async () => {
-    const coordinate = await getCurrentLocation();
+    const coordinate = await getBestCurrentLocation();
     if (coordinate) {
-      await updateLocation(coordinate, "auto");
+      const resolveType = CapacitorGeolocation.isNativePlatform()
+        ? "capacitor_native"
+        : "auto";
+      await updateLocation(coordinate, resolveType);
       // Also update timezone after getting location
       await updateTimezoneFromLocation();
     }
   };
 
+  const handleGetNativeLocation = async () => {
+    const success = await requestNativeLocationAndUpdate();
+    if (success) {
+      // Also update timezone after getting location
+      await updateTimezoneFromLocation();
+    }
+  };
+
+  // Determine which location functions to show
+  const isNativePlatform = CapacitorGeolocation.isNativePlatform();
+  const showNativeOptions = isNativePlatform;
+
   // Check if timezone is based on location coordinates
   const isTimezoneFromLocation =
     settings.coordinate &&
     settings.locationResolvedAt &&
-    settings.locationResolveType === "auto";
+    (settings.locationResolveType === "auto" ||
+      settings.locationResolveType === "capacitor_native");
 
   return (
     <Page>
@@ -98,6 +121,18 @@ export default function GeneralSettings() {
         {settings.coordinate && (
           <div className="mt-3 p-3 bg-gray-50 rounded text-xs">
             <div className="space-y-2">
+              {settings.locationResolveType && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t("source")}</span>
+                  <span>
+                    {settings.locationResolveType === "capacitor_native"
+                      ? t("gps_location")
+                      : settings.locationResolveType === "auto"
+                        ? t("browser_location")
+                        : t("manual_location")}
+                  </span>
+                </div>
+              )}
               {settings.coordinate.accuracy && (
                 <div className="flex justify-between">
                   <span className="text-gray-600">{t("accuracy")}</span>
@@ -119,7 +154,7 @@ export default function GeneralSettings() {
         <div className="mt-3 flex flex-wrap gap-2">
           {!hasLocationPermission ? (
             <button
-              onClick={requestLocationPermission}
+              onClick={requestBestLocationPermission}
               disabled={loading}
               className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               style={
@@ -143,6 +178,31 @@ export default function GeneralSettings() {
             </button>
           ) : (
             <>
+              {showNativeOptions && (
+                <button
+                  onClick={handleGetNativeLocation}
+                  disabled={loading}
+                  className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+                  style={
+                    {
+                      backgroundColor: "var(--hvsna-primary-color)",
+                      "--hover-bg": "var(--hvsna-primary-color-hover)",
+                      "--focus-ring-color": "var(--hvsna-primary-color)",
+                    } as React.CSSProperties
+                  }
+                  onMouseEnter={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.backgroundColor =
+                      "var(--hvsna-primary-color-hover)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.currentTarget as HTMLElement;
+                    target.style.backgroundColor = "var(--hvsna-primary-color)";
+                  }}
+                >
+                  {t("get_gps_location")}
+                </button>
+              )}
               <button
                 onClick={handleGetLocation}
                 disabled={loading}
@@ -164,7 +224,9 @@ export default function GeneralSettings() {
                   target.style.backgroundColor = "var(--hvsna-primary-color)";
                 }}
               >
-                {t("get_location")}
+                {showNativeOptions
+                  ? t("get_browser_location")
+                  : t("get_location")}
               </button>
               {settings.coordinate && (
                 <button

@@ -47,5 +47,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to calculate time.</string>
+
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need your location in the background.</string>
 </dict>
 </plist>
