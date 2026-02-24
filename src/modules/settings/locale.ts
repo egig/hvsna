@@ -250,6 +250,10 @@ export const settingsTranslations = {
     en: "Account",
     id: "Akun",
   },
+  manage_account: {
+    en: "Manage Account",
+    id: "Atur Akun",
+  },
   user: {
     en: "User",
     id: "Pengguna",
