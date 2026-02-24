@@ -66,6 +66,7 @@ export interface TaskUpdateInput {
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
+  removeTime?: boolean;
 }
 
 export interface TaskChange {

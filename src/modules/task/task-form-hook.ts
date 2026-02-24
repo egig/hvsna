@@ -17,29 +17,25 @@ import type {
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "src/modules/settings/useSettings";
-import {
-  parseHijriDateString,
-  parseTimeString,
-  formatHijriDateString,
-} from "./task-form-helpers";
+import { formatHijriDateString } from "./task-form-helpers";
+
+export interface TaskScheduleAt {
+  dateHijri: HijriDate | null;
+  time: string;
+  prayerTime: string;
+}
 
 export interface UseTaskFormReturn {
   task: Task | null;
   error: string | null;
-  selectedHijriDate: HijriDate | null;
-  selectedTime: string | null;
   isSubmitting: boolean;
-  setSelectedHijriDate: any;
-  setSelectedTime: any;
   selectedTargetId: string;
   setSelectedTargetId: any;
   selectedGoal: any;
   trackerAttributes: any;
-  // Prayer time fields
-  selectedPrayerTime?: string;
-  setSelectedPrayerTime?: any;
-  handleTimeSelection: (time: string, prayerTime?: string) => void;
   handleSubmit: (f: FormData) => void;
+  selectedScheduleAt: TaskScheduleAt;
+  setSelectedScheduleAt: any;
 }
 
 export const useTaskForm = (
@@ -63,13 +59,13 @@ export const useTaskForm = (
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | null>(
-    null,
-  );
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
-  // Prayer time state
-  const [selectedPrayerTime, setSelectedPrayerTime] = useState<string>("");
+
+  const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
+    dateHijri: null,
+    time: "",
+    prayerTime: "",
+  });
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
@@ -137,31 +133,25 @@ export const useTaskForm = (
     return updatedTask;
   };
 
-  const handleTimeSelection = (time: string, prayerTime?: string) => {
-    setSelectedTime(time);
-    setSelectedPrayerTime(prayerTime || "");
-  };
-
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
       taskName: string;
       taskDescription: string;
     } & Partial<Task>;
 
-    if (!!selectedHijriDate) {
+    if (!!selectedScheduleAt.dateHijri) {
       taskData.atDateHijri = formatHijriDateString(
-        selectedHijriDate.year,
-        selectedHijriDate.month,
-        selectedHijriDate.day,
+        selectedScheduleAt.dateHijri.year,
+        selectedScheduleAt.dateHijri.month,
+        selectedScheduleAt.dateHijri.day,
       );
-      taskData.atEpochMillis = selectedHijriDate?.toDate().valueOf();
 
-      if (!!selectedTime) {
-        taskData.atTime = selectedTime;
+      if (!!selectedScheduleAt.time) {
+        taskData.atTime = selectedScheduleAt.time;
       }
-    } else {
-      taskData.atDateHijri = undefined;
-      taskData.atEpochMillis = undefined;
+      if (!!selectedScheduleAt.prayerTime) {
+        taskData.prayerTime = selectedScheduleAt.prayerTime as PrayerTime;
+      }
     }
 
     try {
@@ -192,7 +182,7 @@ export const useTaskForm = (
         attributes: attr,
         atDateHijri: taskData.atDateHijri as string,
         atTime: taskData.atTime,
-        prayerTime: selectedPrayerTime as PrayerTime,
+        prayerTime: taskData.prayerTime as PrayerTime,
         lat: latitude,
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
@@ -237,7 +227,13 @@ export const useTaskForm = (
         onSuccess(result);
       }
 
-      if (!isMatchLocationContext(location, selectedHijriDate, getToday())) {
+      if (
+        !isMatchLocationContext(
+          location,
+          selectedScheduleAt.dateHijri,
+          getToday(),
+        )
+      ) {
         showSnackbar("Task created but not listed in this page");
       }
     } catch (err) {
@@ -251,20 +247,14 @@ export const useTaskForm = (
   return {
     task,
     error,
-    selectedHijriDate: selectedHijriDate || null,
     isSubmitting,
-    setSelectedHijriDate,
-    selectedTime,
-    setSelectedTime,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,
     trackerAttributes,
-    // Prayer time fields
-    selectedPrayerTime,
-    setSelectedPrayerTime,
-    handleTimeSelection,
     handleSubmit,
+    selectedScheduleAt,
+    setSelectedScheduleAt,
   };
 };
 

@@ -12,25 +12,22 @@ import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "src/modules/settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
+import type { TaskScheduleAt } from "./task-form-hook";
 
 export interface UseTaskFormReturn {
   task: Task | null;
   error: string | null;
-  selectedHijriDate: HijriDate | null;
-  selectedTime: string | null;
   isSubmitting: boolean;
-  setSelectedHijriDate: any;
-  setSelectedTime: any;
   selectedTargetId: string;
   setSelectedTargetId: any;
   selectedGoal: any;
   trackerAttributes: any;
-  // Prayer time fields
-  selectedPrayerTime?: string;
-  setSelectedPrayerTime?: any;
-  handleTimeSelection: (time: string, prayerTime?: string) => void;
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
+  removeTime: boolean;
+  setRemoveTime: (removeTime: boolean) => void;
+  selectedScheduleAt: TaskScheduleAt;
+  setSelectedScheduleAt: any;
 }
 
 export const useTaskFormEdit = (
@@ -50,12 +47,7 @@ export const useTaskFormEdit = (
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [selectedHijriDate, setSelectedHijriDate] = useState<HijriDate | null>(
-    null,
-  );
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
-  const [selectedPrayerTime, setSelectedPrayerTime] = useState<string>("");
 
   const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
@@ -69,10 +61,46 @@ export const useTaskFormEdit = (
   // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
   const { getToday, createHijriDate } = useHijriCalendar();
+  const [removeTime, setRemoveTime] = useState(false);
+
+  const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
+    dateHijri: null,
+    time: "",
+    prayerTime: "",
+  });
 
   const offset = settings.manualDateOffset || 0;
   const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
+
+  useEffect(() => {
+    if (!!task?.atDateHijri) {
+      // Parse YYYYMMDD format using helper function
+      const { year, month, day } = parseHijriDateString(task.atDateHijri);
+
+      // Parse time if available using helper function
+      let hour: number | undefined = undefined;
+      let minute: number | undefined = undefined;
+      if (!!task.atTime) {
+        const timeParts = parseTimeString(task.atTime);
+        hour = timeParts.hour;
+        minute = timeParts.minute;
+      }
+
+      const hijriDate = createHijriDate(year, month, day, hour, minute);
+      setSelectedScheduleAt({
+        dateHijri: hijriDate,
+        time: task?.atTime || "",
+        prayerTime: task?.prayerTime || "",
+      });
+    } else {
+      setSelectedScheduleAt({
+        dateHijri: null,
+        time: "",
+        prayerTime: "",
+      });
+    }
+  }, [task, createHijriDate]);
 
   useEffect(() => {
     if (taskId) {
@@ -146,26 +174,23 @@ export const useTaskFormEdit = (
     return updatedTask;
   };
 
-  const handleTimeSelection = (time: string, prayerTime?: string) => {
-    setSelectedTime(time);
-    setSelectedPrayerTime(prayerTime || "");
-  };
-
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
       taskName: string;
       taskDescription: string;
     } & Partial<Task>;
 
-    if (!!selectedHijriDate) {
+    console.log("selectedScheduleAt", selectedScheduleAt);
+
+    if (!!selectedScheduleAt?.dateHijri) {
       taskData.atDateHijri = formatHijriDateString(
-        selectedHijriDate.year,
-        selectedHijriDate.month,
-        selectedHijriDate.day,
+        selectedScheduleAt.dateHijri.year,
+        selectedScheduleAt.dateHijri.month,
+        selectedScheduleAt.dateHijri.day,
       );
 
-      if (!!selectedTime) {
-        taskData.atTime = selectedTime;
+      if (!!selectedScheduleAt.time) {
+        taskData.atTime = selectedScheduleAt.time;
       }
     } else {
       taskData.atDateHijri = undefined;
@@ -203,7 +228,7 @@ export const useTaskFormEdit = (
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
         hijriDateOffset: offset,
-        prayerTime: selectedPrayerTime as PrayerTime,
+        prayerTime: selectedScheduleAt?.prayerTime as PrayerTime,
       };
 
       // Handle repeat - only include if not "none"
@@ -216,7 +241,7 @@ export const useTaskFormEdit = (
       }
 
       let result = await updateTask(taskId, taskInput, () =>
-        refreshAllTaskLists(getToday()),
+        refreshAllTaskLists(getToday().startOfDay()),
       );
 
       // Create recurring task if repeat is selected and not "none"
@@ -272,20 +297,17 @@ export const useTaskFormEdit = (
   return {
     task,
     error,
-    selectedHijriDate: selectedHijriDate || null,
     isSubmitting,
-    setSelectedHijriDate,
-    selectedTime,
-    setSelectedTime,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,
     trackerAttributes,
     // Prayer time fields
-    selectedPrayerTime,
-    setSelectedPrayerTime,
-    handleTimeSelection,
     handleSubmit,
     handleDelete,
+    removeTime,
+    setRemoveTime,
+    selectedScheduleAt,
+    setSelectedScheduleAt,
   };
 };

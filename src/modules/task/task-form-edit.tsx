@@ -6,12 +6,12 @@ import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { DatePrayerInput } from "./date-prayer-input";
-import { HijriDate } from "src/modules/calendar/hijri";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
 import type { Task } from "./types";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
+import type { HijriDate } from "../calendar/hijri";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -34,17 +34,14 @@ export default function TaskFormEdit({
     task,
     handleSubmit,
     handleDelete,
-    selectedHijriDate,
-    setSelectedHijriDate,
-    selectedTime,
-    setSelectedTime,
     selectedTargetId,
     setSelectedTargetId,
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-    selectedPrayerTime,
-    setSelectedPrayerTime,
+    setRemoveTime,
+    selectedScheduleAt,
+    setSelectedScheduleAt,
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
@@ -128,14 +125,19 @@ export default function TaskFormEdit({
       />
 
       <DatePrayerInput
-        atDateHijri={task?.atDateHijri || ""}
-        atTime={task?.atTime || ""}
-        prayerTime={task?.prayerTime || ""}
+        hijriDate={selectedScheduleAt.dateHijri as HijriDate}
+        atTime={selectedScheduleAt.time || ""}
+        prayerTime={selectedScheduleAt.prayerTime || ""}
         isSubmitting={isSubmitting}
         onChange={(hijriDate, time, prayerTime) => {
-          setSelectedHijriDate(hijriDate);
-          setSelectedTime(time);
-          setSelectedPrayerTime(prayerTime);
+          setSelectedScheduleAt({
+            dateHijri: hijriDate,
+            time: time,
+            prayerTime: prayerTime,
+          });
+          if (!time && !prayerTime) {
+            setRemoveTime(true);
+          }
         }}
       />
 

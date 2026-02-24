@@ -71,7 +71,6 @@ class PouchDBTaskDocument {
 
     a._id = t.id;
     a._rev = t.rev;
-    a.usePrayerTime = !!t.prayerTime;
     a.atTimeIsNone = !!t.atTime ? 0 : 1;
     a.atDateIsNone = !!t.atDateHijri ? 0 : 1;
 
@@ -97,7 +96,19 @@ class PouchDBTaskDocument {
           offset: t.hijriDateOffset || 0,
         },
       ).valueOf();
+
+      if (!!t.atTime) {
+        a.atTime = t.atTime;
+        a.prayerTime = undefined;
+        a.usePrayerTime = false;
+      } else if (!!t.prayerTime) {
+        a.prayerTime = t.prayerTime;
+        a.usePrayerTime = true;
+        a.atTime = "";
+      }
     }
+
+    console.log("A", a);
 
     return a;
   }
@@ -165,6 +176,17 @@ export class TaskRepository {
       ),
     );
 
+    if (!!input.atTime) {
+      updateData.atTime = input.atTime;
+      updateData.usePrayerTime = false;
+      updateData.prayerTime = undefined;
+    } else if (!!input.prayerTime) {
+      updateData.prayerTime = input.prayerTime;
+      updateData.usePrayerTime = true;
+      updateData.atTime = "";
+    }
+
+    console.log("updateData", updateData);
     let ud = PouchDBTaskDocument.fromTaskItem(updateData);
 
     const response = await (db as any).put(ud);

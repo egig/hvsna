@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ClockIcon } from "lucide-react";
 import { Modal } from "src/modules/navigation";
 import { TimeSelectionModal } from "./hijri-date-input/time-selection-modal";
@@ -7,14 +7,13 @@ import type { PrayerTime } from "src/modules/task/types";
 interface TimeInputProps {
   name: string;
   label?: string;
-  customTime?: string;
-  prayerTime?: PrayerTime;
+  customTime: string;
+  prayerTime: PrayerTime;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
   className?: string;
-  onChange?: (time: string | null, prayerTime?: PrayerTime) => void;
-  onBlur?: () => void;
+  onChange: (time: string | null, prayerTime?: PrayerTime) => void;
 }
 
 export function TimeInput({
@@ -27,37 +26,19 @@ export function TimeInput({
   required = false,
   className = "",
   onChange,
-  onBlur,
 }: TimeInputProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
-  // Initialize from value
-  useEffect(() => {
-    setSelectedTime(customTime || null);
-  }, [customTime]);
-
-  const handleTimeSelect = (
-    time: string | null,
-    selectedPrayerTime?: PrayerTime,
-  ) => {
-    setSelectedTime(time);
-    if (onChange) {
-      onChange(time, selectedPrayerTime);
-    }
-  };
 
   const handleTimeConfirm = (
     time: string,
     selectedPrayerTime?: PrayerTime | string,
   ) => {
-    handleTimeSelect(time, selectedPrayerTime as PrayerTime);
+    onChange(time, selectedPrayerTime as PrayerTime);
     setIsModalOpen(false);
   };
 
   const handleRemoveTime = () => {
-    handleTimeSelect(null, undefined);
-    setIsModalOpen(false);
+    onChange(null, undefined);
   };
 
   const handleButtonClick = () => {
@@ -94,12 +75,12 @@ export function TimeInput({
         <div className="flex items-center justify-between gap-1">
           <span
             className={
-              selectedTime || prayerTime
+              customTime || prayerTime
                 ? "text-gray-900 dark:text-white"
                 : "text-gray-500 dark:text-gray-400"
             }
           >
-            {formatTimeDisplay(selectedTime, prayerTime)}
+            {formatTimeDisplay(customTime, prayerTime)}
           </span>
           <ClockIcon className="w-5 h-5 text-gray-400" />
         </div>
@@ -111,7 +92,7 @@ export function TimeInput({
         title=""
       >
         <TimeSelectionModal
-          selectedTime={selectedTime}
+          selectedTime={customTime}
           selectedPrayerTime={prayerTime}
           onBack={() => setIsModalOpen(false)}
           onConfirm={handleTimeConfirm}

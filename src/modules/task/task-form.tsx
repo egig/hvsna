@@ -5,7 +5,7 @@ import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { DatePrayerInput } from "./date-prayer-input";
-import { useHijriCalendar } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
@@ -31,17 +31,13 @@ export default function TaskForm({
     error,
     task,
     handleSubmit,
-    selectedHijriDate,
-    setSelectedHijriDate,
-    selectedTime,
-    setSelectedTime,
     selectedTargetId,
     setSelectedTargetId,
     isSubmitting,
     selectedGoal,
     trackerAttributes,
-    selectedPrayerTime,
-    setSelectedPrayerTime,
+    selectedScheduleAt,
+    setSelectedScheduleAt,
   } = useTaskForm(onSuccess, onError, onCancel);
   const { goals } = useGoals();
   const { tracker } = useTracker(selectedGoal?.trackerId);
@@ -61,7 +57,11 @@ export default function TaskForm({
 
   useEffect(() => {
     if (["today", "upcoming"].includes(location.state?.context)) {
-      setSelectedHijriDate(getToday());
+      setSelectedScheduleAt({
+        dateHijri: getToday(),
+        time: "",
+        prayerTime: "",
+      });
     }
   }, [location.state]);
 
@@ -122,14 +122,16 @@ export default function TaskForm({
       />
 
       <DatePrayerInput
-        atDateHijri={selectedHijriDate?.format("YYYYMMDD") || ""}
-        atTime={selectedTime || ""}
-        prayerTime={selectedPrayerTime || ""}
+        hijriDate={selectedScheduleAt.dateHijri}
+        atTime={selectedScheduleAt.time}
+        prayerTime={selectedScheduleAt.prayerTime}
         isSubmitting={isSubmitting}
         onChange={(hijriDate, time, prayerTime) => {
-          setSelectedHijriDate(hijriDate);
-          setSelectedTime(time);
-          setSelectedPrayerTime(prayerTime);
+          setSelectedScheduleAt({
+            dateHijri: hijriDate,
+            time,
+            prayerTime,
+          });
         }}
       />
 
