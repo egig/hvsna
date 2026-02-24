@@ -9,11 +9,12 @@ import type { Tracker } from "../tracker/trackerStore";
 import TaskListItem from "../task/task-list-item";
 import { formatValue } from "src/lib/format";
 import { useToday } from "src/modules/common/use-today";
+import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
 import { LargeNavbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import type { TargetResultData } from "src/modules/goal/useTargetResults";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { Clock } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 import { useMemo, useCallback } from "react";
 
 interface TodayTasksProps {
@@ -23,6 +24,7 @@ interface TodayTasksProps {
 function TodayTasks({ tasks }: TodayTasksProps) {
   const { openTaskForm } = useTask();
   const { t } = useLanguageContext();
+  const { getToday } = useHijriCalendar();
 
   const handleEditTask = useCallback(
     (task: Task) => {
@@ -36,13 +38,38 @@ function TodayTasks({ tasks }: TodayTasksProps) {
     const groups: {
       prayer: PrayerTime | null;
       tasks: Task[];
+      isOverdue?: boolean;
     }[] = [];
 
-    // Separate prayer-based tasks and regular tasks
-    const prayerTasks = tasks.filter(
-      (task) => task.usePrayerTime && task.prayerTime,
+    const today = getToday();
+    const todayStart = today.startOfDay().toDate().valueOf();
+
+    // Separate overdue tasks, prayer-based tasks, and regular tasks
+    const overdueTasks = tasks.filter(
+      (task) => task.atEpochMillis && task.atEpochMillis < todayStart,
     );
-    const regularTasks = tasks.filter((task) => !task.usePrayerTime);
+    const prayerTasks = tasks.filter(
+      (task) =>
+        task.usePrayerTime &&
+        task.prayerTime &&
+        (!task.atEpochMillis || task.atEpochMillis >= todayStart),
+    );
+    const regularTasks = tasks.filter(
+      (task) =>
+        !task.usePrayerTime &&
+        (!task.atEpochMillis || task.atEpochMillis >= todayStart),
+    );
+
+    // Add overdue tasks group first (always at top)
+    if (overdueTasks.length > 0) {
+      groups.push({
+        prayer: null,
+        tasks: overdueTasks.sort(
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        ),
+        isOverdue: true,
+      });
+    }
 
     // Group prayer tasks by prayer time
     const prayerGroups: Record<PrayerTime, Task[]> = {
@@ -91,7 +118,7 @@ function TodayTasks({ tasks }: TodayTasksProps) {
     }
 
     return groups;
-  }, [tasks]);
+  }, [tasks, getToday]);
 
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
@@ -101,16 +128,22 @@ function TodayTasks({ tasks }: TodayTasksProps) {
   );
 
   return (
-    <div className="space-y-6 px-2">
+    <div className="space-y-6">
       {taskGroups.map((group, groupIndex) => (
         <div key={group.prayer || `regular-${groupIndex}`}>
-          {group.prayer && (
-            <div className="flex items-center gap-2 mb-2 px-2">
-              <h3 className="text-sm font-bold  text-gray-700 dark:text-gray-300">
+          {group.isOverdue ? (
+            <div className="flex items-center gap-2 mb-2 px-4">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-red-400">
+                {t("overdue")}
+              </h3>
+            </div>
+          ) : group.prayer ? (
+            <div className="flex items-center gap-2 mb-2 px-4">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">
                 {getPrayerTimeDisplay(group.prayer)}
               </h3>
             </div>
-          )}
+          ) : null}
 
           <div className="space-y-2">
             {group.tasks.map((task) => (

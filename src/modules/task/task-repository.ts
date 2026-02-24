@@ -108,8 +108,6 @@ class PouchDBTaskDocument {
       }
     }
 
-    console.log("A", a);
-
     return a;
   }
 }

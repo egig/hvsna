@@ -88,6 +88,10 @@ export const commonTranslations = {
     en: "Completed",
     id: "Selesai",
   },
+  overdue: {
+    en: "Overdue",
+    id: "Lewat jadwal",
+  },
   status_changed_to: {
     en: "Status changed to",
     id: "Status diubah menjadi",
