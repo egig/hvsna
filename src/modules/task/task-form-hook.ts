@@ -79,8 +79,6 @@ export const useTaskForm = (
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
   const { getToday } = useHijriCalendar();
-
-  // Use the useGoal hook when we have a goalId
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
   useEffect(() => {

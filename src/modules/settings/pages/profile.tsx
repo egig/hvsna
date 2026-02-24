@@ -19,9 +19,9 @@ export default function Profile() {
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
                 {user.imageUrl ? (
-                  <img 
-                    src={user.imageUrl} 
-                    alt={user.fullName || "Profile"} 
+                  <img
+                    src={user.imageUrl}
+                    alt={user.fullName || "Profile"}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -49,15 +49,17 @@ export default function Profile() {
               {user.username && (
                 <div className="flex items-center space-x-3">
                   <User className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">@{user.username}</span>
+                  <span className="text-sm text-gray-600">
+                    @{user.username}
+                  </span>
                 </div>
               )}
             </div>
             <div className="flex justify-end">
-              <a 
-                className="text-[var(--hvsna-primary-color)] hover:underline cursor-pointer" 
+              <a
+                className="text-[var(--hvsna-primary-color)] hover:underline cursor-pointer"
                 href={`${import.meta.env.VITE_CLERK_ACCOUNT_PORTAL}/user`}
-                target="_blank" 
+                target="_blank"
                 rel="noopener noreferrer"
               >
                 {t("manage_account")}

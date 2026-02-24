@@ -8,7 +8,7 @@ import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
-import type { Task, TaskUpdateInput } from "./types";
+import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "src/modules/settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
@@ -203,6 +203,7 @@ export const useTaskFormEdit = (
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
         hijriDateOffset: offset,
+        prayerTime: selectedPrayerTime as PrayerTime,
       };
 
       // Handle repeat - only include if not "none"

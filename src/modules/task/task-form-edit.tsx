@@ -132,7 +132,7 @@ export default function TaskFormEdit({
         atTime={task?.atTime || ""}
         prayerTime={task?.prayerTime || ""}
         isSubmitting={isSubmitting}
-        onDateChange={(hijriDate, time, prayerTime) => {
+        onChange={(hijriDate, time, prayerTime) => {
           setSelectedHijriDate(hijriDate);
           setSelectedTime(time);
           setSelectedPrayerTime(prayerTime);

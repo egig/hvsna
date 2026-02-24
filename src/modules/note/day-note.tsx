@@ -23,7 +23,6 @@ export default function DayNote({ date }: { date: HijriDate }) {
       <Editor
         content={dayData?.content ? dayData.content[0] : emptyContent}
         onUpdate={debounce(async (content) => {
-          console.log(content);
           await saveDayData({ content: [content] });
         }, 500)}
       />

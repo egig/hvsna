@@ -12,7 +12,7 @@ interface DatePrayerInputProps {
   atTime: string | null;
   prayerTime: PrayerTime | string;
   isSubmitting: boolean;
-  onDateChange: (
+  onChange: (
     hijriDate: HijriDate | null,
     time: string | null,
     prayerTime?: PrayerTime | string,
@@ -24,7 +24,7 @@ export function DatePrayerInput({
   atTime,
   prayerTime,
   isSubmitting,
-  onDateChange,
+  onChange,
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
   const { createHijriDate } = useHijriCalendar();
@@ -82,7 +82,7 @@ export function DatePrayerInput({
   ) => {
     setInternalTime(time);
     setInternalPrayerTime(prayerTime || "");
-    onDateChange(currentHijriDate, time, prayerTime);
+    onChange(currentHijriDate, time, prayerTime);
   };
 
   return (
@@ -97,7 +97,7 @@ export function DatePrayerInput({
           required={false}
           className="text-base h-[38px]"
           onChange={(hijriDate: any) => {
-            onDateChange(hijriDate, currentTime, currentPrayerTime);
+            onChange(hijriDate, currentTime, currentPrayerTime);
           }}
         />
         {currentHijriDate && (

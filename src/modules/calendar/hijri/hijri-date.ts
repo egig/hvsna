@@ -565,7 +565,9 @@ export class HijriDate {
     const lng = this._longitude ?? DEFAULT_LONGITUDE;
 
     // Delegate to static method
-    return HijriDate.fromDate(HijriDate.startOfDayInJsDate(this.year, this.month, this.day, lat, lng));
+    return HijriDate.fromDate(
+      HijriDate.startOfDayInJsDate(this.year, this.month, this.day, lat, lng),
+    );
   }
 }
 

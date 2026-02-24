@@ -43,7 +43,6 @@ export function TimeInput({
   ) => {
     setSelectedTime(time);
     if (onChange) {
-      console.log(time, selectedPrayerTime);
       onChange(time, selectedPrayerTime);
     }
   };
