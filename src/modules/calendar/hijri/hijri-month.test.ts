@@ -267,4 +267,110 @@ describe("HijriMonth", () => {
       expect(currentMonth.month).toBe(11); // Should return to original
     });
   });
+
+  describe("latitude, longitude, and offset support", () => {
+    it("should store latitude, longitude, and offset in constructor", () => {
+      const hijriMonth = new HijriMonth(1445, 6, 21.4225, 39.8262, 1);
+      expect(hijriMonth._latitude).toBe(21.4225);
+      expect(hijriMonth._longitude).toBe(39.8262);
+      expect(hijriMonth._offset).toBe(1);
+    });
+
+    it("should handle undefined latitude, longitude, and offset", () => {
+      const hijriMonth = new HijriMonth(1445, 6);
+      expect(hijriMonth._latitude).toBeUndefined();
+      expect(hijriMonth._longitude).toBeUndefined();
+      expect(hijriMonth._offset).toBeUndefined();
+    });
+
+    it("should preserve location and offset in previous() method", () => {
+      const hijriMonth = new HijriMonth(1445, 6, 21.4225, 39.8262, 1);
+      const previousMonth = hijriMonth.previous();
+
+      expect(previousMonth._latitude).toBe(21.4225);
+      expect(previousMonth._longitude).toBe(39.8262);
+      expect(previousMonth._offset).toBe(1);
+    });
+
+    it("should preserve location and offset in next() method", () => {
+      const hijriMonth = new HijriMonth(1445, 6, 21.4225, 39.8262, 1);
+      const nextMonth = hijriMonth.next();
+
+      expect(nextMonth._latitude).toBe(21.4225);
+      expect(nextMonth._longitude).toBe(39.8262);
+      expect(nextMonth._offset).toBe(1);
+    });
+
+    it("should pass location and offset to HijriDate in getFirstDay()", () => {
+      const hijriMonth = new HijriMonth(1445, 6, 21.4225, 39.8262, 1);
+      const firstDay = hijriMonth.getFirstDay();
+
+      expect(firstDay._latitude).toBe(21.4225);
+      expect(firstDay._longitude).toBe(39.8262);
+      expect(firstDay._offset).toBe(1);
+    });
+
+    it("should pass location and offset to HijriDate in getLastDay()", () => {
+      const hijriMonth = new HijriMonth(1445, 6, 21.4225, 39.8262, 1);
+      const lastDay = hijriMonth.getLastDay();
+
+      expect(lastDay._latitude).toBe(21.4225);
+      expect(lastDay._longitude).toBe(39.8262);
+      expect(lastDay._offset).toBe(1);
+    });
+  });
+
+  describe("static fromDate", () => {
+    it("should create HijriMonth from Date with location and offset", () => {
+      const date = new Date(2023, 6, 6); // July 6, 2023
+      const hijriMonth = HijriMonth.fromDate(date, 21.4225, 39.8262, {
+        offset: 1,
+      });
+
+      expect(hijriMonth).toBeInstanceOf(HijriMonth);
+      expect(hijriMonth._latitude).toBe(21.4225);
+      expect(hijriMonth._longitude).toBe(39.8262);
+      expect(hijriMonth._offset).toBe(1);
+    });
+
+    it("should use default location when not provided", () => {
+      const date = new Date(2023, 6, 6);
+      const hijriMonth = HijriMonth.fromDate(date);
+
+      expect(hijriMonth._latitude).toBe(-6.2088); // Jakarta default
+      expect(hijriMonth._longitude).toBe(106.8456); // Jakarta default
+      expect(hijriMonth._offset).toBe(0);
+    });
+
+    it("should use default offset when not provided", () => {
+      const date = new Date(2023, 6, 6);
+      const hijriMonth = HijriMonth.fromDate(date, 21.4225, 39.8262);
+
+      expect(hijriMonth._latitude).toBe(21.4225);
+      expect(hijriMonth._longitude).toBe(39.8262);
+      expect(hijriMonth._offset).toBe(0);
+    });
+  });
+
+  describe("static getCurrent", () => {
+    it("should create current HijriMonth with location and offset", () => {
+      const hijriMonth = HijriMonth.getCurrent(21.4225, 39.8262, { offset: 1 });
+
+      expect(hijriMonth).toBeInstanceOf(HijriMonth);
+      expect(hijriMonth._latitude).toBe(21.4225);
+      expect(hijriMonth._longitude).toBe(39.8262);
+      expect(hijriMonth._offset).toBe(1);
+      expect(hijriMonth.year).toBeGreaterThan(1400);
+      expect(hijriMonth.month).toBeGreaterThanOrEqual(1);
+      expect(hijriMonth.month).toBeLessThanOrEqual(12);
+    });
+
+    it("should use default location and offset when not provided", () => {
+      const hijriMonth = HijriMonth.getCurrent();
+
+      expect(hijriMonth._latitude).toBe(-6.2088); // Jakarta default
+      expect(hijriMonth._longitude).toBe(106.8456); // Jakarta default
+      expect(hijriMonth._offset).toBe(0);
+    });
+  });
 });

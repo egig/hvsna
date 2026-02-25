@@ -50,7 +50,8 @@ export class CapacitorPermissionManager {
     }
 
     try {
-      const permissionStatus: PermissionStatus = await Geolocation.checkPermissions();
+      const permissionStatus: PermissionStatus =
+        await Geolocation.checkPermissions();
       return {
         state: this.mapCapacitorPermissionState(permissionStatus.location),
         canRequest: permissionStatus.location !== "denied",
@@ -59,7 +60,10 @@ export class CapacitorPermissionManager {
       return {
         state: "unknown",
         canRequest: true,
-        message: error instanceof Error ? error.message : "Unknown error checking permissions",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown error checking permissions",
       };
     }
   }
@@ -77,7 +81,8 @@ export class CapacitorPermissionManager {
     }
 
     try {
-      const permissionStatus: PermissionStatus = await Geolocation.requestPermissions();
+      const permissionStatus: PermissionStatus =
+        await Geolocation.requestPermissions();
       const state = this.mapCapacitorPermissionState(permissionStatus.location);
 
       return {

@@ -1,13 +1,30 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
+import * as SunCalc from "suncalc";
+
+// Jakarta coordinates (default location)
+const DEFAULT_LATITUDE = -6.2088;
+const DEFAULT_LONGITUDE = 106.8456;
 
 export class HijriMonth {
   year: number;
   month: number;
   _rawGregorianDate: Date;
+  _latitude?: number;
+  _longitude?: number;
+  _offset?: number;
 
-  constructor(year: number, month: number) {
+  constructor(
+    year: number,
+    month: number,
+    latitude?: number,
+    longitude?: number,
+    offset?: number,
+  ) {
     this.year = year;
     this.month = month;
+    this._latitude = latitude;
+    this._longitude = longitude;
+    this._offset = offset;
     // Use the first day of the month for conversion
     let d = hijriToGregorian({ year, month, day: 1 });
     this._rawGregorianDate = new Date(d.year, d.month - 1, d.day);
@@ -25,7 +42,13 @@ export class HijriMonth {
       day: prevGregorianDate.getDate(),
     });
 
-    return new HijriMonth(hijriDate.year, hijriDate.month);
+    return new HijriMonth(
+      hijriDate.year,
+      hijriDate.month,
+      this._latitude,
+      this._longitude,
+      this._offset,
+    );
   }
 
   next(): HijriMonth {
@@ -40,7 +63,13 @@ export class HijriMonth {
       day: nextGregorianDate.getDate(),
     });
 
-    return new HijriMonth(hijriDate.year, hijriDate.month);
+    return new HijriMonth(
+      hijriDate.year,
+      hijriDate.month,
+      this._latitude,
+      this._longitude,
+      this._offset,
+    );
   }
 
   getDaysInMonth(): number {
@@ -60,33 +89,41 @@ export class HijriMonth {
 
   getFirstDay(): HijriDate {
     // Create a Gregorian date for the first day of this Hijri month
-    const gregorianDate = hijriToGregorian({
-      year: this.year,
-      month: this.month,
-      day: 1,
-    });
-    const date = new Date(
-      gregorianDate.year,
-      gregorianDate.month - 1,
-      gregorianDate.day,
+    const d = HijriDate.hijriToJsDate(
+      this.year,
+      this.month,
+      1,
+      0,
+      0,
+      this._latitude,
+      this._longitude,
+      {
+        offset: this._offset || 0,
+      },
     );
-    return HijriDate.fromDate(date);
+    return HijriDate.fromDate(d, this._latitude, this._longitude, {
+      offset: this._offset || 0,
+    });
   }
 
   getLastDay(): HijriDate {
     const daysInMonth = this.getDaysInMonth();
     // Create a Gregorian date for the last day of this Hijri month
-    const gregorianDate = hijriToGregorian({
-      year: this.year,
-      month: this.month,
-      day: daysInMonth,
-    });
-    const date = new Date(
-      gregorianDate.year,
-      gregorianDate.month - 1,
-      gregorianDate.day,
+    const d = HijriDate.hijriToJsDate(
+      this.year,
+      this.month,
+      daysInMonth,
+      0,
+      0,
+      this._latitude,
+      this._longitude,
+      {
+        offset: this._offset || 0,
+      },
     );
-    return HijriDate.fromDate(date);
+    return HijriDate.fromDate(d, this._latitude, this._longitude, {
+      offset: this._offset || 0,
+    });
   }
 
   toString(): string {
@@ -95,6 +132,47 @@ export class HijriMonth {
 
   equals(other: HijriMonth): boolean {
     return this.year === other.year && this.month === other.month;
+  }
+
+  /**
+   * Create a HijriMonth from a JavaScript Date with location and offset support
+   * @param date JavaScript Date object
+   * @param latitude Latitude for sunset calculation (defaults to Jakarta)
+   * @param longitude Longitude for sunset calculation (defaults to Jakarta)
+   * @param options Optional configuration
+   * @param options.offset Number of days to offset the date (positive for future, negative for past)
+   * @returns HijriMonth instance
+   */
+  static fromDate(
+    date: Date,
+    latitude?: number,
+    longitude?: number,
+    options?: { offset?: number },
+  ): HijriMonth {
+    const lat = latitude ?? DEFAULT_LATITUDE;
+    const lng = longitude ?? DEFAULT_LONGITUDE;
+    const offset = options?.offset ?? 0;
+
+    // Use HijriDate.fromDate to get accurate Hijri date with sunset calculation
+    const hijriDate = HijriDate.fromDate(date, lat, lng, { offset });
+
+    return new HijriMonth(hijriDate.year, hijriDate.month, lat, lng, offset);
+  }
+
+  /**
+   * Get the current Hijri month with location and offset support
+   * @param latitude Latitude for sunset calculation (defaults to Jakarta)
+   * @param longitude Longitude for sunset calculation (defaults to Jakarta)
+   * @param options Optional configuration
+   * @param options.offset Number of days to offset the date (positive for future, negative for past)
+   * @returns Current HijriMonth instance
+   */
+  static getCurrent(
+    latitude?: number,
+    longitude?: number,
+    options?: { offset?: number },
+  ): HijriMonth {
+    return HijriMonth.fromDate(new Date(), latitude, longitude, options);
   }
 }
 

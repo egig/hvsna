@@ -29,13 +29,30 @@ export function CalendarModal({
   const { getToday, createHijriDate } = useHijriCalendar();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
+  const latitude = settings.coordinate?.latitude;
+  const longitude = settings.coordinate?.longitude;
 
+  console.log("latitude", latitude);
+  console.log("longitude", longitude);
+  console.log("offset", offset);
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
-      ? new HijriMonth(selectedDate.year, selectedDate.month)
+      ? new HijriMonth(
+          selectedDate.year,
+          selectedDate.month,
+          latitude,
+          longitude,
+          offset,
+        )
       : (() => {
-          const today = getToday();
-          return new HijriMonth(today.year, today.month);
+          const today = getToday().startOfDay();
+          return new HijriMonth(
+            today.year,
+            today.month,
+            latitude,
+            longitude,
+            offset,
+          );
         })(),
   );
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
@@ -46,10 +63,18 @@ export function CalendarModal({
 
   useEffect(() => {
     if (selectedDate) {
-      setCurrentMonth(new HijriMonth(selectedDate.year, selectedDate.month));
+      setCurrentMonth(
+        new HijriMonth(
+          selectedDate.year,
+          selectedDate.month,
+          latitude,
+          longitude,
+          offset,
+        ),
+      );
       setTempSelectedDate(selectedDate);
     }
-  }, [selectedDate]);
+  }, [selectedDate, latitude, longitude, offset]);
 
   const getDaysInMonth = () => {
     return currentMonth.getDaysInMonth();
@@ -87,6 +112,19 @@ export function CalendarModal({
     setCurrentMonth(currentMonth.next());
   };
 
+  // Update current month when settings change
+  useEffect(() => {
+    setCurrentMonth(
+      new HijriMonth(
+        currentMonth.year,
+        currentMonth.month,
+        latitude,
+        longitude,
+        offset,
+      ),
+    );
+  }, [latitude, longitude, offset]);
+
   const handleDateClick = (date: HijriDate) => {
     setTempSelectedDate(date);
   };
@@ -105,12 +143,12 @@ export function CalendarModal({
 
   const handleTomorrow = () => {
     const h = getToday();
-    onDateSelect(h.next());
+    onDateSelect(h.next().startOfDay());
     onClose();
   };
 
   const handleToday = () => {
-    const today = getToday();
+    const today = getToday().startOfDay();
     onDateSelect(today);
     onClose();
   };
