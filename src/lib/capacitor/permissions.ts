@@ -1,17 +1,5 @@
-// Dynamic imports for Capacitor plugins to avoid type errors when not available
-let Capacitor: any = null;
-let Geolocation: any = null;
-let PermissionStatus: any = null;
-
-try {
-  Capacitor = require("@capacitor/core").Capacitor;
-  const capacitorGeolocation = require("@capacitor/geolocation");
-  Geolocation = capacitorGeolocation.Geolocation;
-  PermissionStatus = capacitorGeolocation.PermissionStatus;
-} catch (error) {
-  // Capacitor not available (e.g., during development/testing)
-  console.warn("Capacitor not available:", error);
-}
+import { Capacitor } from "@capacitor/core";
+import { Geolocation, type PermissionStatus } from "@capacitor/geolocation";
 
 export type PermissionState = "granted" | "denied" | "prompt" | "unknown";
 
@@ -29,7 +17,7 @@ export class CapacitorPermissionManager {
    * Check if running on native platform
    */
   static isNativePlatform(): boolean {
-    return Capacitor?.isNativePlatform() || false;
+    return Capacitor.isNativePlatform();
   }
 
   /**
@@ -62,15 +50,7 @@ export class CapacitorPermissionManager {
     }
 
     try {
-      if (!Geolocation) {
-        return {
-          state: "unknown",
-          canRequest: false,
-          message: "Capacitor geolocation not available",
-        };
-      }
-
-      const permissionStatus: any = await Geolocation.checkPermissions();
+      const permissionStatus: PermissionStatus = await Geolocation.checkPermissions();
       return {
         state: this.mapCapacitorPermissionState(permissionStatus.location),
         canRequest: permissionStatus.location !== "denied",
@@ -79,10 +59,7 @@ export class CapacitorPermissionManager {
       return {
         state: "unknown",
         canRequest: true,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Unknown error checking permissions",
+        message: error instanceof Error ? error.message : "Unknown error checking permissions",
       };
     }
   }
@@ -100,15 +77,7 @@ export class CapacitorPermissionManager {
     }
 
     try {
-      if (!Geolocation) {
-        return {
-          state: "denied",
-          canRequest: false,
-          message: "Capacitor geolocation not available",
-        };
-      }
-
-      const permissionStatus: any = await Geolocation.requestPermissions();
+      const permissionStatus: PermissionStatus = await Geolocation.requestPermissions();
       const state = this.mapCapacitorPermissionState(permissionStatus.location);
 
       return {

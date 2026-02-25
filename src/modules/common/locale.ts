@@ -265,8 +265,8 @@ export const commonTranslations = {
     id: "Gagal memuat waktu sholat",
   },
   custom_time: {
-    en: "Custom Time",
-    id: "Waktu Kustom",
+    en: "Normal Time",
+    id: "Waktu Normal ",
   },
   select_time: {
     en: "Select Time",

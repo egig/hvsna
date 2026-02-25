@@ -125,7 +125,7 @@ export function TimeSelectionModal({
         }
       />
 
-      <div className="p-2">
+      <div className="px-2">
         <div className="flex justify-center gap-1 mb-1 border-b border-gray-200 dark:border-gray-600">
           <button
             onClick={() => setInputMode("prayer")}

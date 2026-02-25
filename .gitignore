@@ -8,3 +8,6 @@
 
 .idea
 dist
+*.jks
+/build.sh
+hvsna-notes

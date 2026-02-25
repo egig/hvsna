@@ -1,18 +1,5 @@
-// Dynamic imports for Capacitor plugins to avoid type errors when not available
-let Capacitor: any = null;
-let Geolocation: any = null;
-let Position: any = null;
-
-try {
-  Capacitor = require("@capacitor/core").Capacitor;
-  const capacitorGeolocation = require("@capacitor/geolocation");
-  Geolocation = capacitorGeolocation.Geolocation;
-  Position = capacitorGeolocation.Position;
-} catch (error) {
-  // Capacitor not available (e.g., during development/testing)
-  console.warn("Capacitor not available:", error);
-}
-
+import { Capacitor } from "@capacitor/core";
+import { Geolocation, type Position } from "@capacitor/geolocation";
 import type { Coordinate } from "../../modules/settings/settings";
 import {
   CapacitorPermissionManager,
@@ -38,7 +25,7 @@ export class CapacitorGeolocation {
    * Check if running on native platform
    */
   static isNativePlatform(): boolean {
-    return Capacitor?.isNativePlatform() || false;
+    return Capacitor.isNativePlatform();
   }
 
   /**
@@ -88,12 +75,8 @@ export class CapacitorGeolocation {
   private static async getCurrentPositionNative(
     options: GeolocationOptions,
   ): Promise<GeolocationResult> {
-    if (!Geolocation) {
-      throw new Error("Capacitor geolocation not available");
-    }
-
     try {
-      const position: any = await Geolocation.getCurrentPosition({
+      const position: Position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: options.enableHighAccuracy,
         timeout: options.timeout,
         maximumAge: options.maximumAge,
@@ -146,18 +129,16 @@ export class CapacitorGeolocation {
     } = options;
 
     if (this.isNativePlatform()) {
-      if (!Geolocation) {
-        throw new Error("Capacitor geolocation not available");
-      }
-
       const watchId = await Geolocation.watchPosition(
         { enableHighAccuracy, timeout, maximumAge },
-        (position: any, err: any) => {
+        (position: Position | null, err: any) => {
           if (err) {
             console.error("Geolocation watch error:", err);
             return;
           }
-          callback(this.convertCapacitorPosition(position, "capacitor"));
+          if (position) {
+            callback(this.convertCapacitorPosition(position, "capacitor"));
+          }
         },
       );
       return watchId.toString();
@@ -188,9 +169,6 @@ export class CapacitorGeolocation {
    */
   static async clearWatch(watchId: string): Promise<void> {
     if (this.isNativePlatform()) {
-      if (!Geolocation) {
-        throw new Error("Capacitor geolocation not available");
-      }
       await Geolocation.clearWatch({ id: watchId });
     } else {
       if ("geolocation" in navigator) {
@@ -203,7 +181,7 @@ export class CapacitorGeolocation {
    * Convert Capacitor Position to our GeolocationResult
    */
   private static convertCapacitorPosition(
-    position: any,
+    position: Position,
     source: "capacitor" | "browser",
   ): GeolocationResult {
     return {
@@ -282,10 +260,6 @@ export class CapacitorGeolocation {
   static async isLocationEnabled(): Promise<boolean> {
     if (!this.isNativePlatform()) {
       return true; // Browser can't determine if location services are enabled
-    }
-
-    if (!Geolocation) {
-      return false;
     }
 
     try {
