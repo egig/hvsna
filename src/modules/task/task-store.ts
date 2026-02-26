@@ -21,6 +21,7 @@ interface TaskState {
   todayTasks: Task[];
   upcommingTasks: Task[];
   browsedTasks: Task[];
+  todayCompletedTasks: Task[];
 
   // Multiple tasks state (for useTasks hook)
   tasks: Task[];
@@ -72,6 +73,8 @@ interface TaskState {
   ) => Promise<Task>;
   deleteTask: (id: string, onSuccess?: () => void) => Promise<void>;
   getTask: (id: string) => Promise<Task | null>;
+  completeTask: (id: string, onSuccess?: () => void) => Promise<Task>;
+  reopenTask: (id: string, onSuccess?: () => void) => Promise<Task>;
 
   // Async actions for multiple tasks
   getTasks: (query?: TaskQuery) => Promise<Task[]>;
@@ -83,6 +86,7 @@ interface TaskState {
   loadTodayTasks: (today: HijriDate) => Promise<void>;
   loadUpcommingTasks: (d: HijriDate) => Promise<void>;
   loadBrowsedTasks: (reset?: boolean) => Promise<void>;
+  loadTodayCompletedTasks: (today: HijriDate) => Promise<void>;
 
   // Reusable function to refresh all task lists
   refreshAllTaskLists: (today: HijriDate) => Promise<void>;
@@ -102,6 +106,7 @@ export const useTaskStore = create<TaskState>()(
       todayTasks: [],
       upcommingTasks: [],
       browsedTasks: [],
+      todayCompletedTasks: [],
       taskCache: {},
       statusFilter: "all" as const,
       dateRangeFilter: null,
@@ -221,6 +226,45 @@ export const useTaskStore = create<TaskState>()(
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : "Failed to delete task";
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      completeTask: async (
+        id: string,
+        onSuccess?: () => void,
+      ): Promise<Task> => {
+        try {
+          set({ loading: true, error: null });
+
+          const updatedTask = await taskRepository.completeTask(id);
+          get().updateTaskInList(id, updatedTask);
+          onSuccess?.();
+          return updatedTask;
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to complete task";
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      reopenTask: async (id: string, onSuccess?: () => void): Promise<Task> => {
+        try {
+          set({ loading: true, error: null });
+
+          const updatedTask = await taskRepository.reopenTask(id);
+          get().updateTaskInList(id, updatedTask);
+          onSuccess?.();
+          return updatedTask;
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to reopen task";
           set({ error: errorMessage });
           throw new Error(errorMessage);
         } finally {
@@ -372,6 +416,27 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
+      loadTodayCompletedTasks: async (d: HijriDate): Promise<void> => {
+        try {
+          set({ loading: true, error: null });
+          const todayCompletedTasksList =
+            await taskRepository.findTodayCompletedTasks(d);
+          let tc = Object.fromEntries(
+            todayCompletedTasksList.map((task) => [task.id, task]),
+          );
+          set({ todayCompletedTasks: todayCompletedTasksList, taskCache: tc });
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error
+              ? err.message
+              : "Failed to load today's completed tasks";
+          set({ error: errorMessage });
+          throw new Error(errorMessage);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       loadBrowsedTasks: async (reset: boolean = false): Promise<void> => {
         try {
           const currentOffset = get().offset;
@@ -459,6 +524,7 @@ export const useTaskStore = create<TaskState>()(
         await Promise.all([
           get().loadTodayTasks(today),
           get().loadUpcommingTasks(today),
+          get().loadTodayCompletedTasks(today),
           get().loadBrowsedTasks(true),
         ]);
       },

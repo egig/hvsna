@@ -19,9 +19,10 @@ import { useMemo, useCallback } from "react";
 
 interface TodayTasksProps {
   tasks: Task[];
+  completedTasks?: Task[];
 }
 
-function TodayTasks({ tasks }: TodayTasksProps) {
+function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { openTaskForm } = useTask();
   const { t } = useLanguageContext();
   const { getToday } = useHijriCalendar();
@@ -39,6 +40,7 @@ function TodayTasks({ tasks }: TodayTasksProps) {
       prayer: PrayerTime | null;
       tasks: Task[];
       isOverdue?: boolean;
+      isCompleted?: boolean;
     }[] = [];
 
     const today = getToday();
@@ -117,8 +119,19 @@ function TodayTasks({ tasks }: TodayTasksProps) {
       });
     }
 
+    // Add completed tasks at the very bottom
+    if (completedTasks.length > 0) {
+      groups.push({
+        prayer: null,
+        tasks: completedTasks.sort(
+          (a, b) => (b.completedAt || 0) - (a.completedAt || 0),
+        ),
+        isCompleted: true,
+      });
+    }
+
     return groups;
-  }, [tasks, getToday]);
+  }, [tasks, completedTasks, getToday]);
 
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
@@ -135,6 +148,12 @@ function TodayTasks({ tasks }: TodayTasksProps) {
             <div className="flex items-center gap-2 mb-2 px-4">
               <h3 className="text-sm font-bold text-gray-700 dark:text-red-400">
                 {t("overdue")}
+              </h3>
+            </div>
+          ) : group.isCompleted ? (
+            <div className="flex items-center gap-2 mb-2 px-4">
+              <h3 className="text-sm font-bold text-gray-700 dark:text-green-600">
+                {t("completed")}
               </h3>
             </div>
           ) : group.prayer ? (
@@ -284,6 +303,7 @@ export function Today() {
   const {
     targetResults,
     todayTasks,
+    todayCompletedTasks,
     loading,
     initiated,
     error,
@@ -327,7 +347,7 @@ export function Today() {
         </div>
       )}
 
-      <TodayTasks tasks={todayTasks} />
+      <TodayTasks tasks={todayTasks} completedTasks={todayCompletedTasks} />
     </Page>
   );
 }

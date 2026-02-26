@@ -29,6 +29,7 @@ class PouchDBTaskDocument {
   targetValue?: number = 0;
   createdAt: number = new Date().valueOf();
   updatedAt: number = new Date().valueOf();
+  completedAt?: number;
   attributes?: Record<string, any> = {};
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean = false;
@@ -53,6 +54,7 @@ class PouchDBTaskDocument {
       targetValue: this.targetValue || 0,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      completedAt: this.completedAt,
       attributes: this.attributes || {},
       atDateHijri: this.atDateHijri || "",
       atDateIsNone: this.atDateIsNone || 1,
@@ -84,19 +86,20 @@ class PouchDBTaskDocument {
         minute = timeParts.minute;
       }
 
-      a.atEpochMillis = HijriDate.hijriToJsDate(
+      let d = HijriDate.hijriToJsDate(
         year,
         month,
         day,
         hour,
         minute,
-        t.lat,
-        t.long,
         {
+          latitude: t.lat,
+          longitude: t.long,
           offset: t.hijriDateOffset || 0,
         },
-      ).valueOf();
+      );
 
+      a.atEpochMillis = d.valueOf();
       if (!!t.atTime) {
         a.atTime = t.atTime;
         a.prayerTime = undefined;
@@ -367,6 +370,8 @@ export class TaskRepository {
       },
     });
 
+    console.log("todayHijri", todayHijri._offset);
+
     const mangoQuery = {
       selector: {
         type: "task",
@@ -379,7 +384,7 @@ export class TaskRepository {
           $gte: 0,
         },
         atEpochMillis: {
-          // date is less that tomorrow
+          // date is less than tomorrow
           // includes "overdue" tasks
           $lt: todayHijri.next().toDate().valueOf(),
         },
@@ -398,6 +403,71 @@ export class TaskRepository {
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );
+  }
+
+  async findTodayCompletedTasks(todayHijri: HijriDate): Promise<Task[]> {
+    await db.createIndex({
+      index: {
+        fields: ["type", "status", "completedAt"],
+      },
+    });
+
+    const todayStart = todayHijri.startOfDay().toDate();
+    const todayEnd = todayHijri.next().startOfDay().toDate();
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        status: 1, // completed status
+        completedAt: {
+          $gte: todayStart.getTime(),
+          $lte: todayEnd.getTime(),
+        },
+      },
+      sort: [{ type: "asc" }, { status: "asc" }, { completedAt: "desc" }],
+    };
+
+    const result = await (db as any).find(mangoQuery);
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      new PouchDBTaskDocument(doc).toTaskItem(),
+    );
+  }
+
+  async completeTask(id: string): Promise<Task> {
+    const existingDoc = await (db as any).get(id);
+    const updateData = new PouchDBTaskDocument({
+      ...existingDoc,
+      status: 1, // completed status
+      completedAt: Date.now(), // set completion timestamp
+      updatedAt: Date.now(),
+    }).toTaskItem();
+
+    const ud = PouchDBTaskDocument.fromTaskItem(updateData);
+    const response = await (db as any).put(ud);
+    const updatedDoc = new PouchDBTaskDocument({
+      ...updateData,
+      _rev: response.rev,
+    });
+
+    return updatedDoc.toTaskItem();
+  }
+
+  async reopenTask(id: string): Promise<Task> {
+    const existingDoc = await (db as any).get(id);
+    const updateData = new PouchDBTaskDocument({
+      ...existingDoc,
+      status: 0, // pending status
+      completedAt: undefined, // clear completion timestamp
+      updatedAt: Date.now(),
+    }).toTaskItem();
+
+    const ud = PouchDBTaskDocument.fromTaskItem(updateData);
+    const response = await (db as any).put(ud);
+    const updatedDoc = new PouchDBTaskDocument({
+      ...updateData,
+      _rev: response.rev,
+    });
+
+    return updatedDoc.toTaskItem();
   }
 
   async findUpcomingTasks(todayHijri: HijriDate): Promise<Task[]> {
@@ -425,6 +495,7 @@ export class TaskRepository {
     };
 
     const result = await (db as any).find(mangoQuery);
+    console.log("upcoming", result.docs);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );

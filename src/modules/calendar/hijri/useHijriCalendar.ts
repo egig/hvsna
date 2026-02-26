@@ -78,13 +78,17 @@ export function useHijriCalendar(
             options.hijriDay,
             0,
             0,
-            latitude,
-            longitude,
-            { offset: manualOffset },
+            {
+              latitude,
+              longitude,
+              offset: manualOffset,
+            },
           )
         : new Date());
 
-    return HijriDate.fromDate(date, latitude, longitude, {
+    return HijriDate.fromDate(date, {
+      latitude,
+      longitude,
       offset: manualOffset,
     });
   }, [
@@ -100,7 +104,9 @@ export function useHijriCalendar(
   // Convert Gregorian date to Hijri date
   const toHijriDate = useCallback(
     (date: Date): HijriDate => {
-      return HijriDate.fromDate(date, latitude, longitude, {
+      return HijriDate.fromDate(date, {
+        latitude,
+        longitude,
         offset: manualOffset,
       });
     },
@@ -117,7 +123,9 @@ export function useHijriCalendar(
 
   // Get today's hijri date
   const getToday = useCallback((): HijriDate => {
-    return HijriDate.fromDate(new Date(), latitude, longitude, {
+    return HijriDate.fromDate(new Date(), {
+      latitude,
+      longitude,
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -126,7 +134,9 @@ export function useHijriCalendar(
   const getTomorrow = useCallback((): HijriDate => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return HijriDate.fromDate(tomorrow, latitude, longitude, {
+    return HijriDate.fromDate(tomorrow, {
+      latitude,
+      longitude,
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -135,7 +145,9 @@ export function useHijriCalendar(
   const getYesterday = useCallback((): HijriDate => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    return HijriDate.fromDate(yesterday, latitude, longitude, {
+    return HijriDate.fromDate(yesterday, {
+      latitude,
+      longitude,
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -195,11 +207,15 @@ export function useHijriCalendar(
         day,
         hour,
         minute,
+        {
+          latitude,
+          longitude,
+          offset: manualOffset,
+        },
+      );
+      return HijriDate.fromDate(jsDate, {
         latitude,
         longitude,
-        { offset: manualOffset },
-      );
-      return HijriDate.fromDate(jsDate, latitude, longitude, {
         offset: manualOffset,
       });
     },

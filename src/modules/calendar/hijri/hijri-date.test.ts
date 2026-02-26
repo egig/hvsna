@@ -26,7 +26,7 @@ describe("HijriDate", () => {
   describe("hijriToJsDate", () => {
     it("should convert Hijri date components to JavaScript Date", () => {
       // Known conversion: 18 Dhu al-Hijjah 1444 corresponds to July 6, 2023
-      const result = HijriDate.hijriToJsDate(1444, 12, 18);
+      const result = HijriDate.hijriToJsDate(1444, 12, 18, 0, 0, {});
 
       expect(result).toBeInstanceOf(Date);
       expect(result.getFullYear()).toBe(2023);
@@ -35,7 +35,7 @@ describe("HijriDate", () => {
     });
 
     it("should convert Hijri date with time components", () => {
-      const result = HijriDate.hijriToJsDate(1444, 12, 18, 14, 30);
+      const result = HijriDate.hijriToJsDate(1444, 12, 18, 14, 30, {});
 
       expect(result.getHours()).toBe(14);
       expect(result.getMinutes()).toBe(30);
@@ -60,6 +60,9 @@ describe("HijriDate", () => {
           hijri.year,
           hijri.month,
           hijri.day,
+          0,
+          0,
+          {},
         );
         expect(result.getFullYear()).toBe(expected.year);
         expect(result.getMonth()).toBe(expected.month);
@@ -83,8 +86,7 @@ describe("HijriDate", () => {
         18,
         0,
         0,
-        latitude,
-        longitude,
+        { latitude, longitude },
       );
 
       expect(result).toBeInstanceOf(Date);
@@ -102,8 +104,7 @@ describe("HijriDate", () => {
         5, // 5 Ramadhan 1447
         19, // 7 PM (after sunset)
         0,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
 
       // Test with morning time (before sunset) - should stay same day
@@ -113,8 +114,7 @@ describe("HijriDate", () => {
         5, // 5 Ramadhan 1447
         7, // 7 AM (before sunset)
         0,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
 
       // Both should be valid dates
@@ -136,8 +136,7 @@ describe("HijriDate", () => {
         18,
         0,
         0,
-        999, // Invalid latitude
-        999, // Invalid longitude
+        { latitude: 999, longitude: 999 }, // Invalid coordinates
       );
 
       // Should fall back to original date without throwing error
@@ -192,8 +191,7 @@ describe("HijriDate", () => {
         hijriDay,
         morningHour,
         morningMinute,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
 
       const eveningFromHijriToJsDate = HijriDate.hijriToJsDate(
@@ -202,22 +200,19 @@ describe("HijriDate", () => {
         hijriDay,
         eveningHour,
         eveningMinute,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
 
       // Method 2: fromDate -> toDate round trip
       const morningFromDate = HijriDate.fromDate(
         morningFromHijriToJsDate,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
       const morningFromToDate = morningFromDate.toDate();
 
       const eveningFromDate = HijriDate.fromDate(
         eveningFromHijriToJsDate,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
       const eveningFromToDate = eveningFromDate.toDate();
 
@@ -232,13 +227,11 @@ describe("HijriDate", () => {
       // Validate that the round-trip preserves Hijri dates
       const morningRoundTrip = HijriDate.fromDate(
         morningFromToDate,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
       const eveningRoundTrip = HijriDate.fromDate(
         eveningFromToDate,
-        jakartaLatitude,
-        jakartaLongitude,
+        { latitude: jakartaLatitude, longitude: jakartaLongitude },
       );
 
       expect(morningFromDate.format("YYYY-MM-DD")).toBe(
@@ -676,7 +669,7 @@ describe("HijriDate", () => {
 
       it("should include coordinates in fromDate", () => {
         const date = new Date(2024, 0, 1, 12, 0, 0);
-        const hijriDate = HijriDate.fromDate(date, latitude, longitude);
+        const hijriDate = HijriDate.fromDate(date, { latitude, longitude });
         expect(hijriDate._latitude).toBe(latitude);
         expect(hijriDate._longitude).toBe(longitude);
       });
@@ -684,8 +677,7 @@ describe("HijriDate", () => {
       it("should include coordinates in fromDate", () => {
         const hijriDate = HijriDate.fromDate(
           new Date(2024, 0, 1, 12, 0, 0),
-          latitude,
-          longitude,
+          { latitude, longitude },
         );
         expect(hijriDate._latitude).toBe(latitude);
         expect(hijriDate._longitude).toBe(longitude);
@@ -693,7 +685,7 @@ describe("HijriDate", () => {
 
       it("should include coordinates in fromDate", () => {
         const date = new Date(2024, 0, 1, 12, 0, 0);
-        const hijriDate = HijriDate.fromDate(date, latitude, longitude);
+        const hijriDate = HijriDate.fromDate(date, { latitude, longitude });
         expect(hijriDate._latitude).toBe(latitude);
         expect(hijriDate._longitude).toBe(longitude);
       });

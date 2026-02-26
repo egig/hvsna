@@ -38,7 +38,7 @@ export function TaskListItem({
   formatDate,
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
-  const { updateStatus } = useTaskListItem();
+  const { updateStatus, completeTask, reopenTask } = useTaskListItem();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
@@ -47,9 +47,9 @@ export function TaskListItem({
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
       case 0:
-        return 1;
+        return 1; // pending -> completed
       case 1:
-        return 0;
+        return 0; // completed -> pending
       default:
         return 0;
     }
@@ -62,6 +62,8 @@ export function TaskListItem({
           <CheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
         );
       case 0:
+        return <Square strokeWidth={1} size={24} className="text-gray-500" />;
+      default:
         return <Square strokeWidth={1} size={24} className="text-gray-500" />;
     }
   };
@@ -143,8 +145,21 @@ export function TaskListItem({
 
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const nextStatus = getNextStatus(task.status);
-    const updatePromise = updateStatus(task.id, nextStatus).then(() => {
+
+    let updatePromise: Promise<Task>;
+    let nextStatus: TaskStatus;
+
+    if (task.status === 0) {
+      // Complete the task
+      updatePromise = completeTask(task.id);
+      nextStatus = 1;
+    } else {
+      // Reopen the task
+      updatePromise = reopenTask(task.id);
+      nextStatus = 0;
+    }
+
+    updatePromise.then(() => {
       if (onStatusChange) {
         onStatusChange(task, nextStatus);
       }
@@ -157,10 +172,16 @@ export function TaskListItem({
         <span>{`${t("status_changed_to")} ${statusText}`}</span>
         <button
           onClick={() => {
-            updateStatus(task.id, task.status).then(() => {
-              //..
-              hideSnackbar(snackbarId);
-            });
+            // Revert the change
+            if (task.status === 0) {
+              reopenTask(task.id).then(() => {
+                hideSnackbar(snackbarId);
+              });
+            } else {
+              completeTask(task.id).then(() => {
+                hideSnackbar(snackbarId);
+              });
+            }
           }}
           className="flex items-center gap-1 px-1 py-1 text-xs bg-white/20 hover:bg-white/30 rounded transition-colors ml-4"
         >

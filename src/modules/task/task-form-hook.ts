@@ -199,7 +199,7 @@ export const useTaskForm = (
       }
 
       let result = await createTask(taskInput, () => {
-        refreshAllTaskLists(getToday().startOfDay());
+        refreshAllTaskLists(getToday());
       });
 
       // Create recurring task if repeat is selected and not "none"

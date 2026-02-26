@@ -6,6 +6,18 @@ const DEFAULT_LATITUDE = -6.2088;
 const DEFAULT_LONGITUDE = 106.8456;
 
 /**
+ * Options for HijriDate calculations
+ */
+export interface HijriDateOptions {
+  /** Latitude for sunset calculation (defaults to Jakarta) */
+  latitude?: number;
+  /** Longitude for sunset calculation (defaults to Jakarta) */
+  longitude?: number;
+  /** Number of days to offset the date (positive for future, negative for past) */
+  offset?: number;
+}
+
+/**
  * Applies day offset to Hijri date components, handling month/year overflow/underflow
  * @param year - Hijri year
  * @param month - Hijri month (1-12)
@@ -66,20 +78,14 @@ export class HijriDate {
   private constructor() {}
 
   toDate(): Date {
-    // Convert Hijri date back to Gregorian
     const gregorian = hijriToGregorian({
       year: this.year,
       month: this.month,
       day: this.day,
     });
 
-    // Create Date object with the converted Gregorian date
     const result = new Date(gregorian.year, gregorian.month - 1, gregorian.day);
-
-    // Set the time components
     result.setHours(this.hour, this.minute, 0, 0);
-
-    // Use Jakarta coordinates as default if not available
     const lat = this._latitude ?? DEFAULT_LATITUDE;
     const lng = this._longitude ?? DEFAULT_LONGITUDE;
 
@@ -132,10 +138,7 @@ export class HijriDate {
    * @param day Hijri day
    * @param hour Hour (0-23, defaults to sunset time if not provided)
    * @param minute Minute (0-59, defaults to sunset time if not provided)
-   * @param latitude Latitude for sunset calculation (defaults to Jakarta)
-   * @param longitude Longitude for sunset calculation (defaults to Jakarta)
-   * @param options Optional configuration
-   * @param options.offset Number of days to offset the date (positive for future, negative for past)
+   * @param options Optional configuration including latitude, longitude, and offset
    * @returns JavaScript Date object
    */
   static hijriToJsDate(
@@ -144,12 +147,10 @@ export class HijriDate {
     day: number,
     hour?: number,
     minute?: number,
-    latitude?: number,
-    longitude?: number,
-    options?: { offset?: number },
+    options?: HijriDateOptions,
   ): Date {
-    const lat = latitude ?? DEFAULT_LATITUDE;
-    const lng = longitude ?? DEFAULT_LONGITUDE;
+    const lat = options?.latitude ?? DEFAULT_LATITUDE;
+    const lng = options?.longitude ?? DEFAULT_LONGITUDE;
     const offset = options?.offset ?? 0;
 
     // Reverse logic: subtract offset instead of add so we times offset with -1
@@ -165,29 +166,22 @@ export class HijriDate {
       day: adjustedDay,
     });
 
-    // Determine hour and minute - use sunset time as default if not provided
-    let finalHour = hour;
-    let finalMinute = minute;
-
-    if (finalHour === undefined || finalMinute === undefined) {
+    if (hour === undefined || minute === undefined) {
       const startOfDay = HijriDate.startOfDayInJsDate(
         adjustedYear,
         adjustedMonth,
         adjustedDay,
-        lat,
-        lng,
+        { latitude: lat, longitude: lng },
       );
-      finalHour = finalHour ?? startOfDay.getHours();
-      finalMinute = finalMinute ?? startOfDay.getMinutes();
+      return startOfDay;
     }
 
-    // Create Date object with time components
     let result = new Date(
       gregorian.year,
       gregorian.month - 1,
       gregorian.day,
-      finalHour,
-      finalMinute,
+      hour,
+      minute,
       0,
       0,
     );
@@ -214,13 +208,11 @@ export class HijriDate {
 
   static fromDate(
     date: Date,
-    latitude?: number,
-    longitude?: number,
-    options?: { offset?: number },
+    options?: HijriDateOptions,
   ) {
     // Use Jakarta coordinates as default if not provided
-    const lat = latitude ?? DEFAULT_LATITUDE;
-    const lng = longitude ?? DEFAULT_LONGITUDE;
+    const lat = options?.latitude ?? DEFAULT_LATITUDE;
+    const lng = options?.longitude ?? DEFAULT_LONGITUDE;
 
     let hijriDate = gregorianToHijri({
       year: date.getFullYear(),
@@ -305,7 +297,9 @@ export class HijriDate {
     const prevGregorian = new Date(this._rawGregorianDate);
     prevGregorian.setDate(prevGregorian.getDate() - 1);
 
-    return HijriDate.fromDate(prevGregorian, this._latitude, this._longitude, {
+    return HijriDate.fromDate(prevGregorian, {
+      latitude: this._latitude,
+      longitude: this._longitude,
       offset: this._offset,
     });
   }
@@ -314,7 +308,9 @@ export class HijriDate {
     const nextGregorian = new Date(this._rawGregorianDate);
     nextGregorian.setDate(nextGregorian.getDate() + 1);
 
-    return HijriDate.fromDate(nextGregorian, this._latitude, this._longitude, {
+    return HijriDate.fromDate(nextGregorian, {
+      latitude: this._latitude,
+      longitude: this._longitude,
       offset: this._offset,
     });
   }
@@ -351,9 +347,11 @@ export class HijriDate {
 
     return HijriDate.fromDate(
       startOfWeekGregorian,
-      this._latitude,
-      this._longitude,
-      { offset: this._offset },
+      {
+        latitude: this._latitude,
+        longitude: this._longitude,
+        offset: this._offset,
+      },
     );
   }
 
@@ -457,7 +455,9 @@ export class HijriDate {
     const lat = this._latitude ?? DEFAULT_LATITUDE;
     const lng = this._longitude ?? DEFAULT_LONGITUDE;
 
-    const today = HijriDate.fromDate(new Date(), lat, lng, {
+    const today = HijriDate.fromDate(new Date(), {
+      latitude: this._latitude,
+      longitude: this._longitude,
       offset: this._offset,
     });
     return (
@@ -473,9 +473,11 @@ export class HijriDate {
 
     const tomorrow = HijriDate.fromDate(
       new Date(Date.now() + 86400000),
-      lat,
-      lng,
-      { offset: this._offset },
+      {
+        latitude: this._latitude,
+        longitude: this._longitude,
+        offset: this._offset,
+      },
     );
     return (
       this.year === tomorrow.year &&
@@ -498,20 +500,18 @@ export class HijriDate {
    * @param year Hijri year
    * @param month Hijri month (1-12)
    * @param day Hijri day
-   * @param latitude Latitude for sunset calculation (defaults to Jakarta)
-   * @param longitude Longitude for sunset calculation (defaults to Jakarta)
+   * @param options Optional configuration including latitude and longitude
    * @returns JavaScript Date object representing the start of the Hijri day (sunset time)
    */
   static startOfDayInJsDate(
     year: number,
     month: number,
     day: number,
-    latitude?: number,
-    longitude?: number,
+    options?: HijriDateOptions,
   ): Date {
     // Use Jakarta coordinates as default if not provided
-    const lat = latitude ?? DEFAULT_LATITUDE;
-    const lng = longitude ?? DEFAULT_LONGITUDE;
+    const lat = options?.latitude ?? DEFAULT_LATITUDE;
+    const lng = options?.longitude ?? DEFAULT_LONGITUDE;
 
     // Convert Hijri date to Gregorian date
     const gregorian = hijriToGregorian({
@@ -524,7 +524,7 @@ export class HijriDate {
     const noonDate = new Date(
       gregorian.year,
       gregorian.month - 1,
-      gregorian.day,
+      gregorian.day - 1, // start of day always the day before
       12,
       0,
       0,
@@ -566,7 +566,15 @@ export class HijriDate {
 
     // Delegate to static method
     return HijriDate.fromDate(
-      HijriDate.startOfDayInJsDate(this.year, this.month, this.day, lat, lng),
+      HijriDate.startOfDayInJsDate(this.year, this.month, this.day, {
+        latitude: this._latitude,
+        longitude: this._longitude,
+      }),
+      {
+        latitude: this._latitude,
+        longitude: this._longitude,
+        offset: this._offset
+      }
     );
   }
 }
@@ -576,7 +584,9 @@ export function isTodayHijriDate(hijriDate: HijriDate): boolean {
   const lat = hijriDate._latitude ?? DEFAULT_LATITUDE;
   const lng = hijriDate._longitude ?? DEFAULT_LONGITUDE;
 
-  const today = HijriDate.fromDate(new Date(), lat, lng, {
+  const today = HijriDate.fromDate(new Date(), {
+    latitude: hijriDate._latitude,
+    longitude: hijriDate._longitude,
     offset: hijriDate._offset,
   });
   return (

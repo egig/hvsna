@@ -239,7 +239,7 @@ export const useTaskFormEdit = (
       }
 
       let result = await updateTask(taskId, taskInput, () =>
-        refreshAllTaskLists(getToday().startOfDay()),
+        refreshAllTaskLists(getToday()),
       );
 
       // Create recurring task if repeat is selected and not "none"

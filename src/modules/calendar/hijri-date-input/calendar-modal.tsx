@@ -4,7 +4,6 @@ import { Modal, Navbar } from "src/modules/navigation";
 import { HijriDate } from "../hijri/hijri-date";
 import { HijriMonth } from "../hijri/hijri-month";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { ListInput } from "src/ui/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
@@ -32,9 +31,6 @@ export function CalendarModal({
   const latitude = settings.coordinate?.latitude;
   const longitude = settings.coordinate?.longitude;
 
-  console.log("latitude", latitude);
-  console.log("longitude", longitude);
-  console.log("offset", offset);
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? new HijriMonth(

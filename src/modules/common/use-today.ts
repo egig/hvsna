@@ -15,7 +15,11 @@ import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
 export function useToday() {
   const { db } = usePouchDB();
   const todayTasks = useTaskStore((s) => s.todayTasks);
+  const todayCompletedTasks = useTaskStore((s) => s.todayCompletedTasks);
   const loadTodayTasks = useTaskStore((s) => s.loadTodayTasks);
+  const loadTodayCompletedTasks = useTaskStore(
+    (s) => s.loadTodayCompletedTasks,
+  );
   const { getTargetResults } = useTargetResults();
   const { getTrackers } = useTrackers();
   const { attributeOptions } = useAttributeOptions();
@@ -62,8 +66,12 @@ export function useToday() {
   }, [db, getTargetResults, getTrackers]);
 
   useEffect(() => {
-    loadTodayTasks(getToday().startOfDay());
+    loadTodayTasks(getToday());
   }, [loadTodayTasks, getToday]);
+
+  useEffect(() => {
+    loadTodayCompletedTasks(getToday());
+  }, [loadTodayCompletedTasks, getToday]);
 
   useEffect(() => {
     loadHomeData();
@@ -74,6 +82,7 @@ export function useToday() {
     targetResults,
     trackers,
     todayTasks,
+    todayCompletedTasks,
     loading,
     initiated,
     error,

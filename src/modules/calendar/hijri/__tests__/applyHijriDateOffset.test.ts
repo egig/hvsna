@@ -13,8 +13,6 @@ describe("applyHijriDateOffset (via HijriDate methods)", () => {
       15,
       undefined,
       undefined,
-      undefined,
-      undefined,
       { offset: 3 },
     );
 
@@ -31,8 +29,6 @@ describe("applyHijriDateOffset (via HijriDate methods)", () => {
       1445,
       1,
       15,
-      undefined,
-      undefined,
       undefined,
       undefined,
       { offset: -2 },
@@ -52,8 +48,6 @@ describe("applyHijriDateOffset (via HijriDate methods)", () => {
       3,
       undefined,
       undefined,
-      undefined,
-      undefined,
       { offset: 5 },
     );
 
@@ -71,8 +65,6 @@ describe("applyHijriDateOffset (via HijriDate methods)", () => {
       15,
       undefined,
       undefined,
-      undefined,
-      undefined,
       { offset: 0 },
     );
 
@@ -85,8 +77,6 @@ describe("applyHijriDateOffset (via HijriDate methods)", () => {
       1445,
       6,
       15,
-      undefined,
-      undefined,
       undefined,
       undefined,
       { offset: 100 },
@@ -104,8 +94,6 @@ describe("applyHijriDateOffset (via HijriDate methods)", () => {
       1445,
       6,
       15,
-      undefined,
-      undefined,
       undefined,
       undefined,
       { offset: -50 },

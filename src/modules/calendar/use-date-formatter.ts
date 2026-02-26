@@ -30,7 +30,7 @@ export function useDateFormatter(
   // Apply manual date offset to initial date using the new offset option
   const getInitialDate = () => {
     const offset = settings.manualDateOffset || 0;
-    return HijriDate.fromDate(initialDate, undefined, undefined, { offset });
+    return HijriDate.fromDate(initialDate, { offset });
   };
 
   const [activeDate, setActiveDate] = useState(getInitialDate);
@@ -44,7 +44,7 @@ export function useDateFormatter(
     // Simply recreate the activeDate with the new offset
     const newOffset = settings.manualDateOffset || 0;
     setActiveDate(
-      HijriDate.fromDate(activeDate.toDate(), undefined, undefined, {
+      HijriDate.fromDate(activeDate.toDate(), {
         offset: newOffset,
       }),
     );

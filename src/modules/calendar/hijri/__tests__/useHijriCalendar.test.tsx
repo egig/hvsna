@@ -81,9 +81,11 @@ describe("useHijriCalendar", () => {
 
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       customDate,
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -102,9 +104,11 @@ describe("useHijriCalendar", () => {
       1,
       0,
       0,
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -135,9 +139,11 @@ describe("useHijriCalendar", () => {
 
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       testDate,
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -157,9 +163,11 @@ describe("useHijriCalendar", () => {
 
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       expect.any(Date),
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -170,9 +178,11 @@ describe("useHijriCalendar", () => {
 
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       expect.any(Date),
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -183,9 +193,11 @@ describe("useHijriCalendar", () => {
 
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       expect.any(Date),
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -255,9 +267,11 @@ describe("useHijriCalendar", () => {
       1,
       12,
       30,
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -272,9 +286,11 @@ describe("useHijriCalendar", () => {
       1,
       undefined,
       undefined,
-      -6.2088,
-      106.8456,
-      { offset: 0 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 0,
+      },
     );
   });
 
@@ -334,9 +350,11 @@ describe("useHijriCalendar", () => {
     result.current.getToday();
     expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
       expect.any(Date),
-      -6.2088,
-      106.8456,
-      { offset: 2 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 2,
+      },
     );
 
     result.current.createHijriDate(1446, 1, 1);
@@ -346,9 +364,11 @@ describe("useHijriCalendar", () => {
       1,
       undefined,
       undefined,
-      -6.2088,
-      106.8456,
-      { offset: 2 },
+      {
+        latitude: -6.2088,
+        longitude: 106.8456,
+        offset: 2,
+      },
     );
   });
 

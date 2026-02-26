@@ -29,6 +29,7 @@ export interface Task {
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
+  completedAt?: number;
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
