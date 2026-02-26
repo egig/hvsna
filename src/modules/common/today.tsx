@@ -3,7 +3,7 @@ import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";
 import { ErrorDisplay } from "../../components/error-display";
 import { useToday } from "src/modules/common/use-today";
-import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
+import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { LargeNavbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -55,7 +55,7 @@ export function Today() {
 function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { openTaskForm } = useTask();
   const { t } = useLanguageContext();
-  const { getToday } = useHijriCalendar();
+  const { getToday } = useHijriDate();
 
   const handleEditTask = useCallback(
     (task: Task) => {

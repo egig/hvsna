@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriDate } from "src/modules/calendar/hijri";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -74,7 +74,7 @@ export const useTaskForm = (
   const [tracker, setTracker] = useState<Tracker | null>(null);
   const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
   const { getTracker } = useTracker();
-  const { getToday } = useHijriCalendar();
+  const { getToday } = useHijriDate();
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
   useEffect(() => {

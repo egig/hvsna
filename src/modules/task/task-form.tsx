@@ -5,7 +5,7 @@ import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { FormInput } from "src/ui/form-input";
 import { useTracker } from "../tracker/use-tracker";
 import { DatePrayerInput } from "./date-prayer-input";
-import { HijriDate, useHijriCalendar } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
@@ -45,7 +45,7 @@ export default function TaskForm({
   const location = useLocation();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
-  const { getToday } = useHijriCalendar();
+  const { getToday } = useHijriDate();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {

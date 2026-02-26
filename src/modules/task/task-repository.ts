@@ -86,11 +86,11 @@ class PouchDBTaskDocument {
         minute = timeParts.minute;
       }
 
-      let d = HijriDate.hijriToJsDate(year, month, day, hour, minute, {
+      let d = new HijriDate(year, month, day, hour, minute, {
         latitude: t.lat,
         longitude: t.long,
         offset: t.hijriDateOffset || 0,
-      });
+      }).toDate();
 
       a.atEpochMillis = d.valueOf();
       if (!!t.atTime) {

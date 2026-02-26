@@ -11,7 +11,7 @@ const DEFAULT_LONGITUDE = 106.8456;
 export class HijriMonth {
   year: number;
   month: number;
-  _rawGregorianDate: Date;
+  _jsDate: Date;
   _latitude?: number;
   _longitude?: number;
   _offset?: number;
@@ -29,18 +29,12 @@ export class HijriMonth {
       this._longitude = DEFAULT_LONGITUDE;
       this._offset = 0;
     }
-    this._rawGregorianDate = HijriDate.hijriToJsDate(
-      year,
-      month,
-      1,
-      0,
-      0,
-      options,
-    );
+    let d = new HijriDate(year, month, 1, undefined, undefined, options);
+    this._jsDate = d.toDate();
   }
 
   previous(): HijriMonth {
-    const prevGregorianDate = new Date(this._rawGregorianDate);
+    const prevGregorianDate = new Date(this._jsDate);
     prevGregorianDate.setDate(prevGregorianDate.getDate() - 29);
 
     const hijriDate = gregorianToHijri({
@@ -59,7 +53,7 @@ export class HijriMonth {
   next(): HijriMonth {
     // Use the raw Gregorian date to calculate next month
     // Add approximately 30 days to get to next Hijri month
-    const nextGregorianDate = new Date(this._rawGregorianDate);
+    const nextGregorianDate = new Date(this._jsDate);
     nextGregorianDate.setDate(nextGregorianDate.getDate() + 30);
 
     const hijriDate = gregorianToHijri({
@@ -80,12 +74,7 @@ export class HijriMonth {
   }
 
   getFirstDay(): HijriDate {
-    const d = HijriDate.hijriToJsDate(this.year, this.month, 1, 0, 0, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset || 0,
-    });
-    return HijriDate.fromDate(d, {
+    return new HijriDate(this.year, this.month, 1, 0, 0, {
       latitude: this._latitude,
       longitude: this._longitude,
       offset: this._offset || 0,
@@ -94,20 +83,7 @@ export class HijriMonth {
 
   getLastDay(): HijriDate {
     const daysInMonth = this.getDaysInMonth();
-    // Create a Gregorian date for the last day of this Hijri month
-    const d = HijriDate.hijriToJsDate(
-      this.year,
-      this.month,
-      daysInMonth,
-      0,
-      0,
-      {
-        latitude: this._latitude,
-        longitude: this._longitude,
-        offset: this._offset || 0,
-      },
-    );
-    return HijriDate.fromDate(d, {
+    return new HijriDate(this.year, this.month, daysInMonth, 0, 0, {
       latitude: this._latitude,
       longitude: this._longitude,
       offset: this._offset || 0,
@@ -129,9 +105,7 @@ export class HijriMonth {
    * @returns HijriMonth instance
    */
   static fromDate(date: Date, options?: HijriDateOptions): HijriMonth {
-    // Use HijriDate.fromDate to get accurate Hijri date with sunset calculation
     const hijriDate = HijriDate.fromDate(date, options);
-
     return new HijriMonth(hijriDate.year, hijriDate.month, options);
   }
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useTaskStore } from "../task/task-store";
 import { hijriToGregorian } from "@tabby_ai/hijri-converter";
-import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
+import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
   const { loading, error, upcommingTasks, loadUpcommingTasks } = useTaskStore();
   const { getToday, getTomorrow, toHijriDate, formatDate, createHijriDate } =
-    useHijriCalendar();
+    useHijriDate();
   const [initiated, setInitiated] = useState(false);
   const [groupedTasks, setGroupedTasks] = useState<{
     today: Task[];

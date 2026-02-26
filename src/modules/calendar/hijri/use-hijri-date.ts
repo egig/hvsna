@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useSettings } from "../../settings/useSettings";
 import { HijriDate } from "./hijri-date";
-import { fromDate } from "./from-date";
 
 export interface UseHijriCalendarOptions {
   date?: Date;
@@ -57,9 +56,7 @@ export interface UseHijriCalendarReturn {
   initiated: boolean;
 }
 
-export function useHijriCalendar(
-  options: UseHijriCalendarOptions = {},
-): UseHijriCalendarReturn {
+export function useHijriDate(): UseHijriCalendarReturn {
   const { settings, loading, error, initiated } = useSettings();
 
   // Extract coordinates and offset from settings
@@ -70,42 +67,17 @@ export function useHijriCalendar(
 
   // Create current hijri date based on options or current time
   const currentHijriDate = useMemo(() => {
-    const date =
-      options.date ||
-      (options.hijriYear && options.hijriMonth && options.hijriDay
-        ? HijriDate.hijriToJsDate(
-            options.hijriYear,
-            options.hijriMonth,
-            options.hijriDay,
-            0,
-            0,
-            {
-              latitude,
-              longitude,
-              offset: manualOffset,
-            },
-          )
-        : new Date());
-
-    return HijriDate.fromDate(date, {
+    return HijriDate.fromDate(new Date(), {
       latitude,
       longitude,
       offset: manualOffset,
     });
-  }, [
-    options.date,
-    options.hijriYear,
-    options.hijriMonth,
-    options.hijriDay,
-    latitude,
-    longitude,
-    manualOffset,
-  ]);
+  }, [latitude, longitude, manualOffset]);
 
   // Convert Gregorian date to Hijri date
   const toHijriDate = useCallback(
     (date: Date): HijriDate => {
-      return fromDate(date, {
+      return HijriDate.fromDate(date, {
         latitude,
         longitude,
         offset: manualOffset,
@@ -124,7 +96,7 @@ export function useHijriCalendar(
 
   // Get today's hijri date
   const getToday = useCallback((): HijriDate => {
-    return fromDate(new Date(), {
+    return HijriDate.fromDate(new Date(), {
       latitude,
       longitude,
       offset: manualOffset,
@@ -202,12 +174,7 @@ export function useHijriCalendar(
       hour: number | undefined = undefined,
       minute: number | undefined = undefined,
     ): HijriDate => {
-      const jsDate = HijriDate.hijriToJsDate(year, month, day, hour, minute, {
-        latitude,
-        longitude,
-        offset: manualOffset,
-      });
-      return HijriDate.fromDate(jsDate, {
+      return new HijriDate(year, month, day, hour, minute, {
         latitude,
         longitude,
         offset: manualOffset,

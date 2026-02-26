@@ -16,7 +16,7 @@ import { useSnackbar } from "../../ui/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useSettings } from "src/modules/settings/useSettings";
-import { useHijriCalendar } from "src/modules/calendar/hijri";
+import { useHijriDate } from "src/modules/calendar/hijri";
 
 interface TaskListItemProps {
   task: Task;
@@ -42,7 +42,7 @@ export function TaskListItem({
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
-  const { getToday, createHijriDate } = useHijriCalendar();
+  const { getToday, createHijriDate } = useHijriDate();
 
   const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
     switch (currentStatus) {
@@ -115,7 +115,7 @@ export function TaskListItem({
     try {
       const taskDate = createHijriDate(
         parseInt(task.atDateHijri.slice(0, 4)),
-        parseInt(task.atDateHijri.slice(4, 6)) - 1,
+        parseInt(task.atDateHijri.slice(4, 6)),
         parseInt(task.atDateHijri.slice(6, 8)),
       );
       const todayGregorian = today.toDate();

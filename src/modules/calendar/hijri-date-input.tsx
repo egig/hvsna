@@ -3,7 +3,7 @@ import { HijriDate } from "./hijri";
 import { CalendarModal } from "./hijri-date-input/calendar-modal";
 import { CalendarIcon } from "lucide-react";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useHijriCalendar } from "./hijri/useHijriCalendar";
+import { useHijriDate } from "./hijri/use-hijri-date";
 
 interface HijriDateInputProps {
   name: string;
@@ -28,7 +28,7 @@ export function HijriDateInput({
   onChange,
   onBlur,
 }: HijriDateInputProps) {
-  const { isToday, isTomorrow, formatDate } = useHijriCalendar();
+  const { isToday, isTomorrow, formatDate } = useHijriDate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<HijriDate | null>(null);
   const { t } = useLanguageContext();

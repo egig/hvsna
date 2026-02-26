@@ -6,7 +6,7 @@ import {
   HijriDate,
   HijriMonth,
   isSameHijriDate,
-  useHijriCalendar,
+  useHijriDate,
 } from "src/modules/calendar/hijri";
 import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -50,7 +50,7 @@ export function HijriDateRangeModal({
 }: HijriDateRangeModalProps) {
   const { t } = useLanguageContext();
   const { hijriMonthNames, weekDays } = useDateFormatter();
-  const { getToday, createHijriDate } = useHijriCalendar();
+  const { getToday, createHijriDate } = useHijriDate();
 
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedRange?.startDate

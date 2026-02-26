@@ -13,7 +13,7 @@ import type { Task } from "./types";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
-import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
+import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -32,7 +32,7 @@ export default function TaskFormEdit({
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const { toHijriDate, formatDate } = useHijriCalendar();
+  const { toHijriDate, formatDate } = useHijriDate();
   const {
     error,
     task,

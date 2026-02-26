@@ -8,7 +8,7 @@ import { ListInput } from "src/ui/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useSettings } from "src/modules/settings/useSettings";
-import { useHijriCalendar } from "../hijri/useHijriCalendar";
+import { useHijriDate } from "../hijri/use-hijri-date";
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export function CalendarModal({
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
   const { hijriMonthNames, weekDays } = useDateFormatter();
-  const { getToday, createHijriDate } = useHijriCalendar();
+  const { getToday, createHijriDate } = useHijriDate();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
   const latitude = settings.coordinate?.latitude;

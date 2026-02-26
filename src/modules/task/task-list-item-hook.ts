@@ -2,7 +2,7 @@ import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
 import { useTaskStore } from "./task-store";
 import type { Task, TaskStatus } from "./types";
-import { useHijriCalendar } from "../calendar/hijri";
+import { useHijriDate } from "../calendar/hijri";
 
 export const useTaskListItem = () => {
   const getTask = useTaskStore((s) => s.getTask);
@@ -12,7 +12,7 @@ export const useTaskListItem = () => {
   const refreshAllTaskLists = useTaskStore((s) => s.refreshAllTaskLists);
   const { createLog } = useLog();
   const { getGoal } = useGoal();
-  const { getToday } = useHijriCalendar();
+  const { getToday } = useHijriDate();
 
   const updateStatus = async (
     id: string,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Page } from "../navigation/page";
-import { useHijriCalendar } from "./hijri/useHijriCalendar";
+import { useHijriDate } from "./hijri/use-hijri-date";
 import { getSunsetTime } from "./hijri/hijri-date";
 
 export function HijriCalendar() {
@@ -15,7 +15,7 @@ export function HijriCalendar() {
     formatDate,
     loading,
     error,
-  } = useHijriCalendar();
+  } = useHijriDate();
 
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sunsetTime, setSunsetTime] = useState<string | null>(null);
@@ -230,12 +230,7 @@ export function HijriCalendar() {
             ) : (
               <div className="space-y-1">
                 <div className="text-xl font-bold text-[var(--hvsna-info-color)]">
-                  {getCurrentDayStart().toLocaleTimeString("en-US", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                    timeZone: timezone,
-                  })}
+                  {getCurrentDayStart().toDateString()}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   {formatGregorianDateTime(getCurrentDayStart())}

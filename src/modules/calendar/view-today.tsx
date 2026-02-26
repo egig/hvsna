@@ -1,7 +1,6 @@
 import {
   HijriDate,
   isSameHijriDate,
-  isTodayHijriDate,
 } from "src/modules/calendar/hijri/hijri-date";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
@@ -162,7 +161,7 @@ export default function ViewToday() {
                     <div
                       className={clsx(
                         "text-center rounded-md border-1",
-                        isTodayHijriDate(d) && "bg-gray-200",
+                        d.isToday() && "bg-gray-200",
                         isSameHijriDate(d, activeDate)
                           ? "border-gray-300"
                           : "border-transparent",
