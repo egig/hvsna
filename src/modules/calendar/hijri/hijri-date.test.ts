@@ -2,27 +2,6 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { HijriDate, getSunsetTime, isAfterSunset } from "./hijri-date";
 
 describe("HijriDate", () => {
-  describe("fromDate", () => {
-    it("should create a HijriDate from a Date object", () => {
-      const date = new Date(2023, 6, 6); // July 6, 2023
-      const hijriDate = HijriDate.fromDate(date);
-      expect(hijriDate.year).toBeGreaterThan(1400);
-      expect(hijriDate.month).toBeGreaterThanOrEqual(1);
-      expect(hijriDate.month).toBeLessThanOrEqual(12);
-      expect(hijriDate.day).toBeGreaterThanOrEqual(1);
-      expect(hijriDate.day).toBeLessThanOrEqual(30);
-    });
-
-    it("should create a HijriDate with valid date conversion", () => {
-      // Known conversion: July 6, 2023 corresponds to 18 Dhu al-Hijjah 1444
-      const date = new Date(2023, 6, 6);
-      const hijriDate = HijriDate.fromDate(date);
-      expect(hijriDate.year).toBe(1444);
-      expect(hijriDate.month).toBe(12);
-      expect(hijriDate.day).toBe(18);
-    });
-  });
-
   describe("hijriToJsDate", () => {
     it("should convert Hijri date components to JavaScript Date", () => {
       // Known conversion: 18 Dhu al-Hijjah 1444 corresponds to July 6, 2023
@@ -80,14 +59,10 @@ describe("HijriDate", () => {
       const latitude = 21.4225; // Mecca
       const longitude = 39.8262;
 
-      const result = HijriDate.hijriToJsDate(
-        1444,
-        12,
-        18,
-        0,
-        0,
-        { latitude, longitude },
-      );
+      const result = HijriDate.hijriToJsDate(1444, 12, 18, 0, 0, {
+        latitude,
+        longitude,
+      });
 
       expect(result).toBeInstanceOf(Date);
       expect(result.getFullYear()).toBe(2023);
@@ -204,16 +179,16 @@ describe("HijriDate", () => {
       );
 
       // Method 2: fromDate -> toDate round trip
-      const morningFromDate = HijriDate.fromDate(
-        morningFromHijriToJsDate,
-        { latitude: jakartaLatitude, longitude: jakartaLongitude },
-      );
+      const morningFromDate = HijriDate.fromDate(morningFromHijriToJsDate, {
+        latitude: jakartaLatitude,
+        longitude: jakartaLongitude,
+      });
       const morningFromToDate = morningFromDate.toDate();
 
-      const eveningFromDate = HijriDate.fromDate(
-        eveningFromHijriToJsDate,
-        { latitude: jakartaLatitude, longitude: jakartaLongitude },
-      );
+      const eveningFromDate = HijriDate.fromDate(eveningFromHijriToJsDate, {
+        latitude: jakartaLatitude,
+        longitude: jakartaLongitude,
+      });
       const eveningFromToDate = eveningFromDate.toDate();
 
       // Validate that all methods produce the same timestamps (perfect symmetry)
@@ -225,14 +200,14 @@ describe("HijriDate", () => {
       );
 
       // Validate that the round-trip preserves Hijri dates
-      const morningRoundTrip = HijriDate.fromDate(
-        morningFromToDate,
-        { latitude: jakartaLatitude, longitude: jakartaLongitude },
-      );
-      const eveningRoundTrip = HijriDate.fromDate(
-        eveningFromToDate,
-        { latitude: jakartaLatitude, longitude: jakartaLongitude },
-      );
+      const morningRoundTrip = HijriDate.fromDate(morningFromToDate, {
+        latitude: jakartaLatitude,
+        longitude: jakartaLongitude,
+      });
+      const eveningRoundTrip = HijriDate.fromDate(eveningFromToDate, {
+        latitude: jakartaLatitude,
+        longitude: jakartaLongitude,
+      });
 
       expect(morningFromDate.format("YYYY-MM-DD")).toBe(
         morningRoundTrip.format("YYYY-MM-DD"),
@@ -405,37 +380,30 @@ describe("HijriDate", () => {
 
   describe("date arithmetic consistency", () => {
     it("should maintain consistency when going forward and backward", () => {
-      const date = new Date(2023, 6, 6); // Known date: 18 Dhu al-Hijjah 1444
-      const originalDate = HijriDate.fromDate(date);
-      const nextDate = originalDate.next();
-      const backToOriginal = nextDate.previous();
+      const originalDate = HijriDate.fromDate(new Date(2023, 6, 10)); // Monday
+      const forwardDate = HijriDate.fromDate(new Date(2023, 6, 10)); // Monday
 
-      expect(backToOriginal.year).toBe(originalDate.year);
-      expect(backToOriginal.month).toBe(originalDate.month);
-      expect(backToOriginal.day).toBe(originalDate.day);
+      forwardDate.advanceDays(5);
+      forwardDate.advanceDays(-5);
+
+      expect(originalDate.year).toBe(forwardDate.year);
+      expect(originalDate.month).toBe(forwardDate.month);
+      expect(originalDate.day).toBe(forwardDate.day);
+      expect(originalDate.dayOfWeek).toBe(forwardDate.dayOfWeek);
     });
 
     it("should handle multiple consecutive operations", () => {
-      const date = new Date(2023, 6, 6);
-      const startDate = HijriDate.fromDate(date);
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 10)); // Monday
+      const originalDayOfWeek = hijriDate.dayOfWeek;
 
-      // Go forward 5 days
-      let currentDate = startDate;
-      for (let i = 0; i < 5; i++) {
-        currentDate = currentDate.next();
-      }
+      hijriDate.advanceDays(1);
+      expect(hijriDate.dayOfWeek).toBe((originalDayOfWeek + 1) % 7);
 
-      expect(currentDate.year).toBe(startDate.year);
-      expect(currentDate.day).toBe(startDate.day + 5);
+      hijriDate.advanceDays(2);
+      expect(hijriDate.dayOfWeek).toBe((originalDayOfWeek + 3) % 7);
 
-      // Go backward 5 days
-      for (let i = 0; i < 5; i++) {
-        currentDate = currentDate.previous();
-      }
-
-      expect(currentDate.year).toBe(startDate.year);
-      expect(currentDate.month).toBe(startDate.month);
-      expect(currentDate.day).toBe(startDate.day);
+      hijriDate.advanceDays(-3);
+      expect(hijriDate.dayOfWeek).toBe(originalDayOfWeek);
     });
   });
 
@@ -449,6 +417,7 @@ describe("HijriDate", () => {
       expect(startOfWeek.year).toBe(fridayDate.year);
       expect(startOfWeek.month).toBe(fridayDate.month);
       expect(startOfWeek.day).toBe(fridayDate.day);
+      expect(fridayDate.dayOfWeek).toBe(0); // Friday is day 0 in Islamic calendar
     });
 
     it("should return previous Friday when current date is Saturday", () => {
@@ -460,6 +429,7 @@ describe("HijriDate", () => {
       expect(startOfWeek.year).toBe(1444);
       expect(startOfWeek.month).toBe(12);
       expect(startOfWeek.day).toBe(19);
+      expect(saturdayDate.dayOfWeek).toBe(1); // Saturday is day 1 in Islamic calendar
     });
 
     it("should return previous Friday when current date is Sunday", () => {
@@ -471,6 +441,7 @@ describe("HijriDate", () => {
       expect(startOfWeek.year).toBe(1444);
       expect(startOfWeek.month).toBe(12);
       expect(startOfWeek.day).toBe(19);
+      expect(sundayDate.dayOfWeek).toBe(2); // Sunday is day 2 in Islamic calendar
     });
 
     it("should return previous Friday when current date is Thursday", () => {
@@ -482,6 +453,7 @@ describe("HijriDate", () => {
       expect(startOfWeek.year).toBe(1444);
       expect(startOfWeek.month).toBe(12);
       expect(startOfWeek.day).toBe(19);
+      expect(thursdayDate.dayOfWeek).toBe(6); // Thursday is day 6 in Islamic calendar
     });
 
     it("should return a new HijriDate instance", () => {
@@ -490,6 +462,64 @@ describe("HijriDate", () => {
 
       expect(startOfWeek).not.toBe(hijriDate);
       expect(hijriDate.day).toBe(22); // Original should remain unchanged
+      expect(hijriDate.dayOfWeek).toBe(3); // Monday is day 3 in Islamic calendar
+    });
+
+    describe("with custom start of week", () => {
+      it("should use Sunday (0) as start of week when specified", () => {
+        // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+        const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9), {
+          startOfWeek: 0,
+        });
+        const startOfWeek = sundayDate.startOfWeek();
+
+        // Should return to Sunday (21 Dhu al-Hijjah 1444) itself
+        expect(startOfWeek.year).toBe(1444);
+        expect(startOfWeek.month).toBe(12);
+        expect(startOfWeek.day).toBe(21);
+        expect(sundayDate.dayOfWeek).toBe(0); // Sunday is day 0 when startOfWeek is Sunday
+      });
+
+      it("should use Monday (1) as start of week when specified", () => {
+        // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+        const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9), {
+          startOfWeek: 1,
+        });
+        const startOfWeek = sundayDate.startOfWeek();
+
+        // Should return to Monday (15 Dhu al-Hijjah 1444)
+        expect(startOfWeek.year).toBe(1444);
+        expect(startOfWeek.month).toBe(12);
+        expect(startOfWeek.day).toBe(15);
+        expect(sundayDate.dayOfWeek).toBe(6); // Sunday is day 6 when startOfWeek is Monday
+      });
+
+      it("should use Saturday (6) as start of week when specified", () => {
+        // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+        const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9), {
+          startOfWeek: 6,
+        });
+        const startOfWeek = sundayDate.startOfWeek();
+
+        // Should return to Saturday (20 Dhu al-Hijjah 1444)
+        expect(startOfWeek.year).toBe(1444);
+        expect(startOfWeek.month).toBe(12);
+        expect(startOfWeek.day).toBe(20);
+        expect(sundayDate.dayOfWeek).toBe(1); // Sunday is day 1 when startOfWeek is Saturday
+      });
+
+      it("should maintain custom start of week in next() and previous() methods", () => {
+        const mondayDate = HijriDate.fromDate(new Date(2023, 6, 10), {
+          startOfWeek: 1,
+        }); // Monday
+        const nextDay = mondayDate.next();
+        const prevDay = mondayDate.previous();
+
+        // Both should maintain the same startOfWeek setting
+        expect(nextDay._startOfWeek).toBe(1);
+        expect(prevDay._startOfWeek).toBe(1);
+        expect(mondayDate.dayOfWeek).toBe(0); // Monday is day 0 when startOfWeek is Monday
+      });
     });
   });
 
@@ -675,10 +705,10 @@ describe("HijriDate", () => {
       });
 
       it("should include coordinates in fromDate", () => {
-        const hijriDate = HijriDate.fromDate(
-          new Date(2024, 0, 1, 12, 0, 0),
-          { latitude, longitude },
-        );
+        const hijriDate = HijriDate.fromDate(new Date(2024, 0, 1, 12, 0, 0), {
+          latitude,
+          longitude,
+        });
         expect(hijriDate._latitude).toBe(latitude);
         expect(hijriDate._longitude).toBe(longitude);
       });

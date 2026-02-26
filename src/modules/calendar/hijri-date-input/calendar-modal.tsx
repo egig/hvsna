@@ -33,22 +33,18 @@ export function CalendarModal({
 
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
-      ? new HijriMonth(
-          selectedDate.year,
-          selectedDate.month,
+      ? new HijriMonth(selectedDate.year, selectedDate.month, {
           latitude,
           longitude,
           offset,
-        )
+        })
       : (() => {
           const today = getToday().startOfDay();
-          return new HijriMonth(
-            today.year,
-            today.month,
+          return new HijriMonth(today.year, today.month, {
             latitude,
             longitude,
             offset,
-          );
+          });
         })(),
   );
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
@@ -60,13 +56,11 @@ export function CalendarModal({
   useEffect(() => {
     if (selectedDate) {
       setCurrentMonth(
-        new HijriMonth(
-          selectedDate.year,
-          selectedDate.month,
+        new HijriMonth(selectedDate.year, selectedDate.month, {
           latitude,
           longitude,
           offset,
-        ),
+        }),
       );
       setTempSelectedDate(selectedDate);
     }
@@ -111,13 +105,11 @@ export function CalendarModal({
   // Update current month when settings change
   useEffect(() => {
     setCurrentMonth(
-      new HijriMonth(
-        currentMonth.year,
-        currentMonth.month,
+      new HijriMonth(currentMonth.year, currentMonth.month, {
         latitude,
         longitude,
         offset,
-      ),
+      }),
     );
   }, [latitude, longitude, offset]);
 

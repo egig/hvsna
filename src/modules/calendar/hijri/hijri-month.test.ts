@@ -270,7 +270,11 @@ describe("HijriMonth", () => {
 
   describe("latitude, longitude, and offset support", () => {
     it("should store latitude, longitude, and offset in constructor", () => {
-      const hijriMonth = new HijriMonth(1445, 6, { latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = new HijriMonth(1445, 6, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
       expect(hijriMonth._latitude).toBe(21.4225);
       expect(hijriMonth._longitude).toBe(39.8262);
       expect(hijriMonth._offset).toBe(1);
@@ -284,7 +288,11 @@ describe("HijriMonth", () => {
     });
 
     it("should preserve location and offset in previous() method", () => {
-      const hijriMonth = new HijriMonth(1445, 6, { latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = new HijriMonth(1445, 6, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
       const previousMonth = hijriMonth.previous();
 
       expect(previousMonth._latitude).toBe(21.4225);
@@ -293,7 +301,11 @@ describe("HijriMonth", () => {
     });
 
     it("should preserve location and offset in next() method", () => {
-      const hijriMonth = new HijriMonth(1445, 6, { latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = new HijriMonth(1445, 6, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
       const nextMonth = hijriMonth.next();
 
       expect(nextMonth._latitude).toBe(21.4225);
@@ -302,7 +314,11 @@ describe("HijriMonth", () => {
     });
 
     it("should pass location and offset to HijriDate in getFirstDay()", () => {
-      const hijriMonth = new HijriMonth(1445, 6, { latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = new HijriMonth(1445, 6, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
       const firstDay = hijriMonth.getFirstDay();
 
       expect(firstDay._latitude).toBe(21.4225);
@@ -311,7 +327,11 @@ describe("HijriMonth", () => {
     });
 
     it("should pass location and offset to HijriDate in getLastDay()", () => {
-      const hijriMonth = new HijriMonth(1445, 6, { latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = new HijriMonth(1445, 6, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
       const lastDay = hijriMonth.getLastDay();
 
       expect(lastDay._latitude).toBe(21.4225);
@@ -323,7 +343,11 @@ describe("HijriMonth", () => {
   describe("static fromDate", () => {
     it("should create HijriMonth from Date with location and offset", () => {
       const date = new Date(2023, 6, 6); // July 6, 2023
-      const hijriMonth = HijriMonth.fromDate(date, { latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = HijriMonth.fromDate(date, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
 
       expect(hijriMonth).toBeInstanceOf(HijriMonth);
       expect(hijriMonth._latitude).toBe(21.4225);
@@ -342,7 +366,11 @@ describe("HijriMonth", () => {
 
     it("should use default offset when not provided", () => {
       const date = new Date(2023, 6, 6);
-      const hijriMonth = HijriMonth.fromDate(date, { latitude: 21.4225, longitude: 39.8262, offset: 0 });
+      const hijriMonth = HijriMonth.fromDate(date, {
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 0,
+      });
 
       expect(hijriMonth._latitude).toBe(21.4225);
       expect(hijriMonth._longitude).toBe(39.8262);
@@ -352,7 +380,11 @@ describe("HijriMonth", () => {
 
   describe("static getCurrent", () => {
     it("should create current HijriMonth with location and offset", () => {
-      const hijriMonth = HijriMonth.getCurrent({ latitude: 21.4225, longitude: 39.8262, offset: 1 });
+      const hijriMonth = HijriMonth.getCurrent({
+        latitude: 21.4225,
+        longitude: 39.8262,
+        offset: 1,
+      });
 
       expect(hijriMonth).toBeInstanceOf(HijriMonth);
       expect(hijriMonth._latitude).toBe(21.4225);

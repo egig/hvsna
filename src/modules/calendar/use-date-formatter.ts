@@ -8,8 +8,6 @@ export interface UseDateFormatterOptions {
 }
 
 export interface DateFormatterReturn {
-  activeDate: HijriDate;
-  setActiveDate: (date: HijriDate) => void;
   gregorianDate: Date;
   pageTitle: string;
   subTitle: string;
@@ -30,7 +28,11 @@ export function useDateFormatter(
   // Apply manual date offset to initial date using the new offset option
   const getInitialDate = () => {
     const offset = settings.manualDateOffset || 0;
-    return HijriDate.fromDate(initialDate, { offset });
+    return HijriDate.fromDate(initialDate, {
+      latitude: settings.coordinate?.latitude,
+      longitude: settings.coordinate?.latitude,
+      offset,
+    });
   };
 
   const [activeDate, setActiveDate] = useState(getInitialDate);
@@ -57,13 +59,13 @@ export function useDateFormatter(
   const formattedData = useMemo(() => {
     // Get localized day names
     const dayNames = [
+      t("friday"),
+      t("saturday"),
       t("sunday"),
       t("monday"),
       t("tuesday"),
       t("wednesday"),
       t("thursday"),
-      t("friday"),
-      t("saturday"),
     ];
 
     // Get localized Hijri month names
@@ -113,10 +115,10 @@ export function useDateFormatter(
     const dayOfWeek = gregorianDate.getDay();
 
     // Format page title: "Day Month Year" (Hijri)
-    const pageTitle = `${activeDate.day} ${hijriMonthNames[activeDate.month - 1]} ${activeDate.year}`;
+    const pageTitle = `${dayNames[activeDate.dayOfWeek]} ${hijriMonthNames[activeDate.month - 1]} ${activeDate.year}`;
 
     // Format subtitle: "DayName, Day Month Year" (Gregorian)
-    const subTitle = `${dayNames[dayOfWeek]}, ${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
+    const subTitle = `${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
 
     return {
       pageTitle,
@@ -129,8 +131,6 @@ export function useDateFormatter(
   }, [activeDate, gregorianDate, t, settings.manualDateOffset]);
 
   return {
-    activeDate,
-    setActiveDate,
     gregorianDate,
     pageTitle: formattedData.pageTitle,
     subTitle: formattedData.subTitle,

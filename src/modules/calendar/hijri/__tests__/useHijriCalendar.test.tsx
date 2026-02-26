@@ -79,14 +79,11 @@ describe("useHijriCalendar", () => {
 
     renderHook(() => useHijriCalendar({ date: customDate }));
 
-    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
-      customDate,
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 0,
-      },
-    );
+    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(customDate, {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 0,
+    });
   });
 
   it("should use provided hijri date components", () => {
@@ -98,18 +95,11 @@ describe("useHijriCalendar", () => {
       }),
     );
 
-    expect(mockHijriDate.hijriToJsDate).toHaveBeenCalledWith(
-      1446,
-      1,
-      1,
-      0,
-      0,
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 0,
-      },
-    );
+    expect(mockHijriDate.hijriToJsDate).toHaveBeenCalledWith(1446, 1, 1, 0, 0, {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 0,
+    });
   });
 
   it("should handle missing coordinates", () => {
@@ -137,14 +127,11 @@ describe("useHijriCalendar", () => {
 
     result.current.toHijriDate(testDate);
 
-    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
-      testDate,
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 0,
-      },
-    );
+    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(testDate, {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 0,
+    });
   });
 
   it("should convert hijri date to gregorian date", () => {
@@ -161,14 +148,11 @@ describe("useHijriCalendar", () => {
 
     result.current.getToday();
 
-    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
-      expect.any(Date),
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 0,
-      },
-    );
+    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(expect.any(Date), {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 0,
+    });
   });
 
   it("should get tomorrow's hijri date", () => {
@@ -176,14 +160,11 @@ describe("useHijriCalendar", () => {
 
     result.current.getTomorrow();
 
-    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
-      expect.any(Date),
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 0,
-      },
-    );
+    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(expect.any(Date), {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 0,
+    });
   });
 
   it("should get yesterday's hijri date", () => {
@@ -191,14 +172,11 @@ describe("useHijriCalendar", () => {
 
     result.current.getYesterday();
 
-    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
-      expect.any(Date),
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 0,
-      },
-    );
+    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(expect.any(Date), {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 0,
+    });
   });
 
   it("should check if hijri date is today", () => {
@@ -348,14 +326,11 @@ describe("useHijriCalendar", () => {
 
     // Test that manual offset is passed to HijriDate operations
     result.current.getToday();
-    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(
-      expect.any(Date),
-      {
-        latitude: -6.2088,
-        longitude: 106.8456,
-        offset: 2,
-      },
-    );
+    expect(mockHijriDate.fromDate).toHaveBeenCalledWith(expect.any(Date), {
+      latitude: -6.2088,
+      longitude: 106.8456,
+      offset: 2,
+    });
 
     result.current.createHijriDate(1446, 1, 1);
     expect(mockHijriDate.hijriToJsDate).toHaveBeenCalledWith(

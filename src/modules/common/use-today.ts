@@ -31,9 +31,19 @@ export function useToday() {
   const [initiated, setInitiated] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { activeDate, setActiveDate, gregorianDate, pageTitle, subTitle } =
-    useDateFormatter();
+  const {
+    activeDate,
+    setActiveDate,
+    dayNames,
+    hijriMonthNames,
+    gregorianMonthNames,
+  } = useDateFormatter();
   const { getToday } = useHijriCalendar();
+  let today = getToday();
+  let gregorianDate = today.toDate();
+
+  const pageTitle = `${dayNames[today.dayOfWeek]} ${today.day} ${hijriMonthNames[today.month - 1]} ${today.year}`;
+  const subTitle = `${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
 
   const loadHomeData = useCallback(async () => {
     if (!db) return;

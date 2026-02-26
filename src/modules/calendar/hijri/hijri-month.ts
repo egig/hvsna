@@ -2,6 +2,7 @@ import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import * as SunCalc from "suncalc";
 import { HijriDate } from "./hijri-date";
 import type { HijriDateOptions } from "./hijri-date";
+import { getDaysInMonth } from "./get-days-in-month";
 
 // Jakarta coordinates (default location)
 const DEFAULT_LATITUDE = -6.2088;
@@ -15,11 +16,7 @@ export class HijriMonth {
   _longitude?: number;
   _offset?: number;
 
-  constructor(
-    year: number,
-    month: number,
-    options?: HijriDateOptions,
-  ) {
+  constructor(year: number, month: number, options?: HijriDateOptions) {
     this.year = year;
     this.month = month;
     // Store default values only when options is undefined, not when it's an empty object
@@ -52,15 +49,11 @@ export class HijriMonth {
       day: prevGregorianDate.getDate(),
     });
 
-    return new HijriMonth(
-      hijriDate.year,
-      hijriDate.month,
-      {
-        latitude: this._latitude,
-        longitude: this._longitude,
-        offset: this._offset,
-      },
-    );
+    return new HijriMonth(hijriDate.year, hijriDate.month, {
+      latitude: this._latitude,
+      longitude: this._longitude,
+      offset: this._offset,
+    });
   }
 
   next(): HijriMonth {
@@ -75,45 +68,23 @@ export class HijriMonth {
       day: nextGregorianDate.getDate(),
     });
 
-    return new HijriMonth(
-      hijriDate.year,
-      hijriDate.month,
-      {
-        latitude: this._latitude,
-        longitude: this._longitude,
-        offset: this._offset,
-      },
-    );
+    return new HijriMonth(hijriDate.year, hijriDate.month, {
+      latitude: this._latitude,
+      longitude: this._longitude,
+      offset: this._offset,
+    });
   }
 
   getDaysInMonth(): number {
-    // Check different days to find the maximum valid day in this month
-    let maxDay = 30;
-    for (let day = 30; day >= 1; day--) {
-      try {
-        hijriToGregorian({ year: this.year, month: this.month, day });
-        maxDay = day;
-        break;
-      } catch (error) {
-        // Day is invalid, continue checking
-      }
-    }
-    return maxDay;
+    return getDaysInMonth(this.year, this.month);
   }
 
   getFirstDay(): HijriDate {
-    const d = HijriDate.hijriToJsDate(
-      this.year,
-      this.month,
-      1,
-      0,
-      0,
-      {
-        latitude: this._latitude,
-        longitude: this._longitude,
-        offset: this._offset || 0,
-      },
-    );
+    const d = HijriDate.hijriToJsDate(this.year, this.month, 1, 0, 0, {
+      latitude: this._latitude,
+      longitude: this._longitude,
+      offset: this._offset || 0,
+    });
     return HijriDate.fromDate(d, {
       latitude: this._latitude,
       longitude: this._longitude,
@@ -157,10 +128,7 @@ export class HijriMonth {
    * @param options Optional configuration including latitude, longitude, and offset
    * @returns HijriMonth instance
    */
-  static fromDate(
-    date: Date,
-    options?: HijriDateOptions,
-  ): HijriMonth {
+  static fromDate(date: Date, options?: HijriDateOptions): HijriMonth {
     // Use HijriDate.fromDate to get accurate Hijri date with sunset calculation
     const hijriDate = HijriDate.fromDate(date, options);
 

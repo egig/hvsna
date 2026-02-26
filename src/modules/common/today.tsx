@@ -8,6 +8,7 @@ import BlockTitle from "../../ui/block-title";
 import type { Tracker } from "../tracker/trackerStore";
 import TaskListItem from "../task/task-list-item";
 import { formatValue } from "src/lib/format";
+import { ErrorDisplay } from "../../components/error-display";
 import { useToday } from "src/modules/common/use-today";
 import { useHijriCalendar } from "../calendar/hijri/useHijriCalendar";
 import { LargeNavbar } from "src/modules/navigation/navbar";
@@ -312,14 +313,7 @@ export function Today() {
   } = useToday();
 
   if (initiated && error) {
-    return (
-      <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="text-red-800 font-medium">{t("error")}</div>
-          <div className="text-red-600 text-sm mt-1">{error}</div>
-        </div>
-      </div>
-    );
+    return <ErrorDisplay error={error} />;
   }
 
   return (

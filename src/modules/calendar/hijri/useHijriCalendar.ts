@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useSettings } from "../../settings/useSettings";
 import { HijriDate } from "./hijri-date";
+import { fromDate } from "./from-date";
 
 export interface UseHijriCalendarOptions {
   date?: Date;
@@ -123,7 +124,7 @@ export function useHijriCalendar(
 
   // Get today's hijri date
   const getToday = useCallback((): HijriDate => {
-    return HijriDate.fromDate(new Date(), {
+    return fromDate(new Date(), {
       latitude,
       longitude,
       offset: manualOffset,
@@ -201,18 +202,11 @@ export function useHijriCalendar(
       hour: number | undefined = undefined,
       minute: number | undefined = undefined,
     ): HijriDate => {
-      const jsDate = HijriDate.hijriToJsDate(
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        {
-          latitude,
-          longitude,
-          offset: manualOffset,
-        },
-      );
+      const jsDate = HijriDate.hijriToJsDate(year, month, day, hour, minute, {
+        latitude,
+        longitude,
+        offset: manualOffset,
+      });
       return HijriDate.fromDate(jsDate, {
         latitude,
         longitude,
