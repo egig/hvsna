@@ -36,7 +36,6 @@ export function useSettings() {
     setInitiated,
   } = useSettingsStore();
 
-  // TODO this is causing too many re-render, many be because the puuchdb sync ?
   useEffect(() => {
     loadSettings();
   }, []);

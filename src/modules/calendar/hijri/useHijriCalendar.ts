@@ -105,7 +105,7 @@ export function useHijriCalendar(
   // Convert Gregorian date to Hijri date
   const toHijriDate = useCallback(
     (date: Date): HijriDate => {
-      return HijriDate.fromDate(date, {
+      return fromDate(date, {
         latitude,
         longitude,
         offset: manualOffset,

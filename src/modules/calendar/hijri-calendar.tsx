@@ -117,25 +117,8 @@ export function HijriCalendar() {
 
   // Get next day start (sunset time)
   const getNextDayStart = () => {
-    if (!latitude || !longitude || !sunsetTime) {
-      return new Date();
-    }
-
-    try {
-      const today = getToday();
-      const sunset = getSunsetTime(new Date(), latitude, longitude);
-      if (sunset) {
-        return sunset;
-      } else {
-        // Fallback: parse the sunset time string
-        const [hours, minutes] = sunsetTime.split(":").map(Number);
-        const nextDayStart = new Date(today.toDate());
-        nextDayStart.setHours(hours, minutes, 0, 0);
-        return nextDayStart;
-      }
-    } catch (error) {
-      return new Date();
-    }
+    const today = getToday();
+    return today.next().startOfDay().toDate();
   };
 
   // Get start of current Hijri day using startOfDay method

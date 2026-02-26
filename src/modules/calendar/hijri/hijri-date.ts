@@ -1,6 +1,6 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { getDaysInMonth } from "./get-days-in-month";
-import { fromDate as standaloneFromDate } from "./from-date";
+import { fromDate, fromDate as standaloneFromDate } from "./from-date";
 import * as SunCalc from "suncalc";
 
 // Jakarta coordinates (default location)
@@ -500,28 +500,28 @@ export class HijriDate {
     );
   }
 
-  /**
-   * Get the start of the Hijri day in JavaScript Date format
-   * @returns JavaScript Date object representing the start of the Hijri day (sunset time)
-   */
   startOfDay(): HijriDate {
-    // Use Jakarta coordinates as default if not available
-    const lat = this._latitude ?? DEFAULT_LATITUDE;
-    const lng = this._longitude ?? DEFAULT_LONGITUDE;
+    try {
+      const times = SunCalc.getTimes(
+        this._rawGregorianDate,
+        this._latitude as number,
+        this._longitude as number,
+      );
+      const sunset = times.sunset;
 
-    // Delegate to static method
-    return standaloneFromDate(
-      HijriDate.startOfDayInJsDate(this.year, this.month, this.day, {
-        latitude: this._latitude,
-        longitude: this._longitude,
-      }),
-      {
-        latitude: this._latitude,
-        longitude: this._longitude,
-        offset: this._offset,
-        startOfWeek: this._startOfWeek,
-      },
-    );
+      if (sunset && !isNaN(sunset.getTime())) {
+        // Set the sunset seconds to match start of hijri date (the day before)
+        sunset.setSeconds(sunset.getSeconds() - 1);
+        return fromDate(sunset, {
+          latitude: this._latitude,
+          longitude: this._longitude,
+          offset: this._offset,
+        });
+      }
+    } catch (error) {
+      console.warn("SunCalc calculation failed in startOfDay:", error);
+    }
+    return this;
   }
 }
 

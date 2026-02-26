@@ -381,7 +381,7 @@ export const useTaskStore = create<TaskState>()(
       loadTodayTasks: async (d: HijriDate): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          const todayTasksList = await taskRepository.findTodayTasks(d);
+          const todayTasksList = await taskRepository.findTasksBefore(d);
           let tc = Object.fromEntries(
             todayTasksList.map((task) => [task.id, task]),
           );
@@ -399,7 +399,7 @@ export const useTaskStore = create<TaskState>()(
       loadUpcommingTasks: async (d: HijriDate): Promise<void> => {
         try {
           set({ loading: true, error: null });
-          const upcomingTasksList = await taskRepository.findUpcomingTasks(d);
+          const upcomingTasksList = await taskRepository.findTasksAfter(d);
           let tc = Object.fromEntries(
             upcomingTasksList.map((task) => [task.id, task]),
           );

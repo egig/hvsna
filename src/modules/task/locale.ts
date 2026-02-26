@@ -161,6 +161,14 @@ export const taskTranslations = {
     en: "Delete Task",
     id: "Hapus Tugas",
   },
+  view_details: {
+    en: "View Details",
+    id: "Lihat Detail",
+  },
+  task_details: {
+    en: "Task Details",
+    id: "Detail Tugas",
+  },
   filter_tasks: {
     en: "Filter Tasks",
     id: "Filter Tugas",
@@ -188,5 +196,94 @@ export const taskTranslations = {
   status: {
     en: "Status",
     id: "Status",
+  },
+  // Task details modal
+  basic_information: {
+    en: "Basic Information",
+    id: "Informasi Dasar",
+  },
+  description: {
+    en: "Description",
+    id: "Deskripsi",
+  },
+  pending: {
+    en: "Pending",
+    id: "Tertunda",
+  },
+  date_information: {
+    en: "Date Information",
+    id: "Informasi Tanggal",
+  },
+  epoch_millis: {
+    en: "Epoch Milliseconds",
+    id: "Epoch Milidetik",
+  },
+  gregorian_date: {
+    en: "Gregorian Date",
+    id: "Tanggal Gregorian",
+  },
+  hijri_date: {
+    en: "Hijri Date",
+    id: "Tanggal Hijri",
+  },
+  scheduled_hijri_date: {
+    en: "Scheduled Hijri Date",
+    id: "Tanggal Hijri Terjadwal",
+  },
+  scheduled_time: {
+    en: "Scheduled Time",
+    id: "Waktu Terjadwal",
+  },
+  prayer_time: {
+    en: "Prayer Time",
+    id: "Waktu Sholat",
+  },
+  location_information: {
+    en: "Location Information",
+    id: "Informasi Lokasi",
+  },
+  latitude: {
+    en: "Latitude",
+    id: "Lintang",
+  },
+  longitude: {
+    en: "Longitude",
+    id: "Bujur",
+  },
+  timezone: {
+    en: "Timezone",
+    id: "Zona Waktu",
+  },
+  goal_information: {
+    en: "Goal Information",
+    id: "Informasi Target",
+  },
+  goal: {
+    en: "Goal",
+    id: "Target",
+  },
+  target_value: {
+    en: "Target Value",
+    id: "Nilai Target",
+  },
+  timestamps: {
+    en: "Timestamps",
+    id: "Stempel Waktu",
+  },
+  created_at: {
+    en: "Created At",
+    id: "Dibuat Pada",
+  },
+  updated_at: {
+    en: "Updated At",
+    id: "Diperbarui Pada",
+  },
+  completed_at: {
+    en: "Completed At",
+    id: "Diselesaikan Pada",
+  },
+  repeat_information: {
+    en: "Repeat Information",
+    id: "Informasi Pengulangan",
   },
 };

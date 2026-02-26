@@ -346,10 +346,9 @@ export class TaskRepository {
     }));
   }
 
-  // Today tasks should list:
-  // Not-completed
-  // Past due
-  async findTodayTasks(todayHijri: HijriDate): Promise<Task[]> {
+  // Find tasks scheduled before a specific Hijri date
+  // Includes: Not-completed tasks with dates before the specified date
+  async findTasksBefore(beforeHijri: HijriDate): Promise<Task[]> {
     await db.createIndex({
       index: {
         fields: [
@@ -363,8 +362,6 @@ export class TaskRepository {
       },
     });
 
-    console.log("todayHijri", todayHijri._offset);
-
     const mangoQuery = {
       selector: {
         type: "task",
@@ -377,9 +374,9 @@ export class TaskRepository {
           $gte: 0,
         },
         atEpochMillis: {
-          // date is less than tomorrow
+          // date is less than the specified date
           // includes "overdue" tasks
-          $lt: todayHijri.next().toDate().valueOf(),
+          $lt: beforeHijri.toDate().valueOf(),
         },
       },
       sort: [
@@ -463,7 +460,7 @@ export class TaskRepository {
     return updatedDoc.toTaskItem();
   }
 
-  async findUpcomingTasks(todayHijri: HijriDate): Promise<Task[]> {
+  async findTasksAfter(todayHijri: HijriDate): Promise<Task[]> {
     await db.createIndex({
       index: {
         fields: ["type", "status", "atDateIsNone", "atEpochMillis"],
