@@ -18,8 +18,8 @@ export interface HijriDateComponents {
  * Interface for time components
  */
 export interface TimeComponents {
-  hour: number;
-  minute: number;
+  hour: number | undefined;
+  minute: number | undefined;
 }
 
 /**
@@ -58,12 +58,17 @@ export function toDate(
   );
 
   const sunsetTime = getSunsetTime(gregorianDate, latitude, longitude);
+  if (hijriTime.hour == undefined && hijriTime.minute == undefined) {
+    hijriTime.hour = sunsetTime?.hour as number;
+    hijriTime.minute = sunsetTime?.minute as number;
+  }
+
   if (isTimeAfter(hijriTime, sunsetTime)) {
     gregorianDate.setDate(gregorianDate.getDate() - 1);
   }
-  const result = new Date(gregorianDate);
-  result.setHours(hijriTime.hour, hijriTime.minute, 0, 0);
 
+  const result = new Date(gregorianDate);
+  result.setHours(hijriTime.hour || 0, hijriTime.minute, 0, 0);
   return result;
 }
 
@@ -78,7 +83,7 @@ export function toDate(
 export function fromDate(
   gregorianDate: Date,
   options?: ConversionOptions,
-): HijriDateComponents {
+): HijriDateComponents & TimeComponents {
   const latitude = options?.latitude ?? DEFAULT_LATITUDE;
   const longitude = options?.longitude ?? DEFAULT_LONGITUDE;
   const offset = options?.offset ?? 0;
@@ -104,7 +109,10 @@ export function fromDate(
   }
 
   const adjustedHijri = _applyOffset(hijriDate, offset);
-  return adjustedHijri;
+  return Object.assign(adjustedHijri, {
+    hour: gregorianDate.getHours(),
+    minute: gregorianDate.getMinutes(),
+  });
 }
 
 /**
@@ -144,7 +152,12 @@ function isTimeAfter(
     return false;
   }
 
-  if (time.hour > sunsetTime.hour) {
+  if (time.hour === undefined || time.minute === undefined || 
+      sunsetTime.hour === undefined || sunsetTime.minute === undefined) {
+    return false;
+  }
+
+  if (time.hour >= sunsetTime.hour) {
     return true;
   }
 

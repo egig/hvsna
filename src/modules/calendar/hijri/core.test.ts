@@ -76,6 +76,35 @@ describe("core", () => {
       expect(result.getHours()).toBe(20);
       expect(result.getMinutes()).toBe(0);
     });
+
+    it("should convert 9 Ramadhan without time with offset -1 to 26 Feb sunset time", () => {
+      // @ts-ignore
+      vi.mocked(hijriToGregorian).mockImplementation((input) => {
+        if (input.year === 1447 && input.month === 9) {
+          if (input.day === 9) return { year: 2026, month: 2, day: 26 };
+          if (input.day === 10) return { year: 2026, month: 2, day: 27 };
+        }
+        return undefined;
+      });
+
+      // @ts-ignore
+      vi.mocked(SunCalc.getTimes).mockReturnValue({
+        sunset: new Date(2026, 1, 27, 18, 30, 0),
+      });
+
+      const hijriDate: HijriDateComponents = { year: 1447, month: 9, day: 9 };
+      // @ts-ignore
+      const hijriTime: TimeComponents = { hour: undefined, minute: undefined }; // 8 PM
+      const options = { offset: -1 };
+
+      const result = toDate(hijriDate, hijriTime, options);
+
+      expect(result.getFullYear()).toBe(2026);
+      expect(result.getMonth()).toBe(1); // February (0-based)
+      expect(result.getDate()).toBe(26); // Previous day due to after sunset
+      expect(result.getHours()).toBe(18);
+      expect(result.getMinutes()).toBe(30);
+    });
   });
 
   describe("fromDate", () => {
