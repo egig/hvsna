@@ -234,6 +234,8 @@ export function HijriCalendar() {
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   {formatGregorianDateTime(getCurrentDayStart())}
+                  <br />
+                  {getToday().startOfDay().day}
                 </div>
               </div>
             )}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTaskStore } from "../task/task-store";
-import { useDateFormatter } from "../calendar/use-date-formatter";
+import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 
 export function useToday() {
@@ -14,7 +14,8 @@ export function useToday() {
   const [initiated, setInitiated] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { dayNames, hijriMonthNames, gregorianMonthNames } = useDateFormatter();
+  const { dayNames, hijriMonthNames, gregorianMonthNames } =
+    useDateTranslationHelper();
   const { getToday, initiated: hijriCalInititated } = useHijriDate();
   let today = getToday();
   let gregorianDate = today.toDate();
@@ -33,7 +34,7 @@ export function useToday() {
     todayCompletedTasks,
     initiated: initiated && hijriCalInititated,
     error,
-    // Computed values from useDateFormatter
+    // Computed values from useDateTranslationHelper
     pageTitle,
     subTitle,
     gregorianDate,

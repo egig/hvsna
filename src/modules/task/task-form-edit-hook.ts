@@ -68,6 +68,7 @@ export const useTaskFormEdit = (
     prayerTime: "",
   });
 
+  // TODO use useHijriDate instead
   const offset = settings.manualDateOffset || 0;
   const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates

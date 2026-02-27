@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from "react";
 import { useSettings } from "../../settings/useSettings";
 import { HijriDate } from "./hijri-date";
+import { HijriMonth } from "./hijri-month";
+
+export * from "./hijri-date";
 
 export interface UseHijriCalendarOptions {
   date?: Date;
@@ -49,6 +52,8 @@ export interface UseHijriCalendarReturn {
     hour?: number,
     minute?: number,
   ) => HijriDate;
+  createHijriMonth: (year: number, month: number) => HijriMonth;
+  currentHijriMonth: () => HijriMonth;
 
   // Loading and error states
   loading: boolean;
@@ -183,6 +188,27 @@ export function useHijriDate(): UseHijriCalendarReturn {
     [latitude, longitude, manualOffset],
   );
 
+  // Create hijri month with specific year and month
+  const createHijriMonth = useCallback(
+    (year: number, month: number): HijriMonth => {
+      return new HijriMonth(year, month, {
+        latitude,
+        longitude,
+        offset: manualOffset,
+      });
+    },
+    [latitude, longitude, manualOffset],
+  );
+
+  // Get current hijri month
+  const currentHijriMonth = useCallback((): HijriMonth => {
+    return HijriMonth.getCurrent({
+      latitude,
+      longitude,
+      offset: manualOffset,
+    });
+  }, [latitude, longitude, manualOffset]);
+
   return {
     // Current hijri date
     currentHijriDate,
@@ -217,6 +243,8 @@ export function useHijriDate(): UseHijriCalendarReturn {
 
     // Creation utilities
     createHijriDate,
+    createHijriMonth,
+    currentHijriMonth,
 
     // Loading and error states
     loading,

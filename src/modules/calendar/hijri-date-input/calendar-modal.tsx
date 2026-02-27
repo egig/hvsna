@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { Modal, Navbar } from "src/modules/navigation";
-import { HijriDate } from "../hijri/hijri-date";
 import { HijriMonth } from "../hijri/hijri-month";
-import { useDateFormatter } from "src/modules/calendar/use-date-formatter";
+import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
 import { ListInput } from "src/ui/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { useSettings } from "src/modules/settings/useSettings";
-import { useHijriDate } from "../hijri/use-hijri-date";
+import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
 
 interface CalendarModalProps {
   isOpen: boolean;
@@ -24,28 +22,14 @@ export function CalendarModal({
   onDateSelect,
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
-  const { hijriMonthNames, weekDays } = useDateFormatter();
-  const { getToday, createHijriDate } = useHijriDate();
-  const { settings } = useSettings();
-  const offset = settings.manualDateOffset || 0;
-  const latitude = settings.coordinate?.latitude;
-  const longitude = settings.coordinate?.longitude;
+  const { hijriMonthNames, weekDays } = useDateTranslationHelper();
+  const { getToday, createHijriDate, createHijriMonth, currentHijriMonth } =
+    useHijriDate();
 
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
-      ? new HijriMonth(selectedDate.year, selectedDate.month, {
-          latitude,
-          longitude,
-          offset,
-        })
-      : (() => {
-          const today = getToday().startOfDay();
-          return new HijriMonth(today.year, today.month, {
-            latitude,
-            longitude,
-            offset,
-          });
-        })(),
+      ? createHijriMonth(selectedDate.year, selectedDate.month)
+      : currentHijriMonth(),
   );
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
     selectedDate,
@@ -55,16 +39,10 @@ export function CalendarModal({
 
   useEffect(() => {
     if (selectedDate) {
-      setCurrentMonth(
-        new HijriMonth(selectedDate.year, selectedDate.month, {
-          latitude,
-          longitude,
-          offset,
-        }),
-      );
+      setCurrentMonth(createHijriMonth(selectedDate.year, selectedDate.month));
       setTempSelectedDate(selectedDate);
     }
-  }, [selectedDate, latitude, longitude, offset]);
+  }, [selectedDate, createHijriMonth]);
 
   const getDaysInMonth = () => {
     return currentMonth.getDaysInMonth();
@@ -104,14 +82,8 @@ export function CalendarModal({
 
   // Update current month when settings change
   useEffect(() => {
-    setCurrentMonth(
-      new HijriMonth(currentMonth.year, currentMonth.month, {
-        latitude,
-        longitude,
-        offset,
-      }),
-    );
-  }, [latitude, longitude, offset]);
+    setCurrentMonth(createHijriMonth(currentMonth.year, currentMonth.month));
+  }, [createHijriDate]);
 
   const handleDateClick = (date: HijriDate) => {
     setTempSelectedDate(date);

@@ -184,6 +184,8 @@ export class HijriDate {
     const times = SunCalc.getTimes(date, lat, lng);
     const sunset = times.sunset;
 
+    // MUST BE greateer and equal because
+    // next day start at sunset
     if (sunset && date >= sunset) {
       let shiftDay = 1;
       const {
@@ -474,13 +476,18 @@ export class HijriDate {
       const sunset = times.sunset;
 
       if (sunset && !isNaN(sunset.getTime())) {
-        // Set the sunset date to match start of hijri date (the day before)
-        sunset.setDate(sunset.getDate() - 1);
-        return HijriDate.fromDate(sunset, {
-          latitude: this._latitude,
-          longitude: this._longitude,
-          offset: this._offset,
-        });
+        return new HijriDate(
+          this.year,
+          this.month,
+          this.day,
+          sunset.getHours(),
+          sunset.getMinutes(),
+          {
+            latitude: this._latitude,
+            longitude: this._longitude,
+            offset: this._offset,
+          },
+        );
       }
     } catch (error) {
       console.warn("SunCalc calculation failed in startOfDay:", error);

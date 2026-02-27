@@ -86,6 +86,7 @@ class PouchDBTaskDocument {
         minute = timeParts.minute;
       }
 
+      // TODO how to make this centralize in useHijriDate
       let d = new HijriDate(year, month, day, hour, minute, {
         latitude: t.lat,
         longitude: t.long,

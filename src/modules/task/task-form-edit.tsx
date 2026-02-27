@@ -217,7 +217,7 @@ export default function TaskFormEdit({
             type="button"
             onClick={() => setShowDetailsModal(true)}
             disabled={isSubmitting}
-            className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 text-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Info size={18} />
             {t("view_details")}
