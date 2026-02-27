@@ -19,31 +19,30 @@ export class HijriMonth {
   constructor(year: number, month: number, options?: HijriDateOptions) {
     this.year = year;
     this.month = month;
-    // Store default values only when options is undefined, not when it's an empty object
-    if (options) {
-      this._latitude = options.latitude;
-      this._longitude = options.longitude;
-      this._offset = options.offset; // Keep undefined when not provided in empty object
-    } else {
+    // Only set defaults if options is undefined, not if it's an empty object
+    if (options === undefined) {
       this._latitude = DEFAULT_LATITUDE;
       this._longitude = DEFAULT_LONGITUDE;
       this._offset = 0;
+    } else {
+      this._latitude = options.latitude;
+      this._longitude = options.longitude;
+      this._offset = options.offset;
     }
     let d = new HijriDate(year, month, 1, undefined, undefined, options);
     this._jsDate = d.toDate();
   }
 
   previous(): HijriMonth {
-    const prevGregorianDate = new Date(this._jsDate);
-    prevGregorianDate.setDate(prevGregorianDate.getDate() - 29);
+    let prevYear = this.year;
+    let prevMonth = this.month - 1;
+    
+    if (prevMonth < 1) {
+      prevMonth = 12;
+      prevYear -= 1;
+    }
 
-    const hijriDate = gregorianToHijri({
-      year: prevGregorianDate.getFullYear(),
-      month: prevGregorianDate.getMonth() + 1,
-      day: prevGregorianDate.getDate(),
-    });
-
-    return new HijriMonth(hijriDate.year, hijriDate.month, {
+    return new HijriMonth(prevYear, prevMonth, {
       latitude: this._latitude,
       longitude: this._longitude,
       offset: this._offset,
@@ -51,18 +50,15 @@ export class HijriMonth {
   }
 
   next(): HijriMonth {
-    // Use the raw Gregorian date to calculate next month
-    // Add approximately 30 days to get to next Hijri month
-    const nextGregorianDate = new Date(this._jsDate);
-    nextGregorianDate.setDate(nextGregorianDate.getDate() + 30);
+    let nextYear = this.year;
+    let nextMonth = this.month + 1;
+    
+    if (nextMonth > 12) {
+      nextMonth = 1;
+      nextYear += 1;
+    }
 
-    const hijriDate = gregorianToHijri({
-      year: nextGregorianDate.getFullYear(),
-      month: nextGregorianDate.getMonth() + 1,
-      day: nextGregorianDate.getDate(),
-    });
-
-    return new HijriMonth(hijriDate.year, hijriDate.month, {
+    return new HijriMonth(nextYear, nextMonth, {
       latitude: this._latitude,
       longitude: this._longitude,
       offset: this._offset,
