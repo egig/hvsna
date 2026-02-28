@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { taskRepository } from "./task-repository";
 import { HijriDate } from "../calendar/hijri";
+import { queryClient } from "../../lib/query-client";
+import { queryKeys } from "../common/query-keys";
 import type {
   Task,
   TaskCreateInput,
@@ -94,7 +96,24 @@ interface TaskState {
 
 export const useTaskStore = create<TaskState>()(
   devtools(
-    (set, get) => ({
+    (set, get) => {
+      // Helper function to invalidate today's queries
+      const invalidateTodayQueries = () => {
+        const today = HijriDate.fromDate(new Date());
+        const todayString = today.toString();
+        queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
+      };
+
+      // Helper function to invalidate upcoming and browsed queries
+      const invalidateUpcomingAndBrowsedQueries = () => {
+        const today = HijriDate.fromDate(new Date());
+        const todayString = today.toString();
+        queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(todayString) });
+        queryClient.invalidateQueries({ queryKey: ['browsed-tasks'] });
+      };
+
+      return {
       loading: false,
       error: null,
       editingTaskId: null,
@@ -183,6 +202,8 @@ export const useTaskStore = create<TaskState>()(
           set({ loading: true, error: null });
 
           const newTask = await taskRepository.create(input);
+          invalidateTodayQueries(); // Invalidate React Query caches
+          invalidateUpcomingAndBrowsedQueries(); // Invalidate upcoming and browsed queries
           onSuccess?.();
           return newTask;
         } catch (err) {
@@ -204,6 +225,8 @@ export const useTaskStore = create<TaskState>()(
           set({ loading: true, error: null });
 
           const updatedTask = await taskRepository.update(id, input);
+          invalidateTodayQueries(); // Invalidate React Query caches
+          invalidateUpcomingAndBrowsedQueries(); // Invalidate upcoming and browsed queries
           onSuccess?.();
           return updatedTask;
         } catch (err) {
@@ -222,6 +245,8 @@ export const useTaskStore = create<TaskState>()(
 
           await taskRepository.delete(id);
           get().removeTaskFromList(id);
+          invalidateTodayQueries(); // Invalidate React Query caches
+          invalidateUpcomingAndBrowsedQueries(); // Invalidate upcoming and browsed queries
           onSuccess?.();
         } catch (err) {
           const errorMessage =
@@ -242,6 +267,8 @@ export const useTaskStore = create<TaskState>()(
 
           const updatedTask = await taskRepository.completeTask(id);
           get().updateTaskInList(id, updatedTask);
+          invalidateTodayQueries(); // Invalidate React Query caches
+          invalidateUpcomingAndBrowsedQueries(); // Invalidate upcoming and browsed queries
           onSuccess?.();
           return updatedTask;
         } catch (err) {
@@ -260,6 +287,8 @@ export const useTaskStore = create<TaskState>()(
 
           const updatedTask = await taskRepository.reopenTask(id);
           get().updateTaskInList(id, updatedTask);
+          invalidateTodayQueries(); // Invalidate React Query caches
+          invalidateUpcomingAndBrowsedQueries(); // Invalidate upcoming and browsed queries
           onSuccess?.();
           return updatedTask;
         } catch (err) {
@@ -378,7 +407,7 @@ export const useTaskStore = create<TaskState>()(
         }
       },
 
-      loadTodayTasks: async (d: HijriDate): Promise<void> => {
+      findTasksBefore: async (d: HijriDate): Promise<void> => {
         try {
           set({ loading: true, error: null });
           const todayTasksList = await taskRepository.findTasksBefore(d);
@@ -528,9 +557,8 @@ export const useTaskStore = create<TaskState>()(
           get().loadBrowsedTasks(true),
         ]);
       },
-    }),
-    {
-      name: "task-store",
-    },
-  ),
+    };
+  }, {
+    name: "task-store",
+  }),
 );

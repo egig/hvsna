@@ -1,41 +1,21 @@
-import { useEffect, useState } from "react";
-import { useTaskStore } from "../task/task-store";
-import { hijriToGregorian } from "@tabby_ai/hijri-converter";
+import { useQuery } from "@tanstack/react-query";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
+import { taskRepository } from "../task/task-repository";
+import { queryKeys } from "./query-keys";
 import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
-  const { loading, error, upcommingTasks, loadUpcommingTasks } = useTaskStore();
   const { getToday, getTomorrow, toHijriDate, formatDate, createHijriDate } =
     useHijriDate();
-  const [initiated, setInitiated] = useState(false);
-  const [groupedTasks, setGroupedTasks] = useState<{
-    today: Task[];
-    tomorrow: Task[];
-    thisWeek: Task[];
-    thisMonth: Task[];
-    later: Task[];
-    unscheduled: Task[];
-  }>({
-    today: [],
-    tomorrow: [],
-    thisWeek: [],
-    thisMonth: [],
-    later: [],
-    unscheduled: [],
+  
+  const today = getToday();
+  const todayString = today.toString(); // Use HijriDate string representation for query key
+
+  // React Query for upcoming tasks
+  const upcomingTasksQuery = useQuery({
+    queryKey: queryKeys.upcomingTasks(todayString),
+    queryFn: () => taskRepository.findTasksAfter(today),
   });
-
-  useEffect(() => {
-    const loadData = async () => {
-      setInitiated(true);
-      loadUpcommingTasks(getToday());
-    };
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    setGroupedTasks(groupTasksByTimePeriod(upcommingTasks));
-  }, [upcommingTasks]);
 
   const formatScheduledDate = (hijriDate?: string) => {
     if (!hijriDate) return "No date set";
@@ -70,7 +50,6 @@ export function useUpcoming() {
       unscheduled: [] as Task[],
     };
 
-    const today = getToday();
     const tomorrow = getTomorrow();
     const todayGregorian = today.toDate();
     const todayString = `${today.year.toString().padStart(4, "0")}${today.month.toString().padStart(2, "0")}${today.day.toString().padStart(2, "0")}`;
@@ -128,13 +107,17 @@ export function useUpcoming() {
     return groups;
   };
 
+  // Group tasks by time period (derived state)
+  const groupedTasks = groupTasksByTimePeriod(upcomingTasksQuery.data || []);
+
   return {
-    upcomingTasks: upcommingTasks,
+    upcomingTasks: upcomingTasksQuery.data || [],
     taskGroups: groupedTasks,
-    loading,
-    initiated,
-    error,
+    loading: upcomingTasksQuery.isPending,
+    initiated: !upcomingTasksQuery.isPending,
+    error: upcomingTasksQuery.error ? 
+      (upcomingTasksQuery.error instanceof Error ? upcomingTasksQuery.error.message : 'Unknown error') : null,
     formatScheduledDate,
-    refreshTasks: loadUpcommingTasks,
+    refreshTasks: () => upcomingTasksQuery.refetch(),
   };
 }

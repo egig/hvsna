@@ -25,6 +25,7 @@
     "@rollbar/react": "^1.0.0",
     "@tabby_ai/hijri-converter": "^1.0.5",
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/react-query": "^5.90.21",
     "@types/pouchdb": "^6.4.2",
     "add": "^2.0.6",
     "axios": "^1.13.5",

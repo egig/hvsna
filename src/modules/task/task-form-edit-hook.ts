@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate, useHijriDate } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriDate } from "../calendar/hijri";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { useTracker } from "../tracker/use-tracker";
 import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
-import { useSettings } from "src/modules/settings/useSettings";
+import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
+import { taskRepository } from "./task-repository";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -38,11 +40,7 @@ export const useTaskFormEdit = (
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
   const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
-  const deleteTask = useTaskStore((s) => s.deleteTask);
-  const error = useTaskStore((s) => s.error);
   const getTask = useTaskStore((s) => s.getTask);
-  const updateTask = useTaskStore((s) => s.updateTask);
-  const refreshAllTaskLists = useTaskStore((s) => s.refreshAllTaskLists);
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
@@ -72,6 +70,42 @@ export const useTaskFormEdit = (
   const offset = settings.manualDateOffset || 0;
   const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
+
+  // React Query mutation for updating tasks
+  const updateTaskMutation = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) => 
+      taskRepository.update(id, input),
+    onSuccess: (result) => {
+      setTask(null);
+      closeTaskForm();
+      
+      if (onSuccess) {
+        onSuccess(result);
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+      if (onError) {
+        onError(error instanceof Error ? error.message : 'Failed to update task');
+      }
+    },
+  });
+
+  // React Query mutation for deleting tasks
+  const deleteTaskMutation = useMutation({
+    mutationFn: (id: string) => taskRepository.delete(id),
+    onSuccess: () => {
+      setTask(null);
+      closeTaskForm();
+      onDelete?.(taskId);
+    },
+    onError: (error) => {
+      console.error(error);
+      if (onError) {
+        onError(error instanceof Error ? error.message : 'Failed to delete task');
+      }
+    },
+  });
 
   useEffect(() => {
     if (!!task?.atDateHijri) {
@@ -139,9 +173,7 @@ export const useTaskFormEdit = (
     const currentTask = await getTask(id);
 
     // Update the task
-    const updatedTask = await updateTask(id, input, () => {
-      refreshAllTaskLists(getToday());
-    });
+    const updatedTask = await taskRepository.update(id, input);
 
     if (!input.targetId) {
       return updatedTask;
@@ -239,9 +271,8 @@ export const useTaskFormEdit = (
         taskInput.targetId = selectedTargetId;
       }
 
-      let result = await updateTask(taskId, taskInput, () =>
-        refreshAllTaskLists(getToday()),
-      );
+      // Use React Query mutation
+      await updateTaskMutation.mutateAsync({ id: taskId, input: taskInput });
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
@@ -260,16 +291,9 @@ export const useTaskFormEdit = (
           // Don't fail the main task creation if recurring task creation fails
         }
       }
-
-      setTask(null);
-      closeTaskForm();
-
-      if (onSuccess) {
-        onSuccess(result);
-      }
     } catch (err) {
       console.error(err);
-      // Error is handled by the hook and passed through onError
+      // Error is handled by the mutation
     } finally {
       setIsSubmitting(false);
     }
@@ -282,21 +306,15 @@ export const useTaskFormEdit = (
           `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
         )
       ) {
-        deleteTask(taskId, () => {
-          refreshAllTaskLists(getToday());
-        }).then(() => {
-          setTask(null);
-          closeTaskForm();
-          onDelete?.(taskId);
-        });
+        await deleteTaskMutation.mutateAsync(taskId);
       }
     }
   };
 
   return {
     task,
-    error,
-    isSubmitting,
+    error: null, // Error is handled by the mutations
+    isSubmitting: isSubmitting || updateTaskMutation.isPending || deleteTaskMutation.isPending,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,

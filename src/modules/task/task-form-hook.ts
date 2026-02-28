@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "react-router";
 import { useTaskStore } from "./task-store";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
-import { HijriDate, useHijriDate } from "src/modules/calendar/hijri";
+import { HijriDate, useHijriDate } from "../calendar/hijri";
 import { useGoals } from "../goal/use-goals";
 import type { Tracker } from "../tracker/trackerStore";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
@@ -16,8 +17,9 @@ import type {
 } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
-import { useSettings } from "src/modules/settings/useSettings";
+import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
+import { taskRepository } from "./task-repository";
 
 export interface TaskScheduleAt {
   dateHijri: HijriDate | null;
@@ -44,11 +46,7 @@ export const useTaskForm = (
   onCancel?: () => void,
 ): UseTaskFormReturn => {
   const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
-  const createTask = useTaskStore((s) => s.createTask);
-  const error = useTaskStore((s) => s.error);
   const getTask = useTaskStore((s) => s.getTask);
-  const updateTask = useTaskStore((s) => s.updateTask);
-  const refreshAllTaskLists = useTaskStore((s) => s.refreshAllTaskLists);
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
@@ -79,6 +77,35 @@ export const useTaskForm = (
   const { getToday } = useHijriDate();
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
+  // React Query mutation for creating tasks
+  const createTaskMutation = useMutation({
+    mutationFn: (taskInput: TaskCreateInput) => taskRepository.create(taskInput),
+    onSuccess: (result) => {
+      setTask(null);
+      closeTaskForm();
+      
+      if (onSuccess) {
+        onSuccess(result);
+      }
+
+      if (
+        !isMatchLocationContext(
+          location,
+          selectedScheduleAt.dateHijri,
+          getToday(),
+        )
+      ) {
+        showSnackbar("Task created but not listed in this page");
+      }
+    },
+    onError: (error) => {
+      console.error(error);
+      if (onError) {
+        onError(error instanceof Error ? error.message : 'Failed to create task');
+      }
+    },
+  });
+
   useEffect(() => {
     setSelectedTargetId(task?.targetId || "");
   }, [task]);
@@ -102,7 +129,7 @@ export const useTaskForm = (
     const currentTask = await getTask(id);
 
     // Update the task
-    const updatedTask = await updateTask(id, input);
+    const updatedTask = await taskRepository.update(id, input);
 
     if (!input.targetId) {
       return updatedTask;
@@ -200,9 +227,8 @@ export const useTaskForm = (
         taskInput.targetId = selectedTargetId;
       }
 
-      let result = await createTask(taskInput, () => {
-        refreshAllTaskLists(getToday());
-      });
+      // Use React Query mutation
+      await createTaskMutation.mutateAsync(taskInput);
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
@@ -221,26 +247,9 @@ export const useTaskForm = (
           // Don't fail the main task creation if recurring task creation fails
         }
       }
-
-      setTask(null);
-      closeTaskForm();
-
-      if (onSuccess) {
-        onSuccess(result);
-      }
-
-      if (
-        !isMatchLocationContext(
-          location,
-          selectedScheduleAt.dateHijri,
-          getToday(),
-        )
-      ) {
-        showSnackbar("Task created but not listed in this page");
-      }
     } catch (err) {
       console.error(err);
-      // Error is handled by the hook and passed through onError
+      // Error is handled by the mutation
     } finally {
       setIsSubmitting(false);
     }
@@ -248,8 +257,8 @@ export const useTaskForm = (
 
   return {
     task,
-    error,
-    isSubmitting,
+    error: null, // Error is handled by the mutation
+    isSubmitting: isSubmitting || createTaskMutation.isPending,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,

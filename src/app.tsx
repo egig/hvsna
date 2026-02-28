@@ -14,6 +14,8 @@ import { SyncProvider } from "./modules/sync/context";
 import { LanguageProviderWrapper } from "./modules/i18n/LanguageProviderWrapper";
 import { SnackbarProvider } from "./ui/snackbar-provider";
 import { ErrorBoundary } from "./components/error-boundary";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./lib/query-client";
 
 export interface AppConfig {
   basePath?: string;
@@ -56,25 +58,27 @@ export default function Hvsna({
         captureUnhandledRejections: true,
       }}
     >
-      <ErrorBoundary>
-        <SnackbarProvider>
-          <ScreenSizeProvider onClose={handleBreakpointClose}>
-            <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
-              <DroppableContext>
-                <PouchDBProvider dbInstance={db}>
-                  <SyncProvider>
-                    <LanguageProviderWrapper>
-                      <BrowserRouter basename={config.appBaseName || ""}>
-                        <AppRoutes />
-                      </BrowserRouter>
-                    </LanguageProviderWrapper>
-                  </SyncProvider>
-                </PouchDBProvider>
-              </DroppableContext>
-            </ClerkProvider>
-          </ScreenSizeProvider>
-        </SnackbarProvider>
-      </ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary>
+          <SnackbarProvider>
+            <ScreenSizeProvider onClose={handleBreakpointClose}>
+              <ClerkProvider publishableKey={config.clerkPublishableKey || ""}>
+                <DroppableContext>
+                  <PouchDBProvider dbInstance={db}>
+                    <SyncProvider>
+                      <LanguageProviderWrapper>
+                        <BrowserRouter basename={config.appBaseName || ""}>
+                          <AppRoutes />
+                        </BrowserRouter>
+                      </LanguageProviderWrapper>
+                    </SyncProvider>
+                  </PouchDBProvider>
+                </DroppableContext>
+              </ClerkProvider>
+            </ScreenSizeProvider>
+          </SnackbarProvider>
+        </ErrorBoundary>
+      </QueryClientProvider>
     </Provider>
   );
 }

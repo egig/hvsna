@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useTaskStore } from "./task-store";
 import { useTask } from "./use-task";
-import type { Task } from "./types";
+import { taskRepository } from "./task-repository";
+import { queryKeys } from "../common/query-keys";
+import type { Task, TaskQuery, TaskStatus } from "./types";
 
 export function useTasks() {
+  const [initiated, setInitiated] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  
+  const { openTaskForm, setEditingTaskId } = useTask();
+  
+  // Keep filter state in store for UI consistency
   const {
-    browsedTasks,
-    loading,
-    loadingMore,
-    error,
-    hasMore,
     deleteTask,
-    loadBrowsedTasks,
     statusFilter,
     dateRangeFilter,
     searchTextFilter,
@@ -20,17 +25,71 @@ export function useTasks() {
     setSearchTextFilter,
     clearFilters,
   } = useTaskStore();
-  const [initiated, setInitiated] = useState(false);
-  const [isScrollable, setIsScrollable] = useState(false);
-  const { openTaskForm, setEditingTaskId } = useTask();
 
-  // Load browsed tasks on mount
+  // Create filter key for React Query
+  const createFilterKey = () => {
+    const filterParts = [
+      statusFilter === "all" ? "" : statusFilter.toString(),
+      dateRangeFilter ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}` : "",
+      searchTextFilter || "",
+    ];
+    return filterParts.join("|");
+  };
+
+  const filterKey = createFilterKey();
+
+  // Build query object for repository
+  const buildQuery = (): TaskQuery => {
+    const query: TaskQuery = {};
+    
+    if (statusFilter && statusFilter !== "all") {
+      query.status = statusFilter as TaskStatus;
+    }
+    
+    if (searchTextFilter && searchTextFilter.trim()) {
+      query.searchText = searchTextFilter;
+    }
+    
+    return query;
+  };
+
+  // React Query for browsed tasks
+  const browsedTasksQuery = useQuery({
+    queryKey: queryKeys.browsedTasks(filterKey),
+    queryFn: () => taskRepository.findBrowsedTasks(buildQuery(), 0, 50), // Load initial page
+    staleTime: 1000 * 60 * 2, // 2 minutes
+  });
+
+  // Load more tasks (pagination)
+  const loadMoreTasks = useCallback(async () => {
+    if (!hasMore || browsedTasksQuery.isFetching || browsedTasksQuery.isPending) return;
+
+    try {
+      const newTasks = await taskRepository.findBrowsedTasks(buildQuery(), offset, 10);
+      
+      // Update hasMore based on whether we got a full page
+      setHasMore(newTasks.length >= 10);
+      
+      // Update offset for next page
+      setOffset(prev => prev + newTasks.length);
+      
+      // Invalidate query to trigger refetch with new data
+      browsedTasksQuery.refetch();
+    } catch (error) {
+      console.error("Failed to load more tasks:", error);
+    }
+  }, [hasMore, browsedTasksQuery.isFetching, browsedTasksQuery.isPending, offset, buildQuery]);
+
+  // Reset pagination when filters change
+  const resetPagination = useCallback(() => {
+    setOffset(0);
+    setHasMore(true);
+    browsedTasksQuery.refetch();
+  }, [browsedTasksQuery]);
+
+  // Initialize on mount
   useEffect(() => {
-    const loadData = async () => {
-      setInitiated(true);
-      loadBrowsedTasks(true); // Reset on initial load
-    };
-    loadData();
+    setInitiated(true);
   }, []);
 
   const openEditPopup = useCallback((task: Task) => {
@@ -38,8 +97,8 @@ export function useTasks() {
   }, []);
 
   const handleTaskSuccess = useCallback(() => {
-    loadBrowsedTasks(true); // Reset when task is updated
-  }, []);
+    resetPagination();
+  }, [resetPagination]);
 
   const handleTaskError = useCallback((errorMessage: string) => {
     alert(errorMessage);
@@ -53,23 +112,23 @@ export function useTasks() {
     async (task: Task) => {
       try {
         await deleteTask(task.id);
-        loadBrowsedTasks(true); // Reset when task is deleted
+        resetPagination();
         setEditingTaskId(null);
       } catch (err) {
         alert("Failed to delete task. Please try again.");
       }
     },
-    [deleteTask, setEditingTaskId],
+    [deleteTask, setEditingTaskId, resetPagination],
   );
 
   const handleDeleteTaskById = useCallback(
     async (taskId: string) => {
-      const task = browsedTasks.find((t: Task) => t.id === taskId);
+      const task = browsedTasksQuery.data?.find((t: Task) => t.id === taskId);
       if (task) {
         await handleDeleteTask(task);
       }
     },
-    [browsedTasks, handleDeleteTask],
+    [browsedTasksQuery.data, handleDeleteTask],
   );
 
   const handleInfiniteScroll = useCallback(
@@ -82,24 +141,24 @@ export function useTasks() {
       setIsScrollable(scrollable);
 
       // If content is not scrollable and we have more tasks, load them
-      if (!scrollable && hasMore && !loading && !loadingMore) {
-        loadBrowsedTasks(false);
+      if (!scrollable && hasMore && !browsedTasksQuery.isPending && !browsedTasksQuery.isFetching) {
+        loadMoreTasks();
         return;
       }
 
       // Check if user has scrolled within 200px of the bottom
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
 
-      if (!loading && !loadingMore && hasMore && isNearBottom) {
-        loadBrowsedTasks(false); // Don't reset for pagination
+      if (!browsedTasksQuery.isPending && !browsedTasksQuery.isFetching && hasMore && isNearBottom) {
+        loadMoreTasks();
       }
     },
-    [loading, loadingMore, hasMore, loadBrowsedTasks, browsedTasks.length],
+    [browsedTasksQuery.isPending, browsedTasksQuery.isFetching, hasMore, loadMoreTasks],
   );
 
   // Check scrollability when tasks change
   useEffect(() => {
-    if (initiated && !loading && browsedTasks.length > 0) {
+    if (initiated && !browsedTasksQuery.isPending && browsedTasksQuery.data && browsedTasksQuery.data.length > 0) {
       // Trigger a scroll check after a short delay to let DOM update
       const timer = setTimeout(() => {
         const scrollElement = document.querySelector(".tasks-scroll-container");
@@ -109,19 +168,19 @@ export function useTasks() {
           setIsScrollable(scrollable);
 
           // If not scrollable and has more tasks, load more
-          if (!scrollable && hasMore && !loadingMore) {
-            loadBrowsedTasks(false);
+          if (!scrollable && hasMore && !browsedTasksQuery.isFetching) {
+            loadMoreTasks();
           }
         }
       }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [browsedTasks.length, loading, initiated, hasMore, loadingMore]);
+  }, [initiated, browsedTasksQuery.isPending, browsedTasksQuery.data, hasMore, browsedTasksQuery.isFetching, loadMoreTasks]);
 
   // Also check scrollability after loading completes
   useEffect(() => {
-    if (initiated && !loading && !loadingMore) {
+    if (initiated && !browsedTasksQuery.isPending && !browsedTasksQuery.isFetching) {
       const timer = setTimeout(() => {
         const scrollElement = document.querySelector(".tasks-scroll-container");
         if (scrollElement) {
@@ -131,22 +190,23 @@ export function useTasks() {
 
           // If not scrollable and has more tasks, load more
           if (!scrollable && hasMore) {
-            loadBrowsedTasks(false);
+            loadMoreTasks();
           }
         }
       }, 100);
 
       return () => clearTimeout(timer);
     }
-  }, [loading, loadingMore, initiated, hasMore]);
+  }, [initiated, browsedTasksQuery.isPending, browsedTasksQuery.isFetching, hasMore, loadMoreTasks]);
 
   return {
     // Data
-    tasks: browsedTasks,
-    loading,
+    tasks: browsedTasksQuery.data || [],
+    loading: browsedTasksQuery.isPending,
     initiated,
-    loadingMore,
-    error,
+    loadingMore: browsedTasksQuery.isFetching,
+    error: browsedTasksQuery.error ? 
+      (browsedTasksQuery.error instanceof Error ? browsedTasksQuery.error.message : 'Unknown error') : null,
     hasMore,
     isScrollable,
 
@@ -156,7 +216,7 @@ export function useTasks() {
     searchTextFilter,
 
     // Handlers
-    refreshTasks: () => loadBrowsedTasks(true),
+    refreshTasks: resetPagination,
     openEditPopup,
     handleTaskSuccess,
     handleTaskError,
