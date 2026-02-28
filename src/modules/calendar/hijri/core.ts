@@ -96,15 +96,15 @@ export function fromDate(
   });
 
   const sunsetTime = getSunsetTime(workingDate, latitude, longitude);
-  if (
-    isTimeAfter(
+  const isAfterSunset = isTimeAfter(
       {
         hour: gregorianDate.getHours(),
         minute: gregorianDate.getMinutes(),
       },
       sunsetTime,
-    )
-  ) {
+  )
+
+  if (isAfterSunset) {
     hijriDate = _applyOffset(hijriDate, 1);
   }
 
@@ -161,11 +161,11 @@ function isTimeAfter(
     return false;
   }
 
-  if (time.hour >= sunsetTime.hour) {
+  if (time.hour > sunsetTime.hour) {
     return true;
   }
 
-  if (time.hour === sunsetTime.hour && time.minute > sunsetTime.minute) {
+  if (time.hour === sunsetTime.hour && time.minute >= sunsetTime.minute) {
     return true;
   }
 

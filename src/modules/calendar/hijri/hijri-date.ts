@@ -17,49 +17,6 @@ export interface HijriDateOptions {
   startOfWeek?: number; // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
 }
 
-/**
- * Applies day offset to Hijri date components, handling month/year overflow/underflow
- * @param year - Hijri year
- * @param month - Hijri month (1-12)
- * @param day - Hijri day
- * @param offset - Number of days to adjust (positive = subtract days, negative = add days)
- * @returns Adjusted Hijri date components
- */
-function _applyOffset(
-  year: number,
-  month: number,
-  day: number,
-  offset: number,
-): { year: number; month: number; day: number } {
-  let adjustedYear = year;
-  let adjustedMonth = month;
-  let adjustedDay = day;
-
-  if (offset !== 0) {
-    adjustedDay = day + offset;
-
-    // Handle day overflow/underflow
-    while (adjustedDay > getDaysInMonth(adjustedYear, adjustedMonth)) {
-      adjustedDay -= getDaysInMonth(adjustedYear, adjustedMonth);
-      adjustedMonth++;
-      if (adjustedMonth > 12) {
-        adjustedMonth = 1;
-        adjustedYear++;
-      }
-    }
-
-    while (adjustedDay < 1) {
-      adjustedDay += getDaysInMonth(adjustedYear, adjustedMonth - 1);
-      adjustedMonth--;
-      if (adjustedMonth < 1) {
-        adjustedMonth = 12;
-        adjustedYear--;
-      }
-    }
-  }
-
-  return { year: adjustedYear, month: adjustedMonth, day: adjustedDay };
-}
 
 export class HijriDate {
   year!: number;
@@ -373,6 +330,35 @@ export class HijriDate {
       }
     } catch (error) {
       console.warn("SunCalc calculation failed in startOfDay:", error);
+    }
+    return this;
+  }
+
+  endOfDay(): HijriDate {
+    try {
+      const nextDay = this.next()
+      const times = SunCalc.getTimes(
+        nextDay._jsDate,
+        nextDay._latitude as number,
+        nextDay._longitude as number,
+      );
+      const sunset = times.sunset;
+
+      if (sunset && !isNaN(sunset.getTime())) {
+        // Subtract one minute from the next day's sunset
+        // TODO Support seconds
+        const endTime = new Date(sunset.getTime() - 60 * 1000);
+        return HijriDate.fromDate(
+          endTime,
+          {
+            latitude: this._latitude,
+            longitude: this._longitude,
+            offset: this._offset,
+          },
+        );
+      }
+    } catch (error) {
+      console.warn("SunCalc calculation failed in endOfDay:", error);
     }
     return this;
   }

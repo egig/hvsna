@@ -118,13 +118,13 @@ export function HijriDateRangeInput({
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
             {selectedRange && (
-              <button
+              <span
                 onClick={handleClear}
                 className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 title={t("clear")}
               >
                 <X className="w-3 h-3" />
-              </button>
+              </span>
             )}
             <CalendarIcon className="w-4 h-4 text-gray-400" />
           </div>

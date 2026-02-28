@@ -46,12 +46,22 @@ export function useTasks() {
   const buildQuery = (): TaskQuery => {
     const query: TaskQuery = {};
 
-    if (statusFilter && statusFilter !== "all") {
+    if (statusFilter !== undefined && statusFilter !== "all") {
       query.status = statusFilter as TaskStatus;
     }
 
     if (searchTextFilter && searchTextFilter.trim()) {
       query.searchText = searchTextFilter;
+    }
+
+    // Add date range filter
+    if (dateRangeFilter) {
+      const startEpoch = dateRangeFilter.startDate.toDate().valueOf();
+      const endEpoch = dateRangeFilter.endDate.toDate().valueOf();
+      query.atEpochMillis = {
+        $gte: startEpoch,
+        $lte: endEpoch,
+      };
     }
 
     return query;

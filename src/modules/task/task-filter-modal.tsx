@@ -78,9 +78,9 @@ export default function TaskFilterModal({
         <ListInputSelect
           label={t("status")}
           value={statusFilter.toString()}
-          onValueChange={(value) =>
+          onValueChange={(value) => {
             onStatusFilterChange(value === "all" ? "all" : parseInt(value))
-          }
+          }}
           options={statusOptions.map((opt) => ({
             value: opt.value.toString(),
             label: opt.label,

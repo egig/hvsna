@@ -156,4 +156,62 @@ describe("core", () => {
       expect(result.day).toBe(10);
     });
   });
+
+  describe("sunset logic", () => {
+    it("should handle times exactly at sunset correctly", () => {
+      // @ts-ignore
+      vi.mocked(gregorianToHijri).mockImplementation((input) => {
+        if (input.year === 2026 && input.month === 2) {
+          if (input.day === 26) return { year: 1447, month: 9, day: 9 };
+          if (input.day === 27) return { year: 1447, month: 9, day: 10 };
+        }
+        return undefined;
+      });
+
+      // @ts-ignore
+      vi.mocked(SunCalc.getTimes).mockReturnValue({
+        sunset: new Date(2026, 1, 27, 18, 30, 0),
+      });
+
+      const options = { offset: 0 };
+
+      // Time exactly at sunset should advance to next Hijri day
+      const resultAtSunset = fromDate(new Date(2026, 1, 26, 18, 30), options);
+      expect(resultAtSunset.year).toBe(1447);
+      expect(resultAtSunset.month).toBe(9);
+      expect(resultAtSunset.day).toBe(10); // Should be next day
+
+      // Time just before sunset should remain same Hijri day
+      const resultBeforeSunset = fromDate(new Date(2026, 1, 26, 18, 29), options);
+      expect(resultBeforeSunset.year).toBe(1447);
+      expect(resultBeforeSunset.month).toBe(9);
+      expect(resultBeforeSunset.day).toBe(9); // Should be same day
+    });
+
+    it("should handle times before and after sunset correctly", () => {
+      // @ts-ignore
+      vi.mocked(gregorianToHijri).mockImplementation((input) => {
+        if (input.year === 2026 && input.month === 2) {
+          if (input.day === 26) return { year: 1447, month: 9, day: 9 };
+          if (input.day === 27) return { year: 1447, month: 9, day: 10 };
+        }
+        return undefined;
+      });
+
+      // @ts-ignore
+      vi.mocked(SunCalc.getTimes).mockReturnValue({
+        sunset: new Date(2026, 1, 27, 18, 30, 0),
+      });
+
+      const options = { offset: 0 };
+
+      // Time well before sunset (morning)
+      const resultMorning = fromDate(new Date(2026, 1, 26, 9, 0), options);
+      expect(resultMorning.day).toBe(9);
+
+      // Time well after sunset (night)
+      const resultNight = fromDate(new Date(2026, 1, 26, 22, 0), options);
+      expect(resultNight.day).toBe(10);
+    });
+  });
 });

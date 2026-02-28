@@ -121,20 +121,19 @@ export function HijriDateRangeModal({
 
   const handleDateClick = (date: HijriDate) => {
     if (!tempStartDate) {
-      // First selection - set start date
-      setTempStartDate(date);
-      setTempEndDate(date);
+      setTempStartDate(date.startOfDay());
+      setTempEndDate(date.endOfDay());
     } else if (!tempEndDate || isBefore(date, tempStartDate)) {
       // Set new start date if clicking before current start, or if no end date yet
-      setTempStartDate(date);
-      setTempEndDate(date);
+      setTempStartDate(date.startOfDay());
+      setTempEndDate(date.endOfDay());
     } else {
       // Set end date
-      setTempEndDate(date);
+      setTempEndDate(date.endOfDay());
       if (isBefore(date, tempStartDate)) {
         // If end is before start, swap them
-        setTempStartDate(date);
-        setTempEndDate(tempStartDate);
+        setTempStartDate(date.startOfDay());
+        setTempEndDate(tempStartDate.endOfDay());
       }
     }
   };

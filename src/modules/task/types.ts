@@ -85,6 +85,7 @@ export type TaskQuery = {
   atDateIsNone?: number;
   atTimeIsNone?: number;
   atTime?: string;
+  atEpochMillis?: number | { $gte?: number; $lte?: number };
   unscheduled?: number;
   searchText?: string;
 };

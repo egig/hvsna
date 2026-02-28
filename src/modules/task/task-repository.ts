@@ -526,7 +526,7 @@ export class TaskRepository {
     };
     // Apply custom filters if provided
     if (query) {
-      if (query.status) {
+      if (query.status !== undefined) {
         mangoQuery.selector.status = Number(query.status);
       }
       if (query.atEpochMillis) {
