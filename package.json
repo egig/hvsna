@@ -11,7 +11,8 @@
     "test:ui": "vitest --ui",
     "cap:sync": "npm run build && npx cap sync",
     "ios": "npx cap run ios",
-    "android": "npx cap run android"
+    "android": "npx cap run android",
+    "prepare": "husky"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
@@ -74,6 +75,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/suncalc": "^1.9.2",
     "@vitest/ui": "^4.0.16",
+    "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "node-fetch": "^3.3.2",
     "pouchdb-memory": "^6.0.0",
