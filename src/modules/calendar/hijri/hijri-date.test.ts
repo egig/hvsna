@@ -706,4 +706,153 @@ describe("HijriDate", () => {
       });
     });
   });
+
+  describe("seconds and milliseconds support", () => {
+    it("should create HijriDate with precise seconds and milliseconds", () => {
+      const date = new Date(2023, 6, 6, 14, 30, 45, 123); // 2:30:45.123 PM
+      const hijriDate = HijriDate.fromDate(date);
+
+      expect(hijriDate.hour).toBe(14);
+      expect(hijriDate.minute).toBe(30);
+      expect(hijriDate.second).toBe(45);
+      expect(hijriDate.millisecond).toBe(123);
+    });
+
+    it("should handle constructor with seconds and milliseconds", () => {
+      const hijriDate = new HijriDate(1444, 12, 18, 14, 30, 45, 123);
+
+      expect(hijriDate.year).toBe(1444);
+      expect(hijriDate.month).toBe(12);
+      expect(hijriDate.day).toBe(18);
+      expect(hijriDate.hour).toBe(14);
+      expect(hijriDate.minute).toBe(30);
+      expect(hijriDate.second).toBe(45);
+      expect(hijriDate.millisecond).toBe(123);
+    });
+
+    it("should format seconds tokens correctly", () => {
+      const hijriDate = HijriDate.fromDate(
+        new Date(2023, 6, 6, 14, 30, 45, 123),
+      );
+
+      expect(hijriDate.format("ss")).toBe("45");
+      expect(hijriDate.format("s")).toBe("45");
+    });
+
+    it("should format milliseconds tokens correctly", () => {
+      const hijriDate = HijriDate.fromDate(
+        new Date(2023, 6, 6, 14, 30, 45, 123),
+      );
+
+      expect(hijriDate.format("SSS")).toBe("123");
+      expect(hijriDate.format("S")).toBe("123");
+    });
+
+    it("should format complex time strings with seconds and milliseconds", () => {
+      const hijriDate = HijriDate.fromDate(
+        new Date(2023, 6, 6, 14, 30, 45, 123),
+      );
+
+      expect(hijriDate.format("HH:mm:ss.SSS")).toBe("14:30:45.123");
+      expect(hijriDate.format("h:mm:ss.SSS a")).toBe("2:30:45.123 pm");
+      expect(hijriDate.format("YYYY-MM-DD HH:mm:ss.SSS")).toBe(
+        "1444-12-18 14:30:45.123",
+      );
+    });
+
+    it("should handle zero seconds and milliseconds", () => {
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 6, 14, 30, 0, 0));
+
+      expect(hijriDate.second).toBe(0);
+      expect(hijriDate.millisecond).toBe(0);
+      expect(hijriDate.format("ss")).toBe("00");
+      expect(hijriDate.format("SSS")).toBe("000");
+    });
+
+    it("should preserve precise times in toDate() method", () => {
+      const originalDate = new Date(2023, 6, 6, 14, 30, 45, 123);
+      const hijriDate = HijriDate.fromDate(originalDate);
+      const convertedDate = hijriDate.toDate();
+
+      expect(convertedDate.getHours()).toBe(14);
+      expect(convertedDate.getMinutes()).toBe(30);
+      expect(convertedDate.getSeconds()).toBe(45);
+      expect(convertedDate.getMilliseconds()).toBe(123);
+      expect(convertedDate.getTime()).toBe(originalDate.getTime());
+    });
+
+    it("should handle startOfDay with precise sunset times", () => {
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 6, 12, 0, 0, 0), {
+        latitude: 21.4225, // Mecca
+        longitude: 39.8262,
+      });
+
+      const startOfDay = hijriDate.startOfDay();
+
+      // Should have sunset time with seconds and milliseconds
+      expect(startOfDay.hour).toBeGreaterThanOrEqual(17); // Around sunset time
+      expect(startOfDay.second).toBeGreaterThanOrEqual(0);
+      expect(startOfDay.millisecond).toBeGreaterThanOrEqual(0);
+    });
+
+    it("should handle endOfDay with precise times", () => {
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 6, 12, 0, 0, 0), {
+        latitude: 21.4225, // Mecca
+        longitude: 39.8262,
+      });
+
+      const endOfDay = hijriDate.endOfDay();
+
+      // Should be just before next day's sunset
+      expect(endOfDay.hour).toBeGreaterThanOrEqual(17); // Around sunset time
+      expect(endOfDay.second).toBeGreaterThanOrEqual(0);
+      expect(endOfDay.millisecond).toBeGreaterThanOrEqual(0);
+    });
+
+    it("should maintain precision in next() and previous() methods", () => {
+      const originalDate = new Date(2023, 6, 6, 14, 30, 45, 123);
+      const hijriDate = HijriDate.fromDate(originalDate);
+
+      const nextDate = hijriDate.next();
+      const prevDate = hijriDate.previous();
+
+      // Should maintain the same time precision
+      expect(nextDate.hour).toBe(14);
+      expect(nextDate.minute).toBe(30);
+      expect(nextDate.second).toBe(45);
+      expect(nextDate.millisecond).toBe(123);
+
+      expect(prevDate.hour).toBe(14);
+      expect(prevDate.minute).toBe(30);
+      expect(prevDate.second).toBe(45);
+      expect(prevDate.millisecond).toBe(123);
+    });
+
+    it("should handle edge case with maximum milliseconds", () => {
+      const hijriDate = HijriDate.fromDate(
+        new Date(2023, 6, 6, 14, 30, 45, 999),
+      );
+
+      expect(hijriDate.millisecond).toBe(999);
+      expect(hijriDate.format("SSS")).toBe("999");
+      expect(hijriDate.format("HH:mm:ss.SSS")).toBe("14:30:45.999");
+    });
+
+    it("should handle undefined seconds and milliseconds in constructor gracefully", () => {
+      const hijriDate = new HijriDate(
+        1444,
+        12,
+        18,
+        14,
+        30,
+        undefined,
+        undefined,
+      );
+
+      expect(hijriDate.hour).toBe(14);
+      expect(hijriDate.minute).toBe(30);
+      expect(hijriDate.second).toBeUndefined();
+      expect(hijriDate.millisecond).toBeUndefined();
+    });
+  });
 });

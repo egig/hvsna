@@ -179,7 +179,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
       hour: number | undefined = undefined,
       minute: number | undefined = undefined,
     ): HijriDate => {
-      return new HijriDate(year, month, day, hour, minute, {
+      return new HijriDate(year, month, day, hour, minute, 0, 0, {
         latitude,
         longitude,
         offset: manualOffset,

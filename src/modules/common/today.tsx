@@ -77,9 +77,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     const todayStart = today.startOfDay().toDate().valueOf();
 
     // Separate overdue tasks, prayer-based tasks, and regular tasks
-    const overdueTasks = tasks.filter(
-      (task) => task.atEpochMillis && task.atEpochMillis < todayStart,
-    );
+    const overdueTasks = tasks.filter((task) => task.isOverdue());
     const prayerTasks = tasks.filter(
       (task) =>
         task.usePrayerTime &&

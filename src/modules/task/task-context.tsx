@@ -312,6 +312,7 @@ export const TaskProvider: React.FC<{
         queryKey: queryKeys.upcomingTasks(tomorrowString),
       });
       queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+      setFormOpen(false);
     },
     onError: (error) => {
       console.error("Failed to delete task:", error);

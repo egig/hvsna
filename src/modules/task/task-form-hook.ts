@@ -227,8 +227,8 @@ function isMatchLocationContext(
     return ["today", "upcoming"].indexOf(location.state?.context) == -1;
   }
 
-  const todayTimestamp = today.toDate().valueOf();
-  const selectedTimestamp = selectedHijriDate.toDate().valueOf();
+  const todayTimestamp = today.startOfDay().toDate().valueOf();
+  const selectedTimestamp = selectedHijriDate.startOfDay().toDate().valueOf();
 
   if (selectedTimestamp <= todayTimestamp) {
     return ["today", "upcoming"].indexOf(location.state?.context) !== -1;

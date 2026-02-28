@@ -7,7 +7,8 @@ import { TaskProvider } from "../task-context";
 import { PouchDBProvider } from "../../../pouchdb";
 import { SettingsProvider } from "../../../modules/settings";
 import { SystemProvider } from "../../../modules/system";
-import type { Task, TaskStatus } from "../types";
+import type { TaskStatus } from "../types";
+import { Task } from "../types";
 
 // Mock the dependencies
 vi.mock("../task-repository");
@@ -73,8 +74,16 @@ describe("useTasks with React Query", () => {
 
   it("should load browsed tasks successfully", async () => {
     const mockBrowsedTasks: Task[] = [
-      { id: "task_1", name: "Browsed Task 1", status: 0 as TaskStatus },
-      { id: "task_2", name: "Browsed Task 2", status: 1 as TaskStatus },
+      new Task({
+        id: "task_1",
+        name: "Browsed Task 1",
+        status: 0 as TaskStatus,
+      }),
+      new Task({
+        id: "task_2",
+        name: "Browsed Task 2",
+        status: 1 as TaskStatus,
+      }),
     ];
 
     mockTaskRepository.findBrowsedTasks.mockResolvedValue(mockBrowsedTasks);
@@ -103,7 +112,7 @@ describe("useTasks with React Query", () => {
 
   it("should build query with filters correctly", async () => {
     const mockBrowsedTasks: Task[] = [
-      { id: "task_1", name: "Task 1", status: 0 as TaskStatus },
+      new Task({ id: "task_1", name: "Task 1", status: 0 as TaskStatus }),
     ];
 
     mockTaskRepository.findBrowsedTasks.mockResolvedValue(mockBrowsedTasks);
@@ -163,7 +172,7 @@ describe("useTasks with React Query", () => {
 
   it("should provide refresh functionality", async () => {
     const mockTasks: Task[] = [
-      { id: "task_1", name: "Task 1", status: 0 as TaskStatus },
+      new Task({ id: "task_1", name: "Task 1", status: 0 as TaskStatus }),
     ];
     mockTaskRepository.findBrowsedTasks.mockResolvedValue(mockTasks);
 

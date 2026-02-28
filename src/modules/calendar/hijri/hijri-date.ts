@@ -17,7 +17,6 @@ export interface HijriDateOptions {
   startOfWeek?: number; // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
 }
 
-
 export class HijriDate {
   year!: number;
   month!: number;
@@ -25,6 +24,8 @@ export class HijriDate {
   dayOfWeek!: number;
   hour!: number;
   minute!: number;
+  second!: number;
+  millisecond!: number;
   _input!: {
     year: number;
     month: number;
@@ -42,6 +43,8 @@ export class HijriDate {
     day: number,
     hour?: number,
     minute?: number,
+    second?: number,
+    millisecond?: number,
     options?: HijriDateOptions,
   ) {
     this._latitude = options?.latitude || DEFAULT_LATITUDE;
@@ -54,13 +57,15 @@ export class HijriDate {
     this.day = day;
     this.hour = hour as number;
     this.minute = minute as number;
+    this.second = second as number;
+    this.millisecond = millisecond as number;
     this._jsDate = toDate(
       {
         year,
         month,
         day,
       },
-      { hour, minute },
+      { hour, minute, second, millisecond },
       {
         latitude: this._latitude,
         longitude: this._longitude,
@@ -85,6 +90,8 @@ export class HijriDate {
       h.day,
       h.hour,
       h.minute,
+      h.second,
+      h.millisecond,
       {
         latitude: options?.latitude,
         longitude: options?.longitude,
@@ -219,6 +226,7 @@ export class HijriDate {
     const hours = this._jsDate.getHours();
     const minutes = this._jsDate.getMinutes();
     const seconds = this._jsDate.getSeconds();
+    const milliseconds = this._jsDate.getMilliseconds();
 
     let result = formatString;
 
@@ -236,6 +244,7 @@ export class HijriDate {
     result = result.replace(/HH/g, hours.toString().padStart(2, "0"));
     result = result.replace(/mm/g, minutes.toString().padStart(2, "0"));
     result = result.replace(/ss/g, seconds.toString().padStart(2, "0"));
+    result = result.replace(/SSS/g, milliseconds.toString().padStart(3, "0"));
 
     // Replace single character tokens only when they stand alone
     result = result.replace(/\bM\b/g, this.month.toString());
@@ -244,11 +253,16 @@ export class HijriDate {
     result = result.replace(/\bh\b/g, (hours % 12 || 12).toString());
     result = result.replace(/\bm\b/g, minutes.toString());
     result = result.replace(/\bs\b/g, seconds.toString());
+    result = result.replace(/\bS\b/g, milliseconds.toString());
     result = result.replace(/\ba\b/g, hours < 12 ? "am" : "pm");
     result = result.replace(/\bA\b/g, hours < 12 ? "AM" : "PM");
     result = result.replace(/\bdd\b/g, dayShortNames[dayOfWeek]);
 
     return result;
+  }
+
+  toString(): string {
+    return this.format("YYYY-MM-DD");
   }
 
   private getDayWithSuffix(): string {
@@ -321,6 +335,8 @@ export class HijriDate {
           this.day,
           sunset.getHours(),
           sunset.getMinutes(),
+          sunset.getSeconds(),
+          sunset.getMilliseconds(),
           {
             latitude: this._latitude,
             longitude: this._longitude,
@@ -336,7 +352,7 @@ export class HijriDate {
 
   endOfDay(): HijriDate {
     try {
-      const nextDay = this.next()
+      const nextDay = this.next();
       const times = SunCalc.getTimes(
         nextDay._jsDate,
         nextDay._latitude as number,
@@ -345,11 +361,16 @@ export class HijriDate {
       const sunset = times.sunset;
 
       if (sunset && !isNaN(sunset.getTime())) {
-        // Subtract one minute from the next day's sunset
-        // TODO Support seconds
-        const endTime = new Date(sunset.getTime() - 60 * 1000);
-        return HijriDate.fromDate(
-          endTime,
+        // Subtract one second from the next day's sunset for precise end of day
+        const endTime = new Date(sunset.getTime() - 1000);
+        return new HijriDate(
+          this.year,
+          this.month,
+          this.day,
+          endTime.getHours(),
+          endTime.getMinutes(),
+          endTime.getSeconds(),
+          endTime.getMilliseconds(),
           {
             latitude: this._latitude,
             longitude: this._longitude,

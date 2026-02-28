@@ -79,7 +79,7 @@ export default function TaskFilterModal({
           label={t("status")}
           value={statusFilter.toString()}
           onValueChange={(value) => {
-            onStatusFilterChange(value === "all" ? "all" : parseInt(value))
+            onStatusFilterChange(value === "all" ? "all" : parseInt(value));
           }}
           options={statusOptions.map((opt) => ({
             value: opt.value.toString(),

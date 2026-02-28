@@ -211,15 +211,6 @@ export function TaskListItem({
     }
   };
 
-  const isOverdue = () => {
-    // TOOD check if use use time or not
-    return (
-      !!task.atEpochMillis &&
-      task.atEpochMillis > 0 &&
-      new Date().valueOf() > task.atEpochMillis
-    );
-  };
-
   return (
     <motion.div
       className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
@@ -256,7 +247,7 @@ export function TaskListItem({
 
           {showDateTime && !!task.atDateHijri && (
             <p
-              className={`text-xs ${isOverdue() && task.status !== 1 ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
+              className={`text-xs ${task.isOverdue() && task.status !== 1 ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
             >
               {formatScheduledDate(task, location.state?.context)}
             </p>

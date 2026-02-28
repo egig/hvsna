@@ -9,11 +9,10 @@ export function useUpcoming() {
     useHijriDate();
 
   const today = getToday();
-  const todayString = today.toString(); // Use HijriDate string representation for query key
-
-  // React Query for upcoming tasks
+  const tomorrow = today.next();
+  const tomorrowString = tomorrow.toString();
   const upcomingTasksQuery = useQuery({
-    queryKey: queryKeys.upcomingTasks(todayString),
+    queryKey: queryKeys.upcomingTasks(tomorrowString),
     queryFn: () => taskRepository.findTasksAfter(today),
   });
 

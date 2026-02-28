@@ -79,56 +79,103 @@ export function HijriCalendar() {
     return () => clearInterval(refreshInterval);
   }, [latitude, longitude, timezone, getToday, toGregorianDate]);
 
-  // Format current time
-  const formatCurrentTime = (date: Date) => {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-      timeZone: timezone,
-    });
-  };
+  // Define calendar data structure
+  const calendarData = [
+    {
+      id: "current-hijri-date",
+      label: "Current Hijri Date",
+      value: {
+        primary: formatDate(currentHijriDate, "DD MMMM YYYY"),
+        secondary: formatDate(currentHijriDate, "dddd"),
+        tertiary: `Gregorian: ${currentHijriDate.toDate().toString()}`,
+      },
+      color: "text-[var(--hvsna-primary-color)]",
+    },
+    {
+      id: "start-of-current-day",
+      label: "Start of Current Day",
+      value: sunsetLoading
+        ? {
+            primary: "Loading day start...",
+          }
+        : sunsetError
+          ? {
+              primary: "Cannot determine day start",
+              color: "text-[var(--hvsna-danger-color)]",
+            }
+          : {
+              primary: getToday().startOfDay().toDate().toString(),
+              secondary: "",
+              tertiary: `Hijri: ${formatDate(getToday(), "DD MMMM YYYY HH:mm:ss.SSS")}`,
+            },
+      color: "text-[var(--hvsna-info-color)]",
+      striped: true,
+    },
+    {
+      id: "end-of-current-day",
+      label: "End of Current Day",
+      value: sunsetLoading
+        ? {
+            primary: "Loading sunset time...",
+          }
+        : sunsetError
+          ? {
+              primary: "Cannot determine day end",
+              color: "text-[var(--hvsna-danger-color)]",
+            }
+          : sunsetTime
+            ? {
+                primary: sunsetTime,
+                secondary:
+                  "Gregorian: " + getToday().endOfDay().toDate().toString(),
+              }
+            : {
+                primary: "Day end time not available",
+              },
+      color: "text-[var(--hvsna-warning-color)]",
+    },
+    {
+      id: "start-of-next-day",
+      label: "Start of Next Day",
+      value: sunsetLoading
+        ? {
+            primary: "Loading next day start...",
+          }
+        : sunsetError
+          ? {
+              primary: "Cannot determine next day start",
+              color: "text-[var(--hvsna-danger-color)]",
+            }
+          : sunsetTime
+            ? {
+                primary: getToday().next().startOfDay().toDate().toString(),
+                secondary: `Hijri: ${formatDate(getToday().next(), "DD MMMM YYYY HH:mm:ss.SSS")}`,
+              }
+            : {
+                primary: "Next day start not available",
+              },
+    },
+  ];
 
-  // Format Gregorian date with time
-  const formatGregorianDateTime = (date: Date) => {
-    return date.toLocaleString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: timezone,
-    });
-  };
+  // Render function for value content
+  const renderValue = (value: any, defaultColor: string) => {
+    const color = value.color || defaultColor;
 
-  // Format Gregorian date (date only)
-  const formatGregorianDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: timezone,
-    });
-  };
-
-  // Get next day start (sunset time)
-  const getNextDayStart = () => {
-    const today = getToday();
-    return today.next().startOfDay().toDate();
-  };
-
-  // Get start of current Hijri day using startOfDay method
-  const getCurrentDayStart = () => {
-    try {
-      const today = getToday();
-      return today.startOfDay().toDate();
-    } catch (error) {
-      return new Date();
-    }
+    return (
+      <div className="space-y-1">
+        <div className={`text-lg font-bold ${color}`}>{value.primary}</div>
+        {value.secondary && (
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {value.secondary}
+          </div>
+        )}
+        {value.tertiary && (
+          <div className="text-xs text-gray-400 dark:text-gray-500">
+            {value.tertiary}
+          </div>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -153,165 +200,39 @@ export function HijriCalendar() {
 
   return (
     <Page>
-      <div className="p-4 max-w-md mx-auto">
+      <div className="p-4 max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold text-center mb-6 text-[var(--hvsna-primary-color)]">
           Hijri Calendar
         </h1>
 
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 p-4 space-y-4">
-          {/* Current Hijri Date */}
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Current Hijri Date
-            </h2>
-            <div className="text-xl font-bold text-[var(--hvsna-primary-color)]">
-              {formatDate(currentHijriDate, "DD MMMM YYYY")}
-            </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {formatDate(currentHijriDate, "dddd")}
-            </div>
-          </div>
-
-          {/* Current Time */}
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Current Time
-            </h2>
-            <div className="text-xl font-bold text-[var(--hvsna-success-color)]">
-              {formatCurrentTime(currentTime)}
-            </div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Timezone: {timezone}
-            </div>
-          </div>
-
-          {/* Today's Sunset */}
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Today's Sunset
-            </h2>
-            {sunsetLoading ? (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Loading sunset time...
-              </div>
-            ) : sunsetError ? (
-              <div className="text-sm text-[var(--hvsna-danger-color)]">
-                {sunsetError}
-              </div>
-            ) : sunsetTime ? (
-              <div className="text-xl font-bold text-[var(--hvsna-warning-color)]">
-                {sunsetTime}
-              </div>
-            ) : (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Sunset time not available
-              </div>
-            )}
-            {latitude && longitude && (
-              <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                Location: {latitude.toFixed(4)}°, {longitude.toFixed(4)}°
-              </div>
-            )}
-          </div>
-
-          {/* Start of Current Hijri Day */}
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Start of Current Day
-            </h2>
-            {sunsetLoading ? (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Loading day start...
-              </div>
-            ) : sunsetError ? (
-              <div className="text-sm text-[var(--hvsna-danger-color)]">
-                Cannot determine day start
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <div className="text-xl font-bold text-[var(--hvsna-info-color)]">
-                  {getCurrentDayStart().toDateString()}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {formatGregorianDateTime(getCurrentDayStart())}
-                  <br />
-                  {getToday().startOfDay().day}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Start of Next Hijri Day */}
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Start of Next Day
-            </h2>
-            {sunsetLoading ? (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Loading next day start...
-              </div>
-            ) : sunsetError ? (
-              <div className="text-sm text-[var(--hvsna-danger-color)]">
-                Cannot determine next day start
-              </div>
-            ) : sunsetTime ? (
-              <div className="text-sm text-gray-700 dark:text-gray-300">
-                {formatGregorianDateTime(getNextDayStart())}
-              </div>
-            ) : (
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Next day start not available
-              </div>
-            )}
-          </div>
-
-          {/* Current Gregorian Date */}
-          <div className="text-center">
-            <h2 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Current Gregorian Date
-            </h2>
-            <div className="text-xl font-bold text-[var(--hvsna-primary-color-active-tab)]">
-              {formatGregorianDate(currentTime)}
-            </div>
-          </div>
-
-          {/* Additional Information */}
-          <div className="border-t border-gray-200 dark:border-gray-800 pt-3">
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Hijri Day:
-                </span>
-                <span className="ml-2 text-gray-800 dark:text-gray-200">
-                  {currentHijriDate.day}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Hijri Month:
-                </span>
-                <span className="ml-2 text-gray-800 dark:text-gray-200">
-                  {currentHijriDate.month}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Hijri Year:
-                </span>
-                <span className="ml-2 text-gray-800 dark:text-gray-200">
-                  {currentHijriDate.year}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium text-gray-600 dark:text-gray-400">
-                  Manual Offset:
-                </span>
-                <span className="ml-2 text-gray-800 dark:text-gray-200">
-                  {manualOffset || 0} days
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Information
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Value
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {calendarData.map((item) => (
+                <tr
+                  key={item.id}
+                  className={item.striped ? "bg-gray-50 dark:bg-gray-800" : ""}
+                >
+                  <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {item.label}
+                  </td>
+                  <td className="px-4 py-3">
+                    {renderValue(item.value, item.color || "text-gray-900")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </Page>

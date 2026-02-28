@@ -29,7 +29,16 @@ export class HijriMonth {
       this._longitude = options.longitude;
       this._offset = options.offset;
     }
-    let d = new HijriDate(year, month, 1, undefined, undefined, options);
+    let d = new HijriDate(
+      year,
+      month,
+      1,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      options,
+    );
     this._jsDate = d.toDate();
   }
 
@@ -70,7 +79,7 @@ export class HijriMonth {
   }
 
   getFirstDay(): HijriDate {
-    return new HijriDate(this.year, this.month, 1, 0, 0, {
+    return new HijriDate(this.year, this.month, 1, 0, 0, 0, 0, {
       latitude: this._latitude,
       longitude: this._longitude,
       offset: this._offset || 0,
@@ -79,7 +88,7 @@ export class HijriMonth {
 
   getLastDay(): HijriDate {
     const daysInMonth = this.getDaysInMonth();
-    return new HijriDate(this.year, this.month, daysInMonth, 0, 0, {
+    return new HijriDate(this.year, this.month, daysInMonth, 0, 0, 0, 0, {
       latitude: this._latitude,
       longitude: this._longitude,
       offset: this._offset || 0,

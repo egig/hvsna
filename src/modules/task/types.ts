@@ -1,3 +1,5 @@
+import { HijriDate } from "../calendar/hijri";
+
 export type TaskStatus = 0 | 1;
 export type TaskRepeat = "none" | "daily" | "monthly" | "yearly";
 export type PrayerTime =
@@ -8,13 +10,13 @@ export type PrayerTime =
   | "Maghrib"
   | "Isha";
 
-export interface Task {
-  id: string;
+export class Task {
+  id?: string;
   rev?: string;
   userId?: string;
-  name: string;
+  name?: string;
   description?: string;
-  status: TaskStatus;
+  status?: TaskStatus;
   atDateIsNone?: number;
   atTimeIsNone?: number;
   atDateHijri?: string;
@@ -33,6 +35,32 @@ export interface Task {
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
+
+  constructor(a: Partial<Task>) {
+    Object.assign(this, a);
+  }
+
+  isOverdue(): boolean {
+    if (this.status === 1 || this.completedAt) {
+      return false;
+    }
+
+    if (!this.atEpochMillis) {
+      return false;
+    }
+
+    const now = Date.now();
+    if (this.atTimeIsNone === 0) {
+      return now > this.atEpochMillis;
+    }
+
+    // For tasks without specific time, check against end of that calendar day
+    const taskDate = new Date(this.atEpochMillis);
+    const endOfTaskDay = new Date(taskDate);
+    endOfTaskDay.setHours(23, 59, 59, 999); // End of the day
+
+    return now > endOfTaskDay.valueOf();
+  }
 }
 
 export interface TaskCreateInput {

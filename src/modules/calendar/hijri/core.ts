@@ -20,6 +20,8 @@ export interface HijriDateComponents {
 export interface TimeComponents {
   hour: number | undefined;
   minute: number | undefined;
+  second: number | undefined;
+  millisecond: number | undefined;
 }
 
 /**
@@ -58,9 +60,16 @@ export function toDate(
   );
 
   const sunsetTime = getSunsetTime(gregorianDate, latitude, longitude);
-  if (hijriTime.hour == undefined && hijriTime.minute == undefined) {
+  if (
+    hijriTime.hour == undefined &&
+    hijriTime.minute == undefined &&
+    hijriTime.second == undefined &&
+    hijriTime.millisecond == undefined
+  ) {
     hijriTime.hour = sunsetTime?.hour as number;
     hijriTime.minute = sunsetTime?.minute as number;
+    hijriTime.second = sunsetTime?.second as number;
+    hijriTime.millisecond = sunsetTime?.millisecond as number;
   }
 
   if (isTimeAfter(hijriTime, sunsetTime)) {
@@ -68,7 +77,12 @@ export function toDate(
   }
 
   const result = new Date(gregorianDate);
-  result.setHours(hijriTime.hour || 0, hijriTime.minute, 0, 0);
+  result.setHours(
+    hijriTime.hour || 0,
+    hijriTime.minute || 0,
+    hijriTime.second || 0,
+    hijriTime.millisecond || 0,
+  );
   return result;
 }
 
@@ -97,12 +111,14 @@ export function fromDate(
 
   const sunsetTime = getSunsetTime(workingDate, latitude, longitude);
   const isAfterSunset = isTimeAfter(
-      {
-        hour: gregorianDate.getHours(),
-        minute: gregorianDate.getMinutes(),
-      },
-      sunsetTime,
-  )
+    {
+      hour: gregorianDate.getHours(),
+      minute: gregorianDate.getMinutes(),
+      second: gregorianDate.getSeconds(),
+      millisecond: gregorianDate.getMilliseconds(),
+    },
+    sunsetTime,
+  );
 
   if (isAfterSunset) {
     hijriDate = _applyOffset(hijriDate, 1);
@@ -112,6 +128,8 @@ export function fromDate(
   return Object.assign(adjustedHijri, {
     hour: gregorianDate.getHours(),
     minute: gregorianDate.getMinutes(),
+    second: gregorianDate.getSeconds(),
+    millisecond: gregorianDate.getMilliseconds(),
   });
 }
 
@@ -134,6 +152,8 @@ function getSunsetTime(
     return {
       hour: sunset.getHours(),
       minute: sunset.getMinutes(),
+      second: sunset.getSeconds(),
+      millisecond: sunset.getMilliseconds(),
     };
   } catch (error) {
     console.warn("SunCalc calculation failed:", error);
@@ -155,8 +175,12 @@ function isTimeAfter(
   if (
     time.hour === undefined ||
     time.minute === undefined ||
+    time.second === undefined ||
+    time.millisecond === undefined ||
     sunsetTime.hour === undefined ||
-    sunsetTime.minute === undefined
+    sunsetTime.minute === undefined ||
+    sunsetTime.second === undefined ||
+    sunsetTime.millisecond === undefined
   ) {
     return false;
   }
@@ -165,7 +189,24 @@ function isTimeAfter(
     return true;
   }
 
-  if (time.hour === sunsetTime.hour && time.minute >= sunsetTime.minute) {
+  if (time.hour === sunsetTime.hour && time.minute > sunsetTime.minute) {
+    return true;
+  }
+
+  if (
+    time.hour === sunsetTime.hour &&
+    time.minute === sunsetTime.minute &&
+    time.second > sunsetTime.second
+  ) {
+    return true;
+  }
+
+  if (
+    time.hour === sunsetTime.hour &&
+    time.minute === sunsetTime.minute &&
+    time.second === sunsetTime.second &&
+    time.millisecond >= sunsetTime.millisecond
+  ) {
     return true;
   }
 

@@ -1,14 +1,13 @@
 import { db } from "../../lib/pouchdb-singleton";
 import { HijriDate } from "../calendar/hijri";
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import type {
-  Task,
   TaskCreateInput,
   TaskQuery,
   TaskStatus,
   TaskUpdateInput,
   PrayerTime,
 } from "./types";
+import { Task } from "./types";
 import { generatePrefixedUUID } from "../../lib/uuid";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 
@@ -35,6 +34,7 @@ class PouchDBTaskDocument {
   usePrayerTime?: boolean = false;
   lat?: number;
   long?: number;
+  hijriDateOffset?: number;
   timezone?: string;
 
   constructor(o: any) {
@@ -42,13 +42,13 @@ class PouchDBTaskDocument {
   }
 
   toTaskItem(): Task {
-    return {
+    return new Task({
       id: this._id || "",
       rev: this._rev,
       userId: this.userId || "",
       name: this.name || "",
       description: this.description || "",
-      status: this.status || 0,
+      status: this.status !== undefined ? this.status : 0,
       atEpochMillis: this.atEpochMillis || 0,
       targetId: this.targetId || "",
       targetValue: this.targetValue || 0,
@@ -57,15 +57,16 @@ class PouchDBTaskDocument {
       completedAt: this.completedAt,
       attributes: this.attributes || {},
       atDateHijri: this.atDateHijri || "",
-      atDateIsNone: this.atDateIsNone || 1,
-      atTimeIsNone: this.atTimeIsNone || 1,
+      atDateIsNone: this.atDateIsNone !== undefined ? this.atDateIsNone : 1,
+      atTimeIsNone: this.atTimeIsNone !== undefined ? this.atTimeIsNone : 0,
       atTime: this.atTime || "",
       prayerTime: this.prayerTime,
       usePrayerTime: this.usePrayerTime || false,
       lat: this.lat,
       long: this.long,
       timezone: this.timezone,
-    };
+      hijriDateOffset: this.hijriDateOffset,
+    });
   }
 
   static fromTaskItem(t: Task) {
@@ -75,33 +76,42 @@ class PouchDBTaskDocument {
     a._rev = t.rev;
     a.atTimeIsNone = !!t.atTime ? 0 : 1;
     a.atDateIsNone = !!t.atDateHijri ? 0 : 1;
+    a.lat = t.lat;
+    a.long = t.long;
+    a.hijriDateOffset = t.hijriDateOffset;
 
     if (!!t.atDateHijri) {
       const { year, month, day } = parseHijriDateString(t.atDateHijri);
       let hour = undefined;
       let minute = undefined;
-      if (t.atTime) {
-        const timeParts = parseTimeString(t.atTime);
-        hour = timeParts.hour;
-        minute = timeParts.minute;
-      }
-
-      // TODO how to make this centralize in useHijriDate
-      let d = new HijriDate(year, month, day, hour, minute, {
+      // if no time defined set the epoch to the end of day
+      let d = new HijriDate(year, month, day, hour, minute, 0, 0, {
         latitude: t.lat,
         longitude: t.long,
         offset: t.hijriDateOffset || 0,
-      }).toDate();
+      });
 
-      a.atEpochMillis = d.valueOf();
-      if (!!t.atTime) {
-        a.atTime = t.atTime;
-        a.prayerTime = undefined;
-        a.usePrayerTime = false;
-      } else if (!!t.prayerTime) {
+      a.atEpochMillis = d.endOfDay().toDate().valueOf();
+      if (!!t.prayerTime) {
         a.prayerTime = t.prayerTime;
         a.usePrayerTime = true;
         a.atTime = "";
+      }
+
+      if (!!t.atTime) {
+        const timeParts = parseTimeString(t.atTime);
+        hour = timeParts.hour;
+        minute = timeParts.minute;
+        let d = new HijriDate(year, month, day, hour, minute, 0, 0, {
+          latitude: t.lat,
+          longitude: t.long,
+          offset: t.hijriDateOffset || 0,
+        }).toDate();
+
+        a.atEpochMillis = d.valueOf();
+        a.atTime = t.atTime;
+        a.prayerTime = undefined;
+        a.usePrayerTime = false;
       }
     }
 
@@ -130,7 +140,7 @@ export class TaskRepository {
   async create(input: TaskCreateInput): Promise<Task> {
     const now = Date.now().valueOf();
 
-    const newTask: Task = {
+    const newTask = new Task({
       id: generatePrefixedUUID("task_"),
       name: input.name,
       description: input.description,
@@ -147,10 +157,12 @@ export class TaskRepository {
       long: input.long,
       timezone: input.timezone,
       hijriDateOffset: input.hijriDateOffset || 0,
-    };
+    });
 
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
     delete doc._rev;
+
+    console.log("creating tasks", doc);
     await (db as any).put(doc);
 
     return newTask;
