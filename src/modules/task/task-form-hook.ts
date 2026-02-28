@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "react-router";
 import { useTaskContext } from "./task-context";
 import { useLog } from "../log/use-log";
@@ -19,7 +18,6 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
-import { taskRepository } from "./task-repository";
 
 export interface TaskScheduleAt {
   dateHijri: HijriDate | null;
@@ -45,7 +43,8 @@ export const useTaskForm = (
   onError?: (error: string) => void,
   onCancel?: () => void,
 ): UseTaskFormReturn => {
-  const { closeTaskForm, getTask } = useTaskContext();
+  // Use TaskProvider's createTask and updateTask mutations
+  const { createTask, updateTask, getTask } = useTaskContext();
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
@@ -75,91 +74,6 @@ export const useTaskForm = (
   const { getTracker } = useTracker();
   const { getToday } = useHijriDate();
   const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
-
-  // React Query mutation for creating tasks
-  const createTaskMutation = useMutation({
-    mutationFn: (taskInput: TaskCreateInput) => taskRepository.create(taskInput),
-    onSuccess: (result) => {
-      setTask(null);
-      closeTaskForm();
-      
-      if (onSuccess) {
-        onSuccess(result);
-      }
-
-      if (
-        !isMatchLocationContext(
-          location,
-          selectedScheduleAt.dateHijri,
-          getToday(),
-        )
-      ) {
-        showSnackbar("Task created but not listed in this page");
-      }
-    },
-    onError: (error) => {
-      console.error(error);
-      if (onError) {
-        onError(error instanceof Error ? error.message : 'Failed to create task');
-      }
-    },
-  });
-
-  useEffect(() => {
-    setSelectedTargetId(task?.targetId || "");
-  }, [task]);
-
-  useEffect(() => {
-    const goal = goals.find((g) => g.id === selectedTargetId);
-    setSelectedGoal(goal || null);
-
-    if (goal) {
-      getTracker(goal?.trackerId as string).then((tr) => {
-        setTracker(tr);
-      });
-    }
-  }, [selectedTargetId, goals]);
-
-  const updateTaskWithLog = async (
-    id: string,
-    input: TaskUpdateInput,
-  ): Promise<Task> => {
-    // Get the current task before updating to check status change
-    const currentTask = await getTask(id);
-
-    // Update the task
-    const updatedTask = await taskRepository.update(id, input);
-
-    if (!input.targetId) {
-      return updatedTask;
-    }
-
-    // Create log if status changed
-    if (
-      input.status !== undefined &&
-      currentTask &&
-      input.status !== currentTask.status
-    ) {
-      try {
-        const goal = await getGoal(updatedTask.targetId as string);
-        await createLog({
-          trackerId: goal.trackerId,
-          timestamp: Date.now(),
-          value: updatedTask.targetValue as number, // 1 for completed, 0 for re-opened
-          taskId: updatedTask.id,
-          attributes: {
-            newStatus: input.status,
-            targetValue: updatedTask.targetValue,
-          },
-        });
-      } catch (logError) {
-        // Log creation failure shouldn't break task update
-        console.warn("Failed to create log for task status change:", logError);
-      }
-    }
-
-    return updatedTask;
-  };
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
@@ -226,8 +140,23 @@ export const useTaskForm = (
         taskInput.targetId = selectedTargetId;
       }
 
-      // Use React Query mutation
-      await createTaskMutation.mutateAsync(taskInput);
+      // Use TaskProvider's createTask directly
+      const result = await createTask(taskInput);
+      setTask(null);
+
+      if (onSuccess) {
+        onSuccess(result);
+      }
+
+      if (
+        !isMatchLocationContext(
+          location,
+          selectedScheduleAt.dateHijri,
+          getToday(),
+        )
+      ) {
+        showSnackbar("Task created but not listed in this page");
+      }
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
@@ -248,16 +177,33 @@ export const useTaskForm = (
       }
     } catch (err) {
       console.error(err);
-      // Error is handled by the mutation
+      if (onError) {
+        onError(err instanceof Error ? err.message : "Failed to create task");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  useEffect(() => {
+    setSelectedTargetId(task?.targetId || "");
+  }, [task]);
+
+  useEffect(() => {
+    const goal = goals.find((g) => g.id === selectedTargetId);
+    setSelectedGoal(goal || null);
+
+    if (goal) {
+      getTracker(goal?.trackerId as string).then((tr) => {
+        setTracker(tr);
+      });
+    }
+  }, [selectedTargetId, goals]);
+
   return {
     task,
-    error: null, // Error is handled by the mutation
-    isSubmitting: isSubmitting || createTaskMutation.isPending,
+    error: null,
+    isSubmitting,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,

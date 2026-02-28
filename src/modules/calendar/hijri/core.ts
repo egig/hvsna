@@ -152,8 +152,12 @@ function isTimeAfter(
     return false;
   }
 
-  if (time.hour === undefined || time.minute === undefined || 
-      sunsetTime.hour === undefined || sunsetTime.minute === undefined) {
+  if (
+    time.hour === undefined ||
+    time.minute === undefined ||
+    sunsetTime.hour === undefined ||
+    sunsetTime.minute === undefined
+  ) {
     return false;
   }
 

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useTaskContext } from "./task-context";
 import { useLog } from "../log/use-log";
@@ -14,7 +13,6 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
-import { taskRepository } from "./task-repository";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -39,7 +37,8 @@ export const useTaskFormEdit = (
   onCancel?: () => void,
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
-  const { closeTaskForm, getTask } = useTaskContext();
+  // Use TaskProvider's updateTask and deleteTask mutations
+  const { updateTask, deleteTask, getTask } = useTaskContext();
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
@@ -69,141 +68,6 @@ export const useTaskFormEdit = (
   const offset = settings.manualDateOffset || 0;
   const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
-
-  // React Query mutation for updating tasks
-  const updateTaskMutation = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) => 
-      taskRepository.update(id, input),
-    onSuccess: (result) => {
-      setTask(null);
-      closeTaskForm();
-      
-      if (onSuccess) {
-        onSuccess(result);
-      }
-    },
-    onError: (error) => {
-      console.error(error);
-      if (onError) {
-        onError(error instanceof Error ? error.message : 'Failed to update task');
-      }
-    },
-  });
-
-  // React Query mutation for deleting tasks
-  const deleteTaskMutation = useMutation({
-    mutationFn: (id: string) => taskRepository.delete(id),
-    onSuccess: () => {
-      setTask(null);
-      closeTaskForm();
-      onDelete?.(taskId);
-    },
-    onError: (error) => {
-      console.error(error);
-      if (onError) {
-        onError(error instanceof Error ? error.message : 'Failed to delete task');
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (!!task?.atDateHijri) {
-      // Parse YYYYMMDD format using helper function
-      const { year, month, day } = parseHijriDateString(task.atDateHijri);
-
-      // Parse time if available using helper function
-      let hour: number | undefined = undefined;
-      let minute: number | undefined = undefined;
-      if (!!task.atTime) {
-        const timeParts = parseTimeString(task.atTime);
-        hour = timeParts.hour;
-        minute = timeParts.minute;
-      }
-
-      const hijriDate = createHijriDate(year, month, day, hour, minute);
-      setSelectedScheduleAt({
-        dateHijri: hijriDate,
-        time: task?.atTime || "",
-        prayerTime: task?.prayerTime || "",
-      });
-    } else {
-      setSelectedScheduleAt({
-        dateHijri: null,
-        time: "",
-        prayerTime: "",
-      });
-    }
-  }, [task, createHijriDate]);
-
-  useEffect(() => {
-    if (taskId) {
-      getTask(taskId).then((fetchedTask) => {
-        if (fetchedTask) {
-          setTask(fetchedTask);
-          // Update targetId if task has one
-          if (fetchedTask.targetId !== currentTargetId) {
-            setCurrentTargetId(fetchedTask.targetId || null);
-          }
-        }
-      });
-    }
-  }, [taskId, getTask, currentTargetId]);
-
-  useEffect(() => {
-    setSelectedTargetId(task?.targetId || "");
-  }, [task]);
-
-  useEffect(() => {
-    const goal = goals.find((g) => g.id === selectedTargetId);
-    setSelectedGoal(goal || null);
-
-    if (goal) {
-      getTracker(goal?.trackerId as string).then((tr) => {
-        setTracker(tr);
-      });
-    }
-  }, [selectedTargetId, goals]);
-
-  const updateTaskWithLog = async (
-    id: string,
-    input: TaskUpdateInput,
-  ): Promise<Task> => {
-    // Get the current task before updating to check status change
-    const currentTask = await getTask(id);
-
-    // Update the task
-    const updatedTask = await taskRepository.update(id, input);
-
-    if (!input.targetId) {
-      return updatedTask;
-    }
-
-    // Create log if status changed
-    if (
-      input.status !== undefined &&
-      currentTask &&
-      input.status !== currentTask.status
-    ) {
-      try {
-        const goal = await getGoal(updatedTask.targetId as string);
-        await createLog({
-          trackerId: goal.trackerId,
-          timestamp: Date.now(),
-          value: updatedTask.targetValue as number, // 1 for completed, 0 for re-opened
-          taskId: updatedTask.id,
-          attributes: {
-            newStatus: input.status,
-            targetValue: updatedTask.targetValue,
-          },
-        });
-      } catch (logError) {
-        // Log creation failure shouldn't break task update
-        console.warn("Failed to create log for task status change:", logError);
-      }
-    }
-
-    return updatedTask;
-  };
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
@@ -270,8 +134,13 @@ export const useTaskFormEdit = (
         taskInput.targetId = selectedTargetId;
       }
 
-      // Use React Query mutation
-      await updateTaskMutation.mutateAsync({ id: taskId, input: taskInput });
+      // Use TaskProvider's updateTask directly
+      const result = await updateTask(taskId, taskInput);
+      setTask(null);
+
+      if (onSuccess) {
+        onSuccess(result);
+      }
 
       // Create recurring task if repeat is selected and not "none"
       if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
@@ -292,7 +161,9 @@ export const useTaskFormEdit = (
       }
     } catch (err) {
       console.error(err);
-      // Error is handled by the mutation
+      if (onError) {
+        onError(err instanceof Error ? err.message : "Failed to update task");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -305,20 +176,88 @@ export const useTaskFormEdit = (
           `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
         )
       ) {
-        await deleteTaskMutation.mutateAsync(taskId);
+        try {
+          await deleteTask(taskId);
+          setTask(null);
+          onDelete?.(taskId);
+        } catch (error) {
+          console.error(error);
+          if (onError) {
+            onError(
+              error instanceof Error ? error.message : "Failed to delete task",
+            );
+          }
+        }
       }
     }
   };
 
+  useEffect(() => {
+    if (!!task?.atDateHijri) {
+      // Parse YYYYMMDD format using helper function
+      const { year, month, day } = parseHijriDateString(task.atDateHijri);
+
+      // Parse time if available using helper function
+      let hour: number | undefined = undefined;
+      let minute: number | undefined = undefined;
+      if (!!task.atTime) {
+        const timeParts = parseTimeString(task.atTime);
+        hour = timeParts.hour;
+        minute = timeParts.minute;
+      }
+
+      const hijriDate = createHijriDate(year, month, day, hour, minute);
+      setSelectedScheduleAt({
+        dateHijri: hijriDate,
+        time: task?.atTime || "",
+        prayerTime: task?.prayerTime || "",
+      });
+    } else {
+      setSelectedScheduleAt({
+        dateHijri: null,
+        time: "",
+        prayerTime: "",
+      });
+    }
+  }, [task, createHijriDate]);
+
+  useEffect(() => {
+    if (taskId) {
+      getTask(taskId).then((fetchedTask) => {
+        if (fetchedTask) {
+          setTask(fetchedTask);
+          // Update targetId if task has one
+          if (fetchedTask.targetId !== currentTargetId) {
+            setCurrentTargetId(fetchedTask.targetId || null);
+          }
+        }
+      });
+    }
+  }, [taskId, getTask, currentTargetId]);
+
+  useEffect(() => {
+    setSelectedTargetId(task?.targetId || "");
+  }, [task]);
+
+  useEffect(() => {
+    const goal = goals.find((g) => g.id === selectedTargetId);
+    setSelectedGoal(goal || null);
+
+    if (goal) {
+      getTracker(goal?.trackerId as string).then((tr) => {
+        setTracker(tr);
+      });
+    }
+  }, [selectedTargetId, goals]);
+
   return {
     task,
-    error: null, // Error is handled by the mutations
-    isSubmitting: isSubmitting || updateTaskMutation.isPending || deleteTaskMutation.isPending,
+    error: null,
+    isSubmitting,
     selectedTargetId,
     setSelectedTargetId,
     selectedGoal,
     trackerAttributes,
-    // Prayer time fields
     handleSubmit,
     handleDelete,
     removeTime,

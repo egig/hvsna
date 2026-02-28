@@ -1,13 +1,13 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { useTasks } from '../use-tasks';
-import { taskRepository } from '../task-repository';
-import type { Task, TaskStatus } from '../types';
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import { useTasks } from "../use-tasks";
+import { taskRepository } from "../task-repository";
+import type { Task, TaskStatus } from "../types";
 
 // Mock the dependencies
-vi.mock('../task-repository');
-vi.mock('../use-task', () => ({
+vi.mock("../task-repository");
+vi.mock("../use-task", () => ({
   useTask: () => ({
     openTaskForm: vi.fn(),
     setEditingTaskId: vi.fn(),
@@ -16,7 +16,7 @@ vi.mock('../use-task', () => ({
 
 const mockTaskRepository = vi.mocked(taskRepository);
 
-describe('useTasks with React Query', () => {
+describe("useTasks with React Query", () => {
   let queryClient: QueryClient;
 
   beforeEach(() => {
@@ -33,10 +33,10 @@ describe('useTasks with React Query', () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  it('should load browsed tasks successfully', async () => {
+  it("should load browsed tasks successfully", async () => {
     const mockBrowsedTasks: Task[] = [
-      { id: 'task_1', name: 'Browsed Task 1', status: 0 as TaskStatus },
-      { id: 'task_2', name: 'Browsed Task 2', status: 1 as TaskStatus },
+      { id: "task_1", name: "Browsed Task 1", status: 0 as TaskStatus },
+      { id: "task_2", name: "Browsed Task 2", status: 1 as TaskStatus },
     ];
 
     mockTaskRepository.findBrowsedTasks.mockResolvedValue(mockBrowsedTasks);
@@ -58,14 +58,16 @@ describe('useTasks with React Query', () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBe(null);
     expect(result.current.hasMore).toBe(true);
-    
+
     // Verify repository call
     expect(mockTaskRepository.findBrowsedTasks).toHaveBeenCalledWith({}, 0, 50);
   });
 
-  it('should build query with filters correctly', async () => {
-    const mockBrowsedTasks: Task[] = [{ id: 'task_1', name: 'Task 1', status: 0 as TaskStatus }];
-    
+  it("should build query with filters correctly", async () => {
+    const mockBrowsedTasks: Task[] = [
+      { id: "task_1", name: "Task 1", status: 0 as TaskStatus },
+    ];
+
     mockTaskRepository.findBrowsedTasks.mockResolvedValue(mockBrowsedTasks);
 
     const { result } = renderHook(() => useTasks(), { wrapper });
@@ -76,7 +78,7 @@ describe('useTasks with React Query', () => {
 
     // Set filters
     result.current.setStatusFilter(1 as TaskStatus);
-    result.current.setSearchTextFilter('test search');
+    result.current.setSearchTextFilter("test search");
 
     // Trigger refresh to apply filters
     result.current.refreshTasks();
@@ -87,14 +89,14 @@ describe('useTasks with React Query', () => {
 
     // Verify query was built with filters
     expect(mockTaskRepository.findBrowsedTasks).toHaveBeenCalledWith(
-      { status: 1 as TaskStatus, searchText: 'test search' },
+      { status: 1 as TaskStatus, searchText: "test search" },
       0,
-      50
+      50,
     );
   });
 
-  it('should handle errors gracefully', async () => {
-    const error = new Error('Failed to fetch browsed tasks');
+  it("should handle errors gracefully", async () => {
+    const error = new Error("Failed to fetch browsed tasks");
     mockTaskRepository.findBrowsedTasks.mockRejectedValue(error);
 
     const { result } = renderHook(() => useTasks(), { wrapper });
@@ -103,26 +105,28 @@ describe('useTasks with React Query', () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(result.current.error).toBe('Failed to fetch browsed tasks');
+    expect(result.current.error).toBe("Failed to fetch browsed tasks");
     expect(result.current.tasks).toEqual([]);
   });
 
-  it('should provide filter actions', () => {
+  it("should provide filter actions", () => {
     const { result } = renderHook(() => useTasks(), { wrapper });
 
     // Test filter actions are available
-    expect(typeof result.current.setStatusFilter).toBe('function');
-    expect(typeof result.current.setSearchTextFilter).toBe('function');
-    expect(typeof result.current.clearFilters).toBe('function');
-    
+    expect(typeof result.current.setStatusFilter).toBe("function");
+    expect(typeof result.current.setSearchTextFilter).toBe("function");
+    expect(typeof result.current.clearFilters).toBe("function");
+
     // Test calling filter actions
     result.current.setStatusFilter(0 as TaskStatus);
-    result.current.setSearchTextFilter('new search');
+    result.current.setSearchTextFilter("new search");
     result.current.clearFilters();
   });
 
-  it('should provide refresh functionality', async () => {
-    const mockTasks: Task[] = [{ id: 'task_1', name: 'Task 1', status: 0 as TaskStatus }];
+  it("should provide refresh functionality", async () => {
+    const mockTasks: Task[] = [
+      { id: "task_1", name: "Task 1", status: 0 as TaskStatus },
+    ];
     mockTaskRepository.findBrowsedTasks.mockResolvedValue(mockTasks);
 
     const { result } = renderHook(() => useTasks(), { wrapper });

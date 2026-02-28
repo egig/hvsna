@@ -36,7 +36,7 @@ export class HijriMonth {
   previous(): HijriMonth {
     let prevYear = this.year;
     let prevMonth = this.month - 1;
-    
+
     if (prevMonth < 1) {
       prevMonth = 12;
       prevYear -= 1;
@@ -52,7 +52,7 @@ export class HijriMonth {
   next(): HijriMonth {
     let nextYear = this.year;
     let nextMonth = this.month + 1;
-    
+
     if (nextMonth > 12) {
       nextMonth = 1;
       nextYear += 1;

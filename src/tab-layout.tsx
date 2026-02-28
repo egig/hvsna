@@ -4,11 +4,12 @@ import { TabBar } from "./modules/navigation";
 import { Modal } from "./modules/navigation/modal";
 import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
-import { useTask } from "./modules/task/use-task";
 import { useScreenSize } from "./ui/screen-size-wrapper";
+import { useTaskContext } from "./modules/task/task-context";
 
 export default function TabLayout() {
-  const { formOpen, editingTaskId, openTaskForm, closeTaskForm } = useTask();
+  const { formOpen, editingTaskId, openTaskForm, closeTaskForm } =
+    useTaskContext();
   const location = useLocation();
   const { isDesktop } = useScreenSize();
 

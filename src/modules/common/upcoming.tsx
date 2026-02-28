@@ -1,4 +1,3 @@
-import { useTask } from "../task/use-task";
 import { CalendarIcon } from "lucide-react";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -6,10 +5,11 @@ import TaskListItem from "../task/task-list-item";
 import { useUpcoming } from "./use-upcoming";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
+import { useTaskContext } from "../task/task-context";
 
 export default function Upcoming() {
   const { t } = useLanguageContext();
-  const { openTaskForm } = useTask();
+  const { openTaskForm } = useTaskContext();
   const { upcomingTasks, taskGroups, loading, initiated, error } =
     useUpcoming();
 

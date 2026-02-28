@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
 import { useLog } from "../log/use-log";
 import { useGoal } from "../goal/use-goal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +16,7 @@ import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 interface TaskContextType {
   // Task data
   task: Task | null;
-  
+
   // CRUD operations
   createTask: (input: TaskCreateInput) => Promise<Task>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
@@ -19,14 +25,14 @@ interface TaskContextType {
   completeTask: (id: string) => Promise<Task>;
   reopenTask: (id: string) => Promise<Task>;
   reset: () => void;
-  
+
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
   openTaskForm: (taskId?: string) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;
-  
+
   // Legacy compatibility
   refreshAllTaskLists: (today: any) => Promise<void>;
 }
@@ -42,7 +48,7 @@ export const TaskProvider: React.FC<{
   const { getToday } = useHijriDate();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  
+
   // Local form state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
@@ -123,18 +129,24 @@ export const TaskProvider: React.FC<{
       // Invalidate relevant queries
       const today = getToday();
       const todayString = today.toString();
-      
+
       // Invalidate today's tasks and completed tasks
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
-      
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayCompletedTasks(todayString),
+      });
+
       // Invalidate upcoming tasks
       const tomorrow = today.next();
       const tomorrowString = tomorrow.toString();
-      queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
-      
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+
       // Invalidate browsed tasks (for task list views)
-      queryClient.invalidateQueries({ queryKey: ['browsed-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
 
       // Handle log creation
       if (!updatedTask.targetId) {
@@ -174,18 +186,24 @@ export const TaskProvider: React.FC<{
       // Invalidate relevant queries
       const today = getToday();
       const todayString = today.toString();
-      
+
       // Invalidate today's tasks and completed tasks
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
-      
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayCompletedTasks(todayString),
+      });
+
       // Invalidate upcoming tasks
       const tomorrow = today.next();
       const tomorrowString = tomorrow.toString();
-      queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
-      
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+
       // Invalidate browsed tasks (for task list views)
-      queryClient.invalidateQueries({ queryKey: ['browsed-tasks'] });
+      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
 
       // Handle log creation
       if (!updatedTask.targetId) {
@@ -228,11 +246,17 @@ export const TaskProvider: React.FC<{
       const todayString = today.toString();
       const tomorrow = today.next();
       const tomorrowString = tomorrow.toString();
-      
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
-      queryClient.invalidateQueries({ queryKey: ['browsed-tasks'] });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayCompletedTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
     },
     onError: (error) => {
       console.error("Failed to create task:", error);
@@ -242,18 +266,25 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for updating tasks
   const updateTaskMutation = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) => updateTaskWithLog(id, input),
+    mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) =>
+      updateTaskWithLog(id, input),
     onSuccess: () => {
       // Invalidate all relevant queries
       const today = getToday();
       const todayString = today.toString();
       const tomorrow = today.next();
       const tomorrowString = tomorrow.toString();
-      
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
-      queryClient.invalidateQueries({ queryKey: ['browsed-tasks'] });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayCompletedTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
     },
     onError: (error) => {
       console.error("Failed to update task:", error);
@@ -270,11 +301,17 @@ export const TaskProvider: React.FC<{
       const todayString = today.toString();
       const tomorrow = today.next();
       const tomorrowString = tomorrow.toString();
-      
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
-      queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
-      queryClient.invalidateQueries({ queryKey: ['browsed-tasks'] });
+
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.todayCompletedTasks(todayString),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
     },
     onError: (error) => {
       console.error("Failed to delete task:", error);
@@ -284,8 +321,10 @@ export const TaskProvider: React.FC<{
 
   const contextValue: TaskContextType = {
     task,
-    createTask: (input: TaskCreateInput) => createTaskMutation.mutateAsync(input),
-    updateTask: (id: string, input: TaskUpdateInput) => updateTaskMutation.mutateAsync({ id, input }),
+    createTask: (input: TaskCreateInput) =>
+      createTaskMutation.mutateAsync(input),
+    updateTask: (id: string, input: TaskUpdateInput) =>
+      updateTaskMutation.mutateAsync({ id, input }),
     deleteTask: (id: string) => deleteTaskMutation.mutateAsync(id),
     getTask: (id: string) => taskRepository.findById(id),
     completeTask: (id: string) => completeTaskMutation.mutateAsync(id),
@@ -300,9 +339,7 @@ export const TaskProvider: React.FC<{
   };
 
   return (
-    <TaskContext.Provider value={contextValue}>
-      {children}
-    </TaskContext.Provider>
+    <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>
   );
 };
 

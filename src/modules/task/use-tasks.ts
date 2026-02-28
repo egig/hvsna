@@ -1,22 +1,25 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTask } from "./use-task";
 import { taskRepository } from "./task-repository";
 import { queryKeys } from "../common/query-keys";
 import type { Task, TaskStatus, TaskQuery } from "./types";
 import { HijriDate } from "../calendar/hijri";
+import { useTaskContext } from "./task-context";
 
 export function useTasks() {
   const [initiated, setInitiated] = useState(false);
   const [isScrollable, setIsScrollable] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
-  
-  const { openTaskForm, setEditingTaskId } = useTask();
-  
+
+  const { openTaskForm, setEditingTaskId } = useTaskContext();
+
   // Local filter state
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
-  const [dateRangeFilter, setDateRangeFilter] = useState<{ startDate: HijriDate; endDate: HijriDate } | null>(null);
+  const [dateRangeFilter, setDateRangeFilter] = useState<{
+    startDate: HijriDate;
+    endDate: HijriDate;
+  } | null>(null);
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
 
   const clearFilters = useCallback(() => {
@@ -29,7 +32,9 @@ export function useTasks() {
   const createFilterKey = () => {
     const filterParts = [
       statusFilter === "all" ? "" : statusFilter.toString(),
-      dateRangeFilter ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}` : "",
+      dateRangeFilter
+        ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
+        : "",
       searchTextFilter || "",
     ];
     return filterParts.join("|");
@@ -40,15 +45,15 @@ export function useTasks() {
   // Build query object for repository
   const buildQuery = (): TaskQuery => {
     const query: TaskQuery = {};
-    
+
     if (statusFilter && statusFilter !== "all") {
       query.status = statusFilter as TaskStatus;
     }
-    
+
     if (searchTextFilter && searchTextFilter.trim()) {
       query.searchText = searchTextFilter;
     }
-    
+
     return query;
   };
 
@@ -61,23 +66,34 @@ export function useTasks() {
 
   // Load more tasks (pagination)
   const loadMoreTasks = useCallback(async () => {
-    if (!hasMore || browsedTasksQuery.isFetching || browsedTasksQuery.isPending) return;
+    if (!hasMore || browsedTasksQuery.isFetching || browsedTasksQuery.isPending)
+      return;
 
     try {
-      const newTasks = await taskRepository.findBrowsedTasks(buildQuery(), offset, 10);
-      
+      const newTasks = await taskRepository.findBrowsedTasks(
+        buildQuery(),
+        offset,
+        10,
+      );
+
       // Update hasMore based on whether we got a full page
       setHasMore(newTasks.length >= 10);
-      
+
       // Update offset for next page
-      setOffset(prev => prev + newTasks.length);
-      
+      setOffset((prev) => prev + newTasks.length);
+
       // Invalidate query to trigger refetch with new data
       browsedTasksQuery.refetch();
     } catch (error) {
       console.error("Failed to load more tasks:", error);
     }
-  }, [hasMore, browsedTasksQuery.isFetching, browsedTasksQuery.isPending, offset, buildQuery]);
+  }, [
+    hasMore,
+    browsedTasksQuery.isFetching,
+    browsedTasksQuery.isPending,
+    offset,
+    buildQuery,
+  ]);
 
   // Reset pagination when filters change
   const resetPagination = useCallback(() => {
@@ -107,7 +123,6 @@ export function useTasks() {
     openTaskForm();
   }, []);
 
-
   const handleInfiniteScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const element = e.currentTarget;
@@ -118,7 +133,12 @@ export function useTasks() {
       setIsScrollable(scrollable);
 
       // If content is not scrollable and we have more tasks, load them
-      if (!scrollable && hasMore && !browsedTasksQuery.isPending && !browsedTasksQuery.isFetching) {
+      if (
+        !scrollable &&
+        hasMore &&
+        !browsedTasksQuery.isPending &&
+        !browsedTasksQuery.isFetching
+      ) {
         loadMoreTasks();
         return;
       }
@@ -126,16 +146,31 @@ export function useTasks() {
       // Check if user has scrolled within 200px of the bottom
       const isNearBottom = scrollHeight - scrollTop - clientHeight < 200;
 
-      if (!browsedTasksQuery.isPending && !browsedTasksQuery.isFetching && hasMore && isNearBottom) {
+      if (
+        !browsedTasksQuery.isPending &&
+        !browsedTasksQuery.isFetching &&
+        hasMore &&
+        isNearBottom
+      ) {
         loadMoreTasks();
       }
     },
-    [browsedTasksQuery.isPending, browsedTasksQuery.isFetching, hasMore, loadMoreTasks],
+    [
+      browsedTasksQuery.isPending,
+      browsedTasksQuery.isFetching,
+      hasMore,
+      loadMoreTasks,
+    ],
   );
 
   // Check scrollability when tasks change
   useEffect(() => {
-    if (initiated && !browsedTasksQuery.isPending && browsedTasksQuery.data && browsedTasksQuery.data.length > 0) {
+    if (
+      initiated &&
+      !browsedTasksQuery.isPending &&
+      browsedTasksQuery.data &&
+      browsedTasksQuery.data.length > 0
+    ) {
       // Trigger a scroll check after a short delay to let DOM update
       const timer = setTimeout(() => {
         const scrollElement = document.querySelector(".tasks-scroll-container");
@@ -153,11 +188,22 @@ export function useTasks() {
 
       return () => clearTimeout(timer);
     }
-  }, [initiated, browsedTasksQuery.isPending, browsedTasksQuery.data, hasMore, browsedTasksQuery.isFetching, loadMoreTasks]);
+  }, [
+    initiated,
+    browsedTasksQuery.isPending,
+    browsedTasksQuery.data,
+    hasMore,
+    browsedTasksQuery.isFetching,
+    loadMoreTasks,
+  ]);
 
   // Also check scrollability after loading completes
   useEffect(() => {
-    if (initiated && !browsedTasksQuery.isPending && !browsedTasksQuery.isFetching) {
+    if (
+      initiated &&
+      !browsedTasksQuery.isPending &&
+      !browsedTasksQuery.isFetching
+    ) {
       const timer = setTimeout(() => {
         const scrollElement = document.querySelector(".tasks-scroll-container");
         if (scrollElement) {
@@ -174,7 +220,13 @@ export function useTasks() {
 
       return () => clearTimeout(timer);
     }
-  }, [initiated, browsedTasksQuery.isPending, browsedTasksQuery.isFetching, hasMore, loadMoreTasks]);
+  }, [
+    initiated,
+    browsedTasksQuery.isPending,
+    browsedTasksQuery.isFetching,
+    hasMore,
+    loadMoreTasks,
+  ]);
 
   return {
     // Data
@@ -182,8 +234,11 @@ export function useTasks() {
     loading: browsedTasksQuery.isPending,
     initiated,
     loadingMore: browsedTasksQuery.isFetching,
-    error: browsedTasksQuery.error ? 
-      (browsedTasksQuery.error instanceof Error ? browsedTasksQuery.error.message : 'Unknown error') : null,
+    error: browsedTasksQuery.error
+      ? browsedTasksQuery.error instanceof Error
+        ? browsedTasksQuery.error.message
+        : "Unknown error"
+      : null,
     hasMore,
     isScrollable,
 

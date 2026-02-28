@@ -8,7 +8,7 @@ export function useToday() {
   const { dayNames, hijriMonthNames, gregorianMonthNames } =
     useDateTranslationHelper();
   const { getToday, initiated: hijriCalInititated } = useHijriDate();
-  
+
   const today = getToday();
   const gregorianDate = today.toDate();
   const todayString = today.toString(); // Use HijriDate string representation for query key
@@ -31,14 +31,19 @@ export function useToday() {
   const subTitle = `${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
 
   // Combine loading states
-  const isLoading = todayTasksQuery.isPending || todayCompletedTasksQuery.isPending;
+  const isLoading =
+    todayTasksQuery.isPending || todayCompletedTasksQuery.isPending;
   const error = todayTasksQuery.error || todayCompletedTasksQuery.error;
 
   return {
     todayTasks: todayTasksQuery.data || [],
     todayCompletedTasks: todayCompletedTasksQuery.data || [],
     initiated: !isLoading && hijriCalInititated,
-    error: error ? (error instanceof Error ? error.message : 'Unknown error') : null,
+    error: error
+      ? error instanceof Error
+        ? error.message
+        : "Unknown error"
+      : null,
     // Computed values from useDateTranslationHelper
     pageTitle,
     subTitle,

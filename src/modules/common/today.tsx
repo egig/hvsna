@@ -1,4 +1,3 @@
-import { useTask } from "../task/use-task";
 import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";
 import { ErrorDisplay } from "../../components/error-display";
@@ -8,6 +7,7 @@ import { LargeNavbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
+import { useTaskContext } from "../task/task-context";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -53,7 +53,7 @@ export function Today() {
 }
 
 function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
-  const { openTaskForm } = useTask();
+  const { openTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
   const { getToday } = useHijriDate();
 

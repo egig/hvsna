@@ -97,15 +97,19 @@ export class HijriDate {
     this.day = day;
     this.hour = hour as number;
     this.minute = minute as number;
-    this._jsDate = toDate({
-      year,
-      month,
-      day
-    }, {hour, minute}, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset
-    })
+    this._jsDate = toDate(
+      {
+        year,
+        month,
+        day,
+      },
+      { hour, minute },
+      {
+        latitude: this._latitude,
+        longitude: this._longitude,
+        offset: this._offset,
+      },
+    );
 
     this.dayOfWeek = this._jsDate.getDay();
     // Adjust dayOfWeek based on startOfWeek setting
@@ -117,7 +121,7 @@ export class HijriDate {
   }
 
   static fromDate(date: Date, options?: HijriDateOptions): HijriDate {
-    let h = fromDate(date, options)
+    let h = fromDate(date, options);
     const hijriDateObj = new HijriDate(
       h.year,
       h.month,

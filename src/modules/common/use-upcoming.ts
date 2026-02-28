@@ -7,7 +7,7 @@ import type { Task } from "src/modules/task/types";
 export function useUpcoming() {
   const { getToday, getTomorrow, toHijriDate, formatDate, createHijriDate } =
     useHijriDate();
-  
+
   const today = getToday();
   const todayString = today.toString(); // Use HijriDate string representation for query key
 
@@ -115,8 +115,11 @@ export function useUpcoming() {
     taskGroups: groupedTasks,
     loading: upcomingTasksQuery.isPending,
     initiated: !upcomingTasksQuery.isPending,
-    error: upcomingTasksQuery.error ? 
-      (upcomingTasksQuery.error instanceof Error ? upcomingTasksQuery.error.message : 'Unknown error') : null,
+    error: upcomingTasksQuery.error
+      ? upcomingTasksQuery.error instanceof Error
+        ? upcomingTasksQuery.error.message
+        : "Unknown error"
+      : null,
     formatScheduledDate,
     refreshTasks: () => upcomingTasksQuery.refetch(),
   };
