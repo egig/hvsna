@@ -38,7 +38,7 @@ export function TaskListItem({
   formatDate,
 }: TaskListItemProps) {
   const { goal } = useGoal(task.targetId || undefined);
-  const { updateStatus, completeTask, reopenTask } = useTaskListItem();
+  const { completeTask, reopenTask } = useTaskListItem();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();

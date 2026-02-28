@@ -20,7 +20,6 @@ export default function Tasks() {
     loadingMore,
     error,
     hasMore,
-    isScrollable,
     refreshTasks,
     openEditPopup,
     handleInfiniteScroll,

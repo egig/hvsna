@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { formatHijriDateString } from "./task-form-helpers";
-import { useTaskStore } from "./task-store";
+import { useTaskContext } from "./task-context";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
@@ -39,8 +39,7 @@ export const useTaskFormEdit = (
   onCancel?: () => void,
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
-  const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
-  const getTask = useTaskStore((s) => s.getTask);
+  const { closeTaskForm, getTask } = useTaskContext();
 
   const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);

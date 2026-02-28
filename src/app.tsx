@@ -16,6 +16,7 @@ import { SnackbarProvider } from "./ui/snackbar-provider";
 import { ErrorBoundary } from "./components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/query-client";
+import { TaskProvider } from "./modules/task/task-context";
 
 export interface AppConfig {
   basePath?: string;
@@ -67,9 +68,11 @@ export default function Hvsna({
                   <PouchDBProvider dbInstance={db}>
                     <SyncProvider>
                       <LanguageProviderWrapper>
-                        <BrowserRouter basename={config.appBaseName || ""}>
-                          <AppRoutes />
-                        </BrowserRouter>
+                        <TaskProvider>
+                          <BrowserRouter basename={config.appBaseName || ""}>
+                            <AppRoutes />
+                          </BrowserRouter>
+                        </TaskProvider>
                       </LanguageProviderWrapper>
                     </SyncProvider>
                   </PouchDBProvider>

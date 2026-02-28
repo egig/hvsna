@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "react-router";
-import { useTaskStore } from "./task-store";
+import { useTaskContext } from "./task-context";
 import { useLog } from "../log/use-log";
 import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
@@ -45,8 +45,7 @@ export const useTaskForm = (
   onError?: (error: string) => void,
   onCancel?: () => void,
 ): UseTaskFormReturn => {
-  const closeTaskForm = useTaskStore((s) => s.closeTaskForm);
-  const getTask = useTaskStore((s) => s.getTask);
+  const { closeTaskForm, getTask } = useTaskContext();
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();

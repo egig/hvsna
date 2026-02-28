@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useTaskStore } from "./task-store";
 import { useTask } from "./use-task";
 import { taskRepository } from "./task-repository";
 import { queryKeys } from "../common/query-keys";
-import type { Task, TaskQuery, TaskStatus } from "./types";
+import type { Task, TaskStatus, TaskQuery } from "./types";
+import { HijriDate } from "../calendar/hijri";
 
 export function useTasks() {
   const [initiated, setInitiated] = useState(false);
@@ -14,17 +14,16 @@ export function useTasks() {
   
   const { openTaskForm, setEditingTaskId } = useTask();
   
-  // Keep filter state in store for UI consistency
-  const {
-    deleteTask,
-    statusFilter,
-    dateRangeFilter,
-    searchTextFilter,
-    setStatusFilter,
-    setDateRangeFilter,
-    setSearchTextFilter,
-    clearFilters,
-  } = useTaskStore();
+  // Local filter state
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState<{ startDate: HijriDate; endDate: HijriDate } | null>(null);
+  const [searchTextFilter, setSearchTextFilter] = useState<string>("");
+
+  const clearFilters = useCallback(() => {
+    setStatusFilter("all");
+    setDateRangeFilter(null);
+    setSearchTextFilter("");
+  }, []);
 
   // Create filter key for React Query
   const createFilterKey = () => {
@@ -108,28 +107,6 @@ export function useTasks() {
     openTaskForm();
   }, []);
 
-  const handleDeleteTask = useCallback(
-    async (task: Task) => {
-      try {
-        await deleteTask(task.id);
-        resetPagination();
-        setEditingTaskId(null);
-      } catch (err) {
-        alert("Failed to delete task. Please try again.");
-      }
-    },
-    [deleteTask, setEditingTaskId, resetPagination],
-  );
-
-  const handleDeleteTaskById = useCallback(
-    async (taskId: string) => {
-      const task = browsedTasksQuery.data?.find((t: Task) => t.id === taskId);
-      if (task) {
-        await handleDeleteTask(task);
-      }
-    },
-    [browsedTasksQuery.data, handleDeleteTask],
-  );
 
   const handleInfiniteScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
@@ -221,8 +198,6 @@ export function useTasks() {
     handleTaskSuccess,
     handleTaskError,
     handleTaskCancel,
-    handleDeleteTask,
-    handleDeleteTaskById,
     handleInfiniteScroll,
 
     // Filter actions
