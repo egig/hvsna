@@ -22,7 +22,7 @@ export function PageTransition({ children }: PageTransitionProps) {
     },
     // TODO find a way to use back navigation
     // currently using navigate(-1) or browser back button does not carry new state
-    // using custom state make it crash in back navigation, may store it in zustand ?
+    // using custom state make it crash in back navigation
     back: {
       initial: { x: "-20%", opacity: 0 },
       animate: { x: 0, opacity: 1 },

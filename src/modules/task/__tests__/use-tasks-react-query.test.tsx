@@ -3,6 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useTasks } from "../use-tasks";
 import { taskRepository } from "../task-repository";
+import { TaskProvider } from "../task-context";
+import { PouchDBProvider } from "../../../pouchdb";
+import { SettingsProvider } from "../../../modules/settings";
+import { SystemProvider } from "../../../modules/system";
 import type { Task, TaskStatus } from "../types";
 
 // Mock the dependencies
@@ -14,7 +18,33 @@ vi.mock("../use-task", () => ({
   }),
 }));
 
+// Mock PouchDB
+vi.mock("pouchdb", () => ({
+  default: vi.fn(() => ({
+    get: vi.fn(),
+    put: vi.fn(),
+  })),
+}));
+
+// Mock PouchDB singleton
+vi.mock("../../../lib/pouchdb-singleton", () => {
+  const mockDB = {
+    get: vi.fn(),
+    put: vi.fn(),
+  };
+  return {
+    default: mockDB,
+    db: mockDB,
+  };
+});
+
 const mockTaskRepository = vi.mocked(taskRepository);
+
+// Mock DB for wrapper
+const mockDB = {
+  get: vi.fn(),
+  put: vi.fn(),
+};
 
 describe("useTasks with React Query", () => {
   let queryClient: QueryClient;
@@ -30,7 +60,15 @@ describe("useTasks with React Query", () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <SystemProvider>
+        <SettingsProvider>
+          <PouchDBProvider dbInstance={mockDB as any}>
+            <TaskProvider>{children}</TaskProvider>
+          </PouchDBProvider>
+        </SettingsProvider>
+      </SystemProvider>
+    </QueryClientProvider>
   );
 
   it("should load browsed tasks successfully", async () => {
