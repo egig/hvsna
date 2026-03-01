@@ -42,29 +42,28 @@ export default function Tasks() {
 
   return (
     <Page
-    navbar={
-      <Navbar
-        showBackButton={false}
-        showSearch={true}
-        searchValue={searchTextFilter}
-        onSearchChange={setSearchTextFilter}
-        searchPlaceholder={t("search_tasks")}
-        rightAction={
-          <Button
-            onClick={() => setFilterModalOpened(true)}
-            aria-label={t("filter_options")}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500"
-          >
-            {hasFilter() && (
-              <div className="absolute w-2 h-2 bg-[var(--hvsna-primary-color)] opacity-[0.8] rounded-full" />
-            )}
-            <Filter size={20} />
-          </Button>
-        }
-      />
-    }
+      navbar={
+        <Navbar
+          showBackButton={false}
+          showSearch={true}
+          searchValue={searchTextFilter}
+          onSearchChange={setSearchTextFilter}
+          searchPlaceholder={t("search_tasks")}
+          rightAction={
+            <Button
+              onClick={() => setFilterModalOpened(true)}
+              aria-label={t("filter_options")}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500"
+            >
+              {hasFilter() && (
+                <div className="absolute w-2 h-2 bg-[var(--hvsna-primary-color)] opacity-[0.8] rounded-full" />
+              )}
+              <Filter size={20} />
+            </Button>
+          }
+        />
+      }
     >
-
       <div
         className="tasks-scroll-container h-[100%] overflow-y-auto min-h-[400px]"
         onScroll={handleInfiniteScroll}

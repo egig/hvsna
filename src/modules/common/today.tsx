@@ -3,7 +3,7 @@ import TaskListItem from "../task/task-list-item";
 import { ErrorDisplay } from "../../components/error-display";
 import { useToday } from "src/modules/common/use-today";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { LargeNavbar } from "src/modules/navigation/navbar";
+import { LargeNavbar, Navbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
@@ -34,11 +34,7 @@ export function Today() {
   }
 
   return (
-    <Page
-    navbar={
-      <LargeNavbar title={pageTitle} subtitle={subTitle} />
-    }
-    >
+    <Page navbarLarge={<LargeNavbar title={pageTitle} subtitle={subTitle} />}>
       {initiated && todayTasks.length === 0 && (
         <div className="p-4">
           <div className="text-gray-400 mb-2">

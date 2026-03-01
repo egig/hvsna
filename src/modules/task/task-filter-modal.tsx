@@ -5,6 +5,7 @@ import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../../ui/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import type { TaskStatus } from "./types";
 
 interface TaskFilterModalProps {
   isOpen: boolean;
@@ -12,7 +13,7 @@ interface TaskFilterModalProps {
   statusFilter: number | "all";
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
-  onStatusFilterChange: (value: number | "all") => void;
+  onStatusFilterChange: (value: TaskStatus | "all") => void;
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
   ) => void;
@@ -79,7 +80,9 @@ export default function TaskFilterModal({
           label={t("status")}
           value={statusFilter.toString()}
           onValueChange={(value) => {
-            onStatusFilterChange(value === "all" ? "all" : parseInt(value));
+            onStatusFilterChange(
+              value === "all" ? "all" : (parseInt(value) as TaskStatus),
+            );
           }}
           options={statusOptions.map((opt) => ({
             value: opt.value.toString(),
