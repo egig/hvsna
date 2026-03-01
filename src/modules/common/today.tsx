@@ -34,8 +34,11 @@ export function Today() {
   }
 
   return (
-    <Page>
+    <Page
+    navbar={
       <LargeNavbar title={pageTitle} subtitle={subTitle} />
+    }
+    >
       {initiated && todayTasks.length === 0 && (
         <div className="p-4">
           <div className="text-gray-400 mb-2">

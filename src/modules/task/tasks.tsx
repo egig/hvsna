@@ -41,7 +41,8 @@ export default function Tasks() {
   };
 
   return (
-    <Page>
+    <Page
+    navbar={
       <Navbar
         showBackButton={false}
         showSearch={true}
@@ -61,9 +62,11 @@ export default function Tasks() {
           </Button>
         }
       />
+    }
+    >
 
       <div
-        className="tasks-scroll-container h-[calc(100vh-var(--tab-bar-height)-65px)] overflow-y-auto min-h-[400px]"
+        className="tasks-scroll-container h-[100%] overflow-y-auto min-h-[400px]"
         onScroll={handleInfiniteScroll}
       >
         {initiated && error && (
