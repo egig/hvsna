@@ -79,6 +79,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   // Manual sync function
   const manualSync = async () => {
+    console.log(isSignedIn, user, db);
     if (!isSignedIn || !user?.syncURL || !db) {
       throw new Error(
         "Sync not available - user not signed in or sync URL not configured",

@@ -11,7 +11,6 @@ interface TaskPreviewProps {
 export default function TaskPreview({ task, selectedGoal }: TaskPreviewProps) {
   const { t } = useLanguageContext();
   const { toHijriDate, formatDate } = useHijriDate();
-  console.log(task);
   return (
     <div className="p-4 space-y-4 max-h-[50vh] overflow-y-auto text-sm">
       {/* Basic Information */}

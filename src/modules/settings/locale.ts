@@ -172,6 +172,22 @@ export const settingsTranslations = {
     en: "Hijri calendar manual offset",
     id: "Offset manual kalender Hijri",
   },
+  source: {
+    en: "Source",
+    id: "Sumber",
+  },
+  gps_location: {
+    en: "GPS",
+    id: "GPS",
+  },
+  browser_location: {
+    en: "Browser Location",
+    id: "Lokasi Browser",
+  },
+  manual_location: {
+    en: "Manual",
+    id: "Manual",
+  },
 
   // Missing translations
   settings: {

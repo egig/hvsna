@@ -103,7 +103,7 @@ describe("useToday with React Query", () => {
     expect(result.current.error).toBe(null);
 
     // Check computed values
-    expect(result.current.pageTitle).toBe("Tue 15 Muharram 1445"); // Updated to match actual day
+    expect(result.current.pageTitle).toBe("Tue, 15 Muharram 1445"); // Updated to match actual day
     expect(result.current.subTitle).toContain("2023"); // Updated to match actual year
 
     // Verify repository calls

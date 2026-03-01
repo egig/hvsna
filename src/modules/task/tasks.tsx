@@ -4,7 +4,6 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
-import { LoadingSpinner } from "src/ui/loader";
 import TaskListItem from "src/modules/task/task-list-item";
 import { useTasks } from "./use-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -17,7 +16,6 @@ export default function Tasks() {
     tasks,
     loading,
     initiated,
-    loadingMore,
     error,
     hasMore,
     refreshTasks,
@@ -106,12 +104,6 @@ export default function Tasks() {
               />
             ))}
           </>
-        )}
-
-        {loadingMore && hasMore && (
-          <div className="flex justify-center py-4">
-            <LoadingSpinner size="md" />
-          </div>
         )}
       </div>
 

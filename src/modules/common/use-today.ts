@@ -27,7 +27,7 @@ export function useToday() {
     enabled: hijriCalInititated,
   });
 
-  const pageTitle = `${dayNames[today.dayOfWeek]} ${today.day} ${hijriMonthNames[today.month - 1]} ${today.year}`;
+  const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${hijriMonthNames[today.month - 1]} ${today.year}`;
   const subTitle = `${gregorianDate.getDate()} ${gregorianMonthNames[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
 
   // Combine loading states

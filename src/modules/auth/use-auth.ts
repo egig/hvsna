@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { useAuthStore } from "./auth-store";
 import { useSession } from "@clerk/clerk-react";
+import { useAuthContext } from "./auth-context";
 
 export const useAuth = () => {
-  const { user, loading, error, fetchUser, clearError } = useAuthStore();
+  const { user, loading, error, fetchUser, clearError } = useAuthContext();
   const { isSignedIn, session } = useSession();
 
   // Auto-fetch user on mount if not already loaded and user is signed in
