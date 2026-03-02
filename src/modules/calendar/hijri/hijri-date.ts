@@ -15,6 +15,7 @@ export interface HijriDateOptions {
   longitude?: number;
   offset?: number;
   startOfWeek?: number; // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+  sunsetShift?: number;
 }
 
 export class HijriDate {
@@ -36,6 +37,7 @@ export class HijriDate {
   _longitude: number;
   _offset?: number;
   _startOfWeek?: number;
+  _sunsetShift?: number;
 
   constructor(
     year: number,
@@ -79,7 +81,7 @@ export class HijriDate {
     // If startOfWeek is Monday (1), dayOfWeek becomes 0-6 (Mon-Sun)
     // If startOfWeek is Friday (5), dayOfWeek becomes 0-6 (Fri-Thu)
     const startOfWeekDay = this._startOfWeek ?? 5; // Default to Friday (5) for Islamic calendar
-    this.dayOfWeek = (this.dayOfWeek - startOfWeekDay + 7) % 7;
+    this.dayOfWeek = (this.dayOfWeek - startOfWeekDay + 7 + (options?.sunsetShift || 0)) % 7;
   }
 
   static fromDate(date: Date, options?: HijriDateOptions): HijriDate {
@@ -97,6 +99,7 @@ export class HijriDate {
         longitude: options?.longitude,
         offset: options?.offset,
         startOfWeek: options?.startOfWeek,
+        sunsetShift: h.sunsetShift
       },
     );
 

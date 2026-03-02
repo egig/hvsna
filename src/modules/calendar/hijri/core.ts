@@ -12,6 +12,7 @@ export interface HijriDateComponents {
   year: number;
   month: number;
   day: number;
+  sunsetShift?: number;
 }
 
 /**
@@ -120,12 +121,15 @@ export function fromDate(
     sunsetTime,
   );
 
+  let sunsetShift = 0;
   if (isAfterSunset) {
     hijriDate = _applyOffset(hijriDate, 1);
+    sunsetShift = 1
   }
 
   const adjustedHijri = _applyOffset(hijriDate, offset);
   return Object.assign(adjustedHijri, {
+    sunsetShift: sunsetShift,
     hour: gregorianDate.getHours(),
     minute: gregorianDate.getMinutes(),
     second: gregorianDate.getSeconds(),
