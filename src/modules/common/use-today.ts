@@ -13,10 +13,9 @@ export function useToday() {
   const gregorianDate = today.toDate();
   const todayString = today.toString(); // Use HijriDate string representation for query key
 
-  // React Query for today's tasks
   const todayTasksQuery = useQuery({
     queryKey: queryKeys.todayTasks(todayString),
-    queryFn: () => taskRepository.findTasksBefore(today.next().startOfDay()),
+    queryFn: () => taskRepository.findTasksBefore(today.endOfDay()),
     enabled: hijriCalInititated,
   });
 

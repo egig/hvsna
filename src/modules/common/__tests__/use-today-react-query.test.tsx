@@ -108,7 +108,7 @@ describe("useToday with React Query", () => {
 
     // Verify repository calls
     expect(mockTaskRepository.findTasksBefore).toHaveBeenCalledWith(
-      today.next().startOfDay(),
+      today.endOfDay(),
     );
     expect(mockTaskRepository.findTodayCompletedTasks).toHaveBeenCalledWith(
       today,

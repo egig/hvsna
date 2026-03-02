@@ -84,9 +84,7 @@ describe("Task.isOverdue", () => {
       atTimeIsNone: 1, // indicates no specific time is set
     });
 
-    // Tasks without specific time should check against end of day
-    // Since it's only 1 second ago, it should still be before end of day, so not overdue
-    expect(taskWithoutTime.isOverdue()).toBe(false);
+    expect(taskWithoutTime.isOverdue()).toBe(true);
   });
 
   it("should handle tasks with atTimeIsNone=0 (specific time set) correctly", () => {
@@ -149,8 +147,6 @@ describe("Task.isOverdue", () => {
       atTimeIsNone: 1, // indicates no specific time is set
     });
 
-    // Tasks without specific time should check against end of day
-    // Since it's still today, it should not be overdue yet
-    expect(taskWithoutTimeToday.isOverdue()).toBe(false);
+    expect(taskWithoutTimeToday.isOverdue()).toBe(true);
   });
 });

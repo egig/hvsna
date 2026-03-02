@@ -162,7 +162,6 @@ export class TaskRepository {
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
     delete doc._rev;
 
-    console.log("creating tasks", doc);
     await (db as any).put(doc);
 
     return newTask;

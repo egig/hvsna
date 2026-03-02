@@ -50,16 +50,7 @@ export class Task {
     }
 
     const now = Date.now();
-    if (this.atTimeIsNone === 0) {
-      return now > this.atEpochMillis;
-    }
-
-    // For tasks without specific time, check against end of that calendar day
-    const taskDate = new Date(this.atEpochMillis);
-    const endOfTaskDay = new Date(taskDate);
-    endOfTaskDay.setHours(23, 59, 59, 999); // End of the day
-
-    return now > endOfTaskDay.valueOf();
+    return now > this.atEpochMillis;
   }
 }
 
