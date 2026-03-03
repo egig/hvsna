@@ -386,9 +386,7 @@ export class TaskRepository {
           $gte: 0,
         },
         atEpochMillis: {
-          // date is less than the specified date
-          // includes "overdue" tasks
-          $lt: beforeHijri.toDate().valueOf(),
+          $lte: beforeHijri.toDate().valueOf(),
         },
       },
       sort: [

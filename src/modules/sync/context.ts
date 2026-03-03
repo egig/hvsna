@@ -9,6 +9,7 @@ import { useAuth } from "src/modules/auth/use-auth";
 import { useSession } from "@clerk/clerk-react";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {
@@ -76,6 +77,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
+  const queryClient = useQueryClient();
 
   // Manual sync function
   const manualSync = async () => {
@@ -103,6 +105,9 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
       // Perform one-time sync
       await db.sync(remoteDB);
+
+      // Invalidate all queries so UI reflects synced data
+      queryClient.invalidateQueries();
 
       // Update last sync time
       const now = new Date();
@@ -165,6 +170,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
           })
           .on("change", async (info: any) => {
             console.log("[sync] change:", info);
+            queryClient.invalidateQueries();
             const now = new Date();
             setLastSyncTime(now);
             await storeSyncTimeToDB(db, now);

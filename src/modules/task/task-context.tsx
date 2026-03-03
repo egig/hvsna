@@ -70,6 +70,18 @@ export const TaskProvider: React.FC<{
     }
   }, [taskId, currentTargetId]);
 
+  const invalidateTaskQueries = () => {
+    console.log("invalidate")
+    const today = getToday();
+    const todayString = today.toString();
+    const tomorrowString = today.next().toString();
+
+    queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
+    queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
+    queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+  };
+
   // Local form functions
   const openTaskForm = (taskId?: string) => {
     setEditingTaskId(taskId || null);
@@ -126,27 +138,7 @@ export const TaskProvider: React.FC<{
   const completeTaskMutation = useMutation({
     mutationFn: (id: string) => taskRepository.completeTask(id),
     onSuccess: async (updatedTask, id) => {
-      // Invalidate relevant queries
-      const today = getToday();
-      const todayString = today.toString();
-
-      // Invalidate today's tasks and completed tasks
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayCompletedTasks(todayString),
-      });
-
-      // Invalidate upcoming tasks
-      const tomorrow = today.next();
-      const tomorrowString = tomorrow.toString();
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.upcomingTasks(tomorrowString),
-      });
-
-      // Invalidate browsed tasks (for task list views)
-      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+      invalidateTaskQueries();
 
       // Handle log creation
       if (!updatedTask.targetId) {
@@ -183,27 +175,7 @@ export const TaskProvider: React.FC<{
   const reopenTaskMutation = useMutation({
     mutationFn: (id: string) => taskRepository.reopenTask(id),
     onSuccess: async (updatedTask, id) => {
-      // Invalidate relevant queries
-      const today = getToday();
-      const todayString = today.toString();
-
-      // Invalidate today's tasks and completed tasks
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayCompletedTasks(todayString),
-      });
-
-      // Invalidate upcoming tasks
-      const tomorrow = today.next();
-      const tomorrowString = tomorrow.toString();
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.upcomingTasks(tomorrowString),
-      });
-
-      // Invalidate browsed tasks (for task list views)
-      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+      invalidateTaskQueries();
 
       // Handle log creation
       if (!updatedTask.targetId) {
@@ -241,22 +213,7 @@ export const TaskProvider: React.FC<{
   const createTaskMutation = useMutation({
     mutationFn: (input: TaskCreateInput) => taskRepository.create(input),
     onSuccess: () => {
-      // Invalidate all relevant queries
-      const today = getToday();
-      const todayString = today.toString();
-      const tomorrow = today.next();
-      const tomorrowString = tomorrow.toString();
-
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayCompletedTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.upcomingTasks(tomorrowString),
-      });
-      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+      invalidateTaskQueries();
     },
     onError: (error) => {
       console.error("Failed to create task:", error);
@@ -269,22 +226,7 @@ export const TaskProvider: React.FC<{
     mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) =>
       updateTaskWithLog(id, input),
     onSuccess: () => {
-      // Invalidate all relevant queries
-      const today = getToday();
-      const todayString = today.toString();
-      const tomorrow = today.next();
-      const tomorrowString = tomorrow.toString();
-
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayCompletedTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.upcomingTasks(tomorrowString),
-      });
-      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+      invalidateTaskQueries();
     },
     onError: (error) => {
       console.error("Failed to update task:", error);
@@ -296,22 +238,7 @@ export const TaskProvider: React.FC<{
   const deleteTaskMutation = useMutation({
     mutationFn: (id: string) => taskRepository.delete(id),
     onSuccess: () => {
-      // Invalidate all relevant queries
-      const today = getToday();
-      const todayString = today.toString();
-      const tomorrow = today.next();
-      const tomorrowString = tomorrow.toString();
-
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.todayCompletedTasks(todayString),
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.upcomingTasks(tomorrowString),
-      });
-      queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+      invalidateTaskQueries();
       setFormOpen(false);
     },
     onError: (error) => {
