@@ -16,6 +16,8 @@ const config: AppConfig = {
   supabasePublishableKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY!,
   rollbarAccessToken: import.meta.env.VITE_ROLLBAR_ACCESS_TOKEN!,
   rollbarEnv: import.meta.env.VITE_ROLLBAR_ENV!,
+  posthogKey: import.meta.env.VITE_PUBLIC_POSTHOG_KEY,
+  posthogHost: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
 };
 
 const root = createRoot(document.getElementById("root") as Container);

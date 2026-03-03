@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from "react";
 import type { ReactNode } from "react";
 import { ErrorBoundary as RollbarErrorBoundary } from "@rollbar/react";
+import { PostHogErrorBoundary } from "@posthog/react";
 
 interface Props {
   children: ReactNode;
@@ -134,10 +135,12 @@ function ErrorBoundaryContent({ children, fallback }: Props) {
 
 export function ErrorBoundary({ children, fallback }: Props) {
   return (
-    <RollbarErrorBoundary>
-      <ErrorBoundaryContent fallback={fallback}>
-        {children}
-      </ErrorBoundaryContent>
-    </RollbarErrorBoundary>
+    <PostHogErrorBoundary fallback={fallback as any}>
+      <RollbarErrorBoundary>
+        <ErrorBoundaryContent fallback={fallback}>
+          {children}
+        </ErrorBoundaryContent>
+      </RollbarErrorBoundary>
+    </PostHogErrorBoundary>
   );
 }

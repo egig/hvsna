@@ -10,6 +10,7 @@ import type {
   LocationResolveType,
 } from "./modules/settings/settings";
 import { Provider } from "@rollbar/react";
+import { PostHogProvider } from "@posthog/react";
 import { SyncProvider } from "./modules/sync/context";
 import { LanguageProviderWrapper } from "./modules/i18n/LanguageProviderWrapper";
 import { SnackbarProvider } from "./ui/snackbar-provider";
@@ -20,6 +21,7 @@ import { TaskProvider } from "./modules/task/task-context";
 import { AuthProvider } from "./modules/auth";
 import { SettingsProvider } from "./modules/settings";
 import { SystemProvider } from "./modules/system";
+import { PostHogSessionTracker } from "./components/posthog-session-tracker";
 
 export interface AppConfig {
   basePath?: string;
@@ -31,6 +33,8 @@ export interface AppConfig {
   clerkPublishableKey?: string;
   rollbarAccessToken?: string;
   rollbarEnv?: string;
+  posthogKey?: string;
+  posthogHost?: string;
   authUser?: any;
   appBaseName?: string;
   supabaseURL?: string;
@@ -39,6 +43,11 @@ export interface AppConfig {
   locationResolveType?: LocationResolveType;
   coordinate?: Coordinate | null;
 }
+
+const posthogOptions = {
+  api_host: "",
+  defaults: "2026-01-30",
+} as const;
 
 export default function Hvsna({
   config,
@@ -53,6 +62,10 @@ export default function Hvsna({
   };
 
   return (
+    <PostHogProvider
+      apiKey={config.posthogKey || ""}
+      options={{ ...posthogOptions, api_host: config.posthogHost || "https://us.i.posthog.com" }}
+    >
     <Provider
       config={{
         accessToken: config.rollbarAccessToken,
@@ -80,6 +93,7 @@ export default function Hvsna({
                                 <BrowserRouter
                                   basename={config.appBaseName || ""}
                                 >
+                                  <PostHogSessionTracker />
                                   <AppRoutes />
                                 </BrowserRouter>
                               </TaskProvider>
@@ -96,5 +110,6 @@ export default function Hvsna({
         </ErrorBoundary>
       </QueryClientProvider>
     </Provider>
+    </PostHogProvider>
   );
 }
