@@ -16,7 +16,13 @@ import {
   TbSquareRoundedPlusFilled,
 } from "react-icons/tb";
 
-export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
+export function TabBar({
+  openTaskForm,
+  collapsed,
+}: {
+  openTaskForm?: () => void;
+  collapsed?: boolean;
+}) {
   const { t } = useLanguageContext();
   const location = useLocation();
   const { isDesktop } = useScreenSize();
@@ -65,21 +71,25 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
       <nav className="flex flex-col h-full">
         {/* Add Task Button at top */}
         {openTaskForm && (
-          <div className="pt-4 px-4">
+          <div className="pt-4 px-2">
             <button
               onClick={() => {
                 openTaskForm();
               }}
-              className="flex items-center space-x-3 w-full px-3 py-2 font-bold text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              className={`flex items-center w-full px-3 py-2 font-bold text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors ${
+                collapsed ? "justify-center" : "space-x-3"
+              }`}
               aria-label="Add new task"
             >
               <TbSquareRoundedPlusFilled size={20} />
-              <span className="font-medium">{t("add_new_task")}</span>
+              {!collapsed && (
+                <span className="font-medium">{t("add_new_task")}</span>
+              )}
             </button>
           </div>
         )}
 
-        <div className="flex-1 p-4 space-y-2">
+        <div className="flex-1 p-2 space-y-2">
           {tabs.map((tab) => {
             const isActive = getIsActive(tab.path);
             return (
@@ -87,7 +97,9 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
                 key={tab.path}
                 to={tab.path}
                 navType="sidebar"
-                className={`flex text-[var(--hvsna-primary-color)] items-center space-x-3 w-full px-3 py-2 rounded-lg transition-colors ${
+                className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
+                  collapsed ? "justify-center" : "space-x-3"
+                } ${
                   isActive ? "bg-gray-100" : "hover:bg-gray-100"
                 }`}
                 aria-label={tab.label}
@@ -97,7 +109,9 @@ export function TabBar({ openTaskForm }: { openTaskForm?: () => void }) {
                 <span className="text-xl">
                   {isActive ? tab.activeIcon : tab.icon}
                 </span>
-                <span className="font-medium">{tab.label}</span>
+                {!collapsed && (
+                  <span className="font-medium">{tab.label}</span>
+                )}
               </Button>
             );
           })}

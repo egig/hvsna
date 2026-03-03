@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
-import { Plus } from "lucide-react";
+import { Plus, PanelLeftClose, PanelLeft } from "lucide-react";
+import { SignedIn, UserButton } from "@clerk/clerk-react";
 import { TabBar } from "./modules/navigation";
 import { Modal } from "./modules/navigation/modal";
 import TaskForm from "./modules/task/task-form";
@@ -14,6 +16,7 @@ export default function TabLayout() {
     useTaskContext();
   const location = useLocation();
   const { isDesktop } = useScreenSize();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleTaskSuccess = () => {
     closeTaskForm();
@@ -28,9 +31,34 @@ export default function TabLayout() {
     return (
       <div className="flex h-screen">
         {/* Side Navigation */}
-        <div className="w-48 bg-white border-r border-gray-200 flex flex-col">
+        <div
+          className={`${
+            sidebarCollapsed ? "w-14" : "w-48"
+          } bg-white border-r border-gray-200 flex flex-col transition-all duration-200`}
+        >
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
+            {!sidebarCollapsed && (
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            )}
+            <button
+              onClick={() => setSidebarCollapsed((prev) => !prev)}
+              className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
+                sidebarCollapsed ? "mx-auto" : "ml-auto"
+              }`}
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              {sidebarCollapsed ? (
+                <PanelLeft size={18} />
+              ) : (
+                <PanelLeftClose size={18} />
+              )}
+            </button>
+          </div>
           <div className="flex-1">
-            <TabBar openTaskForm={openTaskForm} />
+            <TabBar openTaskForm={openTaskForm} collapsed={sidebarCollapsed} />
           </div>
         </div>
 
@@ -63,7 +91,7 @@ export default function TabLayout() {
 
   // Mobile Layout with bottom tabs
   return (
-    <div className="m-auto h-[100dvh] flex flex-col">
+    <div className="h-[100dvh] flex flex-col">
       <div className="flex-1 overflow-hidden">
         <Outlet />
       </div>

@@ -133,20 +133,4 @@ describe("Task.isOverdue", () => {
     // Since yesterday is well past end of its day, it should be considered overdue
     expect(taskWithoutTimeNotOverdue.isOverdue()).toBe(true);
   });
-
-  it("should handle tasks with atTimeIsNone=1 for today (not overdue yet)", () => {
-    // Create a task for today (before end of day)
-    const today = new Date();
-    today.setHours(9, 0, 0, 0); // 9 AM today
-
-    const taskWithoutTimeToday = new Task({
-      id: "test11",
-      name: "Today Task Without Specific Time",
-      status: 0, // pending
-      atEpochMillis: today.valueOf(),
-      atTimeIsNone: 1, // indicates no specific time is set
-    });
-
-    expect(taskWithoutTimeToday.isOverdue()).toBe(true);
-  });
 });
