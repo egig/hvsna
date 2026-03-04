@@ -15,7 +15,6 @@ class PouchDBTaskDocument {
   _id?: string;
   _rev?: string | undefined;
   type: "task" = "task";
-  userId?: string;
   name?: string;
   description?: string;
   status?: TaskStatus = 0;
@@ -44,7 +43,6 @@ class PouchDBTaskDocument {
     return new Task({
       id: this._id || "",
       rev: this._rev,
-      userId: this.userId || "",
       name: this.name || "",
       description: this.description || "",
       status: this.status !== undefined ? this.status : 0,
@@ -228,13 +226,7 @@ export class TaskRepository {
   async find(query?: TaskQuery): Promise<Task[]> {
     await (db as any).createIndex({
       index: {
-        fields: [
-          "type",
-          "status",
-          "noDate",
-          "atDateHijri",
-          "atEpochMillis",
-        ],
+        fields: ["type", "status", "noDate", "atDateHijri", "atEpochMillis"],
       },
     });
 
@@ -342,7 +334,6 @@ export class TaskRepository {
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) => ({
       id: doc._id,
-      userId: doc.userId,
       name: doc.name,
       status: doc.status,
       atEpochMillis: doc.atEpochMillis,
@@ -359,13 +350,7 @@ export class TaskRepository {
   async findTasksBefore(beforeHijri: HijriDate): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: [
-          "type",
-          "status",
-          "noDate",
-          "atDateHijri",
-          "atEpochMillis",
-        ],
+        fields: ["type", "status", "noDate", "atDateHijri", "atEpochMillis"],
       },
     });
 

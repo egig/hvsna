@@ -276,4 +276,14 @@ export const commonTranslations = {
     en: "Remove Time",
     id: "Hapus Waktu",
   },
+
+  // App update
+  update_available: {
+    en: "A new version is available",
+    id: "Versi baru tersedia",
+  },
+  update_now: {
+    en: "Update Now",
+    id: "Perbarui Sekarang",
+  },
 };

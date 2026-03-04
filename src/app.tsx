@@ -22,6 +22,7 @@ import { AuthProvider } from "./modules/auth";
 import { SettingsProvider } from "./modules/settings";
 import { SystemProvider } from "./modules/system";
 import { PostHogSessionTracker } from "./components/posthog-session-tracker";
+import { PlatformProvider } from "./modules/platform";
 
 export interface AppConfig {
   basePath?: string;
@@ -80,36 +81,38 @@ export default function Hvsna({
       >
         <QueryClientProvider client={queryClient}>
           <ErrorBoundary>
-            <SnackbarProvider>
-              <SystemProvider>
-                <ScreenSizeProvider onClose={handleBreakpointClose}>
-                  <ClerkProvider
-                    publishableKey={config.clerkPublishableKey || ""}
-                  >
-                    <AuthProvider>
-                      <SettingsProvider>
-                        <DroppableContext>
-                          <PouchDBProvider dbInstance={db}>
-                            <SyncProvider>
-                              <LanguageProviderWrapper>
-                                <TaskProvider>
-                                  <BrowserRouter
-                                    basename={config.appBaseName || ""}
-                                  >
-                                    <PostHogSessionTracker />
-                                    <AppRoutes />
-                                  </BrowserRouter>
-                                </TaskProvider>
-                              </LanguageProviderWrapper>
-                            </SyncProvider>
-                          </PouchDBProvider>
-                        </DroppableContext>
-                      </SettingsProvider>
-                    </AuthProvider>
-                  </ClerkProvider>
-                </ScreenSizeProvider>
-              </SystemProvider>
-            </SnackbarProvider>
+            <PlatformProvider>
+              <SnackbarProvider>
+                <SystemProvider>
+                  <ScreenSizeProvider onClose={handleBreakpointClose}>
+                    <ClerkProvider
+                      publishableKey={config.clerkPublishableKey || ""}
+                    >
+                      <AuthProvider>
+                        <SettingsProvider>
+                          <DroppableContext>
+                            <PouchDBProvider dbInstance={db}>
+                              <SyncProvider>
+                                <LanguageProviderWrapper>
+                                  <TaskProvider>
+                                    <BrowserRouter
+                                      basename={config.appBaseName || ""}
+                                    >
+                                      <PostHogSessionTracker />
+                                      <AppRoutes />
+                                    </BrowserRouter>
+                                  </TaskProvider>
+                                </LanguageProviderWrapper>
+                              </SyncProvider>
+                            </PouchDBProvider>
+                          </DroppableContext>
+                        </SettingsProvider>
+                      </AuthProvider>
+                    </ClerkProvider>
+                  </ScreenSizeProvider>
+                </SystemProvider>
+              </SnackbarProvider>
+            </PlatformProvider>
           </ErrorBoundary>
         </QueryClientProvider>
       </Provider>

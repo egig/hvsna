@@ -1,10 +1,18 @@
+import { useRegisterSW } from "virtual:pwa-register/react";
+import { RefreshCw } from "lucide-react";
 import { Page } from "../navigation";
 import packageInfo from "../../../package.json";
 import { LargeNavbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { usePlatform } from "../platform";
 
 export default function About() {
   const { t } = useLanguageContext();
+  const { isNative } = usePlatform();
+  const {
+    needRefresh: [needRefresh],
+    updateServiceWorker,
+  } = useRegisterSW();
 
   return (
     <Page>
@@ -17,6 +25,35 @@ export default function About() {
           </p>
           <p>{t("about_description")}</p>
         </div>
+
+        {!isNative && needRefresh && (
+          <div
+            className="border rounded-lg p-4 flex items-center justify-between gap-4"
+            style={{
+              backgroundColor:
+                "color-mix(in srgb, var(--hvsna-primary-color, #5A4A7A) 10%, transparent)",
+              borderColor:
+                "color-mix(in srgb, var(--hvsna-primary-color, #5A4A7A) 30%, transparent)",
+            }}
+          >
+            <p
+              className="text-sm m-0"
+              style={{ color: "var(--hvsna-primary-color, #5A4A7A)" }}
+            >
+              {t("update_available")}
+            </p>
+            <button
+              onClick={() => updateServiceWorker(true)}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white rounded-md shrink-0"
+              style={{
+                backgroundColor: "var(--hvsna-primary-color, #5A4A7A)",
+              }}
+            >
+              <RefreshCw size={14} />
+              {t("update_now")}
+            </button>
+          </div>
+        )}
       </div>
     </Page>
   );
