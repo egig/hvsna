@@ -99,13 +99,13 @@ export function TabBar({
                 openTaskForm();
               }}
               className={`flex items-center w-full px-3 py-2 font-bold text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors ${
-                collapsed ? "justify-center" : "space-x-3"
+                collapsed ? "justify-center" : "space-x-1"
               }`}
               aria-label="Add new task"
             >
               <TbSquareRoundedPlusFilled size={20} />
               {!collapsed && (
-                <span className="font-medium">{t("add_new_task")}</span>
+                <span className="font-medium text-sm">{t("add_new_task")}</span>
               )}
             </button>
           </div>
@@ -120,7 +120,7 @@ export function TabBar({
                 to={tab.path}
                 navType="sidebar"
                 className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
-                  collapsed ? "justify-center" : "space-x-3"
+                  collapsed ? "justify-center" : "space-x-1"
                 } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
                 aria-label={tab.label}
                 aria-current={isActive ? "page" : undefined}
@@ -129,7 +129,7 @@ export function TabBar({
                 <span className="text-xl">
                   {isActive ? tab.activeIcon : tab.icon}
                 </span>
-                {!collapsed && <span className="font-medium">{tab.label}</span>}
+                {!collapsed && <span className="text-sm">{tab.label}</span>}
               </Button>
             );
           })}
@@ -144,7 +144,7 @@ export function TabBar({
                 to={tab.path}
                 navType="sidebar"
                 className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
-                  collapsed ? "justify-center" : "space-x-3"
+                  collapsed ? "justify-center" : "space-x-1"
                 } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
                 aria-label={tab.label}
                 aria-current={isActive ? "page" : undefined}
@@ -156,7 +156,7 @@ export function TabBar({
                 <span className="text-xl">
                   {isActive ? tab.activeIcon : tab.icon}
                 </span>
-                {!collapsed && <span className="font-medium">{tab.label}</span>}
+                {!collapsed && <span className="text-sm">{tab.label}</span>}
               </Button>
             );
           })}

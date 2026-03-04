@@ -58,15 +58,20 @@ export function SettingsModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={t("settings")}
-      className="max-w-6xl h-[80vh] max-h-[800px] overflow-hidden flex flex-col"
+      // title={t("settings")}
+      className="max-w-5xl h-[60vh] max-h-[800px] overflow-hidden flex flex-col"
       noPadding
     >
       {/* Modal Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidenav */}
-        <div className="w-64 bg-gray-50 border-r border-gray-200 flex-shrink-0">
+        <div className="w-56 bg-gray-50 border-r border-gray-200 flex-shrink-0">
           <nav className="p-3 space-y-1">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t("settings")}
+              </h2>
+            </div>
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = section.path === location.pathname;
@@ -79,12 +84,12 @@ export function SettingsModal({
                         onClick={() => handleSectionChange(section.path)}
                         className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                           isActive
-                            ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
+                            ? "bg-primary-50 text-primary-600"
                             : "text-gray-700 hover:bg-gray-100"
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-medium text-sm">
+                        <span className="text-sm">
                           {section.title}
                         </span>
                       </button>
@@ -96,12 +101,12 @@ export function SettingsModal({
                         onClick={() => handleSectionChange(section.path)}
                         className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                           isActive
-                            ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
+                            ? "bg-primary-50 text-primary-600"
                             : "text-gray-700 hover:bg-gray-100"
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-medium text-sm">
+                        <span className="text-sm">
                           {section.title}
                         </span>
                       </button>
@@ -112,12 +117,12 @@ export function SettingsModal({
                       onClick={() => handleSectionChange(section.path)}
                       className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
                         isActive
-                          ? "bg-primary-50 text-primary-600 border-l-4 border-primary-600"
+                          ? "bg-primary-50 text-primary-600"
                           : "text-gray-700 hover:bg-gray-100"
                       }`}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="font-medium text-sm">
+                      <span className="text-sm">
                         {section.title}
                       </span>
                     </button>
@@ -132,7 +137,7 @@ export function SettingsModal({
                 <SignOutButton>
                   <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-danger-600 hover:bg-danger-50 transition-colors">
                     <LogOut className="w-5 h-5 flex-shrink-0" />
-                    <span className="font-medium text-sm">{t("sign_out")}</span>
+                    <span className="text-sm">{t("sign_out")}</span>
                   </button>
                 </SignOutButton>
               </div>
@@ -155,119 +160,6 @@ interface SettingsLayoutProps {
   sections: SettingsSection[];
   className?: string;
   children?: ReactNode;
-}
-
-export function SettingsLayout({
-  sections,
-  className = "",
-  children,
-}: SettingsLayoutProps) {
-  const { t } = useLanguageContext();
-  const location = useLocation();
-
-  const currentSection = sections.find(
-    (section) => section.path === location.pathname,
-  );
-
-  return (
-    <div className={`flex h-full bg-gray-50 ${className}`}>
-      {/* Sidenav */}
-      <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {t("settings")}
-          </h2>
-        </div>
-
-        <nav className="p-2 space-y-1">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            const isActive = section.path === location.pathname;
-
-            return (
-              <div key={section.id}>
-                {section.requiresAuth && (
-                  <SignedIn>
-                    <Link
-                      to={section.path}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors block ${
-                        isActive
-                          ? "bg-blue-50 text-primary-600"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{section.title}</span>
-                    </Link>
-                  </SignedIn>
-                )}
-                {section.hideWhenSignedIn && (
-                  <SignedOut>
-                    <Link
-                      to={section.path}
-                      className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors block ${
-                        isActive
-                          ? "bg-blue-50 text-primary-600"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{section.title}</span>
-                    </Link>
-                  </SignedOut>
-                )}
-                {!section.requiresAuth && !section.hideWhenSignedIn && (
-                  <Link
-                    to={section.path}
-                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors block ${
-                      isActive
-                        ? "bg-blue-50 text-primary-600"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{section.title}</span>
-                  </Link>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Sign Out Button */}
-          <SignedIn>
-            <SignOutButton>
-              <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-gray-700 hover:bg-gray-100 transition-colors">
-                <LogOut className="w-5 h-5" />
-                <span className="font-medium">{t("sign_out")}</span>
-              </button>
-            </SignOutButton>
-          </SignedIn>
-        </nav>
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {currentSection && (
-          <>
-            {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-6 py-4">
-              <div className="flex items-center space-x-3">
-                <currentSection.icon className="w-6 h-6 text-gray-600" />
-                <h1 className="text-xl font-semibold text-gray-900">
-                  {currentSection.title}
-                </h1>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-auto bg-gray-50">
-              <div className="p-6">{children}</div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
 }
 
 export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
