@@ -71,7 +71,6 @@ export const TaskProvider: React.FC<{
   }, [taskId, currentTargetId]);
 
   const invalidateTaskQueries = () => {
-    console.log("invalidate");
     const today = getToday();
     const todayString = today.toString();
     const tomorrowString = today.next().toString();

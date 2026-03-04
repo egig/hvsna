@@ -20,8 +20,7 @@ class PouchDBTaskDocument {
   description?: string;
   status?: TaskStatus = 0;
   atDateHijri?: string = "";
-  atDateIsNone?: number = 1;
-  atTimeIsNone?: number = 1;
+  noDate?: number = 1;
   atEpochMillis?: number | null = null;
   atTime?: string = "";
   targetId?: string = "";
@@ -49,7 +48,7 @@ class PouchDBTaskDocument {
       name: this.name || "",
       description: this.description || "",
       status: this.status !== undefined ? this.status : 0,
-      atEpochMillis: this.atEpochMillis || 0,
+      atEpochMillis: this.atEpochMillis || null,
       targetId: this.targetId || "",
       targetValue: this.targetValue || 0,
       createdAt: this.createdAt,
@@ -57,8 +56,7 @@ class PouchDBTaskDocument {
       completedAt: this.completedAt,
       attributes: this.attributes || {},
       atDateHijri: this.atDateHijri || "",
-      atDateIsNone: this.atDateIsNone !== undefined ? this.atDateIsNone : 1,
-      atTimeIsNone: this.atTimeIsNone !== undefined ? this.atTimeIsNone : 0,
+      noDate: this.noDate !== undefined ? this.noDate : 1,
       atTime: this.atTime || "",
       prayerTime: this.prayerTime,
       usePrayerTime: this.usePrayerTime || false,
@@ -71,11 +69,9 @@ class PouchDBTaskDocument {
 
   static fromTaskItem(t: Task) {
     let a = new PouchDBTaskDocument(t);
-
     a._id = t.id;
     a._rev = t.rev;
-    a.atTimeIsNone = !!t.atTime ? 0 : 1;
-    a.atDateIsNone = !!t.atDateHijri ? 0 : 1;
+    a.noDate = !!t.atDateHijri ? 0 : 1;
     a.lat = t.lat;
     a.long = t.long;
     a.hijriDateOffset = t.hijriDateOffset;
@@ -235,7 +231,7 @@ export class TaskRepository {
         fields: [
           "type",
           "status",
-          "atDateIsNone",
+          "noDate",
           "atDateHijri",
           "atEpochMillis",
         ],
@@ -246,7 +242,7 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        atDateIsNone: { $gte: 0 },
+        noDate: { $gte: 0 },
         atEpochMillis: {
           $gte: null,
         },
@@ -254,7 +250,7 @@ export class TaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { atDateIsNone: "asc" },
+        { noDate: "asc" },
         { atDateHijri: "asc" },
         { atEpochMillis: "asc" },
       ],
@@ -366,9 +362,8 @@ export class TaskRepository {
         fields: [
           "type",
           "status",
-          "atDateIsNone",
+          "noDate",
           "atDateHijri",
-          "atTimeIsNone",
           "atEpochMillis",
         ],
       },
@@ -378,12 +373,9 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        atDateIsNone: 0,
+        noDate: 0,
         atDateHijri: {
           $gt: null,
-        },
-        atTimeIsNone: {
-          $gte: 0,
         },
         atEpochMillis: {
           $lte: beforeHijri.toDate().valueOf(),
@@ -392,9 +384,8 @@ export class TaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { atDateIsNone: "asc" },
+        { noDate: "asc" },
         { atDateHijri: "asc" },
-        { atTimeIsNone: "asc" },
         { atEpochMillis: "asc" },
       ],
     };
@@ -473,7 +464,7 @@ export class TaskRepository {
   async findTasksAfter(todayHijri: HijriDate): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: ["type", "status", "atDateIsNone", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis"],
       },
     });
 
@@ -481,7 +472,7 @@ export class TaskRepository {
       selector: {
         type: "task",
         status: 0,
-        atDateIsNone: 0,
+        noDate: 0,
         atEpochMillis: {
           $gte: todayHijri.toDate().valueOf(),
         },
@@ -489,7 +480,7 @@ export class TaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { atDateIsNone: 0 },
+        { noDate: 0 },
         { atEpochMillis: "asc" },
       ],
     };
@@ -507,7 +498,7 @@ export class TaskRepository {
   ): Promise<Task[]> {
     await db.createIndex({
       index: {
-        fields: ["type", "status", "atDateIsNone", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis"],
       },
     });
 
@@ -521,13 +512,13 @@ export class TaskRepository {
         status: {
           $gte: 0,
         },
-        atDateIsNone: { $gte: 0 },
+        noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { atDateIsNone: "asc" },
+        { noDate: "asc" },
         { atEpochMillis: "asc" },
       ],
       limit,

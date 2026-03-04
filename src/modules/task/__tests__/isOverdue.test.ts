@@ -44,7 +44,6 @@ describe("Task.isOverdue", () => {
       name: "Overdue Task",
       status: 0, // pending
       atEpochMillis: pastTime,
-      atTimeIsNone: 0, // specific time is set
     });
 
     expect(task.isOverdue()).toBe(true);
@@ -81,7 +80,6 @@ describe("Task.isOverdue", () => {
       name: "Task Without Specific Time",
       status: 0, // pending
       atEpochMillis: pastDate,
-      atTimeIsNone: 1, // indicates no specific time is set
     });
 
     expect(taskWithoutTime.isOverdue()).toBe(true);
@@ -94,7 +92,6 @@ describe("Task.isOverdue", () => {
       name: "Task With Specific Time",
       status: 0, // pending
       atEpochMillis: pastTime,
-      atTimeIsNone: 0, // indicates specific time is set
     });
 
     // Tasks with specific time should be overdue if past the scheduled time
@@ -108,7 +105,6 @@ describe("Task.isOverdue", () => {
       name: "Future Task Without Specific Time",
       status: 0, // pending
       atEpochMillis: futureDate,
-      atTimeIsNone: 1, // indicates no specific time is set
     });
 
     // Future tasks should not be overdue regardless of atTimeIsNone
@@ -126,7 +122,6 @@ describe("Task.isOverdue", () => {
       name: "Past Task Without Specific Time - Not Overdue",
       status: 0, // pending
       atEpochMillis: yesterday.valueOf(),
-      atTimeIsNone: 1, // indicates no specific time is set
     });
 
     // Tasks without specific time should check against end of day

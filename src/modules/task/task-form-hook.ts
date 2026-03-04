@@ -43,8 +43,7 @@ export const useTaskForm = (
   onError?: (error: string) => void,
   onCancel?: () => void,
 ): UseTaskFormReturn => {
-  // Use TaskProvider's createTask and updateTask mutations
-  const { createTask, updateTask, getTask } = useTaskContext();
+  const { createTask} = useTaskContext();
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();

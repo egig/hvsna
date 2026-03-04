@@ -17,11 +17,10 @@ export class Task {
   name?: string;
   description?: string;
   status?: TaskStatus;
-  atDateIsNone?: number;
-  atTimeIsNone?: number;
+  noDate?: number;
   atDateHijri?: string;
   atTime?: string;
-  atEpochMillis?: number;
+  atEpochMillis: number | null = null;
   lat?: number;
   long?: number;
   timezone?: string;
@@ -101,8 +100,7 @@ export type TaskQuery = {
   status?: TaskStatus;
   targetId?: string;
   atDateHijri?: string;
-  atDateIsNone?: number;
-  atTimeIsNone?: number;
+  noDate?: number;
   atTime?: string;
   atEpochMillis?: number | { $gte?: number; $lte?: number };
   unscheduled?: number;
