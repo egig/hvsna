@@ -50,13 +50,16 @@ export function TabBar({
       context: "all",
     },
     {
-      path: "/settings",
+      path: "/settings/general",
       label: t("settings"),
       icon: <TbSettings />,
       activeIcon: <TbSettingsFilled />,
       context: "settings",
     },
   ];
+
+  const mainTabs = tabs.filter((tab) => !tab.path.startsWith("/settings"));
+  const bottomTabs = tabs.filter((tab) => tab.path.startsWith("/settings"));
 
   const getIsActive = (tabPath: string) => {
     const isRootTab = tabPath === "/";
@@ -90,7 +93,7 @@ export function TabBar({
         )}
 
         <div className="flex-1 p-2 space-y-2">
-          {tabs.map((tab) => {
+          {mainTabs.map((tab) => {
             const isActive = getIsActive(tab.path);
             return (
               <Button
@@ -102,14 +105,34 @@ export function TabBar({
                 } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
                 aria-label={tab.label}
                 aria-current={isActive ? "page" : undefined}
-                state={
-                  tab.path === "/settings"
-                    ? {
-                        context: tab.context,
-                        settingsBackgroundLocation: location,
-                      }
-                    : { context: tab.context }
-                }
+                state={{ context: tab.context }}
+              >
+                <span className="text-xl">
+                  {isActive ? tab.activeIcon : tab.icon}
+                </span>
+                {!collapsed && <span className="font-medium">{tab.label}</span>}
+              </Button>
+            );
+          })}
+        </div>
+
+        <div className="p-2 space-y-2">
+          {bottomTabs.map((tab) => {
+            const isActive = getIsActive(tab.path);
+            return (
+              <Button
+                key={tab.path}
+                to={tab.path}
+                navType="sidebar"
+                className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
+                  collapsed ? "justify-center" : "space-x-3"
+                } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
+                aria-label={tab.label}
+                aria-current={isActive ? "page" : undefined}
+                state={{
+                  context: tab.context,
+                  settingsBackgroundLocation: location,
+                }}
               >
                 <span className="text-xl">
                   {isActive ? tab.activeIcon : tab.icon}

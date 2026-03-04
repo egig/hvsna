@@ -27,7 +27,7 @@ export default function Settings() {
         <SignedOut>
           <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
         </SignedOut>
-        <MenuItem title={t("general")} icon={Cog} to="/general-settings" />
+        <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
         <SignedIn>
           <MenuItem title={t("sync")} icon={RefreshCw} to="/sync" />
         </SignedIn>

@@ -33,8 +33,6 @@ import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
 import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
-import MonthView from "./modules/calendar/month-view";
-import YearView from "./ui/year-view";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 
@@ -45,7 +43,7 @@ const desktopSettingsSections: SettingsSection[] = [
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "general")!,
-    path: "/general-settings",
+    path: "/settings/general",
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "sync")!,
@@ -107,7 +105,7 @@ export const AppRoutes = () => {
           <Route path="trackers-attributes" element={<TrackersAttributes />} />
           <Route path="attribute-options" element={<AttributeOptions />} />
           <Route path="logs" element={<Logs />} />
-          <Route path="general-settings" element={<GeneralSettings />} />
+          <Route path="settings/general" element={<GeneralSettings />} />
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />
@@ -124,7 +122,7 @@ export const AppRoutes = () => {
           }
         >
           <Routes>
-            <Route path="general-settings" element={<GeneralSettings />} />
+            <Route path="settings/general" element={<GeneralSettings />} />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />

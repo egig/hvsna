@@ -37,6 +37,17 @@ export default function TaskPreview({ task, selectedGoal }: TaskPreviewProps) {
               {task.status === 1 ? t("completed") : t("pending")}
             </p>
           </div>
+          {task.status === 1 && task.completedAt && (
+            <div>
+              <span className="font-medium text-gray-600">
+                {t("completed_at")}:
+              </span>
+              <p className="text-gray-900">
+                {new Date(task.completedAt).toLocaleDateString()}{" "}
+                {new Date(task.completedAt).toLocaleTimeString()}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

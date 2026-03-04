@@ -11,7 +11,7 @@ const settingsSections: SettingsSection[] = defaultSettingsSections.map(
     ...section,
     path:
       section.id === "general"
-        ? "/general-settings"
+        ? "/settings/general"
         : section.id === "account"
           ? "/profile"
           : section.id === "sync"
