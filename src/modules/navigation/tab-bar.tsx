@@ -49,6 +49,10 @@ export function TabBar({
       activeIcon: <TbLayoutListFilled />,
       context: "all",
     },
+  ];
+
+  const desktopTabs = [
+    ...tabs,
     {
       path: "/settings/general",
       label: t("settings"),
@@ -58,8 +62,23 @@ export function TabBar({
     },
   ];
 
-  const mainTabs = tabs.filter((tab) => !tab.path.startsWith("/settings"));
-  const bottomTabs = tabs.filter((tab) => tab.path.startsWith("/settings"));
+  const mobileTabs = [
+    ...tabs,
+    {
+      path: "/settings",
+      label: t("settings"),
+      icon: <TbSettings />,
+      activeIcon: <TbSettingsFilled />,
+      context: "settings",
+    },
+  ];
+
+  const mainTabs = desktopTabs.filter(
+    (tab) => !tab.path.startsWith("/settings"),
+  );
+  const bottomTabs = desktopTabs.filter((tab) =>
+    tab.path.startsWith("/settings"),
+  );
 
   const getIsActive = (tabPath: string) => {
     const isRootTab = tabPath === "/";
@@ -74,7 +93,7 @@ export function TabBar({
       <nav className="flex flex-col h-full">
         {/* Add Task Button at top */}
         {openTaskForm && (
-          <div className="pt-4 px-2">
+          <div className="pt-4 px-2 mb-2">
             <button
               onClick={() => {
                 openTaskForm();
@@ -150,7 +169,7 @@ export function TabBar({
   return (
     <nav className="p-2 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 no-select">
       <div className="flex justify-around items-center pb-[env(safe-area-inset-bottom)]">
-        {tabs.map((tab) => {
+        {mobileTabs.map((tab) => {
           const isActive = getIsActive(tab.path);
           return (
             <Button
