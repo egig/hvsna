@@ -48,7 +48,9 @@ export default function TabLayout() {
               className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
                 sidebarCollapsed ? "mx-auto" : "ml-auto"
               }`}
-              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={
+                sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
+              }
             >
               {sidebarCollapsed ? (
                 <PanelLeft size={18} />

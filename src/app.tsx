@@ -64,52 +64,55 @@ export default function Hvsna({
   return (
     <PostHogProvider
       apiKey={config.posthogKey || ""}
-      options={{ ...posthogOptions, api_host: config.posthogHost || "https://us.i.posthog.com" }}
-    >
-    <Provider
-      config={{
-        accessToken: config.rollbarAccessToken,
-        environment: import.meta.env.MODE,
-        code_version: "1.0.0",
-        captureUncaught: true,
-        captureUnhandledRejections: true,
+      options={{
+        ...posthogOptions,
+        api_host: config.posthogHost || "https://us.i.posthog.com",
       }}
     >
-      <QueryClientProvider client={queryClient}>
-        <ErrorBoundary>
-          <SnackbarProvider>
-            <SystemProvider>
-              <ScreenSizeProvider onClose={handleBreakpointClose}>
-                <ClerkProvider
-                  publishableKey={config.clerkPublishableKey || ""}
-                >
-                  <AuthProvider>
-                    <SettingsProvider>
-                      <DroppableContext>
-                        <PouchDBProvider dbInstance={db}>
-                          <SyncProvider>
-                            <LanguageProviderWrapper>
-                              <TaskProvider>
-                                <BrowserRouter
-                                  basename={config.appBaseName || ""}
-                                >
-                                  <PostHogSessionTracker />
-                                  <AppRoutes />
-                                </BrowserRouter>
-                              </TaskProvider>
-                            </LanguageProviderWrapper>
-                          </SyncProvider>
-                        </PouchDBProvider>
-                      </DroppableContext>
-                    </SettingsProvider>
-                  </AuthProvider>
-                </ClerkProvider>
-              </ScreenSizeProvider>
-            </SystemProvider>
-          </SnackbarProvider>
-        </ErrorBoundary>
-      </QueryClientProvider>
-    </Provider>
+      <Provider
+        config={{
+          accessToken: config.rollbarAccessToken,
+          environment: import.meta.env.MODE,
+          code_version: "1.0.0",
+          captureUncaught: true,
+          captureUnhandledRejections: true,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <ErrorBoundary>
+            <SnackbarProvider>
+              <SystemProvider>
+                <ScreenSizeProvider onClose={handleBreakpointClose}>
+                  <ClerkProvider
+                    publishableKey={config.clerkPublishableKey || ""}
+                  >
+                    <AuthProvider>
+                      <SettingsProvider>
+                        <DroppableContext>
+                          <PouchDBProvider dbInstance={db}>
+                            <SyncProvider>
+                              <LanguageProviderWrapper>
+                                <TaskProvider>
+                                  <BrowserRouter
+                                    basename={config.appBaseName || ""}
+                                  >
+                                    <PostHogSessionTracker />
+                                    <AppRoutes />
+                                  </BrowserRouter>
+                                </TaskProvider>
+                              </LanguageProviderWrapper>
+                            </SyncProvider>
+                          </PouchDBProvider>
+                        </DroppableContext>
+                      </SettingsProvider>
+                    </AuthProvider>
+                  </ClerkProvider>
+                </ScreenSizeProvider>
+              </SystemProvider>
+            </SnackbarProvider>
+          </ErrorBoundary>
+        </QueryClientProvider>
+      </Provider>
     </PostHogProvider>
   );
 }

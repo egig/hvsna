@@ -124,7 +124,7 @@ export function fromDate(
   let sunsetShift = 0;
   if (isAfterSunset) {
     hijriDate = _applyOffset(hijriDate, 1);
-    sunsetShift = 1
+    sunsetShift = 1;
   }
 
   const adjustedHijri = _applyOffset(hijriDate, offset);

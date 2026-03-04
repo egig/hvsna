@@ -99,19 +99,22 @@ export function TabBar({
                 navType="sidebar"
                 className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
                   collapsed ? "justify-center" : "space-x-3"
-                } ${
-                  isActive ? "bg-gray-100" : "hover:bg-gray-100"
-                }`}
+                } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
                 aria-label={tab.label}
                 aria-current={isActive ? "page" : undefined}
-                state={{ context: tab.context }}
+                state={
+                  tab.path === "/settings"
+                    ? {
+                        context: tab.context,
+                        settingsBackgroundLocation: location,
+                      }
+                    : { context: tab.context }
+                }
               >
                 <span className="text-xl">
                   {isActive ? tab.activeIcon : tab.icon}
                 </span>
-                {!collapsed && (
-                  <span className="font-medium">{tab.label}</span>
-                )}
+                {!collapsed && <span className="font-medium">{tab.label}</span>}
               </Button>
             );
           })}

@@ -71,14 +71,20 @@ export const TaskProvider: React.FC<{
   }, [taskId, currentTargetId]);
 
   const invalidateTaskQueries = () => {
-    console.log("invalidate")
+    console.log("invalidate");
     const today = getToday();
     const todayString = today.toString();
     const tomorrowString = today.next().toString();
 
-    queryClient.invalidateQueries({ queryKey: queryKeys.todayTasks(todayString) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.todayCompletedTasks(todayString) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.upcomingTasks(tomorrowString) });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.todayTasks(todayString),
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.todayCompletedTasks(todayString),
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.upcomingTasks(tomorrowString),
+    });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
   };
 

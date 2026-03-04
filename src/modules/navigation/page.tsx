@@ -15,9 +15,7 @@ export function Page({ children, navbar, navbarLarge }: PageProps) {
       <div className="flex flex-col h-full">
         {!!navbar && <div className="flex-shrink-0">{navbar}</div>}
         <div className="flex-1 overflow-y-auto">
-          <div
-            className={isDesktop ? "max-w-2xl mx-auto w-full" : ""}
-          >
+          <div className={isDesktop ? "max-w-2xl mx-auto w-full" : ""}>
             {!!navbarLarge && navbarLarge}
             {children}
           </div>

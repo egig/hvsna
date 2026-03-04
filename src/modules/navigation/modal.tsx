@@ -8,9 +8,18 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   title?: string;
+  className?: string;
+  noPadding?: boolean;
 }
 
-export function Modal({ isOpen, onClose, children, title }: ModalProps) {
+export function Modal({
+  isOpen,
+  onClose,
+  children,
+  title,
+  className = "",
+  noPadding = false,
+}: ModalProps) {
   const { isDesktop } = useScreenSize();
 
   // Desktop Modal - centered modal with backdrop using Base UI Dialog
@@ -23,7 +32,9 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
           <Dialog.Viewport>
-            <Dialog.Popup className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-auto outline-none">
+            <Dialog.Popup
+              className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-xl shadow-xl w-full mx-4 outline-none ${className || "max-w-lg max-h-[90vh] overflow-auto"}`}
+            >
               {/* Header */}
               {title && (
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -52,7 +63,7 @@ export function Modal({ isOpen, onClose, children, title }: ModalProps) {
               )}
 
               {/* Modal Body */}
-              <div className="p-2">{children}</div>
+              {noPadding ? children : <div className="p-2">{children}</div>}
             </Dialog.Popup>
           </Dialog.Viewport>
         </Dialog.Portal>
