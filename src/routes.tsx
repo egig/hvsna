@@ -36,6 +36,7 @@ import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
+import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -45,6 +46,10 @@ const desktopSettingsSections: SettingsSection[] = [
   {
     ...defaultSettingsSections.find((s) => s.id === "general")!,
     path: "/settings/general",
+  },
+  {
+    ...defaultSettingsSections.find((s) => s.id === "prayer-time-fallback")!,
+    path: "/settings/prayer-time-fallback",
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "sync")!,
@@ -107,6 +112,10 @@ export const AppRoutes = () => {
           <Route path="attribute-options" element={<AttributeOptions />} />
           <Route path="logs" element={<Logs />} />
           <Route path="settings/general" element={<GeneralSettings />} />
+          <Route
+            path="settings/prayer-time-fallback"
+            element={<PrayerTimeFallback />}
+          />
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />
@@ -123,6 +132,10 @@ export const AppRoutes = () => {
         >
           <Routes>
             <Route path="settings/general" element={<GeneralSettings />} />
+            <Route
+              path="settings/prayer-time-fallback"
+              element={<PrayerTimeFallback />}
+            />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />

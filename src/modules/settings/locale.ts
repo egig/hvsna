@@ -310,4 +310,34 @@ export const settingsTranslations = {
     en: "Please sign in to view your profile information",
     id: "Silakan masuk untuk melihat informasi profil Anda",
   },
+
+  // Prayer Time Fallback Settings
+  prayer_time_fallback: {
+    en: "Prayer Times",
+    id: "Waktu Sholat",
+  },
+  offline_mode: {
+    en: "Offline Mode",
+    id: "Mode Offline",
+  },
+  prayer_fallback_description: {
+    en: "These prayer times will be used when the app is offline and cannot fetch real-time prayer schedules.",
+    id: "Waktu sholat ini akan digunakan ketika aplikasi offline dan tidak dapat mengambil jadwal sholat real-time.",
+  },
+  prayer_times: {
+    en: "Prayer Times",
+    id: "Waktu Sholat",
+  },
+  set_fallback_times: {
+    en: "Set fallback times for each prayer",
+    id: "Atur waktu cadangan untuk setiap sholat",
+  },
+  how_it_works: {
+    en: "How it works",
+    id: "Cara kerja",
+  },
+  prayer_fallback_explanation: {
+    en: "When your device is offline, the app will automatically use these saved prayer times to manage today's timeline instead of trying to fetch them from the internet.",
+    id: "Ketika perangkat Anda offline, aplikasi akan secara otomatis menggunakan waktu sholat yang tersimpan ini untuk mengatur timeline hari ini alih-alih mencoba mengambilnya dari internet.",
+  },
 };

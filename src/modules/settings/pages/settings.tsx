@@ -10,6 +10,7 @@ import {
   User,
   LogOut,
   Calendar,
+  Clock,
 } from "lucide-react";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../../ui/menu-item";
@@ -32,6 +33,11 @@ export default function Settings() {
           <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
         </SignedOut>
         <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
+        <MenuItem
+          title={t("prayer_time_fallback") || "Prayer Time Fallback"}
+          icon={Clock}
+          to="/settings/prayer-time-fallback"
+        />
         <SignedIn>
           <MenuItem title={t("sync")} icon={RefreshCw} to="/sync" />
         </SignedIn>

@@ -6,10 +6,15 @@ import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { LargeNavbar, Navbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { useTaskContext } from "../task/task-context";
+import { useSettings } from "../settings/useSettings";
+import {
+  groupTasksByPrayerTimes,
+  getPrayerTimesWithFallback,
+} from "../../lib/prayer-time-utils";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -53,10 +58,136 @@ export function Today() {
   );
 }
 
+// Fallback function for original grouping logic
+const getOriginalTaskGroups = (
+  tasks: Task[],
+  completedTasks: Task[],
+  getToday: any,
+) => {
+  const groups: {
+    prayer: PrayerTime | null;
+    tasks: Task[];
+    isOverdue?: boolean;
+    isCompleted?: boolean;
+  }[] = [];
+
+  const today = getToday();
+  const todayStart = today.startOfDay().toDate().valueOf();
+
+  // Separate overdue tasks, prayer-based tasks, and regular tasks
+  const overdueTasks = tasks.filter(
+    (task) => task.isOverdue() && !task.completedAt,
+  );
+  const prayerTasks = tasks.filter(
+    (task) =>
+      task.usePrayerTime &&
+      task.prayerTime &&
+      (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
+      !task.completedAt,
+  );
+  const regularTasks = tasks.filter(
+    (task) =>
+      !task.usePrayerTime &&
+      (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
+      !task.completedAt,
+  );
+
+  // Add overdue tasks group first (always at top)
+  if (overdueTasks.length > 0) {
+    groups.push({
+      prayer: null,
+      tasks: overdueTasks.sort(
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+      ),
+      isOverdue: true,
+    });
+  }
+
+  // Group prayer tasks by prayer time
+  const prayerGroups: Record<PrayerTime, Task[]> = {
+    Fajr: [],
+    Sunrise: [],
+    Dhuhr: [],
+    Asr: [],
+    Maghrib: [],
+    Isha: [],
+  };
+
+  prayerTasks.forEach((task) => {
+    if (task.prayerTime && prayerGroups[task.prayerTime]) {
+      prayerGroups[task.prayerTime].push(task);
+    }
+  });
+
+  // Add prayer groups in chronological order starting from Maghrib
+  const prayerOrder: PrayerTime[] = [
+    "Maghrib",
+    "Isha",
+    "Fajr",
+    "Sunrise",
+    "Dhuhr",
+    "Asr",
+  ];
+  prayerOrder.forEach((prayer) => {
+    if (prayerGroups[prayer].length > 0) {
+      groups.push({
+        prayer,
+        tasks: prayerGroups[prayer].sort(
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        ),
+      });
+    }
+  });
+
+  // Add regular tasks at the end
+  if (regularTasks.length > 0) {
+    groups.push({
+      prayer: null,
+      tasks: regularTasks.sort(
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+      ),
+    });
+  }
+
+  // Add completed tasks at the very bottom
+  if (completedTasks.length > 0) {
+    groups.push({
+      prayer: null,
+      tasks: completedTasks.sort(
+        (a, b) => (b.completedAt || 0) - (a.completedAt || 0),
+      ),
+      isCompleted: true,
+    });
+  }
+
+  return groups;
+};
+
 function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { openTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
   const { getToday } = useHijriDate();
+  const { settings } = useSettings();
+  const [prayerTimings, setPrayerTimings] = useState<any>(null);
+  const [loadingPrayerTimes, setLoadingPrayerTimes] = useState(true);
+
+  // Load prayer times
+  useEffect(() => {
+    const loadPrayerTimes = async () => {
+      try {
+        setLoadingPrayerTimes(true);
+        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+        const timings = await getPrayerTimesWithFallback(settings, today);
+        setPrayerTimings(timings);
+      } catch (error) {
+        console.error("Failed to load prayer times:", error);
+      } finally {
+        setLoadingPrayerTimes(false);
+      }
+    };
+
+    loadPrayerTimes();
+  }, [settings]);
 
   const handleEditTask = useCallback(
     (task: Task) => {
@@ -65,118 +196,43 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     [openTaskForm],
   );
 
-  // Memoize task grouping to prevent unnecessary recalculations
+  // Use new prayer time grouping logic
   const taskGroups = useMemo(() => {
-    const groups: {
-      prayer: PrayerTime | null;
-      tasks: Task[];
-      isOverdue?: boolean;
-      isCompleted?: boolean;
-    }[] = [];
+    if (!prayerTimings) {
+      // Fallback to original logic if prayer times not loaded
+      return getOriginalTaskGroups(tasks, completedTasks, getToday);
+    }
 
-    const today = getToday();
-    const todayStart = today.startOfDay().toDate().valueOf();
-
-    // Separate overdue tasks, prayer-based tasks, and regular tasks
-    const overdueTasks = tasks.filter((task) => task.isOverdue());
-    const prayerTasks = tasks.filter(
-      (task) =>
-        task.usePrayerTime &&
-        task.prayerTime &&
-        (!task.atEpochMillis || task.atEpochMillis >= todayStart),
+    // Pass all tasks (active + completed) to the new grouping function
+    return groupTasksByPrayerTimes(
+      [...tasks, ...completedTasks],
+      prayerTimings,
     );
-    const regularTasks = tasks.filter(
-      (task) =>
-        !task.usePrayerTime &&
-        (!task.atEpochMillis || task.atEpochMillis >= todayStart),
-    );
-
-    // Add overdue tasks group first (always at top)
-    if (overdueTasks.length > 0) {
-      groups.push({
-        prayer: null,
-        tasks: overdueTasks.sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
-        ),
-        isOverdue: true,
-      });
-    }
-
-    // Group prayer tasks by prayer time
-    const prayerGroups: Record<PrayerTime, Task[]> = {
-      Fajr: [],
-      Sunrise: [],
-      Dhuhr: [],
-      Asr: [],
-      Maghrib: [],
-      Isha: [],
-    };
-
-    prayerTasks.forEach((task) => {
-      if (task.prayerTime && prayerGroups[task.prayerTime]) {
-        prayerGroups[task.prayerTime].push(task);
-      }
-    });
-
-    // Add prayer groups in chronological order starting from Maghrib
-    const prayerOrder: PrayerTime[] = [
-      "Maghrib",
-      "Isha",
-      "Fajr",
-      "Sunrise",
-      "Dhuhr",
-      "Asr",
-    ];
-    prayerOrder.forEach((prayer) => {
-      if (prayerGroups[prayer].length > 0) {
-        groups.push({
-          prayer,
-          tasks: prayerGroups[prayer].sort(
-            (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
-          ),
-        });
-      }
-    });
-
-    // Add regular tasks at the end
-    if (regularTasks.length > 0) {
-      groups.push({
-        prayer: null,
-        tasks: regularTasks.sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
-        ),
-      });
-    }
-
-    // Add completed tasks at the very bottom
-    if (completedTasks.length > 0) {
-      groups.push({
-        prayer: null,
-        tasks: completedTasks.sort(
-          (a, b) => (b.completedAt || 0) - (a.completedAt || 0),
-        ),
-        isCompleted: true,
-      });
-    }
-
-    return groups;
-  }, [tasks, completedTasks, getToday]);
+  }, [tasks, completedTasks, prayerTimings, getToday]);
 
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
-      return t(prayer.toLowerCase());
+      const prayerName = t(prayer.toLowerCase());
+
+      // Add actual prayer time if available and not using fallback
+      if (prayerTimings && prayerTimings[prayer]) {
+        const prayerTime = prayerTimings[prayer];
+        return `${prayerName} (${prayerTime})`;
+      }
+
+      return prayerName;
     },
-    [t],
+    [t, prayerTimings],
   );
 
   return (
     <div className="space-y-6">
-      {taskGroups.map((group, groupIndex) => {
+      {taskGroups.map((group: any, groupIndex: number) => {
         const hasLabel = group.isOverdue || group.isCompleted || !!group.prayer;
 
         const tasks = (
           <div className="">
-            {group.tasks.map((task) => (
+            {group.tasks.map((task: Task) => (
               <TaskListItem
                 key={task.id}
                 task={task}

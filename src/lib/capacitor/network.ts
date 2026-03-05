@@ -81,12 +81,15 @@ export class CapacitorNetwork {
   private static async addListenerNative(
     callback: (status: NetworkStatus) => void,
   ): Promise<NetworkListener> {
-    const handle = await Network.addListener("networkStatusChange", (status) => {
-      callback({
-        connected: status.connected,
-        connectionType: status.connectionType,
-      });
-    });
+    const handle = await Network.addListener(
+      "networkStatusChange",
+      (status) => {
+        callback({
+          connected: status.connected,
+          connectionType: status.connectionType,
+        });
+      },
+    );
 
     return {
       callback,

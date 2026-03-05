@@ -5,7 +5,16 @@ import React, {
   useCallback,
 } from "react";
 import type { ReactNode } from "react";
-import type { GeneralSettings } from "./settings";
+import type { GeneralSettings, PrayerTimesFallback } from "./settings";
+
+const DEFAULT_PRAYER_TIMES: PrayerTimesFallback = {
+  fajr: "05:00",
+  sunrise: "06:00",
+  dzuhr: "12:00",
+  asr: "15:00",
+  maghrib: "18:00",
+  isha: "19:00",
+};
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   language: "en",
@@ -13,6 +22,7 @@ const DEFAULT_SETTINGS: GeneralSettings = {
   manualDateOffset: 0,
   theme: "system",
   notifications: true,
+  prayerTimesFallback: DEFAULT_PRAYER_TIMES,
 };
 
 interface SettingsState {

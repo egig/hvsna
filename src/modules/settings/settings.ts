@@ -12,6 +12,15 @@ export interface Coordinate {
 
 export type LocationResolveType = "manual" | "auto" | "capacitor_native";
 
+export interface PrayerTimesFallback {
+  fajr: string;
+  sunrise: string;
+  dzuhr: string;
+  asr: string;
+  maghrib: string;
+  isha: string;
+}
+
 export interface GeneralSettings {
   language: Language;
   timezone: string;
@@ -22,6 +31,7 @@ export interface GeneralSettings {
   locationResolveType?: LocationResolveType;
   coordinate?: Coordinate | null;
   onboardedAt?: number;
+  prayerTimesFallback?: PrayerTimesFallback;
 }
 
 export interface SettingsState {

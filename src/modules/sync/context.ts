@@ -151,34 +151,38 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         setIsOnline(status.connected);
 
         // Add network status listener
-        networkListener = await CapacitorNetwork.addListener((networkStatus) => {
-          console.log(`[sync] Network ${networkStatus.connected ? 'online' : 'offline'} - ${networkStatus.connectionType}`);
-          setIsOnline(networkStatus.connected);
-        });
+        networkListener = await CapacitorNetwork.addListener(
+          (networkStatus) => {
+            console.log(
+              `[sync] Network ${networkStatus.connected ? "online" : "offline"} - ${networkStatus.connectionType}`,
+            );
+            setIsOnline(networkStatus.connected);
+          },
+        );
       } catch (error) {
-        console.error('[sync] Failed to initialize network monitoring:', error);
+        console.error("[sync] Failed to initialize network monitoring:", error);
         // Fallback to browser API
         setIsOnline(navigator.onLine);
-        
+
         const handleOnline = () => {
-          console.log('[sync] Network online - resuming sync');
+          console.log("[sync] Network online - resuming sync");
           setIsOnline(true);
         };
 
         const handleOffline = () => {
-          console.log('[sync] Network offline - pausing sync');
+          console.log("[sync] Network offline - pausing sync");
           setIsOnline(false);
         };
 
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
-        
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+
         // Store fallback listeners for cleanup
         networkListener = {
           remove: async () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
-          }
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+          },
         };
       }
     };
@@ -197,14 +201,14 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     if (replication) {
       if (isOnline) {
         // Resume sync when coming back online
-        console.log('[sync] Network available - continuing sync');
+        console.log("[sync] Network available - continuing sync");
         // Trigger a manual sync to ensure data is synced when back online
-        manualSync().catch(error => {
-          console.log('[sync] Auto-sync on network resume failed:', error);
+        manualSync().catch((error) => {
+          console.log("[sync] Auto-sync on network resume failed:", error);
         });
       } else {
         // Pause sync when going offline
-        console.log('[sync] Network unavailable - pausing sync');
+        console.log("[sync] Network unavailable - pausing sync");
         // PouchDB automatically handles pausing when offline,
         // but we can ensure sync state is reflected
         setIsSyncing(false);
@@ -229,7 +233,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
       // Don't initialize sync if offline
       if (!isOnline) {
-        console.log('[sync] Offline - skipping sync initialization');
+        console.log("[sync] Offline - skipping sync initialization");
         return;
       }
 

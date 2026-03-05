@@ -8,6 +8,7 @@ import {
   User,
   LogOut,
   Calendar,
+  Clock,
 } from "lucide-react";
 import { Modal } from "../modules/navigation/modal";
 import { useLanguageContext } from "../modules/i18n/LanguageContext";
@@ -198,6 +199,11 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
     id: "general",
     title: "General",
     icon: Cog,
+  },
+  {
+    id: "prayer-time-fallback",
+    title: "Prayer Times",
+    icon: Clock,
   },
   {
     id: "sync",
