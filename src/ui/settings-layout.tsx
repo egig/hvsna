@@ -63,13 +63,13 @@ export function SettingsModal({
       isOpen={isOpen}
       onClose={onClose}
       // title={t("settings")}
-      className="max-w-5xl h-[60vh] max-h-[800px] overflow-hidden flex flex-col"
+      className="max-w-3xl h-[80vh] max-h-[800px] overflow-hidden flex flex-col"
       noPadding
     >
       {/* Modal Body */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidenav */}
-        <div className="w-56 bg-gray-50 border-r border-gray-200 flex-shrink-0">
+        <div className="w-48 bg-gray-50 border-r border-gray-200 flex-shrink-0">
           <nav className="p-3 space-y-1">
             <div className="p-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">
@@ -212,7 +212,7 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
   },
   {
     id: "reset",
-    title: "Reset Device Data",
+    title: "Reset Data",
     icon: Trash,
   },
   {

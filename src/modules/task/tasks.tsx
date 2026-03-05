@@ -113,7 +113,7 @@ export default function Tasks() {
       <Modal
         isOpen={filterModalOpened}
         onClose={handleFilterModalClose}
-        title={t("filter_tasks")}
+        title=""
       >
         <TaskFilterModal
           isOpen={filterModalOpened}

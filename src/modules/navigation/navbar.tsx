@@ -41,7 +41,8 @@ export function Navbar({
 
   // Auto-determine if back button should be shown
   const shouldShowBackButton =
-    (propShowBackButton ?? !ROOT_PATHS.includes(location.pathname)) && !isDesktop;
+    (propShowBackButton ?? !ROOT_PATHS.includes(location.pathname)) &&
+    !isDesktop;
 
   const handleBack = () => {
     if (customBackAction) {
@@ -142,7 +143,8 @@ export function LargeNavbar({
 
   // Auto-determine if back button should be shown
   const shouldShowBackButton =
-    (propShowBackButton ?? !ROOT_PATHS.includes(location.pathname)) && !isDesktop;
+    (propShowBackButton ?? !ROOT_PATHS.includes(location.pathname)) &&
+    !isDesktop;
 
   const handleBack = () => {
     if (customBackAction) {

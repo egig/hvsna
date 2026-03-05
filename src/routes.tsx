@@ -18,6 +18,7 @@ import { useScreenSize } from "./ui/screen-size-wrapper";
 import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
+import { NotFound } from "./ui/not-found";
 import Logs from "./modules/log/logs";
 import Trackers from "./modules/tracker/trackers";
 import TrackersAttributes from "./modules/attribute/tracker-attributes";
@@ -109,7 +110,7 @@ export const AppRoutes = () => {
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />
-          <Route path="*" element={<p>Not Found</p>} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AnimatePresence>
       {isSettingsOpen && (
