@@ -10,6 +10,7 @@ import { useSession } from "@clerk/clerk-react";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
+import { CapacitorNetwork } from "src/lib/capacitor/network";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {
@@ -63,6 +64,7 @@ type SyncContextType = {
   lastSyncTime: Date | null;
   isSyncing: boolean;
   isManualSyncing: boolean;
+  isOnline: boolean;
   manualSync: () => Promise<void>;
 };
 
@@ -77,6 +79,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const queryClient = useQueryClient();
 
   // Manual sync function
@@ -86,6 +89,10 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       throw new Error(
         "Sync not available - user not signed in or sync URL not configured",
       );
+    }
+
+    if (!isOnline) {
+      throw new Error("Sync not available - network offline");
     }
 
     console.log("[sync] Manual sync started");
@@ -133,6 +140,78 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     loadSyncTime();
   }, [db]);
 
+  // Network status monitoring
+  useEffect(() => {
+    let networkListener: any = null;
+
+    const initializeNetworkMonitoring = async () => {
+      try {
+        // Get initial network status
+        const status = await CapacitorNetwork.getStatus();
+        setIsOnline(status.connected);
+
+        // Add network status listener
+        networkListener = await CapacitorNetwork.addListener((networkStatus) => {
+          console.log(`[sync] Network ${networkStatus.connected ? 'online' : 'offline'} - ${networkStatus.connectionType}`);
+          setIsOnline(networkStatus.connected);
+        });
+      } catch (error) {
+        console.error('[sync] Failed to initialize network monitoring:', error);
+        // Fallback to browser API
+        setIsOnline(navigator.onLine);
+        
+        const handleOnline = () => {
+          console.log('[sync] Network online - resuming sync');
+          setIsOnline(true);
+        };
+
+        const handleOffline = () => {
+          console.log('[sync] Network offline - pausing sync');
+          setIsOnline(false);
+        };
+
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        
+        // Store fallback listeners for cleanup
+        networkListener = {
+          remove: async () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+          }
+        };
+      }
+    };
+
+    initializeNetworkMonitoring();
+
+    return () => {
+      if (networkListener) {
+        networkListener.remove();
+      }
+    };
+  }, []);
+
+  // Pause/resume sync based on network status
+  useEffect(() => {
+    if (replication) {
+      if (isOnline) {
+        // Resume sync when coming back online
+        console.log('[sync] Network available - continuing sync');
+        // Trigger a manual sync to ensure data is synced when back online
+        manualSync().catch(error => {
+          console.log('[sync] Auto-sync on network resume failed:', error);
+        });
+      } else {
+        // Pause sync when going offline
+        console.log('[sync] Network unavailable - pausing sync');
+        // PouchDB automatically handles pausing when offline,
+        // but we can ensure sync state is reflected
+        setIsSyncing(false);
+      }
+    }
+  }, [isOnline, replication]);
+
   useEffect(() => {
     const initializeSync = async () => {
       if (!isSignedIn || !user?.syncURL || !db) {
@@ -145,6 +224,12 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (syncInitialized) {
+        return;
+      }
+
+      // Don't initialize sync if offline
+      if (!isOnline) {
+        console.log('[sync] Offline - skipping sync initialization');
         return;
       }
 
@@ -210,7 +295,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     if (!!db && !!isSignedIn && !!user) {
       initializeSync();
     }
-  }, [db, isSignedIn, user, session]);
+  }, [db, isSignedIn, user, session, isOnline]);
 
   return React.createElement(
     SyncContext.Provider,
@@ -220,6 +305,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         lastSyncTime,
         isSyncing,
         isManualSyncing,
+        isOnline,
         manualSync,
       },
     },
