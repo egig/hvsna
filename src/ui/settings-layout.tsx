@@ -89,9 +89,7 @@ export function SettingsModal({
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
-                        <span className="text-sm">
-                          {section.title}
-                        </span>
+                        <span className="text-sm">{section.title}</span>
                       </button>
                     </SignedIn>
                   )}
@@ -106,9 +104,7 @@ export function SettingsModal({
                         }`}
                       >
                         <Icon className="w-5 h-5 flex-shrink-0" />
-                        <span className="text-sm">
-                          {section.title}
-                        </span>
+                        <span className="text-sm">{section.title}</span>
                       </button>
                     </SignedOut>
                   )}
@@ -122,9 +118,7 @@ export function SettingsModal({
                       }`}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-sm">
-                        {section.title}
-                      </span>
+                      <span className="text-sm">{section.title}</span>
                     </button>
                   )}
                 </div>

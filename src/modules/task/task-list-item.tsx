@@ -235,7 +235,9 @@ export function TaskListItem({
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className={`truncate ${getStatusColor(task.status)}`}>
+          <h3
+            className={`truncate ${getStatusColor(task.status as TaskStatus)}`}
+          >
             {task.name}
           </h3>
 

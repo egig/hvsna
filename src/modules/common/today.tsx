@@ -7,6 +7,8 @@ import { LargeNavbar, Navbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
+import { Collapsible } from "@base-ui/react/collapsible";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { useTaskContext } from "../task/task-context";
 
 interface TodayTasksProps {
@@ -169,29 +171,11 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
 
   return (
     <div className="space-y-6">
-      {taskGroups.map((group, groupIndex) => (
-        <div key={group.prayer || `regular-${groupIndex}`}>
-          {group.isOverdue ? (
-            <div className="flex items-center gap-2 mb-2 px-4">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-red-400">
-                {t("overdue")}
-              </h3>
-            </div>
-          ) : group.isCompleted ? (
-            <div className="flex items-center gap-2 mb-2 px-4">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-green-600">
-                {t("completed")}
-              </h3>
-            </div>
-          ) : group.prayer ? (
-            <div className="flex items-center gap-2 mb-2 px-4">
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                {getPrayerTimeDisplay(group.prayer)}
-              </h3>
-            </div>
-          ) : null}
+      {taskGroups.map((group, groupIndex) => {
+        const hasLabel = group.isOverdue || group.isCompleted || !!group.prayer;
 
-          <div className="space-y-2">
+        const tasks = (
+          <div className="">
             {group.tasks.map((task) => (
               <TaskListItem
                 key={task.id}
@@ -203,8 +187,54 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
               />
             ))}
           </div>
-        </div>
-      ))}
+        );
+
+        if (!hasLabel) {
+          return <div key={`regular-${groupIndex}`}>{tasks}</div>;
+        }
+
+        const labelContent = group.isOverdue ? (
+          <span className="text-sm font-bold text-gray-700 dark:text-red-400">
+            {t("overdue")}
+          </span>
+        ) : group.isCompleted ? (
+          <span className="text-sm font-bold text-gray-700 dark:text-green-600">
+            {t("completed")}
+          </span>
+        ) : (
+          <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+            {getPrayerTimeDisplay(group.prayer!)}
+          </span>
+        );
+
+        return (
+          <Collapsible.Root
+            key={
+              group.prayer ||
+              (group.isOverdue
+                ? "overdue"
+                : group.isCompleted
+                  ? "completed"
+                  : `regular-${groupIndex}`)
+            }
+            defaultOpen={!group.isCompleted}
+          >
+            <Collapsible.Trigger className="flex items-center gap-1.5 mb-2 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
+              <ChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
+              <ChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
+              {labelContent}
+              {group.isCompleted && (
+                <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
+                  ({group.tasks.length})
+                </span>
+              )}
+            </Collapsible.Trigger>
+            <Collapsible.Panel className="ml-4 overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
+              {tasks}
+            </Collapsible.Panel>
+          </Collapsible.Root>
+        );
+      })}
     </div>
   );
 }

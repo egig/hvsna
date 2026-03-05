@@ -11,8 +11,6 @@ import {
   TbLayoutListFilled,
   TbSettings,
   TbSettingsFilled,
-  TbPlus,
-  TbSquarePlus,
   TbSquareRoundedPlusFilled,
 } from "react-icons/tb";
 
