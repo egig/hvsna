@@ -2,6 +2,7 @@ import { ChevronLeft, X, Search } from "lucide-react";
 import { useAppNavigation } from "./use-app-navigation";
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";
+import { useScreenSize } from "../system";
 
 interface NavbarProps {
   title?: string | React.ReactNode;
@@ -36,10 +37,11 @@ export function Navbar({
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
+  const { isDesktop } = useScreenSize();
 
   // Auto-determine if back button should be shown
   const shouldShowBackButton =
-    propShowBackButton ?? !ROOT_PATHS.includes(location.pathname);
+    (propShowBackButton ?? !ROOT_PATHS.includes(location.pathname)) && !isDesktop;
 
   const handleBack = () => {
     if (customBackAction) {
@@ -135,11 +137,12 @@ export function LargeNavbar({
 }: NavbarProps) {
   const { goBack } = useAppNavigation();
   const location = useLocation();
+  const { isDesktop } = useScreenSize();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Auto-determine if back button should be shown
   const shouldShowBackButton =
-    propShowBackButton ?? !ROOT_PATHS.includes(location.pathname);
+    (propShowBackButton ?? !ROOT_PATHS.includes(location.pathname)) && !isDesktop;
 
   const handleBack = () => {
     if (customBackAction) {

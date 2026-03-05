@@ -86,7 +86,7 @@ export default function Sync() {
     if (isSyncing) return t("auto_syncing");
 
     if (manualSyncStatus === "success") return t("sync_successful");
-    if (manualSyncStatus === "error") return errorMessage || t("sync_failed");
+    if (manualSyncStatus === "error") return t("sync_failed");
 
     if (lastSyncTime) return t("sync_successful");
 
@@ -98,6 +98,21 @@ export default function Sync() {
       <Navbar title={t("sync")} />
       <Block>
         <div className="space-y-6">
+          {/* Error Message Section */}
+          {manualSyncStatus === "error" && errorMessage && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-red-800 mb-1">
+                    {t("sync_failed")}
+                  </h3>
+                  <p className="text-sm text-red-700">{errorMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="rounded-lg p-4 bg-gray-200">
             <p className="text-sm text-gray-600">{t("sync_description")}</p>
           </div>
