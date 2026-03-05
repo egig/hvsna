@@ -114,6 +114,10 @@ export const taskTranslations = {
     en: "This Week",
     id: "Minggu Ini",
   },
+  next_week: {
+    en: "Next Week",
+    id: "Minggu Depan",
+  },
   this_month: {
     en: "This Month",
     id: "Bulan Ini",
@@ -221,6 +225,14 @@ export const taskTranslations = {
   gregorian_date: {
     en: "Gregorian Date",
     id: "Tanggal Gregorian",
+  },
+  hijri: {
+    en: "Hijri",
+    id: "Hijri",
+  },
+  gregorian: {
+    en: "Gregorian",
+    id: "Masehi",
   },
   hijri_date: {
     en: "Hijri Date",

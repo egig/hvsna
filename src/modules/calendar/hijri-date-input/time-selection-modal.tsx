@@ -5,6 +5,8 @@ import { Navbar } from "src/modules/navigation";
 import { useSettings } from "src/modules/settings/useSettings";
 import * as SunCalc from "suncalc";
 import type { PrayerTime } from "src/modules/task/types";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
+import { Toggle } from "@base-ui/react/toggle";
 
 /**
  * Generates an array of hours sorted from sunset to next sunset based on geographic coordinates
@@ -109,7 +111,7 @@ export function TimeSelectionModal({
   };
 
   return (
-    <div className="">
+    <div className="min-h-[50dvh]">
       <Navbar
         title={t("select_time")}
         showBackButton={true}
@@ -152,22 +154,34 @@ export function TimeSelectionModal({
 
       {inputMode === "prayer" && (
         <div className="p-4">
-          <select
-            value={selectedPrayer}
-            onChange={(e) =>
-              setSelectedPrayer(e.target.value as PrayerTime | "")
-            }
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+          <ToggleGroup
+            value={selectedPrayer ? [selectedPrayer] : []}
+            onValueChange={(values) => {
+              const selected = values[0] as PrayerTime | "";
+              setSelectedPrayer(selected);
+              if (selected) {
+                onConfirm("", selected);
+              }
+            }}
+            multiple={false}
+            className="grid grid-cols-2 gap-2"
           >
-            <option value="">
-              {t("select_prayer_time") || "Select Prayer Time"}
-            </option>
             {prayerTimes.map((prayer) => (
-              <option key={prayer} value={prayer}>
+              <Toggle
+                key={prayer}
+                value={prayer}
+                className={({ pressed }) =>
+                  `px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
+                    pressed
+                      ? "bg-[var(--hvsna-primary-color)] text-white border-[var(--hvsna-primary-color)]"
+                      : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  }`
+                }
+              >
                 {t(prayer.toLowerCase())}
-              </option>
+              </Toggle>
             ))}
-          </select>
+          </ToggleGroup>
         </div>
       )}
 
