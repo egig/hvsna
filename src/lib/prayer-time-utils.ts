@@ -188,13 +188,13 @@ export function groupTasksByPrayerTimes(
 
 function findPrayerTimeForTaskTime(
   taskTime: string,
-  prayerTimings: PrayerTimesResponse["data"]["timings"],
+  prayerTimings: PrayerTimesResponse["data"]["timings"]
 ): PrayerTime | null {
   // Convert task time to minutes for comparison
   const [taskHours, taskMinutes] = taskTime.split(":").map(Number);
   const taskTotalMinutes = taskHours * 60 + taskMinutes;
 
-  // Convert prayer times to minutes and find the closest one
+  // Convert prayer times to minutes and sort them chronologically
   const prayerTimes: { prayer: PrayerTime; minutes: number }[] = [
     { prayer: "Fajr", minutes: timeToMinutes(prayerTimings.Fajr) },
     { prayer: "Sunrise", minutes: timeToMinutes(prayerTimings.Sunrise) },
@@ -204,20 +204,31 @@ function findPrayerTimeForTaskTime(
     { prayer: "Isha", minutes: timeToMinutes(prayerTimings.Isha) },
   ];
 
-  // Find the prayer time that the task time is closest to
-  let closestPrayer: PrayerTime | null = null;
-  let minDifference = Infinity;
+  // Sort prayer times by minutes for proper chronological comparison
+  prayerTimes.sort((a, b) => a.minutes - b.minutes);
 
-  prayerTimes.forEach(({ prayer, minutes }) => {
-    const difference = Math.abs(taskTotalMinutes - minutes);
-    if (difference < minDifference) {
-      minDifference = difference;
-      closestPrayer = prayer;
+  // Find the appropriate prayer time based on the new rule:
+  // Assign to prayer if task time is within 15 minutes before prayer time or any time after prayer time
+  for (let i = prayerTimes.length - 1; i >= 0; i--) {
+    const { prayer, minutes } = prayerTimes[i];
+    
+    // Check if task time is within 15 minutes before this prayer time or after it
+    if (taskTotalMinutes >= minutes - 15) {
+      // Special handling for Maghrib - assign to Asr instead
+      if (prayer === "Maghrib") {
+        return "Asr";
+      }
+      return prayer;
     }
-  });
+  }
 
-  // Only assign to prayer time if within 30 minutes
-  return minDifference <= 30 ? closestPrayer : null;
+  // If task time is before the first prayer time minus 15 minutes, 
+  // assign to the first prayer time
+  const firstPrayer = prayerTimes[0];
+  if (firstPrayer.prayer === "Maghrib") {
+    return "Asr";
+  }
+  return firstPrayer.prayer;
 }
 
 function timeToMinutes(time: string): number {
