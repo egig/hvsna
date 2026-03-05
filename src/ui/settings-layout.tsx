@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 import { Modal } from "../modules/navigation/modal";
 import { useLanguageContext } from "../modules/i18n/LanguageContext";
-import { SignedIn, SignedOut, SignOutButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
+import { useState } from "react";
+import { Dialog } from "@base-ui/react/dialog";
 import { Link, useLocation, useNavigate } from "react-router";
 
 export interface SettingsSection {
@@ -41,6 +43,8 @@ export function SettingsModal({
   const { t } = useLanguageContext();
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useClerk();
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const currentSection = sections.find(
     (section) => section.path === location.pathname,
@@ -128,13 +132,40 @@ export function SettingsModal({
             {/* Sign Out Button */}
             <SignedIn>
               <div className="pt-4 mt-4 border-t border-gray-200">
-                <SignOutButton>
-                  <button className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-danger-600 hover:bg-danger-50 transition-colors">
-                    <LogOut className="w-5 h-5 flex-shrink-0" />
-                    <span className="text-sm">{t("sign_out")}</span>
-                  </button>
-                </SignOutButton>
+                <button
+                  onClick={() => setConfirmOpen(true)}
+                  className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-danger-600 hover:bg-danger-50 transition-colors"
+                >
+                  <LogOut className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">{t("sign_out")}</span>
+                </button>
               </div>
+              <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <Dialog.Portal>
+                  <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/40" />
+                  <Dialog.Viewport className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+                    <Dialog.Popup className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-6 outline-none">
+                      <Dialog.Title className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                        {t("sign_out")}
+                      </Dialog.Title>
+                      <Dialog.Description className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        {t("sign_out_confirm")}
+                      </Dialog.Description>
+                      <div className="flex gap-3 justify-end">
+                        <Dialog.Close className="px-4 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                          {t("cancel")}
+                        </Dialog.Close>
+                        <button
+                          onClick={() => signOut()}
+                          className="px-4 py-2 text-sm font-medium rounded-lg bg-danger-500 text-white hover:bg-danger-600 transition-colors"
+                        >
+                          {t("sign_out")}
+                        </button>
+                      </div>
+                    </Dialog.Popup>
+                  </Dialog.Viewport>
+                </Dialog.Portal>
+              </Dialog.Root>
             </SignedIn>
           </nav>
         </div>

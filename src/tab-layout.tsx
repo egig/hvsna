@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
-import { Plus, PanelLeftClose, PanelLeft } from "lucide-react";
-import { SignedIn, UserButton } from "@clerk/clerk-react";
+import { Plus, PanelLeftClose, PanelLeft, UserRound } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+import { Link } from "react-router";
 import { TabBar } from "./modules/navigation";
 import { Modal } from "./modules/navigation/modal";
 import TaskForm from "./modules/task/task-form";
@@ -39,9 +40,20 @@ export default function TabLayout() {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
             {!sidebarCollapsed && (
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
+              <>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+                <SignedOut>
+                  <Link
+                    to="/signin"
+                    className="flex items-center justify-center size-8 rounded-full bg-primary-100 hover:bg-primary-200 text-gray-400 hover:text-primary-600 transition-colors"
+                    title="Sign in"
+                  >
+                    <UserRound size={16} />
+                  </Link>
+                </SignedOut>
+              </>
             )}
             <button
               onClick={() => setSidebarCollapsed((prev) => !prev)}

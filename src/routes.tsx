@@ -112,7 +112,6 @@ export const AppRoutes = () => {
           <Route path="*" element={<p>Not Found</p>} />
         </Routes>
       </AnimatePresence>
-
       {isSettingsOpen && (
         <SettingsModal
           sections={desktopSettingsSections}
