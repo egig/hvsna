@@ -202,6 +202,18 @@ export const settingsTranslations = {
     en: "Sign In",
     id: "Masuk",
   },
+  sign_out: {
+    en: "Sign Out",
+    id: "Keluar",
+  },
+  sign_out_confirm: {
+    en: "Are you sure you want to sign out?",
+    id: "Apakah Anda yakin ingin keluar?",
+  },
+  cancel: {
+    en: "Cancel",
+    id: "Batal",
+  },
   general: {
     en: "General",
     id: "Umum",
