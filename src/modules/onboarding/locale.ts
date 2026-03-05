@@ -1,8 +1,8 @@
 export const onboardingTranslations = {
   // Onboarding
   welcome: {
-    en: "Welcome",
-    id: "Selamat Datang",
+    en: "Welcome to Hvsna",
+    id: "Selamat Datang di Hvsna",
   },
   select_language: {
     en: "Select Language",
@@ -45,7 +45,7 @@ export const onboardingTranslations = {
     id: "Mengatur...",
   },
   location_privacy_note: {
-    en: "Your location is only used to set timezone and is stored locally",
-    id: "Lokasi anda hanya digunakan untuk mengatur zona waktu dan disimpan secara lokal",
+    en: "Your location is used to set timezone",
+    id: "Lokasi anda digunakan untuk mengatur zona waktu",
   },
 };

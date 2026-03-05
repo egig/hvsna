@@ -1,5 +1,7 @@
-import { Page } from "../../navigation";
-import { Navbar } from "../../navigation";
+import React, { useState } from "react";
+import { ChevronsUpDown } from "lucide-react";
+import { Page, Navbar } from "../../navigation";
+import { TimezonePickerModal } from "../../../ui/timezone-picker-modal";
 import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../../lib/timezones";
@@ -28,6 +30,8 @@ export default function GeneralSettings() {
     requestBestLocationPermission,
   } = useSettings();
   const { t } = useLanguageContext();
+
+  const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
   const handleLanguageChange = async (newLanguage: string) => {
     if (newLanguage === "en" || newLanguage === "id") {
@@ -262,22 +266,39 @@ export default function GeneralSettings() {
       </div>
 
       <div className="bg-white">
-        <ListInputSelect
-          label={t("timezone")}
+        <div className="p-2 border-b border-gray-200 p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-900 font-semibold text-left truncate flex-1 min-w-0">
+              {t("timezone")}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsTimezoneModalOpen(true)}
+              disabled={loading || !!isTimezoneFromLocation}
+              className="flex items-center space-x-1 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed min-w-0 max-w-[50%]"
+            >
+              <span className="truncate">
+                {settings.timezone.replace(/_/g, " ")}
+              </span>
+              <ChevronsUpDown className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            </button>
+          </div>
+          {isTimezoneFromLocation && (
+            <div className="mt-2 text-sm text-gray-500">
+              {t("timezone_from_location")}
+            </div>
+          )}
+        </div>
+
+        <TimezonePickerModal
+          isOpen={isTimezoneModalOpen}
+          onClose={() => setIsTimezoneModalOpen(false)}
           value={settings.timezone}
-          onValueChange={handleTimezoneChange}
-          disabled={loading || !!isTimezoneFromLocation}
-          options={ALL_TIMEZONES.map((tz) => ({
-            value: tz,
-            label: tz,
-          }))}
-          helpText={
-            isTimezoneFromLocation ? t("timezone_from_location") : undefined
-          }
+          onSelect={handleTimezoneChange}
+          title={t("timezone")}
         />
 
         <div className="space-y-4">
-          {/* TODO How about upcoming date, should I adjust created tasks */}
           <ListInputSelect
             label={t("manual_date_offset")}
             value={settings.manualDateOffset?.toString() || "0"}

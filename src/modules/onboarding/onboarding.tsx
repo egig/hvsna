@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { MapPin, Globe, ChevronRight, Languages } from "lucide-react";
-import { Page } from "../navigation";
-import { Navbar } from "../navigation";
+import {
+  MapPin,
+  Globe,
+  ChevronRight,
+  Languages,
+  ChevronsUpDown,
+} from "lucide-react";
+import { Page, Navbar } from "../navigation";
+import { TimezonePickerModal } from "../../ui/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";
-import { ALL_TIMEZONES } from "../../lib/timezones";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import type { Coordinate } from "src/modules/settings/settings";
 import type { Language } from "src/modules/i18n/language";
@@ -12,6 +17,7 @@ export default function Onboarding() {
   const { t, language, setLanguage } = useLanguageContext();
   const { updateSettings } = useSettings();
   const [loading, setLoading] = useState(false);
+  const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedTimezone, setSelectedTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -197,18 +203,25 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <select
-          value={selectedTimezone}
-          onChange={(e) => setSelectedTimezone(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-[var(--hvsna-primary-color)]"
+        <button
+          type="button"
+          onClick={() => setIsTimezoneModalOpen(true)}
           disabled={loading}
+          className="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg hover:border-[var(--hvsna-primary-color)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
         >
-          {ALL_TIMEZONES.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz.replace(/_/g, " ")}
-            </option>
-          ))}
-        </select>
+          <span className="text-sm text-gray-800">
+            {selectedTimezone.replace(/_/g, " ")}
+          </span>
+          <ChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0" />
+        </button>
+
+        <TimezonePickerModal
+          isOpen={isTimezoneModalOpen}
+          onClose={() => setIsTimezoneModalOpen(false)}
+          value={selectedTimezone}
+          onSelect={setSelectedTimezone}
+          title={t("select_timezone_manually") || "Select Timezone"}
+        />
 
         <button
           onClick={handleManualTimezone}
