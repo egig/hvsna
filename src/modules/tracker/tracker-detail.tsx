@@ -10,6 +10,7 @@ import { usePouchDB } from "src/pouchdb";
 import { Navbar, Page } from "../navigation";
 import type { TrackerAttribute } from "../attribute/trackerAttributeStore";
 import type { AttributeOption } from "../option/optionStore";
+import logger from "src/lib/logger";
 
 interface AttributeOptionSum {
   option: string;
@@ -57,7 +58,7 @@ export default function TrackerDetail() {
 
             optionsMap[attribute.id] = options;
           } catch (error) {
-            console.error(
+            logger.error(
               `Failed to fetch options for attribute ${attribute.id}:`,
               error,
             );
@@ -133,7 +134,7 @@ export default function TrackerDetail() {
 
       setAttributeSums(sums);
     } catch (error) {
-      console.error("Failed to calculate attribute sums:", error);
+      logger.error("Failed to calculate attribute sums:", error);
     } finally {
       setLoading(false);
     }

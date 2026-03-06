@@ -5,6 +5,7 @@ import { queryKeys } from "../common/query-keys";
 import type { Task, TaskStatus, TaskQuery } from "./types";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
+import log from "../../lib/logger"
 
 export function useTasks() {
   const [initiated, setInitiated] = useState(false);
@@ -95,7 +96,7 @@ export function useTasks() {
       // Invalidate query to trigger refetch with new data
       browsedTasksQuery.refetch();
     } catch (error) {
-      console.error("Failed to load more tasks:", error);
+      log.error("Failed to load more tasks:", error);
     }
   }, [
     hasMore,

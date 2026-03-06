@@ -12,6 +12,7 @@ import { useGoal } from "./use-goal";
 import type { Tracker } from "../tracker/trackerStore";
 import { LoadingSpinner } from "src/ui/loader";
 import { ListItem } from "../../ui/list-item";
+import logger from "src/lib/logger";
 
 export default function GoalList() {
   const { loading, error, goals, getGoals } = useGoals();
@@ -33,7 +34,7 @@ export default function GoalList() {
       ]);
       setTrackers(trackersData);
     } catch (err) {
-      console.error("Failed to load data:", err);
+      logger.error("Failed to load data:", err);
     }
   };
 
@@ -80,7 +81,7 @@ export default function GoalList() {
       getGoals();
       setPopupOpened(false);
     } catch (err) {
-      console.error("Failed to delete goal:", err);
+      logger.error("Failed to delete goal:", err);
       alert("Failed to delete goal. Please try again.");
     }
   };

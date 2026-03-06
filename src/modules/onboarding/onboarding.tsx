@@ -5,13 +5,16 @@ import {
   ChevronRight,
   Languages,
   ChevronsUpDown,
+  Bell,
 } from "lucide-react";
 import { Page, Navbar } from "../navigation";
 import { TimezonePickerModal } from "../../ui/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
+import { CapacitorNotifications } from "../../lib/capacitor";
 import type { Coordinate } from "src/modules/settings/settings";
 import type { Language } from "src/modules/i18n/language";
+import logger from "src/lib/logger";
 
 export default function Onboarding() {
   const { t, language, setLanguage } = useLanguageContext();
@@ -29,7 +32,7 @@ export default function Onboarding() {
       await setLanguage(selectedLanguage);
       setCurrentStep(2);
     } catch (error) {
-      console.error("Failed to set language:", error);
+      logger.error("Failed to set language:", error);
     } finally {
       setLoading(false);
     }
@@ -66,13 +69,13 @@ export default function Onboarding() {
         coordinate,
         locationResolveType: "auto",
         locationResolvedAt: new Date().toISOString(),
-        onboardedAt: Date.now(),
       });
 
-      // Redirect to main app
-      window.location.href = "/";
+      // Move to notification step
+      setCurrentStep(3);
+      setLoading(false);
     } catch (error) {
-      console.error("Location access denied:", error);
+      logger.error("Location access denied:", error);
       setLoading(false);
       // Fall back to manual timezone selection
     }
@@ -85,14 +88,47 @@ export default function Onboarding() {
         timezone: selectedTimezone,
         locationResolveType: "manual",
         locationResolvedAt: new Date().toISOString(),
+      });
+
+      // Move to notification step
+      setCurrentStep(3);
+      setLoading(false);
+    } catch (error) {
+      logger.error("Failed to save settings:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleNotificationPermission = async (enable: boolean) => {
+    setLoading(true);
+    try {
+      let notificationEnabled = false;
+
+      if (enable) {
+        const permission = await CapacitorNotifications.requestPermissions();
+        notificationEnabled = permission.state === "granted";
+      }
+
+      await updateSettings({
+        notifications: notificationEnabled,
         onboardedAt: Date.now(),
       });
 
       // Redirect to main app
       window.location.href = "/";
     } catch (error) {
-      console.error("Failed to save settings:", error);
+      logger.error("Failed to handle notification permission:", error);
       setLoading(false);
+    }
+  };
+
+  const checkNotificationPermission = async () => {
+    try {
+      const permission = await CapacitorNotifications.checkPermissions();
+      return permission.state;
+    } catch (error) {
+      logger.error("Failed to check notification permission:", error);
+      return "unknown";
     }
   };
 
@@ -243,16 +279,92 @@ export default function Onboarding() {
     </div>
   );
 
+  const renderNotificationSetup = () => (
+    <div className="space-y-4">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold text-gray-900">
+          {t("setup_notifications") || "Setup Notifications"}
+        </h1>
+        <p className="text-gray-600">
+          {t("notification_setup_description") ||
+            "Enable notifications to get reminders for your tasks"}
+        </p>
+      </div>
+
+      {/* Enable Notifications Option */}
+      <button
+        onClick={() => handleNotificationPermission(true)}
+        disabled={loading}
+        className="w-full bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
+              <Bell className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-semibold text-gray-900">
+                {t("enable_notifications") || "Enable Notifications"}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {t("get_task_reminders") ||
+                  "Get reminders for your tasks before they're due"}
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
+        </div>
+      </button>
+
+      {/* Skip Notifications Option */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="bg-gray-100 p-2 rounded-lg">
+            <ChevronsUpDown className="w-5 h-5 text-gray-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">
+              {t("skip_notifications") || "Skip Notifications"}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {t("skip_notifications_description") ||
+                "You can enable notifications later in settings"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => handleNotificationPermission(false)}
+          disabled={loading}
+          className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? t("continuing") || "Continuing..." : t("skip") || "Skip"}
+        </button>
+      </div>
+
+      <div className="text-center text-sm text-gray-500">
+        <p>
+          {t("notification_privacy_note") ||
+            "Notifications are only used for task reminders and are stored locally"}
+        </p>
+      </div>
+    </div>
+  );
+
+  console.log(loading);
+
   return (
     <Page>
       <Navbar
         title={
           currentStep === 1
             ? t("welcome") || "Welcome"
-            : t("setup_location") || "Setup Location"
+            : currentStep === 2
+              ? t("setup_location") || "Setup Location"
+              : t("setup_notifications") || "Setup Notifications"
         }
-        showBackButton={currentStep === 2}
-        customBackAction={() => setCurrentStep(1)}
+        showBackButton={currentStep === 2 || currentStep === 3}
+        customBackAction={() => setCurrentStep(currentStep - 1)}
       />
 
       <div className="p-6 space-y-6">
@@ -269,23 +381,43 @@ export default function Onboarding() {
           </div>
           <div
             className={`w-16 h-1 ${
-              currentStep === 2
+              currentStep === 2 || currentStep === 3
                 ? "bg-[var(--hvsna-primary-color)]"
                 : "bg-gray-300"
             }`}
           ></div>
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 2
+              currentStep === 2 || currentStep === 3
                 ? "bg-[var(--hvsna-primary-color)] text-white"
                 : "bg-gray-300 text-gray-600"
             }`}
           >
             2
           </div>
+          <div
+            className={`w-16 h-1 ${
+              currentStep === 3
+                ? "bg-[var(--hvsna-primary-color)]"
+                : "bg-gray-300"
+            }`}
+          ></div>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              currentStep === 3
+                ? "bg-[var(--hvsna-primary-color)] text-white"
+                : "bg-gray-300 text-gray-600"
+            }`}
+          >
+            3
+          </div>
         </div>
 
-        {currentStep === 1 ? renderLanguageSelection() : renderLocationSetup()}
+        {currentStep === 1
+          ? renderLanguageSelection()
+          : currentStep === 2
+            ? renderLocationSetup()
+            : renderNotificationSetup()}
       </div>
     </Page>
   );

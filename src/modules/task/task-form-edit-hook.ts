@@ -13,6 +13,7 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
+import logger from "src/lib/logger";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -155,12 +156,12 @@ export const useTaskFormEdit = (
           //   baseDate: taskInput.atEpochMillis,
           // });
         } catch (recurringError) {
-          console.error("Failed to create recurring task:", recurringError);
+          logger.error("Failed to create recurring task:", recurringError);
           // Don't fail the main task creation if recurring task creation fails
         }
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       if (onError) {
         onError(err instanceof Error ? err.message : "Failed to update task");
       }
@@ -181,7 +182,7 @@ export const useTaskFormEdit = (
           setTask(null);
           onDelete?.(taskId);
         } catch (error) {
-          console.error(error);
+          logger.error(error);
           if (onError) {
             onError(
               error instanceof Error ? error.message : "Failed to delete task",

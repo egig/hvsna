@@ -12,6 +12,9 @@ import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 import { taskRepository } from "./task-repository";
 import { queryKeys } from "../common/query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
+import { ReminderService } from "./reminder-service";
+import { useSettings } from "../settings/useSettings";
+import logger from "../../lib/logger"
 
 interface TaskContextType {
   // Task data
@@ -46,6 +49,7 @@ export const TaskProvider: React.FC<{
   const { createLog } = useLog();
   const queryClient = useQueryClient();
   const { getToday } = useHijriDate();
+  const { settings } = useSettings();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
 
@@ -143,6 +147,15 @@ export const TaskProvider: React.FC<{
   const completeTaskMutation = useMutation({
     mutationFn: (id: string) => taskRepository.completeTask(id),
     onSuccess: async (updatedTask, id) => {
+      // Cancel reminders when task is completed
+      if (settings.notifications) {
+        try {
+          await ReminderService.cancelTaskReminders(id);
+        } catch (error) {
+          logger.error("Failed to cancel task reminders:", error);
+        }
+      }
+
       invalidateTaskQueries();
 
       // Handle log creation
@@ -171,7 +184,7 @@ export const TaskProvider: React.FC<{
       }
     },
     onError: (error) => {
-      console.error("Failed to complete task:", error);
+      logger.error("Failed to complete task:", error);
       throw error;
     },
   });
@@ -180,6 +193,15 @@ export const TaskProvider: React.FC<{
   const reopenTaskMutation = useMutation({
     mutationFn: (id: string) => taskRepository.reopenTask(id),
     onSuccess: async (updatedTask, id) => {
+      // Reschedule reminders when task is reopened
+      if (settings.notifications && updatedTask.atEpochMillis) {
+        try {
+          await ReminderService.updateTaskReminders(updatedTask);
+        } catch (error) {
+          logger.error("Failed to reschedule task reminders:", error);
+        }
+      }
+
       invalidateTaskQueries();
 
       // Handle log creation
@@ -217,7 +239,15 @@ export const TaskProvider: React.FC<{
   // React Query mutation for creating tasks
   const createTaskMutation = useMutation({
     mutationFn: (input: TaskCreateInput) => taskRepository.create(input),
-    onSuccess: () => {
+    onSuccess: async (createdTask) => {
+      // Schedule reminders if notifications are enabled and task has scheduled time
+      if (settings.notifications && createdTask.atEpochMillis) {
+        try {
+          await ReminderService.scheduleTaskReminders(createdTask);
+        } catch (error) {
+          console.error("Failed to schedule task reminders:", error);
+        }
+      }
       invalidateTaskQueries();
     },
     onError: (error) => {
@@ -230,7 +260,24 @@ export const TaskProvider: React.FC<{
   const updateTaskMutation = useMutation({
     mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) =>
       updateTaskWithLog(id, input),
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
+      // Update reminders if notifications are enabled
+      if (settings.notifications) {
+        try {
+          const updatedTask = await taskRepository.findById(variables.id);
+          if (updatedTask) {
+            if (updatedTask.status === 1 || !updatedTask.atEpochMillis) {
+              // Task completed or no scheduled time - cancel reminders
+              await ReminderService.cancelTaskReminders(variables.id);
+            } else {
+              // Task updated - reschedule reminders
+              await ReminderService.updateTaskReminders(updatedTask);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to update task reminders:", error);
+        }
+      }
       invalidateTaskQueries();
     },
     onError: (error) => {
@@ -242,7 +289,15 @@ export const TaskProvider: React.FC<{
   // React Query mutation for deleting tasks
   const deleteTaskMutation = useMutation({
     mutationFn: (id: string) => taskRepository.delete(id),
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
+      // Cancel all reminders for the deleted task
+      if (settings.notifications) {
+        try {
+          await ReminderService.cancelTaskReminders(variables);
+        } catch (error) {
+          console.error("Failed to cancel task reminders:", error);
+        }
+      }
       invalidateTaskQueries();
       setFormOpen(false);
     },

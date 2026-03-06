@@ -18,9 +18,9 @@ import {
   getLocalDocCount,
   isDatabaseEmpty,
   deleteAllLocalDocs,
-  type SyncStateDocument,
 } from "./utils/sync-state";
-import log from "src/lib/logger";
+import logger from "src/lib/logger";
+import log from "loglevel";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {

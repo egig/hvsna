@@ -18,6 +18,7 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
+import logger from "src/lib/logger";
 
 export interface TaskScheduleAt {
   dateHijri: HijriDate | null;
@@ -170,12 +171,12 @@ export const useTaskForm = (
           //   baseDate: taskInput.atEpochMillis,
           // });
         } catch (recurringError) {
-          console.error("Failed to create recurring task:", recurringError);
+          logger.error("Failed to create recurring task:", recurringError);
           // Don't fail the main task creation if recurring task creation fails
         }
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       if (onError) {
         onError(err instanceof Error ? err.message : "Failed to create task");
       }

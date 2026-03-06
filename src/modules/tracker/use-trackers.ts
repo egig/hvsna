@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useTrackerStore } from "./trackerStore";
 import type { Tracker, TrackerQuery } from "./trackerStore";
 import { usePouchDB } from "src/pouchdb";
+import logger from "src/lib/logger";
 
 export function useTrackers() {
   const { db } = usePouchDB();
@@ -24,7 +25,7 @@ export function useTrackers() {
     try {
       await getTrackers();
     } catch (err) {
-      console.error("Failed to load trackers:", err);
+      logger.error("Failed to load trackers:", err);
     }
   };
 

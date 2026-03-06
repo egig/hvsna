@@ -13,6 +13,7 @@ import { FormInput } from "src/ui/form-input";
 import { Trash2 } from "lucide-react";
 import { useRecurringTasks } from "../task/use-recurring-tasks";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
+import logger from "src/lib/logger";
 
 interface GoalFormProps {
   goalId?: string | null;
@@ -133,7 +134,7 @@ export default function GoalForm({
             baseDate: Date.now(), // Start from now
           });
         } catch (recurringError) {
-          console.error(
+          logger.error(
             "Failed to create recurring task for goal:",
             recurringError,
           );

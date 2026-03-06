@@ -16,6 +16,7 @@ import {
 import BlockTitle from "../../ui/block-title";
 import { GoalResultItem } from "src/modules/goal/goal-result-item";
 import { GoalResultsSummary } from "src/modules/goal/goal-result-summary";
+import logger from "src/lib/logger";
 
 export function Goals() {
   const { db } = usePouchDB();
@@ -109,7 +110,7 @@ export function Goals() {
       getGoals();
       setPopupOpened(false);
     } catch (err) {
-      console.error("Failed to delete goal:", err);
+      logger.error("Failed to delete goal:", err);
       alert("Failed to delete goal. Please try again.");
     }
   };

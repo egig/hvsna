@@ -286,4 +286,90 @@ export const commonTranslations = {
     en: "Update Now",
     id: "Perbarui Sekarang",
   },
+
+  // Onboarding
+  welcome: {
+    en: "Welcome",
+    id: "Selamat Datang",
+  },
+  select_language: {
+    en: "Select Language",
+    id: "Pilih Bahasa",
+  },
+  language_selection_description: {
+    en: "Choose your preferred language for the app",
+    id: "Pilih bahasa yang Anda sukai untuk aplikasi",
+  },
+  setup_location: {
+    en: "Setup Location",
+    id: "Atur Lokasi",
+  },
+  location_setup_description: {
+    en: "Choose how you want to set your timezone for accurate scheduling",
+    id: "Pilih cara Anda ingin mengatur zona waktu untuk penjadwalan yang akurat",
+  },
+  use_current_location: {
+    en: "Use Current Location",
+    id: "Gunakan Lokasi Saat Ini",
+  },
+  auto_detect_timezone: {
+    en: "Auto-detect timezone from your location",
+    id: "Deteksi otomatis zona waktu dari lokasi Anda",
+  },
+  select_timezone_manually: {
+    en: "Select Timezone Manually",
+    id: "Pilih Zona Waktu Secara Manual",
+  },
+  choose_timezone: {
+    en: "Choose your timezone from the list",
+    id: "Pilih zona waktu Anda dari daftar",
+  },
+  setting_up: {
+    en: "Setting up...",
+    id: "Mengatur...",
+  },
+  continue: {
+    en: "Continue",
+    id: "Lanjutkan",
+  },
+  location_privacy_note: {
+    en: "Your location is only used to set timezone and is stored locally",
+    id: "Lokasi Anda hanya digunakan untuk mengatur zona waktu dan disimpan secara lokal",
+  },
+  setup_notifications: {
+    en: "Setup Notifications",
+    id: "Atur Notifikasi",
+  },
+  notification_setup_description: {
+    en: "Enable notifications to get reminders for your tasks",
+    id: "Aktifkan notifikasi untuk mendapatkan pengingat untuk tugas Anda",
+  },
+  enable_notifications: {
+    en: "Enable Notifications",
+    id: "Aktifkan Notifikasi",
+  },
+  get_task_reminders: {
+    en: "Get reminders for your tasks before they're due",
+    id: "Dapatkan pengingat untuk tugas Anda sebelum jatuh tempo",
+  },
+  skip_notifications: {
+    en: "Skip Notifications",
+    id: "Lewati Notifikasi",
+  },
+  skip_notifications_description: {
+    en: "You can enable notifications later in settings",
+    id: "Anda dapat mengaktifkan notifikasi nanti di pengaturan",
+  },
+  skip: {
+    en: "Skip",
+    id: "Lewati",
+  },
+  continuing: {
+    en: "Continuing...",
+    id: "Melanjutkan...",
+  },
+  notification_privacy_note: {
+    en: "Notifications are only used for task reminders and are stored locally",
+    id: "Notifikasi hanya digunakan untuk pengingat tugas dan disimpan secara lokal",
+  },
 };

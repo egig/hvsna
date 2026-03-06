@@ -15,6 +15,7 @@ import {
   groupTasksByPrayerTimes,
   getPrayerTimesWithFallback,
 } from "../../lib/prayer-time-utils";
+import logger from "src/lib/logger";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -180,7 +181,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
         const timings = await getPrayerTimesWithFallback(settings, today);
         setPrayerTimings(timings);
       } catch (error) {
-        console.error("Failed to load prayer times:", error);
+        logger.error("Failed to load prayer times:", error);
       } finally {
         setLoadingPrayerTimes(false);
       }

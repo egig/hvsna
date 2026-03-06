@@ -8,6 +8,7 @@ import { Navbar, Page } from "../navigation";
 import { useTrackers } from "./use-trackers";
 import { ListItem } from "../../ui/list-item";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
+import logger from "src/lib/logger";
 
 export default function Trackers() {
   const {
@@ -64,7 +65,7 @@ export default function Trackers() {
       loadTrackers();
       setPopupOpened(false);
     } catch (err) {
-      console.error("Failed to delete tracker:", err);
+      logger.error("Failed to delete tracker:", err);
       alert("Failed to delete tracker. Please try again.");
     }
   };

@@ -13,6 +13,7 @@ import { Page } from "../navigation";
 import { useAttributeOptions } from "../option/use-options";
 import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
 import { LogItem } from "./log-item";
+import logger from "src/lib/logger";
 
 export default function Logs() {
   const { loading, error, getLogs, refreshLogs, logs } = useLogs();
@@ -33,7 +34,7 @@ export default function Logs() {
       const [trackersData] = await Promise.all([getTrackers()]);
       setTrackers(trackersData);
     } catch (err) {
-      console.error("Failed to load data:", err);
+      logger.error("Failed to load data:", err);
     }
   };
 
@@ -79,7 +80,7 @@ export default function Logs() {
       await deleteLog(log.id);
       loadData();
     } catch (err) {
-      console.error("Failed to delete log:", err);
+      logger.error("Failed to delete log:", err);
       alert("Failed to delete log entry. Please try again.");
     }
     setPopupOpened(false);
