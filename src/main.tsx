@@ -7,6 +7,8 @@ import {
   createRequiredIndexes,
   getPouchDBInstance,
 } from "src/lib/pouchdb-singleton";
+import { configureLogger } from "src/lib/logger";
+import log from "./lib/logger";
 
 const config: AppConfig = {
   basePath: import.meta.env.VITE_API_BASE,
@@ -24,6 +26,9 @@ const root = createRoot(document.getElementById("root") as Container);
 
 const db = getPouchDBInstance();
 
+// Configure logger early
+configureLogger();
+
 (async () => {
   root.render(<Hvsna config={config} db={db} />);
   // @ts-ignore
@@ -32,9 +37,9 @@ const db = getPouchDBInstance();
 
 registerSW({
   onOfflineReady() {
-    console.log("App ready to work offline");
+    log.info("App ready to work offline");
   },
   onNeedRefresh() {
-    console.log("New content available, please refresh");
+    log.info("New content available, please refresh");
   },
 });

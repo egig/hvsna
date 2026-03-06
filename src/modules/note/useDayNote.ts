@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNote } from "./useNote";
 import type { Note, NoteCreateInput, NoteUpdateInput } from "./note";
+import log from "../../lib/logger";
 
 export function useDayNote(date: string) {
   const [fetched, setFetched] = useState(false);
@@ -14,7 +15,7 @@ export function useDayNote(date: string) {
         setDayData(data);
       } catch (err) {
         // Note not found is expected for new days
-        console.log("No existing data for date:", date);
+        log.info("No existing data for date:", date);
       }
     };
 

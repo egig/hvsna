@@ -23,6 +23,7 @@ import { SettingsProvider } from "./modules/settings";
 import { SystemProvider } from "./modules/system";
 import { PostHogSessionTracker } from "./components/posthog-session-tracker";
 import { PlatformProvider } from "./modules/platform";
+import log from "./lib/logger";
 
 export interface AppConfig {
   basePath?: string;
@@ -58,7 +59,7 @@ export default function Hvsna({
   db: PouchDB.Database;
 }) {
   const handleBreakpointClose = () => {
-    console.log("Breakpoint wrapper closed by user");
+    log.info("Breakpoint wrapper closed by user");
     // You can add analytics tracking or other logic here
   };
 

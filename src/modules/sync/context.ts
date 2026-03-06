@@ -11,6 +11,7 @@ import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
 import { CapacitorNetwork } from "src/lib/capacitor/network";
+import log from "../../lib/logger";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {
@@ -84,7 +85,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   // Manual sync function
   const manualSync = async () => {
-    console.log(isSignedIn, user, db);
+    log.info(isSignedIn, user, db);
     if (!isSignedIn || !user?.syncURL || !db) {
       throw new Error(
         "Sync not available - user not signed in or sync URL not configured",
@@ -95,7 +96,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       throw new Error("Sync not available - network offline");
     }
 
-    console.log("[sync] Manual sync started");
+    log.info("[sync] Manual sync started");
     try {
       setIsManualSyncing(true);
 
@@ -153,7 +154,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         // Add network status listener
         networkListener = await CapacitorNetwork.addListener(
           (networkStatus) => {
-            console.log(
+            log.info(
               `[sync] Network ${networkStatus.connected ? "online" : "offline"} - ${networkStatus.connectionType}`,
             );
             setIsOnline(networkStatus.connected);
@@ -165,12 +166,12 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         setIsOnline(navigator.onLine);
 
         const handleOnline = () => {
-          console.log("[sync] Network online - resuming sync");
+          log.info("[sync] Network online - resuming sync");
           setIsOnline(true);
         };
 
         const handleOffline = () => {
-          console.log("[sync] Network offline - pausing sync");
+          log.info("[sync] Network offline - pausing sync");
           setIsOnline(false);
         };
 
@@ -201,14 +202,14 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     if (replication) {
       if (isOnline) {
         // Resume sync when coming back online
-        console.log("[sync] Network available - continuing sync");
+        log.info("[sync] Network available - continuing sync");
         // Trigger a manual sync to ensure data is synced when back online
         manualSync().catch((error) => {
-          console.log("[sync] Auto-sync on network resume failed:", error);
+          log.warn("[sync] Auto-sync on network resume failed:", error);
         });
       } else {
         // Pause sync when going offline
-        console.log("[sync] Network unavailable - pausing sync");
+        log.info("[sync] Network unavailable - pausing sync");
         // PouchDB automatically handles pausing when offline,
         // but we can ensure sync state is reflected
         setIsSyncing(false);
@@ -233,7 +234,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
       // Don't initialize sync if offline
       if (!isOnline) {
-        console.log("[sync] Offline - skipping sync initialization");
+        log.info("[sync] Offline - skipping sync initialization");
         return;
       }
 
@@ -258,18 +259,18 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
             retry: true,
           })
           .on("change", async (info: any) => {
-            console.log("[sync] change:", info);
+            log.info("[sync] change:", info);
             queryClient.invalidateQueries();
             const now = new Date();
             setLastSyncTime(now);
             await storeSyncTimeToDB(db, now);
           })
           .on("paused", (err: any) => {
-            console.log("[sync] paused:", err);
+            log.info("[sync] paused:", err);
             // setIsSyncing(false);
           })
           .on("active", () => {
-            console.log("[sync] active");
+            log.info("[sync] active");
             // setIsSyncing(true);
           })
           .on("denied", (err: any) => {
@@ -277,7 +278,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
             // setIsSyncing(false);
           })
           .on("complete", async (info: any) => {
-            console.log("[sync] complete:", info);
+            log.info("[sync] complete:", info);
             const now = new Date();
             setLastSyncTime(now);
             await storeSyncTimeToDB(db, now);
