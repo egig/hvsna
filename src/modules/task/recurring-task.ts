@@ -4,8 +4,6 @@ export interface RecurringTask {
   id: string;
   user_id: string;
   name: string;
-  targetId?: string;
-  targetValue?: number;
   attributes?: Record<string, string>;
   repeat: TaskRepeat;
   baseDate: number; // The original scheduled date to base repetitions on
@@ -16,8 +14,6 @@ export interface RecurringTask {
 export interface RecurringTaskCreateInput {
   id?: string;
   name: string;
-  targetId?: string;
-  targetValue?: number;
   attributes?: Record<string, string>;
   repeat: TaskRepeat;
   baseDate: number;
@@ -25,8 +21,6 @@ export interface RecurringTaskCreateInput {
 
 export interface RecurringTaskUpdateInput {
   name?: string;
-  targetId?: string;
-  targetValue?: number;
   attributes?: Record<string, string>;
   repeat?: TaskRepeat;
   baseDate?: number;

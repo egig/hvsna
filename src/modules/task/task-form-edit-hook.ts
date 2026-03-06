@@ -32,9 +32,6 @@ export const useTaskFormEdit = (
   const { updateTask, deleteTask, getTask } = useTaskContext();
 
   const [task, setTask] = useState<Task | null>(null);
-  const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
-
   const { createRecurringTask } = useRecurringTasks();
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -80,8 +77,6 @@ export const useTaskFormEdit = (
       const taskInput: TaskUpdateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
-        targetId: taskData.targetId,
-        targetValue: taskData.targetValue,
         attributes: attr,
         atDateHijri: taskData.atDateHijri,
         atTime: taskData.atTime,
@@ -98,10 +93,6 @@ export const useTaskFormEdit = (
         taskInput.repeat = taskData.repeat;
       }
 
-      if (selectedTargetId) {
-        taskInput.targetId = selectedTargetId;
-      }
-
       // Use TaskProvider's updateTask directly
       const result = await updateTask(taskId, taskInput);
       setTask(null);
@@ -116,8 +107,6 @@ export const useTaskFormEdit = (
           // TODO: implement recurring task creation
           // await createRecurringTask({
           //   name: taskInput.name,
-          //   targetId: taskInput.targetId,
-          //   targetValue: taskInput.targetValue,
           //   attributes: taskInput.attributes,
           //   repeat: taskData.repeat,
           //   baseDate: taskInput.atEpochMillis,
@@ -194,18 +183,10 @@ export const useTaskFormEdit = (
       getTask(taskId).then((fetchedTask) => {
         if (fetchedTask) {
           setTask(fetchedTask);
-          // Update targetId if task has one
-          if (fetchedTask.targetId !== currentTargetId) {
-            setCurrentTargetId(fetchedTask.targetId || null);
-          }
         }
       });
     }
-  }, [taskId, getTask, currentTargetId]);
-
-  useEffect(() => {
-    setSelectedTargetId(task?.targetId || "");
-  }, [task]);
+  }, [taskId, getTask]);
 
   return {
     task,

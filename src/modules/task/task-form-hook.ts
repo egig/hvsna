@@ -45,9 +45,6 @@ export const useTaskForm = (
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
 
   const [task, setTask] = useState<Task | null>(null);
-  const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
-
   const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
     dateHijri: null,
     time: "",
@@ -87,8 +84,6 @@ export const useTaskForm = (
       const taskInput: TaskCreateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
-        targetId: taskData.targetId,
-        targetValue: taskData.targetValue,
         attributes: attr,
         atDateHijri: taskData.atDateHijri as string,
         atTime: taskData.atTime,
@@ -102,10 +97,6 @@ export const useTaskForm = (
       // Handle repeat - only include if not "none"
       if (taskData.repeat && taskData.repeat !== "none") {
         taskInput.repeat = taskData.repeat;
-      }
-
-      if (selectedTargetId) {
-        taskInput.targetId = selectedTargetId;
       }
 
       // Use TaskProvider's createTask directly
@@ -132,8 +123,6 @@ export const useTaskForm = (
           // TODO
           // await createRecurringTask({
           //   name: taskInput.name,
-          //   targetId: taskInput.targetId,
-          //   targetValue: taskInput.targetValue,
           //   attributes: taskInput.attributes,
           //   repeat: taskData.repeat,
           //   baseDate: taskInput.atEpochMillis,
@@ -152,10 +141,6 @@ export const useTaskForm = (
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    setSelectedTargetId(task?.targetId || "");
-  }, [task]);
 
   return {
     task,

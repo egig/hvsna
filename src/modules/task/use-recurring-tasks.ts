@@ -25,8 +25,6 @@ export function useRecurringTasks() {
           id,
           user_id: "current_user", // TODO: Get from auth context
           name: input.name,
-          targetId: input.targetId,
-          targetValue: input.targetValue,
           attributes: input.attributes,
           repeat: input.repeat,
           baseDate: input.baseDate,

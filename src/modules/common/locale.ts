@@ -106,10 +106,6 @@ export const commonTranslations = {
     en: "Name and type fields are required",
     id: "Field nama dan tipe wajib diisi",
   },
-  name_tracker_and_attribute_are_required: {
-    en: "Name, tracker, and attribute are required",
-    id: "Nama, pelacak, dan atribut wajib diisi",
-  },
 
   // Common fields
   name: {

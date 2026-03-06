@@ -92,7 +92,6 @@ export interface TaskChange {
 
 export type TaskQuery = {
   status?: TaskStatus;
-  targetId?: string;
   atDateHijri?: string;
   noDate?: number;
   atTime?: string;

@@ -18,10 +18,7 @@ export const getCurrentEnvironment = (): Environment => {
  * Feature flag configuration per feature
  * Each feature lists the environments where it's enabled
  */
-export const featureFlagConfig: FeatureFlagConfig = {
-  TRACKER_ATTR: [],
-  GOAL_RANGE: [],
-};
+export const featureFlagConfig: FeatureFlagConfig = {};
 
 /**
  * Get feature flags for the current environment

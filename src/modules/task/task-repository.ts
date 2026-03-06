@@ -22,8 +22,6 @@ class PouchDBTaskDocument {
   noDate?: number = 1;
   atEpochMillis?: number | null = null;
   atTime?: string = "";
-  targetId?: string = "";
-  targetValue?: number = 0;
   createdAt: number = new Date().valueOf();
   updatedAt: number = new Date().valueOf();
   completedAt?: number;
@@ -47,8 +45,6 @@ class PouchDBTaskDocument {
       description: this.description || "",
       status: this.status !== undefined ? this.status : 0,
       atEpochMillis: this.atEpochMillis || null,
-      targetId: this.targetId || "",
-      targetValue: this.targetValue || 0,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       completedAt: this.completedAt,
@@ -143,8 +139,6 @@ export class TaskRepository {
       atTime: input.atTime || "",
       createdAt: now,
       updatedAt: now,
-      targetId: input.targetId || "",
-      targetValue: input.targetValue || 0,
       attributes: input.attributes || {},
       prayerTime: input.prayerTime,
       lat: input.lat,
@@ -252,10 +246,6 @@ export class TaskRepository {
       mangoQuery.selector.status = query.status;
     }
 
-    if (query?.targetId) {
-      mangoQuery.selector.targetId = query.targetId;
-    }
-
     if (query?.searchText && query.searchText.trim()) {
       const searchLower = query.searchText.toLowerCase().trim();
       mangoQuery.selector.$or = [
@@ -337,8 +327,6 @@ export class TaskRepository {
       name: doc.name,
       status: doc.status,
       atEpochMillis: doc.atEpochMillis,
-      targetId: doc.targetId,
-      targetValue: doc.targetValue,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
       atDateHijri: doc.atDateHijri,

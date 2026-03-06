@@ -48,7 +48,6 @@ export const TaskProvider: React.FC<{
   const { getToday } = useHijriDate();
   const { settings } = useSettings();
   const [task, setTask] = useState<Task | null>(null);
-  const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
 
   // Local form state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
@@ -59,14 +58,10 @@ export const TaskProvider: React.FC<{
       taskRepository.findById(taskId).then((fetchedTask) => {
         if (fetchedTask) {
           setTask(fetchedTask);
-          // Update targetId if task has one
-          if (fetchedTask.targetId !== currentTargetId) {
-            setCurrentTargetId(fetchedTask.targetId || null);
-          }
         }
       });
     }
-  }, [taskId, currentTargetId]);
+  }, [taskId]);
 
   const invalidateTaskQueries = () => {
     const today = getToday();
@@ -105,11 +100,6 @@ export const TaskProvider: React.FC<{
 
     // Update the task
     const updatedTask = await taskRepository.update(id, input);
-
-    if (!input.targetId) {
-      return updatedTask;
-    }
-
     return updatedTask;
   };
 
@@ -127,12 +117,6 @@ export const TaskProvider: React.FC<{
       }
 
       invalidateTaskQueries();
-
-      // Handle log creation
-      if (!updatedTask.targetId) {
-        return;
-      }
-
       try {
         const currentTask = await taskRepository.findById(id);
         if (currentTask?.status === 1) {
@@ -162,11 +146,6 @@ export const TaskProvider: React.FC<{
       }
 
       invalidateTaskQueries();
-
-      // Handle log creation
-      if (!updatedTask.targetId) {
-        return;
-      }
 
       try {
         const currentTask = await taskRepository.findById(id);

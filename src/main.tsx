@@ -3,10 +3,7 @@ import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import type { AppConfig } from "src/app";
 import Hvsna from "src/app";
-import {
-  createRequiredIndexes,
-  getPouchDBInstance,
-} from "src/lib/pouchdb-singleton";
+import { getPouchDBInstance } from "src/lib/pouchdb-singleton";
 import { configureLogger } from "src/lib/logger";
 import log from "./lib/logger";
 
