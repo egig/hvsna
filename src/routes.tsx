@@ -19,14 +19,8 @@ import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
 import { NotFound } from "./ui/not-found";
-import Logs from "./modules/log/logs";
-import Trackers from "./modules/tracker/trackers";
-import TrackersAttributes from "./modules/attribute/tracker-attributes";
-import AttributeOptions from "./modules/option/options";
-import { Goals } from "./modules/goal/goals";
 import { Today } from "./modules/common/today";
 import WipeData from "./modules/settings/wipe-data";
-import TrackerDetail from "./modules/tracker/tracker-detail";
 import Browse from "./modules/task/browse";
 import Upcoming from "./modules/common/upcoming";
 import SyncPage from "./modules/sync/sync";
@@ -95,7 +89,6 @@ export const AppRoutes = () => {
             <Route index element={<Today />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="upcoming" element={<Upcoming />} />
-            <Route path="goals" element={<Goals />} />
             <Route path="browse" element={<Browse />} />
             {!isDesktop && <Route path="settings" element={<Settings />} />}
           </Route>
@@ -106,11 +99,6 @@ export const AppRoutes = () => {
           <Route path="signup" element={<SignUpPage />} />
           <Route path="signup/:action" element={<SignUpPage />} />
           <Route path="sync" element={<SyncPage />} />
-          <Route path="trackers" element={<Trackers />} />
-          <Route path="trackers/:trackerId" element={<TrackerDetail />} />
-          <Route path="trackers-attributes" element={<TrackersAttributes />} />
-          <Route path="attribute-options" element={<AttributeOptions />} />
-          <Route path="logs" element={<Logs />} />
           <Route path="settings/general" element={<GeneralSettings />} />
           <Route
             path="settings/prayer-time-fallback"

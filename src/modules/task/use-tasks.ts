@@ -5,7 +5,7 @@ import { queryKeys } from "../common/query-keys";
 import type { Task, TaskStatus, TaskQuery } from "./types";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
-import log from "../../lib/logger"
+import log from "../../lib/logger";
 
 export function useTasks() {
   const [initiated, setInitiated] = useState(false);

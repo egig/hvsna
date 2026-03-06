@@ -25,8 +25,6 @@ export class Task {
   long?: number;
   timezone?: string;
   repeat?: TaskRepeat;
-  targetId?: string;
-  targetValue?: number;
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
@@ -63,8 +61,6 @@ export interface TaskCreateInput {
   long?: number;
   timezone?: string;
   repeat?: TaskRepeat;
-  targetId?: string;
-  targetValue?: number;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
@@ -80,8 +76,6 @@ export interface TaskUpdateInput {
   long?: number;
   timezone?: string;
   repeat?: TaskRepeat;
-  targetId?: string;
-  targetValue?: number;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;

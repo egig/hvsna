@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useTaskContext } from "./task-context";
-import { useLog } from "../log/use-log";
-import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import { useGoals } from "../goal/use-goals";
-import type { Tracker } from "../tracker/trackerStore";
-import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { useTracker } from "../tracker/use-tracker";
 import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "../settings/useSettings";
@@ -19,10 +13,6 @@ export interface UseTaskFormReturn {
   task: Task | null;
   error: string | null;
   isSubmitting: boolean;
-  selectedTargetId: string;
-  setSelectedTargetId: any;
-  selectedGoal: any;
-  trackerAttributes: any;
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
   removeTime: boolean;
@@ -41,21 +31,13 @@ export const useTaskFormEdit = (
   // Use TaskProvider's updateTask and deleteTask mutations
   const { updateTask, deleteTask, getTask } = useTaskContext();
 
-  const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
 
-  const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [tracker, setTracker] = useState<Tracker | null>(null);
-  const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
-  const { getTracker } = useTracker();
-
-  const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
   const { getToday, createHijriDate } = useHijriDate();
   const [removeTime, setRemoveTime] = useState(false);
 
@@ -95,21 +77,6 @@ export const useTaskFormEdit = (
 
       // Extract scope values from form data
       const attr: Record<string, any> = {};
-      if (selectedGoal?.scope) {
-        selectedGoal.scope.forEach((attributeId: string, index: number) => {
-          const value = formData.get(attributeId) as string;
-          attr[attributeId] = value;
-        });
-      }
-
-      if (tracker?.type === "counter") {
-        taskData.targetValue = 1;
-      }
-
-      if (tracker?.negative) {
-        taskData.targetValue = -1 * (taskData.targetValue || 0);
-      }
-
       const taskInput: TaskUpdateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
@@ -240,25 +207,10 @@ export const useTaskFormEdit = (
     setSelectedTargetId(task?.targetId || "");
   }, [task]);
 
-  useEffect(() => {
-    const goal = goals.find((g) => g.id === selectedTargetId);
-    setSelectedGoal(goal || null);
-
-    if (goal) {
-      getTracker(goal?.trackerId as string).then((tr) => {
-        setTracker(tr);
-      });
-    }
-  }, [selectedTargetId, goals]);
-
   return {
     task,
     error: null,
     isSubmitting,
-    selectedTargetId,
-    setSelectedTargetId,
-    selectedGoal,
-    trackerAttributes,
     handleSubmit,
     handleDelete,
     removeTime,

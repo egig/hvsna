@@ -5,8 +5,6 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
-import { useLog } from "../log/use-log";
-import { useGoal } from "../goal/use-goal";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 import { taskRepository } from "./task-repository";
@@ -14,7 +12,7 @@ import { queryKeys } from "../common/query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings/useSettings";
-import logger from "../../lib/logger"
+import logger from "../../lib/logger";
 
 interface TaskContextType {
   // Task data
@@ -46,7 +44,6 @@ export const TaskProvider: React.FC<{
   children: ReactNode;
   taskId?: string;
 }> = ({ children, taskId }) => {
-  const { createLog } = useLog();
   const queryClient = useQueryClient();
   const { getToday } = useHijriDate();
   const { settings } = useSettings();
@@ -56,9 +53,6 @@ export const TaskProvider: React.FC<{
   // Local form state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
-
-  // Use the useGoal hook when we have a goalId
-  const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
   useEffect(() => {
     if (taskId) {
@@ -116,30 +110,6 @@ export const TaskProvider: React.FC<{
       return updatedTask;
     }
 
-    // Create log if status changed
-    if (
-      input.status !== undefined &&
-      currentTask &&
-      input.status !== currentTask.status
-    ) {
-      try {
-        const goal = await getGoal(updatedTask.targetId as string);
-        await createLog({
-          trackerId: goal.trackerId,
-          timestamp: Date.now(),
-          value: updatedTask.targetValue as number, // 1 for completed, 0 for re-opened
-          taskId: updatedTask.id,
-          attributes: {
-            newStatus: input.status,
-            targetValue: updatedTask.targetValue,
-          },
-        });
-      } catch (logError) {
-        // Log creation failure shouldn't break task update
-        console.warn("Failed to create log for task status change:", logError);
-      }
-    }
-
     return updatedTask;
   };
 
@@ -168,17 +138,6 @@ export const TaskProvider: React.FC<{
         if (currentTask?.status === 1) {
           return; // Already completed
         }
-
-        const goal = await getGoal(updatedTask.targetId as string);
-        const v = updatedTask.targetValue || 0;
-
-        await createLog({
-          trackerId: goal.trackerId,
-          timestamp: Date.now(),
-          value: v,
-          taskId: updatedTask.id,
-          attributes: updatedTask.attributes,
-        });
       } catch (logError) {
         console.warn("Failed to create log for task completion:", logError);
       }
@@ -214,18 +173,6 @@ export const TaskProvider: React.FC<{
         if (currentTask?.status === 0) {
           return; // Already pending
         }
-
-        const goal = await getGoal(updatedTask.targetId as string);
-        let v = updatedTask.targetValue || 0;
-        v = -1 * v; // Negative value for reopening
-
-        await createLog({
-          trackerId: goal.trackerId,
-          timestamp: Date.now(),
-          value: v,
-          taskId: updatedTask.id,
-          attributes: updatedTask.attributes,
-        });
       } catch (logError) {
         console.warn("Failed to create log for task reopening:", logError);
       }

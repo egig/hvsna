@@ -1,14 +1,12 @@
-import type { Goal } from "../goal/goalStore";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { Task } from "./types";
 
 interface TaskPreviewProps {
   task: Task;
-  selectedGoal?: Goal;
 }
 
-export default function TaskPreview({ task, selectedGoal }: TaskPreviewProps) {
+export default function TaskPreview({ task }: TaskPreviewProps) {
   const { t } = useLanguageContext();
   const { toHijriDate, formatDate } = useHijriDate();
   return (
@@ -158,29 +156,6 @@ export default function TaskPreview({ task, selectedGoal }: TaskPreviewProps) {
                   {t("timezone")}:
                 </span>
                 <p className="text-gray-900">{task.timezone}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Goal Information */}
-      {task.targetId && selectedGoal && (
-        <div className="space-y-2">
-          <h3 className="font-semibold text-gray-900">
-            {t("goal_information")}
-          </h3>
-          <div className="bg-gray-50 p-3 rounded-lg space-y-2">
-            <div>
-              <span className="font-medium text-gray-600">{t("goal")}:</span>
-              <p className="text-gray-900">{selectedGoal.name}</p>
-            </div>
-            {task.targetValue !== undefined && (
-              <div>
-                <span className="font-medium text-gray-600">
-                  {t("target_value")}:
-                </span>
-                <p className="text-gray-900">{task.targetValue}</p>
               </div>
             )}
           </div>

@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useTaskContext } from "./task-context";
-import { useLog } from "../log/use-log";
-import { useGoal, type Goal } from "../goal/use-goal";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import { useGoals } from "../goal/use-goals";
-import type { Tracker } from "../tracker/trackerStore";
-import { useTrackerAttributes } from "../attribute/use-tracker-attributes";
-import { useTracker } from "../tracker/use-tracker";
 import type {
   PrayerTime,
   Task,
@@ -30,10 +24,6 @@ export interface UseTaskFormReturn {
   task: Task | null;
   error: string | null;
   isSubmitting: boolean;
-  selectedTargetId: string;
-  setSelectedTargetId: any;
-  selectedGoal: any;
-  trackerAttributes: any;
   handleSubmit: (f: FormData) => void;
   selectedScheduleAt: TaskScheduleAt;
   setSelectedScheduleAt: any;
@@ -54,7 +44,6 @@ export const useTaskForm = (
   const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
 
-  const { createLog } = useLog();
   const [task, setTask] = useState<Task | null>(null);
   const [currentTargetId, setCurrentTargetId] = useState<string | null>(null);
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
@@ -65,15 +54,9 @@ export const useTaskForm = (
     prayerTime: "",
   });
 
-  const { goals } = useGoals();
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-  const [tracker, setTracker] = useState<Tracker | null>(null);
-  const { trackerAttributes } = useTrackerAttributes(selectedGoal?.trackerId);
-  const { getTracker } = useTracker();
   const { getToday } = useHijriDate();
-  const { goal: currentGoal, getGoal } = useGoal(currentTargetId || "");
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
@@ -101,21 +84,6 @@ export const useTaskForm = (
 
       // Extract scope values from form data
       const attr: Record<string, any> = {};
-      if (selectedGoal?.scope) {
-        selectedGoal.scope.forEach((attributeId: string, index: number) => {
-          const value = formData.get(attributeId) as string;
-          attr[attributeId] = value;
-        });
-      }
-
-      if (tracker?.type === "counter") {
-        taskData.targetValue = 1;
-      }
-
-      if (tracker?.negative) {
-        taskData.targetValue = -1 * (taskData.targetValue || 0);
-      }
-
       const taskInput: TaskCreateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
@@ -189,25 +157,10 @@ export const useTaskForm = (
     setSelectedTargetId(task?.targetId || "");
   }, [task]);
 
-  useEffect(() => {
-    const goal = goals.find((g) => g.id === selectedTargetId);
-    setSelectedGoal(goal || null);
-
-    if (goal) {
-      getTracker(goal?.trackerId as string).then((tr) => {
-        setTracker(tr);
-      });
-    }
-  }, [selectedTargetId, goals]);
-
   return {
     task,
     error: null,
     isSubmitting,
-    selectedTargetId,
-    setSelectedTargetId,
-    selectedGoal,
-    trackerAttributes,
     handleSubmit,
     selectedScheduleAt,
     setSelectedScheduleAt,

@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowUp } from "lucide-react";
-import { useGoals } from "../goal/use-goals";
-import CustomAttributeInput from "src/ui/custom-attribute-input";
 import { FormInput } from "src/ui/form-input";
-import { useTracker } from "../tracker/use-tracker";
 import { DatePrayerInput } from "./date-prayer-input";
 import { HijriDate, useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
@@ -31,16 +28,10 @@ export default function TaskForm({
     error,
     task,
     handleSubmit,
-    selectedTargetId,
-    setSelectedTargetId,
     isSubmitting,
-    selectedGoal,
-    trackerAttributes,
     selectedScheduleAt,
     setSelectedScheduleAt,
   } = useTaskForm(onSuccess, onError, onCancel);
-  const { goals } = useGoals();
-  const { tracker } = useTracker(selectedGoal?.trackerId);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
   const location = useLocation();
   const { settings } = useSettings();
@@ -71,24 +62,7 @@ export default function TaskForm({
     }
   }, [error, onError]);
 
-  // Helper function to get attribute by ID
-  const getAttributeById = (attributeId: string): any => {
-    return trackerAttributes.find((attr: any) => attr.id === attributeId);
-  };
-
   // Helper function to render attribute input using CustomAttributeInput
-  const renderAttributeInput = (attribute: any, index: number) => {
-    const value = task?.attributes?.[attribute.id];
-
-    return (
-      <CustomAttributeInput
-        key={attribute.id}
-        attr={attribute}
-        value={value}
-        disabled={isSubmitting}
-      />
-    );
-  };
 
   return (
     <form
@@ -134,72 +108,6 @@ export default function TaskForm({
           });
         }}
       />
-
-      {goalEnabled && (
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t("target_optional")}
-          </label>
-          <select
-            // HACK to set this re-render
-            key={Math.random()}
-            defaultValue={selectedTargetId}
-            onChange={(e) => setSelectedTargetId(e.target.value)}
-            disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] focus:border-[var(--hvsna-primary-color)] dark:bg-gray-700 dark:text-white"
-          >
-            <option value="">{t("select_a_goal")}</option>
-            {goals.map((goal) => (
-              <option key={goal.id} value={goal.id}>
-                {goal.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {selectedTargetId && (
-        <>
-          {tracker?.type === "amount" && (
-            <FormInput
-              name="targetValue"
-              label={t("target_value")}
-              value={task?.targetValue?.toString() || ""}
-              placeholder={t("enter_target_value")}
-              type="number"
-              disabled={isSubmitting}
-              required={false}
-              className="text-base"
-              aria-label={t("target_value")}
-            />
-          )}
-
-          {selectedGoal?.scope?.map((attributeId: string, index: number) => {
-            const attribute = getAttributeById(attributeId);
-            if (!attribute) {
-              // Fallback to basic text input if attribute not found
-              return (
-                <FormInput
-                  key={`${index}`}
-                  name={`${attributeId}`}
-                  label={`${t("scope")}: ${attributeId}`}
-                  value={task?.attributes?.[index]?.toString() || ""}
-                  placeholder={t("enter_value_for_attribute", {
-                    attribute: attributeId,
-                  })}
-                  type="text"
-                  disabled={isSubmitting}
-                  required={false}
-                  className="text-base"
-                  aria-label={`${t("scope_attribute")} ${attributeId}`}
-                />
-              );
-            }
-
-            return renderAttributeInput(attribute, index);
-          })}
-        </>
-      )}
 
       <div className="flex justify-end p-4">
         <button

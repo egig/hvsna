@@ -1,21 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { motion, time } from "framer-motion";
-import {
-  CircleIcon,
-  CheckCircleIcon,
-  Square,
-  CheckSquareIcon,
-  CheckSquare2,
-} from "lucide-react";
-import { useGoal } from "../goal/use-goal";
-import { HijriDate } from "../calendar/hijri";
-import { IoEllipseOutline } from "react-icons/io5";
+import { Square, CheckSquare2 } from "lucide-react";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
-import { useSettings } from "src/modules/settings/useSettings";
 import { useHijriDate } from "src/modules/calendar/hijri";
 
 interface TaskListItemProps {
@@ -37,7 +27,6 @@ export function TaskListItem({
   showDateTime = false,
   formatDate,
 }: TaskListItemProps) {
-  const { goal } = useGoal(task.targetId || undefined);
   const { completeTask, reopenTask } = useTaskListItem();
   const location = useLocation();
   const { t } = useLanguageContext();
@@ -137,12 +126,6 @@ export function TaskListItem({
     }
   };
 
-  const getTargetInfo = (goal: any) => {
-    if (!task.targetId || !showGoalInfo) return null;
-    const targetName = goal?.name || "Unknown Goal";
-    return `Goal: ${targetName}${task.targetValue ? ` (Value: ${task.targetValue})` : ""}`;
-  };
-
   const handleStatusClick = (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -174,11 +157,11 @@ export function TaskListItem({
           onClick={() => {
             // Revert the change
             if (task.status === 0) {
-              reopenTask(task.id).then(() => {
+              reopenTask(task.id as string).then(() => {
                 hideSnackbar(snackbarId);
               });
             } else {
-              completeTask(task.id).then(() => {
+              completeTask(task.id as string).then(() => {
                 hideSnackbar(snackbarId);
               });
             }
@@ -252,12 +235,6 @@ export function TaskListItem({
               className={`text-xs ${task.isOverdue() && task.status !== 1 ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
             >
               {formatScheduledDate(task, location.state?.context)}
-            </p>
-          )}
-
-          {getTargetInfo(goal) && (
-            <p className="text-sm text-gray-500 mt-1 truncate">
-              {getTargetInfo(goal)}
             </p>
           )}
         </div>
