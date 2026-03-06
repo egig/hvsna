@@ -42,7 +42,7 @@ export default log;
 /**
  * Log levels available:
  * - trace: 0
- * - debug: 1  
+ * - debug: 1
  * - info: 2
  * - warn: 3
  * - error: 4

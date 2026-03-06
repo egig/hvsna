@@ -188,7 +188,7 @@ export function groupTasksByPrayerTimes(
 
 function findPrayerTimeForTaskTime(
   taskTime: string,
-  prayerTimings: PrayerTimesResponse["data"]["timings"]
+  prayerTimings: PrayerTimesResponse["data"]["timings"],
 ): PrayerTime | null {
   // Convert task time to minutes for comparison
   const [taskHours, taskMinutes] = taskTime.split(":").map(Number);
@@ -211,7 +211,7 @@ function findPrayerTimeForTaskTime(
   // Assign to prayer if task time is within 15 minutes before prayer time or any time after prayer time
   for (let i = prayerTimes.length - 1; i >= 0; i--) {
     const { prayer, minutes } = prayerTimes[i];
-    
+
     // Check if task time is within 15 minutes before this prayer time or after it
     if (taskTotalMinutes >= minutes - 15) {
       // Special handling for Maghrib - assign to Asr instead
@@ -222,7 +222,7 @@ function findPrayerTimeForTaskTime(
     }
   }
 
-  // If task time is before the first prayer time minus 15 minutes, 
+  // If task time is before the first prayer time minus 15 minutes,
   // assign to the first prayer time
   const firstPrayer = prayerTimes[0];
   if (firstPrayer.prayer === "Maghrib") {

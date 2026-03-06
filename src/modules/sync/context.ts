@@ -11,7 +11,16 @@ import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
 import { CapacitorNetwork } from "src/lib/capacitor/network";
-import log from "../../lib/logger";
+import { SyncInitDialog } from "./components/sync-init-dialog";
+import {
+  hasSyncedBefore,
+  markAsSynced,
+  getLocalDocCount,
+  isDatabaseEmpty,
+  deleteAllLocalDocs,
+  type SyncStateDocument,
+} from "./utils/sync-state";
+import log from "src/lib/logger";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {
@@ -66,7 +75,13 @@ type SyncContextType = {
   isSyncing: boolean;
   isManualSyncing: boolean;
   isOnline: boolean;
+  initialSyncPerformed: boolean;
+  showSyncDialog: boolean;
+  localDocCount: number;
   manualSync: () => Promise<void>;
+  handleSyncMerge: () => Promise<void>;
+  handleSyncDeleteLocal: () => Promise<void>;
+  closeSyncDialog: () => void;
 };
 
 const SyncContext = createContext<SyncContextType | undefined>(undefined);
@@ -81,11 +96,14 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [initialSyncPerformed, setInitialSyncPerformed] = useState(false);
+  const [showSyncDialog, setShowSyncDialog] = useState(false);
+  const [localDocCount, setLocalDocCount] = useState(0);
+  const [hasCheckedSyncState, setHasCheckedSyncState] = useState(false);
   const queryClient = useQueryClient();
 
   // Manual sync function
   const manualSync = async () => {
-    log.info(isSignedIn, user, db);
     if (!isSignedIn || !user?.syncURL || !db) {
       throw new Error(
         "Sync not available - user not signed in or sync URL not configured",
@@ -129,6 +147,70 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Handle merge sync option
+  const handleSyncMerge = async () => {
+    if (!db) return;
+
+    try {
+      log.info("[sync] User chose merge option");
+      setIsManualSyncing(true);
+
+      // Perform sync (merge is default behavior)
+      await manualSync();
+
+      // Mark as synced
+      await markAsSynced(db, "merge");
+
+      // Close dialog
+      setShowSyncDialog(false);
+
+      log.info("[sync] Merge sync completed successfully");
+    } catch (error) {
+      log.error("[sync] Merge sync failed:", error);
+      throw error;
+    } finally {
+      setIsManualSyncing(false);
+    }
+  };
+
+  // Handle delete local data option
+  const handleSyncDeleteLocal = async () => {
+    if (!db) return;
+
+    try {
+      log.info("[sync] User chose delete local data option");
+      setIsManualSyncing(true);
+
+      // Delete all local documents
+      await deleteAllLocalDocs(db);
+
+      // Perform sync to get fresh data from remote
+      await manualSync();
+
+      // Mark as synced
+      await markAsSynced(db, "delete-local");
+
+      // Close dialog
+      setShowSyncDialog(false);
+
+      // Update local doc count
+      setLocalDocCount(0);
+
+      log.info("[sync] Delete local sync completed successfully");
+    } catch (error) {
+      log.error("[sync] Delete local sync failed:", error);
+      throw error;
+    } finally {
+      setIsManualSyncing(false);
+    }
+  };
+
+  // Close sync dialog
+  const closeSyncDialog = () => {
+    setShowSyncDialog(false);
+    log.info("[sync] Sync dialog closed by user");
+  };
+
   // Load syncTime from DB on component mount
   useEffect(() => {
     const loadSyncTime = async () => {
@@ -140,6 +222,38 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
     loadSyncTime();
   }, [db]);
+
+  // Check sync state and local document count
+  useEffect(() => {
+    const checkSyncState = async () => {
+      if (!db || hasCheckedSyncState) return;
+
+      try {
+        const [hasSynced, docCount] = await Promise.all([
+          hasSyncedBefore(db),
+          getLocalDocCount(db),
+        ]);
+
+        setLocalDocCount(docCount);
+        setHasCheckedSyncState(true);
+
+        log.info(
+          `[sync] Database state: hasSynced=${hasSynced}, docCount=${docCount}`,
+        );
+
+        // Show dialog if database has data but hasn't been synced before
+        if (!hasSynced && docCount > 0 && isSignedIn && user?.syncURL) {
+          setShowSyncDialog(true);
+          log.info("[sync] Showing sync initialization dialog");
+        }
+      } catch (error) {
+        log.error("[sync] Failed to check sync state:", error);
+        setHasCheckedSyncState(true);
+      }
+    };
+
+    checkSyncState();
+  }, [db, hasCheckedSyncState, isSignedIn, user]);
 
   // Network status monitoring
   useEffect(() => {
@@ -216,6 +330,73 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [isOnline, replication]);
+
+  // Perform initial sync on first load when conditions are met
+  useEffect(() => {
+    const performInitialSync = async () => {
+      // Only perform initial sync if:
+      // 1. User is signed in
+      // 2. Sync URL is available
+      // 3. Database is available
+      // 4. Network is online
+      // 5. Initial sync hasn't been performed yet
+      // 6. Sync state has been checked (to avoid showing dialog conflicts)
+      if (
+        isSignedIn &&
+        user?.syncURL &&
+        db &&
+        isOnline &&
+        !initialSyncPerformed &&
+        hasCheckedSyncState
+      ) {
+        // Check if database has been synced before
+        const hasSynced = await hasSyncedBefore(db);
+
+        if (hasSynced) {
+          log.info("[sync] Performing initial sync on first load");
+          try {
+            await manualSync();
+            setInitialSyncPerformed(true);
+            log.info("[sync] Initial sync completed successfully");
+          } catch (error) {
+            log.error("[sync] Initial sync failed:", error);
+            // Don't set initialSyncPerformed to true on failure, so it can retry
+          }
+        } else {
+          // If not synced before, check if database is empty
+          const isEmpty = await isDatabaseEmpty(db);
+          if (isEmpty) {
+            log.info("[sync] Database is empty, performing initial sync");
+            try {
+              await manualSync();
+              setInitialSyncPerformed(true);
+              await markAsSynced(db, "merge"); // Default to merge for empty DB
+              log.info(
+                "[sync] Initial sync for empty DB completed successfully",
+              );
+            } catch (error) {
+              log.error("[sync] Initial sync for empty DB failed:", error);
+            }
+          } else {
+            // Database has data but hasn't been synced - dialog will be shown
+            log.info(
+              "[sync] Database has unsynced data, waiting for user choice",
+            );
+            setInitialSyncPerformed(true); // Don't auto-sync, wait for dialog
+          }
+        }
+      }
+    };
+
+    performInitialSync();
+  }, [
+    isSignedIn,
+    user,
+    db,
+    isOnline,
+    initialSyncPerformed,
+    hasCheckedSyncState,
+  ]);
 
   useEffect(() => {
     const initializeSync = async () => {
@@ -311,10 +492,27 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         isSyncing,
         isManualSyncing,
         isOnline,
+        initialSyncPerformed,
+        showSyncDialog,
+        localDocCount,
         manualSync,
+        handleSyncMerge,
+        handleSyncDeleteLocal,
+        closeSyncDialog,
       },
     },
-    children,
+    React.createElement(
+      React.Fragment,
+      null,
+      children,
+      React.createElement(SyncInitDialog, {
+        isOpen: showSyncDialog,
+        onClose: closeSyncDialog,
+        onMerge: handleSyncMerge,
+        onDeleteLocal: handleSyncDeleteLocal,
+        localDocCount: localDocCount,
+      }),
+    ),
   );
 };
 
