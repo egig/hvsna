@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Trash2, Eye, Info } from "lucide-react";
+import { ArrowUp, Trash2, Eye, Info, MoreVertical } from "lucide-react";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -9,6 +9,7 @@ import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
+import { Menu } from "@base-ui/react/menu";
 import TaskPreview from "./task-preview";
 
 interface TaskFormEditProps {
@@ -54,20 +55,6 @@ export default function TaskFormEditDesktop({
     }
   }, [error, onError]);
 
-  // Helper function to render attribute input using CustomAttributeInput
-  const renderAttributeInput = (attribute: any, index: number) => {
-    const value = task?.attributes?.[attribute.id];
-
-    return (
-      <CustomAttributeInput
-        key={attribute.id}
-        attr={attribute}
-        value={value}
-        disabled={isSubmitting}
-      />
-    );
-  };
-
   return (
     <form
       className="h-[100%]"
@@ -77,6 +64,45 @@ export default function TaskFormEditDesktop({
         await handleSubmit(formData);
       }}
     >
+      {/* Modal Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {t("edit_task")}
+        </h2>
+        <div className="flex items-center gap-2">
+          <Menu.Root>
+            <Menu.Trigger
+              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center transition-colors"
+              aria-label={t("more_options")}
+            >
+              <MoreVertical size={18} />
+            </Menu.Trigger>
+
+            <Menu.Portal>
+              <Menu.Positioner className="z-[9999]">
+                <Menu.Popup className="z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 pointer-events-auto">
+                  <Menu.Item
+                    onClick={() => setShowDetailsModal(true)}
+                    disabled={isSubmitting}
+                    className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
+                  >
+                    <Info size={18} />
+                    {t("view_details")}
+                  </Menu.Item>
+                  <Menu.Item
+                    onClick={handleDelete}
+                    disabled={isSubmitting}
+                    className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
+                  >
+                    <Trash2 size={18} />
+                    {t("delete_task")}
+                  </Menu.Item>
+                </Menu.Popup>
+              </Menu.Positioner>
+            </Menu.Portal>
+          </Menu.Root>
+        </div>
+      </div>
       <input
         ref={nameInputRef}
         name="taskName"
@@ -124,29 +150,6 @@ export default function TaskFormEditDesktop({
         >
           {t("submit")}
         </button>
-      </div>
-
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setShowDetailsModal(true)}
-            disabled={isSubmitting}
-            className="flex-1 px-4 py-3 text-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Info size={18} />
-            {t("view_details")}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isSubmitting}
-            className="flex-1 px-4 py-3 hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Trash2 size={18} />
-            {t("delete_task")}
-          </button>
-        </div>
       </div>
 
       {/* Task Details Modal */}

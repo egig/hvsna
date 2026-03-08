@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Trash2, Eye, Info } from "lucide-react";
+import { ArrowUp, Trash2, Eye, Info, MoreVertical } from "lucide-react";
+import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -28,6 +29,8 @@ export default function TaskFormEdit({
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [isFormFocused, setIsFormFocused] = useState(false);
+  const [isFormDirty, setIsFormDirty] = useState(false);
   const { toHijriDate, formatDate } = useHijriDate();
   const {
     error,
@@ -41,12 +44,6 @@ export default function TaskFormEdit({
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    // Focus the name input when the form opens
-    if (nameInputRef.current) {
-      nameInputRef.current.focus();
-    }
-  }, []);
 
   useEffect(() => {
     if (error && onError) {
@@ -56,7 +53,7 @@ export default function TaskFormEdit({
 
   return (
     <form
-      className="h-[100%]"
+      className="h-[100%] mb-4 pb-[env(safe-area-inset-bottom)]"
       onSubmit={async (e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -67,13 +64,53 @@ export default function TaskFormEdit({
         title="Edit Task"
         showBackButton={false}
         rightAction={
-          <button
-            className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-            aria-label={t("add_new_task")}
-            type="submit"
-          >
-            <ArrowUp />
-          </button>
+          <div className="flex items-center gap-2">
+            {(isFormFocused || isFormDirty) && (
+              <button
+                className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+                aria-label={t("add_new_task")}
+                type="submit"
+              >
+                <ArrowUp />
+              </button>
+            )}
+
+            {isFormFocused || isFormDirty || (
+              <Menu.Root>
+                <Menu.Trigger
+                  className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors z-50"
+                  aria-label={t("more_options")}
+                >
+                  <MoreVertical size={20} />
+                </Menu.Trigger>
+
+                <Menu.Portal>
+                  <Menu.Positioner className="z-[9999]">
+                    <Menu.Popup className="z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 pointer-events-auto">
+                      <Menu.Item
+                        onClick={() => setShowDetailsModal(true)}
+                        disabled={isSubmitting}
+                        // closeOnClick={true}
+                        className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
+                      >
+                        <Info size={18} />
+                        {t("view_details")}
+                      </Menu.Item>
+                      <Menu.Item
+                        onClick={handleDelete}
+                        disabled={isSubmitting}
+                        closeOnClick={true}
+                        className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
+                      >
+                        <Trash2 size={18} />
+                        {t("delete_task")}
+                      </Menu.Item>
+                    </Menu.Popup>
+                  </Menu.Positioner>
+                </Menu.Portal>
+              </Menu.Root>
+            )}
+          </div>
         }
       />
       <input
@@ -88,6 +125,9 @@ export default function TaskFormEdit({
         autoCorrect="off"
         autoCapitalize="off"
         aria-label={t("task_name")}
+        onChange={() => setIsFormDirty(true)}
+        onFocus={() => setIsFormFocused(true)}
+        onBlur={() => setIsFormFocused(false)}
       />
       <textarea
         name="taskDescription"
@@ -96,6 +136,9 @@ export default function TaskFormEdit({
         defaultValue={task?.description || ""}
         disabled={isSubmitting}
         style={{ resize: "none" }}
+        onChange={() => setIsFormDirty(true)}
+        onFocus={() => setIsFormFocused(true)}
+        onBlur={() => setIsFormFocused(false)}
       />
 
       <DatePrayerInput
@@ -109,34 +152,12 @@ export default function TaskFormEdit({
             time: time,
             prayerTime: prayerTime,
           });
+          setIsFormDirty(true);
           if (!time && !prayerTime) {
             setRemoveTime(true);
           }
         }}
       />
-
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setShowDetailsModal(true)}
-            disabled={isSubmitting}
-            className="flex-1 px-4 py-3 text-gray-700 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Info size={18} />
-            {t("view_details")}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isSubmitting}
-            className="flex-1 px-4 py-3 hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Trash2 size={18} />
-            {t("delete_task")}
-          </button>
-        </div>
-      </div>
 
       {/* Task Details Modal */}
       <Modal

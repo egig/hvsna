@@ -173,6 +173,14 @@ export const taskTranslations = {
     en: "Task Details",
     id: "Detail Tugas",
   },
+  edit_task: {
+    en: "Edit Task",
+    id: "Edit Tugas",
+  },
+  more_options: {
+    en: "More Options",
+    id: "Opsi Lainnya",
+  },
   filter_tasks: {
     en: "Filter Tasks",
     id: "Filter Tugas",
