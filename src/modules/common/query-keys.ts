@@ -5,4 +5,5 @@ export const queryKeys = {
   upcomingTasks: (dateString: string) =>
     ["upcoming-tasks", dateString] as const,
   browsedTasks: (filters: string) => ["browsed-tasks", filters] as const,
+  lists: (filters: string) => ["lists", filters] as const,
 } as const;

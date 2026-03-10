@@ -31,6 +31,9 @@ export default function TaskForm({
     isSubmitting,
     selectedScheduleAt,
     setSelectedScheduleAt,
+    selectedListId,
+    setSelectedListId,
+    lists,
   } = useTaskForm(onSuccess, onError, onCancel);
   const goalEnabled = useFeatureFlag("TASK_GOAL");
   const location = useLocation();
@@ -108,6 +111,28 @@ export default function TaskForm({
           });
         }}
       />
+
+      {/* List Selection */}
+      {lists.length > 0 && (
+        <div className="px-4 py-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t("list") || "List"}
+          </label>
+          <select
+            value={selectedListId}
+            onChange={(e) => setSelectedListId(e.target.value)}
+            disabled={isSubmitting}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">No list</option>
+            {lists.map((list) => (
+              <option key={list.id} value={list.id}>
+                {list.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="flex justify-end p-4">
         <button

@@ -32,6 +32,7 @@ export class Task {
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
+  listId?: string;
 
   constructor(a: Partial<Task>) {
     Object.assign(this, a);
@@ -64,6 +65,7 @@ export interface TaskCreateInput {
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
+  listId?: string;
 }
 
 export interface TaskUpdateInput {
@@ -80,6 +82,7 @@ export interface TaskUpdateInput {
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   removeTime?: boolean;
+  listId?: string;
 }
 
 export interface TaskChange {
@@ -97,5 +100,45 @@ export type TaskQuery = {
   atTime?: string;
   atEpochMillis?: number | { $gte?: number; $lte?: number };
   unscheduled?: number;
+  searchText?: string;
+  listId?: string;
+};
+
+export class List {
+  id?: string;
+  rev?: string;
+  userId?: string;
+  name?: string;
+  description?: string;
+  color?: string;
+  createdAt?: number;
+  updatedAt?: number;
+
+  constructor(a: Partial<List>) {
+    Object.assign(this, a);
+  }
+}
+
+export interface ListCreateInput {
+  name: string;
+  description?: string;
+  color?: string;
+}
+
+export interface ListUpdateInput {
+  name?: string;
+  description?: string;
+  color?: string;
+}
+
+export interface ListChange {
+  id: string;
+  documentId: string;
+  type: "create" | "update" | "delete";
+  timestamp: Date;
+  data: List | ListUpdateInput;
+}
+
+export type ListQuery = {
   searchText?: string;
 };

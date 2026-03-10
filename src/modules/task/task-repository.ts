@@ -6,8 +6,12 @@ import type {
   TaskStatus,
   TaskUpdateInput,
   PrayerTime,
+  List,
+  ListCreateInput,
+  ListUpdateInput,
+  ListQuery,
 } from "./types";
-import { Task } from "./types";
+import { Task, List as ListClass } from "./types";
 import { generatePrefixedUUID } from "../../lib/uuid";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 
@@ -32,6 +36,7 @@ class PouchDBTaskDocument {
   long?: number;
   hijriDateOffset?: number;
   timezone?: string;
+  listId?: string;
 
   constructor(o: any) {
     Object.assign(this, o);
@@ -58,6 +63,7 @@ class PouchDBTaskDocument {
       long: this.long,
       timezone: this.timezone,
       hijriDateOffset: this.hijriDateOffset,
+      listId: this.listId,
     });
   }
 
@@ -145,6 +151,7 @@ export class TaskRepository {
       long: input.long,
       timezone: input.timezone,
       hijriDateOffset: input.hijriDateOffset || 0,
+      listId: input.listId,
     });
 
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
@@ -244,6 +251,10 @@ export class TaskRepository {
 
     if (query?.status) {
       mangoQuery.selector.status = query.status;
+    }
+
+    if (query?.listId) {
+      mangoQuery.selector.listId = query.listId;
     }
 
     if (query?.searchText && query.searchText.trim()) {
@@ -516,9 +527,16 @@ export class TaskRepository {
       if (query.atEpochMillis) {
         mangoQuery.selector.atEpochMillis = query.atEpochMillis;
       }
+
+      if (query.unscheduled !== undefined) {
+        mangoQuery.selector.noDate = query.unscheduled;
+      }
     }
 
+    console.log(mangoQuery);
+
     const result = await (db as any).find(mangoQuery);
+    console.log(result.docs);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );

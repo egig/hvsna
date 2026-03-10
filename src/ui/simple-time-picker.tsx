@@ -58,7 +58,7 @@ export function SimpleTimePicker({
         onClick={openModal}
         disabled={disabled}
         className={`
-          w-full flex items-center justify-between p-3 border border-gray-300 dark:border-gray-600 rounded-lg
+          w-full flex items-center justify-between py-1 px-2 border border-gray-300 dark:border-gray-600 rounded-lg
           hover:border-[var(--hvsna-primary-color)] transition-colors
           disabled:opacity-50 disabled:cursor-not-allowed text-left
           bg-white dark:bg-gray-700 text-gray-900 dark:text-white

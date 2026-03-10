@@ -12,7 +12,8 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
-import logger from "src/lib/logger";
+import { useLists } from "./use-lists";
+import logger from "../../lib/logger";
 
 export interface TaskScheduleAt {
   dateHijri: HijriDate | null;
@@ -27,6 +28,9 @@ export interface UseTaskFormReturn {
   handleSubmit: (f: FormData) => void;
   selectedScheduleAt: TaskScheduleAt;
   setSelectedScheduleAt: any;
+  selectedListId: string;
+  setSelectedListId: (listId: string) => void;
+  lists: any[];
 }
 
 export const useTaskForm = (
@@ -34,10 +38,11 @@ export const useTaskForm = (
   onError?: (error: string) => void,
   onCancel?: () => void,
 ): UseTaskFormReturn => {
-  const { createTask } = useTaskContext();
+  const { createTask, preselectedListId } = useTaskContext();
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
+  const { lists } = useLists();
 
   // TODO use useHijriDate instead
   const offset = settings.manualDateOffset || 0;
@@ -50,10 +55,20 @@ export const useTaskForm = (
     time: "",
     prayerTime: "",
   });
+  const [selectedListId, setSelectedListId] = useState<string>(
+    preselectedListId || "",
+  );
 
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { getToday } = useHijriDate();
+
+  // Update selectedListId when preselectedListId changes
+  useEffect(() => {
+    if (preselectedListId && !selectedListId) {
+      setSelectedListId(preselectedListId);
+    }
+  }, [preselectedListId, selectedListId]);
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
@@ -92,6 +107,7 @@ export const useTaskForm = (
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
         hijriDateOffset: offset,
+        listId: selectedListId || undefined,
       };
 
       // Handle repeat - only include if not "none"
@@ -149,6 +165,9 @@ export const useTaskForm = (
     handleSubmit,
     selectedScheduleAt,
     setSelectedScheduleAt,
+    selectedListId,
+    setSelectedListId,
+    lists,
   };
 };
 

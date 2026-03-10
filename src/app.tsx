@@ -18,6 +18,7 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/query-client";
 import { TaskProvider } from "./modules/task/task-context";
+import { ListProvider } from "./modules/task/list-context";
 import { AuthProvider } from "./modules/auth";
 import { SettingsProvider } from "./modules/settings";
 import { SystemProvider } from "./modules/system";
@@ -96,12 +97,14 @@ export default function Hvsna({
                               <SyncProvider>
                                 <LanguageProviderWrapper>
                                   <TaskProvider>
-                                    <BrowserRouter
-                                      basename={config.appBaseName || ""}
-                                    >
-                                      <PostHogSessionTracker />
-                                      <AppRoutes />
-                                    </BrowserRouter>
+                                    <ListProvider>
+                                      <BrowserRouter
+                                        basename={config.appBaseName || ""}
+                                      >
+                                        <PostHogSessionTracker />
+                                        <AppRoutes />
+                                      </BrowserRouter>
+                                    </ListProvider>
                                   </TaskProvider>
                                 </LanguageProviderWrapper>
                               </SyncProvider>

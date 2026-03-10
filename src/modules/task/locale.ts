@@ -306,4 +306,62 @@ export const taskTranslations = {
     en: "Repeat Information",
     id: "Informasi Pengulangan",
   },
+
+  // List-related translations
+  lists: {
+    en: "Lists",
+    id: "Daftar",
+  },
+  create_list: {
+    en: "Create List",
+    id: "Buat Daftar",
+  },
+  edit_list: {
+    en: "Edit List",
+    id: "Edit Daftar",
+  },
+  list_name: {
+    en: "List name",
+    id: "Nama daftar",
+  },
+  list_description: {
+    en: "List description",
+    id: "Deskripsi daftar",
+  },
+  no_lists: {
+    en: "No lists yet",
+    id: "Belum ada daftar",
+  },
+  no_lists_description: {
+    en: "Create your first list to organize your tasks.",
+    id: "Buat daftar pertama Anda untuk mengatur tugas.",
+  },
+  create_first_list: {
+    en: "Create First List",
+    id: "Buat Daftar Pertama",
+  },
+  list_not_found: {
+    en: "List Not Found",
+    id: "Daftar Tidak Ditemukan",
+  },
+  list_not_found_description: {
+    en: "The list you're looking for doesn't exist or has been deleted.",
+    id: "Daftar yang Anda cari tidak ada atau telah dihapus.",
+  },
+  loading_tasks: {
+    en: "Loading tasks...",
+    id: "Memuat tugas...",
+  },
+  no_tasks_in_list: {
+    en: "No Tasks in List",
+    id: "Tidak Ada Tugas dalam Daftar",
+  },
+  no_tasks_in_list_description: {
+    en: "There are no tasks in this list yet. Create your first task to get started.",
+    id: "Belum ada tugas dalam daftar ini. Buat tugas pertama Anda untuk memulai.",
+  },
+  view_all_lists: {
+    en: "View all lists",
+    id: "Lihat semua daftar",
+  },
 };

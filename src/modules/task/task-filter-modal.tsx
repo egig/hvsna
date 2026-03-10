@@ -13,11 +13,13 @@ interface TaskFilterModalProps {
   statusFilter: number | "all";
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
+  unscheduledFilter: boolean;
   onStatusFilterChange: (value: TaskStatus | "all") => void;
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
   ) => void;
   onSearchTextFilterChange: (value: string) => void;
+  onUnscheduledFilterChange: (value: boolean) => void;
   onClear: () => void;
 }
 
@@ -27,9 +29,11 @@ export default function TaskFilterModal({
   statusFilter,
   dateRangeFilter,
   searchTextFilter,
+  unscheduledFilter,
   onStatusFilterChange,
   onDateRangeFilterChange,
   onSearchTextFilterChange,
+  onUnscheduledFilterChange,
   onClear,
 }: TaskFilterModalProps) {
   const { t } = useLanguageContext();
@@ -55,6 +59,7 @@ export default function TaskFilterModal({
     onStatusFilterChange("all");
     onDateRangeFilterChange(null);
     onSearchTextFilterChange("");
+    onUnscheduledFilterChange(false);
     onClear();
     onClose();
   };
@@ -89,6 +94,29 @@ export default function TaskFilterModal({
             label: opt.label,
           }))}
         />
+
+        {/* Unscheduled Filter */}
+        <div className="p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-900 font-semibold">
+              {t("unscheduled")}
+            </span>
+            <button
+              onClick={() => onUnscheduledFilterChange(!unscheduledFilter)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                unscheduledFilter
+                  ? "bg-[var(--hvsna-primary-color)]"
+                  : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  unscheduledFilter ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="p-2 border-b border-gray-200 p-4">

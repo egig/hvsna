@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
-import { usePouchDB } from "src/pouchdb";
 import type {
   RecurringTask,
   RecurringTaskCreateInput,
   RecurringTaskQuery,
   RecurringTaskUpdateInput,
 } from "./recurring-task";
+import { usePouchDB } from "../../pouchdb";
 
 export function useRecurringTasks() {
   const { db } = usePouchDB();

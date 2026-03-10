@@ -86,7 +86,11 @@ export function groupTasksByPrayerTimes(
     (task) => task.isOverdue() && !task.completedAt,
   );
   const prayerBasedTasks = tasks.filter(
-    (task) => task.usePrayerTime && task.prayerTime && !task.completedAt,
+    (task) =>
+      task.usePrayerTime &&
+      task.prayerTime &&
+      !task.isOverdue() &&
+      !task.completedAt,
   );
   const timeBasedTasks = tasks.filter(
     (task) =>

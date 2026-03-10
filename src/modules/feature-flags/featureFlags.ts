@@ -18,7 +18,9 @@ export const getCurrentEnvironment = (): Environment => {
  * Feature flag configuration per feature
  * Each feature lists the environments where it's enabled
  */
-export const featureFlagConfig: FeatureFlagConfig = {};
+export const featureFlagConfig: FeatureFlagConfig = {
+  TASK_LIST: ["development"],
+};
 
 /**
  * Get feature flags for the current environment

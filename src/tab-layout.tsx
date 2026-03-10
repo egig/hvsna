@@ -1,20 +1,29 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
-import { Plus, PanelLeftClose, PanelLeft, UserRound } from "lucide-react";
+import { Plus } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Link } from "react-router";
-import { TabBar } from "./modules/navigation";
+import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
+import { TabBar } from "./modules/navigation/tab-bar";
 import { Modal } from "./modules/navigation/modal";
 import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./ui/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
+import { useListContext } from "./modules/task/list-context";
 import TaskFormDesktop from "./modules/task/task-form-desktop";
 import TaskFormEditDesktop from "./modules/task/task-form-edit-desktop";
+import ListFormContainer from "./modules/task/list-form-container";
 
 export default function TabLayout() {
   const { formOpen, editingTaskId, openTaskForm, closeTaskForm } =
     useTaskContext();
+  const {
+    formOpen: listFormOpen,
+    editingListId,
+    openListForm,
+    closeListForm,
+  } = useListContext();
   const location = useLocation();
   const { isDesktop } = useScreenSize();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -27,54 +36,24 @@ export default function TabLayout() {
     closeTaskForm();
   };
 
+  const handleListSuccess = () => {
+    closeListForm();
+  };
+
+  const handleListCancel = () => {
+    closeListForm();
+  };
+
   // Desktop Layout with side navigation
   if (isDesktop) {
     return (
       <div className="flex h-screen">
         {/* Side Navigation */}
-        <div
-          className={`${
-            sidebarCollapsed ? "w-14" : "w-48"
-          } bg-white border-r border-gray-200 flex flex-col transition-all duration-200`}
-        >
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
-            {!sidebarCollapsed && (
-              <>
-                <SignedIn>
-                  <UserButton />
-                </SignedIn>
-                <SignedOut>
-                  <Link
-                    to="/signin"
-                    className="flex items-center justify-center size-8 rounded-full bg-primary-100 hover:bg-primary-200 text-gray-400 hover:text-primary-600 transition-colors"
-                    title="Sign in"
-                  >
-                    <UserRound size={16} />
-                  </Link>
-                </SignedOut>
-              </>
-            )}
-            <button
-              onClick={() => setSidebarCollapsed((prev) => !prev)}
-              className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
-                sidebarCollapsed ? "mx-auto" : "ml-auto"
-              }`}
-              aria-label={
-                sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
-              }
-            >
-              {sidebarCollapsed ? (
-                <PanelLeft size={18} />
-              ) : (
-                <PanelLeftClose size={18} />
-              )}
-            </button>
-          </div>
-          <div className="flex-1">
-            <TabBar openTaskForm={openTaskForm} collapsed={sidebarCollapsed} />
-          </div>
-        </div>
+        <DesktopSidebar
+          openTaskForm={openTaskForm}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col relative border-r border-gray-200">
@@ -97,6 +76,11 @@ export default function TabLayout() {
                 onCancel={handleTaskCancel}
               />
             )}
+          </Modal>
+
+          {/* List Form Modal */}
+          <Modal isOpen={listFormOpen} onClose={handleListCancel}>
+            <ListFormContainer />
           </Modal>
         </div>
       </div>
@@ -137,6 +121,11 @@ export default function TabLayout() {
         {!editingTaskId && !isDesktop && (
           <TaskForm onSuccess={handleTaskSuccess} onCancel={handleTaskCancel} />
         )}
+      </Modal>
+
+      {/* List Form Modal */}
+      <Modal isOpen={listFormOpen} onClose={handleListCancel}>
+        <ListFormContainer />
       </Modal>
     </div>
   );

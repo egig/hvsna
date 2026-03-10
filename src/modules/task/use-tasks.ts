@@ -22,11 +22,15 @@ export function useTasks() {
     endDate: HijriDate;
   } | null>(null);
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
+  const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
+  const [listIdFilter, setListIdFilter] = useState<string | null>(null);
 
   const clearFilters = useCallback(() => {
     setStatusFilter("all");
     setDateRangeFilter(null);
     setSearchTextFilter("");
+    setUnscheduledFilter(false);
+    setListIdFilter(null);
   }, []);
 
   // Create filter key for React Query
@@ -37,6 +41,8 @@ export function useTasks() {
         ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
         : "",
       searchTextFilter || "",
+      unscheduledFilter ? "1" : "",
+      listIdFilter || "",
     ];
     return filterParts.join("|");
   };
@@ -63,6 +69,16 @@ export function useTasks() {
         $gte: startEpoch,
         $lte: endEpoch,
       };
+    }
+
+    // Add unscheduled filter
+    if (unscheduledFilter) {
+      query.unscheduled = 1;
+    }
+
+    // Add list filter
+    if (listIdFilter) {
+      query.listId = listIdFilter;
     }
 
     return query;
@@ -257,6 +273,8 @@ export function useTasks() {
     statusFilter,
     dateRangeFilter,
     searchTextFilter,
+    unscheduledFilter,
+    listIdFilter,
 
     // Handlers
     refreshTasks: resetPagination,
@@ -270,6 +288,8 @@ export function useTasks() {
     setStatusFilter,
     setDateRangeFilter,
     setSearchTextFilter,
+    setUnscheduledFilter,
+    setListIdFilter,
     clearFilters,
   };
 }

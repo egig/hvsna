@@ -6,7 +6,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../../ui/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
-import { useHijriDate } from "src/modules/calendar/hijri";
+import { useHijriDate } from "../calendar/hijri";
 
 interface TaskListItemProps {
   task: Task;

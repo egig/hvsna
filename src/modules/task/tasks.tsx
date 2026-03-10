@@ -24,9 +24,11 @@ export default function Tasks() {
     statusFilter,
     dateRangeFilter,
     searchTextFilter,
+    unscheduledFilter,
     setStatusFilter,
     setDateRangeFilter,
     setSearchTextFilter,
+    setUnscheduledFilter,
     clearFilters,
   } = useTasks();
 
@@ -36,7 +38,10 @@ export default function Tasks() {
 
   const hasFilter = () => {
     return (
-      searchTextFilter !== "" || statusFilter !== "all" || !!dateRangeFilter
+      searchTextFilter !== "" ||
+      statusFilter !== "all" ||
+      !!dateRangeFilter ||
+      unscheduledFilter
     );
   };
 
@@ -121,9 +126,11 @@ export default function Tasks() {
           statusFilter={statusFilter}
           dateRangeFilter={dateRangeFilter}
           searchTextFilter={searchTextFilter}
+          unscheduledFilter={unscheduledFilter}
           onStatusFilterChange={setStatusFilter}
           onDateRangeFilterChange={setDateRangeFilter}
           onSearchTextFilterChange={setSearchTextFilter}
+          onUnscheduledFilterChange={setUnscheduledFilter}
           onClear={clearFilters}
         />
       </Modal>

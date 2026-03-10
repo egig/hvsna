@@ -136,6 +136,10 @@ export const commonTranslations = {
     en: "Status",
     id: "Status",
   },
+  color: {
+    en: "Color",
+    id: "Warna",
+  },
 
   // Common messages
   error: {

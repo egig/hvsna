@@ -30,9 +30,10 @@ interface TaskContextType {
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
-  openTaskForm: (taskId?: string) => void;
+  openTaskForm: (taskId?: string, options?: { listId?: string }) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;
+  preselectedListId: string | null;
 
   // Legacy compatibility
   refreshAllTaskLists: (today: any) => Promise<void>;
@@ -52,6 +53,9 @@ export const TaskProvider: React.FC<{
   // Local form state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
+  const [preselectedListId, setPreselectedListId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (taskId) {
@@ -81,13 +85,15 @@ export const TaskProvider: React.FC<{
   };
 
   // Local form functions
-  const openTaskForm = (taskId?: string) => {
+  const openTaskForm = (taskId?: string, options?: { listId?: string }) => {
     setEditingTaskId(taskId || null);
+    setPreselectedListId(options?.listId || null);
     setFormOpen(true);
   };
 
   const closeTaskForm = () => {
     setEditingTaskId(null);
+    setPreselectedListId(null);
     setFormOpen(false);
   };
 
@@ -249,6 +255,7 @@ export const TaskProvider: React.FC<{
     openTaskForm,
     closeTaskForm,
     setEditingTaskId,
+    preselectedListId,
     refreshAllTaskLists: () => Promise.resolve(), // Legacy compatibility
   };
 
