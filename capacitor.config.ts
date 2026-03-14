@@ -10,6 +10,16 @@ const config: CapacitorConfig = {
       iconColor: "#488AFF",
       sound: "notification.wav",
     },
+    SplashScreen: {
+      launchShowDuration: 3000,
+      launchAutoHide: true,
+      backgroundColor: "#ffffff",
+      androidSplashResourceName: "splash",
+      androidScaleType: "CENTER_CROP",
+      showSpinner: true,
+      spinnerStyle: "large",
+      spinnerColor: "#999999",
+    },
   },
 };
 

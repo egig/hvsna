@@ -11,3 +11,5 @@ dist
 *.jks
 /build.sh
 hvsna-notes
+
+android/app/release

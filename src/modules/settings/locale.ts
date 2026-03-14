@@ -93,6 +93,14 @@ export const settingsTranslations = {
     en: "Get Location",
     id: "Dapatkan Lokasi",
   },
+  get_gps_location: {
+    en: "Get GPS Location",
+    id: "Dapatkan Lokasi GPS",
+  },
+  get_browser_location: {
+    en: "Get Browser Location",
+    id: "Dapatkan Lokasi Browser",
+  },
   clear_location: {
     en: "Clear Location",
     id: "Hapus Lokasi",

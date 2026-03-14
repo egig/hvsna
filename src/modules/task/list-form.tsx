@@ -1,3 +1,4 @@
+import { Button } from "src/ui/button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
 interface ListFormData {
@@ -98,12 +99,12 @@ export default function ListForm({
         >
           {t("cancel") || "Cancel"}
         </button>
-        <button
+        <Button
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           {isEdit ? t("update") || "Update" : t("create") || "Create"}
-        </button>
+        </Button>
       </div>
     </form>
   );

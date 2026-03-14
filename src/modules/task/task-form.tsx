@@ -35,7 +35,7 @@ export default function TaskForm({
     setSelectedListId,
     lists,
   } = useTaskForm(onSuccess, onError, onCancel);
-  const goalEnabled = useFeatureFlag("TASK_GOAL");
+  const listEnabled = useFeatureFlag("TASK_LIST");
   const location = useLocation();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
@@ -113,11 +113,8 @@ export default function TaskForm({
       />
 
       {/* List Selection */}
-      {lists.length > 0 && (
+      {listEnabled && lists.length > 0 && (
         <div className="px-4 py-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t("list") || "List"}
-          </label>
           <select
             value={selectedListId}
             onChange={(e) => setSelectedListId(e.target.value)}
