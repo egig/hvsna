@@ -11,6 +11,8 @@ import {
   TbLayoutListFilled,
   TbSettings,
   TbSettingsFilled,
+  TbCalendarEvent,
+  TbCalendarEventFilled,
 } from "react-icons/tb";
 
 export function TabBar() {

@@ -533,10 +533,7 @@ export class TaskRepository {
       }
     }
 
-    console.log(mangoQuery);
-
     const result = await (db as any).find(mangoQuery);
-    console.log(result.docs);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );

@@ -26,6 +26,8 @@ import {
   TbLayoutListFilled,
   TbSettings,
   TbSettingsFilled,
+  TbCalendarEvent,
+  TbCalendarEventFilled,
 } from "react-icons/tb";
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
@@ -45,6 +47,7 @@ export function DesktopSidebar({
   const location = useLocation();
   const { openListForm } = useListContext();
   const listEnabled = useFeatureFlag("TASK_LIST");
+  const yearReviewEnabled = useFeatureFlag("YEAR_REVIEW");
 
   const handleEditList = (list: any) => {
     openListForm(list.id!);
@@ -77,6 +80,14 @@ export function DesktopSidebar({
       context: "upcoming",
     },
     {
+      path: "/year-review",
+      label: "Year Review",
+      icon: <TbCalendarEvent />,
+      activeIcon: <TbCalendarEventFilled />,
+      context: "year-review",
+      hide: !yearReviewEnabled,
+    },
+    {
       path: "/tasks",
       label: t("browse"),
       icon: <TbLayoutList />,
@@ -94,7 +105,7 @@ export function DesktopSidebar({
       activeIcon: <TbSettingsFilled />,
       context: "settings",
     },
-  ];
+  ].filter((t) => !t.hide);
 
   const mainTabs = desktopTabs.filter(
     (tab) => !tab.path.startsWith("/settings"),

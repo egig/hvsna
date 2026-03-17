@@ -20,6 +20,7 @@ export const getCurrentEnvironment = (): Environment => {
  */
 export const featureFlagConfig: FeatureFlagConfig = {
   TASK_LIST: ["development"],
+  YEAR_REVIEW: ["development"],
 };
 
 /**
