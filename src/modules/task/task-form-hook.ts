@@ -176,7 +176,7 @@ function isMatchLocationContext(
   selectedHijriDate: any,
   today: HijriDate,
 ) {
-  if (location.state.context === "all") {
+  if (location?.state?.context === "all") {
     return true;
   }
 

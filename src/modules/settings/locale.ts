@@ -270,8 +270,8 @@ export const settingsTranslations = {
     id: "Waktu Sholat",
   },
   set_fallback_times: {
-    en: "Set fallback times for each prayer",
-    id: "Atur waktu cadangan untuk setiap sholat",
+    en: "Set fallback times for each prayer. You can fetch automatically or manually edit.",
+    id: "Atur waktu untuk setiap sholat. Anda bisa ambil otomatis pada saat online atau edit manual.",
   },
   how_it_works: {
     en: "How it works",
@@ -280,5 +280,29 @@ export const settingsTranslations = {
   prayer_fallback_explanation: {
     en: "When your device is offline, the app will automatically use these saved prayer times to manage today's timeline instead of trying to fetch them from the internet.",
     id: "Ketika perangkat Anda offline, aplikasi akan secara otomatis menggunakan waktu sholat yang tersimpan ini untuk mengatur timeline hari ini alih-alih mencoba mengambilnya dari internet.",
+  },
+  fetch_updated_prayer_times: {
+    en: "Fetch Updated Prayer Times",
+    id: "Ambil Waktu Sholat Terbaru",
+  },
+  fetching: {
+    en: "Fetching...",
+    id: "Mengambil...",
+  },
+  location_required: {
+    en: "Location coordinates are required to fetch prayer times",
+    id: "Koordinat lokasi diperlukan untuk mengambil waktu sholat",
+  },
+  location_required_for_fetch: {
+    en: "Location coordinates must be set in settings to fetch prayer times",
+    id: "Koordinat lokasi harus diatur di pengaturan untuk mengambil waktu sholat",
+  },
+  fetch_prayer_times_error: {
+    en: "Failed to fetch updated prayer times",
+    id: "Gagal mengambil waktu sholat terbaru",
+  },
+  prayer_times_updated: {
+    en: "Prayer times updated successfully",
+    id: "Waktu sholat berhasil diperbarui",
   },
 };
