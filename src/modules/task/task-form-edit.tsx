@@ -41,6 +41,9 @@ export default function TaskFormEdit({
     setRemoveTime,
     selectedScheduleAt,
     setSelectedScheduleAt,
+    selectedListId,
+    setSelectedListId,
+    lists,
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -141,23 +144,42 @@ export default function TaskFormEdit({
         onBlur={() => setIsFormFocused(false)}
       />
 
-      <DatePrayerInput
-        hijriDate={selectedScheduleAt.dateHijri as HijriDate}
-        atTime={selectedScheduleAt.time || ""}
-        prayerTime={selectedScheduleAt.prayerTime || ""}
-        isSubmitting={isSubmitting}
-        onChange={(hijriDate, time, prayerTime) => {
-          setSelectedScheduleAt({
-            dateHijri: hijriDate,
-            time: time,
-            prayerTime: prayerTime,
-          });
-          setIsFormDirty(true);
-          if (!time && !prayerTime) {
-            setRemoveTime(true);
-          }
-        }}
-      />
+      <div className="flex flex-wrap gap-3 px-4">
+        <DatePrayerInput
+          hijriDate={selectedScheduleAt.dateHijri as HijriDate}
+          atTime={selectedScheduleAt.time || ""}
+          prayerTime={selectedScheduleAt.prayerTime || ""}
+          isSubmitting={isSubmitting}
+          onChange={(hijriDate, time, prayerTime) => {
+            setSelectedScheduleAt({
+              dateHijri: hijriDate,
+              time: time,
+              prayerTime: prayerTime,
+            });
+            setIsFormDirty(true);
+            if (!time && !prayerTime) {
+              setRemoveTime(true);
+            }
+          }}
+        />
+        {lists.length > 0 && (
+          <div className="w-fit">
+            <select
+              value={selectedListId}
+              onChange={(e) => setSelectedListId(e.target.value)}
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">{t("no_list")}</option>
+              {lists.map((list) => (
+                <option key={list.id} value={list.id}>
+                  {list.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
 
       {/* Task Details Modal */}
       <Modal

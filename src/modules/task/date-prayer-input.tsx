@@ -26,8 +26,8 @@ export function DatePrayerInput({
   const { t } = useLanguageContext();
 
   return (
-    <div className="mx-4">
-      <div className="flex flex-wrap gap-3 items-center">
+    <div className="w-fit">
+      <div className="flex gap-3 items-center">
         <HijriDateInput
           name="atEpochMillis"
           label={t("scheduled_date_time_hijri")}

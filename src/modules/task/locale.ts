@@ -60,6 +60,10 @@ export const taskTranslations = {
     en: "New task",
     id: "Tugas baru",
   },
+  submit: {
+    en: "Submit",
+    id: "Kirim",
+  },
   select_date: {
     en: "Select Date",
     id: "Pilih Tanggal",
@@ -345,6 +349,10 @@ export const taskTranslations = {
   list_description: {
     en: "List description",
     id: "Deskripsi daftar",
+  },
+  no_list: {
+    en: "No list",
+    id: "Tanpa list",
   },
   no_lists: {
     en: "No lists yet",

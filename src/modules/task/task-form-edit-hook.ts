@@ -7,6 +7,7 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
+import { useLists } from "./use-lists";
 import logger from "src/lib/logger";
 
 export interface UseTaskFormReturn {
@@ -19,6 +20,9 @@ export interface UseTaskFormReturn {
   setRemoveTime: (removeTime: boolean) => void;
   selectedScheduleAt: TaskScheduleAt;
   setSelectedScheduleAt: any;
+  selectedListId: string;
+  setSelectedListId: (listId: string) => void;
+  lists: any[];
 }
 
 export const useTaskFormEdit = (
@@ -30,6 +34,7 @@ export const useTaskFormEdit = (
 ): UseTaskFormReturn => {
   // Use TaskProvider's updateTask and deleteTask mutations
   const { updateTask, deleteTask, getTask } = useTaskContext();
+  const { lists } = useLists();
 
   const [task, setTask] = useState<Task | null>(null);
   const { createRecurringTask } = useRecurringTasks();
@@ -37,6 +42,7 @@ export const useTaskFormEdit = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { getToday, createHijriDate } = useHijriDate();
   const [removeTime, setRemoveTime] = useState(false);
+  const [selectedListId, setSelectedListId] = useState<string>("");
 
   const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
     dateHijri: null,
@@ -86,6 +92,7 @@ export const useTaskFormEdit = (
         hijriDateOffset: offset,
         prayerTime: selectedScheduleAt?.prayerTime as PrayerTime,
         removeTime: removeTime,
+        listId: selectedListId || undefined,
       };
 
       // Handle repeat - only include if not "none"
@@ -176,6 +183,11 @@ export const useTaskFormEdit = (
         prayerTime: "",
       });
     }
+
+    // Set listId from task
+    if (task?.listId) {
+      setSelectedListId(task.listId);
+    }
   }, [task, createHijriDate]);
 
   useEffect(() => {
@@ -198,5 +210,8 @@ export const useTaskFormEdit = (
     setRemoveTime,
     selectedScheduleAt,
     setSelectedScheduleAt,
+    selectedListId,
+    setSelectedListId,
+    lists,
   };
 };

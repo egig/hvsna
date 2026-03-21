@@ -569,6 +569,40 @@ export class TaskRepository {
       new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
+
+  // Find tasks by specific list ID with pagination
+  async findTasksByListId(
+    listId: string,
+    offset: number = 0,
+    limit: number = 50,
+  ): Promise<Task[]> {
+    await db.createIndex({
+      index: {
+        fields: ["type", "status", "listId", "atEpochMillis"],
+      },
+    });
+
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        status: { $gte: 0 }, // Include all statuses (0=pending, 1=completed)
+        listId: listId,
+      },
+      sort: [
+        { type: "asc" },
+        { status: "asc" },
+        { listId: "asc" },
+        { atEpochMillis: "asc" },
+      ],
+      limit,
+      skip: offset,
+    };
+
+    const result = await (db as any).find(mangoQuery);
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      new PouchDBTaskDocument(doc).toTaskItem(),
+    );
+  }
 }
 
 // Export singleton instance

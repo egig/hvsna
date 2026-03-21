@@ -6,6 +6,8 @@ import {
   MoreVertical,
   Edit,
   Trash2,
+  Square,
+  Circle,
 } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Link, useLocation } from "react-router";
@@ -47,7 +49,6 @@ export function DesktopSidebar({
   const { t } = useLanguageContext();
   const location = useLocation();
   const { openListForm } = useListContext();
-  const listEnabled = useFeatureFlag("wip");
   const yearReviewEnabled = useFeatureFlag("wip");
 
   const handleEditList = (list: any) => {
@@ -97,7 +98,7 @@ export function DesktopSidebar({
     },
     {
       path: "/tasks",
-      label: t("browse"),
+      label: t("all_tasks"),
       icon: <TbLayoutList />,
       activeIcon: <TbLayoutListFilled />,
       context: "all",
@@ -205,7 +206,7 @@ export function DesktopSidebar({
           );
         })}
 
-        {!collapsed && listEnabled && (
+        {!collapsed && (
           <div className="p-2 mt-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-gray-500 tracking-wider">
@@ -235,10 +236,6 @@ export function DesktopSidebar({
                             : "text-gray-700 hover:bg-gray-100"
                         }`}
                       >
-                        <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: list.color || "#2e335a" }}
-                        />
                         <span className="truncate flex-1">{list.name}</span>
                       </Link>
 

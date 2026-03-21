@@ -372,4 +372,14 @@ export const commonTranslations = {
     en: "Notifications are only used for task reminders and are stored locally",
     id: "Notifikasi hanya digunakan untuk pengingat tugas dan disimpan secara lokal",
   },
+
+  // Inbox
+  no_tasks_in_inbox: {
+    en: "No tasks in inbox",
+    id: "Tidak ada tugas di kotak masuk",
+  },
+  tasks_without_schedule_or_list_will_appear_here: {
+    en: "Tasks without schedule or list will appear here",
+    id: "Tugas tanpa jadwal atau daftar akan muncul di sini",
+  },
 };

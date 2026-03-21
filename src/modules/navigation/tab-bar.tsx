@@ -7,9 +7,13 @@ import {
   TbCalendarFilled,
   TbCalendarMonth,
   TbCalendarMonthFilled,
-  TbSettings,
-  TbSettingsFilled,
+  TbFileFilled,
+  TbList,
 } from "react-icons/tb";
+import {
+  HiOutlineEllipsisHorizontalCircle,
+  HiEllipsisHorizontalCircle,
+} from "react-icons/hi2";
 import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
 
 export function TabBar() {
@@ -40,11 +44,11 @@ export function TabBar() {
       context: "inbox",
     },
     {
-      path: "/settings",
-      label: t("settings"),
-      icon: <TbSettings />,
-      activeIcon: <TbSettingsFilled />,
-      context: "settings",
+      path: "/browse",
+      label: t("Browse"),
+      icon: <HiOutlineEllipsisHorizontalCircle />,
+      activeIcon: <HiEllipsisHorizontalCircle />,
+      context: "browse",
     },
   ];
 

@@ -35,7 +35,6 @@ export default function TaskForm({
     setSelectedListId,
     lists,
   } = useTaskForm(onSuccess, onError, onCancel);
-  const listEnabled = useFeatureFlag("TASK_LIST");
   const location = useLocation();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
@@ -98,38 +97,38 @@ export default function TaskForm({
         style={{ resize: "none" }}
       />
 
-      <DatePrayerInput
-        hijriDate={selectedScheduleAt.dateHijri}
-        atTime={selectedScheduleAt.time}
-        prayerTime={selectedScheduleAt.prayerTime}
-        isSubmitting={isSubmitting}
-        onChange={(hijriDate, time, prayerTime) => {
-          setSelectedScheduleAt({
-            dateHijri: hijriDate,
-            time,
-            prayerTime,
-          });
-        }}
-      />
-
-      {/* List Selection */}
-      {listEnabled && lists.length > 0 && (
-        <div className="px-4 py-2">
-          <select
-            value={selectedListId}
-            onChange={(e) => setSelectedListId(e.target.value)}
-            disabled={isSubmitting}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">No list</option>
-            {lists.map((list) => (
-              <option key={list.id} value={list.id}>
-                {list.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      <div className="flex flex-wrap gap-3 px-4">
+        <DatePrayerInput
+          hijriDate={selectedScheduleAt.dateHijri}
+          atTime={selectedScheduleAt.time}
+          prayerTime={selectedScheduleAt.prayerTime}
+          isSubmitting={isSubmitting}
+          onChange={(hijriDate, time, prayerTime) => {
+            setSelectedScheduleAt({
+              dateHijri: hijriDate,
+              time,
+              prayerTime,
+            });
+          }}
+        />
+        {lists.length > 0 && (
+          <div className="w-fit">
+            <select
+              value={selectedListId}
+              onChange={(e) => setSelectedListId(e.target.value)}
+              disabled={isSubmitting}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">{t("no_list")}</option>
+              {lists.map((list) => (
+                <option key={list.id} value={list.id}>
+                  {list.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
 
       <div className="flex justify-end p-4">
         <button

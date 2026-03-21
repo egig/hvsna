@@ -21,8 +21,6 @@ import Tasks from "./modules/task/tasks";
 import { NotFound } from "./ui/not-found";
 import { Today } from "./modules/common/today";
 import WipeData from "./modules/settings/wipe-data";
-import Browse from "./modules/task/browse";
-import Lists from "./modules/task/lists";
 import ListDetail from "./modules/task/list-detail";
 import Upcoming from "./modules/common/upcoming";
 import SyncPage from "./modules/sync/sync";
@@ -35,6 +33,7 @@ import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import { YearReview } from "./modules/common/year-review";
 import { Inbox } from "./modules/common/inbox";
+import Browse from "./modules/task/browse";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -96,7 +95,6 @@ export const AppRoutes = () => {
             <Route path="inbox" element={<Inbox />} />
             <Route path="year-review" element={<YearReview />} />
             <Route path="browse" element={<Browse />} />
-            <Route path="list" element={<Lists />} />
             <Route path="list/:listId" element={<ListDetail />} />
             {!isDesktop && <Route path="settings" element={<Settings />} />}
           </Route>

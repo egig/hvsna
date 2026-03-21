@@ -23,11 +23,10 @@ export default function Settings() {
   const { t } = useLanguageContext();
   const { signOut } = useClerk();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const listEnabled = useFeatureFlag("TASK_LIST");
 
   return (
     <Page>
-      <Navbar title={t("settings")} showBackButton={false} />
+      <Navbar title={t("settings")} showBackButton={true} />
       <SignedIn>
         <MenuItem title={t("account")} icon={User} to="/profile" />
       </SignedIn>
@@ -35,8 +34,6 @@ export default function Settings() {
         <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
       </SignedOut>
       <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
-      <MenuItem title={t("browse")} icon={ListIcon} to="/tasks" />
-      {listEnabled && <MenuItem title={t("list")} icon={List} to="/list" />}
       <MenuItem
         title={t("prayer_time_fallback") || "Prayer Time Fallback"}
         icon={Clock}

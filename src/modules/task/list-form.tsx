@@ -72,25 +72,6 @@ export default function ListForm({
         />
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          {t("color") || "Color"}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {defaultColors.map((color) => (
-            <button
-              key={color}
-              type="button"
-              onClick={() => setFormData({ ...formData, color })}
-              className={`w-8 h-8 rounded-full border-2 ${
-                formData.color === color ? "border-gray-800" : "border-gray-300"
-              }`}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-      </div>
-
       <div className="flex justify-end gap-2">
         <button
           type="button"

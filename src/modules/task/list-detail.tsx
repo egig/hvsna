@@ -1,57 +1,77 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { ArrowLeft, Plus, List as ListIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  List as ListIcon,
+  Edit2,
+  Trash2,
+  MoreVertical,
+} from "lucide-react";
+import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { Button, Page } from "../navigation";
 import { useLists } from "./use-lists";
-import { useTasks } from "./use-tasks";
+import { useListTasks } from "./use-list-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useListContext } from "./list-context";
 import type { List, Task } from "./types";
 import TaskListItem from "./task-list-item";
 import { useTaskContext } from "./task-context";
+import { useScreenSize } from "../system";
 
 export default function ListDetail() {
   const { t } = useLanguageContext();
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
   const { openTaskForm } = useTaskContext();
-
-  const [createTaskModalOpened, setCreateTaskModalOpened] = useState(false);
+  const { openListForm } = useListContext();
+  const { isDesktop } = useScreenSize();
 
   const {
     lists,
     loading: listsLoading,
     error: listsError,
     getList,
+    deleteList,
   } = useLists();
 
   const {
     tasks,
     loading: tasksLoading,
     error: tasksError,
-    openEditPopup,
-    handleTaskSuccess,
-    handleTaskError,
-    handleTaskCancel,
     refreshTasks,
-    setListIdFilter,
-  } = useTasks();
+  } = useListTasks({ listId: listId || "", enabled: !!listId });
 
   const [currentList, setCurrentList] = useState<List | null>(null);
 
-  // Load list details and set filter
+  const handleEditList = () => {
+    if (currentList) {
+      openListForm(currentList.id);
+    }
+  };
+
+  const handleDeleteList = async () => {
+    if (
+      !currentList ||
+      !confirm(`Are you sure you want to delete "${currentList.name}"?`)
+    ) {
+      return;
+    }
+
+    const success = await deleteList(currentList.id!);
+    if (success) {
+      navigate("/browse");
+    }
+  };
+
+  // Load list details
   useEffect(() => {
     if (listId) {
       loadListDetails();
-      setListIdFilter(listId);
     }
-
-    // Cleanup filter when unmounting
-    return () => {
-      setListIdFilter(null);
-    };
-  }, [listId, setListIdFilter]);
+  }, [listId]);
 
   const loadListDetails = async () => {
     if (listId) {
@@ -65,20 +85,9 @@ export default function ListDetail() {
     openTaskForm(undefined, { listId });
   };
 
-  const goBack = () => {
-    navigate("/list");
-  };
-
   if (listsLoading) {
     return (
-      <Page
-        navbar={
-          <Navbar
-            title={t("loading") || "Loading..."}
-            customBackAction={goBack}
-          />
-        }
-      >
+      <Page navbar={<Navbar title={t("loading") || "Loading..."} />}>
         <div className="flex justify-center items-center h-32">
           <div className="text-gray-500">{t("loading") || "Loading..."}</div>
         </div>
@@ -88,11 +97,7 @@ export default function ListDetail() {
 
   if (listsError) {
     return (
-      <Page
-        navbar={
-          <Navbar title={t("error") || "Error"} customBackAction={goBack} />
-        }
-      >
+      <Page navbar={<Navbar title={t("error") || "Error"} />}>
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded m-4">
           {listsError}
         </div>
@@ -102,14 +107,7 @@ export default function ListDetail() {
 
   if (!currentList) {
     return (
-      <Page
-        navbar={
-          <Navbar
-            title={t("list_not_found") || "List Not Found"}
-            customBackAction={goBack}
-          />
-        }
-      >
+      <Page navbar={<Navbar title={t("list_not_found") || "List Not Found"} />}>
         <div className="text-center py-12">
           <ListIcon size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -119,10 +117,6 @@ export default function ListDetail() {
             {t("list_not_found_description") ||
               "The list you're looking for doesn't exist or has been deleted."}
           </p>
-          <Button onClick={goBack}>
-            <ArrowLeft size={20} className="mr-2" />
-            {t("back_to_lists") || "Back to Lists"}
-          </Button>
         </div>
       </Page>
     );
@@ -130,7 +124,44 @@ export default function ListDetail() {
 
   return (
     <Page
-      navbar={<Navbar title={currentList.name} customBackAction={goBack} />}
+      navbar={
+        <Navbar
+          title={currentList.name}
+          rightAction={
+            !isDesktop && (
+              <Menu.Root>
+                <Menu.Trigger
+                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors"
+                  aria-label="More options"
+                >
+                  <MoreVertical size={20} />
+                </Menu.Trigger>
+
+                <Menu.Portal>
+                  <Menu.Positioner className="z-[9999]">
+                    <Menu.Popup className="z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 pointer-events-auto">
+                      <Menu.Item
+                        onClick={handleEditList}
+                        className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
+                      >
+                        <Edit2 size={18} />
+                        {t("edit_list")}
+                      </Menu.Item>
+                      <Menu.Item
+                        onClick={handleDeleteList}
+                        className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
+                      >
+                        <Trash2 size={18} />
+                        {t("delete_task")}
+                      </Menu.Item>
+                    </Menu.Popup>
+                  </Menu.Positioner>
+                </Menu.Portal>
+              </Menu.Root>
+            )
+          }
+        />
+      }
     >
       {currentList.description && (
         <div className="px-4 py-2 border-b border-gray-200">
@@ -162,10 +193,6 @@ export default function ListDetail() {
             {t("no_tasks_in_list_description") ||
               "There are no tasks in this list yet. Create your first task to get started."}
           </p>
-          <Button onClick={handleCreateTask}>
-            <Plus size={20} className="mr-2" />
-            {t("create_first_task") || "Create First Task"}
-          </Button>
         </div>
       )}
 
@@ -175,7 +202,7 @@ export default function ListDetail() {
             <TaskListItem
               key={task.id}
               task={task}
-              onEdit={() => openEditPopup(task)}
+              onEdit={() => openTaskForm(task.id)}
               showDateTime={true}
             />
           ))}

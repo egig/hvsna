@@ -83,6 +83,7 @@ export const TaskProvider: React.FC<{
     });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
     queryClient.invalidateQueries({ queryKey: queryKeys.inboxTasks() });
+    queryClient.invalidateQueries({ queryKey: ["list-tasks"] });
   };
 
   // Local form functions
