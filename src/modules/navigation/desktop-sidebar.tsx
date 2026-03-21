@@ -6,8 +6,6 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  Square,
-  Circle,
 } from "lucide-react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Link, useLocation } from "react-router";
@@ -26,13 +24,10 @@ import {
   TbLayoutListFilled,
   TbSettings,
   TbSettingsFilled,
-  TbCalendarEvent,
-  TbCalendarEventFilled,
 } from "react-icons/tb";
 
 import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
 
-import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 interface DesktopSidebarProps {
   openTaskForm?: () => void;
@@ -49,7 +44,6 @@ export function DesktopSidebar({
   const { t } = useLanguageContext();
   const location = useLocation();
   const { openListForm } = useListContext();
-  const yearReviewEnabled = useFeatureFlag("wip");
 
   const handleEditList = (list: any) => {
     openListForm(list.id!);
@@ -89,14 +83,6 @@ export function DesktopSidebar({
       context: "inbox",
     },
     {
-      path: "/year-review",
-      label: "Year Review",
-      icon: <TbCalendarEvent />,
-      activeIcon: <TbCalendarEventFilled />,
-      context: "year-review",
-      hide: !yearReviewEnabled,
-    },
-    {
       path: "/tasks",
       label: t("all_tasks"),
       icon: <TbLayoutList />,
@@ -114,7 +100,7 @@ export function DesktopSidebar({
       activeIcon: <TbSettingsFilled />,
       context: "settings",
     },
-  ].filter((t) => !t.hide);
+  ]
 
   const mainTabs = desktopTabs.filter(
     (tab) => !tab.path.startsWith("/settings"),

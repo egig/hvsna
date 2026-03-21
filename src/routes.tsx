@@ -31,7 +31,6 @@ import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
-import { YearReview } from "./modules/common/year-review";
 import { Inbox } from "./modules/common/inbox";
 import Browse from "./modules/task/browse";
 
@@ -93,11 +92,10 @@ export const AppRoutes = () => {
             <Route path="tasks" element={<Tasks />} />
             <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
-            <Route path="year-review" element={<YearReview />} />
             <Route path="browse" element={<Browse />} />
             <Route path="list/:listId" element={<ListDetail />} />
-            {!isDesktop && <Route path="settings" element={<Settings />} />}
           </Route>
+          {!isDesktop && <Route path="settings" element={<Settings />} />}
           <Route path="about" element={<About />} />
           <Route path="wipe-local" element={<WipeData />} />
           <Route path="signin" element={<SignInPage />} />
@@ -134,7 +132,6 @@ export const AppRoutes = () => {
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />
             <Route path="hijri-calendar" element={<HijriCalendar />} />
-            <Route path="year-review" element={<YearReview />} />
             <Route path="wipe-local" element={<WipeData />} />
             <Route path="about" element={<About />} />
           </Routes>

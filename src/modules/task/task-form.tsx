@@ -1,13 +1,11 @@
 import { useEffect, useRef } from "react";
 import { ArrowUp } from "lucide-react";
-import { FormInput } from "src/ui/form-input";
 import { DatePrayerInput } from "./date-prayer-input";
-import { HijriDate, useHijriDate } from "src/modules/calendar/hijri";
+import { useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
-import type { PrayerTime, Task } from "./types";
-import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
+import type { Task } from "./types";
 import { useSettings } from "src/modules/settings/useSettings";
 
 interface TaskFormProps {
