@@ -11,10 +11,15 @@ export const useAuth = () => {
     if (!user && isSignedIn) {
       (async () => {
         let t = await session.getToken();
-        await fetchUser(t as string);
+        try {
+          await fetchUser(t as string);
+        } catch (error) {
+          // Error is handled by React Query and available in the error state
+          console.error("Failed to fetch user:", error);
+        }
       })();
     }
-  }, [isSignedIn]);
+  }, [user, isSignedIn, session, fetchUser]);
 
   return {
     user,

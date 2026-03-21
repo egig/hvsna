@@ -1,10 +1,10 @@
 import React, {
   createContext,
   useContext,
-  useReducer,
   useCallback,
 } from "react";
 import type { ReactNode } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import type { User, AuthState, AuthActions } from "./user";
 
@@ -16,85 +16,71 @@ const initialState: AuthState = {
   error: null,
 };
 
-type AuthAction =
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_ERROR"; payload: string | null }
-  | { type: "SET_USER"; payload: User | null }
-  | { type: "FETCH_USER_START" }
-  | { type: "FETCH_USER_SUCCESS"; payload: User }
-  | { type: "FETCH_USER_ERROR"; payload: string };
-
-const authReducer = (state: AuthState, action: AuthAction): AuthState => {
-  switch (action.type) {
-    case "SET_LOADING":
-      return { ...state, loading: action.payload };
-    case "SET_ERROR":
-      return { ...state, error: action.payload };
-    case "SET_USER":
-      return { ...state, user: action.payload };
-    case "FETCH_USER_START":
-      return { ...state, loading: true, error: null };
-    case "FETCH_USER_SUCCESS":
-      return { ...state, user: action.payload, loading: false, error: null };
-    case "FETCH_USER_ERROR":
-      return { ...state, user: null, loading: false, error: action.payload };
-    default:
-      return state;
-  }
-};
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
+const fetchUserFn = async (token: string): Promise<User> => {
+  const response = await axios.get<User>(
+    `${import.meta.env.VITE_API_URL}/me`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+  return response.data;
+};
+
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const queryClient = useQueryClient();
 
-  const setLoading = useCallback((loading: boolean) => {
-    dispatch({ type: "SET_LOADING", payload: loading });
-  }, []);
+  // Query for user data - we'll manage this reactively
+  const userQuery = useQuery<User>({
+    queryKey: ["user"],
+    queryFn: () => {
+      throw new Error("User query must be triggered with token");
+    },
+    enabled: false, // Disabled by default, will be enabled when token is available
+    retry: false,
+  });
 
-  const setError = useCallback((error: string | null) => {
-    dispatch({ type: "SET_ERROR", payload: error });
-  }, []);
-
-  const setUser = useCallback((user: User | null) => {
-    dispatch({ type: "SET_USER", payload: user });
-  }, []);
-
-  const fetchUser = useCallback(async (token: string) => {
-    dispatch({ type: "FETCH_USER_START" });
-
+  const fetchUser = useCallback(async (token: string): Promise<void> => {
     try {
-      const response = await axios.get<User>(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      dispatch({ type: "FETCH_USER_SUCCESS", payload: response.data });
+      const result = await queryClient.fetchQuery({
+        queryKey: ["user"],
+        queryFn: () => fetchUserFn(token),
+      });
+      // Data is automatically set in the query cache by fetchQuery
     } catch (error) {
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.data?.message || error.message
         : "Failed to fetch user";
-
-      dispatch({ type: "FETCH_USER_ERROR", payload: errorMessage });
+      throw new Error(errorMessage);
     }
-  }, []);
+  }, [queryClient]);
+
+
+  const setUser = useCallback((user: User | null) => {
+    if (user) {
+      queryClient.setQueryData(["user"], user);
+    } else {
+      queryClient.setQueryData(["user"], null);
+      queryClient.removeQueries({ queryKey: ["user"] });
+    }
+  }, [queryClient]);
 
   const clearError = useCallback(() => {
-    dispatch({ type: "SET_ERROR", payload: null });
-  }, []);
+    // Clear any error state
+    queryClient.resetQueries({ queryKey: ["user"] });
+  }, [queryClient]);
 
   const contextValue: AuthContextType = {
-    ...state,
-    setLoading,
-    setError,
+    user: userQuery.data || null,
+    loading: userQuery.isLoading,
+    error: userQuery.error ? (userQuery.error as Error).message : null,
     setUser,
     fetchUser,
     clearError,

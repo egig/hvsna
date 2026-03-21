@@ -351,8 +351,6 @@ export default function Onboarding() {
     </div>
   );
 
-  console.log(loading);
-
   return (
     <Page>
       <Navbar

@@ -46,8 +46,8 @@ export function DesktopSidebar({
   const { t } = useLanguageContext();
   const location = useLocation();
   const { openListForm } = useListContext();
-  const listEnabled = useFeatureFlag("TASK_LIST");
-  const yearReviewEnabled = useFeatureFlag("YEAR_REVIEW");
+  const listEnabled = useFeatureFlag("wip");
+  const yearReviewEnabled = useFeatureFlag("wip");
 
   const handleEditList = (list: any) => {
     openListForm(list.id!);

@@ -1,15 +1,21 @@
 import { useCallback, useMemo } from "react";
-import { getFeatureFlags, isFeatureEnabled } from "./featureFlags";
+import { useAuthContext } from "../auth/auth-context";
+import type { FeatureFlags } from "./types";
 
 /**
  * Hook for accessing feature flags in React components
  */
 export const useFeatureFlags = () => {
-  const flags = useMemo(() => getFeatureFlags(), []);
+  const { user } = useAuthContext();
+  
+  const flags = useMemo((): FeatureFlags => {
+    // Use feature flags from user data, fallback to empty object if not available
+    return user?.featureFlags || {};
+  }, [user]);
 
   const isEnabled = useCallback((flagKey: string): boolean => {
-    return isFeatureEnabled(flagKey);
-  }, []);
+    return flags[flagKey] || false;
+  }, [flags]);
 
   const getEnabledFlags = useCallback((): string[] => {
     return Object.entries(flags)

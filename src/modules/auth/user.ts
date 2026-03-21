@@ -1,3 +1,5 @@
+import type { FeatureFlags } from "../feature-flags/types";
+
 export interface User {
   userId: string;
   externalId: string;
@@ -7,6 +9,7 @@ export interface User {
   createdAt: string;
   dbName: string;
   syncURL?: string;
+  featureFlags?: FeatureFlags;
 }
 
 export interface AuthState {
@@ -16,8 +19,6 @@ export interface AuthState {
 }
 
 export interface AuthActions {
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
   setUser: (user: User | null) => void;
   fetchUser: (t: string) => Promise<void>;
   clearError: () => void;
