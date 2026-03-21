@@ -538,6 +538,37 @@ export class TaskRepository {
       new PouchDBTaskDocument(doc).toTaskItem(),
     );
   }
+
+  // Find tasks that have no schedule (noDate=1) and no listId
+  async findInboxTasks(): Promise<Task[]> {
+    await db.createIndex({
+      index: {
+        fields: ["type", "noDate", "listId", "status", "createdAt"],
+      },
+    });
+
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        noDate: 1, // No schedule
+        listId: { $eq: null }, // No listId (null or undefined)
+        status: 0, // Not completed
+        createdAt: { $gte: null },
+      },
+      sort: [
+        { type: "asc" },
+        { noDate: "asc" },
+        { listId: "asc" },
+        { status: "asc" },
+        { createdAt: "asc" },
+      ],
+    };
+
+    const result = await (db as any).find(mangoQuery);
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      new PouchDBTaskDocument(doc).toTaskItem(),
+    );
+  }
 }
 
 // Export singleton instance

@@ -9,9 +9,9 @@ import {
   RefreshCw,
   User,
   LogOut,
-  Calendar,
   Clock,
   List,
+  ListIcon,
 } from "lucide-react";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../../ui/menu-item";
@@ -35,6 +35,7 @@ export default function Settings() {
         <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
       </SignedOut>
       <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
+      <MenuItem title={t("browse")} icon={ListIcon} to="/tasks" />
       {listEnabled && <MenuItem title={t("list")} icon={List} to="/list" />}
       <MenuItem
         title={t("prayer_time_fallback") || "Prayer Time Fallback"}

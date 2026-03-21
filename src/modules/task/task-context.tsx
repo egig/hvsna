@@ -82,6 +82,7 @@ export const TaskProvider: React.FC<{
       queryKey: queryKeys.upcomingTasks(tomorrowString),
     });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+    queryClient.invalidateQueries({ queryKey: queryKeys.inboxTasks() });
   };
 
   // Local form functions

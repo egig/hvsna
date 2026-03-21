@@ -1,10 +1,8 @@
-import { useState } from "react";
 import {
   Plus,
   PanelLeftClose,
   PanelLeft,
   UserRound,
-  Settings,
   MoreVertical,
   Edit,
   Trash2,
@@ -29,6 +27,9 @@ import {
   TbCalendarEvent,
   TbCalendarEventFilled,
 } from "react-icons/tb";
+
+import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
+
 import { useFeatureFlag } from "../feature-flags/useFeatureFlags";
 
 interface DesktopSidebarProps {
@@ -78,6 +79,13 @@ export function DesktopSidebar({
       icon: <TbCalendarMonth />,
       activeIcon: <TbCalendarMonthFilled />,
       context: "upcoming",
+    },
+    {
+      path: "/inbox",
+      label: "Inbox",
+      icon: <HiOutlineInbox />,
+      activeIcon: <HiInbox />,
+      context: "inbox",
     },
     {
       path: "/year-review",

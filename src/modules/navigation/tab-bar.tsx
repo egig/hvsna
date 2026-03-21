@@ -7,13 +7,10 @@ import {
   TbCalendarFilled,
   TbCalendarMonth,
   TbCalendarMonthFilled,
-  TbLayoutList,
-  TbLayoutListFilled,
   TbSettings,
   TbSettingsFilled,
-  TbCalendarEvent,
-  TbCalendarEventFilled,
 } from "react-icons/tb";
+import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
 
 export function TabBar() {
   const { t } = useLanguageContext();
@@ -36,11 +33,11 @@ export function TabBar() {
       context: "upcoming",
     },
     {
-      path: "/tasks",
-      label: t("browse"),
-      icon: <TbLayoutList />,
-      activeIcon: <TbLayoutListFilled />,
-      context: "all",
+      path: "/inbox",
+      label: "Inbox",
+      icon: <HiOutlineInbox />,
+      activeIcon: <HiInbox />,
+      context: "inbox",
     },
     {
       path: "/settings",

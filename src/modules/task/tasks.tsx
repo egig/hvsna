@@ -49,7 +49,6 @@ export default function Tasks() {
     <Page
       navbar={
         <Navbar
-          showBackButton={false}
           showSearch={true}
           searchValue={searchTextFilter}
           onSearchChange={setSearchTextFilter}
