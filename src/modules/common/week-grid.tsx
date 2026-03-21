@@ -26,7 +26,7 @@ export function WeekGrid({ tasks }: WeekGridProps) {
 
   const weeksData = useMemo(() => {
     const weeks: WeekData[] = [];
-    
+
     try {
       // Find Ramadan 1st of current Hijri year
       let ramadanStart: Date;
@@ -39,40 +39,40 @@ export function WeekGrid({ tasks }: WeekGridProps) {
         // Fallback to today if Ramadan calculation fails
         ramadanStart = new Date();
       }
-      
+
       // Generate 52 weeks starting from Ramadan
       for (let i = 0; i < 52; i++) {
         try {
           // Calculate week start (Ramadan + i weeks, then adjust to Friday)
           const weekStart = new Date(ramadanStart);
-          weekStart.setDate(ramadanStart.getDate() + (i * 7));
-          
+          weekStart.setDate(ramadanStart.getDate() + i * 7);
+
           // Adjust to Friday (day 5, where Sunday=0, Friday=5)
           const dayOfWeek = weekStart.getDay();
           const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
           weekStart.setDate(weekStart.getDate() + daysUntilFriday);
-          
+
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekStart.getDate() + 6); // Friday to Thursday
-          
+
           // Convert to Hijri dates
           const hijriStart = HijriDate.fromDate(weekStart);
           const hijriEnd = HijriDate.fromDate(weekEnd);
-          
+
           // Filter tasks for this week
           const weekTasks = tasks.filter((task) => {
             if (!task.atEpochMillis) return false;
             const taskDate = new Date(task.atEpochMillis);
             return taskDate >= weekStart && taskDate <= weekEnd;
           });
-          
+
           // Check if this is the current week
           const today = new Date();
           const isCurrentWeek = today >= weekStart && today <= weekEnd;
-          
+
           // Get month name
-          const monthName = hijriMonthNames[hijriStart.month - 1] || 'Unknown';
-          
+          const monthName = hijriMonthNames[hijriStart.month - 1] || "Unknown";
+
           // Add week data
           weeks.push({
             weekNumber: i + 1,
@@ -84,13 +84,11 @@ export function WeekGrid({ tasks }: WeekGridProps) {
             isCurrentWeek,
             monthName,
           });
-          
         } catch (weekError) {
           console.error(`Error in week ${i + 1}:`, weekError);
           // Continue with next week
         }
       }
-          
     } catch (error) {
       console.error("Error calculating weeks:", error);
       if (error instanceof Error) {
@@ -98,13 +96,9 @@ export function WeekGrid({ tasks }: WeekGridProps) {
       }
       return [];
     }
-    
+
     return weeks;
-  }, [
-    currentHijriDate.year,
-    hijriMonthNames,
-    tasks,
-  ]);
+  }, [currentHijriDate.year, hijriMonthNames, tasks]);
 
   return (
     <div className="space-y-6">
@@ -114,7 +108,8 @@ export function WeekGrid({ tasks }: WeekGridProps) {
           Weekly Overview - Hijri Year {currentHijriDate.year}
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          Starting from Ramadan • Weeks run Friday to Thursday • {weeksData.length} weeks
+          Starting from Ramadan • Weeks run Friday to Thursday •{" "}
+          {weeksData.length} weeks
         </p>
       </div>
 

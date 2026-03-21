@@ -7,15 +7,18 @@ import type { FeatureFlags } from "./types";
  */
 export const useFeatureFlags = () => {
   const { user } = useAuthContext();
-  
+
   const flags = useMemo((): FeatureFlags => {
     // Use feature flags from user data, fallback to empty object if not available
     return user?.featureFlags || {};
   }, [user]);
 
-  const isEnabled = useCallback((flagKey: string): boolean => {
-    return flags[flagKey] || false;
-  }, [flags]);
+  const isEnabled = useCallback(
+    (flagKey: string): boolean => {
+      return flags[flagKey] || false;
+    },
+    [flags],
+  );
 
   const getEnabledFlags = useCallback((): string[] => {
     return Object.entries(flags)

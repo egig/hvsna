@@ -184,6 +184,22 @@ export class HijriDate {
     });
   }
 
+  endOfWeek(): HijriDate {
+    // Get the start of the week first
+    const startOfWeek = this.startOfWeek();
+
+    // Add 6 days to get to the end of the week (Friday + 6 = Thursday)
+    const endOfWeekGregorian = new Date(startOfWeek._jsDate);
+    endOfWeekGregorian.setDate(endOfWeekGregorian.getDate() + 6);
+
+    return HijriDate.fromDate(endOfWeekGregorian, {
+      latitude: this._latitude,
+      longitude: this._longitude,
+      offset: this._offset,
+      startOfWeek: this._startOfWeek,
+    });
+  }
+
   format(formatString: string): string {
     const hijriMonthNames = [
       "Muharram",

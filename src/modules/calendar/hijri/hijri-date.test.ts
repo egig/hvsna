@@ -252,6 +252,121 @@ describe("HijriDate", () => {
     });
   });
 
+  describe("endOfWeek", () => {
+    it("should return Thursday when current date is Friday", () => {
+      // Create a Hijri date that corresponds to a Friday
+      // July 7, 2023 was a Friday, which corresponds to 19 Dhu al-Hijjah 1444
+      const fridayDate = HijriDate.fromDate(new Date(2023, 6, 7));
+      const endOfWeek = fridayDate.endOfWeek();
+
+      // Should return Thursday of the same week (25 Dhu al-Hijjah 1444)
+      expect(endOfWeek.year).toBe(fridayDate.year);
+      expect(endOfWeek.month).toBe(fridayDate.month);
+      expect(endOfWeek.day).toBe(25);
+      expect(fridayDate.dayOfWeek).toBe(0); // Friday is day 0 in Islamic calendar
+    });
+
+    it("should return Thursday when current date is Saturday", () => {
+      // July 8, 2023 was a Saturday, which corresponds to 20 Dhu al-Hijjah 1444
+      const saturdayDate = HijriDate.fromDate(new Date(2023, 6, 8));
+      const endOfWeek = saturdayDate.endOfWeek();
+
+      // Should return Thursday of the same week (25 Dhu al-Hijjah 1444)
+      expect(endOfWeek.year).toBe(1444);
+      expect(endOfWeek.month).toBe(12);
+      expect(endOfWeek.day).toBe(25);
+      expect(saturdayDate.dayOfWeek).toBe(1); // Saturday is day 1 in Islamic calendar
+    });
+
+    it("should return Thursday when current date is Sunday", () => {
+      // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+      const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9));
+      const endOfWeek = sundayDate.endOfWeek();
+
+      // Should return Thursday of the same week (25 Dhu al-Hijjah 1444)
+      expect(endOfWeek.year).toBe(1444);
+      expect(endOfWeek.month).toBe(12);
+      expect(endOfWeek.day).toBe(25);
+      expect(sundayDate.dayOfWeek).toBe(2); // Sunday is day 2 in Islamic calendar
+    });
+
+    it("should return Thursday when current date is Thursday", () => {
+      // July 13, 2023 was a Thursday, which corresponds to 25 Dhu al-Hijjah 1444
+      const thursdayDate = HijriDate.fromDate(new Date(2023, 6, 13));
+      const endOfWeek = thursdayDate.endOfWeek();
+
+      // Should return Thursday itself (25 Dhu al-Hijjah 1444)
+      expect(endOfWeek.year).toBe(1444);
+      expect(endOfWeek.month).toBe(12);
+      expect(endOfWeek.day).toBe(25);
+      expect(thursdayDate.dayOfWeek).toBe(6); // Thursday is day 6 in Islamic calendar
+    });
+
+    it("should return a new HijriDate instance", () => {
+      const hijriDate = HijriDate.fromDate(new Date(2023, 6, 10)); // Monday
+      const endOfWeek = hijriDate.endOfWeek();
+
+      expect(endOfWeek).not.toBe(hijriDate);
+      expect(hijriDate.day).toBe(22); // Original should remain unchanged
+      expect(hijriDate.dayOfWeek).toBe(3); // Monday is day 3 in Islamic calendar
+    });
+
+    describe("with custom start of week", () => {
+      it("should use Saturday (6) as end of week when startOfWeek is Sunday (0)", () => {
+        // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+        const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9), {
+          startOfWeek: 0,
+        });
+        const endOfWeek = sundayDate.endOfWeek();
+
+        // Should return Saturday (27 Dhu al-Hijjah 1444)
+        expect(endOfWeek.year).toBe(1444);
+        expect(endOfWeek.month).toBe(12);
+        expect(endOfWeek.day).toBe(27);
+        expect(sundayDate.dayOfWeek).toBe(0); // Sunday is day 0 when startOfWeek is Sunday
+      });
+
+      it("should use Sunday (6) as end of week when startOfWeek is Monday (1)", () => {
+        // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+        const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9), {
+          startOfWeek: 1,
+        });
+        const endOfWeek = sundayDate.endOfWeek();
+
+        // Should return Sunday (21 Dhu al-Hijjah 1444) itself
+        expect(endOfWeek.year).toBe(1444);
+        expect(endOfWeek.month).toBe(12);
+        expect(endOfWeek.day).toBe(21);
+        expect(sundayDate.dayOfWeek).toBe(6); // Sunday is day 6 when startOfWeek is Monday
+      });
+
+      it("should use Friday (6) as end of week when startOfWeek is Saturday (6)", () => {
+        // July 9, 2023 was a Sunday, which corresponds to 21 Dhu al-Hijjah 1444
+        const sundayDate = HijriDate.fromDate(new Date(2023, 6, 9), {
+          startOfWeek: 6,
+        });
+        const endOfWeek = sundayDate.endOfWeek();
+
+        // Should return Friday (26 Dhu al-Hijjah 1444)
+        expect(endOfWeek.year).toBe(1444);
+        expect(endOfWeek.month).toBe(12);
+        expect(endOfWeek.day).toBe(26);
+        expect(sundayDate.dayOfWeek).toBe(1); // Sunday is day 1 when startOfWeek is Saturday
+      });
+
+      it("should maintain custom start of week in endOfWeek result", () => {
+        const mondayDate = HijriDate.fromDate(new Date(2023, 6, 10), {
+          startOfWeek: 1,
+        }); // Monday
+        const endOfWeek = mondayDate.endOfWeek();
+
+        // Should maintain the same startOfWeek setting
+        expect(endOfWeek._startOfWeek).toBe(1);
+        expect(mondayDate.dayOfWeek).toBe(0); // Monday is day 0 when startOfWeek is Monday
+      });
+    });
+  });
+
   describe("format", () => {
     it("should format year tokens correctly", () => {
       const date = new Date(2023, 6, 6); // Known date: 18 Dhu al-Hijjah 1444

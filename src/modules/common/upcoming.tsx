@@ -10,8 +10,41 @@ import { useTaskContext } from "../task/task-context";
 export default function Upcoming() {
   const { t } = useLanguageContext();
   const { openTaskForm } = useTaskContext();
-  const { upcomingTasks, taskGroups, loading, initiated, error } =
-    useUpcoming();
+  const {
+    upcomingTasks,
+    taskGroups,
+    loading,
+    initiated,
+    error,
+    formatScheduledDate,
+    today,
+    tomorrow,
+    endOfWeek,
+    formatDate,
+  } = useUpcoming();
+
+  // Generate labels with translations
+  const taskGroupsWithLabels = {
+    ...taskGroups,
+    today: {
+      ...taskGroups.today,
+      label: t("today_with_date", { date: formatDate(today, "D MMMM") }),
+    },
+    tomorrow: {
+      ...taskGroups.tomorrow,
+      label: t("tomorrow_with_date", { date: formatDate(tomorrow, "D MMMM") }),
+    },
+    thisWeek: {
+      ...taskGroups.thisWeek,
+      label: t("this_week_due", { date: formatDate(endOfWeek, "D MMMM") }),
+    },
+    thisMonth: {
+      ...taskGroups.thisMonth,
+      label: t("this_month_name", { month: formatDate(today, "MMMM") }),
+    },
+    later: { ...taskGroups.later, label: t("later") },
+    unscheduled: { ...taskGroups.unscheduled, label: t("unscheduled") },
+  };
 
   const handleEditTask = (task: Task) => {
     openTaskForm(task.id);
@@ -45,28 +78,33 @@ export default function Upcoming() {
             { key: "thisWeek", label: t("this_week") },
             { key: "thisMonth", label: t("this_month") },
             { key: "later", label: t("later") },
-            { key: "unscheduled", label: t("unscheduled") },
           ]
             .filter(
               ({ key }) =>
-                taskGroups[key as keyof typeof taskGroups] &&
-                taskGroups[key as keyof typeof taskGroups].length > 0,
+                taskGroupsWithLabels[
+                  key as keyof typeof taskGroupsWithLabels
+                ] &&
+                taskGroupsWithLabels[key as keyof typeof taskGroupsWithLabels]
+                  .tasks.length > 0,
             )
             .map(({ key, label }) => (
               <div key={key}>
                 <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
-                  {label}
+                  {taskGroupsWithLabels[
+                    key as keyof typeof taskGroupsWithLabels
+                  ].label || label}
                 </h3>
                 <>
-                  {taskGroups[key as keyof typeof taskGroups].map(
-                    (task: Task) => (
-                      <TaskListItem
-                        key={task.id}
-                        task={task}
-                        onEdit={handleEditTask}
-                      />
-                    ),
-                  )}
+                  {taskGroupsWithLabels[
+                    key as keyof typeof taskGroupsWithLabels
+                  ].tasks.map((task: Task) => (
+                    <TaskListItem
+                      key={task.id}
+                      task={task}
+                      onEdit={handleEditTask}
+                      formatDate={formatScheduledDate}
+                    />
+                  ))}
                 </>
               </div>
             ))}

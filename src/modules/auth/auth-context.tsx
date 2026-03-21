@@ -1,8 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useCallback } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -23,14 +19,11 @@ interface AuthProviderProps {
 }
 
 const fetchUserFn = async (token: string): Promise<User> => {
-  const response = await axios.get<User>(
-    `${import.meta.env.VITE_API_URL}/me`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const response = await axios.get<User>(`${import.meta.env.VITE_API_URL}/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
-  );
+  });
   return response.data;
 };
 
@@ -47,30 +40,35 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     retry: false,
   });
 
-  const fetchUser = useCallback(async (token: string): Promise<void> => {
-    try {
-      const result = await queryClient.fetchQuery({
-        queryKey: ["user"],
-        queryFn: () => fetchUserFn(token),
-      });
-      // Data is automatically set in the query cache by fetchQuery
-    } catch (error) {
-      const errorMessage = axios.isAxiosError(error)
-        ? error.response?.data?.message || error.message
-        : "Failed to fetch user";
-      throw new Error(errorMessage);
-    }
-  }, [queryClient]);
+  const fetchUser = useCallback(
+    async (token: string): Promise<void> => {
+      try {
+        const result = await queryClient.fetchQuery({
+          queryKey: ["user"],
+          queryFn: () => fetchUserFn(token),
+        });
+        // Data is automatically set in the query cache by fetchQuery
+      } catch (error) {
+        const errorMessage = axios.isAxiosError(error)
+          ? error.response?.data?.message || error.message
+          : "Failed to fetch user";
+        throw new Error(errorMessage);
+      }
+    },
+    [queryClient],
+  );
 
-
-  const setUser = useCallback((user: User | null) => {
-    if (user) {
-      queryClient.setQueryData(["user"], user);
-    } else {
-      queryClient.setQueryData(["user"], null);
-      queryClient.removeQueries({ queryKey: ["user"] });
-    }
-  }, [queryClient]);
+  const setUser = useCallback(
+    (user: User | null) => {
+      if (user) {
+        queryClient.setQueryData(["user"], user);
+      } else {
+        queryClient.setQueryData(["user"], null);
+        queryClient.removeQueries({ queryKey: ["user"] });
+      }
+    },
+    [queryClient],
+  );
 
   const clearError = useCallback(() => {
     // Clear any error state

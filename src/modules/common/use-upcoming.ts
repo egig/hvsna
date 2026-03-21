@@ -10,96 +10,92 @@ export function useUpcoming() {
 
   const today = getToday();
   const tomorrow = today.next();
+  const endOfWeek = today.endOfWeek();
   const tomorrowString = tomorrow.toString();
   const upcomingTasksQuery = useQuery({
     queryKey: queryKeys.upcomingTasks(tomorrowString),
     queryFn: () => taskRepository.findTasksAfter(today),
   });
 
-  const formatScheduledDate = (hijriDate?: string) => {
-    if (!hijriDate) return "No date set";
+  const formatScheduledDate = (task: Task) => {
+    if (!task.atEpochMillis) return "No date set";
 
     try {
-      const year = parseInt(hijriDate.substring(0, 4));
-      const month = parseInt(hijriDate.substring(4, 6));
-      const day = parseInt(hijriDate.substring(6, 8));
-      const hijriDateObj = createHijriDate(year, month, day);
+      const taskDate = new Date(task.atEpochMillis);
+      const hijriDateObj = toHijriDate(taskDate);
       return formatDate(hijriDateObj, "YYYY M DD");
     } catch {
-      return hijriDate;
+      return task.atDateHijri || "Invalid date";
     }
   };
 
   const groupTasksByTimePeriod = (
     tasks: Task[],
   ): {
-    today: Task[];
-    tomorrow: Task[];
-    thisWeek: Task[];
-    thisMonth: Task[];
-    later: Task[];
-    unscheduled: Task[];
+    today: { tasks: Task[]; label: string };
+    tomorrow: { tasks: Task[]; label: string };
+    thisWeek: { tasks: Task[]; label: string };
+    thisMonth: { tasks: Task[]; label: string };
+    later: { tasks: Task[]; label: string };
+    unscheduled: { tasks: Task[]; label: string };
   } => {
     const groups = {
-      today: [] as Task[],
-      tomorrow: [] as Task[],
-      thisWeek: [] as Task[],
-      thisMonth: [] as Task[],
-      later: [] as Task[],
-      unscheduled: [] as Task[],
+      today: { tasks: [] as Task[], label: "" },
+      tomorrow: { tasks: [] as Task[], label: "" },
+      thisWeek: { tasks: [] as Task[], label: "" },
+      thisMonth: { tasks: [] as Task[], label: "" },
+      later: { tasks: [] as Task[], label: "" },
+      unscheduled: { tasks: [] as Task[], label: "" },
     };
 
-    const tomorrow = getTomorrow();
-    const todayGregorian = today.toDate();
-    const todayString = `${today.year.toString().padStart(4, "0")}${today.month.toString().padStart(2, "0")}${today.day.toString().padStart(2, "0")}`;
+    const todayStartOfDay = today.startOfDay().toDate();
+    const tomorrowStartOfDay = today.next().startOfDay().toDate();
+    const endOfWeek = today.endOfWeek();
 
     tasks.forEach((task) => {
-      if (!task.atDateHijri) {
-        groups.unscheduled.push(task);
+      if (!task.atEpochMillis) {
+        groups.unscheduled.tasks.push(task);
         return;
       }
 
       try {
-        // Early string comparison for today/tomorrow to avoid expensive date parsing
-        if (task.atDateHijri === todayString) {
-          groups.today.push(task);
+        const taskDate = new Date(task.atEpochMillis);
+
+        // Today
+        if (taskDate >= todayStartOfDay && taskDate < tomorrowStartOfDay) {
+          groups.today.tasks.push(task);
           return;
         }
 
-        const tomorrowString = `${tomorrow.year.toString().padStart(4, "0")}${tomorrow.month.toString().padStart(2, "0")}${tomorrow.day.toString().padStart(2, "0")}`;
-        if (task.atDateHijri === tomorrowString) {
-          groups.tomorrow.push(task);
-          return;
-        }
-
-        const year = parseInt(task.atDateHijri.substring(0, 4));
-        const month = parseInt(task.atDateHijri.substring(4, 6));
-        const day = parseInt(task.atDateHijri.substring(6, 8));
-        const taskDate = createHijriDate(year, month, day);
-        const taskGregorian = taskDate.toDate();
-        const daysDiff = Math.floor(
-          (taskGregorian.getTime() - todayGregorian.getTime()) /
-            (1000 * 60 * 60 * 24),
-        );
-
-        // This week (next 6 days after today)
-        if (daysDiff > 1 && daysDiff <= 6) {
-          groups.thisWeek.push(task);
-        }
-        // This month
-        else if (
-          taskDate.year === today.year &&
-          taskDate.month === today.month
+        if (
+          taskDate >= tomorrowStartOfDay &&
+          taskDate <
+            new Date(tomorrowStartOfDay.getTime() + 24 * 60 * 60 * 1000)
         ) {
-          groups.thisMonth.push(task);
+          groups.tomorrow.tasks.push(task);
+          return;
         }
-        // Later
-        else {
-          groups.later.push(task);
+
+        if (taskDate > tomorrowStartOfDay && taskDate <= endOfWeek.toDate()) {
+          groups.thisWeek.tasks.push(task);
+          return;
         }
+
+        // This month: same Hijri month as today
+        const taskHijriDate = toHijriDate(taskDate);
+        if (
+          taskHijriDate.year === today.year &&
+          taskHijriDate.month === today.month
+        ) {
+          groups.thisMonth.tasks.push(task);
+          return;
+        }
+
+        // Later: everything else
+        groups.later.tasks.push(task);
       } catch (error) {
         // If date parsing fails, put in unscheduled
-        groups.unscheduled.push(task);
+        groups.unscheduled.tasks.push(task);
       }
     });
 
@@ -121,5 +117,9 @@ export function useUpcoming() {
       : null,
     formatScheduledDate,
     refreshTasks: () => upcomingTasksQuery.refetch(),
+    today,
+    tomorrow,
+    endOfWeek,
+    formatDate,
   };
 }

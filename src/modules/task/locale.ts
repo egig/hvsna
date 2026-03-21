@@ -135,6 +135,24 @@ export const taskTranslations = {
     id: "Akan Datang",
   },
 
+  // Task scheduling with dates
+  today_with_date: {
+    en: "Today ({date})",
+    id: "Hari ini ({date})",
+  },
+  tomorrow_with_date: {
+    en: "Tomorrow ({date})",
+    id: "Besok ({date})",
+  },
+  this_week_due: {
+    en: "This week (due {date})",
+    id: "Minggu ini (hingga {date})",
+  },
+  this_month_name: {
+    en: "This month ({month})",
+    id: "Bulan ini ({month})",
+  },
+
   // Task status messages
   no_tasks_scheduled_for_today: {
     en: "No tasks scheduled for today",
