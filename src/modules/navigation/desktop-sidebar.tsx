@@ -28,7 +28,6 @@ import {
 
 import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
 
-
 interface DesktopSidebarProps {
   openTaskForm?: () => void;
   collapsed?: boolean;
@@ -100,7 +99,7 @@ export function DesktopSidebar({
       activeIcon: <TbSettingsFilled />,
       context: "settings",
     },
-  ]
+  ];
 
   const mainTabs = desktopTabs.filter(
     (tab) => !tab.path.startsWith("/settings"),
@@ -225,7 +224,6 @@ export function DesktopSidebar({
                         <span className="truncate flex-1">{list.name}</span>
                       </Link>
 
-                      {/* Base UI Menu */}
                       <Menu.Root>
                         <Menu.Trigger className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100">
                           <MoreVertical size={14} />

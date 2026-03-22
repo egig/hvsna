@@ -92,7 +92,7 @@ export const AppRoutes = () => {
             <Route path="tasks" element={<Tasks />} />
             <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
-            <Route path="browse" element={<Browse />} />
+            {!isDesktop && <Route path="browse" element={<Browse />} />}
             <Route path="list/:listId" element={<ListDetail />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}

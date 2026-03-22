@@ -3,6 +3,7 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useCallback,
   type ReactNode,
 } from "react";
 import { useAuth } from "src/modules/auth/use-auth";
@@ -19,8 +20,7 @@ import {
   isDatabaseEmpty,
   deleteAllLocalDocs,
 } from "./utils/sync-state";
-import logger from "src/lib/logger";
-import log from "loglevel";
+import log from "../../lib/logger";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {
@@ -102,16 +102,17 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [hasCheckedSyncState, setHasCheckedSyncState] = useState(false);
   const queryClient = useQueryClient();
 
+  // Reusable function to check if sync conditions are met
+  const canSync = useCallback((): boolean => {
+    return !!(isSignedIn && user && user.syncURL && db && isOnline);
+  }, [isSignedIn, user, db, isOnline]);
+
   // Manual sync function
   const manualSync = async () => {
-    if (!isSignedIn || !user?.syncURL || !db) {
+    if (!canSync()) {
       throw new Error(
-        "Sync not available - user not signed in or sync URL not configured",
+        "Sync not available - user not signed in, sync URL not configured, or network offline",
       );
-    }
-
-    if (!isOnline) {
-      throw new Error("Sync not available - network offline");
     }
 
     log.info("[sync] Manual sync started");
@@ -120,7 +121,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
       const token = await session?.getToken();
 
-      const remoteDB = new PouchDB(user.syncURL, {
+      const remoteDB = new PouchDB(user!.syncURL, {
         fetch: function (url: string | Request, options: any) {
           if (token) {
             options.headers.set("Authorization", `Bearer ${token}`);
@@ -331,6 +332,28 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [isOnline, replication]);
 
+  // Tab visibility monitoring - trigger manual sync when tab becomes visible
+  useEffect(() => {
+    if (!canSync()) {
+      return;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        log.info("[sync] Tab became visible - triggering manual sync");
+        manualSync().catch((error) => {
+          log.warn("[sync] Auto-sync on tab visibility failed:", error);
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [canSync]);
+
   // Perform initial sync on first load when conditions are met
   useEffect(() => {
     const performInitialSync = async () => {
@@ -400,7 +423,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const initializeSync = async () => {
-      if (!isSignedIn || !user?.syncURL || !db) {
+      if (!canSync()) {
         if (replication) {
           replication.cancel();
           setReplication(null);
@@ -413,19 +436,13 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      // Don't initialize sync if offline
-      if (!isOnline) {
-        log.info("[sync] Offline - skipping sync initialization");
-        return;
-      }
-
       try {
         setIsSyncing(true);
         setSyncInitialized(true);
 
         const token = await session?.getToken();
 
-        const remoteDB = new PouchDB(user.syncURL, {
+        const remoteDB = new PouchDB(user!.syncURL, {
           fetch: function (url: string | Request, options: any) {
             if (token) {
               options.headers.set("Authorization", `Bearer ${token}`);
@@ -448,40 +465,35 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
           })
           .on("paused", (err: any) => {
             log.info("[sync] paused:", err);
-            // setIsSyncing(false);
           })
           .on("active", () => {
             log.info("[sync] active");
-            // setIsSyncing(true);
           })
           .on("denied", (err: any) => {
             console.error("[sync] denied:", err);
-            // setIsSyncing(false);
           })
           .on("complete", async (info: any) => {
             log.info("[sync] complete:", info);
             const now = new Date();
             setLastSyncTime(now);
             await storeSyncTimeToDB(db, now);
-            // setIsSyncing(false);
           })
           .on("error", (err: any) => {
             console.error("[sync] error:", err);
-            // setIsSyncing(false);
           });
 
         // Store the replication reference for cleanup
         setReplication(syncReplication);
       } catch (error) {
-        console.error("sync error", error);
+        log.error("sync error", error);
         setIsSyncing(false);
       }
     };
 
-    if (!!db && !!isSignedIn && !!user) {
+    if (canSync()) {
       initializeSync();
     }
-  }, [db, isSignedIn, user, session, isOnline]);
+  }, [db, session, canSync]);
 
   return React.createElement(
     SyncContext.Provider,

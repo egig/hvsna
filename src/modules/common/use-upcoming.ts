@@ -50,7 +50,7 @@ export function useUpcoming() {
 
     const todayStartOfDay = today.startOfDay().toDate();
     const tomorrowStartOfDay = today.next().startOfDay().toDate();
-    const endOfWeek = today.endOfWeek();
+    const endOfWeek = today.endOfWeek().endOfDay();
 
     tasks.forEach((task) => {
       if (!task.atEpochMillis) {

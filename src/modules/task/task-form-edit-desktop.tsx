@@ -11,6 +11,7 @@ import { Modal } from "../navigation/modal";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { Menu } from "@base-ui/react/menu";
 import TaskPreview from "./task-preview";
+import { ListSelector } from "../common/list-selector";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -67,7 +68,6 @@ export default function TaskFormEditDesktop({
         await handleSubmit(formData);
       }}
     >
-      {/* Modal Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           {t("edit_task")}
@@ -146,21 +146,12 @@ export default function TaskFormEditDesktop({
           }}
         />
         {lists.length > 0 && (
-          <div className="w-fit">
-            <select
-              value={selectedListId}
-              onChange={(e) => setSelectedListId(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">{t("no_list")}</option>
-              {lists.map((list) => (
-                <option key={list.id} value={list.id}>
-                  {list.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ListSelector
+            lists={lists}
+            selectedListId={selectedListId}
+            onListChange={(listId) => setSelectedListId(listId)}
+            disabled={isSubmitting}
+          />
         )}
       </div>
 

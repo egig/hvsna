@@ -6,6 +6,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
 import { useSettings } from "src/modules/settings/useSettings";
 import type { Task } from "./types";
+import { ListSelector } from "../common/list-selector";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -106,21 +107,12 @@ export default function TaskFormDesktop({
           }}
         />
         {lists.length > 0 && (
-          <div className="w-fit">
-            <select
-              value={selectedListId}
-              onChange={(e) => setSelectedListId(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">{t("no_list")}</option>
-              {lists.map((list) => (
-                <option key={list.id} value={list.id}>
-                  {list.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ListSelector
+            lists={lists}
+            selectedListId={selectedListId}
+            onListChange={(listId) => setSelectedListId(listId)}
+            disabled={isSubmitting}
+          />
         )}
       </div>
 

@@ -24,6 +24,7 @@ import { SettingsProvider } from "./modules/settings";
 import { SystemProvider } from "./modules/system";
 import { PostHogSessionTracker } from "./components/posthog-session-tracker";
 import { PlatformProvider } from "./modules/platform";
+import { EnsureRequiredParams } from "./components/ensure-required-params";
 import log from "./lib/logger";
 
 export interface AppConfig {
@@ -65,20 +66,27 @@ export default function Hvsna({
   };
 
   return (
-    <PostHogProvider
-      apiKey={config.posthogKey || ""}
-      options={{
-        ...posthogOptions,
-        api_host: config.posthogHost || "https://us.i.posthog.com",
+    <EnsureRequiredParams
+      component={PostHogProvider}
+      required={["apiKey"]}
+      props={{
+        apiKey: config.posthogKey || "",
+        options: {
+          ...posthogOptions,
+          api_host: config.posthogHost || "https://us.i.posthog.com",
+        },
       }}
     >
-      <Provider
-        config={{
-          accessToken: config.rollbarAccessToken,
-          environment: import.meta.env.MODE,
-          code_version: "1.0.0",
-          captureUncaught: true,
-          captureUnhandledRejections: true,
+      <EnsureRequiredParams
+        component={Provider}
+        props={{
+          config: {
+            accessToken: config.rollbarAccessToken,
+            environment: import.meta.env.MODE,
+            code_version: "1.0.0",
+            captureUncaught: true,
+            captureUnhandledRejections: true,
+          },
         }}
       >
         <QueryClientProvider client={queryClient}>
@@ -119,7 +127,7 @@ export default function Hvsna({
             </PlatformProvider>
           </ErrorBoundary>
         </QueryClientProvider>
-      </Provider>
-    </PostHogProvider>
+      </EnsureRequiredParams>
+    </EnsureRequiredParams>
   );
 }

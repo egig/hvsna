@@ -11,6 +11,7 @@ import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import TaskPreview from "./task-preview";
+import { ListSelector } from "../common/list-selector";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -163,21 +164,15 @@ export default function TaskFormEdit({
           }}
         />
         {lists.length > 0 && (
-          <div className="w-fit">
-            <select
-              value={selectedListId}
-              onChange={(e) => setSelectedListId(e.target.value)}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">{t("no_list")}</option>
-              {lists.map((list) => (
-                <option key={list.id} value={list.id}>
-                  {list.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <ListSelector
+            lists={lists}
+            selectedListId={selectedListId}
+            onListChange={(listId) => {
+              setIsFormDirty(true);
+              setSelectedListId(listId);
+            }}
+            disabled={isSubmitting}
+          />
         )}
       </div>
 

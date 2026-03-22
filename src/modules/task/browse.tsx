@@ -76,10 +76,6 @@ export default function Browse() {
             {t("no_lists_description") ||
               "Create your first list to organize your tasks."}
           </p>
-          <Button onClick={handleCreateList}>
-            <Plus size={20} className="mr-2" />
-            {t("create_first_list") || "Create First List"}
-          </Button>
         </div>
       )}
 
