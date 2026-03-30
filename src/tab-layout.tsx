@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { Plus } from "lucide-react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
 import { Link } from "react-router";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";

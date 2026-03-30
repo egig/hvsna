@@ -72,7 +72,8 @@ export function useLists() {
 
   // Delete list mutation
   const deleteListMutation = useMutation({
-    mutationFn: (id: string) => listRepository.delete(id),
+    mutationFn: ({ id, deleteTasks }: { id: string; deleteTasks?: boolean }) =>
+      listRepository.delete(id, deleteTasks),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.lists("") });
     },
@@ -119,9 +120,9 @@ export function useLists() {
 
   // Delete list
   const deleteList = useCallback(
-    async (id: string): Promise<boolean> => {
+    async (id: string, deleteTasks?: boolean): Promise<boolean> => {
       try {
-        await deleteListMutation.mutateAsync(id);
+        await deleteListMutation.mutateAsync({ id, deleteTasks });
         return true;
       } catch (error) {
         log.error("Failed to delete list:", error);

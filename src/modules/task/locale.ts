@@ -26,6 +26,12 @@ export const taskTranslations = {
   },
 
   // Task filtering and search
+  search: {
+    en: "Search",
+    id: "Cari",
+  },
+
+  // Task filtering and search
   search_tasks: {
     en: "Search tasks...",
     id: "Cari tugas...",
@@ -341,6 +347,10 @@ export const taskTranslations = {
   edit_list: {
     en: "Edit List",
     id: "Edit Daftar",
+  },
+  delete_list: {
+    en: "Delete List",
+    id: "Delete Daftar",
   },
   list_name: {
     en: "List name",

@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
+import { Show, useClerk } from "@clerk/react";
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import {
@@ -27,24 +27,24 @@ export default function Settings() {
   return (
     <Page>
       <Navbar title={t("settings")} showBackButton={true} />
-      <SignedIn>
+      <Show when="signed-in">
         <MenuItem title={t("account")} icon={User} to="/profile" />
-      </SignedIn>
-      <SignedOut>
+      </Show>
+      <Show when="signed-out">
         <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
-      </SignedOut>
+      </Show>
       <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
       <MenuItem
         title={t("prayer_time_fallback") || "Prayer Time Fallback"}
         icon={Clock}
         to="/settings/prayer-time-fallback"
       />
-      <SignedIn>
+      <Show when="signed-in">
         <MenuItem title={t("sync")} icon={RefreshCw} to="/sync" />
-      </SignedIn>
+      </Show>
       <MenuItem title={t("reset_device_data")} icon={Trash} to="/wipe-local" />
       <MenuItem title={t("about")} icon={Info} to="/about" />
-      <SignedIn>
+      <Show when="signed-in">
         <MenuItem
           title={t("sign_out")}
           icon={LogOut}
@@ -76,7 +76,7 @@ export default function Settings() {
             </Dialog.Viewport>
           </Dialog.Portal>
         </Dialog.Root>
-      </SignedIn>
+      </Show>
     </Page>
   );
 }

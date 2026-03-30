@@ -7,7 +7,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { useAuth } from "src/modules/auth/use-auth";
-import { useSession } from "@clerk/clerk-react";
+import { useSession } from "@clerk/react";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";

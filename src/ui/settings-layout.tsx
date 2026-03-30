@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Modal } from "../modules/navigation/modal";
 import { useLanguageContext } from "../modules/i18n/LanguageContext";
-import { SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
+import { Show, useClerk } from "@clerk/react";
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -84,7 +84,7 @@ export function SettingsModal({
               return (
                 <div key={section.id}>
                   {section.requiresAuth && (
-                    <SignedIn>
+                    <Show when="signed-in">
                       <button
                         onClick={() => handleSectionChange(section.path)}
                         className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
@@ -96,10 +96,10 @@ export function SettingsModal({
                         <Icon className="w-5 h-5 flex-shrink-0" />
                         <span className="text-sm">{section.title}</span>
                       </button>
-                    </SignedIn>
+                    </Show>
                   )}
                   {section.hideWhenSignedIn && (
-                    <SignedOut>
+                    <Show when="signed-out">
                       <button
                         onClick={() => handleSectionChange(section.path)}
                         className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
@@ -111,7 +111,7 @@ export function SettingsModal({
                         <Icon className="w-5 h-5 flex-shrink-0" />
                         <span className="text-sm">{section.title}</span>
                       </button>
-                    </SignedOut>
+                    </Show>
                   )}
                   {!section.requiresAuth && !section.hideWhenSignedIn && (
                     <button
@@ -131,7 +131,7 @@ export function SettingsModal({
             })}
 
             {/* Sign Out Button */}
-            <SignedIn>
+            <Show when="signed-in">
               <div className="pt-4 mt-4 border-t border-gray-200">
                 <button
                   onClick={() => setConfirmOpen(true)}
@@ -167,7 +167,7 @@ export function SettingsModal({
                   </Dialog.Viewport>
                 </Dialog.Portal>
               </Dialog.Root>
-            </SignedIn>
+            </Show>
           </nav>
         </div>
 

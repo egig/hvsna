@@ -1,4 +1,4 @@
-import { SignIn } from "@clerk/clerk-react";
+import { SignIn } from "@clerk/react";
 import { useNavigate } from "react-router";
 import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";

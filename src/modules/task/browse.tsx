@@ -63,7 +63,7 @@ export default function Browse() {
 
       {/* Navigation Menu Items */}
       <div className="mb-6">
-        <MenuItem title={t("all_tasks") || "All Tasks"} to="/tasks" />
+        <MenuItem title={t("search") || "Search"} to="/tasks" />
       </div>
 
       {!loading && initiated && lists.length === 0 && (

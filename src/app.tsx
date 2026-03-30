@@ -1,5 +1,5 @@
 import { BrowserRouter } from "react-router";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkProvider } from "@clerk/react";
 import { AppRoutes } from "src/routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";

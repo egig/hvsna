@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/react";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";

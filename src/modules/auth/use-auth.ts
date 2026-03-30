@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSession } from "@clerk/clerk-react";
+import { useSession } from "@clerk/react";
 import { useAuthContext } from "./auth-context";
 
 export const useAuth = () => {

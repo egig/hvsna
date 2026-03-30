@@ -13,3 +13,5 @@ dist
 hvsna-notes
 
 android/app/release
+.env*
+!.env.example

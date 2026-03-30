@@ -10,12 +10,12 @@ import {
 } from "lucide-react";
 import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
-import { Modal } from "../navigation/modal";
-import { Button, Page } from "../navigation";
+import { Page } from "../navigation";
 import { useLists } from "./use-lists";
 import { useListTasks } from "./use-list-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useListContext } from "./list-context";
+import { DeleteListModal } from "./delete-list-modal";
 import type { List, Task } from "./types";
 import TaskListItem from "./task-list-item";
 import { useTaskContext } from "./task-context";
@@ -45,6 +45,7 @@ export default function ListDetail() {
   } = useListTasks({ listId: listId || "", enabled: !!listId });
 
   const [currentList, setCurrentList] = useState<List | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleEditList = () => {
     if (currentList) {
@@ -52,16 +53,22 @@ export default function ListDetail() {
     }
   };
 
-  const handleDeleteList = async () => {
-    if (
-      !currentList ||
-      !confirm(`Are you sure you want to delete "${currentList.name}"?`)
-    ) {
+  const handleDeleteList = () => {
+    if (!currentList) {
       return;
     }
 
-    const success = await deleteList(currentList.id!);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteList = async (deleteTasks: boolean) => {
+    if (!currentList) {
+      return;
+    }
+
+    const success = await deleteList(currentList.id!, deleteTasks);
     if (success) {
+      setShowDeleteModal(false);
       navigate("/browse");
     }
   };
@@ -152,7 +159,7 @@ export default function ListDetail() {
                         className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
                         <Trash2 size={18} />
-                        {t("delete_task")}
+                        {t("delete_list")}
                       </Menu.Item>
                     </Menu.Popup>
                   </Menu.Positioner>
@@ -208,6 +215,15 @@ export default function ListDetail() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteListModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteList}
+        listName={currentList?.name || ""}
+        tasks={tasks}
+      />
     </Page>
   );
 }

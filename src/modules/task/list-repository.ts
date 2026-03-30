@@ -107,13 +107,48 @@ export class ListRepository {
     return updatedDoc.toListItem();
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, deleteTasks: boolean = false): Promise<void> {
     const doc: PouchDBListDocument = await (db as any).get(id);
 
     if (!doc._rev) {
       throw new Error("Document revision is required for deletion");
     }
 
+    // Handle associated tasks based on deleteTasks parameter
+    await db.createIndex({
+      index: {
+        fields: ["type", "listId"],
+      },
+    });
+
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        listId: id,
+      },
+    };
+
+    const result = await (db as any).find(mangoQuery);
+    const tasks = (result as any).docs;
+
+    if (deleteTasks) {
+      // Delete all tasks associated with this list
+      for (const task of tasks) {
+        await (db as any).remove(task);
+      }
+    } else {
+      // Set listId to null for all associated tasks
+      for (const task of tasks) {
+        const updatedTask = {
+          ...task,
+          listId: null,
+          updatedAt: Date.now(),
+        };
+        await (db as any).put(updatedTask);
+      }
+    }
+
+    // Finally, delete the list document
     await (db as any).remove(doc as any);
   }
 

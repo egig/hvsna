@@ -7,13 +7,16 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/clerk-react";
+import { Show, UserButton } from "@clerk/react";
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
 import { useLists } from "../task/use-lists";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useListContext } from "../task/list-context";
+import { DeleteListModal } from "../task/delete-list-modal";
+import { useTasks } from "../task/use-tasks";
+import { useState } from "react";
 import {
   TbSquareRoundedPlusFilled,
   TbCalendar,
@@ -40,23 +43,42 @@ export function DesktopSidebar({
   onToggleCollapse,
 }: DesktopSidebarProps) {
   const { lists, loading, deleteList } = useLists();
+  const { tasks } = useTasks();
   const { t } = useLanguageContext();
   const location = useLocation();
   const { openListForm } = useListContext();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedList, setSelectedList] = useState<any>(null);
 
   const handleEditList = (list: any) => {
     openListForm(list.id!);
   };
 
-  const handleDeleteList = async (list: any) => {
-    if (!confirm(`Are you sure you want to delete "${list.name}"?`)) {
+  const handleDeleteList = (list: any) => {
+    setSelectedList(list);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteList = async (deleteTasks: boolean) => {
+    if (!selectedList) {
       return;
     }
 
-    const success = await deleteList(list.id!);
+    const success = await deleteList(selectedList.id!, deleteTasks);
     if (success) {
+      setShowDeleteModal(false);
+      setSelectedList(null);
       // List will be automatically refreshed by the hook
     }
+  };
+
+  // Helper to get tasks for a list (filters open tasks and groups by list ID)
+  const getListTasks = (listId: string) => {
+    // Filter for open/pending tasks (status 0) that belong to the specified list
+    return tasks.filter(task => 
+      task.status === 0 && // Only open/pending tasks
+      task.listId === listId // Tasks belonging to this list
+    );
   };
 
   const tabs = [
@@ -76,14 +98,14 @@ export function DesktopSidebar({
     },
     {
       path: "/inbox",
-      label: "Inbox",
+      label: t("inbox") || "Inbox",
       icon: <HiOutlineInbox />,
       activeIcon: <HiInbox />,
       context: "inbox",
     },
     {
       path: "/tasks",
-      label: t("all_tasks"),
+      label: t("search"),
       icon: <TbLayoutList />,
       activeIcon: <TbLayoutListFilled />,
       context: "all",
@@ -124,10 +146,10 @@ export function DesktopSidebar({
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
         {!collapsed && (
           <>
-            <SignedIn>
+            <Show when="signed-in">
               <UserButton />
-            </SignedIn>
-            <SignedOut>
+            </Show>
+            <Show when="signed-out">
               <Link
                 to="/signin"
                 className="flex items-center justify-center size-8 rounded-full bg-primary-100 hover:bg-primary-200 text-gray-400 hover:text-primary-600 transition-colors"
@@ -135,7 +157,7 @@ export function DesktopSidebar({
               >
                 <UserRound size={16} />
               </Link>
-            </SignedOut>
+            </Show>
           </>
         )}
         <button
@@ -195,19 +217,19 @@ export function DesktopSidebar({
           <div className="p-2 mt-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-gray-500 tracking-wider">
-                Lists
+                {t("lists") || "Lists"}
               </h3>
               <button
                 onClick={() => openListForm()}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                title="Add new list"
+                title={t("add_new_list") || "Add new list"}
               >
                 <Plus size={16} />
               </button>
             </div>
             <div className="space-y-1">
               {loading ? (
-                <div className="text-xs text-gray-400">Loading...</div>
+                <div className="text-xs text-gray-400">{t("loading") || "Loading..."}</div>
               ) : lists.length > 0 ? (
                 lists.slice(0, 5).map((list) => {
                   const isActive = location.pathname === `/list/${list.id}`;
@@ -236,14 +258,14 @@ export function DesktopSidebar({
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                               >
                                 <Edit size={14} />
-                                <span>Edit</span>
+                                <span>{t("edit") || "Edit"}</span>
                               </Menu.Item>
                               <Menu.Item
                                 onClick={() => handleDeleteList(list)}
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               >
                                 <Trash2 size={14} />
-                                <span>Delete</span>
+                                <span>{t("delete") || "Delete"}</span>
                               </Menu.Item>
                             </Menu.Popup>
                           </Menu.Positioner>
@@ -253,7 +275,7 @@ export function DesktopSidebar({
                   );
                 })
               ) : (
-                <div className="text-xs text-gray-400">No lists yet</div>
+                <div className="text-xs text-gray-400">{t("no_lists_yet") || "No lists yet"}</div>
               )}
             </div>
             {lists.length > 5 && (
@@ -266,7 +288,7 @@ export function DesktopSidebar({
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  View all lists →
+                  {t("view_all_lists") || "View all lists"} →
                 </Link>
               </div>
             )}
@@ -300,6 +322,20 @@ export function DesktopSidebar({
           );
         })}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {selectedList && (
+        <DeleteListModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedList(null);
+          }}
+          onConfirm={confirmDeleteList}
+          listName={selectedList.name || ""}
+          tasks={getListTasks(selectedList.id)}
+        />
+      )}
     </div>
   );
 }
