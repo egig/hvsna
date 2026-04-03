@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { tokenManager } from '../auth/token-manager';
+import { getTokenStore, getAuthUseCases } from '../../infra/auth/AuthServiceFactory';
 
 export interface ApiError {
   message: string;
@@ -20,7 +20,7 @@ export const httpClient: AxiosInstance = axios.create({
 // Request interceptor to add auth token
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const authHeader = tokenManager.getAuthHeader();
+    const authHeader = getTokenStore().getAuthHeader();
     if (authHeader.Authorization) {
       config.headers.Authorization = authHeader.Authorization;
     }
@@ -47,18 +47,18 @@ httpClient.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        await tokenManager.refreshAccessToken();
-        
+        await getAuthUseCases().refreshSession();
+
         // Get the new token and retry the original request
-        const authHeader = tokenManager.getAuthHeader();
+        const authHeader = getTokenStore().getAuthHeader();
         if (authHeader.Authorization && originalRequest.headers) {
           originalRequest.headers.Authorization = authHeader.Authorization;
         }
-        
+
         return httpClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed, token is invalid
-        await tokenManager.clearTokens();
+        getTokenStore().clearAccessToken();
         
         // Don't redirect here - let the auth context handle it
         // Just propagate the error so components can handle it

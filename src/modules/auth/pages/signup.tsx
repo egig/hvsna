@@ -4,7 +4,9 @@ import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
 import Block from "src/ui/block";
 import { useAuth } from "../use-auth";
-import { authService } from "../../../lib/auth/auth-service";
+import { getAuthUseCases } from "../../../infra/auth/AuthServiceFactory";
+
+const authService = getAuthUseCases();
 
 export default function SignUpPage() {
   const navigate = useNavigate();

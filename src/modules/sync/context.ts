@@ -19,7 +19,7 @@ import {
   isDatabaseEmpty,
   deleteAllLocalDocs,
 } from "./utils/sync-state";
-import { tokenManager } from "../../lib/auth/token-manager";
+import { getTokenStore } from "../../infra/auth/AuthServiceFactory";
 import log from "../../lib/logger";
 
 // Helper functions for syncTime persistence
@@ -118,7 +118,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsManualSyncing(true);
 
-      const token = tokenManager.getAccessToken();
+      const token = getTokenStore().getAccessToken();
 
       const remoteDB = new PouchDB(user!.syncURL, {
         fetch: function (url: string | Request, options: any) {
@@ -439,7 +439,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         setIsSyncing(true);
         setSyncInitialized(true);
 
-        const token = tokenManager.getAccessToken();
+        const token = getTokenStore().getAccessToken();
 
         const remoteDB = new PouchDB(user!.syncURL, {
           fetch: function (url: string | Request, options: any) {

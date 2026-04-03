@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { authService } from "../../lib/auth/auth-service";
+import { getAuthUseCases } from "../../infra/auth/AuthServiceFactory";
+
+const authService = getAuthUseCases();
 import type { User, AuthState, AuthActions } from "./user";
 
 type AuthContextType = AuthState & AuthActions;
