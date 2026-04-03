@@ -1,5 +1,4 @@
 import { BrowserRouter } from "react-router";
-import { ClerkProvider } from "@clerk/react";
 import { AppRoutes } from "src/routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
@@ -34,7 +33,6 @@ export interface AppConfig {
   searchBase?: string;
   cookieDomain?: string;
   sessionKey?: string;
-  clerkPublishableKey?: string;
   rollbarAccessToken?: string;
   rollbarEnv?: string;
   posthogKey?: string;
@@ -95,32 +93,28 @@ export default function Hvsna({
               <SnackbarProvider>
                 <SystemProvider>
                   <ScreenSizeProvider onClose={handleBreakpointClose}>
-                    <ClerkProvider
-                      publishableKey={config.clerkPublishableKey || ""}
-                    >
-                      <AuthProvider>
-                        <SettingsProvider>
-                          <DroppableContext>
-                            <PouchDBProvider dbInstance={db}>
-                              <SyncProvider>
-                                <LanguageProviderWrapper>
-                                  <TaskProvider>
-                                    <ListProvider>
-                                      <BrowserRouter
-                                        basename={config.appBaseName || ""}
-                                      >
-                                        <PostHogSessionTracker />
-                                        <AppRoutes />
-                                      </BrowserRouter>
-                                    </ListProvider>
-                                  </TaskProvider>
-                                </LanguageProviderWrapper>
-                              </SyncProvider>
-                            </PouchDBProvider>
-                          </DroppableContext>
-                        </SettingsProvider>
-                      </AuthProvider>
-                    </ClerkProvider>
+                    <AuthProvider>
+                      <SettingsProvider>
+                        <DroppableContext>
+                          <PouchDBProvider dbInstance={db}>
+                            <SyncProvider>
+                              <LanguageProviderWrapper>
+                                <TaskProvider>
+                                  <ListProvider>
+                                    <BrowserRouter
+                                      basename={config.appBaseName || ""}
+                                    >
+                                      <PostHogSessionTracker />
+                                      <AppRoutes />
+                                    </BrowserRouter>
+                                  </ListProvider>
+                                </TaskProvider>
+                              </LanguageProviderWrapper>
+                            </SyncProvider>
+                          </PouchDBProvider>
+                        </DroppableContext>
+                      </SettingsProvider>
+                    </AuthProvider>
                   </ScreenSizeProvider>
                 </SystemProvider>
               </SnackbarProvider>

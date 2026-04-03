@@ -7,7 +7,6 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
-import { Show, UserButton } from "@clerk/react";
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
@@ -17,6 +16,7 @@ import { useListContext } from "../task/list-context";
 import { DeleteListModal } from "../task/delete-list-modal";
 import { useTasks } from "../task/use-tasks";
 import { useState } from "react";
+import { useAuth } from "../auth/use-auth";
 import {
   TbSquareRoundedPlusFilled,
   TbCalendar,
@@ -27,6 +27,7 @@ import {
   TbLayoutListFilled,
   TbSettings,
   TbSettingsFilled,
+  TbSearch,
 } from "react-icons/tb";
 
 import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
@@ -47,6 +48,7 @@ export function DesktopSidebar({
   const { t } = useLanguageContext();
   const location = useLocation();
   const { openListForm } = useListContext();
+  const { user, isAuthenticated, logout } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedList, setSelectedList] = useState<any>(null);
 
@@ -106,8 +108,8 @@ export function DesktopSidebar({
     {
       path: "/tasks",
       label: t("search"),
-      icon: <TbLayoutList />,
-      activeIcon: <TbLayoutListFilled />,
+      icon: <TbSearch />,
+      activeIcon: <TbSearch />,
       context: "all",
     },
   ];
@@ -146,10 +148,24 @@ export function DesktopSidebar({
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
         {!collapsed && (
           <>
-            <Show when="signed-in">
-              <UserButton />
-            </Show>
-            <Show when="signed-out">
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-center size-8 rounded-full bg-primary-100 text-primary-600">
+                  <UserRound size={16} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">
+                    {user?.firstName || user?.email?.split('@')[0]}
+                  </span>
+                  <button
+                    onClick={logout}
+                    className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            ) : (
               <Link
                 to="/signin"
                 className="flex items-center justify-center size-8 rounded-full bg-primary-100 hover:bg-primary-200 text-gray-400 hover:text-primary-600 transition-colors"
@@ -157,7 +173,7 @@ export function DesktopSidebar({
               >
                 <UserRound size={16} />
               </Link>
-            </Show>
+            )}
           </>
         )}
         <button

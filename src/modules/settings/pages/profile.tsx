@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/react";
+import { useAuth } from "../../auth/use-auth";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";
@@ -6,7 +6,7 @@ import { User, Mail } from "lucide-react";
 
 export default function Profile() {
   const { t } = useLanguageContext();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   return (
     <Page>
@@ -18,22 +18,17 @@ export default function Profile() {
             {/* Profile Picture */}
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                {user.imageUrl ? (
-                  <img
-                    src={user.imageUrl}
-                    alt={user.fullName || "Profile"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User className="w-8 h-8 text-gray-400" />
-                )}
+                <User className="w-8 h-8 text-gray-400" />
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {user.fullName || t("user")}
+                  {user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.email?.split('@')[0] || t("user")
+                  }
                 </h2>
                 <p className="text-sm text-gray-500">
-                  {user.primaryEmailAddress?.emailAddress}
+                  {user.email}
                 </p>
               </div>
             </div>
@@ -43,27 +38,23 @@ export default function Profile() {
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-600">
-                  {user.primaryEmailAddress?.emailAddress}
+                  {user.email}
                 </span>
               </div>
-              {user.username && (
+              <div className="flex items-center space-x-3">
+                <User className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-600">
+                  User ID: {user.userId}
+                </span>
+              </div>
+              {user.createdAt && (
                 <div className="flex items-center space-x-3">
                   <User className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    @{user.username}
+                    Member since: {new Date(user.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               )}
-            </div>
-            <div className="flex justify-end">
-              <a
-                className="text-[var(--hvsna-primary-color)] hover:underline cursor-pointer"
-                href={`${import.meta.env.VITE_CLERK_ACCOUNT_PORTAL}/user`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t("manage_account")}
-              </a>
             </div>
           </div>
         )}

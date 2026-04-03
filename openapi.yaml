@@ -1,0 +1,518 @@
+openapi: 3.0.3
+info:
+  title: hvsna-sync
+  description: CouchDB proxy server with user authentication and per-user database provisioning.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local development
+  - url: https://api.hvsna.app
+    description: Production
+
+tags:
+  - name: auth
+    description: Authentication endpoints
+  - name: user
+    description: User account endpoints
+  - name: sync
+    description: CouchDB sync proxy
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [user]
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+              example:
+                code: OK
+                message: server is healthy
+                data:
+                  timestamp: "2024-01-01T00:00:00Z"
+
+  /register:
+    post:
+      summary: Register a new user
+      description: Creates a user account, hashes the password, provisions a personal CouchDB database, and returns a token pair.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TokenPair"
+              example:
+                code: CREATED
+                message: user registered successfully
+                data:
+                  access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refresh_token: a3f1c2d4e5b6...
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: EMAIL_TAKEN
+                message: email already registered
+                data: null
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /login:
+    post:
+      summary: Login with email and password
+      description: Verifies credentials via bcrypt and returns a JWT access token and a refresh token.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TokenPair"
+              example:
+                code: OK
+                message: login successful
+                data:
+                  access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refresh_token: a3f1c2d4e5b6...
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      description: Exchanges a valid refresh token for a new token pair (rolling refresh — old token is revoked).
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: New token pair issued
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/TokenPair"
+              example:
+                code: OK
+                message: token refreshed successfully
+                data:
+                  access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refresh_token: a3f1c2d4e5b6...
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                expired:
+                  summary: Refresh token expired
+                  value:
+                    code: TOKEN_EXPIRED
+                    message: refresh token has expired
+                    data: null
+                invalid:
+                  summary: Invalid refresh token
+                  value:
+                    code: INVALID_TOKEN
+                    message: invalid refresh token
+                    data: null
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /auth/logout:
+    post:
+      summary: Logout (revoke refresh token)
+      description: Deletes the refresh token from the sessions store. Idempotent — returns 200 even if the token is already gone.
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutRequest"
+      responses:
+        "200":
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: OK
+                message: logged out successfully
+                data: null
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /me:
+    get:
+      summary: Get current user
+      description: Returns the authenticated user's profile and CouchDB sync configuration.
+      tags: [user]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/MeResponse"
+              example:
+                code: OK
+                message: user profile retrieved
+                data:
+                  userId: "1234567890"
+                  externalId: "1234567890"
+                  firstName: Jane
+                  lastName: Doe
+                  email: user@example.com
+                  createdAt: "2024-01-01T00:00:00Z"
+                  dbName: userdb-313233343536373839300a
+                  syncURL: https://api.hvsna.app/sync
+                  featureFlags: {}
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: USER_NOT_FOUND
+                message: user not found
+                data: null
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /sync/{path}:
+    parameters:
+      - name: path
+        in: path
+        required: true
+        schema:
+          type: string
+        description: CouchDB path (e.g. `_all_docs`, `mydoc`, `_changes`)
+    get:
+      summary: Proxy GET to user's CouchDB database
+      tags: [sync]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: CouchDB response (raw, passed through)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/UserNotFound"
+        "502":
+          $ref: "#/components/responses/ProxyError"
+    post:
+      summary: Proxy POST to user's CouchDB database
+      tags: [sync]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: CouchDB response (raw, passed through)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/UserNotFound"
+        "502":
+          $ref: "#/components/responses/ProxyError"
+    put:
+      summary: Proxy PUT to user's CouchDB database
+      tags: [sync]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: CouchDB response (raw, passed through)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/UserNotFound"
+        "502":
+          $ref: "#/components/responses/ProxyError"
+    delete:
+      summary: Proxy DELETE to user's CouchDB database
+      tags: [sync]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: CouchDB response (raw, passed through)
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/UserNotFound"
+        "502":
+          $ref: "#/components/responses/ProxyError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from /login or /register
+
+  schemas:
+    BaseResponse:
+      type: object
+      required: [code, message, data]
+      properties:
+        code:
+          type: string
+          description: Application-level result code
+          example: OK
+        message:
+          type: string
+          description: Human-readable description
+          example: operation successful
+        data:
+          description: Response payload (null for errors or empty responses)
+
+    ErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/BaseResponse"
+        - type: object
+          properties:
+            data:
+              nullable: true
+              example: null
+
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          minLength: 8
+          example: s3cr3tpassword
+        firstName:
+          type: string
+          example: Jane
+        lastName:
+          type: string
+          example: Doe
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: s3cr3tpassword
+
+    TokenPair:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: Short-lived JWT (15 min). Use as Bearer token.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refresh_token:
+          type: string
+          description: Long-lived opaque token (30 days). Store securely.
+          example: a3f1c2d4e5b6...
+
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+          example: a3f1c2d4e5b6...
+
+    LogoutRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+          example: a3f1c2d4e5b6...
+
+    MeResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "1234567890"
+        externalId:
+          type: string
+          example: "1234567890"
+        firstName:
+          type: string
+          nullable: true
+          example: Jane
+        lastName:
+          type: string
+          nullable: true
+          example: Doe
+        email:
+          type: string
+          nullable: true
+          format: email
+          example: user@example.com
+        createdAt:
+          type: string
+          format: date-time
+        dbName:
+          type: string
+          description: User's personal CouchDB database name
+          example: userdb-313233343536373839300a
+        syncURL:
+          type: string
+          description: Base URL for CouchDB sync
+          example: https://api.hvsna.app/sync
+        featureFlags:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: INVALID_REQUEST
+            message: invalid request body
+            data: null
+
+    Unauthorized:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            unauthorized:
+              value:
+                code: UNAUTHORIZED
+                message: missing or invalid authorization header
+                data: null
+            token_expired:
+              value:
+                code: TOKEN_EXPIRED
+                message: access token has expired
+                data: null
+            invalid_token:
+              value:
+                code: INVALID_TOKEN
+                message: invalid token
+                data: null
+
+    UserNotFound:
+      description: Authenticated user has no database provisioned
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: USER_NOT_FOUND
+            message: user not found
+            data: null
+
+    ProxyError:
+      description: CouchDB unreachable or upstream error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: PROXY_ERROR
+            message: upstream CouchDB error
+            data: null
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: INTERNAL_ERROR
+            message: internal server error
+            data: null

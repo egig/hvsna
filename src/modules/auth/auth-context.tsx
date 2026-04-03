@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useCallback } from "react";
+import React, { createContext, useContext, useCallback, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { authService } from "../../lib/auth/auth-service";
 import type { User, AuthState, AuthActions } from "./user";
 
 type AuthContextType = AuthState & AuthActions;
@@ -18,39 +18,95 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const fetchUserFn = async (token: string): Promise<User> => {
-  const response = await axios.get<User>(`${import.meta.env.VITE_API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const queryClient = useQueryClient();
 
-  // Query for user data - we'll manage this reactively
+  // Query for user data
   const userQuery = useQuery<User>({
     queryKey: ["user"],
-    queryFn: () => {
-      throw new Error("User query must be triggered with token");
-    },
-    enabled: false, // Disabled by default, will be enabled when token is available
+    queryFn: () => authService.getCurrentUser(),
+    enabled: false, // Disabled by default, will be enabled when authenticated
     retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    const initializeAuth = async () => {
+      try {
+        await authService.initialize();
+        const isAuthenticated = await authService.isAuthenticated();
+        if (isAuthenticated) {
+          userQuery.refetch();
+        }
+      } catch (error) {
+        console.error("Failed to initialize auth:", error);
+      }
+    };
+
+    initializeAuth();
+  }, [userQuery]);
+
+  // Login mutation
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      await authService.login({ email, password });
+      const user = await authService.getCurrentUser();
+      return user;
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(["user"], user);
+    },
+    onError: (error) => {
+      console.error("Login failed:", error);
+    },
+  });
+
+  // Register mutation
+  const registerMutation = useMutation({
+    mutationFn: async (userData: { 
+      email: string; 
+      password: string; 
+      firstName?: string; 
+      lastName?: string; 
+    }) => {
+      await authService.register(userData);
+      const user = await authService.getCurrentUser();
+      return user;
+    },
+    onSuccess: (user) => {
+      queryClient.setQueryData(["user"], user);
+    },
+    onError: (error) => {
+      console.error("Registration failed:", error);
+    },
+  });
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await authService.logout();
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["user"], null);
+      queryClient.removeQueries({ queryKey: ["user"] });
+    },
+    onError: (error) => {
+      console.error("Logout failed:", error);
+      // Even if logout fails, clear user data
+      queryClient.setQueryData(["user"], null);
+      queryClient.removeQueries({ queryKey: ["user"] });
+    },
   });
 
   const fetchUser = useCallback(
-    async (token: string): Promise<void> => {
+    async (): Promise<void> => {
       try {
-        const result = await queryClient.fetchQuery({
-          queryKey: ["user"],
-          queryFn: () => fetchUserFn(token),
-        });
-        // Data is automatically set in the query cache by fetchQuery
+        const user = await authService.getCurrentUser();
+        queryClient.setQueryData(["user"], user);
       } catch (error) {
-        const errorMessage = axios.isAxiosError(error)
-          ? error.response?.data?.message || error.message
+        const errorMessage = error && typeof error === 'object' && 'message' in error 
+          ? (error as any).message 
           : "Failed to fetch user";
         throw new Error(errorMessage);
       }
@@ -75,13 +131,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     queryClient.resetQueries({ queryKey: ["user"] });
   }, [queryClient]);
 
+  const login = useCallback(
+    async (email: string, password: string) => {
+      return loginMutation.mutateAsync({ email, password });
+    },
+    [loginMutation]
+  );
+
+  const register = useCallback(
+    async (userData: { 
+      email: string; 
+      password: string; 
+      firstName?: string; 
+      lastName?: string; 
+    }) => {
+      return registerMutation.mutateAsync(userData);
+    },
+    [registerMutation]
+  );
+
+  const logout = useCallback(
+    async () => {
+      return logoutMutation.mutateAsync();
+    },
+    [logoutMutation]
+  );
+
   const contextValue: AuthContextType = {
     user: userQuery.data || null,
-    loading: userQuery.isLoading,
-    error: userQuery.error ? (userQuery.error as Error).message : null,
+    loading: userQuery.isLoading || loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
+    error: userQuery.error 
+      ? (userQuery.error as Error).message 
+      : loginMutation.error
+        ? (loginMutation.error as Error).message
+        : registerMutation.error
+          ? (registerMutation.error as Error).message
+          : logoutMutation.error
+            ? (logoutMutation.error as Error).message
+            : null,
     setUser,
     fetchUser,
     clearError,
+    // Add new auth actions
+    login,
+    register,
+    logout,
   };
 
   return (

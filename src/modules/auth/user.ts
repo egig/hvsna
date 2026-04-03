@@ -20,6 +20,14 @@ export interface AuthState {
 
 export interface AuthActions {
   setUser: (user: User | null) => void;
-  fetchUser: (t: string) => Promise<void>;
+  fetchUser: (t?: string) => Promise<void>;
   clearError: () => void;
+  login: (email: string, password: string) => Promise<User>;
+  register: (userData: { 
+    email: string; 
+    password: string; 
+    firstName?: string; 
+    lastName?: string; 
+  }) => Promise<User>;
+  logout: () => Promise<void>;
 }

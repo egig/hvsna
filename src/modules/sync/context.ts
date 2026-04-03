@@ -7,7 +7,6 @@ import React, {
   type ReactNode,
 } from "react";
 import { useAuth } from "src/modules/auth/use-auth";
-import { useSession } from "@clerk/react";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,6 +19,7 @@ import {
   isDatabaseEmpty,
   deleteAllLocalDocs,
 } from "./utils/sync-state";
+import { tokenManager } from "../../lib/auth/token-manager";
 import log from "../../lib/logger";
 
 // Helper functions for syncTime persistence
@@ -88,8 +88,7 @@ const SyncContext = createContext<SyncContextType | undefined>(undefined);
 
 export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const { db } = usePouchDB();
-  const { user, isSignedIn } = useAuth();
-  const { session } = useSession();
+  const { user, isAuthenticated } = useAuth();
   const [syncInitialized, setSyncInitialized] = useState(false);
   const [replication, setReplication] = useState<any | null>(null);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
@@ -104,8 +103,8 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   // Reusable function to check if sync conditions are met
   const canSync = useCallback((): boolean => {
-    return !!(isSignedIn && user && user.syncURL && db && isOnline);
-  }, [isSignedIn, user, db, isOnline]);
+    return !!(isAuthenticated && user && user.syncURL && db && isOnline);
+  }, [isAuthenticated, user, db, isOnline]);
 
   // Manual sync function
   const manualSync = async () => {
@@ -119,7 +118,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     try {
       setIsManualSyncing(true);
 
-      const token = await session?.getToken();
+      const token = tokenManager.getAccessToken();
 
       const remoteDB = new PouchDB(user!.syncURL, {
         fetch: function (url: string | Request, options: any) {
@@ -243,7 +242,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         );
 
         // Show dialog if database has data but hasn't been synced before
-        if (!hasSynced && docCount > 0 && isSignedIn && user?.syncURL) {
+        if (!hasSynced && docCount > 0 && isAuthenticated && user?.syncURL) {
           setShowSyncDialog(true);
           log.info("[sync] Showing sync initialization dialog");
         }
@@ -254,7 +253,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     };
 
     checkSyncState();
-  }, [db, hasCheckedSyncState, isSignedIn, user]);
+  }, [db, hasCheckedSyncState, isAuthenticated, user]);
 
   // Network status monitoring
   useEffect(() => {
@@ -358,14 +357,14 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const performInitialSync = async () => {
       // Only perform initial sync if:
-      // 1. User is signed in
+      // 1. User is authenticated
       // 2. Sync URL is available
       // 3. Database is available
       // 4. Network is online
       // 5. Initial sync hasn't been performed yet
       // 6. Sync state has been checked (to avoid showing dialog conflicts)
       if (
-        isSignedIn &&
+        isAuthenticated &&
         user?.syncURL &&
         db &&
         isOnline &&
@@ -413,7 +412,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
     performInitialSync();
   }, [
-    isSignedIn,
+    isAuthenticated,
     user,
     db,
     isOnline,
@@ -440,7 +439,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         setIsSyncing(true);
         setSyncInitialized(true);
 
-        const token = await session?.getToken();
+        const token = tokenManager.getAccessToken();
 
         const remoteDB = new PouchDB(user!.syncURL, {
           fetch: function (url: string | Request, options: any) {
@@ -493,7 +492,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     if (canSync()) {
       initializeSync();
     }
-  }, [db, session, canSync]);
+  }, [db, canSync]);
 
   return React.createElement(
     SyncContext.Provider,

@@ -1,32 +1,47 @@
 import { useEffect } from "react";
-import { useSession } from "@clerk/react";
 import { useAuthContext } from "./auth-context";
+import { tokenManager } from "../../lib/auth/token-manager";
 
 export const useAuth = () => {
-  const { user, loading, error, fetchUser, clearError } = useAuthContext();
-  const { isSignedIn, session } = useSession();
+  const { 
+    user, 
+    loading, 
+    error, 
+    fetchUser, 
+    clearError,
+    login,
+    register,
+    logout,
+    setUser
+  } = useAuthContext();
 
-  // Auto-fetch user on mount if not already loaded and user is signed in
+  // Auto-fetch user on mount if authenticated but user data not loaded
   useEffect(() => {
-    if (!user && isSignedIn) {
-      (async () => {
-        let t = await session.getToken();
-        try {
-          await fetchUser(t as string);
-        } catch (error) {
-          // Error is handled by React Query and available in the error state
-          console.error("Failed to fetch user:", error);
+    (async () => {
+      try {
+        // Check if user has valid tokens (is authenticated)
+        const hasTokens = await tokenManager.hasTokens();
+        
+        // If authenticated but no user data, fetch user details
+        if (hasTokens && !user && !loading) {
+          await fetchUser();
         }
-      })();
-    }
-  }, [user, isSignedIn, session, fetchUser]);
+      } catch (error) {
+        // Error is handled by React Query and available in the error state
+        console.error("Failed to check authentication status:", error);
+      }
+    })();
+  }, [user, loading, fetchUser]);
 
   return {
     user,
-    isSignedIn,
     loading,
     error,
     isAuthenticated: !!user,
     clearError,
+    login,
+    register,
+    logout,
+    setUser,
   };
 };
