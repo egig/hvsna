@@ -2,8 +2,8 @@ import { BrowserRouter } from "react-router";
 import { AppRoutes } from "src/routes";
 import "./app.css";
 import { PouchDBProvider } from "./pouchdb";
-import DroppableContext from "./ui/droppable-context";
-import { ScreenSizeProvider } from "./ui/screen-size-wrapper";
+import DroppableContext from "./modules/components/droppable-context";
+import { ScreenSizeProvider } from "./modules/components/screen-size-wrapper";
 import type {
   Coordinate,
   LocationResolveType,
@@ -12,19 +12,19 @@ import { Provider } from "@rollbar/react";
 import { PostHogProvider } from "@posthog/react";
 import { SyncProvider } from "./modules/sync/context";
 import { LanguageProviderWrapper } from "./modules/i18n/LanguageProviderWrapper";
-import { SnackbarProvider } from "./ui/snackbar-provider";
-import { ErrorBoundary } from "./components/error-boundary";
+import { SnackbarProvider } from "./modules/components/snackbar-provider";
+import { ErrorBoundary } from "./modules/components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "./lib/query-client";
+import { queryClient } from "./modules/query-client";
 import { TaskProvider } from "./modules/task/task-context";
 import { ListProvider } from "./modules/task/list-context";
 import { AuthProvider } from "./modules/auth";
 import { SettingsProvider } from "./modules/settings";
 import { SystemProvider } from "./modules/system";
-import { PostHogSessionTracker } from "./components/posthog-session-tracker";
+import { PostHogSessionTracker } from "./modules/posthog/posthog-session-tracker";
 import { PlatformProvider } from "./modules/platform";
-import { EnsureRequiredParams } from "./components/ensure-required-params";
-import log from "./lib/logger";
+import { EnsureRequiredParams } from "./modules/components/ensure-required-params";
+import log from "./modules/logger";
 
 export interface AppConfig {
   basePath?: string;

@@ -4,7 +4,7 @@ import { Modal, Navbar } from "src/modules/navigation";
 import { Tabs } from "@base-ui/react/tabs";
 import { HijriMonth } from "../hijri/hijri-month";
 import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
-import { ListInput } from "src/ui/list-input";
+import { ListInput } from "src/modules/components/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";

@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { Plus } from "lucide-react";
-import { Link } from "react-router";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";
 import { Modal } from "./modules/navigation/modal";
 import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
-import { useScreenSize } from "./ui/screen-size-wrapper";
+import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
 import { useListContext } from "./modules/task/list-context";
 import TaskFormDesktop from "./modules/task/task-form-desktop";
@@ -19,8 +18,6 @@ export default function TabLayout() {
     useTaskContext();
   const {
     formOpen: listFormOpen,
-    editingListId,
-    openListForm,
     closeListForm,
   } = useListContext();
   const location = useLocation();

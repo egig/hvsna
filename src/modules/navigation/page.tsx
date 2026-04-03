@@ -1,5 +1,5 @@
 import { PageTransition } from "./page-transition";
-import { useScreenSize } from "../../ui/screen-size-wrapper";
+import { useScreenSize } from "../components/screen-size-wrapper";
 
 type PageProps = {
   children: React.ReactNode;

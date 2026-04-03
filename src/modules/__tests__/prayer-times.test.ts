@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getPrayerTimes, type PrayerTimesParams } from "../prayer-times";
+import { getPrayerTimes, type PrayerTimesParams } from "../../modules/prayer-times";
 
 // Mock fetch globally
 const mockFetch = vi.fn();

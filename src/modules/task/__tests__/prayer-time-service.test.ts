@@ -11,11 +11,11 @@ import { HijriDate } from "../../calendar/hijri";
 import type { PrayerTime } from "../types";
 
 // Mock the prayer times API
-vi.mock("../../../lib/prayer-times", () => ({
+vi.mock("../../../modules/prayer-times", () => ({
   getPrayerTimes: vi.fn(),
 }));
 
-import { getPrayerTimes } from "../../../lib/prayer-times";
+import { getPrayerTimes } from "../../prayer-times";
 
 describe("Prayer Time Service", () => {
   beforeEach(() => {

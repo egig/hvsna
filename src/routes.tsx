@@ -13,12 +13,12 @@ import {
   SettingsModal,
   defaultSettingsSections,
   type SettingsSection,
-} from "./ui/settings-layout";
-import { useScreenSize } from "./ui/screen-size-wrapper";
+} from "./modules/components/settings-layout";
+import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
-import { NotFound } from "./ui/not-found";
+import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/common/today";
 import WipeData from "./modules/settings/wipe-data";
 import ListDetail from "./modules/task/list-detail";

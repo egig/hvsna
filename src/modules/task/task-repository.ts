@@ -1,4 +1,4 @@
-import { db } from "../../lib/pouchdb-singleton";
+import { db } from "../pouchdb-singleton";
 import { HijriDate } from "../calendar/hijri";
 import type {
   TaskCreateInput,
@@ -12,7 +12,7 @@ import type {
   ListQuery,
 } from "./types";
 import { Task, List as ListClass } from "./types";
-import { generatePrefixedUUID } from "../../lib/uuid";
+import { generatePrefixedUUID } from "../uuid";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 
 class PouchDBTaskDocument {

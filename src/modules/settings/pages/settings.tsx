@@ -13,7 +13,7 @@ import {
   ListIcon,
 } from "lucide-react";
 import { Page } from "../../navigation";
-import { MenuItem } from "../../../ui/menu-item";
+import { MenuItem } from "../../components/menu-item";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";

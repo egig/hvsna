@@ -1,7 +1,7 @@
 import { Content, Drawer } from "vaul";
 import { Dialog } from "@base-ui/react/dialog";
 import { type ReactNode } from "react";
-import { useScreenSize } from "../../ui/screen-size-wrapper";
+import { useScreenSize } from "../components/screen-size-wrapper";
 
 interface ModalProps {
   isOpen: boolean;

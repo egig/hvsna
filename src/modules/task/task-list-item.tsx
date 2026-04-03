@@ -3,7 +3,7 @@ import { motion, time } from "framer-motion";
 import { Square, CheckSquare2 } from "lucide-react";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useSnackbar } from "../../ui/snackbar-provider";
+import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useHijriDate } from "../calendar/hijri";

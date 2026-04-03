@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../use-cases/task";
+import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "./query-keys";
 
 export function useToday() {

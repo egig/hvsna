@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Clock, ChevronDown } from "lucide-react";
-import { Modal } from "../modules/navigation";
+import { Modal } from "../navigation";
 
 interface SimpleTimePickerProps {
   value: string;

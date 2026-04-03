@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Button } from "../modules/navigation";
+import { Button } from "../navigation";
 
 interface CardButtonProps {
   to?: string;

@@ -2,10 +2,10 @@ import { Capacitor } from "@capacitor/core";
 import { WebSessionRepository } from "./WebSessionRepository";
 import { CapacitorSessionRepository } from "./CapacitorSessionRepository";
 import { InMemoryTokenStore } from "./InMemoryTokenStore";
-import { AuthUseCases } from "../../use-cases/auth/AuthUseCases";
-import { api } from "../../lib/api/http-client";
+import { AuthUseCases } from "../../usecases/auth/AuthUseCases";
+import { api } from "../../modules/api/http-client";
 import type { ITokenStore } from "../../domain/auth/ITokenStore";
-import type { AuthUseCases as IAuthUseCases } from "../../use-cases/auth/AuthUseCases";
+import type { AuthUseCases as IAuthUseCases } from "../../usecases/auth/AuthUseCases";
 
 let authUseCasesInstance: IAuthUseCases | null = null;
 let tokenStoreInstance: ITokenStore | null = null;

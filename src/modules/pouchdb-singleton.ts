@@ -1,6 +1,5 @@
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
-import log from "./logger";
 
 PouchDB.plugin(PouchDBFind);
 

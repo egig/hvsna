@@ -1,6 +1,6 @@
 import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";
-import { ErrorDisplay } from "../../components/error-display";
+import { ErrorDisplay } from "../components/error-display";
 import { useToday } from "src/modules/common/use-today";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { LargeNavbar, Navbar } from "src/modules/navigation/navbar";
@@ -14,8 +14,8 @@ import { useSettings } from "../settings/useSettings";
 import {
   groupTasksByPrayerTimes,
   getPrayerTimesWithFallback,
-} from "../../lib/prayer-time-utils";
-import logger from "src/lib/logger";
+} from "../prayer-time-utils";
+import logger from "src/modules/logger";
 
 interface TodayTasksProps {
   tasks: Task[];

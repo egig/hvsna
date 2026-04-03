@@ -1,6 +1,6 @@
 import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";
-import { ErrorDisplay } from "../../components/error-display";
+import { ErrorDisplay } from "../components/error-display";
 import { useInbox } from "./use-inbox";
 import { LargeNavbar } from "../navigation/navbar";
 import type { Task } from "../task/types";

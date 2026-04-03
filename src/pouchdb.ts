@@ -4,7 +4,7 @@ import React, {
   type ReactNode,
   type Context,
 } from "react";
-import { db } from "./lib/pouchdb-singleton";
+import { db } from "./modules/pouchdb-singleton";
 
 export interface PouchDBContextType {
   db: PouchDB.Database;

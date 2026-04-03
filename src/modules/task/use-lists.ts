@@ -8,7 +8,7 @@ import type {
   ListUpdateInput,
   ListQuery,
 } from "./types";
-import log from "../../lib/logger";
+import log from "../logger";
 
 export function useLists() {
   const [initiated, setInitiated] = useState(false);

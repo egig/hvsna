@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { ChevronsUpDown } from "lucide-react";
 import { Page, Navbar } from "../../navigation";
-import { TimezonePickerModal } from "../../../ui/timezone-picker-modal";
+import { TimezonePickerModal } from "../../components/timezone-picker-modal";
 import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../../lib/timezones";
-import { ListInputSelect } from "../../../ui/list-input-select";
+import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../timezones";
+import { ListInputSelect } from "../../components/list-input-select";
 import { Capacitor } from "@capacitor/core";
 
 export default function GeneralSettings() {

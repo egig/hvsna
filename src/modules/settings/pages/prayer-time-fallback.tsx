@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Clock, Wifi, WifiOff, RefreshCw, AlertTriangle } from "lucide-react";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
-import { FormInput } from "../../../ui/form-input";
-import { SimpleTimePicker } from "../../../ui/simple-time-picker";
-import Block from "../../../ui/block";
-import BlockTitle from "../../../ui/block-title";
+import { FormInput } from "../../components/form-input";
+import { SimpleTimePicker } from "../../components/simple-time-picker";
+import Block from "../../components/block";
+import BlockTitle from "../../components/block-title";
 import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { getPrayerTimes } from "../../../lib/prayer-times";
+import { getPrayerTimes } from "../../prayer-times";
 import type { PrayerTimesFallback } from "../settings";
 
 const prayerTimeKeys: (keyof PrayerTimesFallback)[] = [

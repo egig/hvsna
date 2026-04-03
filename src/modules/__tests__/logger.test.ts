@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import log from "../logger";
-import { configureLogger, setOriginalMode } from "../logger";
+import log from "../../modules/logger";
+import { configureLogger, setOriginalMode } from "../../modules/logger";
 
 describe("Logger Configuration", () => {
   beforeEach(() => {

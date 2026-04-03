@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { XIcon, SmartphoneIcon } from "lucide-react";
-import { useSystemStore } from "../modules/system/systemStore";
+import { useSystemStore } from "../system/systemStore";
 
 export const useScreenSize = () => {
   const { isDesktop } = useSystemStore();

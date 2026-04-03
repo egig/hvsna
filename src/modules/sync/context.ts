@@ -20,7 +20,7 @@ import {
   deleteAllLocalDocs,
 } from "./utils/sync-state";
 import { getTokenStore } from "../../infra/auth/AuthServiceFactory";
-import log from "../../lib/logger";
+import log from "../logger";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {

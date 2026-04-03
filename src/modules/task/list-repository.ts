@@ -1,5 +1,5 @@
-import { generatePrefixedUUID } from "../../lib";
-import { db } from "../../lib/pouchdb-singleton";
+import { generatePrefixedUUID } from "..";
+import { db } from "../pouchdb-singleton";
 import {
   List,
   type ListCreateInput,

@@ -1,7 +1,7 @@
 import {
   getPrayerTimes,
   type PrayerTimesResponse,
-} from "../../lib/prayer-times";
+} from "../prayer-times";
 import { HijriDate } from "../calendar/hijri";
 import type { PrayerTime } from "./types";
 

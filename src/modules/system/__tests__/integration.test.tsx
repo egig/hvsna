@@ -1,7 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { SystemProvider, useSystemContext } from "../system-context";
-import { useScreenSize } from "../../../ui/screen-size-wrapper";
+import { useScreenSize } from "../../components/screen-size-wrapper";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 const wrapper = ({ children }: { children: ReactNode }) => (

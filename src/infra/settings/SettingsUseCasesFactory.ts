@@ -1,4 +1,4 @@
-import { SettingsUseCases } from "../../use-cases/settings/SettingsUseCases";
+import { SettingsUseCases } from "../../usecases/settings/SettingsUseCases";
 import { PouchDBSettingsRepository } from "./PouchDBSettingsRepository";
 import { createLocationProvider } from "./CapacitorLocationProvider";
 import { TimeAPITimezoneProvider } from "./TimeAPITimezoneProvider";

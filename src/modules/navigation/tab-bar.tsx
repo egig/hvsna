@@ -1,7 +1,7 @@
 import { useLocation } from "react-router";
 import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useScreenSize } from "../../ui/screen-size-wrapper";
+import { useScreenSize } from "../components/screen-size-wrapper";
 import {
   TbCalendar,
   TbCalendarFilled,

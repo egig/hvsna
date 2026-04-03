@@ -1,4 +1,4 @@
-import { Button } from "src/ui/button";
+import { Button } from "src/modules/components/button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
 interface ListFormData {

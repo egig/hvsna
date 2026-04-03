@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
-import Block from "src/ui/block";
+import Block from "src/modules/components/block";
 import { useAuth } from "../use-auth";
 import { getAuthUseCases } from "../../../infra/auth/AuthServiceFactory";
 

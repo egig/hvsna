@@ -3,7 +3,7 @@ import { Navbar } from "../navigation/navbar";
 import { Check } from "lucide-react";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
-import { ListInputSelect } from "../../ui/list-input-select";
+import { ListInputSelect } from "../components/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { TaskStatus } from "./types";
 

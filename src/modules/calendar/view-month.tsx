@@ -5,7 +5,7 @@ import {
   GREGORIAN_MONTH_NAMES_EN,
   HIJRI_MONTH_NAMES_EN,
 } from "src/modules/calendar/hijri-months";
-import PrevNext from "src/ui/prev-next";
+import PrevNext from "src/modules/components/prev-next";
 
 export default function MonthViewPage() {
   const params = useParams();

@@ -9,11 +9,11 @@ import type {
   TaskUpdateInput,
 } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
-import { useSnackbar } from "../../ui/snackbar-provider";
+import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useLists } from "./use-lists";
-import logger from "../../lib/logger";
+import logger from "../logger";
 
 export interface TaskScheduleAt {
   dateHijri: HijriDate | null;

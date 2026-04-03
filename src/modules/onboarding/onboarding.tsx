@@ -8,13 +8,13 @@ import {
   Bell,
 } from "lucide-react";
 import { Page, Navbar } from "../navigation";
-import { TimezonePickerModal } from "../../ui/timezone-picker-modal";
+import { TimezonePickerModal } from "../components/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { createNotificationsProvider } from "../../infra";
 import type { Coordinate } from "src/modules/settings/settings";
 import type { Language } from "src/modules/i18n/language";
-import logger from "src/lib/logger";
+import logger from "src/modules/logger";
 
 export default function Onboarding() {
   const { t, language, setLanguage } = useLanguageContext();

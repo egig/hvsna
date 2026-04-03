@@ -1,6 +1,6 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
-import { Button } from "../modules/navigation";
+import { Button } from "../navigation";
 
 interface MenuItemProps {
   title: string;

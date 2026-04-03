@@ -5,7 +5,7 @@ import {
   HIJRI_MONTH_NAMES_EN,
   HIJRI_MONTH_NAMES_EN_SHORT,
 } from "src/modules/calendar/hijri-months";
-import MonthViewSmall from "../modules/calendar/month-view-small";
+import MonthViewSmall from "../calendar/month-view-small";
 
 export default function YearView({ year }: { year: number }) {
   return (

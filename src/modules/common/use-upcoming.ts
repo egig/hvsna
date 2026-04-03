@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../use-cases/task";
+import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "./query-keys";
 import type { Task } from "src/modules/task/types";
 

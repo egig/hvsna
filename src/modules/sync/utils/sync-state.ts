@@ -1,5 +1,5 @@
 import PouchDB from "pouchdb";
-import log from "src/lib/logger";
+import log from "src/modules/logger";
 
 export interface SyncStateDocument {
   _id: string;

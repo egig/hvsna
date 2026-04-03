@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Page } from "../navigation";
 import { Navbar } from "../navigation";
-import Block from "../../ui/block";
+import Block from "../components/block";
 import { RefreshCw, CheckCircle, AlertCircle, Clock, Info } from "lucide-react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useSync } from "src/modules/sync/context";

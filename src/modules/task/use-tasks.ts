@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../use-cases/task";
+import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../common/query-keys";
 import type { Task, TaskStatus, TaskQuery } from "./types";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
-import log from "../../lib/logger";
+import log from "../logger";
 
 export function useTasks() {
   const [initiated, setInitiated] = useState(false);

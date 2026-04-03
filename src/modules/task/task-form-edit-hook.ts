@@ -8,7 +8,7 @@ import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
 import { useLists } from "./use-lists";
-import logger from "src/lib/logger";
+import logger from "src/modules/logger";
 
 export interface UseTaskFormReturn {
   task: Task | null;

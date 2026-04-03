@@ -8,12 +8,12 @@ import React, {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../use-cases/task";
+import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../common/query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings/useSettings";
-import logger from "../../lib/logger";
+import logger from "../logger";
 
 interface TaskContextType {
   // Task data

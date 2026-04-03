@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search } from "lucide-react";
-import { Modal } from "../modules/navigation";
-import { ALL_TIMEZONES } from "../lib/timezones";
+import { Modal } from "../navigation";
+import { ALL_TIMEZONES } from "../timezones";
 
 interface TimezonePickerModalProps {
   isOpen: boolean;

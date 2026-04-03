@@ -3,4 +3,4 @@ export { useSystemStore } from "./systemStore";
 export {
   useScreenSize,
   ScreenSizeProvider,
-} from "../../ui/screen-size-wrapper";
+} from "../components/screen-size-wrapper";

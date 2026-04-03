@@ -11,7 +11,7 @@ import type {
   ListQuery,
 } from "../../modules/task/types";
 import { Task, List } from "../../modules/task/types";
-import { generatePrefixedUUID } from "../../lib/uuid";
+import { generatePrefixedUUID } from "../../modules/uuid";
 import {
   parseHijriDateString,
   parseTimeString,

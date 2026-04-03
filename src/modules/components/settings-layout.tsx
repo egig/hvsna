@@ -10,9 +10,9 @@ import {
   Calendar,
   Clock,
 } from "lucide-react";
-import { Modal } from "../modules/navigation/modal";
-import { useLanguageContext } from "../modules/i18n/LanguageContext";
-import { useAuth } from "../modules/auth/use-auth";
+import { Modal } from "../navigation/modal";
+import { useLanguageContext } from "../i18n/LanguageContext";
+import { useAuth } from "../auth/use-auth";
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Link, useLocation, useNavigate } from "react-router";

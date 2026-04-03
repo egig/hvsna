@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useHijriDate } from "./hijri/use-hijri-date";
-import log from "../../lib/logger";
+import log from "../logger";
 
 export default function HijriDebug() {
   const { getToday } = useHijriDate();

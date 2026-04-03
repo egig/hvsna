@@ -12,7 +12,7 @@ import { useLists } from "./use-lists";
 import { useListContext } from "./list-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { List, ListCreateInput, ListUpdateInput } from "./types";
-import { MenuItem } from "../../ui/menu-item";
+import { MenuItem } from "../components/menu-item";
 
 export default function Browse() {
   const { t } = useLanguageContext();

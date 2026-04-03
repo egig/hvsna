@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router";
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { HijriDate } from "./hijri/hijri-date";
 import PrevNext from "../components/prev-next";
-import YearView from "src/ui/year-view";
+import YearView from "src/modules/components/year-view";
 import { GREGORIAN_MONTH_NAMES_EN } from "src/modules/calendar/hijri-months";
 
 export default function YearPage() {
