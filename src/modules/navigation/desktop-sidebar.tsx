@@ -77,9 +77,10 @@ export function DesktopSidebar({
   // Helper to get tasks for a list (filters open tasks and groups by list ID)
   const getListTasks = (listId: string) => {
     // Filter for open/pending tasks (status 0) that belong to the specified list
-    return tasks.filter(task => 
-      task.status === 0 && // Only open/pending tasks
-      task.listId === listId // Tasks belonging to this list
+    return tasks.filter(
+      (task) =>
+        task.status === 0 && // Only open/pending tasks
+        task.listId === listId, // Tasks belonging to this list
     );
   };
 
@@ -155,7 +156,7 @@ export function DesktopSidebar({
                 </div>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-900">
-                    {user?.firstName || user?.email?.split('@')[0]}
+                    {user?.firstName || user?.email?.split("@")[0]}
                   </span>
                   <button
                     onClick={logout}
@@ -245,7 +246,9 @@ export function DesktopSidebar({
             </div>
             <div className="space-y-1">
               {loading ? (
-                <div className="text-xs text-gray-400">{t("loading") || "Loading..."}</div>
+                <div className="text-xs text-gray-400">
+                  {t("loading") || "Loading..."}
+                </div>
               ) : lists.length > 0 ? (
                 lists.slice(0, 5).map((list) => {
                   const isActive = location.pathname === `/list/${list.id}`;
@@ -291,7 +294,9 @@ export function DesktopSidebar({
                   );
                 })
               ) : (
-                <div className="text-xs text-gray-400">{t("no_lists_yet") || "No lists yet"}</div>
+                <div className="text-xs text-gray-400">
+                  {t("no_lists_yet") || "No lists yet"}
+                </div>
               )}
             </div>
             {lists.length > 5 && (

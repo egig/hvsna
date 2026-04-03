@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { taskRepository } from "./task-repository";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../use-cases/task";
 import { queryKeys } from "../common/query-keys";
 import type { Task } from "./types";
 import log from "../../lib/logger";
@@ -18,11 +19,13 @@ export function useListTasks({
 }: UseListTasksOptions) {
   const [initiated, setInitiated] = useState(false);
   const queryClient = useQueryClient();
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
 
   // React Query for list tasks
   const listTasksQuery = useQuery({
     queryKey: queryKeys.listTasks(listId),
-    queryFn: () => taskRepository.findTasksByListId(listId, 0, limit),
+    queryFn: () => taskUseCases.getTasksByListId(listId),
     staleTime: 1000 * 60 * 2, // 2 minutes
     enabled: enabled && Boolean(listId && listId.trim() !== ""),
   });
@@ -46,11 +49,7 @@ export function useListTasks({
     }
 
     try {
-      const newTasks = await taskRepository.findTasksByListId(
-        listId,
-        currentLength,
-        limit,
-      );
+      const newTasks = await taskUseCases.getTasksByListId(listId);
 
       // Update query data with new tasks
       queryClient.setQueryData(queryKeys.listTasks(listId), [

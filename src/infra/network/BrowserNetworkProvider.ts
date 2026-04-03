@@ -1,4 +1,8 @@
-import type { INetworkProvider, NetworkStatus, NetworkListener } from "../../domain/network/INetworkProvider";
+import type {
+  INetworkProvider,
+  NetworkStatus,
+  NetworkListener,
+} from "../../domain/network/INetworkProvider";
 
 export class BrowserNetworkProvider implements INetworkProvider {
   async getStatus(): Promise<NetworkStatus> {
@@ -8,7 +12,9 @@ export class BrowserNetworkProvider implements INetworkProvider {
     };
   }
 
-  async addListener(callback: (status: NetworkStatus) => void): Promise<NetworkListener> {
+  async addListener(
+    callback: (status: NetworkStatus) => void,
+  ): Promise<NetworkListener> {
     const handleOnline = () => {
       callback({
         connected: true,

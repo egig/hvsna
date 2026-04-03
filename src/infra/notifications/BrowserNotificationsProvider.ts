@@ -1,8 +1,8 @@
-import type { 
-  INotificationsProvider, 
-  TaskReminderOptions, 
-  ReminderResult, 
-  NotificationPermissionResult 
+import type {
+  INotificationsProvider,
+  TaskReminderOptions,
+  ReminderResult,
+  NotificationPermissionResult,
 } from "../../domain/notifications/INotificationsProvider";
 import type { PermissionState } from "../../domain/permissions/IPermissionsProvider";
 

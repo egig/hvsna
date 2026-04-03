@@ -22,14 +22,11 @@ export default function Profile() {
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {user.firstName && user.lastName 
+                  {user.firstName && user.lastName
                     ? `${user.firstName} ${user.lastName}`
-                    : user.email?.split('@')[0] || t("user")
-                  }
+                    : user.email?.split("@")[0] || t("user")}
                 </h2>
-                <p className="text-sm text-gray-500">
-                  {user.email}
-                </p>
+                <p className="text-sm text-gray-500">{user.email}</p>
               </div>
             </div>
 
@@ -37,9 +34,7 @@ export default function Profile() {
             <div className="space-y-2 pt-2 border-t border-gray-100">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600">
-                  {user.email}
-                </span>
+                <span className="text-sm text-gray-600">{user.email}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <User className="w-4 h-4 text-gray-400" />
@@ -51,7 +46,8 @@ export default function Profile() {
                 <div className="flex items-center space-x-3">
                   <User className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    Member since: {new Date(user.createdAt).toLocaleDateString()}
+                    Member since:{" "}
+                    {new Date(user.createdAt).toLocaleDateString()}
                   </span>
                 </div>
               )}

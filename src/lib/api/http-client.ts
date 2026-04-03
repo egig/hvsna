@@ -1,6 +1,13 @@
-import axios from 'axios';
-import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { getTokenStore, getAuthUseCases } from '../../infra/auth/AuthServiceFactory';
+import axios from "axios";
+import type {
+  AxiosInstance,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from "axios";
+import {
+  getTokenStore,
+  getAuthUseCases,
+} from "../../infra/auth/AuthServiceFactory";
 
 export interface ApiError {
   message: string;
@@ -13,7 +20,7 @@ export const httpClient: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -28,7 +35,7 @@ httpClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor to handle token refresh
@@ -37,11 +44,14 @@ httpClient.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
     const responseData = error.response?.data as any;
 
     // Handle TOKEN_EXPIRED errors
-    const isTokenExpired = error.response?.status === 401 && responseData?.code === 'TOKEN_EXPIRED';
+    const isTokenExpired =
+      error.response?.status === 401 && responseData?.code === "TOKEN_EXPIRED";
     if (isTokenExpired && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true; // Mark that we've tried to refresh
 
@@ -59,7 +69,7 @@ httpClient.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed, token is invalid
         getTokenStore().clearAccessToken();
-        
+
         // Don't redirect here - let the auth context handle it
         // Just propagate the error so components can handle it
         return Promise.reject(refreshError);
@@ -69,31 +79,36 @@ httpClient.interceptors.response.use(
     // Handle 403 Forbidden errors - don't retry, just propagate
     if (error.response?.status === 403) {
       const apiError: ApiError = {
-        message: 'Access forbidden',
+        message: "Access forbidden",
         status: 403,
-        code: 'FORBIDDEN',
+        code: "FORBIDDEN",
       };
       return Promise.reject(apiError);
     }
 
     // Handle other errors
     const apiError: ApiError = {
-      message: responseData?.message || error.message || 'Request failed',
+      message: responseData?.message || error.message || "Request failed",
       status: error.response?.status,
       code: error.code,
     };
 
     return Promise.reject(apiError);
-  }
+  },
 );
 
 // Helper functions for common API calls
 export const api = {
-  get: <T = any>(url: string, config?: any) => httpClient.get<T>(url, config).then(res => res.data),
-  post: <T = any>(url: string, data?: any, config?: any) => httpClient.post<T>(url, data, config).then(res => res.data),
-  put: <T = any>(url: string, data?: any, config?: any) => httpClient.put<T>(url, data, config).then(res => res.data),
-  delete: <T = any>(url: string, config?: any) => httpClient.delete<T>(url, config).then(res => res.data),
-  patch: <T = any>(url: string, data?: any, config?: any) => httpClient.patch<T>(url, data, config).then(res => res.data),
+  get: <T = any>(url: string, config?: any) =>
+    httpClient.get<T>(url, config).then((res) => res.data),
+  post: <T = any>(url: string, data?: any, config?: any) =>
+    httpClient.post<T>(url, data, config).then((res) => res.data),
+  put: <T = any>(url: string, data?: any, config?: any) =>
+    httpClient.put<T>(url, data, config).then((res) => res.data),
+  delete: <T = any>(url: string, config?: any) =>
+    httpClient.delete<T>(url, config).then((res) => res.data),
+  patch: <T = any>(url: string, data?: any, config?: any) =>
+    httpClient.patch<T>(url, data, config).then((res) => res.data),
 };
 
 export default httpClient;

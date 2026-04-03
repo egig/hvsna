@@ -23,7 +23,12 @@ export class PouchDBSettingsRepository implements ISettingsRepository {
       await this.db.put({ ...existing, settings, updated_at: now });
     } catch (err: any) {
       if (err.status === 404) {
-        await this.db.put({ _id: SETTINGS_DOC_ID, settings, created_at: now, updated_at: now });
+        await this.db.put({
+          _id: SETTINGS_DOC_ID,
+          settings,
+          created_at: now,
+          updated_at: now,
+        });
       } else {
         throw err;
       }

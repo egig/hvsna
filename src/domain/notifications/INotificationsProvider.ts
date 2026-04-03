@@ -23,5 +23,8 @@ export interface INotificationsProvider {
   requestPermissions(): Promise<NotificationPermissionResult>;
   scheduleTaskReminder(options: TaskReminderOptions): Promise<ReminderResult>;
   cancelTaskReminder(taskId: string): Promise<void>;
-  updateTaskReminder(taskId: string, options: TaskReminderOptions): Promise<void>;
+  updateTaskReminder(
+    taskId: string,
+    options: TaskReminderOptions,
+  ): Promise<void>;
 }

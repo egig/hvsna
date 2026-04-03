@@ -25,7 +25,7 @@ export default function Onboarding() {
   const [selectedTimezone, setSelectedTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone,
   );
-  
+
   const notificationsProvider = createNotificationsProvider();
 
   const handleLanguageSelection = async (selectedLanguage: Language) => {

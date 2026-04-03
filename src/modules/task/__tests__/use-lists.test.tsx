@@ -114,7 +114,10 @@ describe("useLists", () => {
     const deleteResult = await result.current.deleteList("list_test123");
 
     expect(deleteResult).toBe(true);
-    expect(listRepository.delete).toHaveBeenCalledWith("list_test123", undefined);
+    expect(listRepository.delete).toHaveBeenCalledWith(
+      "list_test123",
+      undefined,
+    );
   });
 
   it("should handle search filter", async () => {

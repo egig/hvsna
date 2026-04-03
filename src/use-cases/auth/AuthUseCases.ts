@@ -1,7 +1,10 @@
 import type { ISessionRepository } from "../../domain/auth/ISessionRepository";
 import type { ITokenStore } from "../../domain/auth/ITokenStore";
 import type { Session } from "../../domain/auth/Session";
-import { NoSessionError, SessionExpiredError } from "../../domain/auth/AuthErrors";
+import {
+  NoSessionError,
+  SessionExpiredError,
+} from "../../domain/auth/AuthErrors";
 import type { User } from "../../modules/auth/user";
 
 export interface LoginRequest {
@@ -38,7 +41,10 @@ export class AuthUseCases {
   ) {}
 
   async login(credentials: LoginRequest): Promise<User> {
-    const response = await this.http.post<BaseResponse<Session>>("/login", credentials);
+    const response = await this.http.post<BaseResponse<Session>>(
+      "/login",
+      credentials,
+    );
     this.tokenStore.setAccessToken(response.data.access_token);
     await this.sessionRepo.saveRefreshToken(response.data.refresh_token);
     const userResponse = await this.http.get<BaseResponse<User>>("/me");
@@ -46,7 +52,10 @@ export class AuthUseCases {
   }
 
   async register(userData: RegisterRequest): Promise<User> {
-    const response = await this.http.post<BaseResponse<Session>>("/register", userData);
+    const response = await this.http.post<BaseResponse<Session>>(
+      "/register",
+      userData,
+    );
     this.tokenStore.setAccessToken(response.data.access_token);
     await this.sessionRepo.saveRefreshToken(response.data.refresh_token);
     const userResponse = await this.http.get<BaseResponse<User>>("/me");
@@ -78,9 +87,12 @@ export class AuthUseCases {
     const refreshToken = await this.sessionRepo.getRefreshToken();
     if (!refreshToken) throw new NoSessionError();
     try {
-      const response = await this.http.post<BaseResponse<Session>>("/auth/refresh", {
-        refresh_token: refreshToken,
-      });
+      const response = await this.http.post<BaseResponse<Session>>(
+        "/auth/refresh",
+        {
+          refresh_token: refreshToken,
+        },
+      );
       this.tokenStore.setAccessToken(response.data.access_token);
       await this.sessionRepo.saveRefreshToken(response.data.refresh_token);
       return response.data;
@@ -119,10 +131,14 @@ export class AuthUseCases {
 
   validatePassword(password: string): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    if (password.length < 8) errors.push("Password must be at least 8 characters long");
-    if (!/[A-Z]/.test(password)) errors.push("Password must contain at least one uppercase letter");
-    if (!/[a-z]/.test(password)) errors.push("Password must contain at least one lowercase letter");
-    if (!/\d/.test(password)) errors.push("Password must contain at least one number");
+    if (password.length < 8)
+      errors.push("Password must be at least 8 characters long");
+    if (!/[A-Z]/.test(password))
+      errors.push("Password must contain at least one uppercase letter");
+    if (!/[a-z]/.test(password))
+      errors.push("Password must contain at least one lowercase letter");
+    if (!/\d/.test(password))
+      errors.push("Password must contain at least one number");
     return { isValid: errors.length === 0, errors };
   }
 }

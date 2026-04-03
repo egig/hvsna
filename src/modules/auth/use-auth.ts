@@ -3,16 +3,16 @@ import { useAuthContext } from "./auth-context";
 import { getAuthUseCases } from "../../infra/auth/AuthServiceFactory";
 
 export const useAuth = () => {
-  const { 
-    user, 
-    loading, 
-    error, 
-    fetchUser, 
+  const {
+    user,
+    loading,
+    error,
+    fetchUser,
     clearError,
     login,
     register,
     logout,
-    setUser
+    setUser,
   } = useAuthContext();
 
   // Auto-fetch user on mount if authenticated but user data not loaded
@@ -21,7 +21,7 @@ export const useAuth = () => {
       try {
         // Check if user has valid tokens (is authenticated)
         const hasTokens = await getAuthUseCases().isAuthenticated();
-        
+
         // If authenticated but no user data, fetch user details
         if (hasTokens && !user && !loading) {
           await fetchUser();

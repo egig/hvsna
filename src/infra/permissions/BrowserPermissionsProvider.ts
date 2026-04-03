@@ -1,4 +1,8 @@
-import type { IPermissionsProvider, PermissionResult, PermissionState } from "../../domain/permissions/IPermissionsProvider";
+import type {
+  IPermissionsProvider,
+  PermissionResult,
+  PermissionState,
+} from "../../domain/permissions/IPermissionsProvider";
 
 export class BrowserPermissionsProvider implements IPermissionsProvider {
   async checkLocationPermission(): Promise<PermissionResult> {
@@ -34,9 +38,7 @@ export class BrowserPermissionsProvider implements IPermissionsProvider {
     };
   }
 
-  private mapBrowserPermissionState(
-    state: PermissionState,
-  ): PermissionState {
+  private mapBrowserPermissionState(state: PermissionState): PermissionState {
     switch (state) {
       case "granted":
         return "granted";

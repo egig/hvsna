@@ -1,5 +1,9 @@
 import { Network } from "@capacitor/network";
-import type { INetworkProvider, NetworkStatus, NetworkListener } from "../../domain/network/INetworkProvider";
+import type {
+  INetworkProvider,
+  NetworkStatus,
+  NetworkListener,
+} from "../../domain/network/INetworkProvider";
 
 export class CapacitorNetworkProvider implements INetworkProvider {
   async getStatus(): Promise<NetworkStatus> {
@@ -18,7 +22,9 @@ export class CapacitorNetworkProvider implements INetworkProvider {
     }
   }
 
-  async addListener(callback: (status: NetworkStatus) => void): Promise<NetworkListener> {
+  async addListener(
+    callback: (status: NetworkStatus) => void,
+  ): Promise<NetworkListener> {
     const handle = await Network.addListener(
       "networkStatusChange",
       (status) => {

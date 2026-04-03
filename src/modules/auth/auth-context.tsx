@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useCallback, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useEffect,
+} from "react";
 import type { ReactNode } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getAuthUseCases } from "../../infra/auth/AuthServiceFactory";
@@ -51,7 +56,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
       await authService.login({ email, password });
       const user = await authService.getCurrentUser();
       return user;
@@ -66,11 +77,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Register mutation
   const registerMutation = useMutation({
-    mutationFn: async (userData: { 
-      email: string; 
-      password: string; 
-      firstName?: string; 
-      lastName?: string; 
+    mutationFn: async (userData: {
+      email: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
     }) => {
       await authService.register(userData);
       const user = await authService.getCurrentUser();
@@ -101,20 +112,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     },
   });
 
-  const fetchUser = useCallback(
-    async (): Promise<void> => {
-      try {
-        const user = await authService.getCurrentUser();
-        queryClient.setQueryData(["user"], user);
-      } catch (error) {
-        const errorMessage = error && typeof error === 'object' && 'message' in error 
-          ? (error as any).message 
+  const fetchUser = useCallback(async (): Promise<void> => {
+    try {
+      const user = await authService.getCurrentUser();
+      queryClient.setQueryData(["user"], user);
+    } catch (error) {
+      const errorMessage =
+        error && typeof error === "object" && "message" in error
+          ? (error as any).message
           : "Failed to fetch user";
-        throw new Error(errorMessage);
-      }
-    },
-    [queryClient],
-  );
+      throw new Error(errorMessage);
+    }
+  }, [queryClient]);
 
   const setUser = useCallback(
     (user: User | null) => {
@@ -137,33 +146,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (email: string, password: string) => {
       return loginMutation.mutateAsync({ email, password });
     },
-    [loginMutation]
+    [loginMutation],
   );
 
   const register = useCallback(
-    async (userData: { 
-      email: string; 
-      password: string; 
-      firstName?: string; 
-      lastName?: string; 
+    async (userData: {
+      email: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
     }) => {
       return registerMutation.mutateAsync(userData);
     },
-    [registerMutation]
+    [registerMutation],
   );
 
-  const logout = useCallback(
-    async () => {
-      return logoutMutation.mutateAsync();
-    },
-    [logoutMutation]
-  );
+  const logout = useCallback(async () => {
+    return logoutMutation.mutateAsync();
+  }, [logoutMutation]);
 
   const contextValue: AuthContextType = {
     user: userQuery.data || null,
-    loading: userQuery.isLoading || loginMutation.isPending || registerMutation.isPending || logoutMutation.isPending,
-    error: userQuery.error 
-      ? (userQuery.error as Error).message 
+    loading:
+      userQuery.isLoading ||
+      loginMutation.isPending ||
+      registerMutation.isPending ||
+      logoutMutation.isPending,
+    error: userQuery.error
+      ? (userQuery.error as Error).message
       : loginMutation.error
         ? (loginMutation.error as Error).message
         : registerMutation.error

@@ -32,15 +32,21 @@ export default function Settings() {
   return (
     <Page>
       <Navbar title={t("settings")} showBackButton={true} />
-      {isAuthenticated && <MenuItem title={t("account")} icon={User} to="/profile" />}
-      {!isAuthenticated && <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />}
+      {isAuthenticated && (
+        <MenuItem title={t("account")} icon={User} to="/profile" />
+      )}
+      {!isAuthenticated && (
+        <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
+      )}
       <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
       <MenuItem
         title={t("prayer_time_fallback") || "Prayer Time Fallback"}
         icon={Clock}
         to="/settings/prayer-time-fallback"
       />
-      {isAuthenticated && <MenuItem title={t("sync")} icon={RefreshCw} to="/sync" />}
+      {isAuthenticated && (
+        <MenuItem title={t("sync")} icon={RefreshCw} to="/sync" />
+      )}
       <MenuItem title={t("reset_device_data")} icon={Trash} to="/wipe-local" />
       <MenuItem title={t("about")} icon={Info} to="/about" />
       {isAuthenticated && (

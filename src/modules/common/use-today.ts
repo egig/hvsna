@@ -1,13 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { taskRepository } from "../task/task-repository";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../use-cases/task";
 import { queryKeys } from "./query-keys";
 
 export function useToday() {
   const { dayNames, hijriMonthNames, gregorianMonthNames } =
     useDateTranslationHelper();
   const { getToday, initiated: hijriCalInititated } = useHijriDate();
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
 
   const today = getToday();
   const gregorianDate = today.toDate();
@@ -15,14 +18,14 @@ export function useToday() {
 
   const todayTasksQuery = useQuery({
     queryKey: queryKeys.todayTasks(todayString),
-    queryFn: () => taskRepository.findTasksBefore(today.endOfDay()),
+    queryFn: () => taskUseCases.getTodayTasks(today),
     enabled: hijriCalInititated,
   });
 
   // React Query for today's completed tasks
   const todayCompletedTasksQuery = useQuery({
     queryKey: queryKeys.todayCompletedTasks(todayString),
-    queryFn: () => taskRepository.findTodayCompletedTasks(today),
+    queryFn: () => taskUseCases.findTodayCompletedTasks(today),
     enabled: hijriCalInititated,
   });
 

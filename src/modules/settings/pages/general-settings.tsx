@@ -44,7 +44,9 @@ export default function GeneralSettings() {
   const handleGetLocation = async () => {
     const coordinate = await getCurrentLocation();
     if (coordinate) {
-      const resolveType = Capacitor.isNativePlatform() ? "capacitor_native" : "auto";
+      const resolveType = Capacitor.isNativePlatform()
+        ? "capacitor_native"
+        : "auto";
       await updateLocation(coordinate, resolveType);
       await updateTimezoneFromLocation();
     }

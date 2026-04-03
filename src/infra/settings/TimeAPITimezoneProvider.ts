@@ -29,7 +29,10 @@ const LONGITUDE_TO_TIMEZONE: Record<string, string> = {
 };
 
 export class TimeAPITimezoneProvider implements ITimezoneProvider {
-  async getTimezone(latitude: number, longitude: number): Promise<string | null> {
+  async getTimezone(
+    latitude: number,
+    longitude: number,
+  ): Promise<string | null> {
     try {
       const response = await fetch(
         `https://timeapi.io/api/Time/current/coordinate?latitude=${latitude}&longitude=${longitude}`,

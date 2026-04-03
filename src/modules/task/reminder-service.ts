@@ -1,8 +1,5 @@
-import {
-  createNotificationsProvider,
-} from "../../infra";
+import { createNotificationsProvider } from "../../infra";
 import type { TaskReminderOptions } from "../../domain/notifications/INotificationsProvider";
-import { taskRepository } from "./task-repository";
 import { Task, type Task as TaskType } from "./types";
 import logger from "../../lib/logger";
 
@@ -11,7 +8,7 @@ export class ReminderService {
    * Default reminder minutes before due time
    */
   private static readonly DEFAULT_REMINDER_MINUTES = 15;
-  
+
   private static get notificationsProvider() {
     return createNotificationsProvider();
   }
@@ -109,39 +106,6 @@ export class ReminderService {
       .map((task) => this.scheduleTaskReminders(task, reminderMinutes));
 
     await Promise.allSettled(promises);
-  }
-
-  /**
-   * Get tasks that need reminders scheduled
-   */
-  static async getTasksNeedingReminders(): Promise<TaskType[]> {
-    try {
-      // Get all pending tasks with scheduled times
-      const now = Date.now();
-      const tasks = await taskRepository.find({
-        status: 0, // pending
-        atEpochMillis: { $gte: now }, // only future or current tasks
-      });
-
-      return tasks.filter((task) => task.atEpochMillis && task.status !== 1);
-    } catch (error) {
-      logger.error("Failed to get tasks needing reminders:", error);
-      return [];
-    }
-  }
-
-  /**
-   * Reschedule all pending task reminders (useful for app startup)
-   */
-  static async rescheduleAllPendingReminders(
-    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES,
-  ): Promise<void> {
-    try {
-      const tasks = await this.getTasksNeedingReminders();
-      await this.scheduleMultipleTaskReminders(tasks, reminderMinutes);
-    } catch (error) {
-      logger.error("Failed to reschedule all pending reminders:", error);
-    }
   }
 
   /**

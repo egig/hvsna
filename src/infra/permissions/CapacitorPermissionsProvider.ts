@@ -1,5 +1,9 @@
 import { Geolocation, type PermissionStatus } from "@capacitor/geolocation";
-import type { IPermissionsProvider, PermissionResult, PermissionState } from "../../domain/permissions/IPermissionsProvider";
+import type {
+  IPermissionsProvider,
+  PermissionResult,
+  PermissionState,
+} from "../../domain/permissions/IPermissionsProvider";
 
 export class CapacitorPermissionsProvider implements IPermissionsProvider {
   async checkLocationPermission(): Promise<PermissionResult> {

@@ -8,7 +8,6 @@ import { getAuthUseCases } from "../../../infra/auth/AuthServiceFactory";
 
 const authService = getAuthUseCases();
 
-
 export default function SignInPage() {
   const navigate = useNavigate();
   const { login, loading, isAuthenticated, error } = useAuth();
@@ -26,7 +25,7 @@ export default function SignInPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear validation errors when user starts typing
     if (validationErrors.length > 0) {
       setValidationErrors([]);
@@ -52,7 +51,7 @@ export default function SignInPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -73,7 +72,9 @@ export default function SignInPage() {
         <div className="mx-auto w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl border border-primary-100 p-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-primary-900 mb-2">Welcome Back</h1>
+              <h1 className="text-3xl font-bold text-primary-900 mb-2">
+                Welcome Back
+              </h1>
               <p className="text-primary-600">Sign in to your account</p>
             </div>
 
@@ -81,7 +82,9 @@ export default function SignInPage() {
             {validationErrors.length > 0 && (
               <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg">
                 {validationErrors.map((error, index) => (
-                  <div key={index} className="text-danger-700 text-sm">{error}</div>
+                  <div key={index} className="text-danger-700 text-sm">
+                    {error}
+                  </div>
                 ))}
               </div>
             )}
@@ -95,7 +98,10 @@ export default function SignInPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-primary-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-primary-700 mb-2"
+                >
                   Email
                 </label>
                 <input
@@ -112,7 +118,10 @@ export default function SignInPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-primary-700 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -140,7 +149,10 @@ export default function SignInPage() {
             <div className="mt-8 text-center">
               <p className="text-primary-600">
                 Don't have an account?{" "}
-                <Link to="/signup" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                <Link
+                  to="/signup"
+                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                >
                   Sign up
                 </Link>
               </p>

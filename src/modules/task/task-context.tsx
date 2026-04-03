@@ -7,7 +7,8 @@ import React, {
 } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
-import { taskRepository } from "./task-repository";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../use-cases/task";
 import { queryKeys } from "../common/query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
@@ -48,6 +49,8 @@ export const TaskProvider: React.FC<{
   const queryClient = useQueryClient();
   const { getToday } = useHijriDate();
   const { settings } = useSettings();
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
   const [task, setTask] = useState<Task | null>(null);
 
   // Local form state
@@ -59,13 +62,13 @@ export const TaskProvider: React.FC<{
 
   useEffect(() => {
     if (taskId) {
-      taskRepository.findById(taskId).then((fetchedTask) => {
+      taskUseCases.getTaskById(taskId).then((fetchedTask: Task | null) => {
         if (fetchedTask) {
           setTask(fetchedTask);
         }
       });
     }
-  }, [taskId]);
+  }, [taskId, taskUseCases]);
 
   const invalidateTaskQueries = () => {
     const today = getToday();
@@ -104,17 +107,17 @@ export const TaskProvider: React.FC<{
     input: TaskUpdateInput,
   ): Promise<Task> => {
     // Get the current task before updating to check status change
-    const currentTask = await taskRepository.findById(id);
+    const currentTask = await taskUseCases.getTaskById(id);
 
     // Update the task
-    const updatedTask = await taskRepository.update(id, input);
+    const updatedTask = await taskUseCases.updateTask(id, input);
     return updatedTask;
   };
 
   // React Query mutation for completing tasks
   const completeTaskMutation = useMutation({
-    mutationFn: (id: string) => taskRepository.completeTask(id),
-    onSuccess: async (updatedTask, id) => {
+    mutationFn: (id: string) => taskUseCases.completeTask(id),
+    onSuccess: async (updatedTask: Task, id) => {
       // Cancel reminders when task is completed
       if (settings.notifications) {
         try {
@@ -126,7 +129,7 @@ export const TaskProvider: React.FC<{
 
       invalidateTaskQueries();
       try {
-        const currentTask = await taskRepository.findById(id);
+        const currentTask = await taskUseCases.getTaskById(id);
         if (currentTask?.status === 1) {
           return; // Already completed
         }
@@ -142,8 +145,8 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for reopening tasks
   const reopenTaskMutation = useMutation({
-    mutationFn: (id: string) => taskRepository.reopenTask(id),
-    onSuccess: async (updatedTask, id) => {
+    mutationFn: (id: string) => taskUseCases.uncompleteTask(id),
+    onSuccess: async (updatedTask: Task, id) => {
       // Reschedule reminders when task is reopened
       if (settings.notifications && updatedTask.atEpochMillis) {
         try {
@@ -156,7 +159,7 @@ export const TaskProvider: React.FC<{
       invalidateTaskQueries();
 
       try {
-        const currentTask = await taskRepository.findById(id);
+        const currentTask = await taskUseCases.getTaskById(id);
         if (currentTask?.status === 0) {
           return; // Already pending
         }
@@ -172,8 +175,8 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for creating tasks
   const createTaskMutation = useMutation({
-    mutationFn: (input: TaskCreateInput) => taskRepository.create(input),
-    onSuccess: async (createdTask) => {
+    mutationFn: (input: TaskCreateInput) => taskUseCases.createTask(input),
+    onSuccess: async (createdTask: Task) => {
       // Schedule reminders if notifications are enabled and task has scheduled time
       if (settings.notifications && createdTask.atEpochMillis) {
         try {
@@ -198,7 +201,7 @@ export const TaskProvider: React.FC<{
       // Update reminders if notifications are enabled
       if (settings.notifications) {
         try {
-          const updatedTask = await taskRepository.findById(variables.id);
+          const updatedTask = await taskUseCases.getTaskById(variables.id);
           if (updatedTask) {
             if (updatedTask.status === 1 || !updatedTask.atEpochMillis) {
               // Task completed or no scheduled time - cancel reminders
@@ -222,7 +225,7 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for deleting tasks
   const deleteTaskMutation = useMutation({
-    mutationFn: (id: string) => taskRepository.delete(id),
+    mutationFn: (id: string) => taskUseCases.deleteTask(id),
     onSuccess: async (_, variables) => {
       // Cancel all reminders for the deleted task
       if (settings.notifications) {
@@ -248,7 +251,7 @@ export const TaskProvider: React.FC<{
     updateTask: (id: string, input: TaskUpdateInput) =>
       updateTaskMutation.mutateAsync({ id, input }),
     deleteTask: (id: string) => deleteTaskMutation.mutateAsync(id),
-    getTask: (id: string) => taskRepository.findById(id),
+    getTask: (id: string) => taskUseCases.getTaskById(id),
     completeTask: (id: string) => completeTaskMutation.mutateAsync(id),
     reopenTask: (id: string) => reopenTaskMutation.mutateAsync(id),
     reset: () => setTask(null),

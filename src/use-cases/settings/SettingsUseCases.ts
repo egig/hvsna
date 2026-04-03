@@ -1,7 +1,14 @@
 import type { ISettingsRepository } from "../../domain/settings/ISettingsRepository";
-import type { ILocationProvider, GeolocationOptions } from "../../domain/settings/ILocationProvider";
+import type {
+  ILocationProvider,
+  GeolocationOptions,
+} from "../../domain/settings/ILocationProvider";
 import type { ITimezoneProvider } from "../../domain/settings/ITimezoneProvider";
-import type { GeneralSettings, Coordinate, LocationResolveType } from "../../modules/settings/settings";
+import type {
+  GeneralSettings,
+  Coordinate,
+  LocationResolveType,
+} from "../../modules/settings/settings";
 import type { Language } from "../../modules/i18n/language";
 
 const DEFAULT_SETTINGS: GeneralSettings = {
@@ -50,7 +57,7 @@ export class SettingsUseCases {
   /** Request permission and get current location. Returns coordinate on success. */
   async requestLocation(options?: GeolocationOptions): Promise<Coordinate> {
     const permission = await this.locationProvider.checkPermission();
-    console.log("perm", permission)
+    console.log("perm", permission);
 
     if (permission.state === "denied") {
       throw new Error(permission.message ?? "Location permission denied");
@@ -59,7 +66,7 @@ export class SettingsUseCases {
     if (permission.state === "prompt" || permission.state === "unknown") {
       const result = await this.locationProvider.requestPermission();
       if (result.state === "prompt") {
-       return this.locationProvider.getCurrentPosition(options); 
+        return this.locationProvider.getCurrentPosition(options);
       }
 
       if (result.state !== "granted" && result.state !== "unknown") {
@@ -111,7 +118,9 @@ export class SettingsUseCases {
     return this.timezoneProvider.getTimezone(latitude, longitude);
   }
 
-  async updateTimezoneFromLocation(current: GeneralSettings): Promise<GeneralSettings> {
+  async updateTimezoneFromLocation(
+    current: GeneralSettings,
+  ): Promise<GeneralSettings> {
     if (!current.coordinate) {
       throw new Error("No location coordinates available");
     }

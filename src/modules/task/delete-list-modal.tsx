@@ -50,8 +50,8 @@ export function DeleteListModal({
           <div className="mb-6">
             <p className="text-gray-700 mb-4">
               This list contains{" "}
-              <span className="font-medium">{tasks.length}</span>{" "}
-              task{tasks.length === 1 ? "" : "s"}.
+              <span className="font-medium">{tasks.length}</span> task
+              {tasks.length === 1 ? "" : "s"}.
             </p>
 
             {/* Toggle Option */}

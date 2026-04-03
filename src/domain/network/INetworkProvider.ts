@@ -10,6 +10,8 @@ export interface NetworkListener {
 
 export interface INetworkProvider {
   getStatus(): Promise<NetworkStatus>;
-  addListener(callback: (status: NetworkStatus) => void): Promise<NetworkListener>;
+  addListener(
+    callback: (status: NetworkStatus) => void,
+  ): Promise<NetworkListener>;
   removeListener(listener: NetworkListener): Promise<void>;
 }

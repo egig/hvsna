@@ -1,12 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { taskRepository } from "../task/task-repository";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../use-cases/task";
 import { queryKeys } from "./query-keys";
 import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
   const { getToday, getTomorrow, toHijriDate, formatDate, createHijriDate } =
     useHijriDate();
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
 
   const today = getToday();
   const tomorrow = today.next();
@@ -14,7 +17,7 @@ export function useUpcoming() {
   const tomorrowString = tomorrow.toString();
   const upcomingTasksQuery = useQuery({
     queryKey: queryKeys.upcomingTasks(tomorrowString),
-    queryFn: () => taskRepository.findTasksAfter(today),
+    queryFn: () => taskUseCases.getUpcomingTasks(today),
   });
 
   const formatScheduledDate = (task: Task) => {

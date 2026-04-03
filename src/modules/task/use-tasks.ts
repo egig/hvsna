@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { taskRepository } from "./task-repository";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../use-cases/task";
 import { queryKeys } from "../common/query-keys";
 import type { Task, TaskStatus, TaskQuery } from "./types";
 import { HijriDate } from "../calendar/hijri";
@@ -14,6 +15,8 @@ export function useTasks() {
   const [hasMore, setHasMore] = useState(true);
 
   const { openTaskForm, setEditingTaskId } = useTaskContext();
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
 
   // Local filter state
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
@@ -87,7 +90,7 @@ export function useTasks() {
   // React Query for browsed tasks
   const browsedTasksQuery = useQuery({
     queryKey: queryKeys.browsedTasks(filterKey),
-    queryFn: () => taskRepository.findBrowsedTasks(buildQuery(), 0, 50), // Load initial page
+    queryFn: () => taskUseCases.getTasks(buildQuery()), // Load initial page
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
@@ -97,11 +100,7 @@ export function useTasks() {
       return;
 
     try {
-      const newTasks = await taskRepository.findBrowsedTasks(
-        buildQuery(),
-        offset,
-        10,
-      );
+      const newTasks = await taskUseCases.getTasks(buildQuery());
 
       // Update hasMore based on whether we got a full page
       setHasMore(newTasks.length >= 10);

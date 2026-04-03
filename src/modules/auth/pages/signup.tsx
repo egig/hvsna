@@ -28,7 +28,7 @@ export default function SignUpPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear validation errors when user starts typing
     if (validationErrors.length > 0) {
       setValidationErrors([]);
@@ -59,7 +59,7 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -85,7 +85,9 @@ export default function SignUpPage() {
         <div className="mx-auto w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl border border-primary-100 p-8">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-primary-900 mb-2">Create Account</h1>
+              <h1 className="text-3xl font-bold text-primary-900 mb-2">
+                Create Account
+              </h1>
               <p className="text-primary-600">Join us today</p>
             </div>
 
@@ -93,7 +95,9 @@ export default function SignUpPage() {
             {validationErrors.length > 0 && (
               <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg">
                 {validationErrors.map((error, index) => (
-                  <div key={index} className="text-danger-700 text-sm">{error}</div>
+                  <div key={index} className="text-danger-700 text-sm">
+                    {error}
+                  </div>
                 ))}
               </div>
             )}
@@ -108,7 +112,10 @@ export default function SignUpPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-primary-700 mb-2">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-primary-700 mb-2"
+                  >
                     First Name
                   </label>
                   <input
@@ -125,7 +132,10 @@ export default function SignUpPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-primary-700 mb-2">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-primary-700 mb-2"
+                  >
                     Last Name
                   </label>
                   <input
@@ -143,7 +153,10 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-primary-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-primary-700 mb-2"
+                >
                   Email
                 </label>
                 <input
@@ -160,7 +173,10 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-primary-700 mb-2"
+                >
                   Password
                 </label>
                 <input
@@ -177,7 +193,10 @@ export default function SignUpPage() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-primary-700 mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-primary-700 mb-2"
+                >
                   Confirm Password
                 </label>
                 <input
@@ -205,7 +224,10 @@ export default function SignUpPage() {
             <div className="mt-8 text-center">
               <p className="text-primary-600">
                 Already have an account?{" "}
-                <Link to="/signin" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">
+                <Link
+                  to="/signin"
+                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                >
                   Sign in
                 </Link>
               </p>

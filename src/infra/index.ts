@@ -13,6 +13,9 @@ export { createPermissionsProvider } from "./permissions";
 export { BrowserPermissionsProvider } from "./permissions/BrowserPermissionsProvider";
 export { CapacitorPermissionsProvider } from "./permissions/CapacitorPermissionsProvider";
 
+// Task providers
+export { PouchDBTaskRepository, PouchDBListRepository } from "./task";
+
 // Location providers (existing)
 export { createLocationProvider } from "./settings/CapacitorLocationProvider";
 export { BrowserLocationProvider } from "./settings/BrowserLocationProvider";

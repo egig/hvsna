@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { taskRepository } from "../task/task-repository";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../use-cases/task";
 import { queryKeys } from "./query-keys";
 import type { Task } from "../task/types";
 
@@ -13,6 +14,8 @@ export function useInbox() {
     formatDate,
     initiated: hijriCalInititated,
   } = useHijriDate();
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
 
   const today = getToday();
   const gregorianDate = today.toDate();
@@ -20,7 +23,7 @@ export function useInbox() {
   // Query for inbox tasks - tasks with no schedule (noDate=1) and no listId
   const inboxTasksQuery = useQuery({
     queryKey: queryKeys.inboxTasks(),
-    queryFn: () => taskRepository.findInboxTasks(),
+    queryFn: () => taskUseCases.getUnscheduledTasks(),
     enabled: hijriCalInititated,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });

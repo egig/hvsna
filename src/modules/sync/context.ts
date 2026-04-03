@@ -100,7 +100,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [localDocCount, setLocalDocCount] = useState(0);
   const [hasCheckedSyncState, setHasCheckedSyncState] = useState(false);
   const queryClient = useQueryClient();
-  
+
   const networkProvider = createNetworkProvider();
 
   // Reusable function to check if sync conditions are met
@@ -268,14 +268,12 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         setIsOnline(status.connected);
 
         // Add network status listener
-        networkListener = await networkProvider.addListener(
-          (networkStatus) => {
-            log.info(
-              `[sync] Network ${networkStatus.connected ? "online" : "offline"} - ${networkStatus.connectionType}`,
-            );
-            setIsOnline(networkStatus.connected);
-          },
-        );
+        networkListener = await networkProvider.addListener((networkStatus) => {
+          log.info(
+            `[sync] Network ${networkStatus.connected ? "online" : "offline"} - ${networkStatus.connectionType}`,
+          );
+          setIsOnline(networkStatus.connected);
+        });
       } catch (error) {
         console.error("[sync] Failed to initialize network monitoring:", error);
         // Fallback to browser API

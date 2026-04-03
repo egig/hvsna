@@ -16,6 +16,8 @@ export class InMemoryTokenStore implements ITokenStore {
   }
 
   getAuthHeader(): { Authorization: string } | Record<string, never> {
-    return this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {};
+    return this.accessToken
+      ? { Authorization: `Bearer ${this.accessToken}` }
+      : {};
   }
 }

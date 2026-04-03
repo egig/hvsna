@@ -1,6 +1,10 @@
 import { useCallback, useEffect } from "react";
 import { useSettingsStore } from "./settingsStore";
-import type { GeneralSettings, Coordinate, LocationResolveType } from "./settings";
+import type {
+  GeneralSettings,
+  Coordinate,
+  LocationResolveType,
+} from "./settings";
 import { usePouchDB } from "../../pouchdb";
 import type { Language } from "../i18n/language";
 import { createSettingsUseCases } from "../../infra/settings/SettingsUseCasesFactory";
@@ -61,7 +65,10 @@ export function useSettings() {
     try {
       setLoading(true);
       setError(null);
-      const coordinate = await useCases.requestLocation({ timeout: 5000, maximumAge: 0 });
+      const coordinate = await useCases.requestLocation({
+        timeout: 5000,
+        maximumAge: 0,
+      });
       await useCases.updateLocation(settings, coordinate, "auto");
       updateSettingsInStore({
         coordinate,
@@ -70,7 +77,11 @@ export function useSettings() {
       });
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to get location permission");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to get location permission",
+      );
       return false;
     } finally {
       setLoading(false);
@@ -82,9 +93,17 @@ export function useSettings() {
       try {
         setLoading(true);
         setError(null);
-        return await useCases.getCurrentPosition(options ?? { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 });
+        return await useCases.getCurrentPosition(
+          options ?? {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000,
+          },
+        );
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to get current location");
+        setError(
+          err instanceof Error ? err.message : "Failed to get current location",
+        );
         return null;
       } finally {
         setLoading(false);
@@ -94,7 +113,10 @@ export function useSettings() {
   );
 
   const updateLocation = useCallback(
-    async (coordinate: Coordinate, resolveType: LocationResolveType): Promise<void> => {
+    async (
+      coordinate: Coordinate,
+      resolveType: LocationResolveType,
+    ): Promise<void> => {
       await updateSettings({
         coordinate,
         locationResolvedAt: new Date().toISOString(),
@@ -136,7 +158,11 @@ export function useSettings() {
       updateSettingsInStore({ timezone: updated.timezone });
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update timezone from location");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to update timezone from location",
+      );
       return false;
     }
   }, [db, settings]);

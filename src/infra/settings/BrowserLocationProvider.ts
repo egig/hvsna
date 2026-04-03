@@ -1,10 +1,13 @@
-import type { ILocationProvider, LocationPermissionResult, GeolocationOptions } from "../../domain/settings/ILocationProvider";
+import type {
+  ILocationProvider,
+  LocationPermissionResult,
+  GeolocationOptions,
+} from "../../domain/settings/ILocationProvider";
 import type { Coordinate } from "../../modules/settings/settings";
 
 export class BrowserLocationProvider implements ILocationProvider {
   async checkPermission(): Promise<LocationPermissionResult> {
-
-    console.log("calling check perm")
+    console.log("calling check perm");
 
     if (!("permissions" in navigator)) {
       return { state: "unknown" };
@@ -23,7 +26,9 @@ export class BrowserLocationProvider implements ILocationProvider {
     return { state: "prompt" };
   }
 
-  async getCurrentPosition(options: GeolocationOptions = {}): Promise<Coordinate> {
+  async getCurrentPosition(
+    options: GeolocationOptions = {},
+  ): Promise<Coordinate> {
     if (!("geolocation" in navigator)) {
       throw new Error("Geolocation is not supported by this browser");
     }
@@ -55,10 +60,14 @@ export class BrowserLocationProvider implements ILocationProvider {
 
   private mapError(err: GeolocationPositionError): Error {
     switch (err.code) {
-      case err.PERMISSION_DENIED: return new Error("Location permission denied");
-      case err.POSITION_UNAVAILABLE: return new Error("Location unavailable");
-      case err.TIMEOUT: return new Error("Location request timed out");
-      default: return new Error("Failed to get location");
+      case err.PERMISSION_DENIED:
+        return new Error("Location permission denied");
+      case err.POSITION_UNAVAILABLE:
+        return new Error("Location unavailable");
+      case err.TIMEOUT:
+        return new Error("Location request timed out");
+      default:
+        return new Error("Failed to get location");
     }
   }
 }
