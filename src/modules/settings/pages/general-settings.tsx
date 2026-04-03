@@ -6,7 +6,7 @@ import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../../lib/timezones";
 import { ListInputSelect } from "../../../ui/list-input-select";
-import { CapacitorGeolocation } from "../../../lib/capacitor";
+import { Capacitor } from "@capacitor/core";
 
 export default function GeneralSettings() {
   const {
@@ -22,12 +22,6 @@ export default function GeneralSettings() {
     clearLocation,
     hasLocationPermission,
     updateTimezoneFromLocation,
-    // Enhanced Capacitor functions
-    requestNativeLocationPermission,
-    getCurrentNativeLocation,
-    requestNativeLocationAndUpdate,
-    getBestCurrentLocation,
-    requestBestLocationPermission,
   } = useSettings();
   const { t } = useLanguageContext();
 
@@ -48,28 +42,15 @@ export default function GeneralSettings() {
   };
 
   const handleGetLocation = async () => {
-    const coordinate = await getBestCurrentLocation();
+    const coordinate = await getCurrentLocation();
     if (coordinate) {
-      const resolveType = CapacitorGeolocation.isNativePlatform()
-        ? "capacitor_native"
-        : "auto";
+      const resolveType = Capacitor.isNativePlatform() ? "capacitor_native" : "auto";
       await updateLocation(coordinate, resolveType);
-      // Also update timezone after getting location
       await updateTimezoneFromLocation();
     }
   };
 
-  const handleGetNativeLocation = async () => {
-    const success = await requestNativeLocationAndUpdate();
-    if (success) {
-      // Also update timezone after getting location
-      await updateTimezoneFromLocation();
-    }
-  };
-
-  // Determine which location functions to show
-  const isNativePlatform = CapacitorGeolocation.isNativePlatform();
-  const showNativeOptions = isNativePlatform;
+  const isNativePlatform = Capacitor.isNativePlatform();
 
   // Check if timezone is based on location coordinates
   const isTimezoneFromLocation =
@@ -158,7 +139,7 @@ export default function GeneralSettings() {
         <div className="mt-3 flex flex-wrap gap-2">
           {!hasLocationPermission ? (
             <button
-              onClick={requestBestLocationPermission}
+              onClick={requestLocationPermission}
               disabled={loading}
               className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               style={
@@ -182,9 +163,9 @@ export default function GeneralSettings() {
             </button>
           ) : (
             <>
-              {showNativeOptions && (
+              {isNativePlatform && (
                 <button
-                  onClick={handleGetNativeLocation}
+                  onClick={handleGetLocation}
                   disabled={loading}
                   className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                   style={
@@ -228,7 +209,7 @@ export default function GeneralSettings() {
                   target.style.backgroundColor = "var(--hvsna-primary-color)";
                 }}
               >
-                {showNativeOptions
+                {isNativePlatform
                   ? t("get_browser_location")
                   : t("get_location")}
               </button>

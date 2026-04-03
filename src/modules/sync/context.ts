@@ -10,7 +10,7 @@ import { useAuth } from "src/modules/auth/use-auth";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
-import { CapacitorNetwork } from "src/lib/capacitor/network";
+import { createNetworkProvider } from "../../infra";
 import { SyncInitDialog } from "./components/sync-init-dialog";
 import {
   hasSyncedBefore,
@@ -100,6 +100,8 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [localDocCount, setLocalDocCount] = useState(0);
   const [hasCheckedSyncState, setHasCheckedSyncState] = useState(false);
   const queryClient = useQueryClient();
+  
+  const networkProvider = createNetworkProvider();
 
   // Reusable function to check if sync conditions are met
   const canSync = useCallback((): boolean => {
@@ -262,11 +264,11 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     const initializeNetworkMonitoring = async () => {
       try {
         // Get initial network status
-        const status = await CapacitorNetwork.getStatus();
+        const status = await networkProvider.getStatus();
         setIsOnline(status.connected);
 
         // Add network status listener
-        networkListener = await CapacitorNetwork.addListener(
+        networkListener = await networkProvider.addListener(
           (networkStatus) => {
             log.info(
               `[sync] Network ${networkStatus.connected ? "online" : "offline"} - ${networkStatus.connectionType}`,

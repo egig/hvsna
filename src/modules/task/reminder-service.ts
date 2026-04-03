@@ -1,7 +1,7 @@
 import {
-  CapacitorNotifications,
-  type TaskReminderOptions,
-} from "../../lib/capacitor";
+  createNotificationsProvider,
+} from "../../infra";
+import type { TaskReminderOptions } from "../../domain/notifications/INotificationsProvider";
 import { taskRepository } from "./task-repository";
 import { Task, type Task as TaskType } from "./types";
 import logger from "../../lib/logger";
@@ -11,6 +11,10 @@ export class ReminderService {
    * Default reminder minutes before due time
    */
   private static readonly DEFAULT_REMINDER_MINUTES = 15;
+  
+  private static get notificationsProvider() {
+    return createNotificationsProvider();
+  }
 
   /**
    * Schedule reminders for a task
@@ -35,7 +39,7 @@ export class ReminderService {
           type: "pre-due",
         };
 
-        await CapacitorNotifications.scheduleTaskReminder(preDueOptions);
+        await this.notificationsProvider.scheduleTaskReminder(preDueOptions);
       }
 
       // Schedule due time reminder
@@ -47,7 +51,7 @@ export class ReminderService {
         type: "due",
       };
 
-      await CapacitorNotifications.scheduleTaskReminder(dueOptions);
+      await this.notificationsProvider.scheduleTaskReminder(dueOptions);
 
       // Schedule overdue reminder (30 minutes after due)
       const overdueOptions: TaskReminderOptions = {
@@ -58,7 +62,7 @@ export class ReminderService {
         type: "overdue",
       };
 
-      await CapacitorNotifications.scheduleTaskReminder(overdueOptions);
+      await this.notificationsProvider.scheduleTaskReminder(overdueOptions);
     } catch (error) {
       logger.error("Failed to schedule task reminders:", error);
     }
@@ -69,7 +73,7 @@ export class ReminderService {
    */
   static async cancelTaskReminders(taskId: string): Promise<void> {
     try {
-      await CapacitorNotifications.cancelTaskReminder(taskId);
+      await this.notificationsProvider.cancelTaskReminder(taskId);
     } catch (error) {
       logger.error("Failed to cancel task reminders:", error);
     }

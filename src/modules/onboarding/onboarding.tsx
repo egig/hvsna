@@ -11,7 +11,7 @@ import { Page, Navbar } from "../navigation";
 import { TimezonePickerModal } from "../../ui/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import { CapacitorNotifications } from "../../lib/capacitor";
+import { createNotificationsProvider } from "../../infra";
 import type { Coordinate } from "src/modules/settings/settings";
 import type { Language } from "src/modules/i18n/language";
 import logger from "src/lib/logger";
@@ -25,6 +25,8 @@ export default function Onboarding() {
   const [selectedTimezone, setSelectedTimezone] = useState(
     Intl.DateTimeFormat().resolvedOptions().timeZone,
   );
+  
+  const notificationsProvider = createNotificationsProvider();
 
   const handleLanguageSelection = async (selectedLanguage: Language) => {
     setLoading(true);
@@ -105,7 +107,7 @@ export default function Onboarding() {
       let notificationEnabled = false;
 
       if (enable) {
-        const permission = await CapacitorNotifications.requestPermissions();
+        const permission = await notificationsProvider.requestPermissions();
         notificationEnabled = permission.state === "granted";
       }
 
@@ -124,7 +126,7 @@ export default function Onboarding() {
 
   const checkNotificationPermission = async () => {
     try {
-      const permission = await CapacitorNotifications.checkPermissions();
+      const permission = await notificationsProvider.checkPermissions();
       return permission.state;
     } catch (error) {
       logger.error("Failed to check notification permission:", error);
