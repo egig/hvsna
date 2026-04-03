@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { listRepository } from "./list-repository";
-import { queryKeys } from "../common/query-keys";
+import { queryKeys } from "../query-keys";
 import type {
   List,
   ListCreateInput,

@@ -11,7 +11,7 @@ import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import TaskPreview from "./task-preview";
-import { ListSelector } from "../common/list-selector";
+import { ListSelector } from "./list-selector";
 
 interface TaskFormEditProps {
   taskId: string;

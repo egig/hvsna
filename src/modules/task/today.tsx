@@ -1,5 +1,5 @@
 import { Page } from "../navigation";
-import TaskListItem from "../task/task-list-item";
+import TaskListItem from "./task-list-item";
 import { ErrorDisplay } from "../components/error-display";
 import { useToday } from "src/modules/common/use-today";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
@@ -9,7 +9,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
 import { ChevronRight, ChevronDown } from "lucide-react";
-import { useTaskContext } from "../task/task-context";
+import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
 import {
   groupTasksByPrayerTimes,

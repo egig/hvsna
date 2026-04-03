@@ -7,7 +7,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
 import type { Task } from "./types";
 import { useSettings } from "src/modules/settings/useSettings";
-import { ListSelector } from "../common/list-selector";
+import { ListSelector } from "./list-selector";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;

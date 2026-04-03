@@ -7,7 +7,7 @@ import {
   useNavigationType,
 } from "react-router";
 import TabLayout from "./tab-layout";
-import About from "./modules/common/about";
+import About from "./modules/settings/about";
 import Settings from "./modules/settings/pages/settings";
 import {
   SettingsModal,
@@ -19,10 +19,10 @@ import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
 import Tasks from "./modules/task/tasks";
 import { NotFound } from "./modules/components/not-found";
-import { Today } from "./modules/common/today";
+import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
 import ListDetail from "./modules/task/list-detail";
-import Upcoming from "./modules/common/upcoming";
+import Upcoming from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
 import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
@@ -31,7 +31,7 @@ import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
-import { Inbox } from "./modules/common/inbox";
+import { Inbox } from "./modules/task/inbox";
 import Browse from "./modules/task/browse";
 
 const desktopSettingsSections: SettingsSection[] = [

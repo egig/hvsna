@@ -2,10 +2,10 @@
 import { taskTranslations } from "../../task/locale";
 import { settingsTranslations } from "../../settings/locale";
 import { navigationTranslations } from "../../navigation/locale";
-import { datetimeTranslations } from "../../common/datetime";
+import { datetimeTranslations } from "../../datetime";
 import { syncTranslations } from "../../sync/locale";
 import { onboardingTranslations } from "../../onboarding/locale";
-import { commonTranslations } from "../../common/locale";
+import { commonTranslations } from "../../locale";
 import { authTranslations } from "../../auth/locale";
 import type { Translations } from "../language";
 

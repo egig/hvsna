@@ -2,7 +2,7 @@ import { CalendarIcon } from "lucide-react";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";
-import { useUpcoming } from "./use-upcoming";
+import { useUpcoming } from "../task/use-upcoming";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "../task/task-context";

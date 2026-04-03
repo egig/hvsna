@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
-import { queryKeys } from "../common/query-keys";
+import { queryKeys } from "../query-keys";
 import type { Task } from "./types";
 import log from "../logger";
 
