@@ -4,6 +4,7 @@ import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
 import Block from "src/modules/components/block";
 import { useAuth } from "../use-auth";
+import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { getAuthUseCases } from "../../../infra/auth/AuthServiceFactory";
 
 const authService = getAuthUseCases();
@@ -11,6 +12,7 @@ const authService = getAuthUseCases();
 export default function SignInPage() {
   const navigate = useNavigate();
   const { login, loading, isAuthenticated, error } = useAuth();
+  const isSignupEnabled = useFeatureFlag("signup");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -149,12 +151,18 @@ export default function SignInPage() {
             <div className="mt-8 text-center">
               <p className="text-primary-600">
                 Don't have an account?{" "}
-                <Link
-                  to="/signup"
-                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
-                >
-                  Sign up
-                </Link>
+                {isSignupEnabled ? (
+                  <Link
+                    to="/signup"
+                    className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                  >
+                    Sign up
+                  </Link>
+                ) : (
+                  <a href="https://recraftory.notion.site/318c304e3c0e809aaaddfadf5b543091" className="text-primary-500 font-medium">
+                    Request Access
+                  </a>
+                )}
               </p>
             </div>
           </div>

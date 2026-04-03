@@ -21,6 +21,9 @@ const config: CapacitorConfig = {
       spinnerColor: "#999999",
     },
   },
+  android: {
+    allowMixedContent: true,
+  },
 };
 
 export default config;

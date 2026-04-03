@@ -3,7 +3,7 @@ import { useDateTranslationHelper } from "../calendar/use-date-translation-helpe
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
-import { queryKeys } from "./query-keys";
+import { queryKeys } from "../query-keys";
 
 export function useToday() {
   const { dayNames, hijriMonthNames, gregorianMonthNames } =
