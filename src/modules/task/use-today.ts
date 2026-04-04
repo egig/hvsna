@@ -18,7 +18,7 @@ export function useToday() {
 
   const todayTasksQuery = useQuery({
     queryKey: queryKeys.todayTasks(todayString),
-    queryFn: () => taskUseCases.getTodayTasks(today),
+    queryFn: () => taskUseCases.getTodayTasks(today.endOfDay()),
     enabled: hijriCalInititated,
   });
 

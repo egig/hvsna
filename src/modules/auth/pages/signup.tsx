@@ -83,7 +83,7 @@ export default function SignUpPage() {
       <Navbar title="Sign Up" />
       <Block>
         <div className="mx-auto w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl border border-primary-100 p-8">
+          <div className="">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-primary-900 mb-2">
                 Create Account

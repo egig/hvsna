@@ -7,8 +7,6 @@ import type { Coordinate } from "../../modules/settings/settings";
 
 export class BrowserLocationProvider implements ILocationProvider {
   async checkPermission(): Promise<LocationPermissionResult> {
-    console.log("calling check perm");
-
     if (!("permissions" in navigator)) {
       return { state: "unknown" };
     }

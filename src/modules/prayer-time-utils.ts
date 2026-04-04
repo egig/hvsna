@@ -1,8 +1,5 @@
 import type { PrayerTimesResponse } from "./prayer-times";
-import type {
-  PrayerTimesFallback,
-  GeneralSettings,
-} from "./settings/settings";
+import type { PrayerTimesFallback, GeneralSettings } from "./settings/settings";
 import type { PrayerTime, Task } from "./task/types";
 import { getPrayerTimes } from "./prayer-times";
 

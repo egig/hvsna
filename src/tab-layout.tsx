@@ -16,10 +16,7 @@ import ListFormContainer from "./modules/task/list-form-container";
 export default function TabLayout() {
   const { formOpen, editingTaskId, openTaskForm, closeTaskForm } =
     useTaskContext();
-  const {
-    formOpen: listFormOpen,
-    closeListForm,
-  } = useListContext();
+  const { formOpen: listFormOpen, closeListForm } = useListContext();
   const location = useLocation();
   const { isDesktop } = useScreenSize();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -91,7 +88,7 @@ export default function TabLayout() {
       </div>
 
       {/* FAB Button for Mobile */}
-      {location?.state?.context !== "settings" && (
+      {location?.state?.context !== "browse" && (
         <button
           onClick={() => openTaskForm()}
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"

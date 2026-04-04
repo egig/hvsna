@@ -10,6 +10,7 @@ import {
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
+import { Modal } from "./modal";
 import { useLists } from "../task/use-lists";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useListContext } from "../task/list-context";
@@ -51,6 +52,7 @@ export function DesktopSidebar({
   const { user, isAuthenticated, logout } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedList, setSelectedList] = useState<any>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleEditList = (list: any) => {
     openListForm(list.id!);
@@ -59,6 +61,19 @@ export function DesktopSidebar({
   const handleDeleteList = (list: any) => {
     setSelectedList(list);
     setShowDeleteModal(true);
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutConfirm(false);
   };
 
   const confirmDeleteList = async (deleteTasks: boolean) => {
@@ -151,26 +166,35 @@ export function DesktopSidebar({
           <>
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
-                <div className="flex items-center justify-center size-8 rounded-full bg-primary-100 text-primary-600">
-                  <UserRound size={16} />
-                </div>
+                <Menu.Root>
+                  <Menu.Trigger className="flex items-center justify-center size-8 rounded-full bg-primary-100 text-primary-600 hover:bg-primary-200 transition-colors cursor-pointer">
+                    <UserRound size={16} />
+                  </Menu.Trigger>
+                  <Menu.Portal>
+                    <Menu.Positioner>
+                      <Menu.Popup className="bg-white border border-gray-200 rounded-md shadow-lg min-w-[140px] py-1 z-50">
+                        <Menu.Item
+                          onClick={handleLogoutClick}
+                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                        >
+                          <UserRound size={16} />
+                          <span>{t("sign_out")}</span>
+                        </Menu.Item>
+                      </Menu.Popup>
+                    </Menu.Positioner>
+                  </Menu.Portal>
+                </Menu.Root>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-gray-900">
                     {user?.firstName || user?.email?.split("@")[0]}
                   </span>
-                  <button
-                    onClick={logout}
-                    className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    Sign out
-                  </button>
                 </div>
               </div>
             ) : (
               <Link
                 to="/signin"
                 className="flex items-center justify-center size-8 rounded-full bg-primary-100 hover:bg-primary-200 text-gray-400 hover:text-primary-600 transition-colors"
-                title="Sign in"
+                title={t("sign_in")}
               >
                 <UserRound size={16} />
               </Link>
@@ -182,7 +206,7 @@ export function DesktopSidebar({
           className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
             collapsed ? "mx-auto" : "ml-auto"
           }`}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? t("expand_sidebar") : t("collapse_sidebar")}
         >
           {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
         </button>
@@ -239,7 +263,7 @@ export function DesktopSidebar({
               <button
                 onClick={() => openListForm()}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                title={t("add_new_list") || "Add new list"}
+                title={t("add_new_list")}
               >
                 <Plus size={16} />
               </button>
@@ -277,14 +301,14 @@ export function DesktopSidebar({
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                               >
                                 <Edit size={14} />
-                                <span>{t("edit") || "Edit"}</span>
+                                <span>{t("edit")}</span>
                               </Menu.Item>
                               <Menu.Item
                                 onClick={() => handleDeleteList(list)}
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               >
                                 <Trash2 size={14} />
-                                <span>{t("delete") || "Delete"}</span>
+                                <span>{t("delete")}</span>
                               </Menu.Item>
                             </Menu.Popup>
                           </Menu.Positioner>
@@ -357,6 +381,33 @@ export function DesktopSidebar({
           tasks={getListTasks(selectedList.id)}
         />
       )}
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutConfirm}
+        onClose={cancelLogout}
+        title={t("confirm_logout")}
+      >
+        <div className="p-4">
+          <p className="text-sm text-gray-600 mb-6">
+            {t("logout_confirmation_message")}
+          </p>
+          <div className="flex space-x-3 justify-end">
+            <button
+              onClick={cancelLogout}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+            >
+              {t("sign_out")}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

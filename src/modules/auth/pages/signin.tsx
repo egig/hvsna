@@ -72,7 +72,7 @@ export default function SignInPage() {
       <Navbar title="Sign In" />
       <Block>
         <div className="mx-auto w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl border border-primary-100 p-8">
+          <div className="">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-primary-900 mb-2">
                 Welcome Back
@@ -159,7 +159,10 @@ export default function SignInPage() {
                     Sign up
                   </Link>
                 ) : (
-                  <a href="https://recraftory.notion.site/318c304e3c0e809aaaddfadf5b543091" className="text-primary-500 font-medium">
+                  <a
+                    href="https://recraftory.notion.site/318c304e3c0e809aaaddfadf5b543091"
+                    className="text-primary-500 font-medium"
+                  >
                     Request Access
                   </a>
                 )}

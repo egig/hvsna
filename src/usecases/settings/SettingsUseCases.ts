@@ -57,7 +57,6 @@ export class SettingsUseCases {
   /** Request permission and get current location. Returns coordinate on success. */
   async requestLocation(options?: GeolocationOptions): Promise<Coordinate> {
     const permission = await this.locationProvider.checkPermission();
-    console.log("perm", permission);
 
     if (permission.state === "denied") {
       throw new Error(permission.message ?? "Location permission denied");

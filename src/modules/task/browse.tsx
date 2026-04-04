@@ -1,13 +1,8 @@
-import {
-  Plus,
-  List as ListIcon,
-  ChevronRight,
-  Settings,
-  LayoutList,
-} from "lucide-react";
+import { Plus, List as ListIcon, Settings, SearchIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Link, Page } from "../navigation";
+import { Button as Button2 } from "../components/button";
 import { useLists } from "./use-lists";
 import { useListContext } from "./list-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -63,7 +58,11 @@ export default function Browse() {
 
       {/* Navigation Menu Items */}
       <div className="mb-6">
-        <MenuItem title={t("search") || "Search"} to="/tasks" />
+        <MenuItem
+          icon={SearchIcon}
+          title={t("search") || "Search"}
+          to="/tasks"
+        />
       </div>
 
       {!loading && initiated && lists.length === 0 && (
@@ -76,12 +75,16 @@ export default function Browse() {
             {t("no_lists_description") ||
               "Create your first list to organize your tasks."}
           </p>
+          <Button2 onClick={handleCreateList}>
+            <Plus size={20} />
+            <span className="">{t("create_list") || "Create List"}</span>
+          </Button2>
         </div>
       )}
 
       {lists.length > 0 && (
         <div>
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+          <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-700">
               {t("lists") || "Lists"}
             </h3>
@@ -98,7 +101,6 @@ export default function Browse() {
               title={list.name || ""}
               to={`/list/${list.id}`}
               showChevron={true}
-              // className="bg-white border-b border-gray-200 p-4 cursor-pointer"
             />
           ))}
         </div>

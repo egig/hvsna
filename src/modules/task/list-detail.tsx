@@ -138,7 +138,7 @@ export default function ListDetail() {
             !isDesktop && (
               <Menu.Root>
                 <Menu.Trigger
-                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors"
+                  className="w-10 h-10 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors"
                   aria-label="More options"
                 >
                   <MoreVertical size={20} />

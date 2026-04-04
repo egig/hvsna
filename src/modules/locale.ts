@@ -374,6 +374,10 @@ export const commonTranslations = {
   },
 
   // Inbox
+  inbox: {
+    en: "Inbox",
+    id: "Inbox",
+  },
   no_tasks_in_inbox: {
     en: "No tasks in inbox",
     id: "Tidak ada tugas di kotak masuk",
@@ -381,5 +385,37 @@ export const commonTranslations = {
   tasks_without_schedule_or_list_will_appear_here: {
     en: "Tasks without schedule or list will appear here",
     id: "Tugas tanpa jadwal atau daftar akan muncul di sini",
+  },
+
+  // Authentication
+  sign_in: {
+    en: "Sign in",
+    id: "Masuk",
+  },
+  sign_out: {
+    en: "Sign out",
+    id: "Keluar",
+  },
+  confirm_logout: {
+    en: "Confirm Logout",
+    id: "Konfirmasi Keluar",
+  },
+  logout_confirmation_message: {
+    en: "Are you sure you want to sign out?",
+    id: "Apakah Anda yakin ingin keluar?",
+  },
+
+  // Sidebar
+  expand_sidebar: {
+    en: "Expand sidebar",
+    id: "Perluas bilah samping",
+  },
+  collapse_sidebar: {
+    en: "Collapse sidebar",
+    id: "Ciutkan bilah samping",
+  },
+  add_new_list: {
+    en: "Add new list",
+    id: "Tambah daftar baru",
   },
 };

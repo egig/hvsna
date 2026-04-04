@@ -38,7 +38,7 @@ export function TabBar() {
     },
     {
       path: "/inbox",
-      label: "Inbox",
+      label: t("inbox"),
       icon: <HiOutlineInbox />,
       activeIcon: <HiInbox />,
       context: "inbox",
