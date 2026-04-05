@@ -1,4 +1,5 @@
 import PouchDB from "pouchdb";
+import { Capacitor } from "@capacitor/core";
 import { HijriDate } from "../../modules/calendar/hijri";
 import type {
   TaskCreateInput,
@@ -156,7 +157,42 @@ class PouchDBListDocument {
 }
 
 export class PouchDBTaskRepository implements ITaskRepository {
-  constructor(private readonly db: PouchDB.Database) {}
+  private readonly db: PouchDB.Database;
+
+  constructor(dbOrName?: PouchDB.Database | string) {
+    if (dbOrName instanceof PouchDB) {
+      // Use provided database instance
+      this.db = dbOrName;
+    } else {
+      // Create database with appropriate adapter
+      this.db = PouchDBTaskRepository.createDatabase(dbOrName);
+    }
+  }
+
+  /**
+   * Factory method to create a PouchDB instance with the appropriate adapter
+   * based on the current platform
+   */
+  static createDatabase(dbName?: string): PouchDB.Database {
+    const databaseName = dbName || "hvsna-tasks";
+    
+    if (Capacitor.isNativePlatform()) {
+      // Use Cordova SQLite adapter for native platforms
+      try {
+        // Dynamically import and register the SQLite adapter only on native platforms
+        PouchDB.plugin(require("pouchdb-adapter-cordova-sqlite"));
+        console.log("Using Cordova SQLite adapter for native platform");
+        return new PouchDB(databaseName, { adapter: "cordova-sqlite" });
+      } catch (error) {
+        console.warn("Failed to load SQLite adapter, falling back to IndexedDB:", error);
+        return new PouchDB(databaseName);
+      }
+    } else {
+      // Use standard IndexedDB adapter for web platform
+      console.log("Using IndexedDB adapter for web platform");
+      return new PouchDB(databaseName);
+    }
+  }
 
   async create(input: TaskCreateInput): Promise<Task> {
     const now = Date.now().valueOf();
@@ -628,7 +664,17 @@ export class PouchDBTaskRepository implements ITaskRepository {
 }
 
 export class PouchDBListRepository implements IListRepository {
-  constructor(private readonly db: PouchDB.Database) {}
+  private readonly db: PouchDB.Database;
+
+  constructor(dbOrName?: PouchDB.Database | string) {
+    if (dbOrName instanceof PouchDB) {
+      // Use provided database instance
+      this.db = dbOrName;
+    } else {
+      // Create database with appropriate adapter
+      this.db = PouchDBTaskRepository.createDatabase(dbOrName);
+    }
+  }
 
   async create(input: ListCreateInput): Promise<List> {
     const now = Date.now().valueOf();
