@@ -18,9 +18,6 @@ export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
   className = "",
 }) => {
   const {
-    isScreenSizeOverlayVisible,
-    setScreenSizeOverlayVisible,
-    isDesktop,
     setDesktop,
   } = useSystemStore();
 

@@ -1,6 +1,6 @@
 import { createRoot, type Container } from "react-dom/client";
 import type { AppConfig } from "./app";
-import Hvsna from "./app";
+import App from "./app";
 import { getPouchDBInstance } from "@src/modules/pouchdb-singleton";
 import { configureLogger } from "@src/modules/logger";
 import { registerCapacitorImplementations } from "./register";
@@ -24,7 +24,7 @@ const db = getPouchDBInstance();
 configureLogger();
 
 (async () => {
-  root.render(<Hvsna config={config} db={db} />);
+  root.render(<App config={config} db={db} />);
   // @ts-ignore
   window.__dtMounted = true;
 })();

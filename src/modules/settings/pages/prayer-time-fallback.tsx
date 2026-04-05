@@ -155,7 +155,7 @@ export default function PrayerTimeFallback() {
           <button
             onClick={fetchUpdatedPrayerTimes}
             disabled={isFetching || !settings.coordinate}
-            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200 font-medium shadow-sm"
+            className="flex items-center justify-center gap-2 w-full px-4 py-3 sm:px-6 sm:py-4 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200 font-medium shadow-sm text-sm sm:text-base"
           >
             <HvRefreshCw
               className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`}

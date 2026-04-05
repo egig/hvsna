@@ -51,7 +51,7 @@ const posthogOptions = {
   defaults: "2026-01-30",
 } as const;
 
-export default function Hvsna({
+export default function App({
   config,
   db,
 }: {
@@ -101,7 +101,7 @@ export default function Hvsna({
                                 <TaskProvider>
                                   <ListProvider>
                                     <MemoryRouter>
-                                      <PostHogSessionTracker />
+                                      <PostHogSessionTracker platform="capacitor" />
                                       <AppRoutes />
                                     </MemoryRouter>
                                   </ListProvider>

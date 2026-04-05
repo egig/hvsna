@@ -6,20 +6,6 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { VitePWA } from "vite-plugin-pwa";
 import type { Plugin } from "vite";
 
-function platformDevServer(platformHtml: string): Plugin {
-  return {
-    name: "platform-dev-server",
-    configureServer(server) {
-      server.middlewares.use((req, _res, next) => {
-        if (req.url === "/" || req.url === "/index.html") {
-          req.url = platformHtml;
-        }
-        next();
-      });
-    },
-  };
-}
-
 function normalizeHtmlOutput(outDir: string, platform: string): Plugin {
   return {
     name: "normalize-html-output",
@@ -42,9 +28,6 @@ function normalizeHtmlOutput(outDir: string, platform: string): Plugin {
 
 export default defineConfig(({ mode }) => {
   const isCapacitor = mode === "capacitor";
-  const platformHtml = isCapacitor
-    ? "/src/platforms/capacitor/index.html"
-    : "/src/platforms/web/index.html";
 
   return {
     build: {
@@ -53,7 +36,9 @@ export default defineConfig(({ mode }) => {
       minify: true,
       rollupOptions: {
         input: {
-          index: path.resolve(__dirname, platformHtml.slice(1)),
+          index: isCapacitor
+            ? path.resolve(__dirname, "src/platforms/capacitor/index.html")
+            : path.resolve(__dirname, "index.html"),
         },
       },
     },
@@ -70,8 +55,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       tailwindcss(),
       tsconfigPaths(),
-      normalizeHtmlOutput("dist", isCapacitor ? "capacitor" : "web"),
-      platformDevServer(platformHtml),
+      ...(isCapacitor ? [normalizeHtmlOutput("dist", "capacitor")] : []),
       ...(!isCapacitor
         ? [
             VitePWA({
@@ -113,7 +97,7 @@ export default defineConfig(({ mode }) => {
                       cacheName: "images-cache",
                       expiration: {
                         maxEntries: 10,
-                        maxAgeSeconds: 60 * 60,
+                        maxAgeSeconds: 60 * 5,
                       },
                     },
                   },

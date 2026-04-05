@@ -3,7 +3,7 @@ import { usePostHog } from "@posthog/react";
 
 const SESSION_KEY = "ph_session_tracked";
 
-export function PostHogSessionTracker() {
+export function PostHogSessionTracker({platform}: {platform: "web" | "capacitor"}) {
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -13,6 +13,7 @@ export function PostHogSessionTracker() {
     posthog.capture("app_opened", {
       referrer: document.referrer || null,
       url: window.location.href,
+      platform: platform
     });
 
     sessionStorage.setItem(SESSION_KEY, "1");
