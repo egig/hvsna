@@ -1,8 +1,22 @@
 import { PouchDBTaskRepository } from "./PouchDBTaskRepository";
 import { PouchDBListRepository } from "./PouchDBTaskRepository";
-import type { ITaskRepository, IListRepository } from "../../domain/task/ITaskRepository";
-import type { Task, TaskCreateInput, TaskUpdateInput, TaskQuery, TaskStatus } from "../../modules/task/types";
-import type { List, ListCreateInput, ListUpdateInput, ListQuery } from "../../modules/task/types";
+import type {
+  ITaskRepository,
+  IListRepository,
+} from "../../domain/task/ITaskRepository";
+import type {
+  Task,
+  TaskCreateInput,
+  TaskUpdateInput,
+  TaskQuery,
+  TaskStatus,
+} from "../../modules/task/types";
+import type {
+  List,
+  ListCreateInput,
+  ListUpdateInput,
+  ListQuery,
+} from "../../modules/task/types";
 
 /**
  * Combined interface that includes both task and list operations with renamed methods to avoid conflicts
@@ -20,12 +34,20 @@ export interface ITaskAndListRepository {
   findTasksBefore(beforeHijri: any): Promise<Task[]>;
   findTodayCompletedTasks(todayHijri: any): Promise<Task[]>;
   findTasksAfter(todayHijri: any): Promise<Task[]>;
-  findBrowsedTasks(query?: any, offset?: number, limit?: number): Promise<Task[]>;
+  findBrowsedTasks(
+    query?: any,
+    offset?: number,
+    limit?: number,
+  ): Promise<Task[]>;
   findInboxTasks(): Promise<Task[]>;
-  findTasksByListId(listId: string, offset?: number, limit?: number): Promise<Task[]>;
+  findTasksByListId(
+    listId: string,
+    offset?: number,
+    limit?: number,
+  ): Promise<Task[]>;
   completeTask(id: string): Promise<Task>;
   reopenTask(id: string): Promise<Task>;
-  
+
   // List operations
   createList(input: ListCreateInput): Promise<List>;
   updateList(id: string, input: ListUpdateInput): Promise<List>;
@@ -42,11 +64,11 @@ export interface ITaskAndListRepository {
 export function createTaskRepository(dbName?: string): ITaskAndListRepository {
   // Create a single database instance that both repositories will share
   const db = PouchDBTaskRepository.createDatabase(dbName);
-  
+
   // Create repositories with the shared database
   const taskRepo = new PouchDBTaskRepository(db);
   const listRepo = new PouchDBListRepository(db);
-  
+
   // Combine both repositories into a single object with renamed methods
   return {
     // Task operations (renamed to avoid conflicts)
@@ -66,7 +88,7 @@ export function createTaskRepository(dbName?: string): ITaskAndListRepository {
     findTasksByListId: taskRepo.findTasksByListId.bind(taskRepo),
     completeTask: taskRepo.completeTask.bind(taskRepo),
     reopenTask: taskRepo.reopenTask.bind(taskRepo),
-    
+
     // List operations
     createList: listRepo.create.bind(listRepo),
     updateList: listRepo.update.bind(listRepo),
@@ -83,10 +105,10 @@ export function createTaskRepository(dbName?: string): ITaskAndListRepository {
 export function createRepositories(dbName?: string) {
   // Create a single database instance that both repositories will share
   const db = PouchDBTaskRepository.createDatabase(dbName);
-  
+
   const taskRepo = new PouchDBTaskRepository(db);
   const listRepo = new PouchDBListRepository(db);
-  
+
   return {
     taskRepository: taskRepo,
     listRepository: listRepo,

@@ -6,7 +6,7 @@ import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../timezones";
 import { ListInputSelect } from "../../components/list-input-select";
-import { Capacitor } from "@capacitor/core";
+import { usePlatform } from "../../platform";
 
 export default function GeneralSettings() {
   const {
@@ -24,6 +24,7 @@ export default function GeneralSettings() {
     updateTimezoneFromLocation,
   } = useSettings();
   const { t } = useLanguageContext();
+  const { isNative: isNativePlatform } = usePlatform();
 
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
@@ -44,15 +45,11 @@ export default function GeneralSettings() {
   const handleGetLocation = async () => {
     const coordinate = await getCurrentLocation();
     if (coordinate) {
-      const resolveType = Capacitor.isNativePlatform()
-        ? "capacitor_native"
-        : "auto";
+      const resolveType = isNativePlatform ? "capacitor_native" : "auto";
       await updateLocation(coordinate, resolveType);
       await updateTimezoneFromLocation();
     }
   };
-
-  const isNativePlatform = Capacitor.isNativePlatform();
 
   // Check if timezone is based on location coordinates
   const isTimezoneFromLocation =

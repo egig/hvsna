@@ -5,6 +5,7 @@ This directory contains task repository implementations that automatically adapt
 ## Available Implementations
 
 ### 1. PouchDBTaskRepository
+
 - **Purpose**: Unified implementation that works on both web and native platforms
 - **Usage**: Automatically selects the appropriate adapter based on platform
 - **Web Platform**: Uses IndexedDB adapter
@@ -12,6 +13,7 @@ This directory contains task repository implementations that automatically adapt
 - **Database**: Single PouchDB instance with platform-optimized storage
 
 ### 2. PouchDBListRepository
+
 - **Purpose**: List management companion to PouchDBTaskRepository
 - **Usage**: Handles list operations with the same platform adaptation
 - **Web Platform**: Uses IndexedDB adapter
@@ -22,23 +24,23 @@ This directory contains task repository implementations that automatically adapt
 ### Automatic Platform Detection (Recommended)
 
 ```typescript
-import { createTaskRepository } from './infra/task';
+import { createTaskRepository } from "./infra/task";
 
 // Automatically creates the appropriate repository for the current platform
 // Uses SQLite on native platforms, IndexedDB on web
-const repository = createTaskRepository('my-app-db');
+const repository = createTaskRepository("my-app-db");
 
 // Use the repository with renamed methods to avoid conflicts
 const task = await repository.createTask({
-  name: 'New Task',
-  description: 'Task description',
-  status: 0
+  name: "New Task",
+  description: "Task description",
+  status: 0,
 });
 
 const list = await repository.createList({
-  name: 'My List',
-  description: 'List description',
-  color: '#ff0000'
+  name: "My List",
+  description: "List description",
+  color: "#ff0000",
 });
 ```
 
@@ -57,20 +59,20 @@ const list = await listRepository.create({...});
 ### Direct Repository Usage
 
 ```typescript
-import { PouchDBTaskRepository, PouchDBListRepository } from './infra/task';
+import { PouchDBTaskRepository, PouchDBListRepository } from "./infra/task";
 
 // The repositories automatically detect platform and use appropriate adapter
-const taskRepo = new PouchDBTaskRepository('my-app-db');
-const listRepo = new PouchDBListRepository('my-app-db');
+const taskRepo = new PouchDBTaskRepository("my-app-db");
+const listRepo = new PouchDBListRepository("my-app-db");
 ```
 
 ### Database Creation
 
 ```typescript
-import { createDatabase } from './infra/task';
+import { createDatabase } from "./infra/task";
 
 // Create a database instance with the appropriate adapter
-const db = createDatabase('my-app-db');
+const db = createDatabase("my-app-db");
 ```
 
 ## Platform Detection
@@ -84,6 +86,7 @@ The repositories automatically detect the platform and use the optimal adapter:
 ## Features
 
 All implementations support:
+
 - ✅ Full CRUD operations for tasks and lists
 - ✅ Complex querying with Mango queries
 - ✅ Pagination support
@@ -98,10 +101,12 @@ All implementations support:
 ## Performance Considerations
 
 ### Native Platform (SQLite)
+
 - **Pros**: Better performance, persistent storage, native optimizations
 - **Cons**: Requires native build, larger app size
 
 ### Web Platform (IndexedDB)
+
 - **Pros**: No native dependencies, smaller bundle size
 - **Cons**: Limited storage quota, browser-dependent performance
 
@@ -132,7 +137,7 @@ For testing, you can use the web implementation or create a mock repository:
 
 ```typescript
 // Test with web implementation
-const testRepo = new PouchDBTaskRepository('test-db');
+const testRepo = new PouchDBTaskRepository("test-db");
 
 // Or create a mock
 const mockRepo = {
@@ -151,6 +156,7 @@ npm install pouchdb-adapter-cordova-sqlite
 ```
 
 The repositories will automatically:
+
 1. Detect if running on a native platform
 2. Load and register the SQLite adapter
 3. Create appropriate database instances

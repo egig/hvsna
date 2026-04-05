@@ -209,7 +209,7 @@ export default function Onboarding() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
-              <MapPin className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
+              <HvMapPin className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
             </div>
             <div className="text-left">
               <h3 className="font-semibold text-gray-900">
@@ -221,7 +221,7 @@ export default function Onboarding() {
               </p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          <HvChevronRight className="w-5 h-5 text-gray-400" />
         </div>
       </button>
 
@@ -229,7 +229,7 @@ export default function Onboarding() {
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
-            <Globe className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
+            <HvGlobe className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">
@@ -250,7 +250,7 @@ export default function Onboarding() {
           <span className="text-sm text-gray-800">
             {selectedTimezone.replace(/_/g, " ")}
           </span>
-          <ChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0" />
+          <HvChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0" />
         </button>
 
         <TimezonePickerModal
@@ -302,7 +302,7 @@ export default function Onboarding() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
-              <Bell className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
+              <HvBell className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
             </div>
             <div className="text-left">
               <h3 className="font-semibold text-gray-900">
@@ -314,7 +314,7 @@ export default function Onboarding() {
               </p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400" />
+          <HvChevronRight className="w-5 h-5 text-gray-400" />
         </div>
       </button>
 
@@ -322,7 +322,7 @@ export default function Onboarding() {
       <div className="bg-white border border-gray-200 rounded-lg p-4">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gray-100 p-2 rounded-lg">
-            <ChevronsUpDown className="w-5 h-5 text-gray-600" />
+            <HvChevronsUpDown className="w-5 h-5 text-gray-600" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">

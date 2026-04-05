@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "build:web": "vite build",
+    "build:capacitor": "vite build --mode capacitor",
     "dev": "vite",
+    "dev:capacitor": "vite --mode capacitor",
     "typecheck": "tsc",
     "test": "vitest run --reporter=tree",
     "test:ui": "vitest --ui",
-    "cap:sync": "npm run build && npx cap sync",
+    "cap:sync": "npm run build:capacitor && npx cap sync",
     "ios": "npx cap run ios",
     "android": "npx cap run android",
     "prepare": "husky"

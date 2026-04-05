@@ -169,29 +169,33 @@ export class PouchDBTaskRepository implements ITaskRepository {
     }
   }
 
+  static createWebDatabase(dbName = "hvsna-tasks"): PouchDB.Database {
+    return new PouchDB(dbName);
+  }
+
+  static createNativeDatabase(dbName = "hvsna-tasks"): PouchDB.Database {
+    try {
+      PouchDB.plugin(require("pouchdb-adapter-cordova-sqlite"));
+      return new PouchDB(dbName, { adapter: "cordova-sqlite" });
+    } catch (error) {
+      console.warn(
+        "Failed to load SQLite adapter, falling back to IndexedDB:",
+        error,
+      );
+      return new PouchDB(dbName);
+    }
+  }
+
   /**
    * Factory method to create a PouchDB instance with the appropriate adapter
-   * based on the current platform
+   * based on the current platform. Prefer createWebDatabase/createNativeDatabase
+   * in platform-specific entry points.
    */
   static createDatabase(dbName?: string): PouchDB.Database {
     const databaseName = dbName || "hvsna-tasks";
-    
-    if (Capacitor.isNativePlatform()) {
-      // Use Cordova SQLite adapter for native platforms
-      try {
-        // Dynamically import and register the SQLite adapter only on native platforms
-        PouchDB.plugin(require("pouchdb-adapter-cordova-sqlite"));
-        console.log("Using Cordova SQLite adapter for native platform");
-        return new PouchDB(databaseName, { adapter: "cordova-sqlite" });
-      } catch (error) {
-        console.warn("Failed to load SQLite adapter, falling back to IndexedDB:", error);
-        return new PouchDB(databaseName);
-      }
-    } else {
-      // Use standard IndexedDB adapter for web platform
-      console.log("Using IndexedDB adapter for web platform");
-      return new PouchDB(databaseName);
-    }
+    return Capacitor.isNativePlatform()
+      ? this.createNativeDatabase(databaseName)
+      : this.createWebDatabase(databaseName);
   }
 
   async create(input: TaskCreateInput): Promise<Task> {

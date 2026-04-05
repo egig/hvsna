@@ -1,11 +1,13 @@
-import { StrictMode } from "react";
 import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
-import type { AppConfig } from "src/app";
-import Hvsna from "src/app";
-import { getPouchDBInstance } from "src/modules/pouchdb-singleton";
-import { configureLogger } from "src/modules/logger";
-import log from "./modules/logger";
+import type { AppConfig } from "@src/app";
+import Hvsna from "@src/app";
+import { getPouchDBInstance } from "@src/modules/pouchdb-singleton";
+import { configureLogger } from "@src/modules/logger";
+import { registerWebImplementations } from "./register";
+import log from "@src/modules/logger";
+
+registerWebImplementations();
 
 const config: AppConfig = {
   basePath: import.meta.env.VITE_API_BASE,
@@ -19,10 +21,8 @@ const config: AppConfig = {
 };
 
 const root = createRoot(document.getElementById("root") as Container);
-
 const db = getPouchDBInstance();
 
-// Configure logger early
 configureLogger();
 
 (async () => {
