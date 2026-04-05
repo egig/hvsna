@@ -1,11 +1,11 @@
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { HvChevronRight, type HvIcon } from "@src/modules/icons";
 import { type ReactNode } from "react";
 import { Button } from "../navigation";
 
 interface MenuItemProps {
   title: string;
   subtitle?: string;
-  icon?: LucideIcon;
+  icon?: HvIcon;
   onClick?: () => void;
   to?: string;
   navType?: "forward" | "back" | "tab" | "modal";
@@ -111,7 +111,7 @@ export function MenuItem({
               flex items-center justify-center
             "
             >
-              <ChevronRight className="w-4 h-4" />
+              <HvChevronRight className="w-4 h-4" />
             </div>
           )}
 
@@ -210,7 +210,7 @@ export function MenuItem({
             flex items-center justify-center
           "
           >
-            <ChevronRight className="w-4 h-4" />
+            <HvChevronRight className="w-4 h-4" />
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Database, Merge, Trash2 } from "lucide-react";
+import { HvDatabase, HvMerge, HvTrash2 } from "@src/modules/icons";
 import { Modal } from "src/modules/navigation/modal";
 
 export interface SyncInitDialogProps {
@@ -29,7 +29,7 @@ export const SyncInitDialog: React.FC<SyncInitDialogProps> = ({
         {/* Content */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
-            <Database className="w-5 h-5 text-blue-600" />
+            <HvDatabase className="w-5 h-5 text-blue-600" />
             <p className="text-gray-700">
               Your local database contains <strong>{localDocCount}</strong>{" "}
               items that need to be synced with the cloud.
@@ -48,7 +48,7 @@ export const SyncInitDialog: React.FC<SyncInitDialogProps> = ({
             className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-left"
           >
             <div className="flex-shrink-0">
-              <Merge className="w-5 h-5 text-green-600" />
+              <HvMerge className="w-5 h-5 text-green-600" />
             </div>
             <div>
               <div className="font-medium text-gray-900">Merge Data</div>
@@ -64,7 +64,7 @@ export const SyncInitDialog: React.FC<SyncInitDialogProps> = ({
             className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-red-50 transition-colors text-left"
           >
             <div className="flex-shrink-0">
-              <Trash2 className="w-5 h-5 text-red-600" />
+              <HvTrash2 className="w-5 h-5 text-red-600" />
             </div>
             <div>
               <div className="font-medium text-gray-900">Delete Local Data</div>

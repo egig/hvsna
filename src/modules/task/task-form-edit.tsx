@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Trash2, Eye, Info, MoreVertical } from "lucide-react";
+import {
+  HvArrowUp,
+  HvTrash2,
+  HvEye,
+  HvInfo,
+  HvMoreVertical,
+} from "@src/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
@@ -75,7 +81,7 @@ export default function TaskFormEdit({
                 aria-label={t("add_new_task")}
                 type="submit"
               >
-                <ArrowUp />
+                <HvArrowUp />
               </button>
             )}
 
@@ -85,7 +91,7 @@ export default function TaskFormEdit({
                   className="w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors z-50"
                   aria-label={t("more_options")}
                 >
-                  <MoreVertical size={20} />
+                  <HvMoreVertical size={20} />
                 </Menu.Trigger>
 
                 <Menu.Portal>
@@ -97,7 +103,7 @@ export default function TaskFormEdit({
                         // closeOnClick={true}
                         className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
-                        <Info size={18} />
+                        <HvInfo size={18} />
                         {t("view_details")}
                       </Menu.Item>
                       <Menu.Item
@@ -106,7 +112,7 @@ export default function TaskFormEdit({
                         closeOnClick={true}
                         className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
-                        <Trash2 size={18} />
+                        <HvTrash2 size={18} />
                         {t("delete_task")}
                       </Menu.Item>
                     </Menu.Popup>

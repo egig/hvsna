@@ -1,5 +1,5 @@
 import { useState, useEffect, type ReactNode } from "react";
-import { Check } from "lucide-react";
+import { HvCheck } from "@src/modules/icons";
 import Block from "../ui/block";
 import { FormInput } from "../ui/form-input";
 import NavActionButton from "../ui/nav-action-button";
@@ -52,7 +52,7 @@ export default function BaseForm<T = void>({
         customBackAction={onCancel}
         rightAction={
           <NavActionButton type="submit" disabled={isSubmitting}>
-            <Check />
+            <HvCheck />
           </NavActionButton>
         }
       />

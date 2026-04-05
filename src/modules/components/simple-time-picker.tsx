@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock, ChevronDown } from "lucide-react";
+import { HvClock, HvChevronDown } from "@src/modules/icons";
 import { Modal } from "../navigation";
 
 interface SimpleTimePickerProps {
@@ -66,7 +66,7 @@ export function SimpleTimePicker({
         `}
       >
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-gray-400" />
+          <HvClock className="w-4 h-4 text-gray-400" />
           <span
             className={
               value ? "font-medium" : "text-gray-500 dark:text-gray-400"
@@ -75,7 +75,7 @@ export function SimpleTimePicker({
             {formatDisplayTime(value)}
           </span>
         </div>
-        <ChevronDown className="w-4 h-4 text-gray-400" />
+        <HvChevronDown className="w-4 h-4 text-gray-400" />
       </button>
 
       <Modal isOpen={isOpen} onClose={handleCancel} title="Select Time">

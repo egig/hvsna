@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HijriDate } from "./hijri";
 import { CalendarModal } from "./hijri-date-input/calendar-modal";
-import { CalendarIcon } from "lucide-react";
+import { HvCalendar } from "@src/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useHijriDate } from "./hijri/use-hijri-date";
 
@@ -91,7 +91,7 @@ export function HijriDateInput({
           >
             {formatDateDisplay(selectedDate)}
           </span>
-          <CalendarIcon className="w-5 h-5 text-gray-400" />
+          <HvCalendar className="w-5 h-5 text-gray-400" />
         </div>
       </button>
 

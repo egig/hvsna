@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Clock, Wifi, WifiOff, RefreshCw, AlertTriangle } from "lucide-react";
+import {
+  HvClock,
+  HvWifi,
+  HvWifiOff,
+  HvRefreshCw,
+  HvAlertTriangle,
+} from "@src/modules/icons";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { FormInput } from "../../components/form-input";
@@ -122,7 +128,7 @@ export default function PrayerTimeFallback() {
       <Block>
         <BlockTitle>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
+            <HvClock className="w-4 h-4" />
             {t("prayer_times") || "Prayer Times"}
           </div>
         </BlockTitle>
@@ -151,7 +157,7 @@ export default function PrayerTimeFallback() {
             disabled={isFetching || !settings.coordinate}
             className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200 font-medium shadow-sm"
           >
-            <RefreshCw
+            <HvRefreshCw
               className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`}
             />
             {isFetching
@@ -161,7 +167,7 @@ export default function PrayerTimeFallback() {
 
           {!settings.coordinate && (
             <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <HvAlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <div>
                 {t("location_required_for_fetch") ||
                   "Location coordinates must be set in settings to fetch prayer times"}
@@ -171,14 +177,14 @@ export default function PrayerTimeFallback() {
 
           {fetchError && (
             <div className="flex items-start gap-2 text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <HvAlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <div>{fetchError}</div>
             </div>
           )}
 
           {fetchSuccess && (
             <div className="flex items-start gap-2 text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-              <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <HvClock className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <div>
                 {t("prayer_times_updated") ||
                   "Prayer times updated successfully"}
@@ -191,7 +197,7 @@ export default function PrayerTimeFallback() {
       <Block>
         <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" />
+            <HvClock className="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" />
             <div>
               <h4 className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-1">
                 {t("how_it_works") || "How it works"}

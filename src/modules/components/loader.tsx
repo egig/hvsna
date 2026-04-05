@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react";
+import { HvLoader2 } from "@src/modules/icons";
 import { type ReactNode } from "react";
 
 interface LoadingSpinnerProps {
@@ -27,7 +27,7 @@ export function LoadingSpinner({
       ${className}
     `}
     >
-      <Loader2
+      <HvLoader2
         className={`
         ${sizeClasses[size]}
         animate-spin

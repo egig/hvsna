@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Trash2, Eye, Info, MoreVertical } from "lucide-react";
+import {
+  HvArrowUp,
+  HvTrash2,
+  HvEye,
+  HvInfo,
+  HvMoreVertical,
+} from "@src/modules/icons";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -78,7 +84,7 @@ export default function TaskFormEditDesktop({
               className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center transition-colors"
               aria-label={t("more_options")}
             >
-              <MoreVertical size={18} />
+              <HvMoreVertical size={18} />
             </Menu.Trigger>
 
             <Menu.Portal>
@@ -89,7 +95,7 @@ export default function TaskFormEditDesktop({
                     disabled={isSubmitting}
                     className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                   >
-                    <Info size={18} />
+                    <HvInfo size={18} />
                     {t("view_details")}
                   </Menu.Item>
                   <Menu.Item
@@ -97,7 +103,7 @@ export default function TaskFormEditDesktop({
                     disabled={isSubmitting}
                     className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                   >
-                    <Trash2 size={18} />
+                    <HvTrash2 size={18} />
                     {t("delete_task")}
                   </Menu.Item>
                 </Menu.Popup>

@@ -1,4 +1,4 @@
-import { CalendarIcon } from "lucide-react";
+import { HvCalendar } from "@src/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";
@@ -60,7 +60,7 @@ export default function Upcoming() {
 
       {initiated && !loading && !error && upcomingTasks.length === 0 && (
         <div className="text-center py-8">
-          <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <HvCalendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 dark:text-gray-400 mb-2">
             {t("no_upcoming_tasks")}
           </p>

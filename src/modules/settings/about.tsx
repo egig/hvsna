@@ -1,5 +1,5 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { RefreshCw } from "lucide-react";
+import { HvRefreshCw } from "@src/modules/icons";
 import { Page } from "../navigation";
 import packageInfo from "../../../package.json";
 import { LargeNavbar } from "../navigation";
@@ -49,7 +49,7 @@ export default function About() {
                 backgroundColor: "var(--hvsna-primary-color, #5A4A7A)",
               }}
             >
-              <RefreshCw size={14} />
+              <HvRefreshCw size={14} />
               {t("update_now")}
             </button>
           </div>

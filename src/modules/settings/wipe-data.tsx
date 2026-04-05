@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Database, Trash2, AlertTriangle } from "lucide-react";
+import { HvDatabase, HvTrash2, HvAlertTriangle } from "@src/modules/icons";
 import { usePouchDB } from "../../pouchdb";
 import { Navbar, Page } from "../navigation";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
@@ -42,7 +42,7 @@ export default function WipeData() {
         {/* Warning Section */}
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
           <div className="flex items-start space-x-3">
-            <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+            <HvAlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
             <div>
               <h3 className="font-semibold text-orange-900 dark:text-orange-100 mb-1">
                 {t("warning")}
@@ -71,7 +71,7 @@ export default function WipeData() {
             disabled={isDeleting}
             className="w-full flex items-center justify-center space-x-2 bg-[var(--hvsna-danger-color)] hover:bg-[var(--hvsna-danger-color-hover)] disabled:bg-[var(--hvsna-danger-color-pressed)] text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
           >
-            <Trash2 className="w-5 h-5" />
+            <HvTrash2 className="w-5 h-5" />
             <span>{isDeleting ? t("deleting") : t("wipe_all_data")}</span>
           </button>
         </div>

@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { HvCheck } from "@src/modules/icons";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { Navbar } from "src/modules/navigation";
@@ -122,7 +122,7 @@ export function TimeSelectionModal({
             disabled={inputMode === "prayer" ? !selectedPrayer : false}
             className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            <Check />
+            <HvCheck />
           </button>
         }
       />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ClockIcon } from "lucide-react";
+import { HvClock } from "@src/modules/icons";
 import { Modal } from "src/modules/navigation";
 import { TimeSelectionModal } from "./hijri-date-input/time-selection-modal";
 import type { PrayerTime } from "src/modules/task/types";
@@ -83,7 +83,7 @@ export function TimeInput({
           >
             {formatTimeDisplay(customTime, prayerTime)}
           </span>
-          <ClockIcon className="w-5 h-5 text-gray-400" />
+          <HvClock className="w-5 h-5 text-gray-400" />
         </div>
       </button>
 

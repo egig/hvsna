@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
-  ArrowLeft,
-  Plus,
-  List as ListIcon,
-  Edit2,
-  Trash2,
-  MoreVertical,
-} from "lucide-react";
+  HvArrowLeft,
+  HvPlus,
+  HvList,
+  HvEdit2,
+  HvTrash2,
+  HvMoreVertical,
+} from "@src/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -116,7 +116,7 @@ export default function ListDetail() {
     return (
       <Page navbar={<Navbar title={t("list_not_found") || "List Not Found"} />}>
         <div className="text-center py-12">
-          <ListIcon size={48} className="mx-auto text-gray-400 mb-4" />
+          <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {t("list_not_found") || "List Not Found"}
           </h3>
@@ -141,7 +141,7 @@ export default function ListDetail() {
                   className="w-10 h-10 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors"
                   aria-label="More options"
                 >
-                  <MoreVertical size={20} />
+                  <HvMoreVertical size={20} />
                 </Menu.Trigger>
 
                 <Menu.Portal>
@@ -151,14 +151,14 @@ export default function ListDetail() {
                         onClick={handleEditList}
                         className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
-                        <Edit2 size={18} />
+                        <HvEdit2 size={18} />
                         {t("edit_list")}
                       </Menu.Item>
                       <Menu.Item
                         onClick={handleDeleteList}
                         className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
-                        <Trash2 size={18} />
+                        <HvTrash2 size={18} />
                         {t("delete_list")}
                       </Menu.Item>
                     </Menu.Popup>
@@ -192,7 +192,7 @@ export default function ListDetail() {
 
       {!tasksLoading && tasks.length === 0 && (
         <div className="text-center py-12">
-          <ListIcon size={48} className="mx-auto text-gray-400 mb-4" />
+          <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {t("no_tasks_in_list") || "No Tasks in List"}
           </h3>

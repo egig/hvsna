@@ -3,18 +3,17 @@ import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import {
-  TbCalendar,
-  TbCalendarFilled,
-  TbCalendarMonth,
-  TbCalendarMonthFilled,
-  TbFileFilled,
-  TbList,
-} from "react-icons/tb";
-import {
-  HiOutlineEllipsisHorizontalCircle,
-  HiEllipsisHorizontalCircle,
-} from "react-icons/hi2";
-import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
+  HvCalendar,
+  HvCalendarFilled,
+  HvCalendarMonth,
+  HvCalendarMonthFilled,
+  HvFileFilled,
+  HvList,
+  HvOutlineEllipsisHorizontalCircle,
+  HvEllipsisHorizontalCircle,
+  HvOutlineInbox,
+  HvHiInbox,
+} from "@src/modules/icons";
 
 export function TabBar() {
   const { t } = useLanguageContext();
@@ -25,29 +24,29 @@ export function TabBar() {
     {
       path: "/",
       label: t("today"),
-      icon: <TbCalendar />,
-      activeIcon: <TbCalendarFilled />,
+      icon: <HvCalendar />,
+      activeIcon: <HvCalendarFilled />,
       context: "today",
     },
     {
       path: "/upcoming",
       label: t("upcoming"),
-      icon: <TbCalendarMonth />,
-      activeIcon: <TbCalendarMonthFilled />,
+      icon: <HvCalendarMonth />,
+      activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
     },
     {
       path: "/inbox",
       label: t("inbox"),
-      icon: <HiOutlineInbox />,
-      activeIcon: <HiInbox />,
+      icon: <HvOutlineInbox />,
+      activeIcon: <HvHiInbox />,
       context: "inbox",
     },
     {
       path: "/browse",
       label: t("Browse"),
-      icon: <HiOutlineEllipsisHorizontalCircle />,
-      activeIcon: <HiEllipsisHorizontalCircle />,
+      icon: <HvOutlineEllipsisHorizontalCircle />,
+      activeIcon: <HvEllipsisHorizontalCircle />,
       context: "browse",
     },
   ];

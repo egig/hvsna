@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, time } from "framer-motion";
-import { Square, CheckSquare2 } from "lucide-react";
+import { HvSquare, HvCheckSquare2 } from "@src/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
@@ -48,12 +48,12 @@ export function TaskListItem({
     switch (status) {
       case 1:
         return (
-          <CheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
+          <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
         );
       case 0:
-        return <Square strokeWidth={1} size={24} className="text-gray-500" />;
+        return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
       default:
-        return <Square strokeWidth={1} size={24} className="text-gray-500" />;
+        return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
     }
   };
 

@@ -1,4 +1,4 @@
-import { Plus, List as ListIcon, Settings, SearchIcon } from "lucide-react";
+import { HvPlus, HvList, HvSettings, HvSearch } from "@src/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Link, Page } from "../navigation";
@@ -35,7 +35,7 @@ export default function Browse() {
           showBackButton={false}
           rightAction={
             <Link to="/settings">
-              <Settings size={20} />
+              <HvSettings size={20} />
               <span className="hidden sm:inline ml-2">
                 {t("settings") || "Settings"}
               </span>
@@ -58,16 +58,12 @@ export default function Browse() {
 
       {/* Navigation Menu Items */}
       <div className="mb-6">
-        <MenuItem
-          icon={SearchIcon}
-          title={t("search") || "Search"}
-          to="/tasks"
-        />
+        <MenuItem icon={HvSearch} title={t("search") || "Search"} to="/tasks" />
       </div>
 
       {!loading && initiated && lists.length === 0 && (
         <div className="text-center py-12">
-          <ListIcon size={48} className="mx-auto text-gray-400 mb-4" />
+          <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {t("no_lists") || "No lists yet"}
           </h3>
@@ -76,7 +72,7 @@ export default function Browse() {
               "Create your first list to organize your tasks."}
           </p>
           <Button2 onClick={handleCreateList}>
-            <Plus size={20} />
+            <HvPlus size={20} />
             <span className="">{t("create_list") || "Create List"}</span>
           </Button2>
         </div>
@@ -89,10 +85,7 @@ export default function Browse() {
               {t("lists") || "Lists"}
             </h3>
             <Button onClick={handleCreateList}>
-              <Plus size={20} />
-              <span className="hidden sm:inline ml-2">
-                {t("create_list") || "Create List"}
-              </span>
+              <HvPlus size={20} />
             </Button>
           </div>
           {lists.map((list) => (

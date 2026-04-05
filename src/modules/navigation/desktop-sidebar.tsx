@@ -1,12 +1,12 @@
 import {
-  Plus,
-  PanelLeftClose,
-  PanelLeft,
-  UserRound,
-  MoreVertical,
-  Edit,
-  Trash2,
-} from "lucide-react";
+  HvPlus,
+  HvPanelLeftClose,
+  HvUserRound,
+  HvMoreVertical,
+  HvEdit,
+  HvTrash2,
+  HvPanelLeft,
+} from "@src/modules/icons";
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
@@ -19,19 +19,20 @@ import { useTasks } from "../task/use-tasks";
 import { useState } from "react";
 import { useAuth } from "../auth/use-auth";
 import {
-  TbSquareRoundedPlusFilled,
-  TbCalendar,
-  TbCalendarFilled,
-  TbCalendarMonth,
-  TbCalendarMonthFilled,
-  TbLayoutList,
-  TbLayoutListFilled,
-  TbSettings,
-  TbSettingsFilled,
-  TbSearch,
-} from "react-icons/tb";
-
-import { HiOutlineInbox, HiInbox } from "react-icons/hi2";
+  HvSquareRoundedPlusFilled,
+  HvCalendar,
+  HvCalendarFilled,
+  HvCalendarMonth,
+  HvCalendarMonthFilled,
+  HvLayoutList,
+  HvLayoutListFilled,
+  HvSearch,
+  HvSettings,
+  HvSettingsFilled,
+  HvOutlineInbox,
+  HvHiInbox,
+} from "@src/modules/icons";
+import { UserRound } from "lucide-react";
 
 interface DesktopSidebarProps {
   openTaskForm?: () => void;
@@ -103,29 +104,29 @@ export function DesktopSidebar({
     {
       path: "/",
       label: t("today"),
-      icon: <TbCalendar />,
-      activeIcon: <TbCalendarFilled />,
+      icon: <HvCalendar />,
+      activeIcon: <HvCalendarFilled />,
       context: "today",
     },
     {
       path: "/upcoming",
       label: t("upcoming"),
-      icon: <TbCalendarMonth />,
-      activeIcon: <TbCalendarMonthFilled />,
+      icon: <HvCalendarMonth />,
+      activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
     },
     {
       path: "/inbox",
       label: t("inbox") || "Inbox",
-      icon: <HiOutlineInbox />,
-      activeIcon: <HiInbox />,
+      icon: <HvOutlineInbox />,
+      activeIcon: <HvHiInbox />,
       context: "inbox",
     },
     {
       path: "/tasks",
       label: t("search"),
-      icon: <TbSearch />,
-      activeIcon: <TbSearch />,
+      icon: <HvSearch />,
+      activeIcon: <HvSearch />,
       context: "all",
     },
   ];
@@ -135,8 +136,8 @@ export function DesktopSidebar({
     {
       path: "/settings/general",
       label: t("settings"),
-      icon: <TbSettings />,
-      activeIcon: <TbSettingsFilled />,
+      icon: <HvSettings />,
+      activeIcon: <HvSettingsFilled />,
       context: "settings",
     },
   ];
@@ -177,7 +178,7 @@ export function DesktopSidebar({
                           onClick={handleLogoutClick}
                           className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                         >
-                          <UserRound size={16} />
+                          <HvUserRound size={16} />
                           <span>{t("sign_out")}</span>
                         </Menu.Item>
                       </Menu.Popup>
@@ -208,7 +209,11 @@ export function DesktopSidebar({
           }`}
           aria-label={collapsed ? t("expand_sidebar") : t("collapse_sidebar")}
         >
-          {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+          {collapsed ? (
+            <HvPanelLeft size={18} />
+          ) : (
+            <HvPanelLeftClose size={18} />
+          )}
         </button>
       </div>
 
@@ -223,7 +228,7 @@ export function DesktopSidebar({
             }`}
             aria-label="Add new task"
           >
-            <TbSquareRoundedPlusFilled size={20} />
+            <HvSquareRoundedPlusFilled size={20} />
             {!collapsed && (
               <span className="font-medium text-sm">{t("add_new_task")}</span>
             )}
@@ -265,7 +270,7 @@ export function DesktopSidebar({
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
                 title={t("add_new_list")}
               >
-                <Plus size={16} />
+                <HvPlus size={16} />
               </button>
             </div>
             <div className="space-y-1">
@@ -291,7 +296,7 @@ export function DesktopSidebar({
 
                       <Menu.Root>
                         <Menu.Trigger className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                          <MoreVertical size={14} />
+                          <HvMoreVertical size={14} />
                         </Menu.Trigger>
                         <Menu.Portal>
                           <Menu.Positioner>
@@ -300,14 +305,14 @@ export function DesktopSidebar({
                                 onClick={() => handleEditList(list)}
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                               >
-                                <Edit size={14} />
+                                <HvEdit size={14} />
                                 <span>{t("edit")}</span>
                               </Menu.Item>
                               <Menu.Item
                                 onClick={() => handleDeleteList(list)}
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               >
-                                <Trash2 size={14} />
+                                <HvTrash2 size={14} />
                                 <span>{t("delete")}</span>
                               </Menu.Item>
                             </Menu.Popup>

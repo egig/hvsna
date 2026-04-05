@@ -2,7 +2,7 @@ import { useAuth } from "../../auth/use-auth";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { User, Mail } from "lucide-react";
+import { HvUser, HvMail } from "@src/modules/icons";
 
 export default function Profile() {
   const { t } = useLanguageContext();
@@ -18,7 +18,7 @@ export default function Profile() {
             {/* Profile Picture */}
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                <User className="w-8 h-8 text-gray-400" />
+                <HvUser className="w-8 h-8 text-gray-400" />
               </div>
               <div className="flex-1">
                 <h2 className="text-lg font-semibold text-gray-900">
@@ -33,18 +33,18 @@ export default function Profile() {
             {/* User Details */}
             <div className="space-y-2 pt-2 border-t border-gray-100">
               <div className="flex items-center space-x-3">
-                <Mail className="w-4 h-4 text-gray-400" />
+                <HvMail className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-600">{user.email}</span>
               </div>
               <div className="flex items-center space-x-3">
-                <User className="w-4 h-4 text-gray-400" />
+                <HvUser className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-600">
                   User ID: {user.userId}
                 </span>
               </div>
               {user.createdAt && (
                 <div className="flex items-center space-x-3">
-                  <User className="w-4 h-4 text-gray-400" />
+                  <HvUser className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">
                     Member since:{" "}
                     {new Date(user.createdAt).toLocaleDateString()}

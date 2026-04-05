@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ArrowUp } from "lucide-react";
+import { HvArrowUp } from "@src/modules/icons";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
@@ -126,7 +126,7 @@ export default function TaskForm({
           aria-label={t("add_new_task")}
           type="submit"
         >
-          <ArrowUp />
+          <HvArrowUp />
         </button>
       </div>
     </form>

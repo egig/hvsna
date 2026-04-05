@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Check, Filter, FilterX } from "lucide-react";
+import { HvPlus, HvCheck, HvFilter, HvFilterX } from "@src/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskFilterModal from "./task-filter-modal";
@@ -62,7 +62,7 @@ export default function Tasks() {
               {hasFilter() && (
                 <div className="absolute w-2 h-2 bg-[var(--hvsna-primary-color)] opacity-[0.8] rounded-full" />
               )}
-              <Filter size={20} />
+              <HvFilter size={20} />
             </Button>
           }
         />
@@ -81,7 +81,7 @@ export default function Tasks() {
               onClick={refreshTasks}
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2 mx-auto"
             >
-              <Plus className="rotate-45" size={16} />
+              <HvPlus className="rotate-45" size={16} />
               {t("retry")}
             </button>
           </div>
@@ -89,7 +89,7 @@ export default function Tasks() {
 
         {initiated && !loading && !error && tasks.length === 0 && (
           <div className="text-center py-8">
-            <Check className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <HvCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400 mb-2">
               {t("no_tasks_yet")}
             </p>

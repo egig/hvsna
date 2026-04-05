@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRightIcon } from "lucide-react";
+import { HvChevronRight } from "@src/modules/icons";
 
 interface ListInputProps {
   label: string;
@@ -47,7 +47,7 @@ export const ListInput: React.FC<ListInputProps> = ({
 
       {!rightContent && (
         <div className="flex-shrink-0 text-gray-400">
-          <ChevronRightIcon className="w-5 h-5" />
+          <HvChevronRight className="w-5 h-5" />
         </div>
       )}
     </button>

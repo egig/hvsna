@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { HvCheck, HvChevronLeft, HvChevronRight } from "@src/modules/icons";
 import { Modal, Navbar } from "src/modules/navigation";
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { Tabs } from "@base-ui/react/tabs";
@@ -342,7 +342,7 @@ export function HijriDateRangeModal({
             disabled={!tempStartDate || !tempEndDate}
             className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
-            <Check />
+            <HvCheck />
           </button>
         }
       />
@@ -422,7 +422,7 @@ export function HijriDateRangeModal({
             }
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
-            <ChevronLeftIcon className="w-5 h-5" />
+            <HvChevronLeft className="w-5 h-5" />
           </button>
 
           <h3 className="text-m text-gray-900 dark:text-white">
@@ -437,7 +437,7 @@ export function HijriDateRangeModal({
             }
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
-            <ChevronRightIcon className="w-5 h-5" />
+            <HvChevronRight className="w-5 h-5" />
           </button>
         </div>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HijriDate } from "./hijri/hijri-date";
 import { HijriDateRangeModal } from "./hijri-date-range-modal";
-import { CalendarIcon, X } from "lucide-react";
+import { HvCalendar, HvX } from "@src/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
 interface DateRange {
@@ -123,10 +123,10 @@ export function HijriDateRangeInput({
                 className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 title={t("clear")}
               >
-                <X className="w-3 h-3" />
+                <HvX className="w-3 h-3" />
               </span>
             )}
-            <CalendarIcon className="w-4 h-4 text-gray-400" />
+            <HvCalendar className="w-4 h-4 text-gray-400" />
           </div>
         </div>
       </button>

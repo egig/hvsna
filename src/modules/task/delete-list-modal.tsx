@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
+import { HvAlertTriangle } from "@src/modules/icons";
 import { Modal } from "../navigation/modal";
 import type { Task } from "./types";
 
@@ -34,7 +34,7 @@ export function DeleteListModal({
       <div className="p-6">
         {/* Warning */}
         <div className="flex items-start gap-3 mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+          <HvAlertTriangle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
           <div>
             <h3 className="font-medium text-red-900 mb-1">
               This action cannot be undone

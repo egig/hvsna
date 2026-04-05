@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { Page } from "../navigation";
 import { Navbar } from "../navigation";
 import Block from "../components/block";
-import { RefreshCw, CheckCircle, AlertCircle, Clock, Info } from "lucide-react";
+import {
+  HvRefreshCw,
+  HvCheckCircle,
+  HvAlertCircle,
+  HvClock,
+  HvInfo,
+} from "@src/modules/icons";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useSync } from "src/modules/sync/context";
 
@@ -59,7 +65,7 @@ export default function Sync() {
 
     if (manualSyncStatus === "success") {
       return (
-        <CheckCircle
+        <HvCheckCircle
           className="h-5 w-5"
           style={{ color: "var(--hvsna-primary-color)" }}
         />
@@ -67,19 +73,19 @@ export default function Sync() {
     }
 
     if (manualSyncStatus === "error") {
-      return <AlertCircle className="h-5 w-5 text-red-600" />;
+      return <HvAlertCircle className="h-5 w-5 text-red-600" />;
     }
 
     if (lastSyncTime) {
       return (
-        <CheckCircle
+        <HvCheckCircle
           className="h-5 w-5"
           style={{ color: "var(--hvsna-primary-color)" }}
         />
       );
     }
 
-    return <Clock className="h-5 w-5 text-gray-400" />;
+    return <HvClock className="h-5 w-5 text-gray-400" />;
   };
 
   const getStatusText = () => {
@@ -102,7 +108,7 @@ export default function Sync() {
           {manualSyncStatus === "error" && errorMessage && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <HvAlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                 <div className="flex-1">
                   <h3 className="text-sm font-medium text-red-800 mb-1">
                     {t("sync_failed")}
@@ -165,12 +171,12 @@ export default function Sync() {
           >
             {isManualSyncing ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <HvRefreshCw className="h-4 w-4 animate-spin" />
                 {t("syncing")}
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4" />
+                <HvRefreshCw className="h-4 w-4" />
                 {t("sync_now")}
               </>
             )}

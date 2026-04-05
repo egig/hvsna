@@ -1,4 +1,4 @@
-import { ChevronLeft, X, Search } from "lucide-react";
+import { HvChevronLeft, HvX, HvSearch } from "@src/modules/icons";
 import { useAppNavigation } from "./use-app-navigation";
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";
@@ -68,8 +68,8 @@ export function Navbar({
             className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
             aria-label="Go back"
           >
-            {modal && <X />}
-            {modal || <ChevronLeft />}
+            {modal && <HvX />}
+            {modal || <HvChevronLeft />}
           </button>
         )}
       </div>
@@ -78,7 +78,7 @@ export function Navbar({
       <div className="flex-1 text-center">
         {showSearch ? (
           <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <HvSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
               value={searchValue}
@@ -97,7 +97,7 @@ export function Navbar({
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label="Clear search"
               >
-                <X className="w-4 h-4" />
+                <HvX className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -192,8 +192,8 @@ export function LargeNavbar({
                 }`}
                 aria-label="Go back"
               >
-                {modal && <X />}
-                {modal || <ChevronLeft />}
+                {modal && <HvX />}
+                {modal || <HvChevronLeft />}
               </button>
             )}
           </div>
@@ -204,7 +204,7 @@ export function LargeNavbar({
           >
             {showSearch ? (
               <div className="relative max-w-md mx-auto">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <HvSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
                   value={searchValue}
@@ -223,7 +223,7 @@ export function LargeNavbar({
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label="Clear search"
                   >
-                    <X className="w-4 h-4" />
+                    <HvX className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -255,7 +255,7 @@ export function LargeNavbar({
         >
           {showSearch ? (
             <div className="relative max-w-lg mx-auto">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <HvSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
                 value={searchValue}
@@ -274,7 +274,7 @@ export function LargeNavbar({
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label="Clear search"
                 >
-                  <X className="w-5 h-5" />
+                  <HvX className="w-5 h-5" />
                 </button>
               )}
             </div>

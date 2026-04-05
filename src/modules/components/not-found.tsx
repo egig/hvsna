@@ -1,4 +1,4 @@
-import { Home, Search, ArrowLeft } from "lucide-react";
+import { HvHome, HvSearch, HvArrowLeft } from "@src/modules/icons";
 import { useNavigate } from "react-router";
 
 export function NotFound() {
@@ -10,7 +10,7 @@ export function NotFound() {
         {/* 404 Icon */}
         <div className="mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-            <Search className="w-10 h-10 text-gray-400" />
+            <HvSearch className="w-10 h-10 text-gray-400" />
           </div>
           <h1 className="text-6xl font-bold text-gray-900 mb-2">404</h1>
         </div>
@@ -32,7 +32,7 @@ export function NotFound() {
             onClick={() => navigate(-1)}
             className="inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors touch-manipulation"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <HvArrowLeft className="w-4 h-4 mr-2" />
             Go Back
           </button>
 
@@ -40,7 +40,7 @@ export function NotFound() {
             onClick={() => navigate("/")}
             className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 border border-transparent rounded-lg text-white hover:bg-primary-700 transition-colors touch-manipulation"
           >
-            <Home className="w-4 h-4 mr-2" />
+            <HvHome className="w-4 h-4 mr-2" />
             Home
           </button>
         </div>

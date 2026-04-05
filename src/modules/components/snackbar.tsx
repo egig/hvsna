@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { HvX } from "@src/modules/icons";
 
 export interface SnackbarProps {
   isOpen: boolean;
@@ -83,7 +83,7 @@ export function Snackbar({
           className="flex-shrink-0 p-1 text-white/70 hover:text-white transition-colors rounded"
           aria-label="Close snackbar"
         >
-          <X size={20} />
+          <HvX size={20} />
         </button>
       )}
     </div>

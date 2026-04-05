@@ -1,6 +1,6 @@
 import { Button } from "../navigation";
 import { Navbar } from "../navigation/navbar";
-import { Check } from "lucide-react";
+import { HvCheck } from "@src/modules/icons";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../components/list-input-select";
@@ -74,7 +74,7 @@ export default function TaskFilterModal({
             onClick={onClose}
             className="w-10 h-10 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full transition-colors font-medium shadow-sm flex items-center justify-center"
           >
-            <Check size={16} />
+            <HvCheck size={16} />
           </Button>
         }
         modal={true}

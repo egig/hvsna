@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import {
-  LogIn,
-  Trash,
-  Cog,
-  Info,
-  RefreshCw,
-  User,
-  LogOut,
-  Clock,
-  List,
-  ListIcon,
-} from "lucide-react";
+  HvLogIn,
+  HvTrash,
+  HvSettings,
+  HvInfo,
+  HvRefreshCw,
+  HvUser,
+  HvLogOut,
+  HvClock,
+  HvList,
+} from "@src/modules/icons";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../components/menu-item";
 import { Navbar } from "../../navigation";
@@ -33,27 +32,31 @@ export default function Settings() {
     <Page>
       <Navbar title={t("settings")} showBackButton={true} />
       {isAuthenticated && (
-        <MenuItem title={t("account")} icon={User} to="/profile" />
+        <MenuItem title={t("account")} icon={HvUser} to="/profile" />
       )}
       {!isAuthenticated && (
-        <MenuItem title={t("sign_in")} icon={LogIn} to="/signin" />
+        <MenuItem title={t("sign_in")} icon={HvLogIn} to="/signin" />
       )}
-      <MenuItem title={t("general")} icon={Cog} to="/settings/general" />
+      <MenuItem title={t("general")} icon={HvSettings} to="/settings/general" />
       <MenuItem
         title={t("prayer_time_fallback") || "Prayer Time Fallback"}
-        icon={Clock}
+        icon={HvClock}
         to="/settings/prayer-time-fallback"
       />
       {isAuthenticated && (
-        <MenuItem title={t("sync")} icon={RefreshCw} to="/sync" />
+        <MenuItem title={t("sync")} icon={HvRefreshCw} to="/sync" />
       )}
-      <MenuItem title={t("reset_device_data")} icon={Trash} to="/wipe-local" />
-      <MenuItem title={t("about")} icon={Info} to="/about" />
+      <MenuItem
+        title={t("reset_device_data")}
+        icon={HvTrash}
+        to="/wipe-local"
+      />
+      <MenuItem title={t("about")} icon={HvInfo} to="/about" />
       {isAuthenticated && (
         <>
           <MenuItem
             title={t("sign_out")}
-            icon={LogOut}
+            icon={HvLogOut}
             onClick={() => setConfirmOpen(true)}
           />
           <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>

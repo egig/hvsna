@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ChevronsUpDown } from "lucide-react";
+import { HvChevronsUpDown } from "@src/modules/icons";
 import { Page, Navbar } from "../../navigation";
 import { TimezonePickerModal } from "../../components/timezone-picker-modal";
 import { useSettings } from "../useSettings";
@@ -263,7 +263,7 @@ export default function GeneralSettings() {
               <span className="truncate">
                 {settings.timezone.replace(/_/g, " ")}
               </span>
-              <ChevronsUpDown className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <HvChevronsUpDown className="w-3.5 h-3.5 text-gray-400 shrink-0" />
             </button>
           </div>
           {isTimezoneFromLocation && (

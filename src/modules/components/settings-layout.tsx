@@ -1,15 +1,15 @@
 import { type ReactNode } from "react";
 import {
-  LogIn,
-  Trash,
-  Cog,
-  Info,
-  RefreshCw,
-  User,
-  LogOut,
-  Calendar,
-  Clock,
-} from "lucide-react";
+  HvLogIn,
+  HvTrash,
+  HvSettings,
+  HvInfo,
+  HvRefreshCw,
+  HvUser,
+  HvLogOut,
+  HvCalendar,
+  HvClock,
+} from "@src/modules/icons";
 import { Modal } from "../navigation/modal";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/use-auth";
@@ -134,7 +134,7 @@ export function SettingsModal({
                     onClick={() => setConfirmOpen(true)}
                     className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left text-danger-600 hover:bg-danger-50 transition-colors"
                   >
-                    <LogOut className="w-5 h-5 flex-shrink-0" />
+                    <HvLogOut className="w-5 h-5 flex-shrink-0" />
                     <span className="text-sm">{t("sign_out")}</span>
                   </button>
                 </div>
@@ -190,38 +190,38 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
   {
     id: "account",
     title: "Account",
-    icon: User,
+    icon: HvUser,
     requiresAuth: true,
   },
   {
     id: "general",
     title: "General",
-    icon: Cog,
+    icon: HvSettings,
   },
   {
     id: "prayer-time-fallback",
     title: "Prayer Times",
-    icon: Clock,
+    icon: HvClock,
   },
   {
     id: "sync",
     title: "Sync",
-    icon: RefreshCw,
+    icon: HvRefreshCw,
     requiresAuth: true,
   },
   {
     id: "calendar",
     title: "Calendar",
-    icon: Calendar,
+    icon: HvCalendar,
   },
   {
     id: "reset",
     title: "Reset Data",
-    icon: Trash,
+    icon: HvTrash,
   },
   {
     id: "about",
     title: "About",
-    icon: Info,
+    icon: HvInfo,
   },
 ];

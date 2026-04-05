@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { HvSearch } from "@src/modules/icons";
 import { Modal } from "../navigation";
 import { ALL_TIMEZONES } from "../timezones";
 
@@ -44,7 +44,7 @@ export function TimezonePickerModal({
       <div className="flex flex-col h-full">
         <div className="px-4 py-3 border-b border-gray-100">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <HvSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
               value={search}

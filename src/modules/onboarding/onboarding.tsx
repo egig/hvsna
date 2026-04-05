@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
-  MapPin,
-  Globe,
-  ChevronRight,
-  Languages,
-  ChevronsUpDown,
-  Bell,
-} from "lucide-react";
+  HvMapPin,
+  HvGlobe,
+  HvChevronRight,
+  HvLanguages,
+  HvChevronsUpDown,
+  HvBell,
+} from "@src/modules/icons";
 import { Page, Navbar } from "../navigation";
 import { TimezonePickerModal } from "../components/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";

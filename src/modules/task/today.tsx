@@ -8,7 +8,7 @@ import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { HvChevronRight, HvChevronDown } from "@src/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
 import {
@@ -277,8 +277,8 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
             defaultOpen={!group.isCompleted}
           >
             <Collapsible.Trigger className="flex items-center gap-1.5 mb-2 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
-              <ChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
-              <ChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
+              <HvChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
+              <HvChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
               {labelContent}
               {group.isCompleted && (
                 <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
