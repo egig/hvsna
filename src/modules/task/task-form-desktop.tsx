@@ -31,6 +31,10 @@ export default function TaskFormDesktop({
     setSelectedScheduleAt,
     selectedListId,
     setSelectedListId,
+    selectedRepeat,
+    setSelectedRepeat,
+    selectedRepeatInterval,
+    setSelectedRepeatInterval,
     lists,
   } = useTaskForm(onSuccess, onError, onCancel);
   const location = useLocation();
@@ -98,6 +102,12 @@ export default function TaskFormDesktop({
           atTime={selectedScheduleAt.time}
           prayerTime={selectedScheduleAt.prayerTime}
           isSubmitting={isSubmitting}
+          repeat={selectedRepeat}
+          repeatInterval={selectedRepeatInterval}
+          onRepeatChange={(repeat, interval) => {
+            setSelectedRepeat(repeat);
+            setSelectedRepeatInterval(interval);
+          }}
           onChange={(hijriDate, time, prayerTime) => {
             setSelectedScheduleAt({
               dateHijri: hijriDate,

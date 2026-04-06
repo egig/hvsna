@@ -44,12 +44,20 @@ export default function TaskFormEdit({
     task,
     handleSubmit,
     handleDelete,
+    handleDeleteSingle,
+    handleDeleteAll,
+    showDeleteOptions,
+    setShowDeleteOptions,
     isSubmitting,
     setRemoveTime,
     selectedScheduleAt,
     setSelectedScheduleAt,
     selectedListId,
     setSelectedListId,
+    selectedRepeat,
+    setSelectedRepeat,
+    selectedRepeatInterval,
+    setSelectedRepeatInterval,
     lists,
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
 
@@ -157,6 +165,13 @@ export default function TaskFormEdit({
           atTime={selectedScheduleAt.time || ""}
           prayerTime={selectedScheduleAt.prayerTime || ""}
           isSubmitting={isSubmitting}
+          repeat={selectedRepeat}
+          repeatInterval={selectedRepeatInterval}
+          onRepeatChange={(repeat, interval) => {
+            setSelectedRepeat(repeat);
+            setSelectedRepeatInterval(interval);
+            setIsFormDirty(true);
+          }}
           onChange={(hijriDate, time, prayerTime) => {
             setSelectedScheduleAt({
               dateHijri: hijriDate,
@@ -189,6 +204,33 @@ export default function TaskFormEdit({
         title={t("task_details")}
       >
         {task && <TaskPreview task={task} />}
+      </Modal>
+
+      {/* Delete options modal for recurring tasks */}
+      <Modal
+        isOpen={showDeleteOptions}
+        onClose={() => setShowDeleteOptions(false)}
+        title={t("delete_task")}
+      >
+        <div className="flex flex-col gap-3 p-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {t("delete_recurring_task_prompt")}
+          </p>
+          <button
+            onClick={handleDeleteSingle}
+            className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            <div className="font-medium">{t("delete_this_task")}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">{t("delete_this_task_desc")}</div>
+          </button>
+          <button
+            onClick={handleDeleteAll}
+            className="w-full px-4 py-3 text-left rounded-lg border border-red-200 dark:border-red-900 text-[var(--hvsna-danger-color)] hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+          >
+            <div className="font-medium">{t("delete_all_recurring")}</div>
+            <div className="text-sm opacity-70">{t("delete_all_recurring_desc")}</div>
+          </button>
+        </div>
       </Modal>
     </form>
   );

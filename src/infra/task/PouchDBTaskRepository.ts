@@ -4,6 +4,7 @@ import { HijriDate } from "../../modules/calendar/hijri";
 import type {
   TaskCreateInput,
   TaskQuery,
+  TaskRepeat,
   TaskStatus,
   TaskUpdateInput,
   PrayerTime,
@@ -43,6 +44,9 @@ class PouchDBTaskDocument {
   long?: number;
   hijriDateOffset?: number;
   timezone?: string;
+  repeat?: TaskRepeat;
+  repeatInterval?: number;
+  recurringTaskId?: string;
   listId?: string;
 
   constructor(o: any) {
@@ -70,6 +74,9 @@ class PouchDBTaskDocument {
       long: this.long,
       timezone: this.timezone,
       hijriDateOffset: this.hijriDateOffset,
+      repeat: this.repeat,
+      repeatInterval: this.repeatInterval,
+      recurringTaskId: this.recurringTaskId,
       listId: this.listId,
     });
   }
@@ -216,6 +223,9 @@ export class PouchDBTaskRepository implements ITaskRepository {
       long: input.long,
       timezone: input.timezone,
       hijriDateOffset: input.hijriDateOffset || 0,
+      repeat: input.repeat,
+      repeatInterval: input.repeatInterval,
+      recurringTaskId: input.recurringTaskId,
       listId: input.listId,
     });
 
@@ -664,6 +674,29 @@ export class PouchDBTaskRepository implements ITaskRepository {
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem(),
     );
+  }
+
+  async findByRecurringTaskId(recurringTaskId: string): Promise<Task[]> {
+    await this.db.createIndex({
+      index: { fields: ["type", "recurringTaskId"] },
+    });
+
+    const result = await this.db.find({
+      selector: {
+        type: "task",
+        recurringTaskId,
+      },
+    });
+
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      new PouchDBTaskDocument(doc).toTaskItem(),
+    );
+  }
+
+  async deletePendingByRecurringTaskId(recurringTaskId: string): Promise<void> {
+    const tasks = await this.findByRecurringTaskId(recurringTaskId);
+    const pending = tasks.filter((t) => t.status !== 1);
+    await Promise.all(pending.map((t) => this.delete(t.id!)));
   }
 }
 

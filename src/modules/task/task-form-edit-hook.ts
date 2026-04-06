@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import type { PrayerTime, Task, TaskUpdateInput } from "./types";
-import { useRecurringTasks } from "./use-recurring-tasks";
+import type { PrayerTime, Task, TaskRepeat, TaskUpdateInput } from "./types";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
@@ -16,12 +15,20 @@ export interface UseTaskFormReturn {
   isSubmitting: boolean;
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
+  handleDeleteSingle: () => Promise<void>;
+  handleDeleteAll: () => Promise<void>;
+  showDeleteOptions: boolean;
+  setShowDeleteOptions: (v: boolean) => void;
   removeTime: boolean;
   setRemoveTime: (removeTime: boolean) => void;
   selectedScheduleAt: TaskScheduleAt;
   setSelectedScheduleAt: any;
   selectedListId: string;
   setSelectedListId: (listId: string) => void;
+  selectedRepeat: TaskRepeat;
+  setSelectedRepeat: (repeat: TaskRepeat) => void;
+  selectedRepeatInterval: number;
+  setSelectedRepeatInterval: (interval: number) => void;
   lists: any[];
 }
 
@@ -33,16 +40,18 @@ export const useTaskFormEdit = (
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
   // Use TaskProvider's updateTask and deleteTask mutations
-  const { updateTask, deleteTask, getTask } = useTaskContext();
+  const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } = useTaskContext();
   const { lists } = useLists();
 
   const [task, setTask] = useState<Task | null>(null);
-  const { createRecurringTask } = useRecurringTasks();
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { getToday, createHijriDate } = useHijriDate();
   const [removeTime, setRemoveTime] = useState(false);
   const [selectedListId, setSelectedListId] = useState<string>("");
+  const [selectedRepeat, setSelectedRepeat] = useState<TaskRepeat>("none");
+  const [selectedRepeatInterval, setSelectedRepeatInterval] = useState(1);
+  const [showDeleteOptions, setShowDeleteOptions] = useState(false);
 
   const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
     dateHijri: null,
@@ -95,9 +104,10 @@ export const useTaskFormEdit = (
         listId: selectedListId || undefined,
       };
 
-      // Handle repeat - only include if not "none"
-      if (taskData.repeat && taskData.repeat !== "none") {
-        taskInput.repeat = taskData.repeat;
+      // Apply the controlled repeat state
+      if (selectedRepeat !== "none") {
+        taskInput.repeat = selectedRepeat;
+        taskInput.repeatInterval = selectedRepeatInterval;
       }
 
       // Use TaskProvider's updateTask directly
@@ -106,22 +116,6 @@ export const useTaskFormEdit = (
 
       if (onSuccess) {
         onSuccess(result);
-      }
-
-      // Create recurring task if repeat is selected and not "none"
-      if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
-        try {
-          // TODO: implement recurring task creation
-          // await createRecurringTask({
-          //   name: taskInput.name,
-          //   attributes: taskInput.attributes,
-          //   repeat: taskData.repeat,
-          //   baseDate: taskInput.atEpochMillis,
-          // });
-        } catch (recurringError) {
-          logger.error("Failed to create recurring task:", recurringError);
-          // Don't fail the main task creation if recurring task creation fails
-        }
       }
     } catch (err) {
       logger.error(err);
@@ -133,26 +127,47 @@ export const useTaskFormEdit = (
     }
   };
 
-  const handleDelete = async () => {
-    if (taskId && task) {
-      if (
-        confirm(
-          `Are you sure you want to delete this task "${task.name}"? This action cannot be undone.`,
-        )
-      ) {
-        try {
-          await deleteTask(taskId);
-          setTask(null);
-          onDelete?.(taskId);
-        } catch (error) {
-          logger.error(error);
-          if (onError) {
-            onError(
-              error instanceof Error ? error.message : "Failed to delete task",
-            );
-          }
-        }
+  const handleDelete = () => {
+    if (!taskId || !task) return;
+    if (task.recurringTaskId) {
+      // Show choice modal for recurring tasks
+      setShowDeleteOptions(true);
+    } else {
+      if (confirm(`Are you sure you want to delete "${task.name}"?`)) {
+        deleteTask(taskId)
+          .then(() => {
+            setTask(null);
+            onDelete?.(taskId);
+          })
+          .catch((error) => {
+            logger.error(error);
+            onError?.(error instanceof Error ? error.message : "Failed to delete task");
+          });
       }
+    }
+  };
+
+  const handleDeleteSingle = async () => {
+    setShowDeleteOptions(false);
+    try {
+      await deleteTask(taskId);
+      setTask(null);
+      onDelete?.(taskId);
+    } catch (error) {
+      logger.error(error);
+      onError?.(error instanceof Error ? error.message : "Failed to delete task");
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    setShowDeleteOptions(false);
+    try {
+      await deleteRecurringTaskSeries(task!.recurringTaskId!);
+      setTask(null);
+      onDelete?.(taskId);
+    } catch (error) {
+      logger.error(error);
+      onError?.(error instanceof Error ? error.message : "Failed to delete recurring tasks");
     }
   };
 
@@ -188,6 +203,10 @@ export const useTaskFormEdit = (
     if (task?.listId) {
       setSelectedListId(task.listId);
     }
+
+    // Set repeat from task
+    setSelectedRepeat(task?.repeat ?? "none");
+    setSelectedRepeatInterval(task?.repeatInterval ?? 1);
   }, [task, createHijriDate]);
 
   useEffect(() => {
@@ -206,12 +225,20 @@ export const useTaskFormEdit = (
     isSubmitting,
     handleSubmit,
     handleDelete,
+    handleDeleteSingle,
+    handleDeleteAll,
+    showDeleteOptions,
+    setShowDeleteOptions,
     removeTime,
     setRemoveTime,
     selectedScheduleAt,
     setSelectedScheduleAt,
     selectedListId,
     setSelectedListId,
+    selectedRepeat,
+    setSelectedRepeat,
+    selectedRepeatInterval,
+    setSelectedRepeatInterval,
     lists,
   };
 };

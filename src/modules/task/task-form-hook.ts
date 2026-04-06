@@ -2,17 +2,20 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import type {
-  PrayerTime,
+import {
   Task,
-  TaskCreateInput,
-  TaskUpdateInput,
+  type PrayerTime,
+  type TaskCreateInput,
+  type TaskRepeat,
 } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useLists } from "./use-lists";
+import { usePouchDB } from "../../pouchdb";
+import { generateOccurrencesForTemplate } from "./recurring-task-generator";
+import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import logger from "../logger";
 
 export interface TaskScheduleAt {
@@ -30,6 +33,10 @@ export interface UseTaskFormReturn {
   setSelectedScheduleAt: any;
   selectedListId: string;
   setSelectedListId: (listId: string) => void;
+  selectedRepeat: TaskRepeat;
+  setSelectedRepeat: (repeat: TaskRepeat) => void;
+  selectedRepeatInterval: number;
+  setSelectedRepeatInterval: (interval: number) => void;
   lists: any[];
 }
 
@@ -43,6 +50,7 @@ export const useTaskForm = (
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { lists } = useLists();
+  const { db } = usePouchDB();
 
   // TODO use useHijriDate instead
   const offset = settings.manualDateOffset || 0;
@@ -61,6 +69,8 @@ export const useTaskForm = (
 
   const { createRecurringTask } = useRecurringTasks();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRepeat, setSelectedRepeat] = useState<TaskRepeat>("none");
+  const [selectedRepeatInterval, setSelectedRepeatInterval] = useState(1);
   const { getToday } = useHijriDate();
 
   // Update selectedListId when preselectedListId changes
@@ -94,58 +104,67 @@ export const useTaskForm = (
     try {
       setIsSubmitting(true);
 
-      // Extract scope values from form data
       const attr: Record<string, any> = {};
-      const taskInput: TaskCreateInput = {
-        name: taskData.taskName.trim(),
-        description: taskData.taskDescription?.trim() || undefined,
-        attributes: attr,
-        atDateHijri: taskData.atDateHijri as string,
-        atTime: taskData.atTime,
-        prayerTime: taskData.prayerTime as PrayerTime,
-        lat: latitude,
-        long: longitude,
-        timezone: settings.timezone || "Asia/Jakarta",
-        hijriDateOffset: offset,
-        listId: selectedListId || undefined,
-      };
+      const isRecurring = selectedRepeat !== "none";
 
-      // Handle repeat - only include if not "none"
-      if (taskData.repeat && taskData.repeat !== "none") {
-        taskInput.repeat = taskData.repeat;
-      }
+      if (isRecurring && taskData.atDateHijri) {
+        // Create a RecurringTask template, then generate all instances
+        const template = await createRecurringTask({
+          name: taskData.taskName.trim(),
+          description: taskData.taskDescription?.trim() || undefined,
+          attributes: attr,
+          baseDateHijri: taskData.atDateHijri as string,
+          repeat: selectedRepeat,
+          repeatInterval: selectedRepeatInterval,
+          atTime: taskData.atTime,
+          prayerTime: taskData.prayerTime as PrayerTime,
+          lat: latitude,
+          long: longitude,
+          timezone: settings.timezone || "Asia/Jakarta",
+          hijriDateOffset: offset,
+          listId: selectedListId || undefined,
+        });
 
-      // Use TaskProvider's createTask directly
-      const result = await createTask(taskInput);
-      setTask(null);
+        const taskRepository = new PouchDBTaskRepository(db);
+        await generateOccurrencesForTemplate(
+          template,
+          taskRepository,
+          Date.now(),
+        );
 
-      if (onSuccess) {
-        onSuccess(result);
-      }
+        if (onSuccess) {
+          onSuccess(new Task({ name: template.name }));
+        }
+      } else {
+        const taskInput: TaskCreateInput = {
+          name: taskData.taskName.trim(),
+          description: taskData.taskDescription?.trim() || undefined,
+          attributes: attr,
+          atDateHijri: taskData.atDateHijri as string,
+          atTime: taskData.atTime,
+          prayerTime: taskData.prayerTime as PrayerTime,
+          lat: latitude,
+          long: longitude,
+          timezone: settings.timezone || "Asia/Jakarta",
+          hijriDateOffset: offset,
+          listId: selectedListId || undefined,
+        };
 
-      if (
-        !isMatchLocationContext(
-          location,
-          selectedScheduleAt.dateHijri,
-          getToday(),
-        )
-      ) {
-        showSnackbar("Task created but not listed in this page");
-      }
+        const result = await createTask(taskInput);
+        setTask(null);
 
-      // Create recurring task if repeat is selected and not "none"
-      if (taskData.repeat && taskData.repeat !== "none" && taskInput.atTime) {
-        try {
-          // TODO
-          // await createRecurringTask({
-          //   name: taskInput.name,
-          //   attributes: taskInput.attributes,
-          //   repeat: taskData.repeat,
-          //   baseDate: taskInput.atEpochMillis,
-          // });
-        } catch (recurringError) {
-          logger.error("Failed to create recurring task:", recurringError);
-          // Don't fail the main task creation if recurring task creation fails
+        if (onSuccess) {
+          onSuccess(result);
+        }
+
+        if (
+          !isMatchLocationContext(
+            location,
+            selectedScheduleAt.dateHijri,
+            getToday(),
+          )
+        ) {
+          showSnackbar("Task created but not listed in this page");
         }
       }
     } catch (err) {
@@ -167,6 +186,10 @@ export const useTaskForm = (
     setSelectedScheduleAt,
     selectedListId,
     setSelectedListId,
+    selectedRepeat,
+    setSelectedRepeat,
+    selectedRepeatInterval,
+    setSelectedRepeatInterval,
     lists,
   };
 };

@@ -2,13 +2,17 @@ import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { HijriDateInput } from "src/modules/calendar/hijri-date-input";
 import { TimeInput } from "src/modules/calendar/time-input";
 import type { HijriDate } from "src/modules/calendar/hijri/hijri-date";
-import type { PrayerTime, Task } from "src/modules/task/types";
+import type { PrayerTime, TaskRepeat } from "src/modules/task/types";
+import { RepeatSelector } from "./repeat-selector";
 
 interface DatePrayerInputProps {
   hijriDate: HijriDate | null;
   atTime: string | null;
   prayerTime: PrayerTime | string;
   isSubmitting: boolean;
+  repeat?: TaskRepeat;
+  repeatInterval?: number;
+  onRepeatChange?: (repeat: TaskRepeat, interval: number) => void;
   onChange: (
     hijriDate: HijriDate | null,
     time: string | null,
@@ -21,6 +25,9 @@ export function DatePrayerInput({
   atTime,
   prayerTime,
   isSubmitting,
+  repeat = "none",
+  repeatInterval = 1,
+  onRepeatChange,
   onChange,
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
@@ -51,6 +58,14 @@ export function DatePrayerInput({
             onChange={(time, prayerTime) => {
               onChange(hijriDate, time, prayerTime);
             }}
+          />
+        )}
+        {hijriDate && onRepeatChange && (
+          <RepeatSelector
+            value={repeat}
+            interval={repeatInterval}
+            onChange={onRepeatChange}
+            disabled={isSubmitting}
           />
         )}
       </div>

@@ -1,7 +1,6 @@
-import { HijriDate } from "../calendar/hijri";
 
 export type TaskStatus = 0 | 1;
-export type TaskRepeat = "none" | "daily" | "monthly" | "yearly";
+export type TaskRepeat = "none" | "daily" | "weekly" | "monthly" | "yearly";
 export type PrayerTime =
   | "Fajr"
   | "Sunrise"
@@ -25,6 +24,8 @@ export class Task {
   long?: number;
   timezone?: string;
   repeat?: TaskRepeat;
+  repeatInterval?: number;
+  recurringTaskId?: string;
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
@@ -62,6 +63,8 @@ export interface TaskCreateInput {
   long?: number;
   timezone?: string;
   repeat?: TaskRepeat;
+  repeatInterval?: number;
+  recurringTaskId?: string;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
@@ -78,6 +81,8 @@ export interface TaskUpdateInput {
   long?: number;
   timezone?: string;
   repeat?: TaskRepeat;
+  repeatInterval?: number;
+  recurringTaskId?: string;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;

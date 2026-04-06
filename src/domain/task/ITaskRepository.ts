@@ -38,6 +38,10 @@ export interface ITaskRepository {
     limit?: number,
   ): Promise<Task[]>;
 
+  // Recurring task operations
+  findByRecurringTaskId(recurringTaskId: string): Promise<Task[]>;
+  deletePendingByRecurringTaskId(recurringTaskId: string): Promise<void>;
+
   // Task status operations
   completeTask(id: string): Promise<Task>;
   reopenTask(id: string): Promise<Task>;

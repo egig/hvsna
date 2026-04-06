@@ -1,6 +1,53 @@
 /**
  * Reusable helper functions for task form operations
  */
+import { HijriDate } from "../calendar/hijri";
+import type { TaskRepeat } from "./types";
+
+/**
+ * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.
+ * Returns null if repeat is "none" or inputs are invalid.
+ */
+export function getNextOccurrenceDate(
+  atDateHijri: string,
+  repeat: TaskRepeat,
+  interval = 1,
+  lat = 0,
+  long = 0,
+  offset = 0,
+): string | null {
+  if (!repeat || repeat === "none" || !atDateHijri) return null;
+
+  const n = Math.max(1, interval);
+  const { year, month, day } = parseHijriDateString(atDateHijri);
+
+  if (repeat === "daily" || repeat === "weekly") {
+    const days = repeat === "weekly" ? n * 7 : n;
+    const hijriDate = new HijriDate(year, month, day, 0, 0, 0, 0, {
+      latitude: lat,
+      longitude: long,
+      offset,
+    });
+    const greg = hijriDate.toDate();
+    greg.setDate(greg.getDate() + days);
+    const next = HijriDate.fromDate(greg, { latitude: lat, longitude: long, offset });
+    return formatHijriDateString(next.year, next.month, next.day);
+  }
+
+  if (repeat === "monthly") {
+    const totalMonths = (year * 12 + (month - 1)) + n;
+    const nextYear = Math.floor(totalMonths / 12);
+    const nextMonth = (totalMonths % 12) + 1;
+    // Cap day at 29 to avoid invalid end-of-month dates (Hijri months are 29–30 days)
+    return formatHijriDateString(nextYear, nextMonth, Math.min(day, 29));
+  }
+
+  if (repeat === "yearly") {
+    return formatHijriDateString(year + n, month, day);
+  }
+
+  return null;
+}
 
 /**
  * Parses a Hijri date string in YYYYMMDD format into year, month, and day components

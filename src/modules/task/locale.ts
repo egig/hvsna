@@ -86,6 +86,30 @@ export const taskTranslations = {
     en: "No repeat",
     id: "Tidak ada pengulangan",
   },
+  repeat_daily: {
+    en: "Daily",
+    id: "Harian",
+  },
+  repeat_weekly: {
+    en: "Weekly",
+    id: "Mingguan",
+  },
+  repeat_monthly: {
+    en: "Monthly",
+    id: "Bulanan",
+  },
+  repeat_yearly: {
+    en: "Yearly",
+    id: "Tahunan",
+  },
+  repeat_custom: {
+    en: "Custom",
+    id: "Kustom",
+  },
+  every: {
+    en: "Every",
+    id: "Setiap",
+  },
   daily_at_time: {
     en: "Daily at {time}",
     id: "Harian pada {time}",
@@ -333,6 +357,26 @@ export const taskTranslations = {
   repeat_information: {
     en: "Repeat Information",
     id: "Informasi Pengulangan",
+  },
+  delete_recurring_task_prompt: {
+    en: "This is a recurring task. What would you like to delete?",
+    id: "Ini adalah tugas berulang. Apa yang ingin Anda hapus?",
+  },
+  delete_this_task: {
+    en: "Delete this task",
+    id: "Hapus tugas ini",
+  },
+  delete_this_task_desc: {
+    en: "Only remove this occurrence",
+    id: "Hanya hapus kejadian ini",
+  },
+  delete_all_recurring: {
+    en: "Delete all recurring tasks",
+    id: "Hapus semua tugas berulang",
+  },
+  delete_all_recurring_desc: {
+    en: "Remove all pending occurrences and stop the recurrence",
+    id: "Hapus semua kejadian yang tertunda dan hentikan pengulangan",
   },
 
   // List-related translations

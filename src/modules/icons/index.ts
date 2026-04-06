@@ -6,7 +6,6 @@ export {
   ArrowRight as HvArrowRight,
   ArrowUp as HvArrowUp,
   Bell as HvBell,
-  Calendar as HvCalendar,
   Check as HvCheck,
   CheckCircle as HvCheckCircle,
   CheckSquare2 as HvCheckSquare2,
@@ -36,6 +35,7 @@ export {
   PanelLeft as HvPanelLeft,
   PanelLeftClose as HvPanelLeftClose,
   Plus as HvPlus,
+  Repeat as HvRepeat,
   RefreshCw as HvRefreshCw,
   Search as HvSearch,
   Settings as HvSettings,
@@ -54,6 +54,7 @@ export {
 // react-icons/tb
 export {
   TbSquareRoundedPlusFilled as HvSquareRoundedPlusFilled,
+  TbCalendar as HvCalendar,
   TbCalendarFilled as HvCalendarFilled,
   TbCalendarMonth as HvCalendarMonth,
   TbCalendarMonthFilled as HvCalendarMonthFilled,

@@ -25,9 +25,18 @@ export function useRecurringTasks() {
           id,
           user_id: "current_user", // TODO: Get from auth context
           name: input.name,
+          description: input.description,
           attributes: input.attributes,
           repeat: input.repeat,
-          baseDate: input.baseDate,
+          repeatInterval: input.repeatInterval ?? 1,
+          baseDateHijri: input.baseDateHijri,
+          atTime: input.atTime,
+          prayerTime: input.prayerTime,
+          lat: input.lat,
+          long: input.long,
+          timezone: input.timezone,
+          hijriDateOffset: input.hijriDateOffset,
+          listId: input.listId,
           created_at: now,
           updated_at: now,
         };
@@ -126,7 +135,7 @@ export function useRecurringTasks() {
         const existingDoc = await db.get(id);
 
         const updatedTask: RecurringTask = {
-          ...(existingDoc as RecurringTask),
+          ...(existingDoc as unknown as RecurringTask),
           ...input,
           updated_at: Date.now(),
         };

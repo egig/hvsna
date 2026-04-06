@@ -13,6 +13,8 @@ import { queryKeys } from "../query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings/useSettings";
+import { generateAllRecurringTaskOccurrences } from "./recurring-task-generator";
+import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import logger from "../logger";
 
 interface TaskContextType {
@@ -23,6 +25,7 @@ interface TaskContextType {
   createTask: (input: TaskCreateInput) => Promise<Task>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
+  deleteRecurringTaskSeries: (recurringTaskId: string) => Promise<void>;
   getTask: (id: string) => Promise<Task | null>;
   completeTask: (id: string) => Promise<Task>;
   reopenTask: (id: string) => Promise<Task>;
@@ -69,6 +72,14 @@ export const TaskProvider: React.FC<{
       });
     }
   }, [taskId, taskUseCases]);
+
+  // Generate missing recurring task occurrences on startup
+  useEffect(() => {
+    const taskRepository = new PouchDBTaskRepository(db);
+    generateAllRecurringTaskOccurrences(db, taskRepository, Date.now()).catch(
+      (err) => logger.error("Failed to generate recurring task occurrences:", err),
+    );
+  }, [db]);
 
   const invalidateTaskQueries = () => {
     const today = getToday();
@@ -244,6 +255,18 @@ export const TaskProvider: React.FC<{
     },
   });
 
+  const deleteRecurringTaskSeries = async (recurringTaskId: string) => {
+    await taskUseCases.deletePendingByRecurringTaskId(recurringTaskId);
+    // Also delete the template document
+    try {
+      const templateDoc = await db.get(recurringTaskId);
+      await db.remove(templateDoc as any);
+    } catch (err) {
+      logger.error("Failed to delete recurring task template:", err);
+    }
+    invalidateTaskQueries();
+  };
+
   const contextValue: TaskContextType = {
     task,
     createTask: (input: TaskCreateInput) =>
@@ -251,6 +274,7 @@ export const TaskProvider: React.FC<{
     updateTask: (id: string, input: TaskUpdateInput) =>
       updateTaskMutation.mutateAsync({ id, input }),
     deleteTask: (id: string) => deleteTaskMutation.mutateAsync(id),
+    deleteRecurringTaskSeries,
     getTask: (id: string) => taskUseCases.getTaskById(id),
     completeTask: (id: string) => completeTaskMutation.mutateAsync(id),
     reopenTask: (id: string) => reopenTaskMutation.mutateAsync(id),

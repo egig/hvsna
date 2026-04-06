@@ -59,6 +59,10 @@ export class TaskUseCases {
     await this.taskRepository.delete(taskId);
   }
 
+  async deletePendingByRecurringTaskId(recurringTaskId: string): Promise<void> {
+    await this.taskRepository.deletePendingByRecurringTaskId(recurringTaskId);
+  }
+
   async completeTask(taskId: string): Promise<Task> {
     // Mark task as completed using repository method
     const updatedTask = await this.taskRepository.completeTask(taskId);
