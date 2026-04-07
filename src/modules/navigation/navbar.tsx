@@ -8,6 +8,7 @@ interface NavbarProps {
   title?: string | React.ReactNode;
   showBackButton?: boolean;
   customBackAction?: () => void;
+  leftAction?: React.ReactNode;
   rightAction?: React.ReactNode;
   className?: string;
   modal?: boolean;
@@ -25,6 +26,7 @@ export function Navbar({
   title,
   showBackButton: propShowBackButton,
   customBackAction,
+  leftAction,
   rightAction,
   className = "",
   modal,
@@ -60,7 +62,7 @@ export function Navbar({
         scrollMarginTop: "64px",
       }}
     >
-      {/* Left: Back Button */}
+      {/* Left: Back Button or leftAction */}
       <div className="flex justify-start">
         {shouldShowBackButton && (
           <button
@@ -72,6 +74,7 @@ export function Navbar({
             {modal || <HvChevronLeft />}
           </button>
         )}
+        {!shouldShowBackButton && leftAction}
       </div>
 
       {/* Center: Title or Search */}

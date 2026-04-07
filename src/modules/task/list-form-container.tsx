@@ -126,6 +126,7 @@ export default function ListFormContainer() {
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       isEdit={!!editingListId}
+      isSubmitting={loading}
     />
   );
 }
