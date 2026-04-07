@@ -69,7 +69,7 @@ export default function WipeData() {
           <button
             onClick={handleWipePouchDB}
             disabled={isDeleting}
-            className="w-full flex items-center justify-center space-x-2 bg-[var(--hvsna-danger-color)] hover:bg-[var(--hvsna-danger-color-hover)] disabled:bg-[var(--hvsna-danger-color-pressed)] text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
+            className=" text-sm w-full md:w-fit px-4 py-2 flex items-center justify-center space-x-2 bg-[var(--hvsna-danger-color)] hover:bg-[var(--hvsna-danger-color-hover)] disabled:bg-[var(--hvsna-danger-color-pressed)] text-white font-medium rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
           >
             <HvTrash2 className="w-5 h-5" />
             <span>{isDeleting ? t("deleting") : t("wipe_all_data")}</span>
