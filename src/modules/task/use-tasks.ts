@@ -37,20 +37,15 @@ export function useTasks() {
   }, []);
 
   // Create filter key for React Query
-  const createFilterKey = () => {
-    const filterParts = [
-      statusFilter === "all" ? "" : statusFilter.toString(),
-      dateRangeFilter
-        ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
-        : "",
-      searchTextFilter || "",
-      unscheduledFilter ? "1" : "",
-      listIdFilter || "",
-    ];
-    return filterParts.join("|");
-  };
-
-  const filterKey = createFilterKey();
+  const filterKey = [
+    statusFilter === "all" ? "" : statusFilter.toString(),
+    dateRangeFilter
+      ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
+      : "",
+    searchTextFilter || "",
+    unscheduledFilter ? "1" : "",
+    listIdFilter || "",
+  ].join("|");
 
   // Build query object for repository
   const buildQuery = (): TaskQuery => {

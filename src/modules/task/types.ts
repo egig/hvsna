@@ -86,7 +86,7 @@ export interface TaskUpdateInput {
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   removeTime?: boolean;
-  listId?: string;
+  listId?: string | null;
 }
 
 export interface TaskChange {

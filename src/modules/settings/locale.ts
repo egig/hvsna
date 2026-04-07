@@ -63,6 +63,22 @@ export const settingsTranslations = {
     en: "About",
     id: "Tentang",
   },
+  changelog: {
+    en: "Changelog",
+    id: "Catatan Perubahan",
+  },
+  website: {
+    en: "Website",
+    id: "Situs Web",
+  },
+  privacy_policy: {
+    en: "Privacy Policy",
+    id: "Kebijakan Privasi",
+  },
+  terms_of_service: {
+    en: "Terms of Service",
+    id: "Syarat Layanan",
+  },
 
   // Location settings
   location: {

@@ -102,7 +102,7 @@ export const useTaskFormEdit = (
         hijriDateOffset: offset,
         prayerTime: selectedScheduleAt?.prayerTime as PrayerTime,
         removeTime: removeTime,
-        listId: selectedListId || undefined,
+        listId: selectedListId === "" ? null : selectedListId || undefined,
       };
 
       // Apply the controlled repeat state

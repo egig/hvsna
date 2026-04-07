@@ -23,6 +23,47 @@ export default function About() {
           <p>{t("about_description")}</p>
         </div>
 
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            <button
+              onClick={() => window.open('https://hvsna.com/changelog', '_blank')}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="text-gray-900 dark:text-gray-100">{t("changelog") || "Changelog"}</span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => window.open('https://hvsna.com', '_blank')}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="text-gray-900 dark:text-gray-100">{t("website") || "Website"}</span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => window.open('https://hvsna.com/privacy', '_blank')}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="text-gray-900 dark:text-gray-100">{t("privacy_policy") || "Privacy Policy"}</span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => window.open('https://hvsna.com/terms', '_blank')}
+              className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            >
+              <span className="text-gray-900 dark:text-gray-100">{t("terms_of_service") || "Terms of Service"}</span>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
         {!isNative && needRefresh && (
           <div
             className="border rounded-lg p-4 flex items-center justify-between gap-4"
