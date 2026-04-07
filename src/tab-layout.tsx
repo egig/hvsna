@@ -9,8 +9,6 @@ import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
 import { useListContext } from "./modules/task/list-context";
-import TaskFormDesktop from "./modules/task/task-form-desktop";
-import TaskFormEditDesktop from "./modules/task/task-form-edit-desktop";
 import ListFormContainer from "./modules/task/list-form-container";
 
 export default function TabLayout() {
@@ -57,14 +55,14 @@ export default function TabLayout() {
           {/* Task Form Modal */}
           <Modal isOpen={formOpen} onClose={handleTaskCancel}>
             {editingTaskId && (
-              <TaskFormEditDesktop
+              <TaskFormEdit
                 taskId={editingTaskId}
                 onSuccess={handleTaskSuccess}
                 onCancel={handleTaskCancel}
               />
             )}
             {!editingTaskId && (
-              <TaskFormDesktop
+              <TaskForm
                 onSuccess={handleTaskSuccess}
                 onCancel={handleTaskCancel}
               />

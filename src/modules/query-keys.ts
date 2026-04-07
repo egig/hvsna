@@ -7,5 +7,6 @@ export const queryKeys = {
   browsedTasks: (filters: string) => ["browsed-tasks", filters] as const,
   listTasks: (listId: string) => ["list-tasks", listId] as const,
   lists: (filters: string) => ["lists", filters] as const,
+  list: (id: string) => ["list", id] as const,
   inboxTasks: () => ["inbox-tasks"] as const,
 } as const;

@@ -77,7 +77,8 @@ export const TaskProvider: React.FC<{
   useEffect(() => {
     const taskRepository = new PouchDBTaskRepository(db);
     generateAllRecurringTaskOccurrences(db, taskRepository, Date.now()).catch(
-      (err) => logger.error("Failed to generate recurring task occurrences:", err),
+      (err) =>
+        logger.error("Failed to generate recurring task occurrences:", err),
     );
   }, [db]);
 

@@ -4,7 +4,13 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
 import type { TaskRepeat } from "./types";
 
-type RepeatOption = "none" | "daily" | "weekly" | "monthly" | "yearly" | "custom";
+type RepeatOption =
+  | "none"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "custom";
 
 interface RepeatSelectorModalProps {
   repeat: TaskRepeat;
@@ -18,6 +24,13 @@ const REPEAT_UNITS: { value: TaskRepeat; labelKey: string }[] = [
   { value: "weekly", labelKey: "repeat_weekly" },
   { value: "monthly", labelKey: "repeat_monthly" },
   { value: "yearly", labelKey: "repeat_yearly" },
+];
+
+const INTERVAL_UNITS: { value: TaskRepeat; labelKey: string }[] = [
+  { value: "daily", labelKey: "Days" },
+  { value: "weekly", labelKey: "Weeks" },
+  { value: "monthly", labelKey: "Months" },
+  { value: "yearly", labelKey: "Years" },
 ];
 
 function isPreset(repeat: TaskRepeat, interval: number): boolean {
@@ -122,7 +135,7 @@ export function RepeatSelectorModal({
           <div className="flex gap-2 mt-1 px-1">
             <input
               type="number"
-              min={2}
+              min={1}
               max={999}
               value={customInterval}
               onChange={(e) =>
@@ -135,7 +148,7 @@ export function RepeatSelectorModal({
               onChange={(e) => setCustomUnit(e.target.value as TaskRepeat)}
               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
-              {REPEAT_UNITS.map(({ value, labelKey }) => (
+              {INTERVAL_UNITS.map(({ value, labelKey }) => (
                 <option key={value} value={value}>
                   {t(labelKey)}
                 </option>

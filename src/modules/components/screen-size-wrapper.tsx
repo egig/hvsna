@@ -17,9 +17,7 @@ export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
   onClose,
   className = "",
 }) => {
-  const {
-    setDesktop,
-  } = useSystemStore();
+  const { setDesktop } = useSystemStore();
 
   useEffect(() => {
     const checkScreenSize = () => {

@@ -1,4 +1,3 @@
-
 export type TaskStatus = 0 | 1;
 export type TaskRepeat = "none" | "daily" | "weekly" | "monthly" | "yearly";
 export type PrayerTime =

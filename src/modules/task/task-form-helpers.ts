@@ -30,12 +30,16 @@ export function getNextOccurrenceDate(
     });
     const greg = hijriDate.toDate();
     greg.setDate(greg.getDate() + days);
-    const next = HijriDate.fromDate(greg, { latitude: lat, longitude: long, offset });
+    const next = HijriDate.fromDate(greg, {
+      latitude: lat,
+      longitude: long,
+      offset,
+    });
     return formatHijriDateString(next.year, next.month, next.day);
   }
 
   if (repeat === "monthly") {
-    const totalMonths = (year * 12 + (month - 1)) + n;
+    const totalMonths = year * 12 + (month - 1) + n;
     const nextYear = Math.floor(totalMonths / 12);
     const nextMonth = (totalMonths % 12) + 1;
     // Cap day at 29 to avoid invalid end-of-month dates (Hijri months are 29–30 days)

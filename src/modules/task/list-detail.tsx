@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import {
-  HvArrowLeft,
-  HvPlus,
-  HvList,
-  HvEdit2,
-  HvTrash2,
-  HvMoreVertical,
-} from "@src/modules/icons";
+import { HvList, HvEdit2, HvTrash2, HvMoreVertical } from "@src/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -35,6 +28,7 @@ export default function ListDetail() {
     error: listsError,
     getList,
     deleteList,
+    updating: isUpdatingList,
   } = useLists();
 
   const {
@@ -76,21 +70,17 @@ export default function ListDetail() {
   // Load list details
   useEffect(() => {
     if (listId) {
-      loadListDetails();
+      getList(listId).then(setCurrentList);
     }
-  }, [listId]);
+  }, [listId, getList]);
 
-  const loadListDetails = async () => {
-    if (listId) {
-      const list = await getList(listId);
-      setCurrentList(list);
+  // Reload list when update completes
+  useEffect(() => {
+    if (!isUpdatingList && listId && currentList) {
+      // Reload the list after an update operation completes
+      getList(listId).then(setCurrentList);
     }
-  };
-
-  const handleCreateTask = () => {
-    // Open task form with pre-filled listId
-    openTaskForm(undefined, { listId });
-  };
+  }, [isUpdatingList, listId, currentList, getList, lists]);
 
   if (listsLoading) {
     return (

@@ -62,8 +62,9 @@ export function useLists() {
   const updateListMutation = useMutation({
     mutationFn: ({ id, input }: { id: string; input: ListUpdateInput }) =>
       listRepository.update(id, input),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.lists("") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.list(id) });
     },
     onError: (error) => {
       log.error("Failed to update list:", error);
@@ -74,23 +75,31 @@ export function useLists() {
   const deleteListMutation = useMutation({
     mutationFn: ({ id, deleteTasks }: { id: string; deleteTasks?: boolean }) =>
       listRepository.delete(id, deleteTasks),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.lists("") });
+      queryClient.invalidateQueries({ queryKey: queryKeys.list(id) });
     },
     onError: (error) => {
       log.error("Failed to delete list:", error);
     },
   });
 
-  // Get single list
-  const getList = useCallback(async (id: string): Promise<List | null> => {
-    try {
-      return await listRepository.findById(id);
-    } catch (error) {
-      log.error("Failed to get list:", error);
-      return null;
-    }
-  }, []);
+  const getList = useCallback(
+    async (id: string): Promise<List | null> => {
+      try {
+        const result = await queryClient.fetchQuery({
+          queryKey: queryKeys.list(id),
+          queryFn: () => listRepository.findById(id),
+          staleTime: 1000 * 60 * 5, // 5 minutes
+        });
+        return result;
+      } catch (error) {
+        log.error("Failed to get list:", error);
+        return null;
+      }
+    },
+    [queryClient],
+  );
 
   // Create list
   const createList = useCallback(

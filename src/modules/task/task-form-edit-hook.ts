@@ -40,7 +40,8 @@ export const useTaskFormEdit = (
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
   // Use TaskProvider's updateTask and deleteTask mutations
-  const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } = useTaskContext();
+  const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
+    useTaskContext();
   const { lists } = useLists();
 
   const [task, setTask] = useState<Task | null>(null);
@@ -141,7 +142,9 @@ export const useTaskFormEdit = (
           })
           .catch((error) => {
             logger.error(error);
-            onError?.(error instanceof Error ? error.message : "Failed to delete task");
+            onError?.(
+              error instanceof Error ? error.message : "Failed to delete task",
+            );
           });
       }
     }
@@ -155,7 +158,9 @@ export const useTaskFormEdit = (
       onDelete?.(taskId);
     } catch (error) {
       logger.error(error);
-      onError?.(error instanceof Error ? error.message : "Failed to delete task");
+      onError?.(
+        error instanceof Error ? error.message : "Failed to delete task",
+      );
     }
   };
 
@@ -167,7 +172,11 @@ export const useTaskFormEdit = (
       onDelete?.(taskId);
     } catch (error) {
       logger.error(error);
-      onError?.(error instanceof Error ? error.message : "Failed to delete recurring tasks");
+      onError?.(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete recurring tasks",
+      );
     }
   };
 

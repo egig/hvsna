@@ -8,6 +8,7 @@ import { useLocation } from "react-router";
 import type { Task } from "./types";
 import { useSettings } from "src/modules/settings/useSettings";
 import { ListSelector } from "./list-selector";
+import { useScreenSize } from "../components/screen-size-wrapper";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -23,6 +24,7 @@ export default function TaskForm({
   onDelete,
 }: TaskFormProps) {
   const { t } = useLanguageContext();
+  const { isDesktop } = useScreenSize();
   const {
     error,
     task,
@@ -131,13 +133,23 @@ export default function TaskForm({
       </div>
 
       <div className="flex justify-end p-4">
-        <button
-          className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-          aria-label={t("add_new_task")}
-          type="submit"
-        >
-          <HvArrowUp />
-        </button>
+        {isDesktop ? (
+          <button
+            className="px-6 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md shadow-sm flex items-center justify-center transition-colors"
+            aria-label={t("add_new_task")}
+            type="submit"
+          >
+            {t("submit")}
+          </button>
+        ) : (
+          <button
+            className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+            aria-label={t("add_new_task")}
+            type="submit"
+          >
+            <HvArrowUp />
+          </button>
+        )}
       </div>
     </form>
   );
