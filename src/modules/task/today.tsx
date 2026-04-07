@@ -165,7 +165,7 @@ const getOriginalTaskGroups = (
 };
 
 function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
-  const { openTaskForm } = useTaskContext();
+  const { openEditTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
   const { getToday } = useHijriDate();
   const { settings } = useSettings();
@@ -192,9 +192,9 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
 
   const handleEditTask = useCallback(
     (task: Task) => {
-      openTaskForm(task.id);
+      openEditTaskForm(task.id as string);
     },
-    [openTaskForm],
+    [openEditTaskForm],
   );
 
   // Use new prayer time grouping logic

@@ -18,7 +18,7 @@ export default function ListDetail() {
   const { t } = useLanguageContext();
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
-  const { openTaskForm } = useTaskContext();
+  const { openEditTaskForm } = useTaskContext();
   const { openListForm } = useListContext();
   const { isDesktop } = useScreenSize();
 
@@ -199,7 +199,7 @@ export default function ListDetail() {
             <TaskListItem
               key={task.id}
               task={task}
-              onEdit={() => openTaskForm(task.id)}
+              onEdit={() => openEditTaskForm(task.id as string)}
               showDateTime={true}
             />
           ))}

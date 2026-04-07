@@ -13,13 +13,13 @@ export function Inbox() {
   const { inboxTasks, error, pageTitle, subTitle, initiated, refetch } =
     useInbox();
 
-  const { openTaskForm } = useTaskContext();
+  const { openEditTaskForm } = useTaskContext();
 
   const handleEditTask = useCallback(
     (task: Task) => {
-      openTaskForm(task.id);
+      openEditTaskForm(task.id as string);
     },
-    [openTaskForm],
+    [openEditTaskForm],
   );
 
   if (!initiated) {

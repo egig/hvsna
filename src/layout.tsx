@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router";
+import { Outlet, useLocation, useParams } from "react-router";
 import { HvPlus } from "@src/modules/icons";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";
@@ -12,10 +12,11 @@ import { useListContext } from "./modules/task/list-context";
 import ListFormContainer from "./modules/task/list-form-container";
 
 export default function TabLayout() {
-  const { formOpen, editingTaskId, openTaskForm, closeTaskForm } =
+  const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm } =
     useTaskContext();
   const { formOpen: listFormOpen, closeListForm } = useListContext();
   const location = useLocation();
+  const params = useParams();
   const { isDesktop } = useScreenSize();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -25,10 +26,6 @@ export default function TabLayout() {
 
   const handleTaskCancel = () => {
     closeTaskForm();
-  };
-
-  const handleListSuccess = () => {
-    closeListForm();
   };
 
   const handleListCancel = () => {
@@ -41,7 +38,7 @@ export default function TabLayout() {
       <div className="flex h-screen">
         {/* Side Navigation */}
         <DesktopSidebar
-          openTaskForm={openTaskForm}
+          openCreateTaskForm={openCreateTaskForm}
           collapsed={sidebarCollapsed}
           onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
         />
@@ -88,7 +85,12 @@ export default function TabLayout() {
       {/* FAB Button for Mobile */}
       {location?.state?.context !== "browse" && (
         <button
-          onClick={() => openTaskForm()}
+          onClick={() => {
+            console.log(location, params);
+            openCreateTaskForm({
+              listId: params.listId,
+            });
+          }}
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
           aria-label="Add new task"
         >

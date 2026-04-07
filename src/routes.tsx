@@ -6,7 +6,7 @@ import {
   useNavigate,
   useNavigationType,
 } from "react-router";
-import TabLayout from "./tab-layout";
+import Layout from "./layout";
 import About from "./modules/settings/about";
 import Settings from "./modules/settings/pages/settings";
 import {
@@ -84,7 +84,7 @@ export const AppRoutes = () => {
           <Route
             element={
               <OnboardingGuard>
-                <TabLayout />
+                <Layout />
               </OnboardingGuard>
             }
           >

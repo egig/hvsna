@@ -14,7 +14,7 @@ export function useTasks() {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
-  const { openTaskForm, setEditingTaskId } = useTaskContext();
+  const { openEditTaskForm, setEditingTaskId } = useTaskContext();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
 
@@ -134,7 +134,7 @@ export function useTasks() {
   }, []);
 
   const openEditPopup = useCallback((task: Task) => {
-    openTaskForm(task.id);
+    openEditTaskForm(task.id as string);
   }, []);
 
   const handleTaskSuccess = useCallback(() => {
@@ -143,10 +143,6 @@ export function useTasks() {
 
   const handleTaskError = useCallback((errorMessage: string) => {
     alert(errorMessage);
-  }, []);
-
-  const handleTaskCancel = useCallback(() => {
-    openTaskForm();
   }, []);
 
   const handleInfiniteScroll = useCallback(
@@ -280,7 +276,6 @@ export function useTasks() {
     openEditPopup,
     handleTaskSuccess,
     handleTaskError,
-    handleTaskCancel,
     handleInfiniteScroll,
 
     // Filter actions

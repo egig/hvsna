@@ -9,7 +9,7 @@ import { useTaskContext } from "../task/task-context";
 
 export default function Upcoming() {
   const { t } = useLanguageContext();
-  const { openTaskForm } = useTaskContext();
+  const { openEditTaskForm } = useTaskContext();
   const {
     upcomingTasks,
     taskGroups,
@@ -47,7 +47,7 @@ export default function Upcoming() {
   };
 
   const handleEditTask = (task: Task) => {
-    openTaskForm(task.id);
+    openEditTaskForm(task.id as string);
   };
 
   return (

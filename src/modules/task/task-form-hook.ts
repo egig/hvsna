@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
 import {
@@ -25,7 +25,6 @@ export interface TaskScheduleAt {
 }
 
 export interface UseTaskFormReturn {
-  task: Task | null;
   error: string | null;
   isSubmitting: boolean;
   handleSubmit: (f: FormData) => void;
@@ -38,6 +37,7 @@ export interface UseTaskFormReturn {
   selectedRepeatInterval: number;
   setSelectedRepeatInterval: (interval: number) => void;
   lists: any[];
+  listIdPreselected: boolean;
 }
 
 export const useTaskForm = (
@@ -45,8 +45,9 @@ export const useTaskForm = (
   onError?: (error: string) => void,
   onCancel?: () => void,
 ): UseTaskFormReturn => {
-  const { createTask, preselectedListId } = useTaskContext();
+  const { createTask } = useTaskContext();
   const location = useLocation();
+  const params = useParams();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { lists } = useLists();
@@ -57,14 +58,13 @@ export const useTaskForm = (
   const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
   const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
 
-  const [task, setTask] = useState<Task | null>(null);
   const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
     dateHijri: null,
     time: "",
     prayerTime: "",
   });
   const [selectedListId, setSelectedListId] = useState<string>(
-    preselectedListId || "",
+    params.listId || "",
   );
 
   const { createRecurringTask } = useRecurringTasks();
@@ -72,13 +72,6 @@ export const useTaskForm = (
   const [selectedRepeat, setSelectedRepeat] = useState<TaskRepeat>("none");
   const [selectedRepeatInterval, setSelectedRepeatInterval] = useState(1);
   const { getToday } = useHijriDate();
-
-  // Update selectedListId when preselectedListId changes
-  useEffect(() => {
-    if (preselectedListId && !selectedListId) {
-      setSelectedListId(preselectedListId);
-    }
-  }, [preselectedListId, selectedListId]);
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
@@ -151,7 +144,6 @@ export const useTaskForm = (
         };
 
         const result = await createTask(taskInput);
-        setTask(null);
 
         if (onSuccess) {
           onSuccess(result);
@@ -178,7 +170,6 @@ export const useTaskForm = (
   };
 
   return {
-    task,
     error: null,
     isSubmitting,
     handleSubmit,
@@ -191,6 +182,7 @@ export const useTaskForm = (
     selectedRepeatInterval,
     setSelectedRepeatInterval,
     lists,
+    listIdPreselected: !!params.listId,
   };
 };
 

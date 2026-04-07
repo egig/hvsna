@@ -27,7 +27,6 @@ export default function TaskForm({
   const { isDesktop } = useScreenSize();
   const {
     error,
-    task,
     handleSubmit,
     isSubmitting,
     selectedScheduleAt,
@@ -39,6 +38,7 @@ export default function TaskForm({
     selectedRepeatInterval,
     setSelectedRepeatInterval,
     lists,
+    listIdPreselected,
   } = useTaskForm(onSuccess, onError, onCancel);
   const location = useLocation();
   const { settings } = useSettings();
@@ -83,7 +83,7 @@ export default function TaskForm({
       <input
         ref={nameInputRef}
         name="taskName"
-        defaultValue={task ? task.name : ""}
+        defaultValue={""}
         placeholder={t("task_name")}
         disabled={isSubmitting}
         required={true}
@@ -97,7 +97,7 @@ export default function TaskForm({
         name="taskDescription"
         placeholder={t("description")}
         className="text-sm px-4 h-[3rem] py-2 w-[100%] outline-none resize-none"
-        defaultValue={task?.description || ""}
+        defaultValue={""}
         disabled={isSubmitting}
         style={{ resize: "none" }}
       />
@@ -127,7 +127,7 @@ export default function TaskForm({
             lists={lists}
             selectedListId={selectedListId}
             onListChange={(listId) => setSelectedListId(listId)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || listIdPreselected}
           />
         )}
       </div>

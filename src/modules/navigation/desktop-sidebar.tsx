@@ -35,13 +35,13 @@ import {
 import { UserRound } from "lucide-react";
 
 interface DesktopSidebarProps {
-  openTaskForm?: () => void;
+  openCreateTaskForm?: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
 export function DesktopSidebar({
-  openTaskForm,
+  openCreateTaskForm,
   collapsed = false,
   onToggleCollapse,
 }: DesktopSidebarProps) {
@@ -217,11 +217,11 @@ export function DesktopSidebar({
         </button>
       </div>
 
-      {openTaskForm && (
+      {openCreateTaskForm && (
         <div className="pt-4 px-2 mb-2">
           <button
             onClick={() => {
-              openTaskForm();
+              openCreateTaskForm();
             }}
             className={`flex items-center w-full px-3 py-2 font-bold text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors ${
               collapsed ? "justify-center" : "space-x-1"
