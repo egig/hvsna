@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Activity } from "react";
 import {
   HvCheck,
   HvChevronLeft,
@@ -265,7 +266,7 @@ export function CalendarModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
       {/* ── Date view ─────────────────────────────────────────────────────── */}
-      {view === "date" && (
+      <Activity mode={view === "date" ? "visible" : "hidden"}>
         <>
           <Navbar
             title={t("select_date")}
@@ -433,10 +434,10 @@ export function CalendarModal({
             </div>
           </div>
         </>
-      )}
+      </Activity>
 
       {/* ── Time sub-view ─────────────────────────────────────────────────── */}
-      {view === "time" && (
+      <Activity mode={view === "time" ? "visible" : "hidden"}>
         <TimeSelectionModal
           selectedTime={tempTime}
           selectedPrayerTime={tempPrayerTime as PrayerTime}
@@ -452,10 +453,10 @@ export function CalendarModal({
             setView("date");
           }}
         />
-      )}
+      </Activity>
 
       {/* ── Repeat sub-view ───────────────────────────────────────────────── */}
-      {view === "repeat" && (
+      <Activity mode={view === "repeat" ? "visible" : "hidden"}>
         <RepeatSelectorModal
           repeat={tempRepeat}
           interval={tempRepeatInterval}
@@ -473,10 +474,10 @@ export function CalendarModal({
             setView("date");
           }}
         />
-      )}
+      </Activity>
 
       {/* ── Repeat end date sub-view ──────────────────────────────────────── */}
-      {view === "repeat_end_date" && (
+      <Activity mode={view === "repeat_end_date" ? "visible" : "hidden"}>
         <>
           <Navbar
             title={t("repeat_ends_on_date")}
@@ -540,7 +541,7 @@ export function CalendarModal({
             </div>
           </div>
         </>
-      )}
+      </Activity>
     </Modal>
   );
 }

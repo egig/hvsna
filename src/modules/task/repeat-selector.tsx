@@ -65,7 +65,10 @@ export function RepeatSelector({
           repeat={value}
           interval={interval}
           onBack={() => setIsOpen(false)}
-          onSelectEndDate={() => {}}
+          onSelectEndDate={() => {
+            // Simple implementation - just show a message or handle gracefully
+            alert("Date selection not available in this context. Please use the full calendar modal for date selection.");
+          }}
           onConfirm={(repeat, interval) => {
             onChange(repeat, interval);
             setIsOpen(false);

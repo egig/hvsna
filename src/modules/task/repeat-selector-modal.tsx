@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HvCheck } from "@src/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
@@ -49,6 +49,15 @@ function getInitialOption(repeat: TaskRepeat, interval: number): RepeatOption {
   return "custom";
 }
 
+function formatRepeatEndDate(dateStr: string | null): string {
+  if (!dateStr) return "On date";
+  // Format YYYYMMDD to a more readable format
+  const year = dateStr.substring(0, 4);
+  const month = dateStr.substring(4, 6);
+  const day = dateStr.substring(6, 8);
+  return `${day}/${month}/${year}`;
+}
+
 export function RepeatSelectorModal({
   repeat,
   interval,
@@ -73,6 +82,15 @@ export function RepeatSelectorModal({
   const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>(repeatEndProp);
   const [endOccurrences, setEndOccurrences] = useState(repeatEndOccurrencesProp);
 
+  // Sync internal state when props change
+  useEffect(() => {
+    setSelectedRepeatEnd(repeatEndProp);
+  }, [repeatEndProp]);
+
+  useEffect(() => {
+    setEndOccurrences(repeatEndOccurrencesProp);
+  }, [repeatEndOccurrencesProp]);
+
   const handleConfirm = () => {
     if (selectedOption === "none") {
       onConfirm("none", 1, "never", null, 1);
@@ -85,11 +103,10 @@ export function RepeatSelectorModal({
 
   const handlePresetTap = (option: RepeatOption) => {
     setSelectedOption(option);
-    // Immediately confirm for presets (excluding custom and none)
-    if (option !== "custom" && option !== "none") {
-      onConfirm(option as TaskRepeat, 1, selectedRepeatEnd, repeatEndDate ?? null, endOccurrences);
-    } else if (option === "none") {
-      onConfirm("none", 1, "never", null, 1);
+    // Only update selection, no immediate confirmation
+    if (option === "none") {
+      setSelectedRepeatEnd("never");
+      setEndOccurrences(1);
     }
   };
 
@@ -104,17 +121,21 @@ export function RepeatSelectorModal({
     <div className="min-h-[50dvh]">
       <Navbar
         title={t("repeat")}
-        showBackButton={true}
-        customBackAction={onBack}
+        leftAction={
+          <button
+            onClick={onBack}
+            className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            {t("cancel")}
+          </button>
+        }
         rightAction={
-          selectedOption === "custom" ? (
-            <button
-              onClick={handleConfirm}
-              className="rounded-full w-10 h-10 flex items-center justify-center text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] transition-colors"
-            >
-              <HvCheck />
-            </button>
-          ) : null
+          <button
+            onClick={handleConfirm}
+            className="px-4 py-2 text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] transition-colors"
+          >
+            {t("done")}
+          </button>
         }
       />
 
@@ -170,29 +191,48 @@ export function RepeatSelectorModal({
         )}
 
         {/* Ends section */}
-        {selectedOption !== "none" && (
-          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${selectedOption === "none" ? "opacity-50" : ""}`}>
             <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t("repeat_ends")}
             </div>
             <div className="flex gap-2">
-              {(["never", "on_date", "after_occurrences"] as const).map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => {
-                    setSelectedRepeatEnd(opt);
-                    if (opt === "on_date") onSelectEndDate();
-                  }}
-                  className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === opt ? activeClass : inactiveClass}`}
-                >
-                  {opt === "never"
-                    ? t("repeat_ends_never")
-                    : opt === "on_date"
-                      ? t("repeat_ends_on_date")
-                      : t("repeat_ends_after")}
-                </button>
-              ))}
+              <button
+                type="button"
+                disabled={selectedOption === "none"}
+                onClick={() => {
+                  if (selectedOption !== "none") {
+                    setSelectedRepeatEnd("never");
+                  }
+                }}
+                className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "never" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+              >
+                {t("repeat_ends_never")}
+              </button>
+              <button
+                type="button"
+                disabled={selectedOption === "none"}
+                onClick={() => {
+                  if (selectedOption !== "none") {
+                    setSelectedRepeatEnd("on_date");
+                    onSelectEndDate();
+                  }
+                }}
+                className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "on_date" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+              >
+                {repeatEndDate ? formatRepeatEndDate(repeatEndDate) : t("repeat_ends_on_date")}
+              </button>
+              <button
+                type="button"
+                disabled={selectedOption === "none"}
+                onClick={() => {
+                  if (selectedOption !== "none") {
+                    setSelectedRepeatEnd("after_occurrences");
+                  }
+                }}
+                className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "after_occurrences" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+              >
+                {t("repeat_ends_after")}
+              </button>
             </div>
             {selectedRepeatEnd === "on_date" && repeatEndDate && (
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{repeatEndDate}</p>
@@ -203,14 +243,18 @@ export function RepeatSelectorModal({
                   type="number"
                   min={1}
                   value={endOccurrences}
-                  onChange={(e) => setEndOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-gray-700 dark:text-white"
+                  disabled={selectedOption === "none"}
+                  onChange={(e) => {
+                    if (selectedOption !== "none") {
+                      setEndOccurrences(Math.max(1, parseInt(e.target.value) || 1));
+                    }
+                  }}
+                  className={`w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-gray-700 dark:text-white ${selectedOption === "none" ? "cursor-not-allowed opacity-50" : ""}`}
                 />
                 <span className="text-sm text-gray-600 dark:text-gray-400">{t("occurrences")}</span>
               </div>
             )}
           </div>
-        )}
       </div>
 
       {/* Remove repeat */}
