@@ -18,7 +18,13 @@ interface DatePrayerInputProps {
   repeatEnd?: RepeatEnd;
   repeatEndDate?: string | null;
   repeatEndOccurrences?: number;
-  onRepeatChange?: (repeat: TaskRepeat, interval: number, repeatEnd: RepeatEnd, repeatEndDate: string | null, repeatEndOccurrences: number) => void;
+  onRepeatChange?: (
+    repeat: TaskRepeat,
+    interval: number,
+    repeatEnd: RepeatEnd,
+    repeatEndDate: string | null,
+    repeatEndOccurrences: number,
+  ) => void;
   onChange: (
     hijriDate: HijriDate | null,
     time: string | null,
@@ -92,9 +98,25 @@ export function DatePrayerInput({
         selectedRepeatEnd={repeatEnd}
         selectedRepeatEndDate={repeatEndDate}
         selectedRepeatEndOccurrences={repeatEndOccurrences}
-        onConfirm={(date, time, confirmedPrayerTime, confirmedRepeat, interval, confirmedRepeatEnd, confirmedRepeatEndDate, confirmedRepeatEndOccurrences) => {
+        onConfirm={(
+          date,
+          time,
+          confirmedPrayerTime,
+          confirmedRepeat,
+          interval,
+          confirmedRepeatEnd,
+          confirmedRepeatEndDate,
+          confirmedRepeatEndOccurrences,
+        ) => {
           onChange(date, time, confirmedPrayerTime ?? undefined);
-          if (onRepeatChange) onRepeatChange(confirmedRepeat, interval, confirmedRepeatEnd, confirmedRepeatEndDate, confirmedRepeatEndOccurrences);
+          if (onRepeatChange)
+            onRepeatChange(
+              confirmedRepeat,
+              interval,
+              confirmedRepeatEnd,
+              confirmedRepeatEndDate,
+              confirmedRepeatEndOccurrences,
+            );
           setIsOpen(false);
         }}
       />

@@ -2,7 +2,7 @@ import type { PrayerTime, TaskRepeat } from "./types";
 
 export interface RecurringTask {
   id: string;
-  user_id: string;
+  user_id?: string;
   name: string;
   description?: string;
   attributes?: Record<string, string>;
@@ -17,7 +17,7 @@ export interface RecurringTask {
   hijriDateOffset?: number;
   listId?: string;
   repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndDate?: string;        // Hijri YYYYMMDD; used when repeatEnd = "on_date"
+  repeatEndDate?: string; // Hijri YYYYMMDD; used when repeatEnd = "on_date"
   repeatEndOccurrences?: number; // used when repeatEnd = "after_occurrences"
   created_at?: number;
   updated_at?: number;

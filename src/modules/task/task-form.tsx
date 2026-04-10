@@ -29,20 +29,10 @@ export default function TaskForm({
     error,
     handleSubmit,
     isSubmitting,
-    selectedScheduleAt,
-    setSelectedScheduleAt,
-    selectedListId,
-    setSelectedListId,
-    selectedRepeat,
-    setSelectedRepeat,
-    selectedRepeatInterval,
-    setSelectedRepeatInterval,
-    selectedRepeatEnd,
-    setSelectedRepeatEnd,
-    selectedRepeatEndDate,
-    setSelectedRepeatEndDate,
-    selectedRepeatEndOccurrences,
-    setSelectedRepeatEndOccurrences,
+    formData,
+    updateFormData,
+    updateScheduleAt,
+    updateRepeatConfig,
     lists,
     listIdPreselected,
   } = useTaskForm(onSuccess, onError, onCancel);
@@ -61,7 +51,7 @@ export default function TaskForm({
 
   useEffect(() => {
     if (["today", "upcoming"].includes(location.state?.context)) {
-      setSelectedScheduleAt({
+      updateScheduleAt({
         dateHijri: getToday(),
         time: "",
         prayerTime: "",
@@ -110,24 +100,32 @@ export default function TaskForm({
 
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput
-          hijriDate={selectedScheduleAt.dateHijri}
-          atTime={selectedScheduleAt.time}
-          prayerTime={selectedScheduleAt.prayerTime}
+          hijriDate={formData.scheduleAt.dateHijri}
+          atTime={formData.scheduleAt.time}
+          prayerTime={formData.scheduleAt.prayerTime}
           isSubmitting={isSubmitting}
-          repeat={selectedRepeat}
-          repeatInterval={selectedRepeatInterval}
-          repeatEnd={selectedRepeatEnd}
-          repeatEndDate={selectedRepeatEndDate}
-          repeatEndOccurrences={selectedRepeatEndOccurrences}
-          onRepeatChange={(repeat, interval, repeatEnd, repeatEndDate, repeatEndOccurrences) => {
-            setSelectedRepeat(repeat);
-            setSelectedRepeatInterval(interval);
-            setSelectedRepeatEnd(repeatEnd);
-            setSelectedRepeatEndDate(repeatEndDate);
-            setSelectedRepeatEndOccurrences(repeatEndOccurrences);
+          repeat={formData.repeat.repeat}
+          repeatInterval={formData.repeat.interval}
+          repeatEnd={formData.repeat.end}
+          repeatEndDate={formData.repeat.endDate}
+          repeatEndOccurrences={formData.repeat.endOccurrences}
+          onRepeatChange={(
+            repeat,
+            interval,
+            repeatEnd,
+            repeatEndDate,
+            repeatEndOccurrences,
+          ) => {
+            updateRepeatConfig({
+              repeat,
+              interval,
+              end: repeatEnd,
+              endDate: repeatEndDate,
+              endOccurrences: repeatEndOccurrences,
+            });
           }}
           onChange={(hijriDate, time, prayerTime) => {
-            setSelectedScheduleAt({
+            updateScheduleAt({
               dateHijri: hijriDate,
               time,
               prayerTime,
@@ -137,8 +135,8 @@ export default function TaskForm({
         {lists.length > 0 && (
           <ListSelector
             lists={lists}
-            selectedListId={selectedListId}
-            onListChange={(listId) => setSelectedListId(listId)}
+            selectedListId={formData.listId}
+            onListChange={(listId) => updateFormData({ listId })}
             disabled={isSubmitting || listIdPreselected}
           />
         )}

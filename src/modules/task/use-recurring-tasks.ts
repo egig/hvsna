@@ -23,7 +23,6 @@ export function useRecurringTasks() {
 
         const recurringTask: RecurringTask = {
           id,
-          user_id: "current_user", // TODO: Get from auth context
           name: input.name,
           description: input.description,
           attributes: input.attributes,
@@ -39,6 +38,9 @@ export function useRecurringTasks() {
           listId: input.listId,
           created_at: now,
           updated_at: now,
+          repeatEnd: input.repeatEnd,
+          repeatEndDate: input.repeatEndDate,
+          repeatEndOccurrences: input.repeatEndOccurrences,
         };
 
         const response = await db.put({

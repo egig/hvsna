@@ -50,14 +50,25 @@ export async function generateOccurrencesForTemplate(
   let endEpoch: number | null = null;
   if (template.repeatEnd === "on_date" && template.repeatEndDate) {
     const { year, month, day } = parseHijriDateString(template.repeatEndDate);
-    endEpoch = new HijriDate(year, month, day, 23, 59, 59, 999, {
-      latitude: template.lat ?? 0,
-      longitude: template.long ?? 0,
-      offset: template.hijriDateOffset ?? 0,
-    }).toDate().getTime();
+    endEpoch = new HijriDate(
+      year,
+      month,
+      day,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        latitude: template.lat ?? 0,
+        longitude: template.long ?? 0,
+        offset: template.hijriDateOffset ?? 0,
+      },
+    )
+      .endOfDay()
+      .toDate()
+      .getTime();
   }
 
-  // "after_occurrences" cap
   const maxToCreate =
     template.repeatEnd === "after_occurrences" && template.repeatEndOccurrences
       ? Math.max(0, template.repeatEndOccurrences - existing.length)
@@ -69,21 +80,47 @@ export async function generateOccurrencesForTemplate(
 
   let currentDateStr = template.baseDateHijri;
   let iterations = 0;
-  const maxIterations = 400; // safety cap
+  const maxIterations = 400;
+
+  // Extract hour and minutes from template time if available
+  let hour = undefined;
+  let minutes = undefined;
+
+  if (template.atTime) {
+    const [h, m] = template.atTime.split(":").map(Number);
+    hour = h;
+    minutes = m;
+  }
 
   while (iterations < maxIterations) {
     const { year, month, day } = parseHijriDateString(currentDateStr);
-    const hijriDate = new HijriDate(year, month, day, 0, 0, 0, 0, {
-      latitude: template.lat ?? 0,
-      longitude: template.long ?? 0,
-      offset: template.hijriDateOffset ?? 0,
-    });
+    let hijriDate = new HijriDate(
+      year,
+      month,
+      day,
+      hour,
+      minutes,
+      undefined,
+      undefined,
+      {
+        // TODO use use hook instead ? lat long is required
+        latitude: template.lat ?? 0,
+        longitude: template.long ?? 0,
+        offset: template.hijriDateOffset ?? 0,
+      },
+    );
+
+    // of no time set, we use end of day as task date
+    if (!template.atTime) {
+      hijriDate = hijriDate.endOfDay();
+    }
     const dateEpoch = hijriDate.toDate().getTime();
 
     if (dateEpoch > effectiveHorizon) break;
 
     if (dateEpoch >= todayEpoch && !existingDates.has(currentDateStr)) {
       if (newCount >= maxToCreate) break;
+      
       await taskRepository.create({
         name: template.name,
         description: template.description,
@@ -110,6 +147,8 @@ export async function generateOccurrencesForTemplate(
       template.lat,
       template.long,
       template.hijriDateOffset,
+      hour,
+      minutes,
     );
     if (!nextStr) break;
     currentDateStr = nextStr;
@@ -131,8 +170,6 @@ export async function generateAllRecurringTaskOccurrences(
     startkey: "rtask_",
     endkey: "rtask_\uffff",
   });
-
-  console.log("generateAllRecurringTaskOccurrences", response)
 
   const templates = response.rows
     .filter((row: any) => row.doc && row.doc.baseDateHijri)

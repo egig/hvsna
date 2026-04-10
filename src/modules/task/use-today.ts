@@ -37,8 +37,6 @@ export function useToday() {
     todayTasksQuery.isPending || todayCompletedTasksQuery.isPending;
   const error = todayTasksQuery.error || todayCompletedTasksQuery.error;
 
-  console.log(todayTasksQuery.data)
-
   return {
     todayTasks: todayTasksQuery.data || [],
     todayCompletedTasks: todayCompletedTasksQuery.data || [],

@@ -18,6 +18,7 @@ import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
 import type { PrayerTime, TaskRepeat } from "src/modules/task/types";
 import { TimeSelectionModal } from "./time-selection-modal";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
+import { RepeatEndDateView } from "./repeat-end-date-view";
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
@@ -83,7 +84,9 @@ export function CalendarModal({
   } = useHijriDate();
 
   // Which sub-view is active inside the modal
-  const [view, setView] = useState<"date" | "time" | "repeat" | "repeat_end_date">("date");
+  const [view, setView] = useState<
+    "date" | "time" | "repeat" | "repeat_end_date"
+  >("date");
 
   // Calendar navigation state
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
@@ -111,9 +114,15 @@ export function CalendarModal({
   const [tempRepeatInterval, setTempRepeatInterval] = useState(
     selectedRepeatInterval ?? 1,
   );
-  const [tempRepeatEnd, setTempRepeatEnd] = useState<RepeatEnd>(selectedRepeatEnd ?? "never");
-  const [tempRepeatEndDate, setTempRepeatEndDate] = useState<string | null>(selectedRepeatEndDate ?? null);
-  const [tempRepeatEndOccurrences, setTempRepeatEndOccurrences] = useState(selectedRepeatEndOccurrences ?? 1);
+  const [tempRepeatEnd, setTempRepeatEnd] = useState<RepeatEnd>(
+    selectedRepeatEnd ?? "never",
+  );
+  const [tempRepeatEndDate, setTempRepeatEndDate] = useState<string | null>(
+    selectedRepeatEndDate ?? null,
+  );
+  const [tempRepeatEndOccurrences, setTempRepeatEndOccurrences] = useState(
+    selectedRepeatEndOccurrences ?? 1,
+  );
 
   // Re-sync pending state whenever the modal opens (props may have changed)
   useEffect(() => {
@@ -221,18 +230,45 @@ export function CalendarModal({
         tempSelectedDate.month,
         tempSelectedDate.day,
       );
-      onConfirm(finalDate, tempTime, tempPrayerTime, tempRepeat, tempRepeatInterval, tempRepeatEnd, tempRepeatEndDate, tempRepeatEndOccurrences);
+      onConfirm(
+        finalDate,
+        tempTime,
+        tempPrayerTime,
+        tempRepeat,
+        tempRepeatInterval,
+        tempRepeatEnd,
+        tempRepeatEndDate,
+        tempRepeatEndOccurrences,
+      );
     }
   };
 
   const handleToday = () => {
     const today = getToday().startOfDay();
-    onConfirm(today, tempTime, tempPrayerTime, tempRepeat, tempRepeatInterval, tempRepeatEnd, tempRepeatEndDate, tempRepeatEndOccurrences);
+    onConfirm(
+      today,
+      tempTime,
+      tempPrayerTime,
+      tempRepeat,
+      tempRepeatInterval,
+      tempRepeatEnd,
+      tempRepeatEndDate,
+      tempRepeatEndOccurrences,
+    );
   };
 
   const handleTomorrow = () => {
     const tomorrow = getToday().next().startOfDay();
-    onConfirm(tomorrow, tempTime, tempPrayerTime, tempRepeat, tempRepeatInterval, tempRepeatEnd, tempRepeatEndDate, tempRepeatEndOccurrences);
+    onConfirm(
+      tomorrow,
+      tempTime,
+      tempPrayerTime,
+      tempRepeat,
+      tempRepeatInterval,
+      tempRepeatEnd,
+      tempRepeatEndDate,
+      tempRepeatEndOccurrences,
+    );
   };
 
   const handleNextWeek = () => {
@@ -241,7 +277,16 @@ export function CalendarModal({
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
     let date = today;
     for (let i = 0; i < daysUntilFriday; i++) date = date.next();
-    onConfirm(date.startOfDay(), tempTime, tempPrayerTime, tempRepeat, tempRepeatInterval, tempRepeatEnd, tempRepeatEndDate, tempRepeatEndOccurrences);
+    onConfirm(
+      date.startOfDay(),
+      tempTime,
+      tempPrayerTime,
+      tempRepeat,
+      tempRepeatInterval,
+      tempRepeatEnd,
+      tempRepeatEndDate,
+      tempRepeatEndOccurrences,
+    );
   };
 
   const handleNoDate = () => {
@@ -425,12 +470,12 @@ export function CalendarModal({
                 icon={<HvClock className="w-4 h-4" />}
                 disabled={!tempSelectedDate}
               />
-                <ListInput
-                  onClick={() => setView("repeat")}
-                  label={repeatLabel}
-                  icon={<HvRepeat className="w-4 h-4" />}
-                  disabled={!tempSelectedDate}
-                />
+              <ListInput
+                onClick={() => setView("repeat")}
+                label={repeatLabel}
+                icon={<HvRepeat className="w-4 h-4" />}
+                disabled={!tempSelectedDate}
+              />
             </div>
           </div>
         </>
@@ -478,69 +523,14 @@ export function CalendarModal({
 
       {/* ── Repeat end date sub-view ──────────────────────────────────────── */}
       <Activity mode={view === "repeat_end_date" ? "visible" : "hidden"}>
-        <>
-          <Navbar
-            title={t("repeat_ends_on_date")}
-            showBackButton={true}
-            customBackAction={() => setView("repeat")}
-          />
-          <div className="pb-[env(safe-area-inset-bottom)]">
-            {/* Month navigation */}
-            <div className="flex items-center justify-between p-2">
-              <button
-                onClick={handlePreviousMonth}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-              >
-                <HvChevronLeft className="w-5 h-5" />
-              </button>
-              <h3 className="text-m text-gray-900 dark:text-white">
-                {`${hijriMonthNames[currentMonth.month - 1]} ${currentMonth.year}`}
-              </h3>
-              <button
-                onClick={handleNextMonth}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
-              >
-                <HvChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-            {/* Calendar grid */}
-            <div className="p-2 border-y border-gray-200">
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {weekDays.map((day: string) => (
-                  <div key={day} className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {getCalendarDays().map((date, index) => (
-                  <div key={index} className="aspect-3/2">
-                    {date ? (
-                      <button
-                        onClick={() => {
-                          const dateStr = `${date.year}${String(date.month).padStart(2, "0")}${String(date.day).padStart(2, "0")}`;
-                          setTempRepeatEndDate(dateStr);
-                          setView("repeat");
-                        }}
-                        className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
-                          tempRepeatEndDate === `${date.year}${String(date.month).padStart(2, "0")}${String(date.day).padStart(2, "0")}`
-                            ? "bg-[var(--hvsna-primary-color)] text-white"
-                            : date.isToday()
-                              ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                              : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                        }`}
-                      >
-                        {date.day}
-                      </button>
-                    ) : (
-                      <div className="w-full h-full" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </>
+        <RepeatEndDateView
+          selectedDate={tempRepeatEndDate}
+          onDateSelect={(dateStr) => {
+            setTempRepeatEndDate(dateStr);
+            setView("repeat");
+          }}
+          onBack={() => setView("repeat")}
+        />
       </Activity>
     </Modal>
   );

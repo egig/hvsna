@@ -15,6 +15,8 @@ export function getNextOccurrenceDate(
   lat = 0,
   long = 0,
   offset = 0,
+  hour: number | undefined,
+  minutes: number | undefined,
 ): string | null {
   if (!repeat || repeat === "none" || !atDateHijri) return null;
 
@@ -23,7 +25,7 @@ export function getNextOccurrenceDate(
 
   if (repeat === "daily" || repeat === "weekly") {
     const days = repeat === "weekly" ? n * 7 : n;
-    const hijriDate = new HijriDate(year, month, day, 0, 0, 0, 0, {
+    const hijriDate = new HijriDate(year, month, day, hour, minutes, 0, 0, {
       latitude: lat,
       longitude: long,
       offset,

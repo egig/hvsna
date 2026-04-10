@@ -10,7 +10,9 @@ export interface DemoteAndDeleteFutureDeps {
 }
 
 export interface PromoteToRecurringDeps {
-  createRecurringTask: (input: RecurringTaskCreateInput) => Promise<RecurringTask>;
+  createRecurringTask: (
+    input: RecurringTaskCreateInput,
+  ) => Promise<RecurringTask>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   taskRepository: ITaskRepository;
   todayEpoch: number;

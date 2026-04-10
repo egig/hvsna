@@ -234,7 +234,13 @@ export default function TaskFormEdit({
           repeatEnd={selectedRepeatEnd}
           repeatEndDate={selectedRepeatEndDate}
           repeatEndOccurrences={selectedRepeatEndOccurrences}
-          onRepeatChange={(repeat, interval, repeatEnd, repeatEndDate, repeatEndOccurrences) => {
+          onRepeatChange={(
+            repeat,
+            interval,
+            repeatEnd,
+            repeatEndDate,
+            repeatEndOccurrences,
+          ) => {
             setSelectedRepeat(repeat);
             setSelectedRepeatInterval(interval);
             setSelectedRepeatEnd(repeatEnd);

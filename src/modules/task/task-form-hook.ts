@@ -14,8 +14,6 @@ import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useLists } from "./use-lists";
 import { usePouchDB } from "../../pouchdb";
-import { generateOccurrencesForTemplate } from "./recurring-task-generator";
-import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import logger from "../logger";
 
 export interface TaskScheduleAt {
@@ -26,24 +24,29 @@ export interface TaskScheduleAt {
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
+// Consolidated state interfaces for better organization
+interface RepeatConfig {
+  repeat: TaskRepeat;
+  interval: number;
+  end: RepeatEnd;
+  endDate: string | null;
+  endOccurrences: number;
+}
+
+interface TaskFormData {
+  scheduleAt: TaskScheduleAt;
+  listId: string;
+  repeat: RepeatConfig;
+}
+
 export interface UseTaskFormReturn {
   error: string | null;
   isSubmitting: boolean;
   handleSubmit: (f: FormData) => void;
-  selectedScheduleAt: TaskScheduleAt;
-  setSelectedScheduleAt: any;
-  selectedListId: string;
-  setSelectedListId: (listId: string) => void;
-  selectedRepeat: TaskRepeat;
-  setSelectedRepeat: (repeat: TaskRepeat) => void;
-  selectedRepeatInterval: number;
-  setSelectedRepeatInterval: (interval: number) => void;
-  selectedRepeatEnd: RepeatEnd;
-  setSelectedRepeatEnd: (v: RepeatEnd) => void;
-  selectedRepeatEndDate: string | null;
-  setSelectedRepeatEndDate: (v: string | null) => void;
-  selectedRepeatEndOccurrences: number;
-  setSelectedRepeatEndOccurrences: (v: number) => void;
+  formData: TaskFormData;
+  updateFormData: (updates: Partial<TaskFormData>) => void;
+  updateScheduleAt: (updates: Partial<TaskScheduleAt>) => void;
+  updateRepeatConfig: (updates: Partial<RepeatConfig>) => void;
   lists: any[];
   listIdPreselected: boolean;
 }
@@ -53,55 +56,79 @@ export const useTaskForm = (
   onError?: (error: string) => void,
   onCancel?: () => void,
 ): UseTaskFormReturn => {
-  const { createTask } = useTaskContext();
+  const { createTask, generateOccurrencesForTemplate } = useTaskContext();
   const location = useLocation();
   const params = useParams();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { lists } = useLists();
   const { db } = usePouchDB();
-
-  // TODO use useHijriDate instead
-  const offset = settings.manualDateOffset || 0;
-  const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
-  const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
-
-  const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
-    dateHijri: null,
-    time: "",
-    prayerTime: "",
-  });
-  const [selectedListId, setSelectedListId] = useState<string>(
-    params.listId || "",
-  );
-
   const { createRecurringTask } = useRecurringTasks();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedRepeat, setSelectedRepeat] = useState<TaskRepeat>("none");
-  const [selectedRepeatInterval, setSelectedRepeatInterval] = useState(1);
-  const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>("never");
-  const [selectedRepeatEndDate, setSelectedRepeatEndDate] = useState<string | null>(null);
-  const [selectedRepeatEndOccurrences, setSelectedRepeatEndOccurrences] = useState(1);
-  const { getToday } = useHijriDate();
 
-  const handleSubmit = async (formData: FormData) => {
-    const taskData = Object.fromEntries(formData) as unknown as {
+  // Use useHijriDate hook instead of manual settings extraction
+  const {
+    timezone,
+    latitude,
+    longitude,
+    manualOffset: offset,
+    getToday,
+  } = useHijriDate();
+
+  // Consolidated state management
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<TaskFormData>({
+    scheduleAt: {
+      dateHijri: null,
+      time: "",
+      prayerTime: "",
+    },
+    listId: params.listId || "",
+    repeat: {
+      repeat: "none",
+      interval: 1,
+      end: "never",
+      endDate: null,
+      endOccurrences: 1,
+    },
+  });
+
+  // Helper functions for updating state
+  const updateFormData = (updates: Partial<TaskFormData>) => {
+    setFormData((prev) => ({ ...prev, ...updates }));
+  };
+
+  const updateScheduleAt = (updates: Partial<TaskScheduleAt>) => {
+    setFormData((prev) => ({
+      ...prev,
+      scheduleAt: { ...prev.scheduleAt, ...updates },
+    }));
+  };
+
+  const updateRepeatConfig = (updates: Partial<RepeatConfig>) => {
+    setFormData((prev) => ({
+      ...prev,
+      repeat: { ...prev.repeat, ...updates },
+    }));
+  };
+
+  const handleSubmit = async (submittedFormData: FormData) => {
+    const taskData = Object.fromEntries(submittedFormData) as unknown as {
       taskName: string;
       taskDescription: string;
     } & Partial<Task>;
 
-    if (!!selectedScheduleAt.dateHijri) {
+    if (!!formData.scheduleAt.dateHijri) {
       taskData.atDateHijri = formatHijriDateString(
-        selectedScheduleAt.dateHijri.year,
-        selectedScheduleAt.dateHijri.month,
-        selectedScheduleAt.dateHijri.day,
+        formData.scheduleAt.dateHijri.year,
+        formData.scheduleAt.dateHijri.month,
+        formData.scheduleAt.dateHijri.day,
       );
 
-      if (!!selectedScheduleAt.time) {
-        taskData.atTime = selectedScheduleAt.time;
+      if (!!formData.scheduleAt.time) {
+        taskData.atTime = formData.scheduleAt.time;
       }
-      if (!!selectedScheduleAt.prayerTime) {
-        taskData.prayerTime = selectedScheduleAt.prayerTime as PrayerTime;
+      if (!!formData.scheduleAt.prayerTime) {
+        taskData.prayerTime = formData.scheduleAt.prayerTime as PrayerTime;
       }
     }
 
@@ -109,7 +136,7 @@ export const useTaskForm = (
       setIsSubmitting(true);
 
       const attr: Record<string, any> = {};
-      const isRecurring = selectedRepeat !== "none";
+      const isRecurring = formData.repeat.repeat !== "none";
 
       if (isRecurring && taskData.atDateHijri) {
         // Create a RecurringTask template, then generate all instances
@@ -118,26 +145,21 @@ export const useTaskForm = (
           description: taskData.taskDescription?.trim() || undefined,
           attributes: attr,
           baseDateHijri: taskData.atDateHijri as string,
-          repeat: selectedRepeat,
-          repeatInterval: selectedRepeatInterval,
-          atTime: taskData.atTime,
-          prayerTime: taskData.prayerTime as PrayerTime,
+          repeat: formData.repeat.repeat,
+          repeatInterval: formData.repeat.interval,
+          atTime: formData.scheduleAt.time,
+          prayerTime: formData.scheduleAt.prayerTime as PrayerTime,
           lat: latitude,
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          listId: selectedListId || undefined,
-          repeatEnd: selectedRepeatEnd === "never" ? undefined : selectedRepeatEnd,
-          repeatEndDate: selectedRepeatEnd === "on_date" ? selectedRepeatEndDate ?? undefined : undefined,
-          repeatEndOccurrences: selectedRepeatEnd === "after_occurrences" ? selectedRepeatEndOccurrences : undefined,
+          listId: formData.listId,
+          repeatEnd: formData.repeat.end,
+          repeatEndDate: formData.repeat.endDate as string,
+          repeatEndOccurrences: formData.repeat.endOccurrences,
         });
 
-        const taskRepository = new PouchDBTaskRepository(db);
-        await generateOccurrencesForTemplate(
-          template,
-          taskRepository,
-          Date.now(),
-        );
+        await generateOccurrencesForTemplate(template);
 
         if (onSuccess) {
           onSuccess(new Task({ name: template.name }));
@@ -154,7 +176,7 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          listId: selectedListId || undefined,
+          listId: formData.listId || undefined,
         };
 
         const result = await createTask(taskInput);
@@ -166,7 +188,7 @@ export const useTaskForm = (
         if (
           !isMatchLocationContext(
             location,
-            selectedScheduleAt.dateHijri,
+            formData.scheduleAt.dateHijri,
             getToday(),
           )
         ) {
@@ -187,20 +209,10 @@ export const useTaskForm = (
     error: null,
     isSubmitting,
     handleSubmit,
-    selectedScheduleAt,
-    setSelectedScheduleAt,
-    selectedListId,
-    setSelectedListId,
-    selectedRepeat,
-    setSelectedRepeat,
-    selectedRepeatInterval,
-    setSelectedRepeatInterval,
-    selectedRepeatEnd,
-    setSelectedRepeatEnd,
-    selectedRepeatEndDate,
-    setSelectedRepeatEndDate,
-    selectedRepeatEndOccurrences,
-    setSelectedRepeatEndOccurrences,
+    formData,
+    updateFormData,
+    updateScheduleAt,
+    updateRepeatConfig,
     lists,
     listIdPreselected: !!params.listId,
   };

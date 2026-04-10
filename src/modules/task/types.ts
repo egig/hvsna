@@ -15,7 +15,7 @@ export class Task {
   name?: string;
   description?: string;
   status?: TaskStatus;
-  noDate?: number
+  noDate?: number;
   atDateHijri?: string;
   atTime?: string;
   atEpochMillis: number | null = null;

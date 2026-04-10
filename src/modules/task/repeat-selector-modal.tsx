@@ -18,7 +18,13 @@ interface RepeatSelectorModalProps {
   repeat: TaskRepeat;
   interval: number;
   onBack: () => void;
-  onConfirm: (repeat: TaskRepeat, interval: number, repeatEnd: RepeatEnd, repeatEndDate: string | null, repeatEndOccurrences: number) => void;
+  onConfirm: (
+    repeat: TaskRepeat,
+    interval: number,
+    repeatEnd: RepeatEnd,
+    repeatEndDate: string | null,
+    repeatEndOccurrences: number,
+  ) => void;
   repeatEnd?: RepeatEnd;
   repeatEndDate?: string | null;
   repeatEndOccurrences?: number;
@@ -79,8 +85,11 @@ export function RepeatSelectorModal({
   const [customUnit, setCustomUnit] = useState<TaskRepeat>(
     repeat !== "none" ? repeat : "daily",
   );
-  const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>(repeatEndProp);
-  const [endOccurrences, setEndOccurrences] = useState(repeatEndOccurrencesProp);
+  const [selectedRepeatEnd, setSelectedRepeatEnd] =
+    useState<RepeatEnd>(repeatEndProp);
+  const [endOccurrences, setEndOccurrences] = useState(
+    repeatEndOccurrencesProp,
+  );
 
   // Sync internal state when props change
   useEffect(() => {
@@ -95,9 +104,21 @@ export function RepeatSelectorModal({
     if (selectedOption === "none") {
       onConfirm("none", 1, "never", null, 1);
     } else if (selectedOption === "custom") {
-      onConfirm(customUnit, Math.max(1, customInterval), selectedRepeatEnd, repeatEndDate ?? null, endOccurrences);
+      onConfirm(
+        customUnit,
+        Math.max(1, customInterval),
+        selectedRepeatEnd,
+        repeatEndDate ?? null,
+        endOccurrences,
+      );
     } else {
-      onConfirm(selectedOption as TaskRepeat, 1, selectedRepeatEnd, repeatEndDate ?? null, endOccurrences);
+      onConfirm(
+        selectedOption as TaskRepeat,
+        1,
+        selectedRepeatEnd,
+        repeatEndDate ?? null,
+        endOccurrences,
+      );
     }
   };
 
@@ -191,70 +212,80 @@ export function RepeatSelectorModal({
         )}
 
         {/* Ends section */}
-        <div className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${selectedOption === "none" ? "opacity-50" : ""}`}>
-            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t("repeat_ends")}
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                disabled={selectedOption === "none"}
-                onClick={() => {
-                  if (selectedOption !== "none") {
-                    setSelectedRepeatEnd("never");
-                  }
-                }}
-                className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "never" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
-              >
-                {t("repeat_ends_never")}
-              </button>
-              <button
-                type="button"
-                disabled={selectedOption === "none"}
-                onClick={() => {
-                  if (selectedOption !== "none") {
-                    setSelectedRepeatEnd("on_date");
-                    onSelectEndDate();
-                  }
-                }}
-                className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "on_date" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
-              >
-                {repeatEndDate ? formatRepeatEndDate(repeatEndDate) : t("repeat_ends_on_date")}
-              </button>
-              <button
-                type="button"
-                disabled={selectedOption === "none"}
-                onClick={() => {
-                  if (selectedOption !== "none") {
-                    setSelectedRepeatEnd("after_occurrences");
-                  }
-                }}
-                className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "after_occurrences" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
-              >
-                {t("repeat_ends_after")}
-              </button>
-            </div>
-            {selectedRepeatEnd === "on_date" && repeatEndDate && (
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{repeatEndDate}</p>
-            )}
-            {selectedRepeatEnd === "after_occurrences" && (
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="number"
-                  min={1}
-                  value={endOccurrences}
-                  disabled={selectedOption === "none"}
-                  onChange={(e) => {
-                    if (selectedOption !== "none") {
-                      setEndOccurrences(Math.max(1, parseInt(e.target.value) || 1));
-                    }
-                  }}
-                  className={`w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-gray-700 dark:text-white ${selectedOption === "none" ? "cursor-not-allowed opacity-50" : ""}`}
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-400">{t("occurrences")}</span>
-              </div>
-            )}
+        <div
+          className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${selectedOption === "none" ? "opacity-50" : ""}`}
+        >
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t("repeat_ends")}
           </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={selectedOption === "none"}
+              onClick={() => {
+                if (selectedOption !== "none") {
+                  setSelectedRepeatEnd("never");
+                }
+              }}
+              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "never" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+            >
+              {t("repeat_ends_never")}
+            </button>
+            <button
+              type="button"
+              disabled={selectedOption === "none"}
+              onClick={() => {
+                if (selectedOption !== "none") {
+                  setSelectedRepeatEnd("on_date");
+                  onSelectEndDate();
+                }
+              }}
+              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "on_date" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+            >
+              {repeatEndDate
+                ? formatRepeatEndDate(repeatEndDate)
+                : t("repeat_ends_on_date")}
+            </button>
+            <button
+              type="button"
+              disabled={selectedOption === "none"}
+              onClick={() => {
+                if (selectedOption !== "none") {
+                  setSelectedRepeatEnd("after_occurrences");
+                }
+              }}
+              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "after_occurrences" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+            >
+              {t("repeat_ends_after")}
+            </button>
+          </div>
+          {selectedRepeatEnd === "on_date" && repeatEndDate && (
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              {repeatEndDate}
+            </p>
+          )}
+          {selectedRepeatEnd === "after_occurrences" && (
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="number"
+                min={1}
+                value={endOccurrences}
+                disabled={selectedOption === "none"}
+                onChange={(e) => {
+                  if (selectedOption !== "none") {
+                    setEndOccurrences(
+                      Math.max(1, parseInt(e.target.value) || 1),
+                    );
+                  }
+                }}
+                className={`w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-gray-700 dark:text-white ${selectedOption === "none" ? "cursor-not-allowed opacity-50" : ""}`}
+              />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {t("occurrences")}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Remove repeat */}

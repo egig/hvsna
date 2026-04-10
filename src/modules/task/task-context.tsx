@@ -13,8 +13,12 @@ import { queryKeys } from "../query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings/useSettings";
-import { generateAllRecurringTaskOccurrences } from "./recurring-task-generator";
+import {
+  generateAllRecurringTaskOccurrences,
+  generateOccurrencesForTemplate,
+} from "./recurring-task-generator";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
+import type { RecurringTask } from "./recurring-task";
 import logger from "../logger";
 
 interface TaskContextType {
@@ -30,6 +34,7 @@ interface TaskContextType {
   completeTask: (id: string) => Promise<Task>;
   reopenTask: (id: string) => Promise<Task>;
   reset: () => void;
+  generateOccurrencesForTemplate: (template: RecurringTask) => Promise<void>;
 
   // Form state management
   editingTaskId: string | null;
@@ -263,6 +268,25 @@ export const TaskProvider: React.FC<{
     },
   });
 
+  // React Query mutation for generating recurring task occurrences
+  const generateOccurrencesMutation = useMutation({
+    mutationFn: async (template: RecurringTask) => {
+      const taskRepository = new PouchDBTaskRepository(db);
+      await generateOccurrencesForTemplate(
+        template,
+        taskRepository,
+        Date.now(),
+      );
+    },
+    onSuccess: () => {
+      invalidateTaskQueries();
+    },
+    onError: (error) => {
+      logger.error("Failed to generate recurring task occurrences:", error);
+      throw error;
+    },
+  });
+
   const deleteRecurringTaskSeries = async (recurringTaskId: string) => {
     await taskUseCases.deletePendingByRecurringTaskId(recurringTaskId);
     // Also delete the template document
@@ -287,6 +311,8 @@ export const TaskProvider: React.FC<{
     completeTask: (id: string) => completeTaskMutation.mutateAsync(id),
     reopenTask: (id: string) => reopenTaskMutation.mutateAsync(id),
     reset: () => setTask(null),
+    generateOccurrencesForTemplate: (template: RecurringTask) =>
+      generateOccurrencesMutation.mutateAsync(template),
     editingTaskId,
     formOpen,
     openCreateTaskForm,

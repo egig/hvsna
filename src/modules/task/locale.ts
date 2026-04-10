@@ -454,11 +454,23 @@ export const taskTranslations = {
   },
 
   // Demotion scope prompt
-  change_recurring_scope: { en: "Change Recurring Task", id: "Ubah Tugas Berulang" },
+  change_recurring_scope: {
+    en: "Change Recurring Task",
+    id: "Ubah Tugas Berulang",
+  },
   change_this_event_only: { en: "This event only", id: "Hanya acara ini" },
-  change_this_event_only_desc: { en: "Remove repeat from this occurrence only", id: "Hapus pengulangan hanya dari kejadian ini" },
-  change_all_future_events: { en: "This and all future events", id: "Ini dan semua acara mendatang" },
-  change_all_future_events_desc: { en: "Delete this and all upcoming pending occurrences", id: "Hapus kejadian ini dan semua kejadian mendatang yang tertunda" },
+  change_this_event_only_desc: {
+    en: "Remove repeat from this occurrence only",
+    id: "Hapus pengulangan hanya dari kejadian ini",
+  },
+  change_all_future_events: {
+    en: "This and all future events",
+    id: "Ini dan semua acara mendatang",
+  },
+  change_all_future_events_desc: {
+    en: "Delete this and all upcoming pending occurrences",
+    id: "Hapus kejadian ini dan semua kejadian mendatang yang tertunda",
+  },
 
   // Repeat end conditions
   repeat_ends: { en: "Ends", id: "Berakhir" },

@@ -45,9 +45,7 @@ function makeRepo(existingTasks: Task[] = []): ITaskRepository {
   } as unknown as ITaskRepository & { _created: Task[] };
 }
 
-function makeTemplate(
-  overrides: Partial<RecurringTask> = {},
-): RecurringTask {
+function makeTemplate(overrides: Partial<RecurringTask> = {}): RecurringTask {
   return {
     id: "rtask_test",
     user_id: "user1",
@@ -247,7 +245,11 @@ describe("generateOccurrencesForTemplate", () => {
     // Simulate that some occurrences already exist
     const existingDate = "14460701";
     const existingTasks = [
-      new Task({ id: "existing1", atDateHijri: existingDate, recurringTaskId: "rtask_test" }),
+      new Task({
+        id: "existing1",
+        atDateHijri: existingDate,
+        recurringTaskId: "rtask_test",
+      }),
     ];
     const repo = makeRepo(existingTasks);
 
@@ -413,7 +415,11 @@ describe("generateOccurrencesForTemplate", () => {
 
     it("creates at most repeatEndOccurrences - existing.length instances when some exist", async () => {
       const existing = [
-        new Task({ id: "e1", atDateHijri: "14460701", recurringTaskId: "rtask_test" }),
+        new Task({
+          id: "e1",
+          atDateHijri: "14460701",
+          recurringTaskId: "rtask_test",
+        }),
       ];
       const template = makeTemplate({
         repeat: "daily",
@@ -433,9 +439,21 @@ describe("generateOccurrencesForTemplate", () => {
 
     it("creates 0 instances when existing.length >= repeatEndOccurrences", async () => {
       const existing = [
-        new Task({ id: "e1", atDateHijri: "14460701", recurringTaskId: "rtask_test" }),
-        new Task({ id: "e2", atDateHijri: "14460702", recurringTaskId: "rtask_test" }),
-        new Task({ id: "e3", atDateHijri: "14460703", recurringTaskId: "rtask_test" }),
+        new Task({
+          id: "e1",
+          atDateHijri: "14460701",
+          recurringTaskId: "rtask_test",
+        }),
+        new Task({
+          id: "e2",
+          atDateHijri: "14460702",
+          recurringTaskId: "rtask_test",
+        }),
+        new Task({
+          id: "e3",
+          atDateHijri: "14460703",
+          recurringTaskId: "rtask_test",
+        }),
       ];
       const template = makeTemplate({
         repeat: "daily",
@@ -469,7 +487,11 @@ describe("generateOccurrencesForTemplate", () => {
 
       const repo1 = makeRepo();
       const repo2 = makeRepo();
-      await generateOccurrencesForTemplate(templateWithNever, repo1, todayEpoch);
+      await generateOccurrencesForTemplate(
+        templateWithNever,
+        repo1,
+        todayEpoch,
+      );
       await generateOccurrencesForTemplate(templateWithout, repo2, todayEpoch);
 
       const created1 = (repo1 as any)._created as Task[];
@@ -488,7 +510,11 @@ describe("generateOccurrencesForTemplate", () => {
     // 30 expected future occurrences get generated.
     const pastDate = new Date(todayEpoch - 390 * 24 * 60 * 60 * 1000);
     const { HijriDate } = await import("../../calendar/hijri");
-    const h = HijriDate.fromDate(pastDate, { latitude: 0, longitude: 0, offset: 0 });
+    const h = HijriDate.fromDate(pastDate, {
+      latitude: 0,
+      longitude: 0,
+      offset: 0,
+    });
     const baseDateHijri = `${h.year.toString().padStart(4, "0")}${h.month.toString().padStart(2, "0")}${h.day.toString().padStart(2, "0")}`;
 
     const template = makeTemplate({

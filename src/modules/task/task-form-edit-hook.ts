@@ -80,9 +80,13 @@ export const useTaskFormEdit = (
     taskInput: TaskUpdateInput;
     task: Task;
   } | null>(null);
-  const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>("never");
-  const [selectedRepeatEndDate, setSelectedRepeatEndDate] = useState<string | null>(null);
-  const [selectedRepeatEndOccurrences, setSelectedRepeatEndOccurrences] = useState(1);
+  const [selectedRepeatEnd, setSelectedRepeatEnd] =
+    useState<RepeatEnd>("never");
+  const [selectedRepeatEndDate, setSelectedRepeatEndDate] = useState<
+    string | null
+  >(null);
+  const [selectedRepeatEndOccurrences, setSelectedRepeatEndOccurrences] =
+    useState(1);
 
   const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
     dateHijri: null,
@@ -156,9 +160,16 @@ export const useTaskFormEdit = (
             timezone: settings.timezone || "Asia/Jakarta",
             hijriDateOffset: offset,
             listId: selectedListId || undefined,
-            repeatEnd: selectedRepeatEnd === "never" ? undefined : selectedRepeatEnd,
-            repeatEndDate: selectedRepeatEnd === "on_date" ? selectedRepeatEndDate ?? undefined : undefined,
-            repeatEndOccurrences: selectedRepeatEnd === "after_occurrences" ? selectedRepeatEndOccurrences : undefined,
+            repeatEnd:
+              selectedRepeatEnd === "never" ? undefined : selectedRepeatEnd,
+            repeatEndDate:
+              selectedRepeatEnd === "on_date"
+                ? (selectedRepeatEndDate ?? undefined)
+                : undefined,
+            repeatEndOccurrences:
+              selectedRepeatEnd === "after_occurrences"
+                ? selectedRepeatEndOccurrences
+                : undefined,
           },
           {
             createRecurringTask,
@@ -240,7 +251,9 @@ export const useTaskFormEdit = (
     } catch (error) {
       logger.error(error);
       onError?.(
-        error instanceof Error ? error.message : "Failed to delete recurring tasks",
+        error instanceof Error
+          ? error.message
+          : "Failed to delete recurring tasks",
       );
     }
   };
@@ -260,7 +273,8 @@ export const useTaskFormEdit = (
       if (onSuccess) onSuccess(result);
     } catch (err) {
       logger.error(err);
-      if (onError) onError(err instanceof Error ? err.message : "Failed to update task");
+      if (onError)
+        onError(err instanceof Error ? err.message : "Failed to update task");
     } finally {
       setIsSubmitting(false);
     }
@@ -286,7 +300,8 @@ export const useTaskFormEdit = (
       if (onSuccess) onSuccess(result);
     } catch (err) {
       logger.error(err);
-      if (onError) onError(err instanceof Error ? err.message : "Failed to update task");
+      if (onError)
+        onError(err instanceof Error ? err.message : "Failed to update task");
     } finally {
       setIsSubmitting(false);
     }
