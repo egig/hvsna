@@ -86,7 +86,6 @@ export default function TabLayout() {
       {location?.state?.context !== "browse" && (
         <button
           onClick={() => {
-            console.log(location, params);
             openCreateTaskForm({
               listId: params.listId,
             });

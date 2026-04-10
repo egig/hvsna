@@ -37,6 +37,12 @@ export default function TaskForm({
     setSelectedRepeat,
     selectedRepeatInterval,
     setSelectedRepeatInterval,
+    selectedRepeatEnd,
+    setSelectedRepeatEnd,
+    selectedRepeatEndDate,
+    setSelectedRepeatEndDate,
+    selectedRepeatEndOccurrences,
+    setSelectedRepeatEndOccurrences,
     lists,
     listIdPreselected,
   } = useTaskForm(onSuccess, onError, onCancel);
@@ -110,9 +116,15 @@ export default function TaskForm({
           isSubmitting={isSubmitting}
           repeat={selectedRepeat}
           repeatInterval={selectedRepeatInterval}
-          onRepeatChange={(repeat, interval) => {
+          repeatEnd={selectedRepeatEnd}
+          repeatEndDate={selectedRepeatEndDate}
+          repeatEndOccurrences={selectedRepeatEndOccurrences}
+          onRepeatChange={(repeat, interval, repeatEnd, repeatEndDate, repeatEndOccurrences) => {
             setSelectedRepeat(repeat);
             setSelectedRepeatInterval(interval);
+            setSelectedRepeatEnd(repeatEnd);
+            setSelectedRepeatEndDate(repeatEndDate);
+            setSelectedRepeatEndOccurrences(repeatEndOccurrences);
           }}
           onChange={(hijriDate, time, prayerTime) => {
             setSelectedScheduleAt({

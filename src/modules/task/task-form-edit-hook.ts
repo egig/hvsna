@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
 import { formatHijriDateString } from "./task-form-helpers";
 import { useTaskContext } from "./task-context";
-import { HijriDate, useHijriDate } from "../calendar/hijri";
+import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskRepeat, TaskUpdateInput } from "./types";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import type { TaskScheduleAt } from "./task-form-hook";
 import { useLists } from "./use-lists";
+import { useRecurringTasks } from "./use-recurring-tasks";
+import { usePouchDB } from "../../pouchdb";
+import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
+import {
+  promoteTaskToRecurring,
+  demoteTaskFromRecurring,
+  demoteTaskFromRecurringAndDeleteFuture,
+} from "./recurring-task-conversion";
 import logger from "src/modules/logger";
+
+type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
 export interface UseTaskFormReturn {
   task: Task | null;
@@ -19,6 +29,10 @@ export interface UseTaskFormReturn {
   handleDeleteAll: () => Promise<void>;
   showDeleteOptions: boolean;
   setShowDeleteOptions: (v: boolean) => void;
+  showRecurringEditScope: boolean;
+  setShowRecurringEditScope: (v: boolean) => void;
+  handleDemoteThisOnly: () => Promise<void>;
+  handleDemoteAllFuture: () => Promise<void>;
   removeTime: boolean;
   setRemoveTime: (removeTime: boolean) => void;
   selectedScheduleAt: TaskScheduleAt;
@@ -29,6 +43,12 @@ export interface UseTaskFormReturn {
   setSelectedRepeat: (repeat: TaskRepeat) => void;
   selectedRepeatInterval: number;
   setSelectedRepeatInterval: (interval: number) => void;
+  selectedRepeatEnd: RepeatEnd;
+  setSelectedRepeatEnd: (v: RepeatEnd) => void;
+  selectedRepeatEndDate: string | null;
+  setSelectedRepeatEndDate: (v: string | null) => void;
+  selectedRepeatEndOccurrences: number;
+  setSelectedRepeatEndOccurrences: (v: number) => void;
   lists: any[];
 }
 
@@ -39,20 +59,30 @@ export const useTaskFormEdit = (
   onCancel?: () => void,
   onDelete?: (taskId: string) => void,
 ): UseTaskFormReturn => {
-  // Use TaskProvider's updateTask and deleteTask mutations
   const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
     useTaskContext();
   const { lists } = useLists();
+  const { createRecurringTask, deleteRecurringTask } = useRecurringTasks();
+  const { db } = usePouchDB();
 
   const [task, setTask] = useState<Task | null>(null);
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { getToday, createHijriDate } = useHijriDate();
+  const { createHijriDate } = useHijriDate();
   const [removeTime, setRemoveTime] = useState(false);
   const [selectedListId, setSelectedListId] = useState<string>("");
   const [selectedRepeat, setSelectedRepeat] = useState<TaskRepeat>("none");
   const [selectedRepeatInterval, setSelectedRepeatInterval] = useState(1);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
+  const [showRecurringEditScope, setShowRecurringEditScope] = useState(false);
+  const [pendingDemoteData, setPendingDemoteData] = useState<{
+    taskId: string;
+    taskInput: TaskUpdateInput;
+    task: Task;
+  } | null>(null);
+  const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>("never");
+  const [selectedRepeatEndDate, setSelectedRepeatEndDate] = useState<string | null>(null);
+  const [selectedRepeatEndOccurrences, setSelectedRepeatEndOccurrences] = useState(1);
 
   const [selectedScheduleAt, setSelectedScheduleAt] = useState<TaskScheduleAt>({
     dateHijri: null,
@@ -60,10 +90,9 @@ export const useTaskFormEdit = (
     prayerTime: "",
   });
 
-  // TODO use useHijriDate instead
   const offset = settings.manualDateOffset || 0;
-  const latitude = settings.coordinate?.latitude || -6.2088; // Default Jakarta coordinates
-  const longitude = settings.coordinate?.longitude || 106.8456; // Default Jakarta coordinates
+  const latitude = settings.coordinate?.latitude || -6.2088;
+  const longitude = settings.coordinate?.longitude || 106.8456;
 
   const handleSubmit = async (formData: FormData) => {
     const taskData = Object.fromEntries(formData) as unknown as {
@@ -88,12 +117,10 @@ export const useTaskFormEdit = (
     try {
       setIsSubmitting(true);
 
-      // Extract scope values from form data
-      const attr: Record<string, any> = {};
       const taskInput: TaskUpdateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
-        attributes: attr,
+        attributes: {},
         atDateHijri: taskData.atDateHijri,
         atTime: taskData.atTime,
         lat: latitude,
@@ -105,18 +132,59 @@ export const useTaskFormEdit = (
         listId: selectedListId === "" ? null : selectedListId || undefined,
       };
 
-      // Apply the controlled repeat state
-      if (selectedRepeat !== "none") {
-        taskInput.repeat = selectedRepeat;
-        taskInput.repeatInterval = selectedRepeatInterval;
+      const wasRegular = !task?.recurringTaskId;
+      const isNowRecurring = selectedRepeat !== "none";
+      let result: Task;
+
+      if (wasRegular && isNowRecurring && taskData.atDateHijri) {
+        // Promote: regular → recurring
+        result = await promoteTaskToRecurring(
+          taskId,
+          taskInput,
+          selectedRepeat,
+          selectedRepeatInterval,
+          {
+            name: taskData.taskName.trim(),
+            description: taskData.taskDescription?.trim() || undefined,
+            baseDateHijri: taskData.atDateHijri,
+            repeat: selectedRepeat,
+            repeatInterval: selectedRepeatInterval,
+            atTime: taskData.atTime,
+            prayerTime: taskData.prayerTime as PrayerTime,
+            lat: latitude,
+            long: longitude,
+            timezone: settings.timezone || "Asia/Jakarta",
+            hijriDateOffset: offset,
+            listId: selectedListId || undefined,
+            repeatEnd: selectedRepeatEnd === "never" ? undefined : selectedRepeatEnd,
+            repeatEndDate: selectedRepeatEnd === "on_date" ? selectedRepeatEndDate ?? undefined : undefined,
+            repeatEndOccurrences: selectedRepeatEnd === "after_occurrences" ? selectedRepeatEndOccurrences : undefined,
+          },
+          {
+            createRecurringTask,
+            updateTask,
+            taskRepository: new PouchDBTaskRepository(db),
+            todayEpoch: Date.now(),
+          },
+        );
+      } else if (!wasRegular && !isNowRecurring) {
+        // Intercept: show scope modal — completion handled by handleDemoteThisOnly / handleDemoteAllFuture
+        setPendingDemoteData({ taskId, taskInput, task: task! });
+        setShowRecurringEditScope(true);
+        setIsSubmitting(false);
+        return;
+      } else {
+        // Normal update — apply repeat fields if set
+        if (isNowRecurring) {
+          taskInput.repeat = selectedRepeat;
+          taskInput.repeatInterval = selectedRepeatInterval;
+        }
+        result = await updateTask(taskId, taskInput);
       }
 
-      // Use TaskProvider's updateTask directly
-      const result = await updateTask(taskId, taskInput);
       setTask(null);
-
       if (onSuccess) {
-        onSuccess(result);
+        onSuccess(result!);
       }
     } catch (err) {
       logger.error(err);
@@ -131,7 +199,6 @@ export const useTaskFormEdit = (
   const handleDelete = () => {
     if (!taskId || !task) return;
     if (task.recurringTaskId) {
-      // Show choice modal for recurring tasks
       setShowDeleteOptions(true);
     } else {
       if (confirm(`Are you sure you want to delete "${task.name}"?`)) {
@@ -173,19 +240,62 @@ export const useTaskFormEdit = (
     } catch (error) {
       logger.error(error);
       onError?.(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete recurring tasks",
+        error instanceof Error ? error.message : "Failed to delete recurring tasks",
       );
+    }
+  };
+
+  const handleDemoteThisOnly = async () => {
+    if (!pendingDemoteData) return;
+    setShowRecurringEditScope(false);
+    setIsSubmitting(true);
+    try {
+      const result = await demoteTaskFromRecurring(
+        pendingDemoteData.taskId,
+        pendingDemoteData.taskInput,
+        updateTask,
+      );
+      setPendingDemoteData(null);
+      setTask(null);
+      if (onSuccess) onSuccess(result);
+    } catch (err) {
+      logger.error(err);
+      if (onError) onError(err instanceof Error ? err.message : "Failed to update task");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDemoteAllFuture = async () => {
+    if (!pendingDemoteData) return;
+    setShowRecurringEditScope(false);
+    setIsSubmitting(true);
+    try {
+      const result = await demoteTaskFromRecurringAndDeleteFuture(
+        pendingDemoteData.taskId,
+        pendingDemoteData.taskInput,
+        pendingDemoteData.task,
+        {
+          updateTask,
+          deleteRecurringTask,
+          taskRepository: new PouchDBTaskRepository(db),
+        },
+      );
+      setPendingDemoteData(null);
+      setTask(null);
+      if (onSuccess) onSuccess(result);
+    } catch (err) {
+      logger.error(err);
+      if (onError) onError(err instanceof Error ? err.message : "Failed to update task");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   useEffect(() => {
     if (!!task?.atDateHijri) {
-      // Parse YYYYMMDD format using helper function
       const { year, month, day } = parseHijriDateString(task.atDateHijri);
 
-      // Parse time if available using helper function
       let hour: number | undefined = undefined;
       let minute: number | undefined = undefined;
       if (!!task.atTime) {
@@ -208,14 +318,17 @@ export const useTaskFormEdit = (
       });
     }
 
-    // Set listId from task
     if (task?.listId) {
       setSelectedListId(task.listId);
     }
 
-    // Set repeat from task
     setSelectedRepeat(task?.repeat ?? "none");
     setSelectedRepeatInterval(task?.repeatInterval ?? 1);
+    // repeatEnd lives on the RecurringTask template, not on Task instances.
+    // Initialize to defaults; can be loaded from the template in a future enhancement.
+    setSelectedRepeatEnd("never");
+    setSelectedRepeatEndDate(null);
+    setSelectedRepeatEndOccurrences(1);
   }, [task, createHijriDate]);
 
   useEffect(() => {
@@ -238,6 +351,10 @@ export const useTaskFormEdit = (
     handleDeleteAll,
     showDeleteOptions,
     setShowDeleteOptions,
+    showRecurringEditScope,
+    setShowRecurringEditScope,
+    handleDemoteThisOnly,
+    handleDemoteAllFuture,
     removeTime,
     setRemoveTime,
     selectedScheduleAt,
@@ -248,6 +365,12 @@ export const useTaskFormEdit = (
     setSelectedRepeat,
     selectedRepeatInterval,
     setSelectedRepeatInterval,
+    selectedRepeatEnd,
+    setSelectedRepeatEnd,
+    selectedRepeatEndDate,
+    setSelectedRepeatEndDate,
+    selectedRepeatEndOccurrences,
+    setSelectedRepeatEndOccurrences,
     lists,
   };
 };

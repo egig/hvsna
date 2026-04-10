@@ -35,6 +35,7 @@ npm run android
 ## Architecture
 
 ### Tech Stack
+
 - **Framework**: React 19 + React Router 7 (client-side only, no SSR)
 - **Styling**: TailwindCSS v4 with Vite plugin
 - **Build**: Vite 7 with TypeScript (strict mode)
@@ -47,7 +48,7 @@ npm run android
 
 ### Directory Structure
 
-```
+```sh
 src/
   domain/          # Interfaces/contracts (no dependencies on other layers)
     auth/          # ISessionRepository, ITokenStore, AuthErrors
@@ -111,7 +112,9 @@ Infrastructure is injected via React providers (dependency injection). Factories
 ### Key Patterns
 
 #### Platform Abstraction (Capacitor vs Browser)
+
 Each infra capability has both a Browser and Capacitor implementation. Factories select at runtime:
+
 ```typescript
 // Example from infra/task/TaskRepositoryFactory.ts
 export function createTaskRepository(): ITaskRepository {
@@ -122,13 +125,16 @@ export function createTaskRepository(): ITaskRepository {
 ```
 
 #### Hijri Calendar System
+
 Located in `src/modules/calendar/hijri/`. Uses `@tabby_ai/hijri-converter` (not `dayjs-hijri`).
+
 - `HijriDate` class in `hijri-date.ts`
 - `HijriMonth` class in `hijri-month.ts`
 - Core logic in `core.ts`
 - Month indices are 1-based in the application (unlike 0-based in most libraries)
 
 #### Prayer Times
+
 - API: Aladhan (`https://api.aladhan.com/v1/timings`)
 - Default method: 20 (Umm al-Qura University)
 - Tuning offsets configured in `src/config.ts`
@@ -137,7 +143,9 @@ Located in `src/modules/calendar/hijri/`. Uses `@tabby_ai/hijri-converter` (not 
 - `src/modules/prayer-time-utils.ts` handles math
 
 #### Task Management
+
 Located in `src/modules/task/` (41 files). Key files:
+
 - `types.ts` — Task, List, TaskStatus types
 - `task-context.tsx` / `list-context.tsx` — React providers
 - `task-repository.ts` / `list-repository.ts` — client-side queries
@@ -147,12 +155,14 @@ Located in `src/modules/task/` (41 files). Key files:
 - Views: `tasks.tsx`, `today.tsx`, `upcoming.tsx`, `inbox.tsx`, `browse.tsx`
 
 #### PouchDB
+
 - Singleton managed in `src/pouchdb.ts` and `src/modules/pouchdb-singleton.ts`
 - Web: uses IndexedDB adapter
 - Native: uses Cordova SQLite adapter
 - Supports CouchDB sync for cross-device data
 
 #### Settings
+
 - Persisted via `PouchDBSettingsRepository` in `src/infra/settings/`
 - Context in `src/modules/settings/settings-context.tsx`
 - Includes location (IP geolocation or native GPS), timezone, prayer method
@@ -160,6 +170,7 @@ Located in `src/modules/task/` (41 files). Key files:
 ### Routing
 
 Client-side React Router 7 routes defined in `src/routes.tsx`:
+
 - `/` — Today view (prayer times + calendar)
 - `/y/:year/m/:month` — Month view
 - `/y/:year/m/:month/d/:date` — Day view
@@ -172,6 +183,7 @@ Client-side React Router 7 routes defined in `src/routes.tsx`:
 ### Testing
 
 Tests are co-located in `__tests__/` directories within each module:
+
 - `src/modules/calendar/__tests__/`
 - `src/modules/task/__tests__/`
 - `src/modules/components/__tests__/`
@@ -187,6 +199,7 @@ npm test:ui                     # Interactive test UI
 ### Environment Variables
 
 See `.env.example` for all variables. Key ones:
+
 - API base URL
 - PostHog key (analytics)
 - Rollbar token (error tracking)

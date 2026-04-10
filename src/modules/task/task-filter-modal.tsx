@@ -5,7 +5,7 @@ import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../components/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { TaskStatus } from "./types";
+import type { TaskStatus, TaskTypeFilter } from "./types";
 
 interface TaskFilterModalProps {
   isOpen: boolean;
@@ -14,12 +14,14 @@ interface TaskFilterModalProps {
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
   unscheduledFilter: boolean;
+  taskTypeFilter: TaskTypeFilter;
   onStatusFilterChange: (value: TaskStatus | "all") => void;
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null,
   ) => void;
   onSearchTextFilterChange: (value: string) => void;
   onUnscheduledFilterChange: (value: boolean) => void;
+  onTaskTypeFilterChange: (value: TaskTypeFilter) => void;
   onClear: () => void;
 }
 

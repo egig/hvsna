@@ -29,7 +29,7 @@ class PouchDBListDocument {
       name: this.name || "",
       description: this.description || "",
       color: this.color || "#3B82F6",
-      icon: this.icon || "list",
+      // icon: this.icon || "list",
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     });

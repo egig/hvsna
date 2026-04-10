@@ -24,6 +24,8 @@ export interface TaskScheduleAt {
   prayerTime: string;
 }
 
+type RepeatEnd = "never" | "on_date" | "after_occurrences";
+
 export interface UseTaskFormReturn {
   error: string | null;
   isSubmitting: boolean;
@@ -36,6 +38,12 @@ export interface UseTaskFormReturn {
   setSelectedRepeat: (repeat: TaskRepeat) => void;
   selectedRepeatInterval: number;
   setSelectedRepeatInterval: (interval: number) => void;
+  selectedRepeatEnd: RepeatEnd;
+  setSelectedRepeatEnd: (v: RepeatEnd) => void;
+  selectedRepeatEndDate: string | null;
+  setSelectedRepeatEndDate: (v: string | null) => void;
+  selectedRepeatEndOccurrences: number;
+  setSelectedRepeatEndOccurrences: (v: number) => void;
   lists: any[];
   listIdPreselected: boolean;
 }
@@ -71,6 +79,9 @@ export const useTaskForm = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRepeat, setSelectedRepeat] = useState<TaskRepeat>("none");
   const [selectedRepeatInterval, setSelectedRepeatInterval] = useState(1);
+  const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>("never");
+  const [selectedRepeatEndDate, setSelectedRepeatEndDate] = useState<string | null>(null);
+  const [selectedRepeatEndOccurrences, setSelectedRepeatEndOccurrences] = useState(1);
   const { getToday } = useHijriDate();
 
   const handleSubmit = async (formData: FormData) => {
@@ -116,6 +127,9 @@ export const useTaskForm = (
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
           listId: selectedListId || undefined,
+          repeatEnd: selectedRepeatEnd === "never" ? undefined : selectedRepeatEnd,
+          repeatEndDate: selectedRepeatEnd === "on_date" ? selectedRepeatEndDate ?? undefined : undefined,
+          repeatEndOccurrences: selectedRepeatEnd === "after_occurrences" ? selectedRepeatEndOccurrences : undefined,
         });
 
         const taskRepository = new PouchDBTaskRepository(db);
@@ -181,6 +195,12 @@ export const useTaskForm = (
     setSelectedRepeat,
     selectedRepeatInterval,
     setSelectedRepeatInterval,
+    selectedRepeatEnd,
+    setSelectedRepeatEnd,
+    selectedRepeatEndDate,
+    setSelectedRepeatEndDate,
+    selectedRepeatEndOccurrences,
+    setSelectedRepeatEndOccurrences,
     lists,
     listIdPreselected: !!params.listId,
   };

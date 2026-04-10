@@ -65,6 +65,7 @@ export function RepeatSelector({
           repeat={value}
           interval={interval}
           onBack={() => setIsOpen(false)}
+          onSelectEndDate={() => {}}
           onConfirm={(repeat, interval) => {
             onChange(repeat, interval);
             setIsOpen(false);

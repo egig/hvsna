@@ -531,6 +531,10 @@ export class TaskRepository {
       if (query.unscheduled !== undefined) {
         mangoQuery.selector.noDate = query.unscheduled;
       }
+
+      if (query.taskType === "recurring") {
+        mangoQuery.selector.repeat = { $ne: "none" };
+      }
     }
 
     const result = await (db as any).find(mangoQuery);

@@ -16,6 +16,9 @@ export interface RecurringTask {
   timezone?: string;
   hijriDateOffset?: number;
   listId?: string;
+  repeatEnd?: "never" | "on_date" | "after_occurrences";
+  repeatEndDate?: string;        // Hijri YYYYMMDD; used when repeatEnd = "on_date"
+  repeatEndOccurrences?: number; // used when repeatEnd = "after_occurrences"
   created_at?: number;
   updated_at?: number;
 }
@@ -35,6 +38,9 @@ export interface RecurringTaskCreateInput {
   timezone?: string;
   hijriDateOffset?: number;
   listId?: string;
+  repeatEnd?: "never" | "on_date" | "after_occurrences";
+  repeatEndDate?: string;
+  repeatEndOccurrences?: number;
 }
 
 export interface RecurringTaskUpdateInput {
@@ -51,6 +57,9 @@ export interface RecurringTaskUpdateInput {
   timezone?: string;
   hijriDateOffset?: number;
   listId?: string;
+  repeatEnd?: "never" | "on_date" | "after_occurrences";
+  repeatEndDate?: string;
+  repeatEndOccurrences?: number;
 }
 
 export interface RecurringTaskChange {

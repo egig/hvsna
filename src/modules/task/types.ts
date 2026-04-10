@@ -15,7 +15,7 @@ export class Task {
   name?: string;
   description?: string;
   status?: TaskStatus;
-  noDate?: number;
+  noDate?: number
   atDateHijri?: string;
   atTime?: string;
   atEpochMillis: number | null = null;
@@ -24,7 +24,7 @@ export class Task {
   timezone?: string;
   repeat?: TaskRepeat;
   repeatInterval?: number;
-  recurringTaskId?: string;
+  recurringTaskId?: string | null;
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
@@ -81,7 +81,7 @@ export interface TaskUpdateInput {
   timezone?: string;
   repeat?: TaskRepeat;
   repeatInterval?: number;
-  recurringTaskId?: string;
+  recurringTaskId?: string | null;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
@@ -97,6 +97,8 @@ export interface TaskChange {
   data: Task | TaskUpdateInput;
 }
 
+export type TaskTypeFilter = "all" | "recurring";
+
 export type TaskQuery = {
   status?: TaskStatus;
   atDateHijri?: string;
@@ -106,6 +108,7 @@ export type TaskQuery = {
   unscheduled?: number;
   searchText?: string;
   listId?: string;
+  taskType?: TaskTypeFilter;
 };
 
 export class List {

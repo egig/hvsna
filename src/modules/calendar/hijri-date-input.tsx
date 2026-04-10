@@ -99,7 +99,7 @@ export function HijriDateInput({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         selectedDate={selectedDate}
-        onDateSelect={handleDateSelect}
+        onConfirm={(date) => handleDateSelect(date)}
       />
     </div>
   );

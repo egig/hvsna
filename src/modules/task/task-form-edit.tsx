@@ -48,6 +48,10 @@ export default function TaskFormEdit({
     handleDeleteAll,
     showDeleteOptions,
     setShowDeleteOptions,
+    showRecurringEditScope,
+    setShowRecurringEditScope,
+    handleDemoteThisOnly,
+    handleDemoteAllFuture,
     isSubmitting,
     setRemoveTime,
     selectedScheduleAt,
@@ -58,6 +62,12 @@ export default function TaskFormEdit({
     setSelectedRepeat,
     selectedRepeatInterval,
     setSelectedRepeatInterval,
+    selectedRepeatEnd,
+    setSelectedRepeatEnd,
+    selectedRepeatEndDate,
+    setSelectedRepeatEndDate,
+    selectedRepeatEndOccurrences,
+    setSelectedRepeatEndOccurrences,
     lists,
   } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
 
@@ -153,6 +163,33 @@ export default function TaskFormEdit({
           </button>
         </div>
       </Modal>
+
+      <Modal
+        isOpen={showRecurringEditScope}
+        onClose={() => setShowRecurringEditScope(false)}
+        title={t("change_recurring_scope")}
+      >
+        <div className="flex flex-col gap-3 p-2">
+          <button
+            onClick={handleDemoteThisOnly}
+            className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            <div className="font-medium">{t("change_this_event_only")}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {t("change_this_event_only_desc")}
+            </div>
+          </button>
+          <button
+            onClick={handleDemoteAllFuture}
+            className="w-full px-4 py-3 text-left rounded-lg border border-red-200 dark:border-red-900 text-[var(--hvsna-danger-color)] hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+          >
+            <div className="font-medium">{t("change_all_future_events")}</div>
+            <div className="text-sm opacity-70">
+              {t("change_all_future_events_desc")}
+            </div>
+          </button>
+        </div>
+      </Modal>
     </>
   );
 
@@ -194,9 +231,15 @@ export default function TaskFormEdit({
           isSubmitting={isSubmitting}
           repeat={selectedRepeat}
           repeatInterval={selectedRepeatInterval}
-          onRepeatChange={(repeat, interval) => {
+          repeatEnd={selectedRepeatEnd}
+          repeatEndDate={selectedRepeatEndDate}
+          repeatEndOccurrences={selectedRepeatEndOccurrences}
+          onRepeatChange={(repeat, interval, repeatEnd, repeatEndDate, repeatEndOccurrences) => {
             setSelectedRepeat(repeat);
             setSelectedRepeatInterval(interval);
+            setSelectedRepeatEnd(repeatEnd);
+            setSelectedRepeatEndDate(repeatEndDate);
+            setSelectedRepeatEndOccurrences(repeatEndOccurrences);
             setIsFormDirty(true);
           }}
           onChange={(hijriDate, time, prayerTime) => {

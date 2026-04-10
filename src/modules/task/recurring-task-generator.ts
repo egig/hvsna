@@ -46,6 +46,27 @@ export async function generateOccurrencesForTemplate(
   const existing = await taskRepository.findByRecurringTaskId(template.id);
   const existingDates = new Set(existing.map((t) => t.atDateHijri));
 
+  // "on_date" end epoch
+  let endEpoch: number | null = null;
+  if (template.repeatEnd === "on_date" && template.repeatEndDate) {
+    const { year, month, day } = parseHijriDateString(template.repeatEndDate);
+    endEpoch = new HijriDate(year, month, day, 23, 59, 59, 999, {
+      latitude: template.lat ?? 0,
+      longitude: template.long ?? 0,
+      offset: template.hijriDateOffset ?? 0,
+    }).toDate().getTime();
+  }
+
+  // "after_occurrences" cap
+  const maxToCreate =
+    template.repeatEnd === "after_occurrences" && template.repeatEndOccurrences
+      ? Math.max(0, template.repeatEndOccurrences - existing.length)
+      : Infinity;
+  let newCount = 0;
+
+  const effectiveHorizon =
+    endEpoch !== null ? Math.min(horizonEpoch, endEpoch) : horizonEpoch;
+
   let currentDateStr = template.baseDateHijri;
   let iterations = 0;
   const maxIterations = 400; // safety cap
@@ -59,9 +80,10 @@ export async function generateOccurrencesForTemplate(
     });
     const dateEpoch = hijriDate.toDate().getTime();
 
-    if (dateEpoch > horizonEpoch) break;
+    if (dateEpoch > effectiveHorizon) break;
 
     if (dateEpoch >= todayEpoch && !existingDates.has(currentDateStr)) {
+      if (newCount >= maxToCreate) break;
       await taskRepository.create({
         name: template.name,
         description: template.description,
@@ -78,6 +100,7 @@ export async function generateOccurrencesForTemplate(
         attributes: template.attributes,
         listId: template.listId,
       });
+      newCount++;
     }
 
     const nextStr = getNextOccurrenceDate(
@@ -105,9 +128,11 @@ export async function generateAllRecurringTaskOccurrences(
 ): Promise<void> {
   const response = await db.allDocs({
     include_docs: true,
-    startkey: "recurring_task_",
-    endkey: "recurring_task_\uffff",
+    startkey: "rtask_",
+    endkey: "rtask_\uffff",
   });
+
+  console.log("generateAllRecurringTaskOccurrences", response)
 
   const templates = response.rows
     .filter((row: any) => row.doc && row.doc.baseDateHijri)

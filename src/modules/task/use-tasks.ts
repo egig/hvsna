@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
-import type { Task, TaskStatus, TaskQuery } from "./types";
+import type { Task, TaskStatus, TaskQuery, TaskTypeFilter } from "./types";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import log from "../logger";
@@ -27,6 +27,7 @@ export function useTasks() {
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
   const [listIdFilter, setListIdFilter] = useState<string | null>(null);
+  const [taskTypeFilter, setTaskTypeFilter] = useState<TaskTypeFilter>("all");
 
   const clearFilters = useCallback(() => {
     setStatusFilter("all");
@@ -34,6 +35,7 @@ export function useTasks() {
     setSearchTextFilter("");
     setUnscheduledFilter(false);
     setListIdFilter(null);
+    setTaskTypeFilter("all");
   }, []);
 
   // Create filter key for React Query
@@ -45,6 +47,7 @@ export function useTasks() {
     searchTextFilter || "",
     unscheduledFilter ? "1" : "",
     listIdFilter || "",
+    taskTypeFilter === "all" ? "" : taskTypeFilter,
   ].join("|");
 
   // Build query object for repository
@@ -77,6 +80,11 @@ export function useTasks() {
     // Add list filter
     if (listIdFilter) {
       query.listId = listIdFilter;
+    }
+
+    // Add task type filter
+    if (taskTypeFilter !== "all") {
+      query.taskType = taskTypeFilter;
     }
 
     return query;
@@ -265,6 +273,7 @@ export function useTasks() {
     searchTextFilter,
     unscheduledFilter,
     listIdFilter,
+    taskTypeFilter,
 
     // Handlers
     refreshTasks: resetPagination,
@@ -279,6 +288,7 @@ export function useTasks() {
     setSearchTextFilter,
     setUnscheduledFilter,
     setListIdFilter,
+    setTaskTypeFilter,
     clearFilters,
   };
 }

@@ -16,6 +16,14 @@ export const taskTranslations = {
     en: "All Status",
     id: "Semua Status",
   },
+  task_type: {
+    en: "Task Type",
+    id: "Jenis Tugas",
+  },
+  recurring: {
+    en: "Recurring",
+    id: "Berulang",
+  },
   to_do: {
     en: "To Do",
     id: "To Do",
@@ -444,4 +452,18 @@ export const taskTranslations = {
     en: "View all lists",
     id: "Lihat semua daftar",
   },
+
+  // Demotion scope prompt
+  change_recurring_scope: { en: "Change Recurring Task", id: "Ubah Tugas Berulang" },
+  change_this_event_only: { en: "This event only", id: "Hanya acara ini" },
+  change_this_event_only_desc: { en: "Remove repeat from this occurrence only", id: "Hapus pengulangan hanya dari kejadian ini" },
+  change_all_future_events: { en: "This and all future events", id: "Ini dan semua acara mendatang" },
+  change_all_future_events_desc: { en: "Delete this and all upcoming pending occurrences", id: "Hapus kejadian ini dan semua kejadian mendatang yang tertunda" },
+
+  // Repeat end conditions
+  repeat_ends: { en: "Ends", id: "Berakhir" },
+  repeat_ends_never: { en: "Never", id: "Tidak Pernah" },
+  repeat_ends_on_date: { en: "On Date", id: "Pada Tanggal" },
+  repeat_ends_after: { en: "After", id: "Setelah" },
+  occurrences: { en: "occurrences", id: "kejadian" },
 };

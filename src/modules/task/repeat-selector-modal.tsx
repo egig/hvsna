@@ -12,11 +12,17 @@ type RepeatOption =
   | "yearly"
   | "custom";
 
+type RepeatEnd = "never" | "on_date" | "after_occurrences";
+
 interface RepeatSelectorModalProps {
   repeat: TaskRepeat;
   interval: number;
   onBack: () => void;
-  onConfirm: (repeat: TaskRepeat, interval: number) => void;
+  onConfirm: (repeat: TaskRepeat, interval: number, repeatEnd: RepeatEnd, repeatEndDate: string | null, repeatEndOccurrences: number) => void;
+  repeatEnd?: RepeatEnd;
+  repeatEndDate?: string | null;
+  repeatEndOccurrences?: number;
+  onSelectEndDate: () => void;
 }
 
 const REPEAT_UNITS: { value: TaskRepeat; labelKey: string }[] = [
@@ -48,6 +54,10 @@ export function RepeatSelectorModal({
   interval,
   onBack,
   onConfirm,
+  repeatEnd: repeatEndProp = "never",
+  repeatEndDate = null,
+  repeatEndOccurrences: repeatEndOccurrencesProp = 1,
+  onSelectEndDate,
 }: RepeatSelectorModalProps) {
   const { t } = useLanguageContext();
 
@@ -60,14 +70,16 @@ export function RepeatSelectorModal({
   const [customUnit, setCustomUnit] = useState<TaskRepeat>(
     repeat !== "none" ? repeat : "daily",
   );
+  const [selectedRepeatEnd, setSelectedRepeatEnd] = useState<RepeatEnd>(repeatEndProp);
+  const [endOccurrences, setEndOccurrences] = useState(repeatEndOccurrencesProp);
 
   const handleConfirm = () => {
     if (selectedOption === "none") {
-      onConfirm("none", 1);
+      onConfirm("none", 1, "never", null, 1);
     } else if (selectedOption === "custom") {
-      onConfirm(customUnit, Math.max(1, customInterval));
+      onConfirm(customUnit, Math.max(1, customInterval), selectedRepeatEnd, repeatEndDate ?? null, endOccurrences);
     } else {
-      onConfirm(selectedOption as TaskRepeat, 1);
+      onConfirm(selectedOption as TaskRepeat, 1, selectedRepeatEnd, repeatEndDate ?? null, endOccurrences);
     }
   };
 
@@ -75,9 +87,9 @@ export function RepeatSelectorModal({
     setSelectedOption(option);
     // Immediately confirm for presets (excluding custom and none)
     if (option !== "custom" && option !== "none") {
-      onConfirm(option as TaskRepeat, 1);
+      onConfirm(option as TaskRepeat, 1, selectedRepeatEnd, repeatEndDate ?? null, endOccurrences);
     } else if (option === "none") {
-      onConfirm("none", 1);
+      onConfirm("none", 1, "never", null, 1);
     }
   };
 
@@ -154,6 +166,49 @@ export function RepeatSelectorModal({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Ends section */}
+        {selectedOption !== "none" && (
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {t("repeat_ends")}
+            </div>
+            <div className="flex gap-2">
+              {(["never", "on_date", "after_occurrences"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    setSelectedRepeatEnd(opt);
+                    if (opt === "on_date") onSelectEndDate();
+                  }}
+                  className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === opt ? activeClass : inactiveClass}`}
+                >
+                  {opt === "never"
+                    ? t("repeat_ends_never")
+                    : opt === "on_date"
+                      ? t("repeat_ends_on_date")
+                      : t("repeat_ends_after")}
+                </button>
+              ))}
+            </div>
+            {selectedRepeatEnd === "on_date" && repeatEndDate && (
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{repeatEndDate}</p>
+            )}
+            {selectedRepeatEnd === "after_occurrences" && (
+              <div className="flex items-center gap-2 mt-2">
+                <input
+                  type="number"
+                  min={1}
+                  value={endOccurrences}
+                  onChange={(e) => setEndOccurrences(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-gray-700 dark:text-white"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">{t("occurrences")}</span>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -18,7 +18,7 @@ export function useRecurringTasks() {
       setError(null);
 
       try {
-        const id = input.id || `recurring_task_${crypto.randomUUID()}`;
+        const id = input.id || `rtask_${crypto.randomUUID()}`;
         const now = Date.now();
 
         const recurringTask: RecurringTask = {
@@ -95,8 +95,8 @@ export function useRecurringTasks() {
       try {
         const response = await db.allDocs({
           include_docs: true,
-          startkey: "recurring_task_",
-          endkey: "recurring_task_\uffff",
+          startkey: "rtask_",
+          endkey: "rtask_\uffff",
         });
 
         let tasks = response.rows
