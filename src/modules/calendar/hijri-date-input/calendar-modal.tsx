@@ -243,6 +243,44 @@ export function CalendarModal({
     }
   };
 
+  const isSelectedToday = () => {
+    if (!selectedDate) return false;
+    const today = getToday().startOfDay();
+    return selectedDate.year === today.year && 
+           selectedDate.month === today.month && 
+           selectedDate.day === today.day;
+  };
+
+  const isSelectedTomorrow = () => {
+    if (!selectedDate) return false;
+    const tomorrow = getToday().next().startOfDay();
+    return selectedDate.year === tomorrow.year && 
+           selectedDate.month === tomorrow.month && 
+           selectedDate.day === tomorrow.day;
+  };
+
+  const isSelectedNextWeek = () => {
+    if (!selectedDate) return false;
+    const today = getToday();
+    const dayOfWeek = today.toDate().getDay(); // 0=Sun ... 5=Fri
+    const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
+    
+    // Create next Friday by adding days using next() method
+    let nextFriday = today;
+    for (let i = 0; i < daysUntilFriday; i++) {
+      nextFriday = nextFriday.next();
+    }
+    nextFriday = nextFriday.startOfDay();
+    
+    return selectedDate.year === nextFriday.year && 
+           selectedDate.month === nextFriday.month && 
+           selectedDate.day === nextFriday.day;
+  };
+
+  const isSelectedNoDate = () => {
+    return selectedDate === null;
+  };
+
   const handleToday = () => {
     const today = getToday().startOfDay();
     onConfirm(
@@ -328,10 +366,22 @@ export function CalendarModal({
 
           {/* Quick date shortcuts */}
           <div className="flex flex-col">
-            <ListInput onClick={handleToday} label={t("today")} />
-            <ListInput onClick={handleTomorrow} label={t("tomorrow")} />
-            <ListInput onClick={handleNextWeek} label={t("next_week")} />
-            <ListInput onClick={handleNoDate} label={t("no_date")} />
+            {!isSelectedToday() && <ListInput 
+              onClick={handleToday} 
+              label={t("today")} 
+            />}
+            {!isSelectedTomorrow() && <ListInput 
+              onClick={handleTomorrow} 
+              label={t("tomorrow")} 
+            />}
+            {!isSelectedNextWeek() && <ListInput 
+              onClick={handleNextWeek} 
+              label={t("next_week")} 
+            />}
+            {!isSelectedNoDate() && <ListInput 
+              onClick={handleNoDate} 
+              label={t("no_date")} 
+            />}
           </div>
 
           <div className="pb-[env(safe-area-inset-bottom)]">
@@ -526,6 +576,7 @@ export function CalendarModal({
         <RepeatEndDateView
           selectedDate={tempRepeatEndDate}
           onDateSelect={(dateStr) => {
+            setTempRepeatEnd("on_date")
             setTempRepeatEndDate(dateStr);
             setView("repeat");
           }}

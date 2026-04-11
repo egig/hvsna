@@ -259,28 +259,39 @@ export function RepeatSelectorModal({
               {t("repeat_ends_after")}
             </button>
           </div>
-          {selectedRepeatEnd === "on_date" && repeatEndDate && (
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              {repeatEndDate}
-            </p>
-          )}
           {selectedRepeatEnd === "after_occurrences" && (
             <div className="flex items-center gap-2 mt-2">
-              <input
-                type="number"
-                min={1}
-                value={endOccurrences}
-                disabled={selectedOption === "none"}
-                onChange={(e) => {
+              <button
+                type="button"
+                disabled={selectedOption === "none" || endOccurrences <= 1}
+                onClick={() => {
                   if (selectedOption !== "none") {
-                    setEndOccurrences(
-                      Math.max(1, parseInt(e.target.value) || 1),
-                    );
+                    setEndOccurrences(Math.max(1, endOccurrences - 1));
                   }
                 }}
-                className={`w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center dark:bg-gray-700 dark:text-white ${selectedOption === "none" ? "cursor-not-allowed opacity-50" : ""}`}
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+                className="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                -
+              </button>
+              
+              <div className="w-12 text-center font-medium text-gray-900 dark:text-white">
+                {endOccurrences}
+              </div>
+              
+              <button
+                type="button"
+                disabled={selectedOption === "none"}
+                onClick={() => {
+                  if (selectedOption !== "none") {
+                    setEndOccurrences(endOccurrences + 1);
+                  }
+                }}
+                className="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                +
+              </button>
+              
+              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
                 {t("occurrences")}
               </span>
             </div>
