@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  HvArrowUp,
-  HvTrash2,
-  HvInfo,
-  HvMoreVertical,
-} from "@/modules/icons";
+import { HvArrowUp, HvTrash2, HvInfo, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
@@ -13,7 +8,6 @@ import { Navbar } from "../navigation";
 import type { Task } from "./types";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import TaskPreview from "./task-preview";
 import { ListSelector } from "./list-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
@@ -22,7 +16,6 @@ interface TaskFormEditProps {
   taskId: string;
   onSuccess?: (task: Task) => void;
   onError?: (error: string) => void;
-  onCancel?: () => void;
   onDelete?: (taskId: string) => void;
 }
 
@@ -30,7 +23,6 @@ export default function TaskFormEdit({
   taskId,
   onSuccess,
   onError,
-  onCancel,
   onDelete,
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
@@ -38,7 +30,6 @@ export default function TaskFormEdit({
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isFormFocused, setIsFormFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const { toHijriDate, formatDate } = useHijriDate();
   const {
     error,
     task,
@@ -50,26 +41,16 @@ export default function TaskFormEdit({
     setShowDeleteOptions,
     showRecurringEditScope,
     setShowRecurringEditScope,
-    handleDemoteThisOnly,
-    handleDemoteAllFuture,
+    handleScopeThisOnly,
+    handleScopeAllFuture,
     isSubmitting,
     setRemoveTime,
-    selectedScheduleAt,
-    setSelectedScheduleAt,
-    selectedListId,
-    setSelectedListId,
-    selectedRepeat,
-    setSelectedRepeat,
-    selectedRepeatInterval,
-    setSelectedRepeatInterval,
-    selectedRepeatEnd,
-    setSelectedRepeatEnd,
-    selectedRepeatEndDate,
-    setSelectedRepeatEndDate,
-    selectedRepeatEndOccurrences,
-    setSelectedRepeatEndOccurrences,
+    formData,
+    updateFormData,
+    updateScheduleAt,
+    updateRepeatConfig,
     lists,
-  } = useTaskFormEdit(taskId, onSuccess, onError, onCancel, onDelete);
+  } = useTaskFormEdit(taskId, onSuccess, onError, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 
@@ -171,7 +152,7 @@ export default function TaskFormEdit({
       >
         <div className="flex flex-col gap-3 p-2">
           <button
-            onClick={handleDemoteThisOnly}
+            onClick={handleScopeThisOnly}
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("change_this_event_only")}</div>
@@ -180,7 +161,7 @@ export default function TaskFormEdit({
             </div>
           </button>
           <button
-            onClick={handleDemoteAllFuture}
+            onClick={handleScopeAllFuture}
             className="w-full px-4 py-3 text-left rounded-lg border border-red-200 dark:border-red-900 text-[var(--hvsna-danger-color)] hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
           >
             <div className="font-medium">{t("change_all_future_events")}</div>
@@ -225,15 +206,15 @@ export default function TaskFormEdit({
 
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput
-          hijriDate={selectedScheduleAt.dateHijri as HijriDate}
-          atTime={selectedScheduleAt.time || ""}
-          prayerTime={selectedScheduleAt.prayerTime || ""}
+          hijriDate={formData.scheduleAt.dateHijri as HijriDate}
+          atTime={formData.scheduleAt.time || ""}
+          prayerTime={formData.scheduleAt.prayerTime || ""}
           isSubmitting={isSubmitting}
-          repeat={selectedRepeat}
-          repeatInterval={selectedRepeatInterval}
-          repeatEnd={selectedRepeatEnd}
-          repeatEndDate={selectedRepeatEndDate}
-          repeatEndOccurrences={selectedRepeatEndOccurrences}
+          repeat={formData.repeat.repeat}
+          repeatInterval={formData.repeat.interval}
+          repeatEnd={formData.repeat.end}
+          repeatEndDate={formData.repeat.endDate}
+          repeatEndOccurrences={formData.repeat.endOccurrences}
           onRepeatChange={(
             repeat,
             interval,
@@ -241,18 +222,20 @@ export default function TaskFormEdit({
             repeatEndDate,
             repeatEndOccurrences,
           ) => {
-            setSelectedRepeat(repeat);
-            setSelectedRepeatInterval(interval);
-            setSelectedRepeatEnd(repeatEnd);
-            setSelectedRepeatEndDate(repeatEndDate);
-            setSelectedRepeatEndOccurrences(repeatEndOccurrences);
+            updateRepeatConfig({
+              repeat,
+              interval,
+              end: repeatEnd,
+              endDate: repeatEndDate,
+              endOccurrences: repeatEndOccurrences,
+            });
             setIsFormDirty(true);
           }}
           onChange={(hijriDate, time, prayerTime) => {
-            setSelectedScheduleAt({
+            updateScheduleAt({
               dateHijri: hijriDate,
-              time: time,
-              prayerTime: prayerTime,
+              time: time ?? "",
+              prayerTime: prayerTime ?? "",
             });
             setIsFormDirty(true);
             if (!time && !prayerTime) {
@@ -263,10 +246,10 @@ export default function TaskFormEdit({
         {lists.length > 0 && (
           <ListSelector
             lists={lists}
-            selectedListId={selectedListId}
+            selectedListId={formData.listId}
             onListChange={(listId) => {
               setIsFormDirty(true);
-              setSelectedListId(listId);
+              updateFormData({ listId });
             }}
             disabled={isSubmitting}
           />

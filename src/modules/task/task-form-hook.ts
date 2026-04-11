@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import {
-  Task,
-  type PrayerTime,
-  type TaskCreateInput,
-  type TaskRepeat,
-} from "./types";
+import { Task, type PrayerTime, type TaskCreateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
@@ -15,29 +10,16 @@ import { formatHijriDateString } from "./task-form-helpers";
 import { useLists } from "./use-lists";
 import { usePouchDB } from "../../pouchdb";
 import logger from "../logger";
-
-export interface TaskScheduleAt {
-  dateHijri: HijriDate | null;
-  time: string;
-  prayerTime: string;
-}
-
-type RepeatEnd = "never" | "on_date" | "after_occurrences";
-
-// Consolidated state interfaces for better organization
-interface RepeatConfig {
-  repeat: TaskRepeat;
-  interval: number;
-  end: RepeatEnd;
-  endDate: string | null;
-  endOccurrences: number;
-}
-
-interface TaskFormData {
-  scheduleAt: TaskScheduleAt;
-  listId: string;
-  repeat: RepeatConfig;
-}
+import type {
+  RepeatConfig,
+  TaskFormData,
+  TaskScheduleAt,
+} from "./task-form-types";
+export type {
+  TaskScheduleAt,
+  RepeatConfig,
+  TaskFormData,
+} from "./task-form-types";
 
 export interface UseTaskFormReturn {
   error: string | null;

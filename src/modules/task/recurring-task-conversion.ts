@@ -1,7 +1,21 @@
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import type { Task, TaskRepeat, TaskUpdateInput } from "./types";
-import type { RecurringTask, RecurringTaskCreateInput } from "./recurring-task";
+import type {
+  RecurringTask,
+  RecurringTaskCreateInput,
+  RecurringTaskUpdateInput,
+} from "./recurring-task";
 import { generateOccurrencesForTemplate } from "./recurring-task-generator";
+
+export interface UpdateRecurringSeriesDeps {
+  updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
+  updateRecurringTask: (
+    id: string,
+    input: RecurringTaskUpdateInput,
+  ) => Promise<RecurringTask>;
+  taskRepository: ITaskRepository;
+  todayEpoch: number;
+}
 
 export interface DemoteAndDeleteFutureDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
@@ -16,6 +30,56 @@ export interface PromoteToRecurringDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   taskRepository: ITaskRepository;
   todayEpoch: number;
+}
+
+/**
+ * Updates a recurring task series from a specific instance forward:
+ * 1. Updates this task instance with new values.
+ * 2. Deletes all future pending instances (from this task's date onward).
+ * 3. Updates the RecurringTask template, resetting baseDateHijri to this
+ *    task's date so the generator starts fresh with the new pattern.
+ * 4. Regenerates future instances from the updated template.
+ *
+ * Past completed instances are left untouched.
+ */
+export async function updateRecurringSeries(
+  taskId: string,
+  taskInput: TaskUpdateInput,
+  task: Task,
+  templateInput: RecurringTaskUpdateInput,
+  deps: UpdateRecurringSeriesDeps,
+): Promise<Task> {
+  const { updateTask, updateRecurringTask, taskRepository, todayEpoch } = deps;
+
+  // Delete all future pending instances except this one
+  const all = await taskRepository.findByRecurringTaskId(task.recurringTaskId!);
+  const futurePending = all.filter(
+    (t) =>
+      t.id !== taskId &&
+      t.status !== 1 &&
+      t.atDateHijri != null &&
+      t.atDateHijri >= task.atDateHijri!,
+  );
+  await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
+
+  // Update the template; anchor baseDateHijri to this task's date so the
+  // generator produces instances starting from here with the new pattern
+  const updatedTemplate = await updateRecurringTask(task.recurringTaskId!, {
+    ...templateInput,
+    baseDateHijri: task.atDateHijri,
+  });
+
+  // Update this task instance
+  const result = await updateTask(taskId, taskInput);
+
+  // Regenerate future instances with the new pattern
+  await generateOccurrencesForTemplate(
+    updatedTemplate,
+    taskRepository,
+    todayEpoch,
+  );
+
+  return result;
 }
 
 /**

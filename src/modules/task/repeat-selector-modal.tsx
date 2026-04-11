@@ -273,11 +273,11 @@ export function RepeatSelectorModal({
               >
                 -
               </button>
-              
+
               <div className="w-12 text-center font-medium text-gray-900 dark:text-white">
                 {endOccurrences}
               </div>
-              
+
               <button
                 type="button"
                 disabled={selectedOption === "none"}
@@ -290,7 +290,7 @@ export function RepeatSelectorModal({
               >
                 +
               </button>
-              
+
               <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
                 {t("occurrences")}
               </span>

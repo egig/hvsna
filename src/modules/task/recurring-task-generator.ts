@@ -120,7 +120,7 @@ export async function generateOccurrencesForTemplate(
 
     if (dateEpoch >= todayEpoch && !existingDates.has(currentDateStr)) {
       if (newCount >= maxToCreate) break;
-      
+
       await taskRepository.create({
         name: template.name,
         description: template.description,

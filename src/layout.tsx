@@ -55,7 +55,6 @@ export default function TabLayout() {
               <TaskFormEdit
                 taskId={editingTaskId}
                 onSuccess={handleTaskSuccess}
-                onCancel={handleTaskCancel}
               />
             )}
             {!editingTaskId && (
@@ -104,11 +103,7 @@ export default function TabLayout() {
       {/* Task Form Modal */}
       <Modal isOpen={formOpen} onClose={handleTaskCancel}>
         {editingTaskId && (
-          <TaskFormEdit
-            taskId={editingTaskId}
-            onSuccess={handleTaskSuccess}
-            onCancel={handleTaskCancel}
-          />
+          <TaskFormEdit taskId={editingTaskId} onSuccess={handleTaskSuccess} />
         )}
         {!editingTaskId && !isDesktop && (
           <TaskForm onSuccess={handleTaskSuccess} onCancel={handleTaskCancel} />
