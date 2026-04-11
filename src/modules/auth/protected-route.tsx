@@ -1,6 +1,6 @@
 import { Navigate } from "react-router";
 import { useAuth } from "./use-auth";
-import { HvLoader2 } from "@src/modules/icons";
+import { HvLoader2 } from "@/modules/icons";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

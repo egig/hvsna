@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvCalendar, HvRepeat } from "@src/modules/icons";
+import { HvCalendar, HvRepeat } from "@/modules/icons";
 import { CalendarModal } from "src/modules/calendar/hijri-date-input/calendar-modal";
 import { useHijriDate } from "src/modules/calendar/hijri";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";

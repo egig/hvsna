@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { HvArrowLeft, HvArrowRight } from "@src/modules/icons";
+import { HvArrowLeft, HvArrowRight } from "@/modules/icons";
 
 export default function PrevNext({ prevLink, nextLink }: any) {
   return (

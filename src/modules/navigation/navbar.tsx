@@ -1,4 +1,4 @@
-import { HvChevronLeft, HvX, HvSearch } from "@src/modules/icons";
+import { HvChevronLeft, HvX, HvSearch } from "@/modules/icons";
 import { useAppNavigation } from "./use-app-navigation";
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";

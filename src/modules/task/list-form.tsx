@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { HvArrowUp, HvX } from "@src/modules/icons";
+import { HvArrowUp, HvX } from "@/modules/icons";
 import { Navbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";

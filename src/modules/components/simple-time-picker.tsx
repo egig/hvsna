@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvClock, HvChevronDown } from "@src/modules/icons";
+import { HvClock, HvChevronDown } from "@/modules/icons";
 import { Modal } from "../navigation";
 
 interface SimpleTimePickerProps {

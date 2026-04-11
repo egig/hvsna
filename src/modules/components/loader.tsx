@@ -1,4 +1,4 @@
-import { HvLoader2 } from "@src/modules/icons";
+import { HvLoader2 } from "@/modules/icons";
 import { type ReactNode } from "react";
 
 interface LoadingSpinnerProps {

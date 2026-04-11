@@ -44,7 +44,7 @@ npm run android
 - **Mobile**: Capacitor (iOS/Android)
 - **Testing**: Vitest with UI support
 - **Animation**: Framer Motion
-- **Path alias**: `@src/*` → `./src/*`
+- **Path alias**: `@/*` → `./src/*`
 
 ### Directory Structure
 

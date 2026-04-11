@@ -1,5 +1,5 @@
 import React from "react";
-import { HvChevronRight } from "@src/modules/icons";
+import { HvChevronRight } from "@/modules/icons";
 
 interface ListInputProps {
   label: string;

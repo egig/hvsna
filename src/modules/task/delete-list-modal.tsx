@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvAlertTriangle } from "@src/modules/icons";
+import { HvAlertTriangle } from "@/modules/icons";
 import { Modal } from "../navigation/modal";
 import type { Task } from "./types";
 

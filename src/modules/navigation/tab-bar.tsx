@@ -13,7 +13,7 @@ import {
   HvEllipsisHorizontalCircle,
   HvOutlineInbox,
   HvHiInbox,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 
 export function TabBar() {
   const { t } = useLanguageContext();

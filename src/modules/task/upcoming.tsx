@@ -1,4 +1,4 @@
-import { HvCalendar } from "@src/modules/icons";
+import { HvCalendar } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
 import TaskListItem from "../task/task-list-item";

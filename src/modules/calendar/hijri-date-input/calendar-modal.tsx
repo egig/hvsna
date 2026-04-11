@@ -6,7 +6,7 @@ import {
   HvChevronRight,
   HvClock,
   HvRepeat,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Modal, Navbar } from "src/modules/navigation";
 import { Tabs } from "@base-ui/react/tabs";
 import { HijriMonth } from "../hijri/hijri-month";

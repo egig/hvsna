@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         ...(isCapacitor && {
-          "@src/platforms/web/usePWARefresh": path.resolve(
+          "@/platforms/web/usePWARefresh": path.resolve(
             __dirname,
             "src/platforms/capacitor/usePWARefresh.ts",
           ),

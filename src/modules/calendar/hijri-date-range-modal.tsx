@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HvCheck, HvChevronLeft, HvChevronRight } from "@src/modules/icons";
+import { HvCheck, HvChevronLeft, HvChevronRight } from "@/modules/icons";
 import { Modal, Navbar } from "src/modules/navigation";
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { Tabs } from "@base-ui/react/tabs";

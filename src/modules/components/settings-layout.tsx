@@ -9,7 +9,7 @@ import {
   HvLogOut,
   HvCalendar,
   HvClock,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Modal } from "../navigation/modal";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useAuth } from "../auth/use-auth";

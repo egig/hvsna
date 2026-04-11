@@ -6,7 +6,7 @@ import {
   HvLanguages,
   HvChevronsUpDown,
   HvBell,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Page, Navbar } from "../navigation";
 import { TimezonePickerModal } from "../components/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";

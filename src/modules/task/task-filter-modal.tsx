@@ -1,6 +1,6 @@
 import { Button } from "../navigation";
 import { Navbar } from "../navigation/navbar";
-import { HvCheck } from "@src/modules/icons";
+import { HvCheck } from "@/modules/icons";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../components/list-input-select";

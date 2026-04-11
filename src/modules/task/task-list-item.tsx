@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion, time } from "framer-motion";
-import { HvSquare, HvCheckSquare2 } from "@src/modules/icons";
+import { HvSquare, HvCheckSquare2 } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvPlus, HvCheck, HvFilter, HvFilterX } from "@src/modules/icons";
+import { HvPlus, HvCheck, HvFilter, HvFilterX } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import TaskFilterModal from "./task-filter-modal";

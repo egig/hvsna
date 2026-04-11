@@ -5,7 +5,7 @@ import {
   HvWifiOff,
   HvRefreshCw,
   HvAlertTriangle,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { FormInput } from "../../components/form-input";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router";
-import { HvPlus } from "@src/modules/icons";
+import { HvPlus } from "@/modules/icons";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";
 import { Modal } from "./modules/navigation/modal";

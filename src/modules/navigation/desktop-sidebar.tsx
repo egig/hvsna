@@ -6,7 +6,7 @@ import {
   HvEdit,
   HvTrash2,
   HvPanelLeft,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
@@ -31,7 +31,7 @@ import {
   HvSettingsFilled,
   HvOutlineInbox,
   HvHiInbox,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { UserRound } from "lucide-react";
 
 interface DesktopSidebarProps {

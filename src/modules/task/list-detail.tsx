@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import { HvList, HvEdit2, HvTrash2, HvMoreVertical } from "@src/modules/icons";
+import { HvList, HvEdit2, HvTrash2, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";

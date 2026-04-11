@@ -1,4 +1,4 @@
-import { HvChevronRight, type HvIcon } from "@src/modules/icons";
+import { HvChevronRight, type HvIcon } from "@/modules/icons";
 import { type ReactNode } from "react";
 import { Button } from "../navigation";
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { HvX } from "@src/modules/icons";
+import { HvX } from "@/modules/icons";
 
 export interface SnackbarProps {
   isOpen: boolean;

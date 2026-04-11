@@ -8,7 +8,7 @@ import {
   HvAlertCircle,
   HvClock,
   HvInfo,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useSync } from "src/modules/sync/context";
 

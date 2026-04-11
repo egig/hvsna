@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HvChevronsUpDown } from "@src/modules/icons";
+import { HvChevronsUpDown } from "@/modules/icons";
 import { Page, Navbar } from "../../navigation";
 import { TimezonePickerModal } from "../../components/timezone-picker-modal";
 import { useSettings } from "../useSettings";

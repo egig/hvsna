@@ -1,5 +1,5 @@
 import React from "react";
-import { HvDatabase, HvMerge, HvTrash2 } from "@src/modules/icons";
+import { HvDatabase, HvMerge, HvTrash2 } from "@/modules/icons";
 import { Modal } from "src/modules/navigation/modal";
 
 export interface SyncInitDialogProps {

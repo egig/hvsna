@@ -4,7 +4,7 @@ import {
   HvTrash2,
   HvInfo,
   HvMoreVertical,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";

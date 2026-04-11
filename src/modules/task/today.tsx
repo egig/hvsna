@@ -8,7 +8,7 @@ import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { HvChevronRight, HvChevronDown } from "@src/modules/icons";
+import { HvChevronRight, HvChevronDown } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
 import {

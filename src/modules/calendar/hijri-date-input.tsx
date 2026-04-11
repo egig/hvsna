@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HijriDate } from "./hijri";
 import { CalendarModal } from "./hijri-date-input/calendar-modal";
-import { HvCalendar } from "@src/modules/icons";
+import { HvCalendar } from "@/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useHijriDate } from "./hijri/use-hijri-date";
 

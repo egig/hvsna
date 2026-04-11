@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HvCheck } from "@src/modules/icons";
+import { HvCheck } from "@/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
 import type { TaskRepeat } from "./types";

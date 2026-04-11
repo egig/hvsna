@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvDatabase, HvTrash2, HvAlertTriangle } from "@src/modules/icons";
+import { HvDatabase, HvTrash2, HvAlertTriangle } from "@/modules/icons";
 import { usePouchDB } from "../../pouchdb";
 import { Navbar, Page } from "../navigation";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";

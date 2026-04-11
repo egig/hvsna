@@ -1,13 +1,13 @@
-import { CapacitorSessionRepository } from "@src/infra/auth/CapacitorSessionRepository";
-import { CapacitorNotificationsProvider } from "@src/infra/notifications/CapacitorNotificationsProvider";
-import { CapacitorPermissionsProvider } from "@src/infra/permissions/CapacitorPermissionsProvider";
-import { CapacitorNetworkProvider } from "@src/infra/network/CapacitorNetworkProvider";
-import { NativeLocationProvider } from "@src/infra/settings/NativeLocationProvider";
-import { initAuthUseCases } from "@src/infra/auth/AuthServiceFactory";
-import { initNotificationsProvider } from "@src/infra/notifications";
-import { initPermissionsProvider } from "@src/infra/permissions";
-import { initNetworkProvider } from "@src/infra/network";
-import { initLocationProvider } from "@src/infra/settings/CapacitorLocationProvider";
+import { CapacitorSessionRepository } from "@/infra/auth/CapacitorSessionRepository";
+import { CapacitorNotificationsProvider } from "@/infra/notifications/CapacitorNotificationsProvider";
+import { CapacitorPermissionsProvider } from "@/infra/permissions/CapacitorPermissionsProvider";
+import { CapacitorNetworkProvider } from "@/infra/network/CapacitorNetworkProvider";
+import { NativeLocationProvider } from "@/infra/settings/NativeLocationProvider";
+import { initAuthUseCases } from "@/infra/auth/AuthServiceFactory";
+import { initNotificationsProvider } from "@/infra/notifications";
+import { initPermissionsProvider } from "@/infra/permissions";
+import { initNetworkProvider } from "@/infra/network";
+import { initLocationProvider } from "@/infra/settings/CapacitorLocationProvider";
 
 export function registerCapacitorImplementations(): void {
   initAuthUseCases(new CapacitorSessionRepository());

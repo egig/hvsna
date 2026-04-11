@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { HvSearch } from "@src/modules/icons";
+import { HvSearch } from "@/modules/icons";
 import { Modal } from "../navigation";
 import { ALL_TIMEZONES } from "../timezones";
 

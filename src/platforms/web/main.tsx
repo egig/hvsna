@@ -1,11 +1,11 @@
 import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
-import type { AppConfig } from "@src/platforms/web/app";
+import type { AppConfig } from "@/platforms/web/app";
 import App from "./app";
-import { getPouchDBInstance } from "@src/modules/pouchdb-singleton";
-import { configureLogger } from "@src/modules/logger";
+import { getPouchDBInstance } from "@/modules/pouchdb-singleton";
+import { configureLogger } from "@/modules/logger";
 import { registerWebImplementations } from "./register";
-import log from "@src/modules/logger";
+import log from "@/modules/logger";
 
 registerWebImplementations();
 

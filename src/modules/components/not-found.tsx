@@ -1,4 +1,4 @@
-import { HvHome, HvSearch, HvArrowLeft } from "@src/modules/icons";
+import { HvHome, HvSearch, HvArrowLeft } from "@/modules/icons";
 import { useNavigate } from "react-router";
 
 export function NotFound() {

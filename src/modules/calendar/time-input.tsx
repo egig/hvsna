@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvClock } from "@src/modules/icons";
+import { HvClock } from "@/modules/icons";
 import { Modal } from "src/modules/navigation";
 import { TimeSelectionModal } from "./hijri-date-input/time-selection-modal";
 import type { PrayerTime } from "src/modules/task/types";

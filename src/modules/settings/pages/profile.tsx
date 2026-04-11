@@ -2,7 +2,7 @@ import { useAuth } from "../../auth/use-auth";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { HvUser, HvMail } from "@src/modules/icons";
+import { HvUser, HvMail } from "@/modules/icons";
 
 export default function Profile() {
   const { t } = useLanguageContext();

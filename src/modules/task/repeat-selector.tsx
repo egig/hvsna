@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvRepeat } from "@src/modules/icons";
+import { HvRepeat } from "@/modules/icons";
 import { Modal } from "src/modules/navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { TaskRepeat } from "./types";

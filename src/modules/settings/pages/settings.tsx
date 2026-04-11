@@ -10,7 +10,7 @@ import {
   HvLogOut,
   HvClock,
   HvList,
-} from "@src/modules/icons";
+} from "@/modules/icons";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../components/menu-item";
 import { Navbar } from "../../navigation";

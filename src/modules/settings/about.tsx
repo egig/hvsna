@@ -1,10 +1,10 @@
-import { HvRefreshCw } from "@src/modules/icons";
+import { HvRefreshCw } from "@/modules/icons";
 import { Page } from "../navigation";
 import packageInfo from "../../../package.json";
 import { LargeNavbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { usePlatform } from "../platform";
-import { usePWARefresh } from "@src/platforms/web/usePWARefresh";
+import { usePWARefresh } from "@/platforms/web/usePWARefresh";
 
 export default function About() {
   const { t } = useLanguageContext();

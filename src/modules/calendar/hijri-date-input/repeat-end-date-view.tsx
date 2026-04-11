@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HvChevronLeft, HvChevronRight } from "@src/modules/icons";
+import { HvChevronLeft, HvChevronRight } from "@/modules/icons";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { Navbar } from "src/modules/navigation";
 import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";

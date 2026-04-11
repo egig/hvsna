@@ -1,8 +1,8 @@
 import { createRoot, type Container } from "react-dom/client";
 import type { AppConfig } from "./app";
 import App from "./app";
-import { getPouchDBInstance } from "@src/modules/pouchdb-singleton";
-import { configureLogger } from "@src/modules/logger";
+import { getPouchDBInstance } from "@/modules/pouchdb-singleton";
+import { configureLogger } from "@/modules/logger";
 import { registerCapacitorImplementations } from "./register";
 
 registerCapacitorImplementations();
