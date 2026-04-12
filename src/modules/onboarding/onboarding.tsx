@@ -135,9 +135,9 @@ export default function Onboarding() {
   };
 
   const renderLanguageSelection = () => (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="language-selection-step">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900" data-testid="welcome-title">
           {t("select_language") || "Select Language"}
         </h1>
         <p className="text-gray-600">
@@ -150,6 +150,7 @@ export default function Onboarding() {
         <button
           onClick={() => handleLanguageSelection("en")}
           disabled={loading}
+          data-testid="language-en"
           className={`w-full bg-white border rounded-lg p-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             language === "en"
               ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
@@ -169,6 +170,7 @@ export default function Onboarding() {
         <button
           onClick={() => handleLanguageSelection("id")}
           disabled={loading}
+          data-testid="language-id"
           className={`w-full bg-white border rounded-lg p-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
             language === "id"
               ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
@@ -189,9 +191,9 @@ export default function Onboarding() {
   );
 
   const renderLocationSetup = () => (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="location-setup-step">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900" data-testid="location-title">
           {t("setup_location") || "Setup Location"}
         </h1>
         <p className="text-gray-600">
@@ -204,6 +206,7 @@ export default function Onboarding() {
       <button
         onClick={handleLocationPermission}
         disabled={loading}
+        data-testid="use-current-location"
         className="w-full bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div className="flex items-center justify-between">
@@ -226,7 +229,7 @@ export default function Onboarding() {
       </button>
 
       {/* Manual Timezone Selection */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="bg-white border border-gray-200 rounded-lg p-4" data-testid="manual-timezone-section">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
             <HvGlobe className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
@@ -245,9 +248,10 @@ export default function Onboarding() {
           type="button"
           onClick={() => setIsTimezoneModalOpen(true)}
           disabled={loading}
+          data-testid="timezone-picker-button"
           className="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg hover:border-[var(--hvsna-primary-color)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
         >
-          <span className="text-sm text-gray-800">
+          <span className="text-sm text-gray-800" data-testid="selected-timezone">
             {selectedTimezone.replace(/_/g, " ")}
           </span>
           <HvChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0" />
@@ -259,11 +263,13 @@ export default function Onboarding() {
           value={selectedTimezone}
           onSelect={setSelectedTimezone}
           title={t("select_timezone_manually") || "Select Timezone"}
+          data-testid="timezone-modal"
         />
 
         <button
           onClick={handleManualTimezone}
           disabled={loading}
+          data-testid="continue-timezone"
           className="w-full mt-4 bg-[var(--hvsna-primary-color)] text-white py-3 rounded-lg font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading
@@ -272,7 +278,7 @@ export default function Onboarding() {
         </button>
       </div>
 
-      <div className="text-center text-sm text-gray-500">
+      <div className="text-center text-sm text-gray-500" data-testid="location-privacy-note">
         <p>
           {t("location_privacy_note") ||
             "Your location is only used to set timezone and is stored locally"}
@@ -282,9 +288,9 @@ export default function Onboarding() {
   );
 
   const renderNotificationSetup = () => (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="notification-setup-step">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900" data-testid="notification-title">
           {t("setup_notifications") || "Setup Notifications"}
         </h1>
         <p className="text-gray-600">
@@ -297,6 +303,7 @@ export default function Onboarding() {
       <button
         onClick={() => handleNotificationPermission(true)}
         disabled={loading}
+        data-testid="enable-notifications"
         className="w-full bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <div className="flex items-center justify-between">
@@ -319,7 +326,7 @@ export default function Onboarding() {
       </button>
 
       {/* Skip Notifications Option */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4">
+      <div className="bg-white border border-gray-200 rounded-lg p-4" data-testid="skip-notifications-section">
         <div className="flex items-center space-x-3 mb-4">
           <div className="bg-gray-100 p-2 rounded-lg">
             <HvChevronsUpDown className="w-5 h-5 text-gray-600" />
@@ -338,13 +345,14 @@ export default function Onboarding() {
         <button
           onClick={() => handleNotificationPermission(false)}
           disabled={loading}
+          data-testid="skip-notifications"
           className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? t("continuing") || "Continuing..." : t("skip") || "Skip"}
         </button>
       </div>
 
-      <div className="text-center text-sm text-gray-500">
+      <div className="text-center text-sm text-gray-500" data-testid="notification-privacy-note">
         <p>
           {t("notification_privacy_note") ||
             "Notifications are only used for task reminders and are stored locally"}
@@ -365,17 +373,19 @@ export default function Onboarding() {
         }
         showBackButton={currentStep === 2 || currentStep === 3}
         customBackAction={() => setCurrentStep(currentStep - 1)}
+        data-testid="navbar-title"
       />
 
       <div className="p-6 space-y-6">
         {/* Step Indicator */}
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex items-center justify-center space-x-2" data-testid="step-indicator">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
               currentStep === 1
                 ? "bg-[var(--hvsna-primary-color)] text-white"
                 : "bg-[var(--hvsna-primary-color)] text-white"
             }`}
+            data-testid="step-1"
           >
             1
           </div>
@@ -385,6 +395,7 @@ export default function Onboarding() {
                 ? "bg-[var(--hvsna-primary-color)]"
                 : "bg-gray-300"
             }`}
+            data-testid="progress-bar-1-2"
           ></div>
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -392,6 +403,7 @@ export default function Onboarding() {
                 ? "bg-[var(--hvsna-primary-color)] text-white"
                 : "bg-gray-300 text-gray-600"
             }`}
+            data-testid="step-2"
           >
             2
           </div>
@@ -401,6 +413,7 @@ export default function Onboarding() {
                 ? "bg-[var(--hvsna-primary-color)]"
                 : "bg-gray-300"
             }`}
+            data-testid="progress-bar-2-3"
           ></div>
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -408,6 +421,7 @@ export default function Onboarding() {
                 ? "bg-[var(--hvsna-primary-color)] text-white"
                 : "bg-gray-300 text-gray-600"
             }`}
+            data-testid="step-3"
           >
             3
           </div>

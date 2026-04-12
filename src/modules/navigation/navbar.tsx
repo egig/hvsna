@@ -67,6 +67,7 @@ export function Navbar({
         {shouldShowBackButton && (
           <button
             onClick={handleBack}
+            data-testid="navbar-back-button"
             className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
             aria-label="Go back"
           >
@@ -107,7 +108,7 @@ export function Navbar({
         ) : (
           <>
             {title && (
-              <h1 className="text-lg font-semibold text-gray-900 truncate">
+              <h1 className="text-lg font-semibold text-gray-900 truncate" data-testid="navbar-title">
                 {title}
               </h1>
             )}

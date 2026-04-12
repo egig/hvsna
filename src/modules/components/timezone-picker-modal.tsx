@@ -40,7 +40,7 @@ export function TimezonePickerModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={title} noPadding>
+    <Modal isOpen={isOpen} onClose={handleClose} title={title} noPadding data-testid="timezone-modal">
       <div className="flex flex-col h-full">
         <div className="px-4 py-3 border-b border-gray-100">
           <div className="relative">
@@ -66,6 +66,7 @@ export function TimezonePickerModal({
                 <button
                   type="button"
                   onClick={() => handleSelect(tz)}
+                  data-testid={`timezone-option-${tz.replace(/[^a-zA-Z0-9]/g, '')}`}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-gray-50 ${
                     tz === value
                       ? "font-semibold text-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"

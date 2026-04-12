@@ -10,6 +10,7 @@ interface ModalProps {
   title?: string;
   className?: string;
   noPadding?: boolean;
+  'data-testid'?: string;
 }
 
 export function Modal({
@@ -19,6 +20,7 @@ export function Modal({
   title,
   className = "",
   noPadding = false,
+  'data-testid': testId,
 }: ModalProps) {
   const { isDesktop } = useScreenSize();
 
@@ -34,6 +36,7 @@ export function Modal({
           <Dialog.Viewport>
             <Dialog.Popup
               className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-xl shadow-xl w-full mx-4 outline-none ${className || "max-w-lg max-h-[90vh] overflow-auto"}`}
+              data-testid={testId}
             >
               {/* Header */}
               {title && (
@@ -79,7 +82,7 @@ export function Modal({
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40" />
-        <Drawer.Content className="bg-white z-[1000] rounded-t-[10px] fixed bottom-0 left-0 right-0 outline-none">
+        <Drawer.Content className="bg-white z-[1000] rounded-t-[10px] fixed bottom-0 left-0 right-0 outline-none" data-testid={testId}>
           <Drawer.Handle />
           <div className="hidden h-0">
             <Drawer.Title>{title}</Drawer.Title>
