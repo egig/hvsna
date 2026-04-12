@@ -471,6 +471,7 @@ export function CalendarModal({
                         {date ? (
                           <button
                             onClick={() => setTempSelectedDate(date)}
+                            data-testid={date.isToday() ? "calendar-today-button" : undefined}
                             className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
                               tempSelectedDate &&
                               date.year === tempSelectedDate.year &&
@@ -527,6 +528,7 @@ export function CalendarModal({
                 label={repeatLabel}
                 icon={<HvRepeat className="w-4 h-4" />}
                 disabled={!tempSelectedDate}
+                testId="repeat-list-button"
               />
             </div>
           </div>

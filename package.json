@@ -12,6 +12,9 @@
     "typecheck": "tsc",
     "test": "vitest run --reporter=tree",
     "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
     "cap:sync": "npm run build:capacitor && npx cap sync",
     "ios": "npx cap run ios",
     "android": "npx cap run android",
@@ -73,6 +76,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.1",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

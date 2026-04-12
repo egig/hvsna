@@ -8,6 +8,7 @@ interface SimpleTimePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  testId?: string;
 }
 
 export function SimpleTimePicker({
@@ -16,6 +17,7 @@ export function SimpleTimePicker({
   placeholder = "Select time",
   disabled = false,
   className = "",
+  testId,
 }: SimpleTimePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [hour, setHour] = useState(0);
@@ -57,6 +59,7 @@ export function SimpleTimePicker({
         type="button"
         onClick={openModal}
         disabled={disabled}
+        data-testid={testId}
         className={`
           w-full flex items-center justify-between py-1 px-2 border border-gray-300 dark:border-gray-600 rounded-lg
           hover:border-[var(--hvsna-primary-color)] transition-colors
@@ -102,6 +105,7 @@ export function SimpleTimePicker({
                 <select
                   value={hour}
                   onChange={(e) => setHour(parseInt(e.target.value))}
+                  data-testid="time-picker-hour"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   {Array.from({ length: 24 }, (_, i) => (
@@ -120,6 +124,7 @@ export function SimpleTimePicker({
                 <select
                   value={minute}
                   onChange={(e) => setMinute(parseInt(e.target.value))}
+                  data-testid="time-picker-minute"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   {Array.from({ length: 60 }, (_, i) => (
@@ -136,12 +141,14 @@ export function SimpleTimePicker({
           <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex gap-3">
             <button
               onClick={handleCancel}
+              data-testid="time-picker-cancel"
               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
+              data-testid="time-picker-confirm"
               className="flex-1 px-4 py-2 bg-[var(--hvsna-primary-color)] text-white rounded-lg hover:bg-[var(--hvsna-primary-color-hover)] transition-colors"
             >
               Confirm

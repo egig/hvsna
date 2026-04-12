@@ -69,6 +69,7 @@ export function DatePrayerInput({
         type="button"
         onClick={() => !isSubmitting && setIsOpen(true)}
         disabled={isSubmitting}
+        data-testid="date-prayer-input-button"
         className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors ${
           hijriDate
             ? "text-gray-900 dark:text-white border-[var(--hvsna-primary-color)]"

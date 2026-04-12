@@ -281,6 +281,7 @@ export default function TaskFormEdit({
           <button
             className="px-6 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md shadow-sm flex items-center justify-center transition-colors"
             aria-label={t("add_new_task")}
+            data-testid="task-form-submit"
             type="submit"
           >
             {t("submit")}
@@ -310,6 +311,7 @@ export default function TaskFormEdit({
               <button
                 className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
                 aria-label={t("add_new_task")}
+                data-testid="task-form-submit"
                 type="submit"
               >
                 <HvArrowUp />

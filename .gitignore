@@ -15,3 +15,7 @@ hvsna-notes
 android/app/release
 .env*
 !.env.example
+
+# Playwright
+playwright-report/
+test-results/

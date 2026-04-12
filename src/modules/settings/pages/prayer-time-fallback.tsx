@@ -146,6 +146,7 @@ export default function PrayerTimeFallback() {
                 value={prayerTimes[prayer]}
                 onChange={(value: string) => handleTimeChange(prayer, value)}
                 placeholder={`Select ${getPrayerName(prayer)} time`}
+                testId={`prayer-time-picker-${prayer}`}
               />
             </div>
           ))}

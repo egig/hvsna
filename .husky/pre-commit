@@ -1,1 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run unit tests only (exclude e2e tests)
+echo "Running unit tests before commit..."
 npm test
+
+# Check if tests passed
+if [ $? -eq 0 ]; then
+    echo "Unit tests passed! Proceeding with commit."
+else
+    echo "Unit tests failed. Commit aborted."
+    exit 1
+fi

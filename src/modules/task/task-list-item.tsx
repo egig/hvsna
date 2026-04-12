@@ -212,6 +212,7 @@ export function TaskListItem({
             onClick={handleStatusClick}
             className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
             aria-label={`Change status from ${task.status}`}
+            data-testid="status-toggle"
           >
             {getStatusIcon(task?.status || 0)}
           </button>

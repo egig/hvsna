@@ -8,6 +8,7 @@ interface ListInputProps {
   disabled?: boolean;
   className?: string;
   icon?: React.ReactNode;
+  testId?: string;
 }
 
 export const ListInput: React.FC<ListInputProps> = ({
@@ -17,12 +18,14 @@ export const ListInput: React.FC<ListInputProps> = ({
   disabled = false,
   className,
   icon,
+  testId,
 }) => {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      data-testid={testId}
       className={`
         w-full flex items-center justify-between p-2 bg-white
         hover:bg-gray-50 active:bg-gray-100 transition-colors duration-150

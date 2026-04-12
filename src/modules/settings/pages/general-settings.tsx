@@ -76,7 +76,7 @@ export default function GeneralSettings() {
       <div className="p-2 border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1 min-w-0">
-            <span className="text-gray-900 font-semibold text-left truncate">
+            <span className="text-gray-900 font-semibold text-left truncate" data-testid="location-section-label">
               {t("location")}
             </span>
           </div>
@@ -140,6 +140,7 @@ export default function GeneralSettings() {
             <button
               onClick={requestLocationPermission}
               disabled={loading}
+              data-testid="location-primary-button"
               className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
               style={
                 {
@@ -190,6 +191,7 @@ export default function GeneralSettings() {
               <button
                 onClick={handleGetLocation}
                 disabled={loading}
+                data-testid="location-primary-button"
                 className="px-3 py-1.5 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
                 style={
                   {
