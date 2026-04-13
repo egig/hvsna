@@ -59,7 +59,7 @@ export function Today() {
   );
 }
 
-// Fallback function for original grouping logic
+// Fallback function for original grouping logic (used while prayer times are loading)
 const getOriginalTaskGroups = (
   tasks: Task[],
   completedTasks: Task[],
@@ -70,12 +70,13 @@ const getOriginalTaskGroups = (
     tasks: Task[];
     isOverdue?: boolean;
     isCompleted?: boolean;
+    isTimeBased?: boolean;
+    atTime?: string;
   }[] = [];
 
   const today = getToday();
   const todayStart = today.startOfDay().toDate().valueOf();
 
-  // Separate overdue tasks, prayer-based tasks, and regular tasks
   const overdueTasks = tasks.filter(
     (task) => task.isOverdue() && !task.completedAt
   );
@@ -86,14 +87,21 @@ const getOriginalTaskGroups = (
       (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
       !task.completedAt
   );
+  const timeBasedTasks = tasks.filter(
+    (task) =>
+      !task.usePrayerTime &&
+      task.atTime &&
+      (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
+      !task.completedAt
+  );
   const regularTasks = tasks.filter(
     (task) =>
       !task.usePrayerTime &&
+      !task.atTime &&
       (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
       !task.completedAt
   );
 
-  // Add overdue tasks group first (always at top)
   if (overdueTasks.length > 0) {
     groups.push({
       prayer: null,
@@ -120,14 +128,13 @@ const getOriginalTaskGroups = (
     }
   });
 
-  // Add prayer groups in chronological order starting from Maghrib
   const prayerOrder: PrayerTime[] = [
-    "Maghrib",
-    "Isha",
     "Fajr",
     "Sunrise",
     "Dhuhr",
     "Asr",
+    "Maghrib",
+    "Isha",
   ];
   prayerOrder.forEach((prayer) => {
     if (prayerGroups[prayer].length > 0) {
@@ -140,7 +147,23 @@ const getOriginalTaskGroups = (
     }
   });
 
-  // Add regular tasks at the end
+  // Add each time-based task as its own entry, sorted by atTime
+  timeBasedTasks
+    .filter((task) => task.atTime)
+    .sort((a, b) => {
+      const [ah, am] = a.atTime!.split(":").map(Number);
+      const [bh, bm] = b.atTime!.split(":").map(Number);
+      return ah * 60 + am - (bh * 60 + bm);
+    })
+    .forEach((task) => {
+      groups.push({
+        prayer: null,
+        tasks: [task],
+        isTimeBased: true,
+        atTime: task.atTime,
+      });
+    });
+
   if (regularTasks.length > 0) {
     groups.push({
       prayer: null,
@@ -150,7 +173,6 @@ const getOriginalTaskGroups = (
     });
   }
 
-  // Add completed tasks at the very bottom
   if (completedTasks.length > 0) {
     groups.push({
       prayer: null,
@@ -272,6 +294,8 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
                 ? "overdue"
                 : group.isCompleted
                 ? "completed"
+                : group.isTimeBased
+                ? `time-${group.atTime}`
                 : `regular-${groupIndex}`)
             }
             defaultOpen={!group.isCompleted}

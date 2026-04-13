@@ -134,11 +134,11 @@ export function TaskListItem({
 
     if (task.status === 0) {
       // Complete the task
-      updatePromise = completeTask(task.id);
+      updatePromise = completeTask(task.id as string);
       nextStatus = 1;
     } else {
       // Reopen the task
-      updatePromise = reopenTask(task.id);
+      updatePromise = reopenTask(task.id as string);
       nextStatus = 0;
     }
 
@@ -208,38 +208,35 @@ export function TaskListItem({
       }}
       layout
     >
-      <div className="flex justify-start gap-2">
-        <div>
-          <button
-            onClick={handleStatusClick}
-            className="m-0 p-0 h-auto w-auto flex-shrink-0 mt-0.5 transition-transform hover:scale-110 cursor-pointer"
-            aria-label={`Change status from ${task.status}`}
-            data-testid="status-toggle"
-          >
-            {getStatusIcon(task?.status || 0)}
-          </button>
-        </div>
+      <div className="flex items-start gap-2">
+        <button
+          onClick={handleStatusClick}
+          className="p-0 shrink-0 leading-none transition-transform hover:scale-110 cursor-pointer"
+          style={{ marginTop: "1px" }}
+          aria-label={`Change status from ${task.status}`}
+          data-testid="status-toggle"
+        >
+          {getStatusIcon(task?.status || 0)}
+        </button>
 
         <div className="flex-1 min-w-0">
-          <h3
-            className={`truncate ${getStatusColor(task.status as TaskStatus)}`}
-          >
+          <h3 className={`leading-6 ${getStatusColor(task.status as TaskStatus)}`}>
             {task.name}
           </h3>
 
           {task.description && (
-            <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
               {task.description}
             </p>
           )}
 
           {showDateTime && !!task.atDateHijri && (
             <p
-              className={`text-xs ${
+              className={`text-xs mt-0.5 ${
                 task.isOverdue() && task.status !== 1
                   ? "text-[var(--hvsna-danger-color)]"
                   : "text-gray-500"
-              } mt-1 line-clamp-2`}
+              }`}
             >
               {formatScheduledDate(task, location.state?.context)}
             </p>

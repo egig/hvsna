@@ -70,12 +70,16 @@ export function groupTasksByPrayerTimes(
   tasks: Task[];
   isOverdue?: boolean;
   isCompleted?: boolean;
+  isTimeBased?: boolean;
+  atTime?: string;
 }[] {
   const groups: {
     prayer: PrayerTime | null;
     tasks: Task[];
     isOverdue?: boolean;
     isCompleted?: boolean;
+    isTimeBased?: boolean;
+    atTime?: string;
   }[] = [];
 
   // Separate tasks by type and status
@@ -116,7 +120,7 @@ export function groupTasksByPrayerTimes(
     });
   }
 
-  // Add prayer-based tasks in their original groups
+  // Build prayer groups (only prayer-assigned tasks)
   const prayerGroups: Record<PrayerTime, Task[]> = {
     Fajr: [],
     Sunrise: [],
@@ -132,38 +136,60 @@ export function groupTasksByPrayerTimes(
     }
   });
 
-  // Add time-based tasks to appropriate prayer groups
-  timeBasedTasks.forEach((task) => {
-    if (task.atTime) {
-      const prayerTime = findPrayerTimeForTaskTime(task.atTime, prayerTimings);
-      if (prayerTime) {
-        prayerGroups[prayerTime].push(task);
-      }
-    }
-  });
+  // Create a sorted list of all timed slots (prayer + individual time-based tasks) by clock time
+  type Slot =
+    | { type: "prayer"; prayer: PrayerTime; minutes: number }
+    | { type: "time"; task: Task; minutes: number };
 
-  // Add prayer groups in chronological order starting from Maghrib
+  const slots: Slot[] = [];
+
   const prayerOrder: PrayerTime[] = [
-    "Maghrib",
-    "Isha",
     "Fajr",
     "Sunrise",
     "Dhuhr",
     "Asr",
+    "Maghrib",
+    "Isha",
   ];
 
   prayerOrder.forEach((prayer) => {
     if (prayerGroups[prayer].length > 0) {
-      groups.push({
+      slots.push({
+        type: "prayer",
         prayer,
-        tasks: prayerGroups[prayer].sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
-        ),
+        minutes: timeToMinutes(prayerTimings[prayer]),
       });
     }
   });
 
-  // Add regular tasks (no specific time)
+  timeBasedTasks.forEach((task) => {
+    if (task.atTime) {
+      slots.push({ type: "time", task, minutes: timeToMinutes(task.atTime) });
+    }
+  });
+
+  slots.sort((a, b) => a.minutes - b.minutes);
+
+  // Build groups from sorted slots
+  slots.forEach((slot) => {
+    if (slot.type === "prayer") {
+      groups.push({
+        prayer: slot.prayer,
+        tasks: prayerGroups[slot.prayer].sort(
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
+        ),
+      });
+    } else {
+      groups.push({
+        prayer: null,
+        tasks: [slot.task],
+        isTimeBased: true,
+        atTime: slot.task.atTime,
+      });
+    }
+  });
+
+  // Add regular tasks (no specific time) after all timed groups
   if (regularTasks.length > 0) {
     groups.push({
       prayer: null,
@@ -185,51 +211,6 @@ export function groupTasksByPrayerTimes(
   }
 
   return groups;
-}
-
-function findPrayerTimeForTaskTime(
-  taskTime: string,
-  prayerTimings: PrayerTimesResponse["data"]["timings"]
-): PrayerTime | null {
-  // Convert task time to minutes for comparison
-  const [taskHours, taskMinutes] = taskTime.split(":").map(Number);
-  const taskTotalMinutes = taskHours * 60 + taskMinutes;
-
-  // Convert prayer times to minutes and sort them chronologically
-  const prayerTimes: { prayer: PrayerTime; minutes: number }[] = [
-    { prayer: "Fajr", minutes: timeToMinutes(prayerTimings.Fajr) },
-    { prayer: "Sunrise", minutes: timeToMinutes(prayerTimings.Sunrise) },
-    { prayer: "Dhuhr", minutes: timeToMinutes(prayerTimings.Dhuhr) },
-    { prayer: "Asr", minutes: timeToMinutes(prayerTimings.Asr) },
-    { prayer: "Maghrib", minutes: timeToMinutes(prayerTimings.Maghrib) },
-    { prayer: "Isha", minutes: timeToMinutes(prayerTimings.Isha) },
-  ];
-
-  // Sort prayer times by minutes for proper chronological comparison
-  prayerTimes.sort((a, b) => a.minutes - b.minutes);
-
-  // Find the appropriate prayer time based on the new rule:
-  // Assign to prayer if task time is within 15 minutes before prayer time or any time after prayer time
-  for (let i = prayerTimes.length - 1; i >= 0; i--) {
-    const { prayer, minutes } = prayerTimes[i];
-
-    // Check if task time is within 15 minutes before this prayer time or after it
-    if (taskTotalMinutes >= minutes - 15) {
-      // Special handling for Maghrib - assign to Asr instead
-      if (prayer === "Maghrib") {
-        return "Asr";
-      }
-      return prayer;
-    }
-  }
-
-  // If task time is before the first prayer time minus 15 minutes,
-  // assign to the first prayer time
-  const firstPrayer = prayerTimes[0];
-  if (firstPrayer.prayer === "Maghrib") {
-    return "Asr";
-  }
-  return firstPrayer.prayer;
 }
 
 function timeToMinutes(time: string): number {
