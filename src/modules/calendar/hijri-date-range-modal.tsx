@@ -334,6 +334,7 @@ export function HijriDateRangeModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
       <Navbar
+        inModal
         title={t("select_date_range")}
         customBackAction={onClose}
         rightAction={

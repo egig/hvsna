@@ -12,6 +12,7 @@ interface NavbarProps {
   rightAction?: React.ReactNode;
   className?: string;
   modal?: boolean;
+  inModal?: boolean;
   subtitle?: string;
   showSearch?: boolean;
   searchPlaceholder?: string;
@@ -30,6 +31,7 @@ export function Navbar({
   rightAction,
   className = "",
   modal,
+  inModal,
   subtitle,
   showSearch,
   searchPlaceholder = "Search...",
@@ -56,7 +58,7 @@ export function Navbar({
 
   return (
     <header
-      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm safe-top ${className}`}
+      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm ${!inModal ? 'safe-top' : ''} ${className}`}
       style={{
         position: "-webkit-sticky",
         scrollMarginTop: "64px",
@@ -136,6 +138,7 @@ export function LargeNavbar({
   rightAction,
   className = "",
   modal,
+  inModal,
   subtitle,
   showSearch,
   searchPlaceholder = "Search...",
@@ -182,7 +185,7 @@ export function LargeNavbar({
   return (
     <>
       <header
-        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm safe-top ${className}`}
+        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm ${!inModal ? 'safe-top' : ''} ${className}`}
         style={{
           position: "-webkit-sticky",
           scrollMarginTop: "62px",

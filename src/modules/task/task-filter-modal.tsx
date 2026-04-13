@@ -64,6 +64,7 @@ export default function TaskFilterModal({
   return (
     <div className="h-full flex flex-col mb-[env(safe-area-inset-bottom)]">
       <Navbar
+        inModal
         title={t("filter_tasks")}
         customBackAction={onClose}
         rightAction={

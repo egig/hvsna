@@ -75,6 +75,7 @@ export function RepeatEndDateView({
   return (
     <>
       <Navbar
+        inModal
         title={t("repeat_ends_on_date")}
         showBackButton={true}
         customBackAction={onBack}

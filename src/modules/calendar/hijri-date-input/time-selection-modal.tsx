@@ -117,6 +117,7 @@ export function TimeSelectionModal({
   return (
     <div className="min-h-[50dvh]">
       <Navbar
+        inModal
         title={t("select_time")}
         showBackButton={true}
         customBackAction={onBack}

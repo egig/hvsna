@@ -360,6 +360,7 @@ export function CalendarModal({
       <Activity mode={view === "date" ? "visible" : "hidden"}>
         <>
           <Navbar
+          inModal
             title={t("select_date")}
             rightAction={
               <button
