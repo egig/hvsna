@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router";
+import { setPendingNavType } from "./nav-type-signal";
 
 type NavType = "forward" | "back" | "tab" | "modal";
 
@@ -38,8 +39,9 @@ export function useAppNavigation() {
     goForward: (to: string, options?: NavigateOptions) =>
       navigateWithNavType(to, "forward", options),
     goBack: (to?: number) => {
-      // Use React Router's navigation state to check if we can go back
-      // If location.key is 'default', we're likely at the initial page
+      // navigate(-1) triggers a POP navigation which can't carry new state,
+      // so we use the module-level signal to pass navType to PageTransition.
+      setPendingNavType("back");
       if (location.key !== "default") {
         navigateWithNavType(to || -1, "back");
       } else {

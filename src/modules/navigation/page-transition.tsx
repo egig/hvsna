@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useLocation } from "react-router";
 import { type ReactNode } from "react";
+import { consumePendingNavType } from "./nav-type-signal";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -8,7 +9,10 @@ interface PageTransitionProps {
 
 export function PageTransition({ children }: PageTransitionProps) {
   const location = useLocation();
-  const stateNavType = (location.state as { navType?: string })?.navType;
+  // consumePendingNavType() handles navigate(-1) which can't carry new state
+  const stateNavType =
+    consumePendingNavType() ||
+    (location.state as { navType?: string })?.navType;
   let currentNavType = stateNavType || "tab";
 
   // Animation variants based on navigation type

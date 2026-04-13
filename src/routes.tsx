@@ -6,6 +6,7 @@ import {
   useNavigate,
   useNavigationType,
 } from "react-router";
+import { useMobileNavigation } from "./modules/navigation/use-mobile-navigation";
 import Layout from "./layout";
 import About from "./modules/settings/about";
 import Settings from "./modules/settings/pages/settings";
@@ -66,6 +67,7 @@ export const AppRoutes = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isDesktop } = useScreenSize();
+  useMobileNavigation();
   const settingsBackgroundLocation = location.state?.settingsBackgroundLocation;
   const isSettingsOpen = isDesktop && !!settingsBackgroundLocation;
   return (

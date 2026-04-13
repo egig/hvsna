@@ -1,4 +1,5 @@
 export { Button } from "./button";
+export { useMobileNavigation } from "./use-mobile-navigation";
 export { Link } from "./link";
 export { CardButton } from "../components/card-button";
 export { FeatureCard } from "../components/feature-card";
