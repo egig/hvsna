@@ -5,11 +5,20 @@ import { LargeNavbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { usePlatform } from "../platform";
 import { usePWARefresh } from "@/platforms/web/usePWARefresh";
+import { useEffect, useState } from "react";
+import { App } from "@capacitor/app";
 
 export default function About() {
   const { t } = useLanguageContext();
   const { isNative } = usePlatform();
   const { needRefresh, updateServiceWorker } = usePWARefresh();
+  const [nativeVersion, setNativeVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isNative) {
+      App.getInfo().then((info) => setNativeVersion(info.version));
+    }
+  }, [isNative]);
 
   return (
     <Page>
@@ -18,7 +27,7 @@ export default function About() {
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-lg font-semibold mb-2">Hvsna</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            v{packageInfo.version}
+            v{nativeVersion ?? packageInfo.version}
           </p>
           <p>{t("about_description")}</p>
         </div>
