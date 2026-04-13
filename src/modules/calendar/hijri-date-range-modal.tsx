@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { HvCheck, HvChevronLeft, HvChevronRight } from "@/modules/icons";
+import { HvCheck, HvChevronLeft, HvChevronRight, HvX } from "@/modules/icons";
+import { NavActionButton } from "../components/nav-action-button";
 import { Modal, Navbar } from "src/modules/navigation";
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { Tabs } from "@base-ui/react/tabs";
@@ -336,15 +337,20 @@ export function HijriDateRangeModal({
       <Navbar
         inModal
         title={t("select_date_range")}
-        customBackAction={onClose}
+        showBackButton={false}
+        leftAction={
+          <NavActionButton variant="neutral" onClick={onClose}>
+            <HvX />
+          </NavActionButton>
+        }
         rightAction={
-          <button
+          <NavActionButton
+            variant="primary"
             onClick={handleConfirm}
             disabled={!tempStartDate || !tempEndDate}
-            className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             <HvCheck />
-          </button>
+          </NavActionButton>
         }
       />
 

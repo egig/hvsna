@@ -6,8 +6,10 @@ import {
   HvChevronRight,
   HvClock,
   HvRepeat,
+  HvX,
 } from "@/modules/icons";
 import { Modal, Navbar } from "src/modules/navigation";
+import { NavActionButton } from "../../components/nav-action-button";
 import { Tabs } from "@base-ui/react/tabs";
 import { HijriMonth } from "../hijri/hijri-month";
 import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
@@ -360,16 +362,22 @@ export function CalendarModal({
       <Activity mode={view === "date" ? "visible" : "hidden"}>
         <>
           <Navbar
-          inModal
+            inModal
             title={t("select_date")}
+            showBackButton={false}
+            leftAction={
+              <NavActionButton variant="neutral" onClick={onClose}>
+                <HvX />
+              </NavActionButton>
+            }
             rightAction={
-              <button
+              <NavActionButton
+                variant="primary"
                 onClick={handleConfirm}
                 disabled={!tempSelectedDate}
-                className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 <HvCheck />
-              </button>
+              </NavActionButton>
             }
           />
 

@@ -1,7 +1,8 @@
 import { HvPlus, HvList, HvSettings, HvSearch } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
-import { Button, Link, Page } from "../navigation";
+import { Button, Page } from "../navigation";
+import { NavActionButton } from "../components/nav-action-button";
 import { Button as Button2 } from "../components/button";
 import { useLists } from "./use-lists";
 import { useListContext } from "./list-context";
@@ -34,12 +35,13 @@ export default function Browse() {
           title={t("browse")}
           showBackButton={false}
           rightAction={
-            <Link to="/settings">
+            <NavActionButton
+              variant="neutral"
+              onClick={handleGoToSettings}
+              aria-label={t("settings") || "Settings"}
+            >
               <HvSettings size={20} />
-              <span className="hidden sm:inline ml-2">
-                {t("settings") || "Settings"}
-              </span>
-            </Link>
+            </NavActionButton>
           }
         />
       }

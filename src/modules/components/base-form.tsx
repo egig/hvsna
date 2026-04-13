@@ -2,7 +2,7 @@ import { useState, useEffect, type ReactNode } from "react";
 import { HvCheck } from "@/modules/icons";
 import Block from "../ui/block";
 import { FormInput } from "../ui/form-input";
-import NavActionButton from "../ui/nav-action-button";
+import { NavActionButton } from "./nav-action-button";
 import { Navbar } from "../navigation";
 
 interface BaseFormProps<T = void> {
@@ -51,7 +51,7 @@ export default function BaseForm<T = void>({
         showBackButton={true}
         customBackAction={onCancel}
         rightAction={
-          <NavActionButton type="submit" disabled={isSubmitting}>
+          <NavActionButton variant="primary" type="submit" disabled={isSubmitting}>
             <HvCheck />
           </NavActionButton>
         }

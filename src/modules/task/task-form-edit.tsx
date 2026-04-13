@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { HvArrowUp, HvTrash2, HvInfo, HvMoreVertical } from "@/modules/icons";
+import { HvArrowUp, HvTrash2, HvInfo, HvMoreVertical, HvCheck } from "@/modules/icons";
+import { NavActionButton } from "../components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
@@ -308,14 +309,15 @@ export default function TaskFormEdit({
         rightAction={
           <div className="flex items-center gap-2">
             {(isFormFocused || isFormDirty) && (
-              <button
-                className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+              <NavActionButton
+                variant="primary"
+                className="shadow-lg z-50"
                 aria-label={t("add_new_task")}
                 data-testid="task-form-submit"
                 type="submit"
               >
-                <HvArrowUp />
-              </button>
+                <HvCheck />
+              </NavActionButton>
             )}
             {isFormFocused || isFormDirty || menu}
           </div>

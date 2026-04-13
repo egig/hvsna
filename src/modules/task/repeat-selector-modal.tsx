@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { HvCheck } from "@/modules/icons";
+import { HvCheck, HvX } from "@/modules/icons";
+import { NavActionButton } from "../components/nav-action-button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
 import type { TaskRepeat } from "./types";
@@ -142,21 +143,16 @@ export function RepeatSelectorModal({
     <div className="min-h-[50dvh]">
       <Navbar
         title={t("repeat")}
+        showBackButton={false}
         leftAction={
-          <button
-            onClick={onBack}
-            className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            {t("cancel")}
-          </button>
+          <NavActionButton variant="neutral" onClick={onBack}>
+            <HvX />
+          </NavActionButton>
         }
         rightAction={
-          <button
-            onClick={handleConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] transition-colors"
-          >
-            {t("done")}
-          </button>
+          <NavActionButton variant="primary" onClick={handleConfirm}>
+            <HvCheck />
+          </NavActionButton>
         }
       />
 

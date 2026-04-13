@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
-import { HvArrowUp, HvX } from "@/modules/icons";
+import { HvArrowUp, HvCheck, HvX } from "@/modules/icons";
+import { NavActionButton } from "../components/nav-action-button";
 import { Navbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
@@ -111,27 +112,28 @@ export default function ListForm({
         title={title}
         showBackButton={false}
         leftAction={
-          <button
+          <NavActionButton
+            variant="neutral"
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-colors disabled:opacity-50"
             aria-label={t("cancel") || "Cancel"}
           >
             <HvX />
-          </button>
+          </NavActionButton>
         }
         rightAction={
-          <button
+          <NavActionButton
+            variant="primary"
             type="submit"
             disabled={isSubmitting}
-            className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50 disabled:opacity-50"
+            className="shadow-lg z-50"
             aria-label={
               isEdit ? t("update") || "Update" : t("create") || "Create"
             }
           >
-            <HvArrowUp />
-          </button>
+            <HvCheck />
+          </NavActionButton>
         }
       />
 

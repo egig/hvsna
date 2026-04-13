@@ -1,6 +1,6 @@
-import { Button } from "../navigation";
 import { Navbar } from "../navigation/navbar";
-import { HvCheck } from "@/modules/icons";
+import { HvCheck, HvX } from "@/modules/icons";
+import { NavActionButton } from "../components/nav-action-button";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../components/list-input-select";
@@ -66,14 +66,16 @@ export default function TaskFilterModal({
       <Navbar
         inModal
         title={t("filter_tasks")}
-        customBackAction={onClose}
+        showBackButton={false}
+        leftAction={
+          <NavActionButton variant="neutral" onClick={onClose}>
+            <HvX />
+          </NavActionButton>
+        }
         rightAction={
-          <Button
-            onClick={onClose}
-            className="w-10 h-10 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full transition-colors font-medium shadow-sm flex items-center justify-center"
-          >
+          <NavActionButton variant="primary" onClick={onClose}>
             <HvCheck size={16} />
-          </Button>
+          </NavActionButton>
         }
         modal={true}
       />

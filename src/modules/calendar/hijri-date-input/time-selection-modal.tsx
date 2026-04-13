@@ -1,4 +1,5 @@
-import { HvCheck } from "@/modules/icons";
+import { HvCheck, HvX } from "@/modules/icons";
+import { NavActionButton } from "../../components/nav-action-button";
 import { getCoordinateFromTimezone } from "@/config";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
@@ -119,16 +120,20 @@ export function TimeSelectionModal({
       <Navbar
         inModal
         title={t("select_time")}
-        showBackButton={true}
-        customBackAction={onBack}
+        showBackButton={false}
+        leftAction={
+          <NavActionButton variant="neutral" onClick={onBack}>
+            <HvX />
+          </NavActionButton>
+        }
         rightAction={
-          <button
+          <NavActionButton
+            variant="primary"
             onClick={handleConfirm}
             disabled={inputMode === "prayer" ? !selectedPrayer : false}
-            className="rounded-full w-10 h-10 flex items-center justify-center text-sm font-medium text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             <HvCheck />
-          </button>
+          </NavActionButton>
         }
       />
 
