@@ -29,7 +29,7 @@ interface RequestWithIP extends Request {
  */
 export function getClientIP(
   req: Request,
-  options: IPExtractorOptions = {},
+  options: IPExtractorOptions = {}
 ): string | null {
   const {
     trustProxy = false,
@@ -66,7 +66,7 @@ export function getClientIP(
  */
 export function getIPFromHeader(
   req: Request,
-  headerName: string,
+  headerName: string
 ): string | null {
   const value = req.headers[headerName.toLowerCase()];
 

@@ -19,20 +19,20 @@ interface SnackbarContextType {
     options?: {
       autoHideDuration?: number;
       showCloseButton?: boolean;
-    },
+    }
   ) => string;
   createSnackbar: (
     message: React.ReactNode,
     options?: {
       autoHideDuration?: number;
       showCloseButton?: boolean;
-    },
+    }
   ) => string;
   hideSnackbar: (id?: string) => void;
 }
 
 const SnackbarContext = createContext<SnackbarContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export function useSnackbar() {
@@ -62,7 +62,7 @@ export function SnackbarProvider({
     options?: {
       autoHideDuration?: number;
       showCloseButton?: boolean;
-    },
+    }
   ) => {
     const id = generateId();
     const newSnackbar: SnackbarItem = {
@@ -86,7 +86,7 @@ export function SnackbarProvider({
     options?: {
       autoHideDuration?: number;
       showCloseButton?: boolean;
-    },
+    }
   ) => {
     return showSnackbar(message, options);
   };
@@ -116,7 +116,11 @@ export function SnackbarProvider({
             showCloseButton={snackbar.showCloseButton}
             className={`
               transition-all duration-300 ease-out
-              ${index === snackbars.length - 1 ? "translate-y-0 opacity-100" : "translate-y-1 opacity-80"}
+              ${
+                index === snackbars.length - 1
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-1 opacity-80"
+              }
             `}
           >
             {snackbar.message}

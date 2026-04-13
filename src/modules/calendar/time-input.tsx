@@ -31,7 +31,7 @@ export function TimeInput({
 
   const handleTimeConfirm = (
     time: string,
-    selectedPrayerTime?: PrayerTime | string,
+    selectedPrayerTime?: PrayerTime | string
   ) => {
     onChange(time, selectedPrayerTime as PrayerTime);
     setIsModalOpen(false);

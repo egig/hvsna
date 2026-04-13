@@ -36,7 +36,7 @@ export interface UseTaskFormReturn {
 export const useTaskForm = (
   onSuccess?: (task: Task) => void,
   onError?: (error: string) => void,
-  onCancel?: () => void,
+  onCancel?: () => void
 ): UseTaskFormReturn => {
   const { createTask, generateOccurrencesForTemplate } = useTaskContext();
   const location = useLocation();
@@ -103,7 +103,7 @@ export const useTaskForm = (
       taskData.atDateHijri = formatHijriDateString(
         formData.scheduleAt.dateHijri.year,
         formData.scheduleAt.dateHijri.month,
-        formData.scheduleAt.dateHijri.day,
+        formData.scheduleAt.dateHijri.day
       );
 
       if (!!formData.scheduleAt.time) {
@@ -171,7 +171,7 @@ export const useTaskForm = (
           !isMatchLocationContext(
             location,
             formData.scheduleAt.dateHijri,
-            getToday(),
+            getToday()
           )
         ) {
           showSnackbar("Task created but not listed in this page");
@@ -203,7 +203,7 @@ export const useTaskForm = (
 function isMatchLocationContext(
   location: any,
   selectedHijriDate: any,
-  today: HijriDate,
+  today: HijriDate
 ) {
   if (location?.state?.context === "all") {
     return true;

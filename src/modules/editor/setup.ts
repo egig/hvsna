@@ -67,6 +67,6 @@ export function setup(options: {
       props: {
         attributes: { class: "ProseMirror-hvsna-editor outline-none" },
       },
-    }),
+    })
   );
 }

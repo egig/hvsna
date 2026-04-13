@@ -26,7 +26,7 @@ export const PouchDBProvider: React.FC<PouchDBProviderProps> = ({
   return React.createElement(
     PouchDBContext.Provider,
     { value: { db } },
-    children,
+    children
   );
 };
 

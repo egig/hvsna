@@ -17,7 +17,7 @@ export function useAppNavigation() {
   const navigateWithNavType = (
     to: string | number,
     navType: NavType = "forward",
-    options?: NavigateOptions,
+    options?: NavigateOptions
   ) => {
     const navOptions: NavigateOptions = {
       ...options,

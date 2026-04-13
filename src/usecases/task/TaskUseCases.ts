@@ -22,7 +22,7 @@ export class TaskUseCases {
   constructor(
     private readonly notificationsProvider: INotificationsProvider,
     private readonly taskRepository: ITaskRepository,
-    private readonly listRepository: IListRepository,
+    private readonly listRepository: IListRepository
   ) {}
 
   // Task operations
@@ -101,7 +101,7 @@ export class TaskUseCases {
   // Reminder operations
   async scheduleTaskReminders(
     task: Task,
-    reminderMinutes: number = 15,
+    reminderMinutes: number = 15
   ): Promise<void> {
     if (!task.atEpochMillis || task.status === 1 || !task.id) {
       return;
@@ -149,7 +149,7 @@ export class TaskUseCases {
 
   async updateTaskReminders(
     task: Task,
-    reminderMinutes: number = 15,
+    reminderMinutes: number = 15
   ): Promise<void> {
     if (!task.id) return;
 
@@ -171,7 +171,7 @@ export class TaskUseCases {
   // Batch operations
   async scheduleMultipleTaskReminders(
     tasks: Task[],
-    reminderMinutes: number = 15,
+    reminderMinutes: number = 15
   ): Promise<void> {
     const promises = tasks
       .filter((task) => task.atEpochMillis && task.status === 0)
@@ -207,7 +207,7 @@ export class TaskUseCases {
 
   // Query helpers
   async getTasks(query: TaskQuery = {}): Promise<Task[]> {
-    return await this.taskRepository.find(query);
+    return await this.taskRepository.findBrowsedTasks(query);
   }
 
   async getTaskById(taskId: string): Promise<Task | null> {

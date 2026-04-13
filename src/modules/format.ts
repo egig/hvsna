@@ -21,7 +21,7 @@ export function formatValue(value: number, format?: "plain" | "idr"): string {
 export function formatValueWithUnit(
   value: number,
   unit: string,
-  format?: "plain" | "idr",
+  format?: "plain" | "idr"
 ): string {
   const formattedValue = formatValue(value, format);
 

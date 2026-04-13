@@ -45,7 +45,7 @@ export interface ConversionOptions {
 export function toDate(
   hijriDate: HijriDateComponents,
   hijriTime: TimeComponents,
-  options?: ConversionOptions,
+  options?: ConversionOptions
 ): Date {
   const latitude = options?.latitude ?? DEFAULT_LATITUDE;
   const longitude = options?.longitude ?? DEFAULT_LONGITUDE;
@@ -57,7 +57,7 @@ export function toDate(
   let gregorianDate = new Date(
     gregorian.year,
     gregorian.month - 1,
-    gregorian.day,
+    gregorian.day
   );
 
   const sunsetTime = getSunsetTime(gregorianDate, latitude, longitude);
@@ -82,7 +82,7 @@ export function toDate(
     hijriTime.hour || 0,
     hijriTime.minute || 0,
     hijriTime.second || 0,
-    hijriTime.millisecond || 0,
+    hijriTime.millisecond || 0
   );
   return result;
 }
@@ -97,7 +97,7 @@ export function toDate(
  */
 export function fromDate(
   gregorianDate: Date,
-  options?: ConversionOptions,
+  options?: ConversionOptions
 ): HijriDateComponents & TimeComponents {
   const latitude = options?.latitude ?? DEFAULT_LATITUDE;
   const longitude = options?.longitude ?? DEFAULT_LONGITUDE;
@@ -118,7 +118,7 @@ export function fromDate(
       second: gregorianDate.getSeconds(),
       millisecond: gregorianDate.getMilliseconds(),
     },
-    sunsetTime,
+    sunsetTime
   );
 
   let sunsetShift = 0;
@@ -143,7 +143,7 @@ export function fromDate(
 function getSunsetTime(
   date: Date,
   latitude: number,
-  longitude: number,
+  longitude: number
 ): TimeComponents | null {
   try {
     const times = SunCalc.getTimes(date, latitude, longitude);
@@ -170,7 +170,7 @@ function getSunsetTime(
  */
 function isTimeAfter(
   time: TimeComponents,
-  sunsetTime: TimeComponents | null,
+  sunsetTime: TimeComponents | null
 ): boolean {
   if (!sunsetTime) {
     return false;
@@ -219,7 +219,7 @@ function isTimeAfter(
 
 function _applyOffset(
   d: HijriDateComponents,
-  offset: number,
+  offset: number
 ): { year: number; month: number; day: number } {
   let adjustedYear = d.year;
   let adjustedMonth = d.month;

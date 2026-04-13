@@ -15,14 +15,14 @@ interface LanguageContextType {
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const useLanguageContext = () => {
   const context = useContext(LanguageContext);
   if (!context) {
     throw new Error(
-      "useLanguageContext must be used within a LanguageProvider",
+      "useLanguageContext must be used within a LanguageProvider"
     );
   }
   return context;
@@ -48,7 +48,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
       /\{(\w+)\}/g,
       (match: string, paramKey: string) => {
         return params[paramKey]?.toString() || match;
-      },
+      }
     );
   };
 

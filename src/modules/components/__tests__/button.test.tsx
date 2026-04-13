@@ -75,7 +75,7 @@ describe("Button", () => {
     render(
       <Button disabled onClick={handleClick}>
         Disabled
-      </Button>,
+      </Button>
     );
     const button = screen.getByRole("button");
     button.click();
@@ -87,7 +87,7 @@ describe("Button", () => {
     render(
       <Button loading onClick={handleClick}>
         Loading
-      </Button>,
+      </Button>
     );
     const button = screen.getByRole("button");
     button.click();

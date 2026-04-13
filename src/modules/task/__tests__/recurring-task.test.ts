@@ -490,7 +490,7 @@ describe("generateOccurrencesForTemplate", () => {
       await generateOccurrencesForTemplate(
         templateWithNever,
         repo1,
-        todayEpoch,
+        todayEpoch
       );
       await generateOccurrencesForTemplate(templateWithout, repo2, todayEpoch);
 
@@ -515,7 +515,9 @@ describe("generateOccurrencesForTemplate", () => {
       longitude: 0,
       offset: 0,
     });
-    const baseDateHijri = `${h.year.toString().padStart(4, "0")}${h.month.toString().padStart(2, "0")}${h.day.toString().padStart(2, "0")}`;
+    const baseDateHijri = `${h.year.toString().padStart(4, "0")}${h.month
+      .toString()
+      .padStart(2, "0")}${h.day.toString().padStart(2, "0")}`;
 
     const template = makeTemplate({
       repeat: "daily",

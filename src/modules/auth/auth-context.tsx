@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         queryClient.removeQueries({ queryKey: ["user"] });
       }
     },
-    [queryClient],
+    [queryClient]
   );
 
   const clearError = useCallback(() => {
@@ -146,7 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     async (email: string, password: string) => {
       return loginMutation.mutateAsync({ email, password });
     },
-    [loginMutation],
+    [loginMutation]
   );
 
   const register = useCallback(
@@ -158,7 +158,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }) => {
       return registerMutation.mutateAsync(userData);
     },
-    [registerMutation],
+    [registerMutation]
   );
 
   const logout = useCallback(async () => {
@@ -175,12 +175,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     error: userQuery.error
       ? (userQuery.error as Error).message
       : loginMutation.error
-        ? (loginMutation.error as Error).message
-        : registerMutation.error
-          ? (registerMutation.error as Error).message
-          : logoutMutation.error
-            ? (logoutMutation.error as Error).message
-            : null,
+      ? (loginMutation.error as Error).message
+      : registerMutation.error
+      ? (registerMutation.error as Error).message
+      : logoutMutation.error
+      ? (logoutMutation.error as Error).message
+      : null,
     setUser,
     fetchUser,
     clearError,

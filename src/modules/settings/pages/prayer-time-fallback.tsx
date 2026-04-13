@@ -37,7 +37,7 @@ export default function PrayerTimeFallback() {
       asr: "15:00",
       maghrib: "18:00",
       isha: "19:00",
-    },
+    }
   );
   const [isFetching, setIsFetching] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -45,7 +45,7 @@ export default function PrayerTimeFallback() {
 
   const handleTimeChange = async (
     prayer: keyof PrayerTimesFallback,
-    value: string,
+    value: string
   ) => {
     const newPrayerTimes = { ...prayerTimes, [prayer]: value };
     setPrayerTimes(newPrayerTimes);
@@ -56,7 +56,7 @@ export default function PrayerTimeFallback() {
     if (!settings.coordinate) {
       setFetchError(
         t("location_required") ||
-          "Location coordinates are required to fetch prayer times",
+          "Location coordinates are required to fetch prayer times"
       );
       return;
     }
@@ -91,7 +91,7 @@ export default function PrayerTimeFallback() {
       setTimeout(() => setFetchSuccess(false), 3000);
     } catch (error) {
       setFetchError(
-        t("fetch_prayer_times_error") || "Failed to fetch updated prayer times",
+        t("fetch_prayer_times_error") || "Failed to fetch updated prayer times"
       );
       console.error("Error fetching prayer times:", error);
     } finally {

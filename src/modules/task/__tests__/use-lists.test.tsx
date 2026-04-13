@@ -116,7 +116,7 @@ describe("useLists", () => {
     expect(deleteResult).toBe(true);
     expect(listRepository.delete).toHaveBeenCalledWith(
       "list_test123",
-      undefined,
+      undefined
     );
   });
 

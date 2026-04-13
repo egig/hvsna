@@ -61,9 +61,7 @@ export function HijriCalendar() {
         }
       } catch (err) {
         setSunsetError(
-          err instanceof Error
-            ? err.message
-            : "Failed to calculate sunset time",
+          err instanceof Error ? err.message : "Failed to calculate sunset time"
         );
       } finally {
         setSunsetLoading(false);
@@ -99,15 +97,18 @@ export function HijriCalendar() {
             primary: "Loading day start...",
           }
         : sunsetError
-          ? {
-              primary: "Cannot determine day start",
-              color: "text-[var(--hvsna-danger-color)]",
-            }
-          : {
-              primary: getToday().startOfDay().toDate().toString(),
-              secondary: "",
-              tertiary: `Hijri: ${formatDate(getToday(), "DD MMMM YYYY HH:mm:ss.SSS")}`,
-            },
+        ? {
+            primary: "Cannot determine day start",
+            color: "text-[var(--hvsna-danger-color)]",
+          }
+        : {
+            primary: getToday().startOfDay().toDate().toString(),
+            secondary: "",
+            tertiary: `Hijri: ${formatDate(
+              getToday(),
+              "DD MMMM YYYY HH:mm:ss.SSS"
+            )}`,
+          },
       color: "text-[var(--hvsna-info-color)]",
       striped: true,
     },
@@ -119,19 +120,19 @@ export function HijriCalendar() {
             primary: "Loading sunset time...",
           }
         : sunsetError
-          ? {
-              primary: "Cannot determine day end",
-              color: "text-[var(--hvsna-danger-color)]",
-            }
-          : sunsetTime
-            ? {
-                primary: sunsetTime,
-                secondary:
-                  "Gregorian: " + getToday().endOfDay().toDate().toString(),
-              }
-            : {
-                primary: "Day end time not available",
-              },
+        ? {
+            primary: "Cannot determine day end",
+            color: "text-[var(--hvsna-danger-color)]",
+          }
+        : sunsetTime
+        ? {
+            primary: sunsetTime,
+            secondary:
+              "Gregorian: " + getToday().endOfDay().toDate().toString(),
+          }
+        : {
+            primary: "Day end time not available",
+          },
       color: "text-[var(--hvsna-warning-color)]",
     },
     {
@@ -142,18 +143,21 @@ export function HijriCalendar() {
             primary: "Loading next day start...",
           }
         : sunsetError
-          ? {
-              primary: "Cannot determine next day start",
-              color: "text-[var(--hvsna-danger-color)]",
-            }
-          : sunsetTime
-            ? {
-                primary: getToday().next().startOfDay().toDate().toString(),
-                secondary: `Hijri: ${formatDate(getToday().next(), "DD MMMM YYYY HH:mm:ss.SSS")}`,
-              }
-            : {
-                primary: "Next day start not available",
-              },
+        ? {
+            primary: "Cannot determine next day start",
+            color: "text-[var(--hvsna-danger-color)]",
+          }
+        : sunsetTime
+        ? {
+            primary: getToday().next().startOfDay().toDate().toString(),
+            secondary: `Hijri: ${formatDate(
+              getToday().next(),
+              "DD MMMM YYYY HH:mm:ss.SSS"
+            )}`,
+          }
+        : {
+            primary: "Next day start not available",
+          },
     },
   ];
 

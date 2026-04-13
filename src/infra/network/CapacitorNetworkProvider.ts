@@ -23,7 +23,7 @@ export class CapacitorNetworkProvider implements INetworkProvider {
   }
 
   async addListener(
-    callback: (status: NetworkStatus) => void,
+    callback: (status: NetworkStatus) => void
   ): Promise<NetworkListener> {
     const handle = await Network.addListener(
       "networkStatusChange",
@@ -32,7 +32,7 @@ export class CapacitorNetworkProvider implements INetworkProvider {
           connected: status.connected,
           connectionType: status.connectionType,
         });
-      },
+      }
     );
 
     return {

@@ -12,7 +12,7 @@ let indexesCreated = false;
  * @returns PouchDB.Database instance
  */
 export const getPouchDBInstance = (
-  dbName: string = "hvsna-notes",
+  dbName: string = "hvsna-notes"
 ): PouchDB.Database => {
   if (!dbInstance) {
     dbInstance = new PouchDB(dbName);

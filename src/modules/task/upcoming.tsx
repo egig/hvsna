@@ -85,7 +85,7 @@ export default function Upcoming() {
                   key as keyof typeof taskGroupsWithLabels
                 ] &&
                 taskGroupsWithLabels[key as keyof typeof taskGroupsWithLabels]
-                  .tasks.length > 0,
+                  .tasks.length > 0
             )
             .map(({ key, label }) => (
               <div key={key}>

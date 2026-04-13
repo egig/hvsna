@@ -59,7 +59,7 @@ export class BrowserNotificationsProvider implements INotificationsProvider {
   }
 
   async scheduleTaskReminder(
-    options: TaskReminderOptions,
+    options: TaskReminderOptions
   ): Promise<ReminderResult> {
     if (!("Notification" in window) || Notification.permission !== "granted") {
       return {
@@ -94,10 +94,10 @@ export class BrowserNotificationsProvider implements INotificationsProvider {
   async cancelTaskReminder(taskId: string): Promise<void> {
     try {
       const reminders = JSON.parse(
-        localStorage.getItem("taskReminders") || "[]",
+        localStorage.getItem("taskReminders") || "[]"
       );
       const filteredReminders = reminders.filter(
-        (reminder: any) => reminder.taskId !== taskId,
+        (reminder: any) => reminder.taskId !== taskId
       );
       localStorage.setItem("taskReminders", JSON.stringify(filteredReminders));
     } catch (error) {
@@ -107,7 +107,7 @@ export class BrowserNotificationsProvider implements INotificationsProvider {
 
   async updateTaskReminder(
     taskId: string,
-    options: TaskReminderOptions,
+    options: TaskReminderOptions
   ): Promise<void> {
     // Cancel existing reminders for this task
     await this.cancelTaskReminder(taskId);

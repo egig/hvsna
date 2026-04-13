@@ -54,7 +54,7 @@ const mac =
 /// remove the binding, or a new key name string.
 export function buildKeymap(
   schema: Schema,
-  mapKeys?: { [key: string]: false | string },
+  mapKeys?: { [key: string]: false | string }
 ) {
   let keys: { [key: string]: Command } = {},
     type;

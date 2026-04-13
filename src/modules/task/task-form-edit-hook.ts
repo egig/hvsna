@@ -63,7 +63,7 @@ export const useTaskFormEdit = (
   taskId: string,
   onSuccess?: (task: Task) => void,
   onError?: (error: string) => void,
-  onDelete?: (taskId: string) => void,
+  onDelete?: (taskId: string) => void
 ): UseTaskFormReturn => {
   const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
     useTaskContext();
@@ -127,7 +127,7 @@ export const useTaskFormEdit = (
       atDateHijri = formatHijriDateString(
         formData.scheduleAt.dateHijri.year,
         formData.scheduleAt.dateHijri.month,
-        formData.scheduleAt.dateHijri.day,
+        formData.scheduleAt.dateHijri.day
       );
     }
 
@@ -177,7 +177,7 @@ export const useTaskFormEdit = (
               formData.repeat.end === "never" ? undefined : formData.repeat.end,
             repeatEndDate:
               formData.repeat.end === "on_date"
-                ? (formData.repeat.endDate ?? undefined)
+                ? formData.repeat.endDate ?? undefined
                 : undefined,
             repeatEndOccurrences:
               formData.repeat.end === "after_occurrences"
@@ -189,7 +189,7 @@ export const useTaskFormEdit = (
             updateTask,
             taskRepository: new PouchDBTaskRepository(db),
             todayEpoch: Date.now(),
-          },
+          }
         );
       } else if (!wasRegular && !isNowRecurring) {
         // Demote: recurring → regular — show scope modal
@@ -248,7 +248,7 @@ export const useTaskFormEdit = (
           .catch((error) => {
             logger.error(error);
             onError?.(
-              error instanceof Error ? error.message : "Failed to delete task",
+              error instanceof Error ? error.message : "Failed to delete task"
             );
           });
       }
@@ -264,7 +264,7 @@ export const useTaskFormEdit = (
     } catch (error) {
       logger.error(error);
       onError?.(
-        error instanceof Error ? error.message : "Failed to delete task",
+        error instanceof Error ? error.message : "Failed to delete task"
       );
     }
   };
@@ -280,7 +280,7 @@ export const useTaskFormEdit = (
       onError?.(
         error instanceof Error
           ? error.message
-          : "Failed to delete recurring tasks",
+          : "Failed to delete recurring tasks"
       );
     }
   };
@@ -295,13 +295,13 @@ export const useTaskFormEdit = (
         result = await demoteTaskFromRecurring(
           pendingOperation.taskId,
           pendingOperation.taskInput,
-          updateTask,
+          updateTask
         );
       } else {
         // Update only this task instance
         result = await updateTask(
           pendingOperation.taskId,
-          pendingOperation.taskInput,
+          pendingOperation.taskInput
         );
       }
       setPendingOperation(null);
@@ -331,7 +331,7 @@ export const useTaskFormEdit = (
             updateTask,
             deleteRecurringTask,
             taskRepository: new PouchDBTaskRepository(db),
-          },
+          }
         );
       } else {
         // Update this instance, delete future instances, update the template,
@@ -358,7 +358,7 @@ export const useTaskFormEdit = (
             updateRecurringTask,
             taskRepository: new PouchDBTaskRepository(db),
             todayEpoch: Date.now(),
-          },
+          }
         );
       }
       setPendingOperation(null);

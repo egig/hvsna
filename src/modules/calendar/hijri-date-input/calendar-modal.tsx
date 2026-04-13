@@ -41,14 +41,14 @@ interface CalendarModalProps {
     repeatInterval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
-    repeatEndOccurrences: number,
+    repeatEndOccurrences: number
   ) => void;
 }
 
 function formatRepeatLabel(
   repeat: TaskRepeat,
   interval: number,
-  t: (key: string) => string,
+  t: (key: string) => string
 ): string {
   const unitLabels: Record<string, string> = {
     daily: t("repeat_daily"),
@@ -57,7 +57,9 @@ function formatRepeatLabel(
     yearly: t("repeat_yearly"),
   };
   if (interval <= 1) return unitLabels[repeat] ?? repeat;
-  return `${t("every") || "Every"} ${interval} ${(unitLabels[repeat] ?? repeat).toLowerCase()}`;
+  return `${t("every") || "Every"} ${interval} ${(
+    unitLabels[repeat] ?? repeat
+  ).toLowerCase()}`;
 }
 
 export function CalendarModal({
@@ -92,36 +94,36 @@ export function CalendarModal({
   const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
     selectedDate
       ? createHijriMonth(selectedDate.year, selectedDate.month)
-      : currentHijriMonth(),
+      : currentHijriMonth()
   );
   const [calendarMode, setCalendarMode] = useState<"hijri" | "gregorian">(
-    "hijri",
+    "hijri"
   );
   const [gregYear, setGregYear] = useState(() => new Date().getFullYear());
   const [gregMonth, setGregMonth] = useState(() => new Date().getMonth());
 
   // Pending selections — committed only when the user taps the confirm button
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
-    selectedDate,
+    selectedDate
   );
   const [tempTime, setTempTime] = useState<string | null>(selectedTime ?? null);
   const [tempPrayerTime, setTempPrayerTime] = useState<PrayerTime | string>(
-    selectedPrayerTime ?? "",
+    selectedPrayerTime ?? ""
   );
   const [tempRepeat, setTempRepeat] = useState<TaskRepeat>(
-    selectedRepeat ?? "none",
+    selectedRepeat ?? "none"
   );
   const [tempRepeatInterval, setTempRepeatInterval] = useState(
-    selectedRepeatInterval ?? 1,
+    selectedRepeatInterval ?? 1
   );
   const [tempRepeatEnd, setTempRepeatEnd] = useState<RepeatEnd>(
-    selectedRepeatEnd ?? "never",
+    selectedRepeatEnd ?? "never"
   );
   const [tempRepeatEndDate, setTempRepeatEndDate] = useState<string | null>(
-    selectedRepeatEndDate ?? null,
+    selectedRepeatEndDate ?? null
   );
   const [tempRepeatEndOccurrences, setTempRepeatEndOccurrences] = useState(
-    selectedRepeatEndOccurrences ?? 1,
+    selectedRepeatEndOccurrences ?? 1
   );
 
   // Re-sync pending state whenever the modal opens (props may have changed)
@@ -139,7 +141,7 @@ export function CalendarModal({
     setCurrentMonth(
       selectedDate
         ? createHijriMonth(selectedDate.year, selectedDate.month)
-        : currentHijriMonth(),
+        : currentHijriMonth()
     );
   }, [isOpen]);
 
@@ -195,7 +197,7 @@ export function CalendarModal({
 
   const gregMonthLabel = new Intl.DateTimeFormat(
     language === "id" ? "id-ID" : "en-US",
-    { month: "long", year: "numeric" },
+    { month: "long", year: "numeric" }
   ).format(new Date(gregYear, gregMonth));
 
   // ── Navigation ─────────────────────────────────────────────────────────────
@@ -228,7 +230,7 @@ export function CalendarModal({
       const finalDate = createHijriDate(
         tempSelectedDate.year,
         tempSelectedDate.month,
-        tempSelectedDate.day,
+        tempSelectedDate.day
       );
       onConfirm(
         finalDate,
@@ -238,7 +240,7 @@ export function CalendarModal({
         tempRepeatInterval,
         tempRepeatEnd,
         tempRepeatEndDate,
-        tempRepeatEndOccurrences,
+        tempRepeatEndOccurrences
       );
     }
   };
@@ -297,7 +299,7 @@ export function CalendarModal({
       tempRepeatInterval,
       tempRepeatEnd,
       tempRepeatEndDate,
-      tempRepeatEndOccurrences,
+      tempRepeatEndOccurrences
     );
   };
 
@@ -311,7 +313,7 @@ export function CalendarModal({
       tempRepeatInterval,
       tempRepeatEnd,
       tempRepeatEndDate,
-      tempRepeatEndOccurrences,
+      tempRepeatEndOccurrences
     );
   };
 
@@ -329,7 +331,7 @@ export function CalendarModal({
       tempRepeatInterval,
       tempRepeatEnd,
       tempRepeatEndDate,
-      tempRepeatEndOccurrences,
+      tempRepeatEndOccurrences
     );
   };
 
@@ -342,8 +344,8 @@ export function CalendarModal({
   const timeLabel = tempPrayerTime
     ? String(tempPrayerTime)
     : tempTime
-      ? tempTime
-      : t("time");
+    ? tempTime
+    : t("time");
 
   const repeatLabel =
     tempRepeat !== "none"
@@ -438,7 +440,9 @@ export function CalendarModal({
 
               <h3 className="text-m text-gray-900 dark:text-white">
                 {calendarMode === "hijri"
-                  ? `${hijriMonthNames[currentMonth.month - 1]} ${currentMonth.year}`
+                  ? `${hijriMonthNames[currentMonth.month - 1]} ${
+                      currentMonth.year
+                    }`
                   : gregMonthLabel}
               </h3>
 
@@ -471,7 +475,11 @@ export function CalendarModal({
                         {date ? (
                           <button
                             onClick={() => setTempSelectedDate(date)}
-                            data-testid={date.isToday() ? "calendar-today-button" : undefined}
+                            data-testid={
+                              date.isToday()
+                                ? "calendar-today-button"
+                                : undefined
+                            }
                             className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
                               tempSelectedDate &&
                               date.year === tempSelectedDate.year &&
@@ -479,8 +487,8 @@ export function CalendarModal({
                               date.day === tempSelectedDate.day
                                 ? "bg-[var(--hvsna-primary-color)] text-white"
                                 : date.isToday()
-                                  ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                                  : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                                ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
+                                : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                             }`}
                           >
                             {date.day}
@@ -501,8 +509,8 @@ export function CalendarModal({
                               isGregSelected(date)
                                 ? "bg-[var(--hvsna-primary-color)] text-white"
                                 : isGregToday(date)
-                                  ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                                  : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                                ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
+                                : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                             }`}
                           >
                             {date.getDate()}

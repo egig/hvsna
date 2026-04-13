@@ -187,7 +187,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     } catch (error) {
       console.warn(
         "Failed to load SQLite adapter, falling back to IndexedDB:",
-        error,
+        error
       );
       return new PouchDB(dbName);
     }
@@ -248,8 +248,8 @@ export class PouchDBTaskRepository implements ITaskRepository {
     Object.assign(
       updateData,
       Object.fromEntries(
-        Object.entries(input).filter(([_, v]) => v !== undefined),
-      ),
+        Object.entries(input).filter(([_, v]) => v !== undefined)
+      )
     );
 
     if (!!input.atTime) {
@@ -343,7 +343,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const result = await this.db.find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -367,7 +367,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const result = await this.db.find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -389,13 +389,13 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const result = await this.db.find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
   async findWithPagination(
     offset: number,
-    limit: number = 20,
+    limit: number = 20
   ): Promise<Task[]> {
     const mangoQuery = {
       selector: {
@@ -449,7 +449,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -480,7 +480,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -548,33 +548,32 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
   async findBrowsedTasks(
     query?: any,
     offset: number = 0,
-    limit: number = 50,
+    limit: number = 50
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis"],
+        fields: ["type", "status", "listId", "noDate", "atEpochMillis"],
       },
     });
 
     const mangoQuery: any = {
       selector: {
         type: "task",
-        status: {
-          $gte: 0,
-        },
+        status: { $gte: 0 },
         noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
+        { listId: "asc" },
         { noDate: "asc" },
         { atEpochMillis: "asc" },
       ] as any,
@@ -597,19 +596,17 @@ export class PouchDBTaskRepository implements ITaskRepository {
           { description: { $regex: searchLower } },
         ];
       }
-
-      if (query.atEpochMillis) {
-        mangoQuery.selector.atEpochMillis = query.atEpochMillis;
-      }
-
       if (query.unscheduled !== undefined) {
         mangoQuery.selector.noDate = query.unscheduled;
+      }
+      if (query.listId) {
+        mangoQuery.selector.listId = query.listId;
       }
     }
 
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -639,14 +636,14 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
   async findTasksByListId(
     listId: string,
     offset: number = 0,
-    limit: number = 50,
+    limit: number = 50
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
@@ -672,7 +669,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -689,7 +686,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     });
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem(),
+      new PouchDBTaskDocument(doc).toTaskItem()
     );
   }
 
@@ -744,8 +741,8 @@ export class PouchDBListRepository implements IListRepository {
     Object.assign(
       updateData,
       Object.fromEntries(
-        Object.entries(input).filter(([_, v]) => v !== undefined),
-      ),
+        Object.entries(input).filter(([_, v]) => v !== undefined)
+      )
     );
 
     const ud = PouchDBListDocument.fromListItem(updateData);
@@ -805,13 +802,13 @@ export class PouchDBListRepository implements IListRepository {
     const result = await this.db.find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBListDocument) =>
-      new PouchDBListDocument(doc).toListItem(),
+      new PouchDBListDocument(doc).toListItem()
     );
   }
 
   async findWithPagination(
     offset: number,
-    limit: number = 20,
+    limit: number = 20
   ): Promise<List[]> {
     const mangoQuery = {
       selector: {
@@ -825,7 +822,7 @@ export class PouchDBListRepository implements IListRepository {
     const result = await this.db.find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBListDocument) =>
-      new PouchDBListDocument(doc).toListItem(),
+      new PouchDBListDocument(doc).toListItem()
     );
   }
 }

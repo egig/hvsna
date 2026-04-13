@@ -106,7 +106,7 @@ export interface PrayerTimesParams {
 }
 
 export async function getPrayerTimes(
-  params: PrayerTimesParams,
+  params: PrayerTimesParams
 ): Promise<PrayerTimesResponse> {
   const {
     date,
@@ -146,7 +146,9 @@ export async function getPrayerTimes(
     return data;
   } catch (error) {
     throw new Error(
-      `Failed to fetch prayer times: ${error instanceof Error ? error.message : "Unknown error"}`,
+      `Failed to fetch prayer times: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
     );
   }
 }

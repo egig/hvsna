@@ -63,7 +63,7 @@ export function Today() {
 const getOriginalTaskGroups = (
   tasks: Task[],
   completedTasks: Task[],
-  getToday: any,
+  getToday: any
 ) => {
   const groups: {
     prayer: PrayerTime | null;
@@ -77,20 +77,20 @@ const getOriginalTaskGroups = (
 
   // Separate overdue tasks, prayer-based tasks, and regular tasks
   const overdueTasks = tasks.filter(
-    (task) => task.isOverdue() && !task.completedAt,
+    (task) => task.isOverdue() && !task.completedAt
   );
   const prayerTasks = tasks.filter(
     (task) =>
       task.usePrayerTime &&
       task.prayerTime &&
       (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
-      !task.completedAt,
+      !task.completedAt
   );
   const regularTasks = tasks.filter(
     (task) =>
       !task.usePrayerTime &&
       (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
-      !task.completedAt,
+      !task.completedAt
   );
 
   // Add overdue tasks group first (always at top)
@@ -98,7 +98,7 @@ const getOriginalTaskGroups = (
     groups.push({
       prayer: null,
       tasks: overdueTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
       ),
       isOverdue: true,
     });
@@ -134,7 +134,7 @@ const getOriginalTaskGroups = (
       groups.push({
         prayer,
         tasks: prayerGroups[prayer].sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
         ),
       });
     }
@@ -145,7 +145,7 @@ const getOriginalTaskGroups = (
     groups.push({
       prayer: null,
       tasks: regularTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
       ),
     });
   }
@@ -155,7 +155,7 @@ const getOriginalTaskGroups = (
     groups.push({
       prayer: null,
       tasks: completedTasks.sort(
-        (a, b) => (b.completedAt || 0) - (a.completedAt || 0),
+        (a, b) => (b.completedAt || 0) - (a.completedAt || 0)
       ),
       isCompleted: true,
     });
@@ -194,7 +194,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     (task: Task) => {
       openEditTaskForm(task.id as string);
     },
-    [openEditTaskForm],
+    [openEditTaskForm]
   );
 
   // Use new prayer time grouping logic
@@ -207,7 +207,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     // Pass all tasks (active + completed) to the new grouping function
     return groupTasksByPrayerTimes(
       [...tasks, ...completedTasks],
-      prayerTimings,
+      prayerTimings
     );
   }, [tasks, completedTasks, prayerTimings, getToday]);
 
@@ -223,7 +223,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
 
       return prayerName;
     },
-    [t, prayerTimings],
+    [t, prayerTimings]
   );
 
   return (
@@ -271,8 +271,8 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
               (group.isOverdue
                 ? "overdue"
                 : group.isCompleted
-                  ? "completed"
-                  : `regular-${groupIndex}`)
+                ? "completed"
+                : `regular-${groupIndex}`)
             }
             defaultOpen={!group.isCompleted}
           >

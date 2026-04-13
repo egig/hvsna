@@ -92,8 +92,8 @@ export class ListRepository {
     Object.assign(
       updateData,
       Object.fromEntries(
-        Object.entries(input).filter(([_, v]) => v !== undefined),
-      ),
+        Object.entries(input).filter(([_, v]) => v !== undefined)
+      )
     );
 
     let ud = PouchDBListDocument.fromListItem(updateData);
@@ -189,13 +189,13 @@ export class ListRepository {
     const result = await (db as any).find(mangoQuery);
 
     return (result as any).docs.map((doc: PouchDBListDocument) =>
-      new PouchDBListDocument(doc).toListItem(),
+      new PouchDBListDocument(doc).toListItem()
     );
   }
 
   async findWithPagination(
     offset: number,
-    limit: number = 20,
+    limit: number = 20
   ): Promise<List[]> {
     const mangoQuery = {
       selector: {

@@ -23,7 +23,7 @@ interface RepeatSelectorModalProps {
     interval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
-    repeatEndOccurrences: number,
+    repeatEndOccurrences: number
   ) => void;
   repeatEnd?: RepeatEnd;
   repeatEndDate?: string | null;
@@ -77,18 +77,18 @@ export function RepeatSelectorModal({
   const { t } = useLanguageContext();
 
   const [selectedOption, setSelectedOption] = useState<RepeatOption>(
-    getInitialOption(repeat, interval),
+    getInitialOption(repeat, interval)
   );
   const [customInterval, setCustomInterval] = useState(
-    interval > 1 ? interval : 2,
+    interval > 1 ? interval : 2
   );
   const [customUnit, setCustomUnit] = useState<TaskRepeat>(
-    repeat !== "none" ? repeat : "daily",
+    repeat !== "none" ? repeat : "daily"
   );
   const [selectedRepeatEnd, setSelectedRepeatEnd] =
     useState<RepeatEnd>(repeatEndProp);
   const [endOccurrences, setEndOccurrences] = useState(
-    repeatEndOccurrencesProp,
+    repeatEndOccurrencesProp
   );
 
   // Sync internal state when props change
@@ -109,7 +109,7 @@ export function RepeatSelectorModal({
         Math.max(1, customInterval),
         selectedRepeatEnd,
         repeatEndDate ?? null,
-        endOccurrences,
+        endOccurrences
       );
     } else {
       onConfirm(
@@ -117,7 +117,7 @@ export function RepeatSelectorModal({
         1,
         selectedRepeatEnd,
         repeatEndDate ?? null,
-        endOccurrences,
+        endOccurrences
       );
     }
   };
@@ -167,7 +167,9 @@ export function RepeatSelectorModal({
             key={value}
             type="button"
             onClick={() => handlePresetTap(value)}
-            className={`${buttonBase} ${selectedOption === value ? activeClass : inactiveClass}`}
+            className={`${buttonBase} ${
+              selectedOption === value ? activeClass : inactiveClass
+            }`}
           >
             <span>{t(labelKey)}</span>
             {selectedOption === value && <HvCheck size={16} />}
@@ -178,7 +180,9 @@ export function RepeatSelectorModal({
         <button
           type="button"
           onClick={() => setSelectedOption("custom")}
-          className={`${buttonBase} ${selectedOption === "custom" ? activeClass : inactiveClass}`}
+          className={`${buttonBase} ${
+            selectedOption === "custom" ? activeClass : inactiveClass
+          }`}
         >
           <span>{t("repeat_custom") || "Custom"}</span>
           {selectedOption === "custom" && <HvCheck size={16} />}
@@ -213,7 +217,9 @@ export function RepeatSelectorModal({
 
         {/* Ends section */}
         <div
-          className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${selectedOption === "none" ? "opacity-50" : ""}`}
+          className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 ${
+            selectedOption === "none" ? "opacity-50" : ""
+          }`}
         >
           <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t("repeat_ends")}
@@ -227,7 +233,9 @@ export function RepeatSelectorModal({
                   setSelectedRepeatEnd("never");
                 }
               }}
-              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "never" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                selectedRepeatEnd === "never" ? activeClass : inactiveClass
+              } ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
             >
               {t("repeat_ends_never")}
             </button>
@@ -240,7 +248,9 @@ export function RepeatSelectorModal({
                   onSelectEndDate();
                 }
               }}
-              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "on_date" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                selectedRepeatEnd === "on_date" ? activeClass : inactiveClass
+              } ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
             >
               {repeatEndDate
                 ? formatRepeatEndDate(repeatEndDate)
@@ -254,7 +264,11 @@ export function RepeatSelectorModal({
                   setSelectedRepeatEnd("after_occurrences");
                 }
               }}
-              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${selectedRepeatEnd === "after_occurrences" ? activeClass : inactiveClass} ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
+              className={`flex-1 px-2 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                selectedRepeatEnd === "after_occurrences"
+                  ? activeClass
+                  : inactiveClass
+              } ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
             >
               {t("repeat_ends_after")}
             </button>

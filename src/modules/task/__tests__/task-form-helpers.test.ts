@@ -18,28 +18,28 @@ describe("task-form-helpers", () => {
 
     it("should throw error for invalid format", () => {
       expect(() => parseHijriDateString("1445")).toThrow(
-        "Invalid Hijri date format: 1445. Expected YYYYMMDD format.",
+        "Invalid Hijri date format: 1445. Expected YYYYMMDD format."
       );
       expect(() => parseHijriDateString("")).toThrow(
-        "Invalid Hijri date format: . Expected YYYYMMDD format.",
+        "Invalid Hijri date format: . Expected YYYYMMDD format."
       );
     });
 
     it("should throw error for invalid month", () => {
       expect(() => parseHijriDateString("14451315")).toThrow(
-        "Invalid month 13 in Hijri date: 14451315. Month must be 1-12.",
+        "Invalid month 13 in Hijri date: 14451315. Month must be 1-12."
       );
     });
 
     it("should throw error for invalid day", () => {
       expect(() => parseHijriDateString("14450831")).toThrow(
-        "Invalid day 31 in Hijri date: 14450831. Day must be 1-30.",
+        "Invalid day 31 in Hijri date: 14450831. Day must be 1-30."
       );
     });
 
     it("should throw error for non-numeric components", () => {
       expect(() => parseHijriDateString("ABCD1234")).toThrow(
-        "Invalid Hijri date components in: ABCD1234",
+        "Invalid Hijri date components in: ABCD1234"
       );
     });
   });
@@ -88,13 +88,13 @@ describe("task-form-helpers", () => {
 
     it("should throw error for invalid hour", () => {
       expect(() => parseTimeString("25:30")).toThrow(
-        "Invalid hour 25 in time: 25:30. Hour must be 0-23.",
+        "Invalid hour 25 in time: 25:30. Hour must be 0-23."
       );
     });
 
     it("should throw error for invalid minute", () => {
       expect(() => parseTimeString("14:60")).toThrow(
-        "Invalid minute 60 in time: 14:60. Minute must be 0-59.",
+        "Invalid minute 60 in time: 14:60. Minute must be 0-59."
       );
     });
   });

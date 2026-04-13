@@ -108,7 +108,7 @@ describe("SystemContext", () => {
       JSON.stringify({
         isScreenSizeOverlayVisible: false,
         isDesktop: false,
-      }),
+      })
     );
 
     const { result } = renderHook(() => useSystemContext(), { wrapper });

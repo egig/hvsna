@@ -207,7 +207,7 @@ describe("core", () => {
       // Time exactly at sunset should advance to next Hijri day
       const resultAtSunset = fromDate(
         new Date(2026, 1, 26, 18, 30, 45, 123),
-        options,
+        options
       );
       expect(resultAtSunset.year).toBe(1447);
       expect(resultAtSunset.month).toBe(9);
@@ -216,7 +216,7 @@ describe("core", () => {
       // Time just before sunset should remain same Hijri day
       const resultBeforeSunset = fromDate(
         new Date(2026, 1, 26, 18, 30, 44, 122),
-        options,
+        options
       );
       expect(resultBeforeSunset.year).toBe(1447);
       expect(resultBeforeSunset.month).toBe(9);
@@ -243,7 +243,7 @@ describe("core", () => {
       // Time well before sunset (morning)
       const resultMorning = fromDate(
         new Date(2026, 1, 26, 9, 0, 0, 0),
-        options,
+        options
       );
       expect(resultMorning.day).toBe(9);
 
@@ -273,21 +273,21 @@ describe("core", () => {
         // Time exactly at sunset (18:30:45.500) should advance to next Hijri day
         const resultAtExactSunset = fromDate(
           new Date(2026, 1, 26, 18, 30, 45, 500),
-          options,
+          options
         );
         expect(resultAtExactSunset.day).toBe(10);
 
         // Time 1 millisecond before sunset should remain same Hijri day
         const resultJustBefore = fromDate(
           new Date(2026, 1, 26, 18, 30, 45, 499),
-          options,
+          options
         );
         expect(resultJustBefore.day).toBe(9);
 
         // Time 1 millisecond after sunset should advance to next Hijri day
         const resultJustAfter = fromDate(
           new Date(2026, 1, 26, 18, 30, 45, 501),
-          options,
+          options
         );
         expect(resultJustAfter.day).toBe(10);
       });

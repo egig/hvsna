@@ -33,10 +33,10 @@ export function useListTasks({
   // Check if there are more tasks
   const hasMore = Boolean(
     listTasksQuery.data &&
-    listTasksQuery.data.length >= limit &&
-    listTasksQuery.data.length > 0 &&
-    !listTasksQuery.isFetching &&
-    !listTasksQuery.isPending,
+      listTasksQuery.data.length >= limit &&
+      listTasksQuery.data.length > 0 &&
+      !listTasksQuery.isFetching &&
+      !listTasksQuery.isPending
   );
 
   // Load more tasks (pagination)

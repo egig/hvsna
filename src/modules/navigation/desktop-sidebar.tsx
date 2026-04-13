@@ -96,7 +96,7 @@ export function DesktopSidebar({
     return tasks.filter(
       (task) =>
         task.status === 0 && // Only open/pending tasks
-        task.listId === listId, // Tasks belonging to this list
+        task.listId === listId // Tasks belonging to this list
     );
   };
 
@@ -143,10 +143,10 @@ export function DesktopSidebar({
   ];
 
   const mainTabs = desktopTabs.filter(
-    (tab) => !tab.path.startsWith("/settings"),
+    (tab) => !tab.path.startsWith("/settings")
   );
   const bottomTabs = desktopTabs.filter((tab) =>
-    tab.path.startsWith("/settings"),
+    tab.path.startsWith("/settings")
   );
 
   const getIsActive = (tabPath: string) => {

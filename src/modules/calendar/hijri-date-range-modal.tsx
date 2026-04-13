@@ -58,21 +58,21 @@ export function HijriDateRangeModal({
     selectedRange?.startDate
       ? createHijriMonth(
           selectedRange.startDate.year,
-          selectedRange.startDate.month,
+          selectedRange.startDate.month
         )
-      : currentHijriMonth(),
+      : currentHijriMonth()
   );
 
   const [tempStartDate, setTempStartDate] = useState<HijriDate | null>(
-    selectedRange?.startDate || null,
+    selectedRange?.startDate || null
   );
 
   const [tempEndDate, setTempEndDate] = useState<HijriDate | null>(
-    selectedRange?.endDate || null,
+    selectedRange?.endDate || null
   );
 
   const [calendarMode, setCalendarMode] = useState<"hijri" | "gregorian">(
-    "hijri",
+    "hijri"
   );
   const [gregYear, setGregYear] = useState(() => new Date().getFullYear());
   const [gregMonth, setGregMonth] = useState(() => new Date().getMonth());
@@ -82,8 +82,8 @@ export function HijriDateRangeModal({
       setCurrentMonth(
         new HijriMonth(
           selectedRange.startDate.year,
-          selectedRange.startDate.month,
-        ),
+          selectedRange.startDate.month
+        )
       );
       setTempStartDate(selectedRange.startDate);
       setTempEndDate(selectedRange.endDate);
@@ -207,7 +207,7 @@ export function HijriDateRangeModal({
 
   const gregMonthLabel = new Intl.DateTimeFormat(
     language === "id" ? "id-ID" : "en-US",
-    { month: "long", year: "numeric" },
+    { month: "long", year: "numeric" }
   ).format(new Date(gregYear, gregMonth));
 
   const getGregDateButtonClass = (date: Date) => {
@@ -427,7 +427,9 @@ export function HijriDateRangeModal({
 
           <h3 className="text-m text-gray-900 dark:text-white">
             {calendarMode === "hijri"
-              ? `${hijriMonthNames[currentMonth.month - 1]} ${currentMonth.year}`
+              ? `${hijriMonthNames[currentMonth.month - 1]} ${
+                  currentMonth.year
+                }`
               : gregMonthLabel}
           </h3>
 

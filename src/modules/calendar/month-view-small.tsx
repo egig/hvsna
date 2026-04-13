@@ -49,14 +49,14 @@ export default function MonthViewSmall({
       </div>
       <div className="grid grid-cols-7 gap-1 mb-2.5">
         {Array.from({ length: startDay }, (_, i) => i + 1).map(() =>
-          EmptyDayItem(),
+          EmptyDayItem()
         )}
         {Array.from({ length: days }, (_, i) => i + 1).map((day) => {
           const gregorianDate = hijriToGregorian({ year, month, day });
           const date = new Date(
             gregorianDate.year,
             gregorianDate.month - 1,
-            gregorianDate.day,
+            gregorianDate.day
           );
           return DayItem(HijriDate.fromDate(date));
         })}

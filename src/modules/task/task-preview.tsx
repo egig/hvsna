@@ -79,7 +79,7 @@ export default function TaskPreview({ task }: TaskPreviewProps) {
                 <p className="text-gray-900">
                   {formatDate(
                     toHijriDate(new Date(task.atEpochMillis)),
-                    "DD MMMM YYYY",
+                    "DD MMMM YYYY"
                   )}
                 </p>
               </div>

@@ -265,6 +265,18 @@ export const taskTranslations = {
     en: "Clear",
     id: "Hapus",
   },
+  clear_filters: {
+    en: "Clear filters",
+    id: "Hapus filter",
+  },
+  all_lists: {
+    en: "All lists",
+    id: "Semua daftar",
+  },
+  list: {
+    en: "List",
+    id: "Daftar",
+  },
   status: {
     en: "Status",
     id: "Status",

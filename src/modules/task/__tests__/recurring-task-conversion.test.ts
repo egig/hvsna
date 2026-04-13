@@ -21,7 +21,7 @@ function makeUpdateTask(overrides?: Partial<Task>) {
         name: "Test",
         ...overrides,
         ...(input as Partial<Task>),
-      }),
+      })
   );
 }
 
@@ -34,7 +34,7 @@ function makeCreateRecurringTask(templateId = "rtask_test") {
       repeat: input.repeat,
       repeatInterval: input.repeatInterval ?? 1,
       baseDateHijri: input.baseDateHijri,
-    }),
+    })
   );
 }
 
@@ -103,7 +103,7 @@ describe("promoteTaskToRecurring", () => {
         updateTask,
         taskRepository: repo,
         todayEpoch: TODAY_EPOCH,
-      },
+      }
     );
 
     expect(createRecurringTask).toHaveBeenCalledOnce();
@@ -133,7 +133,7 @@ describe("promoteTaskToRecurring", () => {
         updateTask,
         taskRepository: repo,
         todayEpoch: TODAY_EPOCH,
-      },
+      }
     );
 
     expect(updateTask).toHaveBeenCalledOnce();
@@ -158,7 +158,7 @@ describe("promoteTaskToRecurring", () => {
           repeatInterval: 1,
           baseDateHijri: input.baseDateHijri,
         };
-      },
+      }
     );
 
     // When updateTask is called, mark the task as linked
@@ -186,7 +186,7 @@ describe("promoteTaskToRecurring", () => {
       async (input: any) => {
         callOrder.push("createInstance");
         return new Task({ id: `task_new`, ...input });
-      },
+      }
     );
 
     await promoteTaskToRecurring(
@@ -205,7 +205,7 @@ describe("promoteTaskToRecurring", () => {
         updateTask,
         taskRepository: repo,
         todayEpoch: TODAY_EPOCH,
-      },
+      }
     );
 
     // Template must be created first, then the task is linked, then instances generated
@@ -239,7 +239,7 @@ describe("promoteTaskToRecurring", () => {
         updateTask,
         taskRepository: repo,
         todayEpoch: TODAY_EPOCH,
-      },
+      }
     );
 
     const created = (repo as any)._created as Task[];
@@ -274,7 +274,7 @@ describe("promoteTaskToRecurring", () => {
         updateTask,
         taskRepository: repo,
         todayEpoch: TODAY_EPOCH,
-      },
+      }
     );
 
     expect(result).toBe(expectedTask);
@@ -304,7 +304,7 @@ describe("demoteTaskFromRecurring", () => {
     await demoteTaskFromRecurring(
       "task_1",
       { ...BASE_TASK_INPUT, repeatInterval: 3 },
-      updateTask,
+      updateTask
     );
 
     const [, input] = updateTask.mock.calls[0];
@@ -338,7 +338,7 @@ describe("demoteTaskFromRecurring", () => {
     const result = await demoteTaskFromRecurring(
       "task_1",
       BASE_TASK_INPUT,
-      updateTask,
+      updateTask
     );
 
     expect(result).toBe(expectedTask);
@@ -400,7 +400,7 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
         updateTask,
         deleteRecurringTask,
         taskRepository: repo,
-      },
+      }
     );
 
     expect(repo.delete).toHaveBeenCalledWith("task_2");
@@ -427,7 +427,7 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
         updateTask,
         deleteRecurringTask,
         taskRepository: repo,
-      },
+      }
     );
 
     expect(repo.delete).not.toHaveBeenCalledWith("task_2");
@@ -453,7 +453,7 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
         updateTask,
         deleteRecurringTask,
         taskRepository: repo,
-      },
+      }
     );
 
     expect(repo.delete).not.toHaveBeenCalledWith("task_0");
@@ -472,7 +472,7 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
         updateTask,
         deleteRecurringTask,
         taskRepository: repo,
-      },
+      }
     );
 
     expect(deleteRecurringTask).toHaveBeenCalledWith("rtask_abc");
@@ -491,7 +491,7 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
         updateTask,
         deleteRecurringTask,
         taskRepository: repo,
-      },
+      }
     );
 
     const [id, input] = updateTask.mock.calls[0];
@@ -514,7 +514,7 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
         updateTask,
         deleteRecurringTask,
         taskRepository: repo,
-      },
+      }
     );
 
     expect(result).toBe(expected);

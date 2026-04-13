@@ -19,7 +19,7 @@ export function Inbox() {
     (task: Task) => {
       openEditTaskForm(task.id as string);
     },
-    [openEditTaskForm],
+    [openEditTaskForm]
   );
 
   if (!initiated) {

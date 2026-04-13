@@ -23,12 +23,12 @@ interface DatePrayerInputProps {
     interval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
-    repeatEndOccurrences: number,
+    repeatEndOccurrences: number
   ) => void;
   onChange: (
     hijriDate: HijriDate | null,
     time: string | null,
-    prayerTime?: PrayerTime | string,
+    prayerTime?: PrayerTime | string
   ) => void;
 }
 
@@ -107,7 +107,7 @@ export function DatePrayerInput({
           interval,
           confirmedRepeatEnd,
           confirmedRepeatEndDate,
-          confirmedRepeatEndOccurrences,
+          confirmedRepeatEndOccurrences
         ) => {
           onChange(date, time, confirmedPrayerTime ?? undefined);
           if (onRepeatChange)
@@ -116,7 +116,7 @@ export function DatePrayerInput({
               interval,
               confirmedRepeatEnd,
               confirmedRepeatEndDate,
-              confirmedRepeatEndOccurrences,
+              confirmedRepeatEndOccurrences
             );
           setIsOpen(false);
         }}

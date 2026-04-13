@@ -11,10 +11,10 @@ export default function YearPage() {
   };
 
   const gStart = HijriDate.fromDate(
-    new Date(new Date().getFullYear(), 0, 1),
+    new Date(new Date().getFullYear(), 0, 1)
   ).toDate();
   const gEnd = HijriDate.fromDate(
-    new Date(new Date().getFullYear(), 11, 31),
+    new Date(new Date().getFullYear(), 11, 31)
   ).toDate();
 
   return (

@@ -80,7 +80,7 @@ describe("Location Service", () => {
       });
 
       await expect(
-        fetchHttpClient.get("https://example.com/api"),
+        fetchHttpClient.get("https://example.com/api")
       ).rejects.toThrow("HTTP error! status: 404");
     });
 
@@ -88,7 +88,7 @@ describe("Location Service", () => {
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       await expect(
-        fetchHttpClient.get("https://example.com/api"),
+        fetchHttpClient.get("https://example.com/api")
       ).rejects.toThrow("Network error");
     });
   });
@@ -120,7 +120,7 @@ describe("Location Service", () => {
       const result = await locationService.getLocationFromIp(testIp);
 
       expect(mockHttpClient.get).toHaveBeenCalledWith(
-        `https://ipapi.co/${testIp}/json/`,
+        `https://ipapi.co/${testIp}/json/`
       );
       expect(result).toEqual(mockLocation);
     });
@@ -128,11 +128,11 @@ describe("Location Service", () => {
     it("should handle API errors gracefully", async () => {
       const errorMessage = "API Error";
       (mockHttpClient.get as any).mockRejectedValueOnce(
-        new Error(errorMessage),
+        new Error(errorMessage)
       );
 
       await expect(locationService.getLocationFromIp()).rejects.toThrow(
-        `Failed to get location from IP: undefined ${errorMessage}`,
+        `Failed to get location from IP: undefined ${errorMessage}`
       );
     });
 
@@ -140,7 +140,7 @@ describe("Location Service", () => {
       (mockHttpClient.get as any).mockRejectedValueOnce("Unknown error");
 
       await expect(locationService.getLocationFromIp()).rejects.toThrow(
-        "Failed to get location from IP: undefined Unknown error",
+        "Failed to get location from IP: undefined Unknown error"
       );
     });
 
@@ -180,7 +180,7 @@ describe("Location Service", () => {
       const result = await getLocationFromIp(testIp);
 
       expect(fetchMock).toHaveBeenCalledWith(
-        `https://ipapi.co/${testIp}/json/`,
+        `https://ipapi.co/${testIp}/json/`
       );
       expect(result).toEqual(mockLocation);
     });

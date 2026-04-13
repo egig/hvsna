@@ -70,7 +70,7 @@ export function TaskListItem({
 
   const formatScheduledDate = (
     task: Task,
-    timeContext: "today" | "upcoming",
+    timeContext: "today" | "upcoming"
   ) => {
     if (typeof formatDate === "function") {
       return formatDate(task);
@@ -105,13 +105,13 @@ export function TaskListItem({
       const taskDate = createHijriDate(
         parseInt(task.atDateHijri.slice(0, 4)),
         parseInt(task.atDateHijri.slice(4, 6)),
-        parseInt(task.atDateHijri.slice(6, 8)),
+        parseInt(task.atDateHijri.slice(6, 8))
       );
       const todayGregorian = today.toDate();
       const taskGregorian = taskDate.toDate();
       const daysDiff = Math.floor(
         (taskGregorian.getTime() - todayGregorian.getTime()) /
-          (1000 * 60 * 60 * 24),
+          (1000 * 60 * 60 * 24)
       );
 
       // If within next 7 days (2-7 days from now)
@@ -184,7 +184,7 @@ export function TaskListItem({
           {t("undo")}
         </button>
       </div>,
-      { autoHideDuration: 5000 },
+      { autoHideDuration: 5000 }
     );
   };
 
@@ -196,7 +196,9 @@ export function TaskListItem({
 
   return (
     <motion.div
-      className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${className || ""}`}
+      className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${
+        className || ""
+      }`}
       onClick={handleItemClick}
       initial={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -233,7 +235,11 @@ export function TaskListItem({
 
           {showDateTime && !!task.atDateHijri && (
             <p
-              className={`text-xs ${task.isOverdue() && task.status !== 1 ? "text-[var(--hvsna-danger-color)]" : "text-gray-500"} mt-1 line-clamp-2`}
+              className={`text-xs ${
+                task.isOverdue() && task.status !== 1
+                  ? "text-[var(--hvsna-danger-color)]"
+                  : "text-gray-500"
+              } mt-1 line-clamp-2`}
             >
               {formatScheduledDate(task, location.state?.context)}
             </p>

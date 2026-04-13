@@ -33,7 +33,7 @@ export class NativeLocationProvider implements ILocationProvider {
   }
 
   async getCurrentPosition(
-    options: GeolocationOptions = {},
+    options: GeolocationOptions = {}
   ): Promise<Coordinate> {
     const {
       enableHighAccuracy = true,

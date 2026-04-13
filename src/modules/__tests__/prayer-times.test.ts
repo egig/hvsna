@@ -105,7 +105,7 @@ describe("getPrayerTimes", () => {
         headers: {
           accept: "application/json",
         },
-      },
+      }
     );
 
     expect(result).toEqual(mockResponse);
@@ -142,15 +142,15 @@ describe("getPrayerTimes", () => {
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("method=2"),
-      expect.any(Object),
+      expect.any(Object)
     );
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("shafaq=habibi"),
-      expect.any(Object),
+      expect.any(Object)
     );
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("timezonestring=America%2FNew_York"),
-      expect.any(Object),
+      expect.any(Object)
     );
   });
 
@@ -167,7 +167,7 @@ describe("getPrayerTimes", () => {
     };
 
     await expect(getPrayerTimes(params)).rejects.toThrow(
-      "Failed to fetch prayer times: HTTP error! status: 404",
+      "Failed to fetch prayer times: HTTP error! status: 404"
     );
   });
 
@@ -181,7 +181,7 @@ describe("getPrayerTimes", () => {
     };
 
     await expect(getPrayerTimes(params)).rejects.toThrow(
-      "Failed to fetch prayer times: Network error",
+      "Failed to fetch prayer times: Network error"
     );
   });
 });

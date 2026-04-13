@@ -36,7 +36,7 @@ function horizonDays(repeat: string, interval: number): number {
 export async function generateOccurrencesForTemplate(
   template: RecurringTask,
   taskRepository: ITaskRepository,
-  todayEpoch: number,
+  todayEpoch: number
 ): Promise<void> {
   const interval = template.repeatInterval ?? 1;
   const horizon = horizonDays(template.repeat, interval);
@@ -62,7 +62,7 @@ export async function generateOccurrencesForTemplate(
         latitude: template.lat ?? 0,
         longitude: template.long ?? 0,
         offset: template.hijriDateOffset ?? 0,
-      },
+      }
     )
       .endOfDay()
       .toDate()
@@ -107,7 +107,7 @@ export async function generateOccurrencesForTemplate(
         latitude: template.lat ?? 0,
         longitude: template.long ?? 0,
         offset: template.hijriDateOffset ?? 0,
-      },
+      }
     );
 
     // of no time set, we use end of day as task date
@@ -148,7 +148,7 @@ export async function generateOccurrencesForTemplate(
       template.long,
       template.hijriDateOffset,
       hour,
-      minutes,
+      minutes
     );
     if (!nextStr) break;
     currentDateStr = nextStr;
@@ -163,7 +163,7 @@ export async function generateOccurrencesForTemplate(
 export async function generateAllRecurringTaskOccurrences(
   db: PouchDB.Database,
   taskRepository: ITaskRepository,
-  todayEpoch: number,
+  todayEpoch: number
 ): Promise<void> {
   const response = await db.allDocs({
     include_docs: true,
@@ -177,7 +177,7 @@ export async function generateAllRecurringTaskOccurrences(
 
   await Promise.all(
     templates.map((template) =>
-      generateOccurrencesForTemplate(template, taskRepository, todayEpoch),
-    ),
+      generateOccurrencesForTemplate(template, taskRepository, todayEpoch)
+    )
   );
 }

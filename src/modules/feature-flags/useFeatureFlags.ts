@@ -17,7 +17,7 @@ export const useFeatureFlags = () => {
     (flagKey: string): boolean => {
       return flags[flagKey] || false;
     },
-    [flags],
+    [flags]
   );
 
   const getEnabledFlags = useCallback((): string[] => {

@@ -12,7 +12,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed",
-          editor.isActive("bold") && "bg-gray-300",
+          editor.isActive("bold") && "bg-gray-300"
         )}
         title="Bold"
       >
@@ -26,7 +26,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed",
-          editor.isActive("italic") && "bg-gray-300",
+          editor.isActive("italic") && "bg-gray-300"
         )}
         title="Italic"
       >
@@ -40,7 +40,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         disabled={!editor.can().chain().focus().toggleStrike().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed",
-          editor.isActive("strike") && "bg-gray-300",
+          editor.isActive("strike") && "bg-gray-300"
         )}
         title="Strike"
       >
@@ -55,7 +55,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("heading", { level: 1 }) && "bg-gray-300",
+          editor.isActive("heading", { level: 1 }) && "bg-gray-300"
         )}
         title="Heading 1"
       >
@@ -66,7 +66,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("heading", { level: 2 }) && "bg-gray-300",
+          editor.isActive("heading", { level: 2 }) && "bg-gray-300"
         )}
         title="Heading 2"
       >
@@ -77,7 +77,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("heading", { level: 3 }) && "bg-gray-300",
+          editor.isActive("heading", { level: 3 }) && "bg-gray-300"
         )}
         title="Heading 3"
       >
@@ -90,7 +90,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("bulletList") && "bg-gray-300",
+          editor.isActive("bulletList") && "bg-gray-300"
         )}
         title="Bullet List"
       >
@@ -103,7 +103,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("orderedList") && "bg-gray-300",
+          editor.isActive("orderedList") && "bg-gray-300"
         )}
         title="Ordered List"
       >
@@ -118,7 +118,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("codeBlock") && "bg-gray-300",
+          editor.isActive("codeBlock") && "bg-gray-300"
         )}
         title="Code Block"
       >
@@ -131,7 +131,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
         className={clsx(
           "p-2 rounded hover:bg-gray-200",
-          editor.isActive("blockquote") && "bg-gray-300",
+          editor.isActive("blockquote") && "bg-gray-300"
         )}
         title="Quote"
       >
@@ -146,7 +146,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().chain().focus().undo().run()}
         className={clsx(
-          "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed",
+          "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
         )}
         title="Undo"
       >
@@ -159,7 +159,7 @@ export default function MenuBar({ editor }: { editor: any }) {
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().chain().focus().redo().run()}
         className={clsx(
-          "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed",
+          "p-2 rounded hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
         )}
         title="Redo"
       >

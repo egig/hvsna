@@ -31,7 +31,7 @@ const detectPlatform = (): PlatformType => {
 };
 
 const PlatformContext = createContext<PlatformContextType | undefined>(
-  undefined,
+  undefined
 );
 
 interface PlatformProviderProps {

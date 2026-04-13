@@ -15,7 +15,7 @@ const SYNC_STATE_DOC_ID = "_local/syncState";
  * Check if database has been synced before
  */
 export const hasSyncedBefore = async (
-  db: PouchDB.Database,
+  db: PouchDB.Database
 ): Promise<boolean> => {
   try {
     const doc = (await db.get(SYNC_STATE_DOC_ID)) as SyncStateDocument;
@@ -31,7 +31,7 @@ export const hasSyncedBefore = async (
  */
 export const markAsSynced = async (
   db: PouchDB.Database,
-  strategy: "merge" | "delete-local",
+  strategy: "merge" | "delete-local"
 ): Promise<void> => {
   try {
     const doc = (await db
@@ -58,7 +58,7 @@ export const markAsSynced = async (
  * Get local document count
  */
 export const getLocalDocCount = async (
-  db: PouchDB.Database,
+  db: PouchDB.Database
 ): Promise<number> => {
   try {
     const result = await db.allDocs({
@@ -67,7 +67,7 @@ export const getLocalDocCount = async (
 
     // Filter out local documents that start with _local
     const nonLocalDocs = result.rows.filter(
-      (row) => !row.id.startsWith("_local/"),
+      (row) => !row.id.startsWith("_local/")
     );
 
     return nonLocalDocs.length;
@@ -81,7 +81,7 @@ export const getLocalDocCount = async (
  * Check if database is empty
  */
 export const isDatabaseEmpty = async (
-  db: PouchDB.Database,
+  db: PouchDB.Database
 ): Promise<boolean> => {
   const count = await getLocalDocCount(db);
   return count === 0;
@@ -91,7 +91,7 @@ export const isDatabaseEmpty = async (
  * Delete all local documents (excluding design and local docs)
  */
 export const deleteAllLocalDocs = async (
-  db: PouchDB.Database,
+  db: PouchDB.Database
 ): Promise<void> => {
   try {
     const result = await db.allDocs({
@@ -100,7 +100,7 @@ export const deleteAllLocalDocs = async (
 
     // Filter out local documents that start with _local
     const docsToDelete = result.rows.filter(
-      (row) => !row.id.startsWith("_local/"),
+      (row) => !row.id.startsWith("_local/")
     );
 
     if (docsToDelete.length === 0) {

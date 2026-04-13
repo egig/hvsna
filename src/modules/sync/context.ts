@@ -30,7 +30,7 @@ interface SyncTimeDocument {
 }
 
 const getSyncTimeFromDB = async (
-  db: PouchDB.Database,
+  db: PouchDB.Database
 ): Promise<Date | null> => {
   try {
     const doc = (await db.get("_local/syncTime")) as SyncTimeDocument;
@@ -43,7 +43,7 @@ const getSyncTimeFromDB = async (
 
 const storeSyncTimeToDB = async (
   db: PouchDB.Database,
-  syncTime: Date,
+  syncTime: Date
 ): Promise<void> => {
   try {
     const doc = (await db
@@ -112,7 +112,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const manualSync = async () => {
     if (!canSync()) {
       throw new Error(
-        "Sync not available - user not signed in, sync URL not configured, or network offline",
+        "Sync not available - user not signed in, sync URL not configured, or network offline"
       );
     }
 
@@ -240,7 +240,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         setHasCheckedSyncState(true);
 
         log.info(
-          `[sync] Database state: hasSynced=${hasSynced}, docCount=${docCount}`,
+          `[sync] Database state: hasSynced=${hasSynced}, docCount=${docCount}`
         );
 
         // Show dialog if database has data but hasn't been synced before
@@ -270,7 +270,9 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         // Add network status listener
         networkListener = await networkProvider.addListener((networkStatus) => {
           log.info(
-            `[sync] Network ${networkStatus.connected ? "online" : "offline"} - ${networkStatus.connectionType}`,
+            `[sync] Network ${
+              networkStatus.connected ? "online" : "offline"
+            } - ${networkStatus.connectionType}`
           );
           setIsOnline(networkStatus.connected);
         });
@@ -394,7 +396,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
               setInitialSyncPerformed(true);
               await markAsSynced(db, "merge"); // Default to merge for empty DB
               log.info(
-                "[sync] Initial sync for empty DB completed successfully",
+                "[sync] Initial sync for empty DB completed successfully"
               );
             } catch (error) {
               log.error("[sync] Initial sync for empty DB failed:", error);
@@ -402,7 +404,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
           } else {
             // Database has data but hasn't been synced - dialog will be shown
             log.info(
-              "[sync] Database has unsynced data, waiting for user choice",
+              "[sync] Database has unsynced data, waiting for user choice"
             );
             setInitialSyncPerformed(true); // Don't auto-sync, wait for dialog
           }
@@ -522,8 +524,8 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         onMerge: handleSyncMerge,
         onDeleteLocal: handleSyncDeleteLocal,
         localDocCount: localDocCount,
-      }),
-    ),
+      })
+    )
   );
 };
 

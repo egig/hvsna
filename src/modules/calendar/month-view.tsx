@@ -16,7 +16,7 @@ function EmptyDayItem() {
 function DayItem(day: HijriDate) {
   let cn = clsx(
     "hover:bg-gray-200 aspect-[1] flex items-center justify-center text-base cursor-pointer transition-all duration-[0.2s] rounded-lg",
-    { "bg-gray-200": day.isToday() },
+    { "bg-gray-200": day.isToday() }
   );
   return (
     <div className={cn} key={day.day}>
@@ -58,14 +58,14 @@ export default function MonthView({
       </div>
       <div className="grid grid-cols-[repeat(7,1fr)] gap-1 mb-2.5">
         {Array.from({ length: startDay }, (_, i) => i + 1).map(() =>
-          EmptyDayItem(),
+          EmptyDayItem()
         )}
         {Array.from({ length: days }, (_, i) => i + 1).map((day) => {
           const gregorianDate = hijriToGregorian({ year, month, day });
           const date = new Date(
             gregorianDate.year,
             gregorianDate.month - 1,
-            gregorianDate.day,
+            gregorianDate.day
           );
           return DayItem(HijriDate.fromDate(date));
         })}

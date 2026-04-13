@@ -58,7 +58,7 @@ export function useSettings() {
         setLoading(false);
       }
     },
-    [db, settings],
+    [db, settings]
   );
 
   const requestLocationPermission = useCallback(async (): Promise<boolean> => {
@@ -78,9 +78,7 @@ export function useSettings() {
       return true;
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to get location permission",
+        err instanceof Error ? err.message : "Failed to get location permission"
       );
       return false;
     } finally {
@@ -98,24 +96,24 @@ export function useSettings() {
             enableHighAccuracy: true,
             timeout: 10000,
             maximumAge: 300000,
-          },
+          }
         );
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to get current location",
+          err instanceof Error ? err.message : "Failed to get current location"
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    [db],
+    [db]
   );
 
   const updateLocation = useCallback(
     async (
       coordinate: Coordinate,
-      resolveType: LocationResolveType,
+      resolveType: LocationResolveType
     ): Promise<void> => {
       await updateSettings({
         coordinate,
@@ -123,7 +121,7 @@ export function useSettings() {
         locationResolveType: resolveType,
       });
     },
-    [updateSettings],
+    [updateSettings]
   );
 
   const setManualLocation = useCallback(
@@ -134,7 +132,7 @@ export function useSettings() {
         locationResolveType: "manual",
       });
     },
-    [updateSettings],
+    [updateSettings]
   );
 
   const clearLocation = useCallback(async (): Promise<void> => {
@@ -149,7 +147,7 @@ export function useSettings() {
     async (latitude: number, longitude: number): Promise<string | null> => {
       return useCases.getTimezoneFromCoordinates(latitude, longitude);
     },
-    [db],
+    [db]
   );
 
   const updateTimezoneFromLocation = useCallback(async (): Promise<boolean> => {
@@ -161,7 +159,7 @@ export function useSettings() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to update timezone from location",
+          : "Failed to update timezone from location"
       );
       return false;
     }
@@ -171,7 +169,7 @@ export function useSettings() {
     async (language: Language): Promise<void> => {
       await updateSettings({ language });
     },
-    [updateSettings],
+    [updateSettings]
   );
 
   const resetSettings = useCallback(async (): Promise<void> => {

@@ -5,7 +5,7 @@ import { getPrayerTimes } from "./prayer-times";
 
 export async function getPrayerTimesWithFallback(
   settings: GeneralSettings,
-  date: string,
+  date: string
 ): Promise<PrayerTimesResponse["data"]["timings"]> {
   // If no location coordinates, use fallback immediately
   if (!settings.coordinate) {
@@ -27,7 +27,7 @@ export async function getPrayerTimesWithFallback(
 }
 
 function convertFallbackToTimings(
-  fallback: PrayerTimesFallback | undefined,
+  fallback: PrayerTimesFallback | undefined
 ): PrayerTimesResponse["data"]["timings"] {
   const defaultTimings = {
     Fajr: "05:00",
@@ -64,7 +64,7 @@ function convertFallbackToTimings(
 
 export function groupTasksByPrayerTimes(
   tasks: Task[],
-  prayerTimings: PrayerTimesResponse["data"]["timings"],
+  prayerTimings: PrayerTimesResponse["data"]["timings"]
 ): {
   prayer: PrayerTime | null;
   tasks: Task[];
@@ -80,28 +80,28 @@ export function groupTasksByPrayerTimes(
 
   // Separate tasks by type and status
   const overdueTasks = tasks.filter(
-    (task) => task.isOverdue() && !task.completedAt,
+    (task) => task.isOverdue() && !task.completedAt
   );
   const prayerBasedTasks = tasks.filter(
     (task) =>
       task.usePrayerTime &&
       task.prayerTime &&
       !task.isOverdue() &&
-      !task.completedAt,
+      !task.completedAt
   );
   const timeBasedTasks = tasks.filter(
     (task) =>
       !task.usePrayerTime &&
       task.atTime &&
       !task.isOverdue() &&
-      !task.completedAt,
+      !task.completedAt
   );
   const regularTasks = tasks.filter(
     (task) =>
       !task.usePrayerTime &&
       !task.atTime &&
       !task.isOverdue() &&
-      !task.completedAt,
+      !task.completedAt
   );
   const completedTasks = tasks.filter((task) => task.completedAt);
 
@@ -110,7 +110,7 @@ export function groupTasksByPrayerTimes(
     groups.push({
       prayer: null,
       tasks: overdueTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
       ),
       isOverdue: true,
     });
@@ -157,7 +157,7 @@ export function groupTasksByPrayerTimes(
       groups.push({
         prayer,
         tasks: prayerGroups[prayer].sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
         ),
       });
     }
@@ -168,7 +168,7 @@ export function groupTasksByPrayerTimes(
     groups.push({
       prayer: null,
       tasks: regularTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
       ),
     });
   }
@@ -178,7 +178,7 @@ export function groupTasksByPrayerTimes(
     groups.push({
       prayer: null,
       tasks: completedTasks.sort(
-        (a, b) => (b.completedAt || 0) - (a.completedAt || 0),
+        (a, b) => (b.completedAt || 0) - (a.completedAt || 0)
       ),
       isCompleted: true,
     });
@@ -189,7 +189,7 @@ export function groupTasksByPrayerTimes(
 
 function findPrayerTimeForTaskTime(
   taskTime: string,
-  prayerTimings: PrayerTimesResponse["data"]["timings"],
+  prayerTimings: PrayerTimesResponse["data"]["timings"]
 ): PrayerTime | null {
   // Convert task time to minutes for comparison
   const [taskHours, taskMinutes] = taskTime.split(":").map(Number);

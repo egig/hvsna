@@ -20,7 +20,7 @@ const prayerCache: Map<string, PrayerTimeCache> = new Map();
 function getCacheKey(
   date: string,
   latitude: number,
-  longitude: number,
+  longitude: number
 ): string {
   return `${date}-${latitude.toFixed(4)}-${longitude.toFixed(4)}`;
 }
@@ -31,7 +31,7 @@ function getCacheKey(
 function getCachedPrayerTimes(
   date: string,
   latitude: number,
-  longitude: number,
+  longitude: number
 ): PrayerTimesResponse | null {
   const key = getCacheKey(date, latitude, longitude);
   const cached = prayerCache.get(key);
@@ -56,7 +56,7 @@ function cachePrayerTimes(
   date: string,
   latitude: number,
   longitude: number,
-  data: PrayerTimesResponse,
+  data: PrayerTimesResponse
 ): void {
   const key = getCacheKey(date, latitude, longitude);
   prayerCache.set(key, {
@@ -75,7 +75,7 @@ export async function getPrayerTimesForDate(
   date: Date,
   latitude: number,
   longitude: number,
-  timezone?: string,
+  timezone?: string
 ): Promise<PrayerTimesResponse> {
   const dateString = date.toISOString().split("T")[0];
 
@@ -101,7 +101,7 @@ export async function getPrayerTimesForDate(
     throw new Error(
       `Failed to fetch prayer times for ${dateString}: ${
         error instanceof Error ? error.message : "Unknown error"
-      }`,
+      }`
     );
   }
 }
@@ -111,7 +111,7 @@ export async function getPrayerTimesForDate(
  */
 export function getPrayerTimeValue(
   prayerTimes: PrayerTimesResponse,
-  prayerTime: PrayerTime,
+  prayerTime: PrayerTime
 ): string {
   const timings = prayerTimes.data.timings;
 
@@ -139,7 +139,7 @@ export function getPrayerTimeValue(
 export function calculateTaskTime(
   prayerTime: string,
   offsetMinutes: number,
-  date: Date,
+  date: Date
 ): Date {
   const [hours, minutes] = prayerTime.split(":").map(Number);
 
@@ -162,7 +162,7 @@ export async function getPrayerBasedTaskTime(
   offsetMinutes: number = 0,
   latitude: number = -6.2088, // Default: Jakarta
   longitude: number = 106.8456, // Default: Jakarta
-  timezone?: string,
+  timezone?: string
 ): Promise<{ time: string; epochMillis: number }> {
   const gregorianDate = hijriDate.toDate();
 
@@ -171,7 +171,7 @@ export async function getPrayerBasedTaskTime(
     gregorianDate,
     latitude,
     longitude,
-    timezone,
+    timezone
   );
 
   // Get the specific prayer time
@@ -181,7 +181,7 @@ export async function getPrayerBasedTaskTime(
   const taskDate = calculateTaskTime(
     prayerTimeValue,
     offsetMinutes,
-    gregorianDate,
+    gregorianDate
   );
 
   // Format time as HH:MM
@@ -201,14 +201,14 @@ export async function getPrayerBasedTaskTime(
  */
 export function formatPrayerTimeDisplay(
   prayerTime: PrayerTime,
-  offsetMinutes: number = 0,
+  offsetMinutes: number = 0
 ): string {
   const offsetText =
     offsetMinutes === 0
       ? ""
       : offsetMinutes > 0
-        ? ` +${offsetMinutes}min`
-        : ` ${offsetMinutes}min`;
+      ? ` +${offsetMinutes}min`
+      : ` ${offsetMinutes}min`;
 
   return `${prayerTime}${offsetText}`;
 }

@@ -108,7 +108,10 @@ export function Navbar({
         ) : (
           <>
             {title && (
-              <h1 className="text-lg font-semibold text-gray-900 truncate" data-testid="navbar-title">
+              <h1
+                className="text-lg font-semibold text-gray-900 truncate"
+                data-testid="navbar-title"
+              >
                 {title}
               </h1>
             )}
@@ -204,7 +207,9 @@ export function LargeNavbar({
 
           {/* Center: Title or Search */}
           <div
-            className={`flex-1 text-center transition-opacity duration-800 ${isScrolled ? "opacity-100" : "opacity-0"}`}
+            className={`flex-1 text-center transition-opacity duration-800 ${
+              isScrolled ? "opacity-100" : "opacity-0"
+            }`}
           >
             {showSearch ? (
               <div className="relative max-w-md mx-auto">
@@ -255,7 +260,9 @@ export function LargeNavbar({
 
       <div className={`bg-white/80 backdrop-blur-sm px-4 h-20`}>
         <div
-          className={`h-full flex flex-col justify-end pb-4 transition-all duration-1000 ${isScrolled ? "opacity-0" : "opacity-100"}`}
+          className={`h-full flex flex-col justify-end pb-4 transition-all duration-1000 ${
+            isScrolled ? "opacity-0" : "opacity-100"
+          }`}
         >
           {showSearch ? (
             <div className="relative max-w-lg mx-auto">

@@ -185,7 +185,7 @@ export function useTasks() {
       browsedTasksQuery.isFetching,
       hasMore,
       loadMoreTasks,
-    ],
+    ]
   );
 
   // Check scrollability when tasks change

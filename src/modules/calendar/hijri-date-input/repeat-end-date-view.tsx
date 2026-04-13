@@ -31,7 +31,7 @@ export function RepeatEndDateView({
         return createHijriMonth(year, month);
       }
       return currentHijriMonth();
-    })(),
+    })()
   );
 
   // Initialize state based on selected date
@@ -66,7 +66,9 @@ export function RepeatEndDateView({
   const handleNextMonth = () => setCurrentMonth(currentMonth.next());
 
   const handleDateClick = (date: HijriDate) => {
-    const dateStr = `${date.year}${String(date.month).padStart(2, "0")}${String(date.day).padStart(2, "0")}`;
+    const dateStr = `${date.year}${String(date.month).padStart(2, "0")}${String(
+      date.day
+    ).padStart(2, "0")}`;
     onDateSelect(dateStr);
   };
 
@@ -116,11 +118,14 @@ export function RepeatEndDateView({
                     onClick={() => handleDateClick(date)}
                     className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
                       selectedDate ===
-                      `${date.year}${String(date.month).padStart(2, "0")}${String(date.day).padStart(2, "0")}`
+                      `${date.year}${String(date.month).padStart(
+                        2,
+                        "0"
+                      )}${String(date.day).padStart(2, "0")}`
                         ? "bg-[var(--hvsna-primary-color)] text-white"
                         : date.isToday()
-                          ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                          : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                        ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
+                        : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                     }`}
                   >
                     {date.day}

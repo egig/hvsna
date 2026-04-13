@@ -76,7 +76,10 @@ export default function GeneralSettings() {
       <div className="p-2 border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 flex-1 min-w-0">
-            <span className="text-gray-900 font-semibold text-left truncate" data-testid="location-section-label">
+            <span
+              className="text-gray-900 font-semibold text-left truncate"
+              data-testid="location-section-label"
+            >
               {t("location")}
             </span>
           </div>
@@ -88,7 +91,9 @@ export default function GeneralSettings() {
               <div className="text-sm text-gray-600 text-right">
                 <div className={`text-xs text-gray-600`}>
                   {settings.coordinate
-                    ? `${settings.coordinate.latitude.toFixed(3)},${settings.coordinate.longitude.toFixed(3)}`
+                    ? `${settings.coordinate.latitude.toFixed(
+                        3
+                      )},${settings.coordinate.longitude.toFixed(3)}`
                     : t("not_set")}
                 </div>
               </div>
@@ -112,8 +117,8 @@ export default function GeneralSettings() {
                     {settings.locationResolveType === "capacitor_native"
                       ? t("gps_location")
                       : settings.locationResolveType === "auto"
-                        ? t("browser_location")
-                        : t("manual_location")}
+                      ? t("browser_location")
+                      : t("manual_location")}
                   </span>
                 </div>
               )}

@@ -50,7 +50,7 @@ export interface UseHijriCalendarReturn {
     month: number,
     day: number,
     hour?: number,
-    minute?: number,
+    minute?: number
   ) => HijriDate;
   createHijriMonth: (year: number, month: number) => HijriMonth;
   currentHijriMonth: () => HijriMonth;
@@ -88,7 +88,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
         offset: manualOffset,
       });
     },
-    [latitude, longitude, manualOffset],
+    [latitude, longitude, manualOffset]
   );
 
   // Convert Hijri date to Gregorian date
@@ -149,7 +149,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
         date1.day === date2.day
       );
     },
-    [],
+    []
   );
 
   // Get week dates for a hijri date
@@ -167,7 +167,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
     (hijriDate: HijriDate, format: string): string => {
       return hijriDate.format(format);
     },
-    [],
+    []
   );
 
   // Create hijri date with specific components
@@ -177,7 +177,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
       month: number,
       day: number,
       hour: number | undefined = undefined,
-      minute: number | undefined = undefined,
+      minute: number | undefined = undefined
     ): HijriDate => {
       return new HijriDate(year, month, day, hour, minute, 0, 0, {
         latitude,
@@ -185,7 +185,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
         offset: manualOffset,
       });
     },
-    [latitude, longitude, manualOffset],
+    [latitude, longitude, manualOffset]
   );
 
   // Create hijri month with specific year and month
@@ -197,7 +197,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
         offset: manualOffset,
       });
     },
-    [latitude, longitude, manualOffset],
+    [latitude, longitude, manualOffset]
   );
 
   // Get current hijri month

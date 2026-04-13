@@ -37,7 +37,7 @@ export class HijriMonth {
       undefined,
       undefined,
       undefined,
-      options,
+      options
     );
     this._jsDate = d.toDate();
   }

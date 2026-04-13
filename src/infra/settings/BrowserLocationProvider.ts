@@ -25,7 +25,7 @@ export class BrowserLocationProvider implements ILocationProvider {
   }
 
   async getCurrentPosition(
-    options: GeolocationOptions = {},
+    options: GeolocationOptions = {}
   ): Promise<Coordinate> {
     if (!("geolocation" in navigator)) {
       throw new Error("Geolocation is not supported by this browser");
@@ -51,7 +51,7 @@ export class BrowserLocationProvider implements ILocationProvider {
           });
         },
         (err) => reject(this.mapError(err)),
-        { enableHighAccuracy, timeout, maximumAge },
+        { enableHighAccuracy, timeout, maximumAge }
       );
     });
   }

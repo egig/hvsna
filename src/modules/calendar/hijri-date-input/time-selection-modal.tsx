@@ -23,7 +23,7 @@ function getSunsetBasedSortedHours(lat: number, lng: number): number[] {
       const sunsetHour = times.sunset.getHours();
       const eveningHours = Array.from(
         { length: 24 - sunsetHour },
-        (_, i) => (sunsetHour + i) % 24,
+        (_, i) => (sunsetHour + i) % 24
       );
       const remainingHours = Array.from({ length: sunsetHour }, (_, i) => i);
 
@@ -35,7 +35,7 @@ function getSunsetBasedSortedHours(lat: number, lng: number): number[] {
   } catch (error) {
     console.warn(
       "SunCalc calculation failed in getSunsetBasedSortedHours:",
-      error,
+      error
     );
     // Fallback to regular 0-23 order
     return Array.from({ length: 24 }, (_, i) => i);
@@ -63,10 +63,10 @@ export function TimeSelectionModal({
   const [minute, setMinute] = useState(0);
   const [sortedHours, setSortedHours] = useState<number[]>([]);
   const [selectedPrayer, setSelectedPrayer] = useState<PrayerTime | "">(
-    selectedPrayerTime || "",
+    selectedPrayerTime || ""
   );
   const [inputMode, setInputMode] = useState<"prayer" | "custom">(
-    selectedTime ? "custom" : "prayer",
+    selectedTime ? "custom" : "prayer"
   );
 
   const prayerTimes: PrayerTime[] = [
@@ -92,7 +92,9 @@ export function TimeSelectionModal({
   }, [settings.coordinate]);
 
   const handleCustomTimeConfirm = () => {
-    const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    const time = `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")}`;
     onConfirm(time, "");
   };
 

@@ -63,9 +63,9 @@ describe("Prayer Time Service", () => {
       const date = new Date("2024-01-01");
 
       await expect(
-        getPrayerTimesForDate(date, -6.2088, 106.8456),
+        getPrayerTimesForDate(date, -6.2088, 106.8456)
       ).rejects.toThrow(
-        "Failed to fetch prayer times for 2024-01-01: API Error",
+        "Failed to fetch prayer times for 2024-01-01: API Error"
       );
     });
   });
@@ -98,7 +98,7 @@ describe("Prayer Time Service", () => {
       };
 
       expect(() =>
-        getPrayerTimeValue(mockResponse, "Unknown" as PrayerTime),
+        getPrayerTimeValue(mockResponse, "Unknown" as PrayerTime)
       ).toThrow("Unknown prayer time: Unknown");
     });
   });
@@ -161,7 +161,7 @@ describe("Prayer Time Service", () => {
         prayerTime,
         offsetMinutes,
         -6.2088,
-        106.8456,
+        106.8456
       );
 
       expect(result.time).toBe("12:30");

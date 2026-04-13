@@ -220,7 +220,7 @@ export default function TaskFormEdit({
             interval,
             repeatEnd,
             repeatEndDate,
-            repeatEndOccurrences,
+            repeatEndOccurrences
           ) => {
             updateRepeatConfig({
               repeat,

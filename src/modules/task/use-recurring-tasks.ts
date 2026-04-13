@@ -63,7 +63,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db],
+    [db]
   );
 
   const getRecurringTask = useCallback(
@@ -86,7 +86,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db],
+    [db]
   );
 
   const getRecurringTasks = useCallback(
@@ -122,13 +122,13 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db],
+    [db]
   );
 
   const updateRecurringTask = useCallback(
     async (
       id: string,
-      input: RecurringTaskUpdateInput,
+      input: RecurringTaskUpdateInput
     ): Promise<RecurringTask> => {
       setLoading(true);
       setError(null);
@@ -163,7 +163,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db],
+    [db]
   );
 
   const deleteRecurringTask = useCallback(
@@ -185,7 +185,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db],
+    [db]
   );
 
   return {

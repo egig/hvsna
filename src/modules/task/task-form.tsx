@@ -114,7 +114,7 @@ export default function TaskForm({
             interval,
             repeatEnd,
             repeatEndDate,
-            repeatEndOccurrences,
+            repeatEndOccurrences
           ) => {
             updateRepeatConfig({
               repeat,

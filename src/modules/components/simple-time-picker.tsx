@@ -34,7 +34,9 @@ export function SimpleTimePicker({
   };
 
   const handleConfirm = () => {
-    const timeString = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+    const timeString = `${hour.toString().padStart(2, "0")}:${minute
+      .toString()
+      .padStart(2, "0")}`;
     onChange(timeString);
     setIsOpen(false);
   };

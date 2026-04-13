@@ -60,7 +60,7 @@ type SettingsAction =
 
 const settingsReducer = (
   state: SettingsState,
-  action: SettingsAction,
+  action: SettingsAction
 ): SettingsState => {
   switch (action.type) {
     case "SET_LOADING":
@@ -81,7 +81,7 @@ const settingsReducer = (
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(
-  undefined,
+  undefined
 );
 
 interface SettingsProviderProps {
@@ -138,7 +138,7 @@ export const useSettingsContext = (): SettingsContextType => {
   const context = useContext(SettingsContext);
   if (context === undefined) {
     throw new Error(
-      "useSettingsContext must be used within a SettingsProvider",
+      "useSettingsContext must be used within a SettingsProvider"
     );
   }
   return context;

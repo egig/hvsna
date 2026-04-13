@@ -13,7 +13,7 @@ export class BrowserNetworkProvider implements INetworkProvider {
   }
 
   async addListener(
-    callback: (status: NetworkStatus) => void,
+    callback: (status: NetworkStatus) => void
   ): Promise<NetworkListener> {
     const handleOnline = () => {
       callback({

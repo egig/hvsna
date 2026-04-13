@@ -7,6 +7,6 @@ export function createSettingsUseCases(db: PouchDB.Database): SettingsUseCases {
   return new SettingsUseCases(
     new PouchDBSettingsRepository(db),
     createLocationProvider(),
-    new TimeAPITimezoneProvider(),
+    new TimeAPITimezoneProvider()
   );
 }

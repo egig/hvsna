@@ -18,7 +18,7 @@ export class ReminderService {
    */
   static async scheduleTaskReminders(
     task: TaskType,
-    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES,
+    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES
   ): Promise<void> {
     // Only schedule if task has a scheduled time and is not completed
     if (!task.atEpochMillis || task.status === 1) {
@@ -81,7 +81,7 @@ export class ReminderService {
    */
   static async updateTaskReminders(
     task: TaskType,
-    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES,
+    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES
   ): Promise<void> {
     if (!task.id) {
       return;
@@ -99,7 +99,7 @@ export class ReminderService {
    */
   static async scheduleMultipleTaskReminders(
     tasks: TaskType[],
-    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES,
+    reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES
   ): Promise<void> {
     const promises = tasks
       .filter((task) => task.atEpochMillis && task.status !== 1)

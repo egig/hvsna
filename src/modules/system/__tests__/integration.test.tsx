@@ -73,7 +73,7 @@ describe("System Integration", () => {
 
     // Both should have same initial desktop state
     expect(result.current.systemContext.isDesktop).toBe(
-      result.current.screenSize.isDesktop,
+      result.current.screenSize.isDesktop
     );
 
     // Update desktop state through context

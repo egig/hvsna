@@ -98,7 +98,7 @@ export function useLists() {
         return null;
       }
     },
-    [queryClient],
+    [queryClient]
   );
 
   // Create list
@@ -111,7 +111,7 @@ export function useLists() {
         return null;
       }
     },
-    [createListMutation],
+    [createListMutation]
   );
 
   // Update list
@@ -124,7 +124,7 @@ export function useLists() {
         return null;
       }
     },
-    [updateListMutation],
+    [updateListMutation]
   );
 
   // Delete list
@@ -138,7 +138,7 @@ export function useLists() {
         return false;
       }
     },
-    [deleteListMutation],
+    [deleteListMutation]
   );
 
   // Refresh lists

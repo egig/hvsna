@@ -48,7 +48,7 @@ export function SettingsModal({
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const currentSection = sections.find(
-    (section) => section.path === location.pathname,
+    (section) => section.path === location.pathname
   );
 
   const handleSectionChange = (path: string) => {

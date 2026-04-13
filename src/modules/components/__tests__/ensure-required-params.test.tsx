@@ -8,7 +8,7 @@ describe("EnsureRequiredParams", () => {
     render(
       <EnsureRequiredParams component="div">
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -21,7 +21,7 @@ describe("EnsureRequiredParams", () => {
     render(
       <EnsureRequiredParams component="div" props={undefined}>
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe("EnsureRequiredParams", () => {
         props={{ className: "wrapper", "data-testid": "wrapper" }}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const wrapper = screen.getByTestId("wrapper");
@@ -62,7 +62,7 @@ describe("EnsureRequiredParams", () => {
         props={{ className: "custom" }}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const customComponent = screen.getByTestId("custom-component");
@@ -80,7 +80,7 @@ describe("EnsureRequiredParams", () => {
         <span>First</span>
         <span>Second</span>
         <span>Third</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const wrapper = screen.getByTestId("wrapper");
@@ -94,7 +94,7 @@ describe("EnsureRequiredParams", () => {
     render(
       <EnsureRequiredParams component="div" props={{}}>
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe("EnsureRequiredParams", () => {
         props={{ className: "", id: "", "data-testid": "" }}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe("EnsureRequiredParams", () => {
         props={{ className: "wrapper", id: "", "data-testid": "wrapper" }}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const wrapper = screen.getByTestId("wrapper");
@@ -141,7 +141,7 @@ describe("EnsureRequiredParams", () => {
         props={{ "data-testid": "wrapper", count: 0 }}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const wrapper = screen.getByTestId("wrapper");
@@ -156,7 +156,7 @@ describe("EnsureRequiredParams", () => {
         props={{ "data-testid": "wrapper", disabled: false }}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const wrapper = screen.getByTestId("wrapper");
@@ -172,7 +172,7 @@ describe("EnsureRequiredParams", () => {
         required={["apiKey"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const span = screen.getByText("Test Content");
@@ -187,7 +187,7 @@ describe("EnsureRequiredParams", () => {
         required={["apiKey"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -203,7 +203,7 @@ describe("EnsureRequiredParams", () => {
         required={["apiKey", "secret"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();
@@ -219,7 +219,7 @@ describe("EnsureRequiredParams", () => {
         required={["apiKey", "secret"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const span = screen.getByText("Test Content");
@@ -234,7 +234,7 @@ describe("EnsureRequiredParams", () => {
         required={["count"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const span = screen.getByText("Test Content");
@@ -249,7 +249,7 @@ describe("EnsureRequiredParams", () => {
         required={["disabled"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     const span = screen.getByText("Test Content");
@@ -264,7 +264,7 @@ describe("EnsureRequiredParams", () => {
         required={["apiKey"]}
       >
         <span>Test Content</span>
-      </EnsureRequiredParams>,
+      </EnsureRequiredParams>
     );
 
     expect(screen.getByText("Test Content")).toBeInTheDocument();

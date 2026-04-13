@@ -29,13 +29,13 @@ export interface ITaskRepository {
   findBrowsedTasks(
     query?: any,
     offset?: number,
-    limit?: number,
+    limit?: number
   ): Promise<Task[]>;
   findInboxTasks(): Promise<Task[]>;
   findTasksByListId(
     listId: string,
     offset?: number,
-    limit?: number,
+    limit?: number
   ): Promise<Task[]>;
 
   // Recurring task operations

@@ -25,7 +25,7 @@ export class SettingsUseCases {
   constructor(
     private readonly settingsRepo: ISettingsRepository,
     private readonly locationProvider: ILocationProvider,
-    private readonly timezoneProvider: ITimezoneProvider,
+    private readonly timezoneProvider: ITimezoneProvider
   ) {}
 
   async loadSettings(): Promise<GeneralSettings> {
@@ -35,7 +35,7 @@ export class SettingsUseCases {
 
   async updateSettings(
     current: GeneralSettings,
-    updates: Partial<GeneralSettings>,
+    updates: Partial<GeneralSettings>
   ): Promise<GeneralSettings> {
     const next = { ...current, ...updates };
     await this.settingsRepo.save(next);
@@ -49,7 +49,7 @@ export class SettingsUseCases {
 
   async setLanguage(
     current: GeneralSettings,
-    language: Language,
+    language: Language
   ): Promise<GeneralSettings> {
     return this.updateSettings(current, { language });
   }
@@ -84,7 +84,7 @@ export class SettingsUseCases {
   async updateLocation(
     current: GeneralSettings,
     coordinate: Coordinate,
-    resolveType: LocationResolveType,
+    resolveType: LocationResolveType
   ): Promise<GeneralSettings> {
     return this.updateSettings(current, {
       coordinate,
@@ -96,7 +96,7 @@ export class SettingsUseCases {
   async setManualLocation(
     current: GeneralSettings,
     latitude: number,
-    longitude: number,
+    longitude: number
   ): Promise<GeneralSettings> {
     const coordinate: Coordinate = { latitude, longitude };
     return this.updateLocation(current, coordinate, "manual");
@@ -112,20 +112,20 @@ export class SettingsUseCases {
 
   async getTimezoneFromCoordinates(
     latitude: number,
-    longitude: number,
+    longitude: number
   ): Promise<string | null> {
     return this.timezoneProvider.getTimezone(latitude, longitude);
   }
 
   async updateTimezoneFromLocation(
-    current: GeneralSettings,
+    current: GeneralSettings
   ): Promise<GeneralSettings> {
     if (!current.coordinate) {
       throw new Error("No location coordinates available");
     }
     const timezone = await this.timezoneProvider.getTimezone(
       current.coordinate.latitude,
-      current.coordinate.longitude,
+      current.coordinate.longitude
     );
     if (!timezone) {
       throw new Error("Could not determine timezone from location");

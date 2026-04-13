@@ -82,7 +82,7 @@ export function openPrompt(options: {
 
 function getValues(
   fields: { [name: string]: Field },
-  domFields: readonly HTMLElement[],
+  domFields: readonly HTMLElement[]
 ) {
   let result = Object.create(null),
     i = 0;
@@ -133,7 +133,7 @@ export abstract class Field {
 
       /// A cleanup function for field values.
       clean?: (value: any) => any;
-    },
+    }
   ) {}
 
   /// Render the field to the DOM. Should be implemented by all subclasses.

@@ -37,13 +37,13 @@ export class AuthUseCases {
   constructor(
     private readonly sessionRepo: ISessionRepository,
     private readonly tokenStore: ITokenStore,
-    private readonly http: AuthHttpPort,
+    private readonly http: AuthHttpPort
   ) {}
 
   async login(credentials: LoginRequest): Promise<User> {
     const response = await this.http.post<BaseResponse<Session>>(
       "/login",
-      credentials,
+      credentials
     );
     this.tokenStore.setAccessToken(response.data.access_token);
     await this.sessionRepo.saveRefreshToken(response.data.refresh_token);
@@ -54,7 +54,7 @@ export class AuthUseCases {
   async register(userData: RegisterRequest): Promise<User> {
     const response = await this.http.post<BaseResponse<Session>>(
       "/register",
-      userData,
+      userData
     );
     this.tokenStore.setAccessToken(response.data.access_token);
     await this.sessionRepo.saveRefreshToken(response.data.refresh_token);
@@ -91,7 +91,7 @@ export class AuthUseCases {
         "/auth/refresh",
         {
           refresh_token: refreshToken,
-        },
+        }
       );
       this.tokenStore.setAccessToken(response.data.access_token);
       await this.sessionRepo.saveRefreshToken(response.data.refresh_token);

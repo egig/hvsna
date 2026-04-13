@@ -49,7 +49,7 @@ describe("HijriMonth", () => {
 
       testCases.forEach(({ gregorian, expected }) => {
         const hijriDate = HijriDate.fromDate(
-          new Date(gregorian.year, gregorian.month - 1, gregorian.day),
+          new Date(gregorian.year, gregorian.month - 1, gregorian.day)
         );
         const hijriMonth = new HijriMonth(hijriDate.year, hijriDate.month);
         expect(hijriMonth.year).toBe(expected.year);

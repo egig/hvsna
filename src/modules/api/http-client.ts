@@ -35,7 +35,7 @@ httpClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  },
+  }
 );
 
 // Response interceptor to handle token refresh
@@ -94,7 +94,7 @@ httpClient.interceptors.response.use(
     };
 
     return Promise.reject(apiError);
-  },
+  }
 );
 
 // Helper functions for common API calls

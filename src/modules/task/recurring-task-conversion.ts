@@ -11,7 +11,7 @@ export interface UpdateRecurringSeriesDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   updateRecurringTask: (
     id: string,
-    input: RecurringTaskUpdateInput,
+    input: RecurringTaskUpdateInput
   ) => Promise<RecurringTask>;
   taskRepository: ITaskRepository;
   todayEpoch: number;
@@ -25,7 +25,7 @@ export interface DemoteAndDeleteFutureDeps {
 
 export interface PromoteToRecurringDeps {
   createRecurringTask: (
-    input: RecurringTaskCreateInput,
+    input: RecurringTaskCreateInput
   ) => Promise<RecurringTask>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   taskRepository: ITaskRepository;
@@ -47,7 +47,7 @@ export async function updateRecurringSeries(
   taskInput: TaskUpdateInput,
   task: Task,
   templateInput: RecurringTaskUpdateInput,
-  deps: UpdateRecurringSeriesDeps,
+  deps: UpdateRecurringSeriesDeps
 ): Promise<Task> {
   const { updateTask, updateRecurringTask, taskRepository, todayEpoch } = deps;
 
@@ -58,7 +58,7 @@ export async function updateRecurringSeries(
       t.id !== taskId &&
       t.status !== 1 &&
       t.atDateHijri != null &&
-      t.atDateHijri >= task.atDateHijri!,
+      t.atDateHijri >= task.atDateHijri!
   );
   await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
 
@@ -76,7 +76,7 @@ export async function updateRecurringSeries(
   await generateOccurrencesForTemplate(
     updatedTemplate,
     taskRepository,
-    todayEpoch,
+    todayEpoch
   );
 
   return result;
@@ -97,7 +97,7 @@ export async function promoteTaskToRecurring(
   repeat: TaskRepeat,
   repeatInterval: number,
   templateInput: RecurringTaskCreateInput,
-  deps: PromoteToRecurringDeps,
+  deps: PromoteToRecurringDeps
 ): Promise<Task> {
   const { createRecurringTask, updateTask, taskRepository, todayEpoch } = deps;
 
@@ -126,7 +126,7 @@ export async function demoteTaskFromRecurringAndDeleteFuture(
   taskId: string,
   taskInput: TaskUpdateInput,
   task: Task,
-  deps: DemoteAndDeleteFutureDeps,
+  deps: DemoteAndDeleteFutureDeps
 ): Promise<Task> {
   const { updateTask, deleteRecurringTask, taskRepository } = deps;
 
@@ -136,7 +136,7 @@ export async function demoteTaskFromRecurringAndDeleteFuture(
       t.id !== taskId &&
       t.status !== 1 &&
       t.atDateHijri != null &&
-      t.atDateHijri >= task.atDateHijri!,
+      t.atDateHijri >= task.atDateHijri!
   );
   await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
   await deleteRecurringTask(task.recurringTaskId!);
@@ -157,7 +157,7 @@ export async function demoteTaskFromRecurringAndDeleteFuture(
 export async function demoteTaskFromRecurring(
   taskId: string,
   taskInput: TaskUpdateInput,
-  updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>,
+  updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>
 ): Promise<Task> {
   return updateTask(taskId, {
     ...taskInput,

@@ -141,8 +141,8 @@ export default function Sync() {
                     (lastSyncTime && manualSyncStatus === "idle")
                       ? "text-green-600"
                       : manualSyncStatus === "error"
-                        ? "text-red-600"
-                        : "text-gray-600"
+                      ? "text-red-600"
+                      : "text-gray-600"
                   }`}
                 >
                   {getStatusText()}

@@ -55,7 +55,7 @@ export class CapacitorNotificationsProvider implements INotificationsProvider {
   }
 
   async scheduleTaskReminder(
-    options: TaskReminderOptions,
+    options: TaskReminderOptions
   ): Promise<ReminderResult> {
     try {
       const scheduledTime = this.calculateReminderTime(options);
@@ -96,7 +96,7 @@ export class CapacitorNotificationsProvider implements INotificationsProvider {
       // Find and cancel all notifications for this task
       const pending = await LocalNotifications.getPending();
       const taskNotifications = pending.notifications.filter(
-        (notification) => notification.extra?.taskId === taskId,
+        (notification) => notification.extra?.taskId === taskId
       );
 
       if (taskNotifications.length > 0) {
@@ -111,7 +111,7 @@ export class CapacitorNotificationsProvider implements INotificationsProvider {
 
   async updateTaskReminder(
     taskId: string,
-    options: TaskReminderOptions,
+    options: TaskReminderOptions
   ): Promise<void> {
     // Cancel existing reminders for this task
     await this.cancelTaskReminder(taskId);

@@ -16,7 +16,7 @@ interface RepeatSelectorProps {
 function formatRepeatLabel(
   repeat: TaskRepeat,
   interval: number,
-  t: (key: string) => string,
+  t: (key: string) => string
 ): string {
   if (repeat === "none") return "";
 
@@ -28,7 +28,9 @@ function formatRepeatLabel(
   };
 
   if (interval <= 1) return unitLabels[repeat] ?? repeat;
-  return `${t("every") || "Every"} ${interval} ${(unitLabels[repeat] ?? repeat).toLowerCase()}`;
+  return `${t("every") || "Every"} ${interval} ${(
+    unitLabels[repeat] ?? repeat
+  ).toLowerCase()}`;
 }
 
 export function RepeatSelector({
@@ -54,7 +56,11 @@ export function RepeatSelector({
           disabled
             ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-50 border-gray-300"
             : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer border-gray-300 dark:border-gray-600"
-        } ${isActive ? "text-[var(--hvsna-primary-color)] border-[var(--hvsna-primary-color)]" : "text-gray-500 dark:text-gray-400"}`}
+        } ${
+          isActive
+            ? "text-[var(--hvsna-primary-color)] border-[var(--hvsna-primary-color)]"
+            : "text-gray-500 dark:text-gray-400"
+        }`}
       >
         <HvRepeat size={16} />
         {isActive && <span>{label}</span>}
@@ -68,7 +74,7 @@ export function RepeatSelector({
           onSelectEndDate={() => {
             // Simple implementation - just show a message or handle gracefully
             alert(
-              "Date selection not available in this context. Please use the full calendar modal for date selection.",
+              "Date selection not available in this context. Please use the full calendar modal for date selection."
             );
           }}
           onConfirm={(repeat, interval) => {

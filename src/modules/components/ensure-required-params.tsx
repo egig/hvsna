@@ -52,7 +52,7 @@ export const EnsureRequiredParams: React.FC<EnsureRequiredParamsProps> = ({
           return value !== null && value !== undefined && value !== "";
         })
       : Object.values(props).some(
-          (value) => value !== null && value !== undefined && value !== "",
+          (value) => value !== null && value !== undefined && value !== ""
         ));
 
   if (shouldWrap) {

@@ -36,7 +36,7 @@ describe("HijriDate", () => {
 
       testCases.forEach(({ gregorian, expected }) => {
         const hijriDate = HijriDate.fromDate(
-          new Date(gregorian.year, gregorian.month - 1, gregorian.day),
+          new Date(gregorian.year, gregorian.month - 1, gregorian.day)
         );
         expect(hijriDate.year).toBe(expected.year);
         expect(hijriDate.month).toBe(expected.month);
@@ -475,7 +475,7 @@ describe("HijriDate", () => {
       const hijriDate = HijriDate.fromDate(new Date(2023, 6, 6, 14, 30, 45)); // Thursday, 18 Dhu al-Hijjah 1444
 
       expect(hijriDate.format("dddd, MMMM Do YYYY, h:mm a")).toBe(
-        "Thursday, Dhu al-Hijjah 18th 1444, 2:30 pm",
+        "Thursday, Dhu al-Hijjah 18th 1444, 2:30 pm"
       );
       expect(hijriDate.format("YYYY-MM-DD")).toBe("1444-12-18");
       expect(hijriDate.format("DD/MM/YYYY")).toBe("18/12/1444");
@@ -727,21 +727,21 @@ describe("HijriDate", () => {
           {
             latitude: jakartaLatitude,
             longitude: jakartaLongitude,
-          },
+          }
         );
         const hijriFromConvertedEvening = HijriDate.fromDate(
           gregorianFromEvening,
           {
             latitude: jakartaLatitude,
             longitude: jakartaLongitude,
-          },
+          }
         );
 
         expect(hijriFromConvertedMorning.format("YYYY-MM-DD")).toBe(
-          hijriMorningFeb22.format("YYYY-MM-DD"),
+          hijriMorningFeb22.format("YYYY-MM-DD")
         );
         expect(hijriFromConvertedEvening.format("YYYY-MM-DD")).toBe(
-          hijriEveningFeb22.format("YYYY-MM-DD"),
+          hijriEveningFeb22.format("YYYY-MM-DD")
         );
 
         // Verify sunset logic still works in Hijri date progression
@@ -787,21 +787,21 @@ describe("HijriDate", () => {
           {
             latitude: jakartaLatitude,
             longitude: jakartaLongitude,
-          },
+          }
         );
         const hijriFromRoundTripEvening = HijriDate.fromDate(
           eveningFromToDate,
           {
             latitude: jakartaLatitude,
             longitude: jakartaLongitude,
-          },
+          }
         );
 
         expect(hijriFromRoundTripMorning.format("YYYY-MM-DD")).toBe(
-          hijriFromMorning.format("YYYY-MM-DD"),
+          hijriFromMorning.format("YYYY-MM-DD")
         );
         expect(hijriFromRoundTripEvening.format("YYYY-MM-DD")).toBe(
-          hijriFromEvening.format("YYYY-MM-DD"),
+          hijriFromEvening.format("YYYY-MM-DD")
         );
       });
 
@@ -847,7 +847,7 @@ describe("HijriDate", () => {
 
     it("should format seconds tokens correctly", () => {
       const hijriDate = HijriDate.fromDate(
-        new Date(2023, 6, 6, 14, 30, 45, 123),
+        new Date(2023, 6, 6, 14, 30, 45, 123)
       );
 
       expect(hijriDate.format("ss")).toBe("45");
@@ -856,7 +856,7 @@ describe("HijriDate", () => {
 
     it("should format milliseconds tokens correctly", () => {
       const hijriDate = HijriDate.fromDate(
-        new Date(2023, 6, 6, 14, 30, 45, 123),
+        new Date(2023, 6, 6, 14, 30, 45, 123)
       );
 
       expect(hijriDate.format("SSS")).toBe("123");
@@ -865,13 +865,13 @@ describe("HijriDate", () => {
 
     it("should format complex time strings with seconds and milliseconds", () => {
       const hijriDate = HijriDate.fromDate(
-        new Date(2023, 6, 6, 14, 30, 45, 123),
+        new Date(2023, 6, 6, 14, 30, 45, 123)
       );
 
       expect(hijriDate.format("HH:mm:ss.SSS")).toBe("14:30:45.123");
       expect(hijriDate.format("h:mm:ss.SSS a")).toBe("2:30:45.123 pm");
       expect(hijriDate.format("YYYY-MM-DD HH:mm:ss.SSS")).toBe(
-        "1444-12-18 14:30:45.123",
+        "1444-12-18 14:30:45.123"
       );
     });
 
@@ -945,7 +945,7 @@ describe("HijriDate", () => {
 
     it("should handle edge case with maximum milliseconds", () => {
       const hijriDate = HijriDate.fromDate(
-        new Date(2023, 6, 6, 14, 30, 45, 999),
+        new Date(2023, 6, 6, 14, 30, 45, 999)
       );
 
       expect(hijriDate.millisecond).toBe(999);
@@ -961,7 +961,7 @@ describe("HijriDate", () => {
         14,
         30,
         undefined,
-        undefined,
+        undefined
       );
 
       expect(hijriDate.hour).toBe(14);

@@ -19,7 +19,7 @@ import {
 function generateWeeks(
   centerDate: HijriDate,
   weeksBefore: number = 2,
-  weeksAfter: number = 2,
+  weeksAfter: number = 2
 ): HijriDate[][] {
   const weeks: HijriDate[][] = [];
   const startWeek = centerDate.startOfWeek();
@@ -34,12 +34,12 @@ function generateWeeks(
     const date = new Date(
       gregorianDate.year,
       gregorianDate.month - 1,
-      gregorianDate.day,
+      gregorianDate.day
     );
     const weekStart = HijriDate.fromDate(date);
     for (let j = 0; j < i * 7; j++) {
       weekStart._rawGregorianDate.setDate(
-        weekStart._rawGregorianDate.getDate() - 1,
+        weekStart._rawGregorianDate.getDate() - 1
       );
     }
     weeks.push(weekStart.getWeekDates());
@@ -58,12 +58,12 @@ function generateWeeks(
     const date = new Date(
       gregorianDate.year,
       gregorianDate.month - 1,
-      gregorianDate.day,
+      gregorianDate.day
     );
     const weekStart = HijriDate.fromDate(date);
     for (let j = 0; j < i * 7; j++) {
       weekStart._rawGregorianDate.setDate(
-        weekStart._rawGregorianDate.getDate() + 1,
+        weekStart._rawGregorianDate.getDate() + 1
       );
     }
     weeks.push(weekStart.getWeekDates());
@@ -89,8 +89,12 @@ export default function ViewToday() {
   const [weekSwiper, setWeekSwiper] = useState<any>(null);
   const [dateSwiper, setDateSwiper] = useState<any>(null);
   const gregorianDate = activeDate.toDate();
-  const pageTitle = `${activeDate.day} ${HIJRI_MONTH_NAMES_EN[activeDate.month - 1]} ${activeDate.year}`;
-  const subTitle = `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]} ${gregorianDate.getFullYear()}`;
+  const pageTitle = `${activeDate.day} ${
+    HIJRI_MONTH_NAMES_EN[activeDate.month - 1]
+  } ${activeDate.year}`;
+  const subTitle = `${activeDate.format("dddd")}, ${gregorianDate.getDate()} ${
+    GREGORIAN_MONTH_NAMES_EN[gregorianDate.getMonth()]
+  } ${gregorianDate.getFullYear()}`;
 
   const weeks = useMemo(() => {
     return generateWeeks(_hijriDate);
@@ -115,7 +119,7 @@ export default function ViewToday() {
               const todayWeekIndex = getWeekIndexFromDate(today, weeks);
               setCurrentWeekIndex(todayWeekIndex);
               const todayDateIndex = allDates.findIndex((d) =>
-                isSameHijriDate(d, today),
+                isSameHijriDate(d, today)
               );
 
               if (weekSwiper) {
@@ -142,7 +146,7 @@ export default function ViewToday() {
               setActiveDate(newWeekDates[0]);
               // Sync date swiper to first day of new week
               const newDateIndex = allDates.findIndex((d) =>
-                isSameHijriDate(d, newWeekDates[0]),
+                isSameHijriDate(d, newWeekDates[0])
               );
               if (dateSwiper && newDateIndex !== -1) {
                 dateSwiper.slideTo(newDateIndex);
@@ -164,13 +168,13 @@ export default function ViewToday() {
                         d.isToday() && "bg-gray-200",
                         isSameHijriDate(d, activeDate)
                           ? "border-gray-300"
-                          : "border-transparent",
+                          : "border-transparent"
                       )}
                       key={index}
                       onClick={() => {
                         setActiveDate(d);
                         const newDateIndex = allDates.findIndex((date) =>
-                          isSameHijriDate(date, d),
+                          isSameHijriDate(date, d)
                         );
                         if (dateSwiper && newDateIndex !== -1) {
                           dateSwiper.slideTo(newDateIndex);

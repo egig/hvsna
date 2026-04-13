@@ -85,7 +85,9 @@ export class IpLocationService implements LocationService {
       };
     } catch (error) {
       throw new Error(
-        `Failed to get location from IP: ${ip} ${error instanceof Error ? error.message : "Unknown error"}`,
+        `Failed to get location from IP: ${ip} ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
       );
     }
   }

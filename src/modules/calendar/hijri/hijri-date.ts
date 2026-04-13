@@ -47,7 +47,7 @@ export class HijriDate {
     minute?: number,
     second?: number,
     millisecond?: number,
-    options?: HijriDateOptions,
+    options?: HijriDateOptions
   ) {
     this._latitude = options?.latitude || DEFAULT_LATITUDE;
     this._longitude = options?.longitude || DEFAULT_LONGITUDE;
@@ -72,7 +72,7 @@ export class HijriDate {
         latitude: this._latitude,
         longitude: this._longitude,
         offset: this._offset,
-      },
+      }
     );
 
     this.dayOfWeek = this._jsDate.getDay();
@@ -101,7 +101,7 @@ export class HijriDate {
         offset: options?.offset,
         startOfWeek: options?.startOfWeek,
         sunsetShift: h.sunsetShift,
-      },
+      }
     );
 
     return hijriDateObj;
@@ -173,7 +173,7 @@ export class HijriDate {
 
     const startOfWeekGregorian = new Date(this._jsDate);
     startOfWeekGregorian.setDate(
-      startOfWeekGregorian.getDate() - daysToSubtract,
+      startOfWeekGregorian.getDate() - daysToSubtract
     );
 
     return HijriDate.fromDate(startOfWeekGregorian, {
@@ -344,7 +344,7 @@ export class HijriDate {
       const times = SunCalc.getTimes(
         this._jsDate,
         this._latitude as number,
-        this._longitude as number,
+        this._longitude as number
       );
       const sunset = times.sunset;
 
@@ -361,7 +361,7 @@ export class HijriDate {
             latitude: this._latitude,
             longitude: this._longitude,
             offset: this._offset,
-          },
+          }
         );
       }
     } catch (error) {
@@ -376,7 +376,7 @@ export class HijriDate {
       const times = SunCalc.getTimes(
         nextDay._jsDate,
         nextDay._latitude as number,
-        nextDay._longitude as number,
+        nextDay._longitude as number
       );
       const sunset = times.sunset;
 
@@ -395,7 +395,7 @@ export class HijriDate {
             latitude: this._latitude,
             longitude: this._longitude,
             offset: this._offset,
-          },
+          }
         );
       }
     } catch (error) {
@@ -419,7 +419,7 @@ export function isSameHijriDate(date1: HijriDate, date2: HijriDate): boolean {
 export function getSunsetTime(
   date: Date,
   latitude: number,
-  longitude: number,
+  longitude: number
 ): Date | null {
   try {
     const times = SunCalc.getTimes(date, latitude, longitude);
@@ -443,7 +443,7 @@ export function getSunsetTime(
 export function isAfterSunset(
   date: Date,
   latitude: number,
-  longitude: number,
+  longitude: number
 ): boolean {
   const sunset = getSunsetTime(date, latitude, longitude);
   return sunset ? date >= sunset : false;

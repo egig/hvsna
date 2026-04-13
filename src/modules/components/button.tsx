@@ -39,12 +39,11 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps
-  extends
-    Omit<
+  extends Omit<
       React.ComponentPropsWithoutRef<typeof BaseUIButton>,
       "variant" | "size"
     >,
@@ -65,7 +64,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     return (
       <BaseUIButton
@@ -99,7 +98,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </BaseUIButton>
     );
-  },
+  }
 );
 
 Button.displayName = "Button";

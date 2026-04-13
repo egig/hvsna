@@ -33,7 +33,7 @@ export function useUpcoming() {
   };
 
   const groupTasksByTimePeriod = (
-    tasks: Task[],
+    tasks: Task[]
   ): {
     today: { tasks: Task[]; label: string };
     tomorrow: { tasks: Task[]; label: string };

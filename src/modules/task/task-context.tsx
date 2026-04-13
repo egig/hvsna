@@ -66,7 +66,7 @@ export const TaskProvider: React.FC<{
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const [preselectedListId, setPreselectedListId] = useState<string | null>(
-    null,
+    null
   );
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export const TaskProvider: React.FC<{
     const taskRepository = new PouchDBTaskRepository(db);
     generateAllRecurringTaskOccurrences(db, taskRepository, Date.now()).catch(
       (err) =>
-        logger.error("Failed to generate recurring task occurrences:", err),
+        logger.error("Failed to generate recurring task occurrences:", err)
     );
   }, [db]);
 
@@ -128,7 +128,7 @@ export const TaskProvider: React.FC<{
 
   const updateTaskWithLog = async (
     id: string,
-    input: TaskUpdateInput,
+    input: TaskUpdateInput
   ): Promise<Task> => {
     // Get the current task before updating to check status change
     const currentTask = await taskUseCases.getTaskById(id);
@@ -275,7 +275,7 @@ export const TaskProvider: React.FC<{
       await generateOccurrencesForTemplate(
         template,
         taskRepository,
-        Date.now(),
+        Date.now()
       );
     },
     onSuccess: () => {

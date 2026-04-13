@@ -14,18 +14,18 @@ export function groupTasks(tasks: Task[], getToday: () => any) {
 
   // Separate overdue tasks, prayer-based tasks, and regular tasks
   const overdueTasks = tasks.filter(
-    (task) => task.atEpochMillis && task.atEpochMillis < todayStart,
+    (task) => task.atEpochMillis && task.atEpochMillis < todayStart
   );
   const prayerTasks = tasks.filter(
     (task) =>
       task.usePrayerTime &&
       task.prayerTime &&
-      (!task.atEpochMillis || task.atEpochMillis >= todayStart),
+      (!task.atEpochMillis || task.atEpochMillis >= todayStart)
   );
   const regularTasks = tasks.filter(
     (task) =>
       !task.usePrayerTime &&
-      (!task.atEpochMillis || task.atEpochMillis >= todayStart),
+      (!task.atEpochMillis || task.atEpochMillis >= todayStart)
   );
 
   // Add overdue tasks group first (always at top)
@@ -33,7 +33,7 @@ export function groupTasks(tasks: Task[], getToday: () => any) {
     groups.push({
       prayer: null,
       tasks: overdueTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
       ),
       isOverdue: true,
     });
@@ -69,7 +69,7 @@ export function groupTasks(tasks: Task[], getToday: () => any) {
       groups.push({
         prayer,
         tasks: prayerGroups[prayer].sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
         ),
       });
     }
@@ -80,7 +80,7 @@ export function groupTasks(tasks: Task[], getToday: () => any) {
     groups.push({
       prayer: null,
       tasks: regularTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0),
+        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
       ),
     });
   }
@@ -152,7 +152,7 @@ describe("Task Grouping Logic", () => {
 
   it("should not show overdue group when no overdue tasks", () => {
     const tasksWithoutOverdue = mockTasks.filter(
-      (task) => task.name !== "Overdue Task",
+      (task) => task.name !== "Overdue Task"
     );
 
     const groups = groupTasks(tasksWithoutOverdue, mockGetToday);

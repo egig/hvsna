@@ -32,7 +32,7 @@ type SystemAction =
 
 const systemReducer = (
   state: SystemState,
-  action: SystemAction,
+  action: SystemAction
 ): SystemState => {
   switch (action.type) {
     case "SET_SCREEN_SIZE_OVERLAY_VISIBLE":

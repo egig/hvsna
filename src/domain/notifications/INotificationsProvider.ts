@@ -25,6 +25,6 @@ export interface INotificationsProvider {
   cancelTaskReminder(taskId: string): Promise<void>;
   updateTaskReminder(
     taskId: string,
-    options: TaskReminderOptions,
+    options: TaskReminderOptions
   ): Promise<void>;
 }

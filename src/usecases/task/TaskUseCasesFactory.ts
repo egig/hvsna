@@ -18,6 +18,6 @@ export function createTaskUseCases(db: PouchDB.Database): TaskUseCases {
   return new TaskUseCases(
     notificationsProvider,
     taskRepository,
-    listRepository,
+    listRepository
   );
 }

@@ -39,7 +39,7 @@ export default function DroppableContext({
         <DragOverlay>
           {!!dragOverlayData && <p>{dragOverlayData}</p>}
         </DragOverlay>,
-        document.body,
+        document.body
       )}
     </DndContext>
   );

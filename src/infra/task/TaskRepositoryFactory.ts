@@ -37,13 +37,13 @@ export interface ITaskAndListRepository {
   findBrowsedTasks(
     query?: any,
     offset?: number,
-    limit?: number,
+    limit?: number
   ): Promise<Task[]>;
   findInboxTasks(): Promise<Task[]>;
   findTasksByListId(
     listId: string,
     offset?: number,
-    limit?: number,
+    limit?: number
   ): Promise<Task[]>;
   completeTask(id: string): Promise<Task>;
   reopenTask(id: string): Promise<Task>;
