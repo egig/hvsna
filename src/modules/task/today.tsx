@@ -32,6 +32,10 @@ export function Today() {
     subTitle,
     initiated,
   } = useToday();
+  const { settings } = useSettings();
+  const hasLocation = !!(
+    settings.coordinate?.latitude && settings.coordinate?.longitude
+  );
 
   if (!initiated) {
     return null;
@@ -43,6 +47,20 @@ export function Today() {
 
   return (
     <Page navbarLarge={<LargeNavbar title={pageTitle} subtitle={subTitle} />}>
+      {initiated && !hasLocation && (
+        <a
+          href="/settings/general"
+          className="flex items-center gap-2 mx-4 mt-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm"
+        >
+          <span className="flex-1">
+            {t("location_not_set_using_default") ||
+              "Location not set — prayer times may be inaccurate."}
+          </span>
+          <span className="shrink-0 font-medium">
+            {t("set_location") || "Set location →"}
+          </span>
+        </a>
+      )}
       {initiated && todayTasks.length === 0 && (
         <div className="p-4">
           <div className="text-gray-400 mb-2">

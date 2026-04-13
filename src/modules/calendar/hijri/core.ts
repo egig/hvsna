@@ -1,9 +1,6 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import * as SunCalc from "suncalc";
-
-// Jakarta coordinates (default location)
-const DEFAULT_LATITUDE = -6.2088;
-const DEFAULT_LONGITUDE = 106.8456;
+import { DEFAULT_LOCATION } from "@/config";
 
 /**
  * Interface for Hijri date components
@@ -47,8 +44,8 @@ export function toDate(
   hijriTime: TimeComponents,
   options?: ConversionOptions
 ): Date {
-  const latitude = options?.latitude ?? DEFAULT_LATITUDE;
-  const longitude = options?.longitude ?? DEFAULT_LONGITUDE;
+  const latitude = options?.latitude ?? DEFAULT_LOCATION.latitude;
+  const longitude = options?.longitude ?? DEFAULT_LOCATION.longitude;
   const offset = options?.offset ?? 0;
 
   const adjustedHijri = _applyOffset(hijriDate, -1 * offset);
@@ -99,8 +96,8 @@ export function fromDate(
   gregorianDate: Date,
   options?: ConversionOptions
 ): HijriDateComponents & TimeComponents {
-  const latitude = options?.latitude ?? DEFAULT_LATITUDE;
-  const longitude = options?.longitude ?? DEFAULT_LONGITUDE;
+  const latitude = options?.latitude ?? DEFAULT_LOCATION.latitude;
+  const longitude = options?.longitude ?? DEFAULT_LOCATION.longitude;
   const offset = options?.offset ?? 0;
 
   const workingDate = new Date(gregorianDate);

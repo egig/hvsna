@@ -9,6 +9,7 @@ import { usePouchDB } from "../../pouchdb";
 import type { Language } from "../i18n/language";
 import { createSettingsUseCases } from "../../infra/settings/SettingsUseCasesFactory";
 import type { GeolocationOptions } from "../../domain/settings/ILocationProvider";
+import { clearPrayerTimesCache } from "../task/prayer-time-service";
 
 export function useSettings() {
   const { db } = usePouchDB();
@@ -115,6 +116,7 @@ export function useSettings() {
       coordinate: Coordinate,
       resolveType: LocationResolveType
     ): Promise<void> => {
+      clearPrayerTimesCache();
       await updateSettings({
         coordinate,
         locationResolvedAt: new Date().toISOString(),

@@ -220,7 +220,9 @@ export function TaskListItem({
         </button>
 
         <div className="flex-1 min-w-0">
-          <h3 className={`leading-6 ${getStatusColor(task.status as TaskStatus)}`}>
+          <h3
+            className={`leading-6 ${getStatusColor(task.status as TaskStatus)}`}
+          >
             {task.name}
           </h3>
 

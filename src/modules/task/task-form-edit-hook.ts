@@ -16,6 +16,7 @@ import {
   updateRecurringSeries,
 } from "./recurring-task-conversion";
 import logger from "src/modules/logger";
+import { getCoordinateFromTimezone } from "@/config";
 import type {
   RepeatConfig,
   TaskFormData,
@@ -113,8 +114,9 @@ export const useTaskFormEdit = (
   };
 
   const offset = settings.manualDateOffset || 0;
-  const latitude = settings.coordinate?.latitude || -6.2088;
-  const longitude = settings.coordinate?.longitude || 106.8456;
+  const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
+  const latitude = settings.coordinate?.latitude || _fallback.latitude;
+  const longitude = settings.coordinate?.longitude || _fallback.longitude;
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const taskData = Object.fromEntries(submittedFormData) as unknown as {

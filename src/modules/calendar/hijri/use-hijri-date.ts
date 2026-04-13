@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useSettings } from "../../settings/useSettings";
 import { HijriDate } from "./hijri-date";
 import { HijriMonth } from "./hijri-month";
+import { getCoordinateFromTimezone } from "@/config";
 
 export * from "./hijri-date";
 
@@ -55,6 +56,9 @@ export interface UseHijriCalendarReturn {
   createHijriMonth: (year: number, month: number) => HijriMonth;
   currentHijriMonth: () => HijriMonth;
 
+  // Whether the user has set a real location (false = silently using default Jakarta coords)
+  hasLocation: boolean;
+
   // Loading and error states
   loading: boolean;
   error: string | null;
@@ -65,8 +69,10 @@ export function useHijriDate(): UseHijriCalendarReturn {
   const { settings, loading, error, initiated } = useSettings();
 
   // Extract coordinates and offset from settings
-  const latitude = settings.coordinate?.latitude;
-  const longitude = settings.coordinate?.longitude;
+  const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
+  const latitude = settings.coordinate?.latitude ?? _fallback.latitude;
+  const longitude = settings.coordinate?.longitude ?? _fallback.longitude;
+  const hasLocation = !!(latitude && longitude);
   const manualOffset = settings.manualDateOffset;
   const timezone = settings.timezone;
 
@@ -245,6 +251,9 @@ export function useHijriDate(): UseHijriCalendarReturn {
     createHijriDate,
     createHijriMonth,
     currentHijriMonth,
+
+    // Location state
+    hasLocation,
 
     // Loading and error states
     loading,

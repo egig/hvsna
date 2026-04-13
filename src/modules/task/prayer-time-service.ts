@@ -1,6 +1,7 @@
 import { getPrayerTimes, type PrayerTimesResponse } from "../prayer-times";
 import { HijriDate } from "../calendar/hijri";
 import type { PrayerTime } from "./types";
+import { getCoordinateFromTimezone } from "@/config";
 
 interface PrayerTimeCache {
   date: string;
@@ -160,17 +161,20 @@ export async function getPrayerBasedTaskTime(
   hijriDate: HijriDate,
   prayerTime: PrayerTime,
   offsetMinutes: number = 0,
-  latitude: number = -6.2088, // Default: Jakarta
-  longitude: number = 106.8456, // Default: Jakarta
+  latitude?: number,
+  longitude?: number,
   timezone?: string
 ): Promise<{ time: string; epochMillis: number }> {
+  const _fallback = getCoordinateFromTimezone(timezone ?? "");
+  const resolvedLat = latitude ?? _fallback.latitude;
+  const resolvedLng = longitude ?? _fallback.longitude;
   const gregorianDate = hijriDate.toDate();
 
   // Get prayer times for the date
   const prayerTimes = await getPrayerTimesForDate(
     gregorianDate,
-    latitude,
-    longitude,
+    resolvedLat,
+    resolvedLng,
     timezone
   );
 

@@ -2,10 +2,7 @@ import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { getDaysInMonth } from "./get-days-in-month";
 import * as SunCalc from "suncalc";
 import { fromDate, toDate } from "./core";
-
-// Jakarta coordinates (default location)
-const DEFAULT_LATITUDE = -6.2088;
-const DEFAULT_LONGITUDE = 106.8456;
+import { DEFAULT_LOCATION } from "@/config";
 
 /**
  * Options for HijriDate calculations
@@ -49,8 +46,8 @@ export class HijriDate {
     millisecond?: number,
     options?: HijriDateOptions
   ) {
-    this._latitude = options?.latitude || DEFAULT_LATITUDE;
-    this._longitude = options?.longitude || DEFAULT_LONGITUDE;
+    this._latitude = options?.latitude || DEFAULT_LOCATION.latitude;
+    this._longitude = options?.longitude || DEFAULT_LOCATION.longitude;
     this._offset = options?.offset || 0;
     this._startOfWeek = options?.startOfWeek ?? 5; // Default to Friday (5) for Islamic calendar
 

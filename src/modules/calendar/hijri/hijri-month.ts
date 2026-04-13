@@ -3,10 +3,7 @@ import * as SunCalc from "suncalc";
 import { HijriDate } from "./hijri-date";
 import type { HijriDateOptions } from "./hijri-date";
 import { getDaysInMonth } from "./get-days-in-month";
-
-// Jakarta coordinates (default location)
-const DEFAULT_LATITUDE = -6.2088;
-const DEFAULT_LONGITUDE = 106.8456;
+import { DEFAULT_LOCATION } from "@/config";
 
 export class HijriMonth {
   year: number;
@@ -21,8 +18,8 @@ export class HijriMonth {
     this.month = month;
     // Only set defaults if options is undefined, not if it's an empty object
     if (options === undefined) {
-      this._latitude = DEFAULT_LATITUDE;
-      this._longitude = DEFAULT_LONGITUDE;
+      this._latitude = DEFAULT_LOCATION.latitude;
+      this._longitude = DEFAULT_LOCATION.longitude;
       this._offset = 0;
     } else {
       this._latitude = options.latitude;

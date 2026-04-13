@@ -5,13 +5,16 @@ import { TimezonePickerModal } from "../components/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { createNotificationsProvider } from "../../infra";
-import type { Coordinate } from "src/modules/settings/settings";
 import type { Language } from "src/modules/i18n/language";
 import logger from "src/modules/logger";
 
 export default function Onboarding() {
   const { t, language, setLanguage } = useLanguageContext();
-  const { updateSettings } = useSettings();
+  const {
+    updateSettings,
+    requestLocationPermission,
+    updateTimezoneFromLocation,
+  } = useSettings();
   const [loading, setLoading] = useState(false);
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -36,34 +39,11 @@ export default function Onboarding() {
   const handleLocationPermission = async () => {
     setLoading(true);
     try {
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0,
-          });
-        }
-      );
-
-      const coordinate: Coordinate = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        altitude: position.coords.altitude || undefined,
-        altitudeAccuracy: position.coords.altitudeAccuracy || undefined,
-        heading: position.coords.heading || undefined,
-        speed: position.coords.speed || undefined,
-      };
-
-      await updateSettings({
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        coordinate,
-        locationResolveType: "auto",
-        locationResolvedAt: new Date().toISOString(),
-      });
-
-      setCurrentStep(3);
+      const success = await requestLocationPermission();
+      if (success) {
+        await updateTimezoneFromLocation();
+        setCurrentStep(3);
+      }
     } catch (error) {
       logger.error("Location access denied:", error);
     } finally {

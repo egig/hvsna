@@ -1,4 +1,5 @@
 import { HvCheck } from "@/modules/icons";
+import { getCoordinateFromTimezone } from "@/config";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { Navbar } from "src/modules/navigation";
@@ -86,10 +87,11 @@ export function TimeSelectionModal({
   }, [selectedTime]);
 
   useEffect(() => {
-    const lat = settings.coordinate?.latitude ?? -6.2088;
-    const lng = settings.coordinate?.longitude ?? 106.8456;
+    const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
+    const lat = settings.coordinate?.latitude ?? _fallback.latitude;
+    const lng = settings.coordinate?.longitude ?? _fallback.longitude;
     setSortedHours(getSunsetBasedSortedHours(lat, lng));
-  }, [settings.coordinate]);
+  }, [settings.coordinate, settings.timezone]);
 
   const handleCustomTimeConfirm = () => {
     const time = `${hour.toString().padStart(2, "0")}:${minute
