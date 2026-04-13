@@ -32,6 +32,10 @@ export const taskTranslations = {
     en: "Completed",
     id: "Selesai",
   },
+  overdue: {
+    en: "Overdue",
+    id: "Terlambat",
+  },
 
   // Task filtering and search
   search: {
@@ -490,4 +494,18 @@ export const taskTranslations = {
   repeat_ends_on_date: { en: "On Date", id: "Pada Tanggal" },
   repeat_ends_after: { en: "After", id: "Setelah" },
   occurrences: { en: "occurrences", id: "kejadian" },
+
+  // Location-based prayer time warnings
+  location_not_set_using_default: {
+    en: "Location not set - prayer times may be inaccurate.",
+    id: "Lokasi tidak diatur - waktu sholat mungkin tidak akurat.",
+  },
+  using_default_location: {
+    en: "Using default location",
+    id: "Menggunakan lokasi default",
+  },
+  set_location: {
+    en: "Set Location",
+    id: "Atur Lokasi",
+  },
 };

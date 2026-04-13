@@ -2,6 +2,7 @@ import { useState } from "react";
 import { HvPlus, HvCheck, HvFilter, HvFilterX } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
+import { EmptyState } from "../components/empty-state";
 import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
 import TaskListItem from "src/modules/task/task-list-item";
@@ -93,30 +94,26 @@ export default function Tasks() {
           </div>
         )}
 
-        {initiated && !loading && !error && tasks.length === 0 && (
-          <div className="text-center py-8">
-            <HvCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
-              {t("no_tasks_yet")}
-            </p>
-            <p className="text-gray-500 dark:text-gray-500 mb-4">
-              {t("create_first_task_to_get_started")}
-            </p>
-          </div>
-        )}
-
-        {initiated && !loading && !error && tasks.length > 0 && (
-          <>
-            {tasks.map((task) => (
-              <TaskListItem
-                key={task.id}
-                task={task}
-                onEdit={openEditPopup}
-                showDateTime={true}
-              />
-            ))}
-          </>
-        )}
+        <div className={initiated && !loading && !error ? "visible" : "invisible"}>
+          {tasks.length === 0 ? (
+            <EmptyState
+              icon={<HvCheck className="w-full h-full" />}
+              title={t("no_tasks_yet")}
+              description={t("create_first_task_to_get_started")}
+            />
+          ) : (
+            <>
+              {tasks.map((task) => (
+                <TaskListItem
+                  key={task.id}
+                  task={task}
+                  onEdit={openEditPopup}
+                  showDateTime={true}
+                />
+              ))}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Filter Modal */}

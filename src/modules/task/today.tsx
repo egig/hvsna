@@ -1,6 +1,7 @@
 import { Page } from "../navigation";
 import TaskListItem from "./task-list-item";
 import { ErrorDisplay } from "../components/error-display";
+import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { LargeNavbar, Navbar } from "src/modules/navigation/navbar";
@@ -8,7 +9,7 @@ import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { HvChevronRight, HvChevronDown } from "@/modules/icons";
+import { HvChevronRight, HvChevronDown, HvCheck } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
 import {
@@ -37,42 +38,40 @@ export function Today() {
     settings.coordinate?.latitude && settings.coordinate?.longitude
   );
 
-  if (!initiated) {
-    return null;
-  }
-
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
   }
 
+  const isEmpty =
+    todayTasks.length === 0 && todayCompletedTasks.length === 0;
+
   return (
     <Page navbarLarge={<LargeNavbar title={pageTitle} subtitle={subTitle} />}>
-      {initiated && !hasLocation && (
-        <a
-          href="/settings/general"
-          className="flex items-center gap-2 mx-4 mt-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm"
-        >
-          <span className="flex-1">
-            {t("location_not_set_using_default") ||
-              "Location not set — prayer times may be inaccurate."}
-          </span>
-          <span className="shrink-0 font-medium">
-            {t("set_location") || "Set location →"}
-          </span>
-        </a>
-      )}
-      {initiated && todayTasks.length === 0 && (
-        <div className="p-4">
-          <div className="text-gray-400 mb-2">
-            {t("no_tasks_scheduled_for_today")}
-          </div>
-          <div className="text-gray-500 text-sm">
-            {t("tasks_scheduled_for_today_will_appear_here")}
-          </div>
-        </div>
-      )}
-
-      <TodayTasks tasks={todayTasks} completedTasks={todayCompletedTasks} />
+      <div className={initiated ? "visible" : "invisible"}>
+        {!hasLocation && (
+          <a
+            href="/settings/general"
+            className="flex items-center gap-2 m-4 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm"
+          >
+            <span className="flex-1">
+              {t("location_not_set_using_default") ||
+                "Location not set — prayer times may be inaccurate."}
+            </span>
+            <span className="shrink-0 font-medium">
+              {t("set_location") || "Set location →"}
+            </span>
+          </a>
+        )}
+        {isEmpty ? (
+          <EmptyState
+            icon={<HvCheck className="w-full h-full" />}
+            title={t("no_tasks_scheduled_for_today")}
+            description={t("tasks_scheduled_for_today_will_appear_here")}
+          />
+        ) : (
+          <TodayTasks tasks={todayTasks} completedTasks={todayCompletedTasks} />
+        )}
+      </div>
     </Page>
   );
 }

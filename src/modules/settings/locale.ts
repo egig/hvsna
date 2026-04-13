@@ -43,12 +43,12 @@ export const settingsTranslations = {
 
   // Data management specific to settings
   confirm_delete_database: {
-    en: "Are you sure you want to delete the entire PouchDB database? This will remove all stored data and cannot be undone.",
-    id: "Apakah Anda yakin ingin menghapus seluruh database PouchDB? Ini akan menghapus semua data yang tersimpan dan tidak dapat dibatalkan.",
+    en: "Are you sure ? This will remove all stored data and cannot be undone.",
+    id: "Apakah Anda yakin ? Ini akan menghapus semua data yang tersimpan dan tidak dapat dibatalkan.",
   },
   database_deleted: {
-    en: "PouchDB database has been successfully deleted. The app will need to be restarted to create a fresh database.",
-    id: "Database PouchDB telah berhasil dihapus. Aplikasi perlu dimulai ulang untuk membuat database baru.",
+    en: "Data has been successfully deleted. The app will need to be restarted to create a fresh database.",
+    id: "Data telah berhasil dihapus. Aplikasi perlu dimulai ulang untuk membuat database baru.",
   },
   error_deleting_database: {
     en: "An error occurred while deleting the database. Please try again.",
