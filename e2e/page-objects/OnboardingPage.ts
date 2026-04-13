@@ -16,13 +16,8 @@ export class OnboardingPage {
     return this.page.locator(`[data-testid="step-${step}"]`);
   }
 
-  async getProgressBar(step: '1-2' | '2-3') {
-    return this.page.locator(`[data-testid="progress-bar-${step}"]`);
-  }
-
   async clickBackButton() {
-    // Look for back button in navbar
-    await this.page.locator('[data-testid="navbar-back-button"]').click();
+    await this.page.locator('[data-testid="back-button"]').click();
   }
 
   // Language selection
@@ -122,17 +117,6 @@ export class OnboardingPage {
   async getErrorMessage(): Promise<string | null> {
     const errorElement = this.page.locator('[data-testid="error-message"]');
     return await errorElement.isVisible() ? await errorElement.textContent() : null;
-  }
-
-  // Privacy notes verification
-  async getLocationPrivacyNote(): Promise<string> {
-    const note = this.page.locator('[data-testid="location-privacy-note"]');
-    return await note.textContent() || '';
-  }
-
-  async getNotificationPrivacyNote(): Promise<string> {
-    const note = this.page.locator('[data-testid="notification-privacy-note"]');
-    return await note.textContent() || '';
   }
 
   // Step visibility helpers

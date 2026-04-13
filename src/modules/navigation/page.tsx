@@ -16,12 +16,20 @@ export function Page({ children, navbar, navbarLarge, fluid }: PageProps) {
       <div className="flex flex-col h-full">
         {!!navbar && <div className="flex-shrink-0">{navbar}</div>}
         <div className="flex-1 overflow-y-auto">
+          {isDesktop &&
           <div
-            className={isDesktop && !fluid ? "max-w-2xl mx-auto w-full" : ""}
+            className={!fluid ? "max-w-2xl mx-auto w-full" : ""}
           >
             {!!navbarLarge && navbarLarge}
             {children}
           </div>
+          }
+          {!isDesktop &&
+          <>
+            {!!navbarLarge && navbarLarge}
+            {children}
+          </>
+          }
         </div>
       </div>
     </PageTransition>

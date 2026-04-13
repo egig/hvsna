@@ -1,13 +1,6 @@
 import { useState } from "react";
-import {
-  HvMapPin,
-  HvGlobe,
-  HvChevronRight,
-  HvLanguages,
-  HvChevronsUpDown,
-  HvBell,
-} from "@/modules/icons";
-import { Page, Navbar } from "../navigation";
+import { HvChevronLeft, HvChevronsUpDown } from "@/modules/icons";
+import { Page } from "../navigation";
 import { TimezonePickerModal } from "../components/timezone-picker-modal";
 import { useSettings } from "../settings/useSettings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
@@ -63,23 +56,18 @@ export default function Onboarding() {
         speed: position.coords.speed || undefined,
       };
 
-      // Get timezone from coordinates (using Intl API as fallback)
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
       await updateSettings({
-        timezone,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         coordinate,
         locationResolveType: "auto",
         locationResolvedAt: new Date().toISOString(),
       });
 
-      // Move to notification step
       setCurrentStep(3);
-      setLoading(false);
     } catch (error) {
       logger.error("Location access denied:", error);
+    } finally {
       setLoading(false);
-      // Fall back to manual timezone selection
     }
   };
 
@@ -91,12 +79,10 @@ export default function Onboarding() {
         locationResolveType: "manual",
         locationResolvedAt: new Date().toISOString(),
       });
-
-      // Move to notification step
       setCurrentStep(3);
-      setLoading(false);
     } catch (error) {
       logger.error("Failed to save settings:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -105,18 +91,11 @@ export default function Onboarding() {
     setLoading(true);
     try {
       let notificationEnabled = false;
-
       if (enable) {
         const permission = await notificationsProvider.requestPermissions();
         notificationEnabled = permission.state === "granted";
       }
-
-      await updateSettings({
-        notifications: notificationEnabled,
-        onboardedAt: Date.now(),
-      });
-
-      // Redirect to main app
+      await updateSettings({ notifications: notificationEnabled, onboardedAt: Date.now() });
       window.location.href = "/";
     } catch (error) {
       logger.error("Failed to handle notification permission:", error);
@@ -124,134 +103,70 @@ export default function Onboarding() {
     }
   };
 
-  const checkNotificationPermission = async () => {
-    try {
-      const permission = await notificationsProvider.checkPermissions();
-      return permission.state;
-    } catch (error) {
-      logger.error("Failed to check notification permission:", error);
-      return "unknown";
-    }
-  };
-
   const renderLanguageSelection = () => (
     <div className="space-y-4" data-testid="language-selection-step">
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900" data-testid="welcome-title">
+      <div className="text-center">
+        <h1 className="text-xl font-bold text-gray-900" data-testid="welcome-title">
           {t("select_language") || "Select Language"}
         </h1>
-        <p className="text-gray-600">
-          {t("language_selection_description") ||
-            "Choose your preferred language for the app"}
-        </p>
       </div>
 
-      <div className="space-y-3">
-        <button
-          onClick={() => handleLanguageSelection("en")}
-          disabled={loading}
-          data-testid="language-en"
-          className={`w-full bg-white border rounded-lg p-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            language === "en"
-              ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
-              : "border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">English</h3>
-            {language === "en" && (
-              <div className="w-5 h-5 rounded-full bg-[var(--hvsna-primary-color)] flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-white"></div>
-              </div>
-            )}
-          </div>
-        </button>
-
-        <button
-          onClick={() => handleLanguageSelection("id")}
-          disabled={loading}
-          data-testid="language-id"
-          className={`w-full bg-white border rounded-lg p-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            language === "id"
-              ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
-              : "border-gray-200 hover:bg-gray-50"
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">Bahasa Indonesia</h3>
-            {language === "id" && (
-              <div className="w-5 h-5 rounded-full bg-[var(--hvsna-primary-color)] flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-white"></div>
-              </div>
-            )}
-          </div>
-        </button>
+      <div className="space-y-2">
+        {(["en", "id"] as Language[]).map((lang) => (
+          <button
+            key={lang}
+            onClick={() => handleLanguageSelection(lang)}
+            disabled={loading}
+            data-testid={`language-${lang}`}
+            className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+              language === lang
+                ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
+                : "border-gray-200 bg-white hover:border-gray-300"
+            }`}
+          >
+            <span className="font-medium text-gray-900">
+              {lang === "en" ? "English" : "Bahasa Indonesia"}
+            </span>
+            <div className={`w-4 h-4 rounded-full border-2 transition-colors ${
+              language === lang
+                ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]"
+                : "border-gray-300"
+            }`} />
+          </button>
+        ))}
       </div>
     </div>
   );
 
   const renderLocationSetup = () => (
-    <div className="space-y-4" data-testid="location-setup-step">
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900" data-testid="location-title">
+    <div className="space-y-2" data-testid="location-setup-step">
+      <div className="text-center space-y-1">
+        <h1 className="text-xl font-bold text-gray-900" data-testid="location-title">
           {t("setup_location") || "Setup Location"}
         </h1>
-        <p className="text-gray-600">
-          {t("location_setup_description") ||
-            "Choose how you want to set your timezone for accurate scheduling"}
+        <p className="text-sm text-gray-500">
+          {t("location_setup_description") || "How would you like to set your timezone?"}
         </p>
       </div>
 
-      {/* Location Permission Option */}
       <button
         onClick={handleLocationPermission}
         disabled={loading}
         data-testid="use-current-location"
-        className="w-full bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full p-4 rounded-xl border-2 border-gray-200 bg-white text-left font-medium text-gray-900 hover:border-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color)]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
-              <HvMapPin className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900">
-                {t("use_current_location") || "Use Current Location"}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {t("auto_detect_timezone") ||
-                  "Auto-detect timezone from your location"}
-              </p>
-            </div>
-          </div>
-          <HvChevronRight className="w-5 h-5 text-gray-400" />
-        </div>
+        {t("use_current_location") || "Use Current Location"}
       </button>
 
-      {/* Manual Timezone Selection */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4" data-testid="manual-timezone-section">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
-            <HvGlobe className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900">
-              {t("select_timezone_manually") || "Select Timezone Manually"}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {t("choose_timezone") || "Choose your timezone from the list"}
-            </p>
-          </div>
-        </div>
-
+      <div className="space-y-2" data-testid="manual-timezone-section">
         <button
           type="button"
           onClick={() => setIsTimezoneModalOpen(true)}
           disabled={loading}
           data-testid="timezone-picker-button"
-          className="w-full flex items-center justify-between p-3 border border-gray-300 rounded-lg hover:border-[var(--hvsna-primary-color)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+          className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <span className="text-sm text-gray-800" data-testid="selected-timezone">
+          <span className="font-medium text-gray-900" data-testid="selected-timezone">
             {selectedTimezone.replace(/_/g, " ")}
           </span>
           <HvChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0" />
@@ -270,168 +185,93 @@ export default function Onboarding() {
           onClick={handleManualTimezone}
           disabled={loading}
           data-testid="continue-timezone"
-          className="w-full mt-4 bg-[var(--hvsna-primary-color)] text-white py-3 rounded-lg font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[var(--hvsna-primary-color)] text-white py-3 rounded-xl font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading
-            ? t("setting_up") || "Setting up..."
-            : t("continue") || "Continue"}
+          {loading ? t("setting_up") || "Setting up..." : t("continue") || "Continue"}
         </button>
       </div>
 
-      <div className="text-center text-sm text-gray-500" data-testid="location-privacy-note">
-        <p>
-          {t("location_privacy_note") ||
-            "Your location is only used to set timezone and is stored locally"}
-        </p>
-      </div>
+      <button
+        onClick={() => setCurrentStep(1)}
+        disabled={loading}
+        data-testid="back-button"
+        className="w-full py-3 text-sm text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {t("back") || "Back"}
+      </button>
     </div>
   );
 
   const renderNotificationSetup = () => (
     <div className="space-y-4" data-testid="notification-setup-step">
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-gray-900" data-testid="notification-title">
+      <div className="text-center space-y-1">
+        <h1 className="text-xl font-bold text-gray-900" data-testid="notification-title">
           {t("setup_notifications") || "Setup Notifications"}
         </h1>
-        <p className="text-gray-600">
-          {t("notification_setup_description") ||
-            "Enable notifications to get reminders for your tasks"}
+        <p className="text-sm text-gray-500">
+          {t("notification_setup_description") || "Get reminders for your tasks and prayer times"}
         </p>
       </div>
 
-      {/* Enable Notifications Option */}
       <button
         onClick={() => handleNotificationPermission(true)}
         disabled={loading}
         data-testid="enable-notifications"
-        className="w-full bg-white border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[var(--hvsna-primary-color)] text-white py-3 rounded-xl font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-[var(--hvsna-primary-color)]/10 p-2 rounded-lg">
-              <HvBell className="w-5 h-5 text-[var(--hvsna-primary-color)]" />
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900">
-                {t("enable_notifications") || "Enable Notifications"}
-              </h3>
-              <p className="text-sm text-gray-600">
-                {t("get_task_reminders") ||
-                  "Get reminders for your tasks before they're due"}
-              </p>
-            </div>
-          </div>
-          <HvChevronRight className="w-5 h-5 text-gray-400" />
-        </div>
+        {t("enable_notifications") || "Enable Notifications"}
       </button>
 
-      {/* Skip Notifications Option */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4" data-testid="skip-notifications-section">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="bg-gray-100 p-2 rounded-lg">
-            <HvChevronsUpDown className="w-5 h-5 text-gray-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900">
-              {t("skip_notifications") || "Skip Notifications"}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {t("skip_notifications_description") ||
-                "You can enable notifications later in settings"}
-            </p>
-          </div>
-        </div>
+      <button
+        onClick={() => handleNotificationPermission(false)}
+        disabled={loading}
+        data-testid="skip-notifications"
+        className="w-full py-3 text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {t("skip") || "Skip for now"}
+      </button>
 
-        <button
-          onClick={() => handleNotificationPermission(false)}
-          disabled={loading}
-          data-testid="skip-notifications"
-          className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? t("continuing") || "Continuing..." : t("skip") || "Skip"}
-        </button>
-      </div>
-
-      <div className="text-center text-sm text-gray-500" data-testid="notification-privacy-note">
-        <p>
-          {t("notification_privacy_note") ||
-            "Notifications are only used for task reminders and are stored locally"}
-        </p>
-      </div>
+      <button
+        onClick={() => setCurrentStep(2)}
+        disabled={loading}
+        data-testid="back-button"
+        className="w-full py-3 text-sm text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {t("back") || "Back"}
+      </button>
     </div>
   );
 
   return (
     <Page>
-      <Navbar
-        title={
-          currentStep === 1
-            ? t("welcome") || "Welcome"
-            : currentStep === 2
-              ? t("setup_location") || "Setup Location"
-              : t("setup_notifications") || "Setup Notifications"
-        }
-        showBackButton={currentStep === 2 || currentStep === 3}
-        customBackAction={() => setCurrentStep(currentStep - 1)}
-        data-testid="navbar-title"
-      />
-
-      <div className="p-6 space-y-6">
-        {/* Step Indicator */}
-        <div className="flex items-center justify-center space-x-2" data-testid="step-indicator">
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 1
-                ? "bg-[var(--hvsna-primary-color)] text-white"
-                : "bg-[var(--hvsna-primary-color)] text-white"
-            }`}
-            data-testid="step-1"
-          >
-            1
-          </div>
-          <div
-            className={`w-16 h-1 ${
-              currentStep === 2 || currentStep === 3
-                ? "bg-[var(--hvsna-primary-color)]"
-                : "bg-gray-300"
-            }`}
-            data-testid="progress-bar-1-2"
-          ></div>
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 2 || currentStep === 3
-                ? "bg-[var(--hvsna-primary-color)] text-white"
-                : "bg-gray-300 text-gray-600"
-            }`}
-            data-testid="step-2"
-          >
-            2
-          </div>
-          <div
-            className={`w-16 h-1 ${
-              currentStep === 3
-                ? "bg-[var(--hvsna-primary-color)]"
-                : "bg-gray-300"
-            }`}
-            data-testid="progress-bar-2-3"
-          ></div>
-          <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              currentStep === 3
-                ? "bg-[var(--hvsna-primary-color)] text-white"
-                : "bg-gray-300 text-gray-600"
-            }`}
-            data-testid="step-3"
-          >
-            3
-          </div>
+      <div className="flex flex-col h-screen px-6 max-w-md mx-auto w-full">
+        <div className="flex flex-col items-center pt-12 pb-6">
+          <img src="/icon-192.png" alt="Hvsna" className="w-14 h-14 rounded-2xl" /> 
         </div>
 
-        {currentStep === 1
-          ? renderLanguageSelection()
-          : currentStep === 2
-            ? renderLocationSetup()
-            : renderNotificationSetup()}
+        <div className="flex-1">
+          {currentStep === 1
+            ? renderLanguageSelection()
+            : currentStep === 2
+              ? renderLocationSetup()
+              : renderNotificationSetup()}
+        </div>
+
+        <div className="flex items-center justify-center gap-1.5 py-8" data-testid="step-indicator">
+          {[1, 2, 3].map((step) => (
+            <div
+              key={step}
+              data-testid={`step-${step}`}
+              className={`rounded-full transition-all duration-300 ${
+                step === currentStep
+                  ? "w-4 h-1.5 bg-[var(--hvsna-primary-color)]"
+                  : step < currentStep
+                    ? "w-1.5 h-1.5 bg-[var(--hvsna-primary-color)]/40"
+                    : "w-1.5 h-1.5 bg-gray-300"
+              }`}
+            />
+          ))}
+        </div>
       </div>
     </Page>
   );

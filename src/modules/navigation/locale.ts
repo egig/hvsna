@@ -24,4 +24,10 @@ export const navigationTranslations = {
     en: "to",
     id: "hingga",
   },
+
+  // Lists
+  no_lists_yet: {
+    en: "No lists yet",
+    id: "Belum ada daftar",
+  },
 };

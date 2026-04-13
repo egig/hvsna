@@ -31,11 +31,6 @@ test.describe("Onboarding TestId Verification", () => {
     await expect(onboarding.page.locator('[data-testid="step-1"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="step-2"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="step-3"]')).toBeVisible();
-    await expect(onboarding.page.locator('[data-testid="progress-bar-1-2"]')).toBeVisible();
-    await expect(onboarding.page.locator('[data-testid="progress-bar-2-3"]')).toBeVisible();
-    
-    // Check navbar
-    await expect(onboarding.page.locator('[data-testid="navbar-title"]')).toBeVisible();
   });
 
   test("verifies language selection using testId", async () => {
@@ -50,10 +45,9 @@ test.describe("Onboarding TestId Verification", () => {
     await expect(onboarding.page.locator('[data-testid="timezone-picker-button"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="selected-timezone"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="continue-timezone"]')).toBeVisible();
-    await expect(onboarding.page.locator('[data-testid="location-privacy-note"]')).toBeVisible();
-    
+
     // Check back button appears
-    await expect(onboarding.page.locator('[data-testid="navbar-back-button"]')).toBeVisible();
+    await expect(onboarding.page.locator('[data-testid="back-button"]')).toBeVisible();
   });
 
   test("verifies location setup using testId", async () => {
@@ -67,9 +61,7 @@ test.describe("Onboarding TestId Verification", () => {
     await expect(onboarding.page.locator('[data-testid="notification-setup-step"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="notification-title"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="enable-notifications"]')).toBeVisible();
-    await expect(onboarding.page.locator('[data-testid="skip-notifications-section"]')).toBeVisible();
     await expect(onboarding.page.locator('[data-testid="skip-notifications"]')).toBeVisible();
-    await expect(onboarding.page.locator('[data-testid="notification-privacy-note"]')).toBeVisible();
   });
 
   test("verifies timezone modal using testId", async () => {

@@ -116,10 +116,6 @@ test.describe("Onboarding Flow", () => {
       expect(await onboarding.isLocationStepVisible()).toBe(false);
     });
 
-    test("shows location privacy note", async () => {
-      const privacyNote = await onboarding.getLocationPrivacyNote();
-      expect(privacyNote).toContain("location is");
-    });
   });
 
   test.describe("Notification Setup", () => {
@@ -164,10 +160,6 @@ test.describe("Onboarding Flow", () => {
       expect(await onboarding.isNotificationStepVisible()).toBe(false);
     });
 
-    test("shows notification privacy note", async () => {
-      const privacyNote = await onboarding.getNotificationPrivacyNote();
-      expect(privacyNote).toContain("Notifications are only used");
-    });
   });
 
   test.describe("Complete Flow", () => {
@@ -215,9 +207,7 @@ test.describe("Onboarding Flow", () => {
 
     test("back button only appears on steps 2 and 3", async () => {
       // Step 1: No back button
-      const backButton = onboarding.page.locator(
-        '[data-testid="navbar-back-button"]',
-      );
+      const backButton = onboarding.page.locator('[data-testid="back-button"]');
       await expect(backButton).not.toBeVisible();
 
       // Step 2: Back button visible
@@ -227,18 +217,6 @@ test.describe("Onboarding Flow", () => {
       // Step 3: Back button visible
       await onboarding.useCurrentLocation();
       await expect(backButton).toBeVisible();
-    });
-
-    test("navbar title changes per step", async () => {
-      const title = onboarding.page.locator('[data-testid="navbar-title"]');
-
-      await expect(title).toContainText("Welcome");
-
-      await onboarding.selectLanguage("en");
-      await expect(title).toContainText("Setup Location");
-
-      await onboarding.useCurrentLocation();
-      await expect(title).toContainText("Setup Notifications");
     });
   });
 });
