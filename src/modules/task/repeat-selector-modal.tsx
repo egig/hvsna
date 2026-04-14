@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HvCheck, HvX } from "@/modules/icons";
+import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
@@ -143,12 +143,8 @@ export function RepeatSelectorModal({
     <div className="min-h-[50dvh]">
       <Navbar
         title={t("repeat")}
-        showBackButton={false}
-        leftAction={
-          <NavActionButton variant="neutral" onClick={onBack}>
-            <HvX />
-          </NavActionButton>
-        }
+        isModal
+        onModalClose={onBack}
         rightAction={
           <NavActionButton variant="primary" onClick={handleConfirm}>
             <HvCheck />

@@ -1,4 +1,4 @@
-import { HvCheck, HvX } from "@/modules/icons";
+import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../../components/nav-action-button";
 import { getCoordinateFromTimezone } from "@/config";
 import { useEffect, useState } from "react";
@@ -120,12 +120,8 @@ export function TimeSelectionModal({
       <Navbar
         inModal
         title={t("select_time")}
-        showBackButton={false}
-        leftAction={
-          <NavActionButton variant="neutral" onClick={onBack}>
-            <HvX />
-          </NavActionButton>
-        }
+        isModal
+        onModalClose={onBack}
         rightAction={
           <NavActionButton
             variant="primary"

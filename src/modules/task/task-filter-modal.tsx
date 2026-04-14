@@ -1,5 +1,5 @@
 import { Navbar } from "../navigation/navbar";
-import { HvCheck, HvX } from "@/modules/icons";
+import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
@@ -66,12 +66,8 @@ export default function TaskFilterModal({
       <Navbar
         inModal
         title={t("filter_tasks")}
-        showBackButton={false}
-        leftAction={
-          <NavActionButton variant="neutral" onClick={onClose}>
-            <HvX />
-          </NavActionButton>
-        }
+        isModal
+        onModalClose={onClose}
         rightAction={
           <NavActionButton variant="primary" onClick={onClose}>
             <HvCheck size={16} />

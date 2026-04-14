@@ -6,7 +6,6 @@ import {
   HvChevronRight,
   HvClock,
   HvRepeat,
-  HvX,
 } from "@/modules/icons";
 import { Modal, Navbar } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
@@ -364,12 +363,8 @@ export function CalendarModal({
           <Navbar
             inModal
             title={t("select_date")}
-            showBackButton={false}
-            leftAction={
-              <NavActionButton variant="neutral" onClick={onClose}>
-                <HvX />
-              </NavActionButton>
-            }
+            isModal
+            onModalClose={onClose}
             rightAction={
               <NavActionButton
                 variant="primary"

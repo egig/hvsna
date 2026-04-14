@@ -13,6 +13,8 @@ interface NavbarProps {
   className?: string;
   modal?: boolean;
   inModal?: boolean;
+  isModal?: boolean;
+  onModalClose?: () => void;
   subtitle?: string;
   showSearch?: boolean;
   searchPlaceholder?: string;
@@ -32,6 +34,8 @@ export function Navbar({
   className = "",
   modal,
   inModal,
+  isModal,
+  onModalClose,
   subtitle,
   showSearch,
   searchPlaceholder = "Search...",
@@ -64,20 +68,28 @@ export function Navbar({
         scrollMarginTop: "64px",
       }}
     >
-      {/* Left: Back Button or leftAction */}
+      {/* Left: Modal close, Back Button, or leftAction */}
       <div className="flex justify-start">
-        {shouldShowBackButton && (
+        {isModal && onModalClose ? (
+          <button
+            onClick={onModalClose}
+            className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
+            aria-label="Close"
+          >
+            <HvX />
+          </button>
+        ) : shouldShowBackButton ? (
           <button
             onClick={handleBack}
             data-testid="navbar-back-button"
-            className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
+            className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
             aria-label="Go back"
           >
-            {modal && <HvX />}
-            {modal || <HvChevronLeft />}
+            {modal ? <HvX /> : <HvChevronLeft />}
           </button>
+        ) : (
+          leftAction
         )}
-        {!shouldShowBackButton && leftAction}
       </div>
 
       {/* Center: Title or Search */}
@@ -135,10 +147,13 @@ export function LargeNavbar({
   title,
   showBackButton: propShowBackButton,
   customBackAction,
+  leftAction,
   rightAction,
   className = "",
   modal,
   inModal,
+  isModal,
+  onModalClose,
   subtitle,
   showSearch,
   searchPlaceholder = "Search...",
@@ -192,19 +207,28 @@ export function LargeNavbar({
         }}
       >
         <div className="flex items-center justify-between">
-          {/* Left: Back Button */}
+          {/* Left: Modal close, Back Button, or leftAction */}
           <div className="flex justify-start">
-            {shouldShowBackButton && (
+            {isModal && onModalClose ? (
+              <button
+                onClick={onModalClose}
+                className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
+                aria-label="Close"
+              >
+                <HvX />
+              </button>
+            ) : shouldShowBackButton ? (
               <button
                 onClick={handleBack}
-                className={`flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-lg transition-all no-select active:scale-95 transition-transform ${
+                className={`flex items-center justify-center bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-all no-select active:scale-95 transition-transform ${
                   isScrolled ? "w-10 h-10" : "w-12 h-12"
                 }`}
                 aria-label="Go back"
               >
-                {modal && <HvX />}
-                {modal || <HvChevronLeft />}
+                {modal ? <HvX /> : <HvChevronLeft />}
               </button>
+            ) : (
+              leftAction
             )}
           </div>
 
