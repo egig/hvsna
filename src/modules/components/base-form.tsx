@@ -51,7 +51,11 @@ export default function BaseForm<T = void>({
         showBackButton={true}
         customBackAction={onCancel}
         rightAction={
-          <NavActionButton variant="primary" type="submit" disabled={isSubmitting}>
+          <NavActionButton
+            variant="primary"
+            type="submit"
+            disabled={isSubmitting}
+          >
             <HvCheck />
           </NavActionButton>
         }

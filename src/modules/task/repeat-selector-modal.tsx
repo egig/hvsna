@@ -143,7 +143,7 @@ export function RepeatSelectorModal({
     <div className="min-h-[50dvh]">
       <Navbar
         title={t("repeat")}
-        isModal
+        modal
         onModalClose={onBack}
         rightAction={
           <NavActionButton variant="primary" onClick={handleConfirm}>

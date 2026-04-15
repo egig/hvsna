@@ -110,6 +110,7 @@ export default function ListForm({
     >
       <Navbar
         title={title}
+        modal
         showBackButton={false}
         leftAction={
           <NavActionButton

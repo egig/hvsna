@@ -64,16 +64,14 @@ export default function TaskFilterModal({
   return (
     <div className="h-full flex flex-col mb-[env(safe-area-inset-bottom)]">
       <Navbar
-        inModal
+        modal
         title={t("filter_tasks")}
-        isModal
         onModalClose={onClose}
         rightAction={
           <NavActionButton variant="primary" onClick={onClose}>
             <HvCheck size={16} />
           </NavActionButton>
         }
-        modal={true}
       />
       <div className="flex-1">
         {/* Status Select */}

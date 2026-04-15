@@ -12,8 +12,6 @@ interface NavbarProps {
   rightAction?: React.ReactNode;
   className?: string;
   modal?: boolean;
-  inModal?: boolean;
-  isModal?: boolean;
   onModalClose?: () => void;
   subtitle?: string;
   showSearch?: boolean;
@@ -33,8 +31,6 @@ export function Navbar({
   rightAction,
   className = "",
   modal,
-  inModal,
-  isModal,
   onModalClose,
   subtitle,
   showSearch,
@@ -62,7 +58,9 @@ export function Navbar({
 
   return (
     <header
-      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm ${!inModal ? 'safe-top' : ''} ${className}`}
+      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm ${
+        !modal ? "safe-top" : ""
+      } ${className}`}
       style={{
         position: "-webkit-sticky",
         scrollMarginTop: "64px",
@@ -70,7 +68,7 @@ export function Navbar({
     >
       {/* Left: Modal close, Back Button, or leftAction */}
       <div className="flex justify-start">
-        {isModal && onModalClose ? (
+        {modal && onModalClose ? (
           <button
             onClick={onModalClose}
             className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
@@ -151,8 +149,6 @@ export function LargeNavbar({
   rightAction,
   className = "",
   modal,
-  inModal,
-  isModal,
   onModalClose,
   subtitle,
   showSearch,
@@ -200,7 +196,9 @@ export function LargeNavbar({
   return (
     <>
       <header
-        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm ${!inModal ? 'safe-top' : ''} ${className}`}
+        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm ${
+          !modal ? "safe-top" : ""
+        } ${className}`}
         style={{
           position: "-webkit-sticky",
           scrollMarginTop: "62px",
@@ -209,7 +207,7 @@ export function LargeNavbar({
         <div className="flex items-center justify-between">
           {/* Left: Modal close, Back Button, or leftAction */}
           <div className="flex justify-start">
-            {isModal && onModalClose ? (
+            {modal && onModalClose ? (
               <button
                 onClick={onModalClose}
                 className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"

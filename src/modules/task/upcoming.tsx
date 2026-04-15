@@ -29,19 +29,19 @@ export default function Upcoming() {
     ...taskGroups,
     today: {
       ...taskGroups.today,
-      label: t("today_with_date", { date: formatDate(today, "D MMMM") }),
+      label: t("today"),
     },
     tomorrow: {
       ...taskGroups.tomorrow,
-      label: t("tomorrow_with_date", { date: formatDate(tomorrow, "D MMMM") }),
+      label: t("tomorrow"),
     },
     thisWeek: {
       ...taskGroups.thisWeek,
-      label: t("this_week_due", { date: formatDate(endOfWeek, "D MMMM") }),
+      label: t("this_week"),
     },
     thisMonth: {
       ...taskGroups.thisMonth,
-      label: t("this_month_name", { month: formatDate(today, "MMMM") }),
+      label: t("this_month"),
     },
     later: { ...taskGroups.later, label: t("later") },
     unscheduled: { ...taskGroups.unscheduled, label: t("unscheduled") },
@@ -97,6 +97,7 @@ export default function Upcoming() {
                       key as keyof typeof taskGroupsWithLabels
                     ].tasks.map((task: Task) => (
                       <TaskListItem
+                        showDateTime
                         key={task.id}
                         task={task}
                         onEdit={handleEditTask}

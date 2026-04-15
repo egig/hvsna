@@ -136,7 +136,14 @@ export function groupTasksByPrayerTimes(
     }
   });
 
-  // Create a sorted list of all timed slots (prayer + individual time-based tasks) by clock time
+  // Islamic day starts at Maghrib — shift all times relative to it for correct ordering
+  const maghribMinutes = timeToMinutes(prayerTimings.Maghrib);
+  const toIslamicDay = (minutes: number) =>
+    minutes >= maghribMinutes
+      ? minutes - maghribMinutes
+      : minutes + (24 * 60 - maghribMinutes);
+
+  // Create a sorted list of all timed slots (prayer + individual time-based tasks)
   type Slot =
     | { type: "prayer"; prayer: PrayerTime; minutes: number }
     | { type: "time"; task: Task; minutes: number };
@@ -144,12 +151,12 @@ export function groupTasksByPrayerTimes(
   const slots: Slot[] = [];
 
   const prayerOrder: PrayerTime[] = [
+    "Maghrib",
+    "Isha",
     "Fajr",
     "Sunrise",
     "Dhuhr",
     "Asr",
-    "Maghrib",
-    "Isha",
   ];
 
   prayerOrder.forEach((prayer) => {
@@ -168,7 +175,7 @@ export function groupTasksByPrayerTimes(
     }
   });
 
-  slots.sort((a, b) => a.minutes - b.minutes);
+  slots.sort((a, b) => toIslamicDay(a.minutes) - toIslamicDay(b.minutes));
 
   // Build groups from sorted slots
   slots.forEach((slot) => {

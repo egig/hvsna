@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { HvArrowUp, HvTrash2, HvInfo, HvMoreVertical, HvCheck } from "@/modules/icons";
+import {
+  HvArrowUp,
+  HvTrash2,
+  HvInfo,
+  HvMoreVertical,
+  HvCheck,
+} from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
@@ -305,6 +311,7 @@ export default function TaskFormEdit({
     >
       <Navbar
         title="Edit Task"
+        modal
         showBackButton={false}
         rightAction={
           <div className="flex items-center gap-2">

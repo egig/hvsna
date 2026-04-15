@@ -11,20 +11,37 @@ export class TodayPage extends BasePage {
     await this.page.waitForLoadState("networkidle");
   }
 
-  /** FAB button to open the create task form */
-  get addTaskFab(): Locator {
-    // The FAB is outside the form — it opens the task form panel
-    return this.page.getByRole("button", { name: /add new task/i }).first();
-  }
-
   get emptyState(): Locator {
-    return this.page.getByText(/no tasks/i);
+    return this.page.getByText(/no tasks scheduled for today/i);
   }
 
-  /** Prayer group collapsible header, e.g. "Fajr" or "Fajr (05:15)" */
+  /**
+   * Collapsible trigger for a prayer group header.
+   * Matches "Fajr", "Fajr (05:15)", "Maghrib (18:15)", etc.
+   */
   getPrayerGroupHeader(prayer: string): Locator {
     return this.page.getByRole("button", {
       name: new RegExp(prayer, "i"),
     });
+  }
+
+  /** The "Completed" collapsible section trigger */
+  get completedGroupHeader(): Locator {
+    return this.page.getByRole("button", { name: /^completed/i });
+  }
+
+  /** The "Overdue" collapsible section trigger */
+  get overdueGroupHeader(): Locator {
+    return this.page.getByRole("button", { name: /^overdue$/i });
+  }
+
+  /**
+   * Returns the bounding box top position of a prayer group header.
+   * Used to verify ordering between groups.
+   */
+  async getPrayerGroupTop(prayer: string): Promise<number> {
+    const box = await this.getPrayerGroupHeader(prayer).boundingBox();
+    if (!box) throw new Error(`Prayer group "${prayer}" not found or not visible`);
+    return box.y;
   }
 }

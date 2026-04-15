@@ -4,7 +4,7 @@ import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { LargeNavbar, Navbar } from "src/modules/navigation/navbar";
+import { LargeNavbar } from "src/modules/navigation/navbar";
 import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
@@ -42,8 +42,7 @@ export function Today() {
     return <ErrorDisplay error={error} />;
   }
 
-  const isEmpty =
-    todayTasks.length === 0 && todayCompletedTasks.length === 0;
+  const isEmpty = todayTasks.length === 0 && todayCompletedTasks.length === 0;
 
   return (
     <Page navbarLarge={<LargeNavbar title={pageTitle} subtitle={subTitle} />}>
@@ -146,12 +145,12 @@ const getOriginalTaskGroups = (
   });
 
   const prayerOrder: PrayerTime[] = [
+    "Maghrib",
+    "Isha",
     "Fajr",
     "Sunrise",
     "Dhuhr",
     "Asr",
-    "Maghrib",
-    "Isha",
   ];
   prayerOrder.forEach((prayer) => {
     if (prayerGroups[prayer].length > 0) {
@@ -209,7 +208,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { getToday } = useHijriDate();
   const { settings } = useSettings();
   const [prayerTimings, setPrayerTimings] = useState<any>(null);
-  const [loadingPrayerTimes, setLoadingPrayerTimes] = useState(true);
+  const [, setLoadingPrayerTimes] = useState(true);
 
   // Load prayer times
   useEffect(() => {

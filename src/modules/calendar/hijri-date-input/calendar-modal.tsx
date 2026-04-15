@@ -361,15 +361,15 @@ export function CalendarModal({
       <Activity mode={view === "date" ? "visible" : "hidden"}>
         <>
           <Navbar
-            inModal
+            modal
             title={t("select_date")}
-            isModal
             onModalClose={onClose}
             rightAction={
               <NavActionButton
                 variant="primary"
                 onClick={handleConfirm}
                 disabled={!tempSelectedDate}
+                data-testid="calendar-confirm-button"
               >
                 <HvCheck />
               </NavActionButton>

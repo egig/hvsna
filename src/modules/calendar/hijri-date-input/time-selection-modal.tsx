@@ -118,9 +118,8 @@ export function TimeSelectionModal({
   return (
     <div className="min-h-[50dvh]">
       <Navbar
-        inModal
+        modal
         title={t("select_time")}
-        isModal
         onModalClose={onBack}
         rightAction={
           <NavActionButton

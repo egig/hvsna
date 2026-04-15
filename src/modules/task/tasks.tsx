@@ -94,7 +94,9 @@ export default function Tasks() {
           </div>
         )}
 
-        <div className={initiated && !loading && !error ? "visible" : "invisible"}>
+        <div
+          className={initiated && !loading && !error ? "visible" : "invisible"}
+        >
           {tasks.length === 0 ? (
             <EmptyState
               icon={<HvCheck className="w-full h-full" />}
