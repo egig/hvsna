@@ -25,9 +25,9 @@ export const navigationTranslations = {
     id: "hingga",
   },
 
-  // Lists
-  no_lists_yet: {
-    en: "No lists yet",
-    id: "Belum ada daftar",
+  // Projects
+  no_projects_yet: {
+    en: "No projects yet",
+    id: "Belum ada proyek",
   },
 };

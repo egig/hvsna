@@ -16,7 +16,7 @@ import type { Task } from "./types";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import TaskPreview from "./task-preview";
-import { ListSelector } from "./list-selector";
+import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
 
 interface TaskFormEditProps {
@@ -56,7 +56,7 @@ export default function TaskFormEdit({
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    lists,
+    projects,
   } = useTaskFormEdit(taskId, onSuccess, onError, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -250,11 +250,11 @@ export default function TaskFormEdit({
             }
           }}
         />
-        {lists.length > 0 && (
-          <ListSelector
-            lists={lists}
-            selectedListId={formData.listId}
-            onListChange={(listId) => {
+        {projects.length > 0 && (
+          <ProjectSelector
+            projects={projects}
+            selectedProjectId={formData.projectId}
+            onProjectChange={(projectId) => {
               setIsFormDirty(true);
               updateFormData({ listId });
             }}

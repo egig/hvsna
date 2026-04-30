@@ -1,6 +1,6 @@
 export {
   PouchDBTaskRepository,
-  PouchDBListRepository,
+  PouchDBProjectRepository,
 } from "./PouchDBTaskRepository";
 
 export {
@@ -9,4 +9,4 @@ export {
   createDatabase,
 } from "./TaskRepositoryFactory";
 
-export type { ITaskAndListRepository } from "./TaskRepositoryFactory";
+export type { ITaskAndProjectRepository } from "./TaskRepositoryFactory";

@@ -6,76 +6,76 @@ import { queryKeys } from "../query-keys";
 import type { Task } from "./types";
 import log from "../logger";
 
-export interface UseListTasksOptions {
-  listId: string;
+export interface UseProjectTasksOptions {
+  projectId: string;
   limit?: number;
   enabled?: boolean;
 }
 
-export function useListTasks({
-  listId,
+export function useProjectTasks({
+  projectId,
   limit = 50,
   enabled = true,
-}: UseListTasksOptions) {
+}: UseProjectTasksOptions) {
   const [initiated, setInitiated] = useState(false);
   const queryClient = useQueryClient();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
 
   // React Query for list tasks
-  const listTasksQuery = useQuery({
-    queryKey: queryKeys.listTasks(listId),
-    queryFn: () => taskUseCases.getTasksByListId(listId),
+  const projectTasksQuery = useQuery({
+    queryKey: queryKeys.projectTasks(projectId),
+    queryFn: () => taskUseCases.getTasksByProjectId(projectId),
     staleTime: 1000 * 60 * 2, // 2 minutes
-    enabled: enabled && Boolean(listId && listId.trim() !== ""),
+    enabled: enabled && Boolean(projectId && projectId.trim() !== ""),
   });
 
   // Check if there are more tasks
   const hasMore = Boolean(
-    listTasksQuery.data &&
-      listTasksQuery.data.length >= limit &&
-      listTasksQuery.data.length > 0 &&
-      !listTasksQuery.isFetching &&
-      !listTasksQuery.isPending
+    projectTasksQuery.data &&
+      projectTasksQuery.data.length >= limit &&
+      projectTasksQuery.data.length > 0 &&
+      !projectTasksQuery.isFetching &&
+      !projectTasksQuery.isPending
   );
 
   // Load more tasks (pagination)
   const loadMoreTasks = useCallback(async () => {
-    const currentData = listTasksQuery.data || [];
+    const currentData = projectTasksQuery.data || [];
     const currentLength = currentData.length;
 
-    if (listTasksQuery.isFetching || listTasksQuery.isPending || !hasMore) {
+    if (projectTasksQuery.isFetching || projectTasksQuery.isPending || !hasMore) {
       return;
     }
 
     try {
-      const newTasks = await taskUseCases.getTasksByListId(listId);
+      const newTasks = await taskUseCases.getTasksByProjectId(projectId);
 
       // Update query data with new tasks
-      queryClient.setQueryData(queryKeys.listTasks(listId), [
+      queryClient.setQueryData(queryKeys.projectTasks(projectId), [
         ...currentData,
         ...newTasks,
       ]);
 
       return newTasks;
     } catch (error) {
-      log.error("Failed to load more list tasks:", error);
+      log.error("Failed to load more project tasks:", error);
       throw error;
     }
   }, [
-    listTasksQuery.data,
-    listTasksQuery.isFetching,
-    listTasksQuery.isPending,
+    projectTasksQuery.data,
+    projectTasksQuery.isFetching,
+    projectTasksQuery.isPending,
     hasMore,
-    listId,
+    projectId,
     limit,
     queryClient,
   ]);
 
   // Refresh tasks
   const refreshTasks = useCallback(() => {
-    return listTasksQuery.refetch();
-  }, [listTasksQuery]);
+    return projectTasksQuery.refetch();
+  }, [projectTasksQuery]);
 
   // Initialize on mount
   useEffect(() => {
@@ -84,13 +84,13 @@ export function useListTasks({
 
   return {
     // Data
-    tasks: listTasksQuery.data || [],
-    loading: listTasksQuery.isPending,
+    tasks: projectTasksQuery.data || [],
+    loading: projectTasksQuery.isPending,
     initiated,
-    loadingMore: listTasksQuery.isFetching && !listTasksQuery.isPending,
-    error: listTasksQuery.error
-      ? listTasksQuery.error instanceof Error
-        ? listTasksQuery.error.message
+    loadingMore: projectTasksQuery.isFetching && !projectTasksQuery.isPending,
+    error: projectTasksQuery.error
+      ? projectTasksQuery.error instanceof Error
+        ? projectTasksQuery.error.message
         : "Unknown error"
       : null,
     hasMore,

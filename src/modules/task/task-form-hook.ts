@@ -7,7 +7,7 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
-import { useLists } from "./use-lists";
+import { useProjects } from "./use-projects";
 import { usePouchDB } from "../../pouchdb";
 import logger from "../logger";
 import type {
@@ -29,8 +29,8 @@ export interface UseTaskFormReturn {
   updateFormData: (updates: Partial<TaskFormData>) => void;
   updateScheduleAt: (updates: Partial<TaskScheduleAt>) => void;
   updateRepeatConfig: (updates: Partial<RepeatConfig>) => void;
-  lists: any[];
-  listIdPreselected: boolean;
+  projects: any[];
+  projectIdPreselected: boolean;
 }
 
 export const useTaskForm = (
@@ -43,7 +43,7 @@ export const useTaskForm = (
   const params = useParams();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
-  const { lists } = useLists();
+  const { projects } = useProjects();
   const { db } = usePouchDB();
   const { createRecurringTask } = useRecurringTasks();
 
@@ -64,7 +64,7 @@ export const useTaskForm = (
       time: "",
       prayerTime: "",
     },
-    listId: params.listId || "",
+    projectId: params.projectId || "",
     repeat: {
       repeat: "none",
       interval: 1,
@@ -135,7 +135,7 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          listId: formData.listId,
+          projectId: formData.projectId,
           repeatEnd: formData.repeat.end,
           repeatEndDate: formData.repeat.endDate as string,
           repeatEndOccurrences: formData.repeat.endOccurrences,
@@ -158,7 +158,7 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          listId: formData.listId || undefined,
+          projectId: formData.projectId || undefined,
         };
 
         const result = await createTask(taskInput);
@@ -195,8 +195,8 @@ export const useTaskForm = (
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    lists,
-    listIdPreselected: !!params.listId,
+    projects,
+    projectIdPreselected: !!params.projectId,
   };
 };
 

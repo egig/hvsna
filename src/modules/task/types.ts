@@ -32,7 +32,7 @@ export class Task {
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
-  listId?: string;
+  projectId?: string;
 
   constructor(a: Partial<Task>) {
     Object.assign(this, a);
@@ -67,7 +67,7 @@ export interface TaskCreateInput {
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
-  listId?: string;
+  projectId?: string;
 }
 
 export interface TaskUpdateInput {
@@ -86,7 +86,7 @@ export interface TaskUpdateInput {
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   removeTime?: boolean;
-  listId?: string | null;
+  projectId?: string | null;
 }
 
 export interface TaskChange {
@@ -107,11 +107,11 @@ export type TaskQuery = {
   atEpochMillis?: number | { $gte?: number; $lte?: number };
   unscheduled?: number;
   searchText?: string;
-  listId?: string;
+  projectId?: string;
   taskType?: TaskTypeFilter;
 };
 
-export class List {
+export class Project {
   id?: string;
   rev?: string;
   userId?: string;
@@ -121,31 +121,31 @@ export class List {
   createdAt?: number;
   updatedAt?: number;
 
-  constructor(a: Partial<List>) {
+  constructor(a: Partial<Project>) {
     Object.assign(this, a);
   }
 }
 
-export interface ListCreateInput {
+export interface ProjectCreateInput {
   name: string;
   description?: string;
   color?: string;
 }
 
-export interface ListUpdateInput {
+export interface ProjectUpdateInput {
   name?: string;
   description?: string;
   color?: string;
 }
 
-export interface ListChange {
+export interface ProjectChange {
   id: string;
   documentId: string;
   type: "create" | "update" | "delete";
   timestamp: Date;
-  data: List | ListUpdateInput;
+  data: Project | ProjectUpdateInput;
 }
 
-export type ListQuery = {
+export type ProjectQuery = {
   searchText?: string;
 };

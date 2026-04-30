@@ -3,18 +3,18 @@ import type {
   TaskUpdateInput,
   TaskQuery,
   TaskStatus,
-  ListCreateInput,
-  ListUpdateInput,
-  ListQuery,
+  ProjectCreateInput,
+  ProjectUpdateInput,
+  ProjectQuery,
 } from "../../modules/task/types";
-import { Task, List } from "../../modules/task/types";
+import { Task, Project } from "../../modules/task/types";
 import type {
   INotificationsProvider,
   TaskReminderOptions,
 } from "../../domain/notifications/INotificationsProvider";
 import type {
   ITaskRepository,
-  IListRepository,
+  IProjectRepository,
 } from "../../domain/task/ITaskRepository";
 import type { HijriDate } from "src/modules/calendar/hijri";
 
@@ -22,7 +22,7 @@ export class TaskUseCases {
   constructor(
     private readonly notificationsProvider: INotificationsProvider,
     private readonly taskRepository: ITaskRepository,
-    private readonly listRepository: IListRepository
+    private readonly projectRepository: IProjectRepository
   ) {}
 
   // Task operations
@@ -85,17 +85,17 @@ export class TaskUseCases {
     return updatedTask;
   }
 
-  // List operations
-  async createList(input: ListCreateInput): Promise<List> {
-    return await this.listRepository.create(input);
+  // Project operations
+  async createProject(input: ProjectCreateInput): Promise<Project> {
+    return await this.projectRepository.create(input);
   }
 
-  async updateList(listId: string, updates: ListUpdateInput): Promise<List> {
-    return await this.listRepository.update(listId, updates);
+  async updateProject(projectId: string, updates: ProjectUpdateInput): Promise<Project> {
+    return await this.projectRepository.update(projectId, updates);
   }
 
-  async deleteList(listId: string): Promise<void> {
-    await this.listRepository.delete(listId);
+  async deleteProject(projectId: string): Promise<void> {
+    await this.projectRepository.delete(projectId);
   }
 
   // Reminder operations
@@ -214,16 +214,16 @@ export class TaskUseCases {
     return await this.taskRepository.findById(taskId);
   }
 
-  async getLists(query: ListQuery = {}): Promise<List[]> {
-    return await this.listRepository.find(query);
+  async getProjects(query: ProjectQuery = {}): Promise<Project[]> {
+    return await this.projectRepository.find(query);
   }
 
-  async getListById(listId: string): Promise<List | null> {
-    return await this.listRepository.findById(listId);
+  async getProjectById(projectId: string): Promise<Project | null> {
+    return await this.projectRepository.findById(projectId);
   }
 
-  async getTasksByListId(listId: string): Promise<Task[]> {
-    return await this.taskRepository.findTasksByListId(listId);
+  async getTasksByProjectId(projectId: string): Promise<Task[]> {
+    return await this.taskRepository.findTasksByProjectId(projectId);
   }
 
   // Search and filtering

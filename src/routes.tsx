@@ -22,7 +22,7 @@ import Tasks from "./modules/task/tasks";
 import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
-import ListDetail from "./modules/task/list-detail";
+import ProjectDetail from "./modules/task/project-detail";
 import Upcoming from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
 import Onboarding from "./modules/onboarding/onboarding";
@@ -95,7 +95,7 @@ export const AppRoutes = () => {
             <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
             {!isDesktop && <Route path="browse" element={<Browse />} />}
-            <Route path="list/:listId" element={<ListDetail />} />
+            <Route path="project/:projectId" element={<ProjectDetail />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}
           <Route path="about" element={<About />} />

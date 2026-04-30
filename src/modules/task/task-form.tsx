@@ -7,7 +7,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
 import type { Task } from "./types";
 import { useSettings } from "src/modules/settings/useSettings";
-import { ListSelector } from "./list-selector";
+import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
 
 interface TaskFormProps {
@@ -33,8 +33,8 @@ export default function TaskForm({
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    lists,
-    listIdPreselected,
+    projects,
+    projectIdPreselected,
   } = useTaskForm(onSuccess, onError, onCancel);
   const location = useLocation();
   const { settings } = useSettings();
@@ -132,12 +132,12 @@ export default function TaskForm({
             });
           }}
         />
-        {lists.length > 0 && (
-          <ListSelector
-            lists={lists}
-            selectedListId={formData.listId}
-            onListChange={(listId) => updateFormData({ listId })}
-            disabled={isSubmitting || listIdPreselected}
+        {projects.length > 0 && (
+          <ProjectSelector
+            projects={projects}
+            selectedProjectId={formData.projectId}
+            onProjectChange={(projectId) => updateFormData({ projectId })}
+            disabled={isSubmitting || projectIdPreselected}
           />
         )}
       </div>

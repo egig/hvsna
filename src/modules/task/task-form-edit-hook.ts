@@ -5,7 +5,7 @@ import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
-import { useLists } from "./use-lists";
+import { useProjects } from "./use-projects";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
@@ -45,7 +45,7 @@ export interface UseTaskFormReturn {
   showRecurringEditScope: boolean;
   removeTime: boolean;
   formData: EditFormData;
-  lists: any[];
+  projects: any[];
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
   handleDeleteSingle: () => Promise<void>;
@@ -68,7 +68,7 @@ export const useTaskFormEdit = (
 ): UseTaskFormReturn => {
   const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
     useTaskContext();
-  const { lists } = useLists();
+  const { projects } = useProjects();
   const { createRecurringTask, deleteRecurringTask, updateRecurringTask } =
     useRecurringTasks();
   const { db } = usePouchDB();
@@ -85,7 +85,7 @@ export const useTaskFormEdit = (
 
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { dateHijri: null, time: "", prayerTime: "" },
-    listId: "",
+    projectId: "",
     repeat: {
       repeat: "none",
       interval: 1,
@@ -148,7 +148,7 @@ export const useTaskFormEdit = (
         hijriDateOffset: offset,
         prayerTime: (formData.scheduleAt.prayerTime as PrayerTime) || undefined,
         removeTime: removeTime,
-        listId: formData.listId === "" ? null : formData.listId || undefined,
+        projectId: formData.projectId === "" ? null : formData.projectId || undefined,
       };
 
       const wasRegular = !task?.recurringTaskId;
@@ -174,7 +174,7 @@ export const useTaskFormEdit = (
             long: longitude,
             timezone: settings.timezone || "Asia/Jakarta",
             hijriDateOffset: offset,
-            listId: formData.listId || undefined,
+            projectId: formData.projectId || undefined,
             repeatEnd:
               formData.repeat.end === "never" ? undefined : formData.repeat.end,
             repeatEndDate:
@@ -353,7 +353,7 @@ export const useTaskFormEdit = (
             prayerTime: pendingOperation.taskInput.prayerTime,
             repeat: pendingOperation.repeatConfig.repeat,
             repeatInterval: pendingOperation.repeatConfig.interval,
-            listId: pendingOperation.taskInput.listId ?? undefined,
+            projectId: pendingOperation.taskInput.projectId ?? undefined,
           },
           {
             updateTask,
@@ -402,7 +402,7 @@ export const useTaskFormEdit = (
 
     setFormData({
       scheduleAt,
-      listId: task.listId || "",
+      projectId: task.projectId || "",
       repeat: {
         repeat: task.repeat ?? "none",
         interval: task.repeatInterval ?? 1,
@@ -444,6 +444,6 @@ export const useTaskFormEdit = (
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    lists,
+    projects,
   };
 };

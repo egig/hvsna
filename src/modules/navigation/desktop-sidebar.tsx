@@ -11,10 +11,10 @@ import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
 import { Modal } from "./modal";
-import { useLists } from "../task/use-lists";
+import { useProjects } from "../task/use-projects";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useListContext } from "../task/list-context";
-import { DeleteListModal } from "../task/delete-list-modal";
+import { useProjectContext } from "../task/project-context";
+import { DeleteProjectModal } from "../task/delete-project-modal";
 import { useTasks } from "../task/use-tasks";
 import { useState } from "react";
 import { useAuth } from "../auth/use-auth";
@@ -45,22 +45,22 @@ export function DesktopSidebar({
   collapsed = false,
   onToggleCollapse,
 }: DesktopSidebarProps) {
-  const { lists, loading, deleteList } = useLists();
+  const { projects, loading, deleteProject } = useProjects();
   const { tasks } = useTasks();
   const { t } = useLanguageContext();
   const location = useLocation();
-  const { openListForm } = useListContext();
+  const { openProjectForm } = useProjectContext();
   const { user, isAuthenticated, logout } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedList, setSelectedList] = useState<any>(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const handleEditList = (list: any) => {
-    openListForm(list.id!);
+  const handleEditProject = (project: any) => {
+    openProjectForm(project.id!);
   };
 
-  const handleDeleteList = (list: any) => {
-    setSelectedList(list);
+  const handleDeleteProject = (project: any) => {
+    setSelectedProject(project);
     setShowDeleteModal(true);
   };
 
@@ -77,26 +77,25 @@ export function DesktopSidebar({
     setShowLogoutConfirm(false);
   };
 
-  const confirmDeleteList = async (deleteTasks: boolean) => {
-    if (!selectedList) {
+  const confirmDeleteProject = async (deleteTasks: boolean) => {
+    if (!selectedProject) {
       return;
     }
 
-    const success = await deleteList(selectedList.id!, deleteTasks);
+    const success = await deleteProject(selectedProject.id!, deleteTasks);
     if (success) {
       setShowDeleteModal(false);
-      setSelectedList(null);
+      setSelectedProject(null);
       // List will be automatically refreshed by the hook
     }
   };
 
   // Helper to get tasks for a list (filters open tasks and groups by list ID)
-  const getListTasks = (listId: string) => {
-    // Filter for open/pending tasks (status 0) that belong to the specified list
+  const getProjectTasks = (projectId: string) => {
     return tasks.filter(
       (task) =>
-        task.status === 0 && // Only open/pending tasks
-        task.listId === listId // Tasks belonging to this list
+        task.status === 0 &&
+        task.projectId === projectId
     );
   };
 
@@ -263,12 +262,12 @@ export function DesktopSidebar({
           <div className="p-2 mt-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xs font-semibold text-gray-500 tracking-wider">
-                {t("lists") || "Lists"}
+                {t("projects") || "Projects"}
               </h3>
               <button
-                onClick={() => openListForm()}
+                onClick={() => openProjectForm()}
                 className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                title={t("add_new_list")}
+                title={t("add_new_project")}
               >
                 <HvPlus size={16} />
               </button>
@@ -278,20 +277,20 @@ export function DesktopSidebar({
                 <div className="text-xs text-gray-400">
                   {t("loading") || "Loading..."}
                 </div>
-              ) : lists.length > 0 ? (
-                lists.slice(0, 5).map((list) => {
-                  const isActive = location.pathname === `/list/${list.id}`;
+              ) : projects.length > 0 ? (
+                projects.slice(0, 5).map((project) => {
+                  const isActive = location.pathname === `/project/${project.id}`;
                   return (
-                    <div key={list.id} className="group relative">
+                    <div key={project.id} className="group relative">
                       <Link
-                        to={`/list/${list.id}`}
+                        to={`/project/${project.id}`}
                         className={`flex items-center space-x-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
                           isActive
                             ? "bg-gray-100"
                             : "text-gray-700 hover:bg-gray-100"
                         }`}
                       >
-                        <span className="truncate flex-1">{list.name}</span>
+                        <span className="truncate flex-1">{project.name}</span>
                       </Link>
 
                       <Menu.Root>
@@ -302,14 +301,14 @@ export function DesktopSidebar({
                           <Menu.Positioner>
                             <Menu.Popup className="bg-white border border-gray-200 rounded-md shadow-lg min-w-[120px] py-1">
                               <Menu.Item
-                                onClick={() => handleEditList(list)}
+                                onClick={() => handleEditProject(project)}
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                               >
                                 <HvEdit size={14} />
                                 <span>{t("edit")}</span>
                               </Menu.Item>
                               <Menu.Item
-                                onClick={() => handleDeleteList(list)}
+                                onClick={() => handleDeleteProject(project)}
                                 className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                               >
                                 <HvTrash2 size={14} />
@@ -324,21 +323,21 @@ export function DesktopSidebar({
                 })
               ) : (
                 <div className="text-xs text-gray-400">
-                  {t("no_lists_yet") || "No lists yet"}
+                  {t("no_projects_yet") || "No projects yet"}
                 </div>
               )}
             </div>
-            {lists.length > 5 && (
+            {projects.length > 5 && (
               <div className="mt-2">
                 <Link
-                  to="/list"
+                  to="/browse"
                   className={`text-xs transition-colors ${
-                    location.pathname === "/list"
+                    location.pathname === "/browse"
                       ? "text-blue-700 font-medium"
                       : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  {t("view_all_lists") || "View all lists"} →
+                  {t("view_all_projects") || "View all projects"} →
                 </Link>
               </div>
             )}
@@ -374,16 +373,16 @@ export function DesktopSidebar({
       </div>
 
       {/* Delete Confirmation Modal */}
-      {selectedList && (
-        <DeleteListModal
+      {selectedProject && (
+        <DeleteProjectModal
           isOpen={showDeleteModal}
           onClose={() => {
             setShowDeleteModal(false);
-            setSelectedList(null);
+            setSelectedProject(null);
           }}
-          onConfirm={confirmDeleteList}
-          listName={selectedList.name || ""}
-          tasks={getListTasks(selectedList.id)}
+          onConfirm={confirmDeleteProject}
+          projectName={selectedProject.name || ""}
+          tasks={getProjectTasks(selectedProject.id)}
         />
       )}
 

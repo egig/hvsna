@@ -146,9 +146,9 @@ Located in `src/modules/calendar/hijri/`. Uses `@tabby_ai/hijri-converter` (not 
 
 Located in `src/modules/task/` (41 files). Key files:
 
-- `types.ts` — Task, List, TaskStatus types
-- `task-context.tsx` / `list-context.tsx` — React providers
-- `task-repository.ts` / `list-repository.ts` — client-side queries
+- `types.ts` — Task, Project, TaskStatus types
+- `task-context.tsx` / `project-context.tsx` — React providers
+- `task-repository.ts` / `project-repository.ts` — client-side queries
 - `recurring-task.ts` — recurring task logic
 - `reminder-service.ts` — reminder scheduling
 - CRUD forms: `task-form.tsx`, `task-form-edit.tsx` (mobile and desktop variants)

@@ -4,7 +4,7 @@ import { BasePage } from "./BasePage";
 /**
  * Page Object for /inbox.
  * Source: src/modules/task/inbox.tsx
- * Shows tasks with no date AND no list assigned.
+ * Shows tasks with no date AND no project assigned.
  */
 export class InboxPage extends BasePage {
   async goto(): Promise<void> {

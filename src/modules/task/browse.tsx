@@ -4,28 +4,28 @@ import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";
 import { NavActionButton } from "../components/nav-action-button";
 import { Button as Button2 } from "../components/button";
-import { useLists } from "./use-lists";
-import { useListContext } from "./list-context";
+import { useProjects } from "./use-projects";
+import { useProjectContext } from "./project-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { List, ListCreateInput, ListUpdateInput } from "./types";
+import type { Project } from "./types";
 import { MenuItem } from "../components/menu-item";
 
 export default function Browse() {
   const { t } = useLanguageContext();
   const navigate = useNavigate();
-  const { openListForm } = useListContext();
-  const { lists, loading, initiated, error, refreshLists } = useLists();
+  const { openProjectForm } = useProjectContext();
+  const { projects, loading, initiated, error } = useProjects();
 
-  const handleCreateList = () => {
-    openListForm(); // Open create form
+  const handleCreateProject = () => {
+    openProjectForm();
   };
 
   const handleGoToSettings = () => {
     navigate("/settings");
   };
 
-  const handleListClick = (list: List) => {
-    navigate(`/list/${list.id}`);
+  const handleProjectClick = (project: Project) => {
+    navigate(`/project/${project.id}`);
   };
 
   return (
@@ -63,38 +63,38 @@ export default function Browse() {
         <MenuItem icon={HvSearch} title={t("search") || "Search"} to="/tasks" />
       </div>
 
-      {!loading && initiated && lists.length === 0 && (
+      {!loading && initiated && projects.length === 0 && (
         <div className="text-center py-12">
           <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {t("no_lists") || "No lists yet"}
+            {t("no_projects") || "No projects yet"}
           </h3>
           <p className="text-gray-500 mb-4">
-            {t("no_lists_description") ||
-              "Create your first list to organize your tasks."}
+            {t("no_projects_description") ||
+              "Create your first project to organize your tasks."}
           </p>
-          <Button2 onClick={handleCreateList}>
+          <Button2 onClick={handleCreateProject}>
             <HvPlus size={20} />
-            <span className="">{t("create_list") || "Create List"}</span>
+            <span className="">{t("create_project") || "Create Project"}</span>
           </Button2>
         </div>
       )}
 
-      {lists.length > 0 && (
+      {projects.length > 0 && (
         <div>
           <div className="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
             <h3 className="text-sm font-medium text-gray-700">
-              {t("lists") || "Lists"}
+              {t("projects") || "Projects"}
             </h3>
-            <Button onClick={handleCreateList}>
+            <Button onClick={handleCreateProject}>
               <HvPlus size={20} />
             </Button>
           </div>
-          {lists.map((list) => (
+          {projects.map((project) => (
             <MenuItem
-              key={list.id}
-              title={list.name || ""}
-              to={`/list/${list.id}`}
+              key={project.id}
+              title={project.name || ""}
+              to={`/project/${project.id}`}
               showChevron={true}
             />
           ))}

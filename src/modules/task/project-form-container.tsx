@@ -1,62 +1,62 @@
 import { useState, useEffect } from "react";
-import { useListContext } from "./list-context";
-import { useLists } from "./use-lists";
-import ListForm from "./list-form";
-import type { List, ListCreateInput, ListUpdateInput } from "./types";
+import { useProjectContext } from "./project-context";
+import { useProjects } from "./use-projects";
+import ProjectForm from "./project-form";
+import type { Project, ProjectCreateInput, ProjectUpdateInput } from "./types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
-interface ListFormData {
+interface ProjectFormData {
   name: string;
   description: string;
   color: string;
 }
 
-export default function ListFormContainer() {
+export default function ProjectFormContainer() {
   const { t } = useLanguageContext();
-  const { editingListId, closeListForm } = useListContext();
-  const { getList, createList, updateList } = useLists();
+  const { editingProjectId, closeProjectForm } = useProjectContext();
+  const { getProject, createProject, updateProject } = useProjects();
 
-  const [list, setList] = useState<List | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formData, setFormData] = useState<ListFormData>({
+  const [formData, setFormData] = useState<ProjectFormData>({
     name: "",
     description: "",
     color: "#2e335a",
   });
 
-  // Load list data when editing
+  // Load project data when editing
   useEffect(() => {
-    if (editingListId) {
-      loadList();
+    if (editingProjectId) {
+      loadProject();
     } else {
       resetForm();
     }
-  }, [editingListId]);
+  }, [editingProjectId]);
 
-  const loadList = async () => {
-    if (!editingListId) return;
+  const loadProject = async () => {
+    if (!editingProjectId) return;
 
     try {
       setLoading(true);
-      const listData = await getList(editingListId);
-      if (listData) {
-        setList(listData);
+      const projectData = await getProject(editingProjectId);
+      if (projectData) {
+        setProject(projectData);
         setFormData({
-          name: listData.name || "",
-          description: listData.description || "",
-          color: listData.color || "#3B82F6",
+          name: projectData.name || "",
+          description: projectData.description || "",
+          color: projectData.color || "#3B82F6",
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load list");
+      setError(err instanceof Error ? err.message : "Failed to load project");
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-    setList(null);
+    setProject(null);
     setFormData({
       name: "",
       description: "",
@@ -69,7 +69,7 @@ export default function ListFormContainer() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("List name is required");
+      setError("Project name is required");
       return;
     }
 
@@ -77,36 +77,36 @@ export default function ListFormContainer() {
       setLoading(true);
       setError(null);
 
-      if (editingListId && list) {
-        // Update existing list
-        const updateInput: ListUpdateInput = {
+      if (editingProjectId && project) {
+        // Update existing project
+        const updateInput: ProjectUpdateInput = {
           name: formData.name.trim(),
           description: formData.description.trim() || undefined,
           color: formData.color,
         };
 
-        await updateList(editingListId, updateInput);
+        await updateProject(editingProjectId, updateInput);
       } else {
-        // Create new list
-        const createInput: ListCreateInput = {
+        // Create new project
+        const createInput: ProjectCreateInput = {
           name: formData.name.trim(),
           description: formData.description.trim() || undefined,
           color: formData.color,
         };
 
-        await createList(createInput);
+        await createProject(createInput);
       }
 
-      closeListForm();
+      closeProjectForm();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save list");
+      setError(err instanceof Error ? err.message : "Failed to save project");
     } finally {
       setLoading(false);
     }
   };
 
   const handleCancel = () => {
-    closeListForm();
+    closeProjectForm();
   };
 
   if (loading) {
@@ -120,12 +120,12 @@ export default function ListFormContainer() {
   }
 
   return (
-    <ListForm
+    <ProjectForm
       formData={formData}
       setFormData={setFormData}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
-      isEdit={!!editingListId}
+      isEdit={!!editingProjectId}
       isSubmitting={loading}
     />
   );

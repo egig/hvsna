@@ -414,8 +414,8 @@ export const commonTranslations = {
     en: "Collapse sidebar",
     id: "Ciutkan bilah samping",
   },
-  add_new_list: {
-    en: "Add new list",
-    id: "Tambah daftar baru",
+  add_new_project: {
+    en: "Add new project",
+    id: "Tambah proyek baru",
   },
 };

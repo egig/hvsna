@@ -4,63 +4,63 @@ import { HvList, HvEdit2, HvTrash2, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
-import { useLists } from "./use-lists";
-import { useListTasks } from "./use-list-tasks";
+import { useProjects } from "./use-projects";
+import { useProjectTasks } from "./use-project-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useListContext } from "./list-context";
-import { DeleteListModal } from "./delete-list-modal";
-import type { List, Task } from "./types";
+import { useProjectContext } from "./project-context";
+import { DeleteProjectModal } from "./delete-project-modal";
+import type { Project, Task } from "./types";
 import TaskListItem from "./task-list-item";
 import { useTaskContext } from "./task-context";
 import { useScreenSize } from "../system";
 
-export default function ListDetail() {
+export default function ProjectDetail() {
   const { t } = useLanguageContext();
-  const { listId } = useParams<{ listId: string }>();
+  const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const { openEditTaskForm } = useTaskContext();
-  const { openListForm } = useListContext();
+  const { openProjectForm } = useProjectContext();
   const { isDesktop } = useScreenSize();
 
   const {
-    lists,
+    projects,
     loading: listsLoading,
     error: listsError,
-    getList,
-    deleteList,
-    updating: isUpdatingList,
-  } = useLists();
+    getProject,
+    deleteProject,
+    updating: isUpdatingProject,
+  } = useProjects();
 
   const {
     tasks,
     loading: tasksLoading,
     error: tasksError,
     refreshTasks,
-  } = useListTasks({ listId: listId || "", enabled: !!listId });
+  } = useProjectTasks({ projectId: projectId || "", enabled: !!projectId });
 
-  const [currentList, setCurrentList] = useState<List | null>(null);
+  const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const handleEditList = () => {
-    if (currentList) {
-      openListForm(currentList.id);
+  const handleEditProject = () => {
+    if (currentProject) {
+      openProjectForm(currentProject.id);
     }
   };
 
-  const handleDeleteList = () => {
-    if (!currentList) {
+  const handleDeleteProject = () => {
+    if (!currentProject) {
       return;
     }
 
     setShowDeleteModal(true);
   };
 
-  const confirmDeleteList = async (deleteTasks: boolean) => {
-    if (!currentList) {
+  const confirmDeleteProject = async (deleteTasks: boolean) => {
+    if (!currentProject) {
       return;
     }
 
-    const success = await deleteList(currentList.id!, deleteTasks);
+    const success = await deleteProject(currentProject.id!, deleteTasks);
     if (success) {
       setShowDeleteModal(false);
       navigate("/browse");
@@ -69,18 +69,18 @@ export default function ListDetail() {
 
   // Load list details
   useEffect(() => {
-    if (listId) {
-      getList(listId).then(setCurrentList);
+    if (projectId) {
+      getProject(projectId).then(setCurrentProject);
     }
-  }, [listId, getList]);
+  }, [projectId, getProject]);
 
   // Reload list when update completes
   useEffect(() => {
-    if (!isUpdatingList && listId && currentList) {
+    if (!isUpdatingProject && projectId && currentProject) {
       // Reload the list after an update operation completes
-      getList(listId).then(setCurrentList);
+      getProject(projectId).then(setCurrentProject);
     }
-  }, [isUpdatingList, listId, currentList, getList, lists]);
+  }, [isUpdatingProject, projectId, currentProject, getProject, projects]);
 
   if (listsLoading) {
     return (
@@ -102,16 +102,16 @@ export default function ListDetail() {
     );
   }
 
-  if (!currentList) {
+  if (!currentProject) {
     return (
-      <Page navbar={<Navbar title={t("list_not_found") || "List Not Found"} />}>
+      <Page navbar={<Navbar title={t("project_not_found") || "Project Not Found"} />}>
         <div className="text-center py-12">
           <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {t("list_not_found") || "List Not Found"}
+            {t("project_not_found") || "Project Not Found"}
           </h3>
           <p className="text-gray-500 mb-4">
-            {t("list_not_found_description") ||
+            {t("project_not_found_description") ||
               "The list you're looking for doesn't exist or has been deleted."}
           </p>
         </div>
@@ -123,7 +123,7 @@ export default function ListDetail() {
     <Page
       navbar={
         <Navbar
-          title={currentList.name}
+          title={currentProject.name}
           rightAction={
             !isDesktop && (
               <Menu.Root>
@@ -138,18 +138,18 @@ export default function ListDetail() {
                   <Menu.Positioner className="z-[9999]">
                     <Menu.Popup className="z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 pointer-events-auto">
                       <Menu.Item
-                        onClick={handleEditList}
+                        onClick={handleEditProject}
                         className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
                         <HvEdit2 size={18} />
-                        {t("edit_list")}
+                        {t("edit_project")}
                       </Menu.Item>
                       <Menu.Item
-                        onClick={handleDeleteList}
+                        onClick={handleDeleteProject}
                         className="px-4 py-3 text-left hover:text-[var(--hvsna-danger-color-hover)] text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
                       >
                         <HvTrash2 size={18} />
-                        {t("delete_list")}
+                        {t("delete_project")}
                       </Menu.Item>
                     </Menu.Popup>
                   </Menu.Positioner>
@@ -160,9 +160,9 @@ export default function ListDetail() {
         />
       }
     >
-      {currentList.description && (
+      {currentProject.description && (
         <div className="px-4 py-2 border-b border-gray-200">
-          <p className="text-gray-600 text-sm">{currentList.description}</p>
+          <p className="text-gray-600 text-sm">{currentProject.description}</p>
         </div>
       )}
 
@@ -184,10 +184,10 @@ export default function ListDetail() {
         <div className="text-center py-12">
           <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {t("no_tasks_in_list") || "No Tasks in List"}
+            {t("no_tasks_in_project") || "No Tasks in Project"}
           </h3>
           <p className="text-gray-500 mb-4">
-            {t("no_tasks_in_list_description") ||
+            {t("no_tasks_in_project_description") ||
               "There are no tasks in this list yet. Create your first task to get started."}
           </p>
         </div>
@@ -207,11 +207,11 @@ export default function ListDetail() {
       )}
 
       {/* Delete Confirmation Modal */}
-      <DeleteListModal
+      <DeleteProjectModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={confirmDeleteList}
-        listName={currentList?.name || ""}
+        onConfirm={confirmDeleteProject}
+        projectName={currentProject?.name || ""}
         tasks={tasks}
       />
     </Page>

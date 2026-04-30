@@ -135,7 +135,7 @@ export async function generateOccurrencesForTemplate(
         repeatInterval: interval,
         recurringTaskId: template.id,
         attributes: template.attributes,
-        listId: template.listId,
+        projectId: template.projectId,
       });
       newCount++;
     }

@@ -8,13 +8,13 @@ import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
-import { useListContext } from "./modules/task/list-context";
-import ListFormContainer from "./modules/task/list-form-container";
+import { useProjectContext } from "./modules/task/project-context";
+import ProjectFormContainer from "./modules/task/project-form-container";
 
 export default function TabLayout() {
   const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm } =
     useTaskContext();
-  const { formOpen: listFormOpen, closeListForm } = useListContext();
+  const { formOpen: projectFormOpen, closeProjectForm } = useProjectContext();
   const location = useLocation();
   const params = useParams();
   const { isDesktop } = useScreenSize();
@@ -28,8 +28,8 @@ export default function TabLayout() {
     closeTaskForm();
   };
 
-  const handleListCancel = () => {
-    closeListForm();
+  const handleProjectCancel = () => {
+    closeProjectForm();
   };
 
   // Desktop Layout with side navigation
@@ -65,9 +65,9 @@ export default function TabLayout() {
             )}
           </Modal>
 
-          {/* List Form Modal */}
-          <Modal isOpen={listFormOpen} onClose={handleListCancel}>
-            <ListFormContainer />
+          {/* Project Form Modal */}
+          <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
+            <ProjectFormContainer />
           </Modal>
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function TabLayout() {
         <button
           onClick={() => {
             openCreateTaskForm({
-              listId: params.listId,
+              projectId: params.projectId,
             });
           }}
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
@@ -111,9 +111,9 @@ export default function TabLayout() {
         )}
       </Modal>
 
-      {/* List Form Modal */}
-      <Modal isOpen={listFormOpen} onClose={handleListCancel}>
-        <ListFormContainer />
+      {/* Project Form Modal */}
+      <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
+        <ProjectFormContainer />
       </Modal>
     </div>
   );

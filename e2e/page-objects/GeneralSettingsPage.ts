@@ -7,10 +7,10 @@ import { BasePage } from "./BasePage";
  * Source: src/modules/settings/pages/general-settings.tsx
  *
  * Layout:
- * - Language: ListInputSelect → native <select> (first combobox on page)
+ * - Language: ProjectInputSelect → native <select> (first combobox on page)
  * - Location section: label "Location", buttons for enable/get/clear
  * - Timezone: button with current timezone + chevron icon
- * - Manual Date Offset: ListInputSelect → native <select> (second combobox on page)
+ * - Manual Date Offset: ProjectInputSelect → native <select> (second combobox on page)
  */
 export class GeneralSettingsPage extends BasePage {
   async goto(): Promise<void> {

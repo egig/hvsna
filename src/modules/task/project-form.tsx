@@ -5,29 +5,29 @@ import { Navbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
 
-interface ListFormData {
+interface ProjectFormData {
   name: string;
   description: string;
   color: string;
 }
 
-interface ListFormProps {
-  formData: ListFormData;
-  setFormData: (data: ListFormData) => void;
+interface ProjectFormProps {
+  formData: ProjectFormData;
+  setFormData: (data: ProjectFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isEdit?: boolean;
   isSubmitting?: boolean;
 }
 
-export default function ListForm({
+export default function ProjectForm({
   formData,
   setFormData,
   onSubmit,
   onCancel,
   isEdit = false,
   isSubmitting = false,
-}: ListFormProps) {
+}: ProjectFormProps) {
   const { t } = useLanguageContext();
   const { isDesktop } = useScreenSize();
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -39,8 +39,8 @@ export default function ListForm({
   }, []);
 
   const title = isEdit
-    ? t("edit_list") || "Edit List"
-    : t("create_list") || "Create List";
+    ? t("edit_project") || "Edit Project"
+    : t("create_project") || "Create Project";
 
   const fields = (
     <>
@@ -52,7 +52,7 @@ export default function ListForm({
         className="text-base font-medium outline-none px-4 py-2 text-lg w-full"
         required
         disabled={isSubmitting}
-        placeholder={t("list_name") || "List name"}
+        placeholder={t("project_name") || "Project name"}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
@@ -65,7 +65,7 @@ export default function ListForm({
         }
         className="text-sm px-4 h-[3rem] py-2 w-full outline-none resize-none"
         disabled={isSubmitting}
-        placeholder={t("list_description") || "List description"}
+        placeholder={t("project_description") || "Project description"}
         style={{ resize: "none" }}
       />
     </>

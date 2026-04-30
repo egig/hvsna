@@ -12,7 +12,7 @@ This directory contains task repository implementations that automatically adapt
 - **Native Platform**: Uses Cordova SQLite adapter
 - **Database**: Single PouchDB instance with platform-optimized storage
 
-### 2. PouchDBListRepository
+### 2. PouchDBProjectepository
 
 - **Purpose**: List management companion to PouchDBTaskRepository
 - **Usage**: Handles list operations with the same platform adaptation
@@ -59,11 +59,11 @@ const list = await listRepository.create({...});
 ### Direct Repository Usage
 
 ```typescript
-import { PouchDBTaskRepository, PouchDBListRepository } from "./infra/task";
+import { PouchDBTaskRepository, PouchDBProjectepository } from "./infra/task";
 
 // The repositories automatically detect platform and use appropriate adapter
 const taskRepo = new PouchDBTaskRepository("my-app-db");
-const listRepo = new PouchDBListRepository("my-app-db");
+const listRepo = new PouchDBProjectepository("my-app-db");
 ```
 
 ### Database Creation

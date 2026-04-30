@@ -11,19 +11,19 @@ export class BrowsePage extends BasePage {
     await this.page.waitForLoadState("networkidle");
   }
 
-  /** "Create List" button shown in empty state */
-  get createListButton(): Locator {
-    return this.page.getByRole("button", { name: /create list/i });
+  /** "Create Project" button shown in empty state */
+  get createProjectButton(): Locator {
+    return this.page.getByRole("button", { name: /create project/i });
   }
 
-  /** List item link/button by name */
-  getListItem(name: string): Locator {
+  /** Project item link/button by name */
+  getProjectItem(name: string): Locator {
     return this.page.getByRole("link", { name }).or(
       this.page.getByText(name, { exact: true }),
     );
   }
 
-  async openList(name: string): Promise<void> {
-    await this.getListItem(name).click();
+  async openProject(name: string): Promise<void> {
+    await this.getProjectItem(name).click();
   }
 }

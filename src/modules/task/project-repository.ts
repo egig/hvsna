@@ -1,20 +1,20 @@
 import { generatePrefixedUUID } from "..";
 import { db } from "../pouchdb-singleton";
 import {
-  List,
-  type ListCreateInput,
-  type ListUpdateInput,
-  type ListQuery,
+  Project,
+  type ProjectCreateInput,
+  type ProjectUpdateInput,
+  type ProjectQuery,
 } from "./types";
 
-class PouchDBListDocument {
+class PouchDBProjectDocument {
   _id?: string;
   _rev?: string | undefined;
-  type: "list" = "list";
+  type: "project" = "project";
   name?: string;
   description?: string;
   color?: string = "#3B82F6";
-  icon?: string = "list";
+  icon?: string = "project";
   createdAt: number = new Date().valueOf();
   updatedAt: number = new Date().valueOf();
 
@@ -22,50 +22,50 @@ class PouchDBListDocument {
     Object.assign(this, o);
   }
 
-  toListItem(): List {
-    return new List({
+  toProjectItem(): Project {
+    return new Project({
       id: this._id || "",
       rev: this._rev,
       name: this.name || "",
       description: this.description || "",
       color: this.color || "#3B82F6",
-      // icon: this.icon || "list",
+      // icon: this.icon || "project",
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     });
   }
 
-  static fromListItem(l: List) {
-    let a = new PouchDBListDocument(l);
+  static fromProjectItem(l: Project) {
+    let a = new PouchDBProjectDocument(l);
     a._id = l.id;
     a._rev = l.rev;
     return a;
   }
 }
 
-export class ListRepository {
-  private static instance: ListRepository;
+export class ProjectRepository {
+  private static instance: ProjectRepository;
 
   private constructor() {
     // Private constructor for singleton
   }
 
-  static getInstance(): ListRepository {
-    if (!ListRepository.instance) {
-      ListRepository.instance = new ListRepository();
+  static getInstance(): ProjectRepository {
+    if (!ProjectRepository.instance) {
+      ProjectRepository.instance = new ProjectRepository();
     }
-    return ListRepository.instance;
+    return ProjectRepository.instance;
   }
 
   static resetInstance(): void {
-    ListRepository.instance = null as any;
+    ProjectRepository.instance = null as any;
   }
 
-  async create(input: ListCreateInput): Promise<List> {
+  async create(input: ProjectCreateInput): Promise<Project> {
     const now = Date.now().valueOf();
 
-    const newList = new List({
-      id: generatePrefixedUUID("list_"),
+    const newProject = new Project({
+      id: generatePrefixedUUID("project_"),
       name: input.name,
       description: input.description,
       color: input.color || "#3B82F6",
@@ -73,20 +73,20 @@ export class ListRepository {
       updatedAt: now,
     });
 
-    const doc = PouchDBListDocument.fromListItem(newList);
+    const doc = PouchDBProjectDocument.fromProjectItem(newProject);
     delete doc._rev;
 
     await (db as any).put(doc);
 
-    return newList;
+    return newProject;
   }
 
-  async update(id: string, input: ListUpdateInput): Promise<List> {
+  async update(id: string, input: ProjectUpdateInput): Promise<Project> {
     const existingDoc = await (db as any).get(id);
-    const updateData = new PouchDBListDocument({
+    const updateData = new PouchDBProjectDocument({
       ...existingDoc,
       updatedAt: Date.now(),
-    }).toListItem();
+    }).toProjectItem();
 
     // Check if field are inputted / undefined
     Object.assign(
@@ -96,19 +96,19 @@ export class ListRepository {
       )
     );
 
-    let ud = PouchDBListDocument.fromListItem(updateData);
+    let ud = PouchDBProjectDocument.fromProjectItem(updateData);
 
     const response = await (db as any).put(ud);
-    const updatedDoc = new PouchDBListDocument({
+    const updatedDoc = new PouchDBProjectDocument({
       ...updateData,
       _rev: response.rev,
     });
 
-    return updatedDoc.toListItem();
+    return updatedDoc.toProjectItem();
   }
 
   async delete(id: string, deleteTasks: boolean = false): Promise<void> {
-    const doc: PouchDBListDocument = await (db as any).get(id);
+    const doc: PouchDBProjectDocument = await (db as any).get(id);
 
     if (!doc._rev) {
       throw new Error("Document revision is required for deletion");
@@ -117,14 +117,14 @@ export class ListRepository {
     // Handle associated tasks based on deleteTasks parameter
     await db.createIndex({
       index: {
-        fields: ["type", "listId"],
+        fields: ["type", "projectId"],
       },
     });
 
     const mangoQuery = {
       selector: {
         type: "task",
-        listId: id,
+        projectId: id,
       },
     };
 
@@ -132,30 +132,30 @@ export class ListRepository {
     const tasks = (result as any).docs;
 
     if (deleteTasks) {
-      // Delete all tasks associated with this list
+      // Delete all tasks associated with this project
       for (const task of tasks) {
         await (db as any).remove(task);
       }
     } else {
-      // Set listId to null for all associated tasks
+      // Set projectId to null for all associated tasks
       for (const task of tasks) {
         const updatedTask = {
           ...task,
-          listId: null,
+          projectId: null,
           updatedAt: Date.now(),
         };
         await (db as any).put(updatedTask);
       }
     }
 
-    // Finally, delete the list document
+    // Finally, delete the project document
     await (db as any).remove(doc as any);
   }
 
-  async findById(id: string): Promise<List | null> {
+  async findById(id: string): Promise<Project | null> {
     try {
-      const doc: PouchDBListDocument = await (db as any).get(id);
-      return new PouchDBListDocument(doc).toListItem();
+      const doc: PouchDBProjectDocument = await (db as any).get(id);
+      return new PouchDBProjectDocument(doc).toProjectItem();
     } catch (err) {
       if ((err as any).status === 404) {
         return null;
@@ -164,7 +164,7 @@ export class ListRepository {
     }
   }
 
-  async find(query?: ListQuery): Promise<List[]> {
+  async find(query?: ProjectQuery): Promise<Project[]> {
     await (db as any).createIndex({
       index: {
         fields: ["type", "name"],
@@ -173,7 +173,7 @@ export class ListRepository {
 
     const mangoQuery: any = {
       selector: {
-        type: "list",
+        type: "project",
       },
       sort: [{ type: "asc" }, { name: "asc" }],
     };
@@ -188,18 +188,18 @@ export class ListRepository {
 
     const result = await (db as any).find(mangoQuery);
 
-    return (result as any).docs.map((doc: PouchDBListDocument) =>
-      new PouchDBListDocument(doc).toListItem()
+    return (result as any).docs.map((doc: PouchDBProjectDocument) =>
+      new PouchDBProjectDocument(doc).toProjectItem()
     );
   }
 
   async findWithPagination(
     offset: number,
     limit: number = 20
-  ): Promise<List[]> {
+  ): Promise<Project[]> {
     const mangoQuery = {
       selector: {
-        type: "list",
+        type: "project",
       },
       sort: [{ _id: "asc" }],
       limit,
@@ -208,7 +208,7 @@ export class ListRepository {
 
     const result = await (db as any).find(mangoQuery);
 
-    return (result as any).docs.map((doc: PouchDBListDocument) => ({
+    return (result as any).docs.map((doc: PouchDBProjectDocument) => ({
       id: doc._id,
       name: doc.name,
       description: doc.description,
@@ -221,4 +221,4 @@ export class ListRepository {
 }
 
 // Export singleton instance
-export const listRepository = ListRepository.getInstance();
+export const projectRepository = ProjectRepository.getInstance();

@@ -6,7 +6,7 @@ import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../components/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { TaskStatus, TaskTypeFilter } from "./types";
-import { useLists } from "./use-lists";
+import { useProjects } from "./use-projects";
 
 interface TaskFilterModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ interface TaskFilterModalProps {
   searchTextFilter: string;
   unscheduledFilter: boolean;
   taskTypeFilter: TaskTypeFilter;
-  listIdFilter: string | null;
+  projectIdFilter: string | null;
   onStatusFilterChange: (value: TaskStatus | "all") => void;
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null
@@ -24,7 +24,7 @@ interface TaskFilterModalProps {
   onSearchTextFilterChange: (value: string) => void;
   onUnscheduledFilterChange: (value: boolean) => void;
   onTaskTypeFilterChange: (value: TaskTypeFilter) => void;
-  onListIdFilterChange: (id: string | null) => void;
+  onProjectIdFilterChange: (id: string | null) => void;
   onClear: () => void;
 }
 
@@ -34,15 +34,15 @@ export default function TaskFilterModal({
   statusFilter,
   dateRangeFilter,
   unscheduledFilter,
-  listIdFilter,
+  projectIdFilter,
   onStatusFilterChange,
   onDateRangeFilterChange,
   onUnscheduledFilterChange,
-  onListIdFilterChange,
+  onProjectIdFilterChange,
   onClear,
 }: TaskFilterModalProps) {
   const { t } = useLanguageContext();
-  const { lists } = useLists();
+  const { projects } = useProjects();
 
   const statusOptions = [
     { value: "all" as const, label: t("all_status"), color: "bg-gray-500" },
@@ -133,19 +133,19 @@ export default function TaskFilterModal({
           </div>
         </div>
 
-        {/* List Filter — only shown when user has lists */}
-        {lists.length > 0 && (
+        {/* Project Filter — only shown when user has projects */}
+        {projects.length > 0 && (
           <ListInputSelect
-            label={t("list")}
-            value={listIdFilter ?? ""}
+            label={t("project")}
+            value={projectIdFilter ?? ""}
             onValueChange={(value) => {
-              onListIdFilterChange(value === "" ? null : value);
+              onProjectIdFilterChange(value === "" ? null : value);
             }}
             options={[
-              { value: "", label: t("all_lists") },
-              ...lists.map((list) => ({
-                value: list.id ?? "",
-                label: list.name ?? "",
+              { value: "", label: t("all_projects") },
+              ...projects.map((proj) => ({
+                value: proj.id ?? "",
+                label: proj.name ?? "",
               })),
             ]}
           />

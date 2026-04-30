@@ -273,13 +273,13 @@ export const taskTranslations = {
     en: "Clear filters",
     id: "Hapus filter",
   },
-  all_lists: {
-    en: "All lists",
-    id: "Semua daftar",
+  all_projects: {
+    en: "All projects",
+    id: "Semua proyek",
   },
-  list: {
-    en: "List",
-    id: "Daftar",
+  project: {
+    en: "Project",
+    id: "Proyek",
   },
   status: {
     en: "Status",
@@ -403,70 +403,70 @@ export const taskTranslations = {
     id: "Hapus semua kejadian yang tertunda dan hentikan pengulangan",
   },
 
-  // List-related translations
-  lists: {
-    en: "Lists",
-    id: "Daftar",
+  // Project-related translations
+  projects: {
+    en: "Projects",
+    id: "Proyek",
   },
-  create_list: {
-    en: "Create List",
-    id: "Buat Daftar",
+  create_project: {
+    en: "Create Project",
+    id: "Buat Proyek",
   },
-  edit_list: {
-    en: "Edit List",
-    id: "Edit Daftar",
+  edit_project: {
+    en: "Edit Project",
+    id: "Edit Proyek",
   },
-  delete_list: {
-    en: "Delete List",
-    id: "Delete Daftar",
+  delete_project: {
+    en: "Delete Project",
+    id: "Hapus Proyek",
   },
-  list_name: {
-    en: "List name",
-    id: "Nama daftar",
+  project_name: {
+    en: "Project name",
+    id: "Nama proyek",
   },
-  list_description: {
-    en: "List description",
-    id: "Deskripsi daftar",
+  project_description: {
+    en: "Project description",
+    id: "Deskripsi proyek",
   },
-  no_list: {
-    en: "No list",
-    id: "Tanpa list",
+  no_project: {
+    en: "No project",
+    id: "Tanpa proyek",
   },
-  no_lists: {
-    en: "No lists yet",
-    id: "Belum ada daftar",
+  no_projects: {
+    en: "No projects yet",
+    id: "Belum ada proyek",
   },
-  no_lists_description: {
-    en: "Create your first list to organize your tasks.",
-    id: "Buat daftar pertama Anda untuk mengatur tugas.",
+  no_projects_description: {
+    en: "Create your first project to organize your tasks.",
+    id: "Buat proyek pertama Anda untuk mengatur tugas.",
   },
-  create_first_list: {
-    en: "Create First List",
-    id: "Buat Daftar Pertama",
+  create_first_project: {
+    en: "Create First Project",
+    id: "Buat Proyek Pertama",
   },
-  list_not_found: {
-    en: "List Not Found",
-    id: "Daftar Tidak Ditemukan",
+  project_not_found: {
+    en: "Project Not Found",
+    id: "Proyek Tidak Ditemukan",
   },
-  list_not_found_description: {
-    en: "The list you're looking for doesn't exist or has been deleted.",
-    id: "Daftar yang Anda cari tidak ada atau telah dihapus.",
+  project_not_found_description: {
+    en: "The project you're looking for doesn't exist or has been deleted.",
+    id: "Proyek yang Anda cari tidak ada atau telah dihapus.",
   },
   loading_tasks: {
     en: "Loading tasks...",
     id: "Memuat tugas...",
   },
-  no_tasks_in_list: {
-    en: "No Tasks in List",
-    id: "Tidak Ada Tugas dalam Daftar",
+  no_tasks_in_project: {
+    en: "No Tasks in Project",
+    id: "Tidak Ada Tugas dalam Proyek",
   },
-  no_tasks_in_list_description: {
-    en: "There are no tasks in this list yet. Create your first task to get started.",
-    id: "Belum ada tugas dalam daftar ini. Buat tugas pertama Anda untuk memulai.",
+  no_tasks_in_project_description: {
+    en: "There are no tasks in this project yet. Create your first task to get started.",
+    id: "Belum ada tugas dalam proyek ini. Buat tugas pertama Anda untuk memulai.",
   },
-  view_all_lists: {
-    en: "View all lists",
-    id: "Lihat semua daftar",
+  view_all_projects: {
+    en: "View all projects",
+    id: "Lihat semua proyek",
   },
 
   // Demotion scope prompt

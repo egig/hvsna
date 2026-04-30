@@ -17,7 +17,7 @@ import { ErrorBoundary } from "../../modules/components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "../../modules/query-client";
 import { TaskProvider } from "../../modules/task/task-context";
-import { ListProvider } from "../../modules/task/list-context";
+import { ProjectProvider } from "../../modules/task/project-context";
 import { AuthProvider } from "../../modules/auth";
 import { SettingsProvider } from "../../modules/settings";
 import { SystemProvider } from "../../modules/system";
@@ -100,14 +100,14 @@ export default function App({
                             <SyncProvider>
                               <LanguageProviderWrapper>
                                 <TaskProvider>
-                                  <ListProvider>
+                                  <ProjectProvider>
                                     <BrowserRouter
                                       basename={config.appBaseName || ""}
                                     >
                                       <PostHogSessionTracker platform="web" />
                                       <AppRoutes />
                                     </BrowserRouter>
-                                  </ListProvider>
+                                  </ProjectProvider>
                                 </TaskProvider>
                               </LanguageProviderWrapper>
                             </SyncProvider>

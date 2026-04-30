@@ -26,7 +26,7 @@ export function useTasks() {
   } | null>(null);
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
-  const [listIdFilter, setListIdFilter] = useState<string | null>(null);
+  const [projectIdFilter, setProjectIdFilter] = useState<string | null>(null);
   const [taskTypeFilter, setTaskTypeFilter] = useState<TaskTypeFilter>("all");
 
   const clearFilters = useCallback(() => {
@@ -34,7 +34,7 @@ export function useTasks() {
     setDateRangeFilter(null);
     setSearchTextFilter("");
     setUnscheduledFilter(false);
-    setListIdFilter(null);
+    setProjectIdFilter(null);
     setTaskTypeFilter("all");
   }, []);
 
@@ -46,7 +46,7 @@ export function useTasks() {
       : "",
     searchTextFilter || "",
     unscheduledFilter ? "1" : "",
-    listIdFilter || "",
+    projectIdFilter || "",
     taskTypeFilter === "all" ? "" : taskTypeFilter,
   ].join("|");
 
@@ -77,9 +77,9 @@ export function useTasks() {
       query.unscheduled = 1;
     }
 
-    // Add list filter
-    if (listIdFilter) {
-      query.listId = listIdFilter;
+    // Add project filter
+    if (projectIdFilter) {
+      query.projectId = projectIdFilter;
     }
 
     // Add task type filter
@@ -272,7 +272,7 @@ export function useTasks() {
     dateRangeFilter,
     searchTextFilter,
     unscheduledFilter,
-    listIdFilter,
+    projectIdFilter,
     taskTypeFilter,
 
     // Handlers
@@ -287,7 +287,7 @@ export function useTasks() {
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
-    setListIdFilter,
+    setProjectIdFilter,
     setTaskTypeFilter,
     clearFilters,
   };

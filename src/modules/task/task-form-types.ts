@@ -19,6 +19,6 @@ export interface RepeatConfig {
 
 export interface TaskFormData {
   scheduleAt: TaskScheduleAt;
-  listId: string;
+  projectId: string;
   repeat: RepeatConfig;
 }

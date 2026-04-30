@@ -3,11 +3,11 @@ import { test } from "../../fixtures/app.fixture";
 import { BrowsePage } from "../../page-objects/BrowsePage";
 
 /**
- * Task list management tests (/browse, /list/:listId)
+ * Task project management tests (/browse, /project/:projectId)
  *
- * Source: src/modules/task/browse.tsx, list-detail.tsx, list-form.tsx
+ * Source: src/modules/task/browse.tsx, project-detail.tsx, project-form.tsx
  */
-test.describe("Task list management", () => {
+test.describe("Task project management", () => {
   let browse: BrowsePage;
 
   test.beforeEach(async ({ taskPage }) => {
@@ -19,45 +19,45 @@ test.describe("Task list management", () => {
     await expect(taskPage).toHaveURL("/browse");
   });
 
-  test("creates a new list", async ({ taskPage }) => {
-    await browse.createListButton.click();
+  test("creates a new project", async ({ taskPage }) => {
+    await browse.createProjectButton.click();
 
-    // List form input — aria-label or name field
+    // Project form input — aria-label or name field
     const nameInput = taskPage
       .getByRole("textbox")
       .filter({ hasText: "" })
       .first();
     await nameInput.fill("Work tasks");
 
-    // Submit the list form
+    // Submit the project form
     await taskPage.getByRole("button", { name: /create|save|submit/i }).last().click();
 
-    // List should appear in browse
-    await expect(browse.getListItem("Work tasks")).toBeVisible();
+    // Project should appear in browse
+    await expect(browse.getProjectItem("Work tasks")).toBeVisible();
   });
 
-  test("clicking a list navigates to list detail", async ({ taskPage }) => {
-    // Create a list first
-    await browse.createListButton.click();
+  test("clicking a project navigates to project detail", async ({ taskPage }) => {
+    // Create a project first
+    await browse.createProjectButton.click();
     const nameInput = taskPage.getByRole("textbox").first();
-    await nameInput.fill("My list");
+    await nameInput.fill("My project");
     await taskPage.getByRole("button", { name: /create|save|submit/i }).last().click();
 
-    // Click on the list
-    await browse.openList("My list");
+    // Click on the project
+    await browse.openProject("My project");
 
-    // URL should contain /list/
-    await expect(taskPage).toHaveURL(/\/list\//);
+    // URL should contain /project/
+    await expect(taskPage).toHaveURL(/\/project\//);
   });
 
-  test("list detail shows empty state when no tasks", async ({ taskPage }) => {
-    // Create a list
-    await browse.createListButton.click();
+  test("project detail shows empty state when no tasks", async ({ taskPage }) => {
+    // Create a project
+    await browse.createProjectButton.click();
     const nameInput = taskPage.getByRole("textbox").first();
-    await nameInput.fill("Empty list");
+    await nameInput.fill("Empty project");
     await taskPage.getByRole("button", { name: /create|save|submit/i }).last().click();
 
-    await browse.openList("Empty list");
+    await browse.openProject("Empty project");
 
     // Should show empty state
     await expect(taskPage.getByRole("heading", { name: /no tasks/i })).toBeVisible();
