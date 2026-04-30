@@ -47,10 +47,11 @@ class PouchDBTaskDocument {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string;
-  projectId?: string;
-  tags?: string[];
+  projectId?: string | null = null;
+  tags?: string[] | null = null;
 
   constructor(o: any) {
+    // o must be data from pouchdb
     Object.assign(this, o);
   }
 
@@ -91,6 +92,8 @@ class PouchDBTaskDocument {
     a.lat = t.lat;
     a.long = t.long;
     a.hijriDateOffset = t.hijriDateOffset;
+    a.projectId = t.projectId || null;
+    a.tags = t.tags || [];
 
     if (!!t.atDateHijri) {
       const { year, month, day } = parseHijriDateString(t.atDateHijri);
@@ -235,6 +238,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
     delete doc._rev;
 
+    console.log("create task with", doc)
     await this.db.put(doc);
 
     return newTask;
@@ -574,8 +578,10 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: { $gte: 0 },
+        projectId: { $gte: null },
         noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
+        tags: { $gte: null },
       },
       sort: [
         { type: "asc" },
@@ -614,7 +620,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
         mangoQuery.selector.tags = { $in: query.tags };
       }
     }
-
     const result = await this.db.find(mangoQuery);
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem()
