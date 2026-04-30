@@ -1,4 +1,4 @@
-import { HvPlus, HvList, HvSettings, HvSearch } from "@/modules/icons";
+import { HvPlus, HvList, HvSettings, HvSearch, HvTag } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";
@@ -59,8 +59,9 @@ export default function Browse() {
       )}
 
       {/* Navigation Menu Items */}
-      <div className="mb-6">
+      <div className="mb-6 space-y-1">
         <MenuItem icon={HvSearch} title={t("search") || "Search"} to="/tasks" />
+        <MenuItem icon={HvTag} title={t("tags") || "Tags"} to="/tags" />
       </div>
 
       {!loading && initiated && projects.length === 0 && (

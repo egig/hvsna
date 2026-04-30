@@ -93,6 +93,7 @@ export const useTaskFormEdit = (
       endDate: null,
       endOccurrences: 1,
     },
+    tags: [],
   });
 
   const updateFormData = (updates: Partial<EditFormData>) => {
@@ -149,6 +150,7 @@ export const useTaskFormEdit = (
         prayerTime: (formData.scheduleAt.prayerTime as PrayerTime) || undefined,
         removeTime: removeTime,
         projectId: formData.projectId === "" ? null : formData.projectId || undefined,
+        tags: formData.tags.length > 0 ? formData.tags : null,
       };
 
       const wasRegular = !task?.recurringTaskId;
@@ -403,6 +405,7 @@ export const useTaskFormEdit = (
     setFormData({
       scheduleAt,
       projectId: task.projectId || "",
+      tags: task.tags || [],
       repeat: {
         repeat: task.repeat ?? "none",
         interval: task.repeatInterval ?? 1,

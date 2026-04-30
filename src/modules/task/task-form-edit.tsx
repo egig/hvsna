@@ -18,6 +18,7 @@ import { Modal } from "../navigation/modal";
 import TaskPreview from "./task-preview";
 import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
+import { TagInput } from "./tag-input";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -79,7 +80,7 @@ export default function TaskFormEdit({
         className={
           isDesktop
             ? "w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center transition-colors"
-            : "w-12 h-12 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors z-50"
+            : "w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors z-50"
         }
         aria-label={t("more_options")}
       >
@@ -210,6 +211,14 @@ export default function TaskFormEdit({
         onFocus={() => setIsFormFocused(true)}
         onBlur={() => setIsFormFocused(false)}
       />
+        <TagInput
+          selectedTags={formData.tags}
+          onTagsChange={(tags) => {
+            updateFormData({ tags });
+            setIsFormDirty(true);
+          }}
+          disabled={isSubmitting}
+        />
 
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput
@@ -256,7 +265,7 @@ export default function TaskFormEdit({
             selectedProjectId={formData.projectId}
             onProjectChange={(projectId) => {
               setIsFormDirty(true);
-              updateFormData({ listId });
+              updateFormData({ projectId });
             }}
             disabled={isSubmitting}
           />

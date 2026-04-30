@@ -1,0 +1,169 @@
+import { useCallback, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePouchDB } from "../../pouchdb";
+import { createTaskUseCases } from "../../usecases/task";
+import { queryKeys } from "../query-keys";
+import log from "../logger";
+
+export interface TagInfo {
+  name: string;
+  count: number;
+}
+
+export function useTags() {
+  const { db } = usePouchDB();
+  const taskUseCases = createTaskUseCases(db);
+  const queryClient = useQueryClient();
+
+  // Query all tasks to extract tags
+  const allTasksQuery = useQuery({
+    queryKey: queryKeys.allTags(),
+    queryFn: () => taskUseCases.getTasks(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+
+  const tasks = allTasksQuery.data || [];
+
+  // Extract unique tags with usage counts
+  const tags = useMemo<TagInfo[]>(() => {
+    const tagCounts = new Map<string, number>();
+
+    for (const task of tasks) {
+      if (task.tags && Array.isArray(task.tags)) {
+        for (const tag of task.tags) {
+          const normalized = normalizeTag(tag);
+          if (normalized) {
+            tagCounts.set(normalized, (tagCounts.get(normalized) || 0) + 1);
+          }
+        }
+      }
+    }
+
+    return Array.from(tagCounts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [tasks]);
+
+  const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
+
+  const refreshTags = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.allTags() });
+    // Also invalidate browsed tasks since tag changes affect task data
+    queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
+  }, [queryClient]);
+
+  // Rename a tag across all tasks
+  const renameTag = useCallback(
+    async (oldName: string, newName: string): Promise<void> => {
+      const normalizedNew = normalizeTag(newName);
+      if (!normalizedNew) {
+        throw new Error("Invalid tag name");
+      }
+      if (oldName === normalizedNew) {
+        return;
+      }
+
+      const tasksToUpdate = tasks.filter(
+        (task) =>
+          task.tags?.includes(oldName) && !task.tags?.includes(normalizedNew)
+      );
+
+      for (const task of tasksToUpdate) {
+        const updatedTags = task.tags!.map((tag) =>
+          tag === oldName ? normalizedNew : tag
+        );
+        try {
+          await taskUseCases.updateTask(task.id!, { tags: updatedTags });
+        } catch (err) {
+          log.error(`Failed to update tag on task ${task.id}:`, err);
+        }
+      }
+
+      refreshTags();
+    },
+    [tasks, taskUseCases, refreshTags]
+  );
+
+  // Delete a tag from all tasks
+  const deleteTag = useCallback(
+    async (tagName: string): Promise<void> => {
+      const tasksToUpdate = tasks.filter((task) =>
+        task.tags?.includes(tagName)
+      );
+
+      for (const task of tasksToUpdate) {
+        const updatedTags = task.tags!.filter((tag) => tag !== tagName);
+        try {
+          await taskUseCases.updateTask(task.id!, {
+            tags: updatedTags.length > 0 ? updatedTags : null,
+          });
+        } catch (err) {
+          log.error(`Failed to remove tag from task ${task.id}:`, err);
+        }
+      }
+
+      refreshTags();
+    },
+    [tasks, taskUseCases, refreshTags]
+  );
+
+  // Merge two tags (source into target)
+  const mergeTags = useCallback(
+    async (sourceTag: string, targetTag: string): Promise<void> => {
+      if (sourceTag === targetTag) return;
+
+      const tasksToUpdate = tasks.filter(
+        (task) =>
+          task.tags?.includes(sourceTag) && !task.tags?.includes(targetTag)
+      );
+
+      for (const task of tasksToUpdate) {
+        const updatedTags = task.tags!.map((tag) =>
+          tag === sourceTag ? targetTag : tag
+        );
+        try {
+          await taskUseCases.updateTask(task.id!, { tags: updatedTags });
+        } catch (err) {
+          log.error(`Failed to merge tag on task ${task.id}:`, err);
+        }
+      }
+
+      // Delete the source tag from any remaining tasks that also have the target
+      const tasksWithBoth = tasks.filter(
+        (task) =>
+          task.tags?.includes(sourceTag) && task.tags?.includes(targetTag)
+      );
+
+      for (const task of tasksWithBoth) {
+        const updatedTags = task.tags!.filter((tag) => tag !== sourceTag);
+        try {
+          await taskUseCases.updateTask(task.id!, { tags: updatedTags });
+        } catch (err) {
+          log.error(`Failed to remove merged tag on task ${task.id}:`, err);
+        }
+      }
+
+      refreshTags();
+    },
+    [tasks, taskUseCases, refreshTags]
+  );
+
+  return {
+    tags,
+    tagNames,
+    loading: allTasksQuery.isPending,
+    error: allTasksQuery.error
+      ? allTasksQuery.error instanceof Error
+        ? allTasksQuery.error.message
+        : "Unknown error"
+      : null,
+    refreshTags,
+    renameTag,
+    deleteTag,
+    mergeTags,
+  };
+}
+
+export function normalizeTag(tag: string): string {
+  return tag.trim().toLowerCase();
+}

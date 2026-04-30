@@ -72,6 +72,7 @@ export const useTaskForm = (
       endDate: null,
       endOccurrences: 1,
     },
+    tags: [],
   });
 
   // Helper functions for updating state
@@ -136,6 +137,7 @@ export const useTaskForm = (
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
           projectId: formData.projectId,
+          tags: formData.tags,
           repeatEnd: formData.repeat.end,
           repeatEndDate: formData.repeat.endDate as string,
           repeatEndOccurrences: formData.repeat.endOccurrences,
@@ -159,6 +161,7 @@ export const useTaskForm = (
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
           projectId: formData.projectId || undefined,
+          tags: formData.tags.length > 0 ? formData.tags : undefined,
         };
 
         const result = await createTask(taskInput);

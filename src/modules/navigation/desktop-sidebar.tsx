@@ -31,6 +31,7 @@ import {
   HvSettingsFilled,
   HvOutlineInbox,
   HvHiInbox,
+  HvTag,
 } from "@/modules/icons";
 import { UserRound } from "lucide-react";
 
@@ -127,6 +128,13 @@ export function DesktopSidebar({
       icon: <HvSearch />,
       activeIcon: <HvSearch />,
       context: "all",
+    },
+    {
+      path: "/tags",
+      label: t("tags") || "Tags",
+      icon: <HvTag />,
+      activeIcon: <HvTag />,
+      context: "tags",
     },
   ];
 

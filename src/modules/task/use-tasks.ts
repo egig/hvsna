@@ -28,6 +28,7 @@ export function useTasks() {
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
   const [projectIdFilter, setProjectIdFilter] = useState<string | null>(null);
   const [taskTypeFilter, setTaskTypeFilter] = useState<TaskTypeFilter>("all");
+  const [tagFilter, setTagFilter] = useState<string[]>([]);
 
   const clearFilters = useCallback(() => {
     setStatusFilter("all");
@@ -36,6 +37,7 @@ export function useTasks() {
     setUnscheduledFilter(false);
     setProjectIdFilter(null);
     setTaskTypeFilter("all");
+    setTagFilter([]);
   }, []);
 
   // Create filter key for React Query
@@ -48,6 +50,7 @@ export function useTasks() {
     unscheduledFilter ? "1" : "",
     projectIdFilter || "",
     taskTypeFilter === "all" ? "" : taskTypeFilter,
+    tagFilter.join(","),
   ].join("|");
 
   // Build query object for repository
@@ -85,6 +88,11 @@ export function useTasks() {
     // Add task type filter
     if (taskTypeFilter !== "all") {
       query.taskType = taskTypeFilter;
+    }
+
+    // Add tag filter (OR logic — matching any selected tag)
+    if (tagFilter.length > 0) {
+      query.tags = tagFilter;
     }
 
     return query;
@@ -274,6 +282,7 @@ export function useTasks() {
     unscheduledFilter,
     projectIdFilter,
     taskTypeFilter,
+    tagFilter,
 
     // Handlers
     refreshTasks: resetPagination,
@@ -289,6 +298,7 @@ export function useTasks() {
     setUnscheduledFilter,
     setProjectIdFilter,
     setTaskTypeFilter,
+    setTagFilter,
     clearFilters,
   };
 }

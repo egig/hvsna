@@ -48,6 +48,7 @@ class PouchDBTaskDocument {
   repeatInterval?: number;
   recurringTaskId?: string;
   projectId?: string;
+  tags?: string[];
 
   constructor(o: any) {
     Object.assign(this, o);
@@ -78,6 +79,7 @@ class PouchDBTaskDocument {
       repeatInterval: this.repeatInterval,
       recurringTaskId: this.recurringTaskId,
       projectId: this.projectId,
+      tags: this.tags,
     });
   }
 
@@ -227,6 +229,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
       repeatInterval: input.repeatInterval,
       recurringTaskId: input.recurringTaskId,
       projectId: input.projectId,
+      tags: input.tags,
     });
 
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
@@ -338,6 +341,10 @@ export class PouchDBTaskRepository implements ITaskRepository {
         { name: { $regex: searchLower } },
         { description: { $regex: searchLower } },
       ];
+    }
+
+    if (query?.tags && query.tags.length > 0) {
+      mangoQuery.selector.tags = { $in: query.tags };
     }
 
     const result = await this.db.find(mangoQuery);
@@ -601,6 +608,9 @@ export class PouchDBTaskRepository implements ITaskRepository {
       }
       if (query.projectId) {
         mangoQuery.selector.projectId = query.projectId;
+      }
+      if (query.tags && query.tags.length > 0) {
+        mangoQuery.selector.tags = { $in: query.tags };
       }
     }
 

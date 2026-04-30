@@ -21,4 +21,5 @@ export interface TaskFormData {
   scheduleAt: TaskScheduleAt;
   projectId: string;
   repeat: RepeatConfig;
+  tags: string[];
 }

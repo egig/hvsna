@@ -508,4 +508,66 @@ export const taskTranslations = {
     en: "Set Location",
     id: "Atur Lokasi",
   },
+
+  // Tags
+  tags: {
+    en: "Tags",
+    id: "Tag",
+  },
+  manage_tags: {
+    en: "Manage Tags",
+    id: "Kelola Tag",
+  },
+  rename_tag: {
+    en: "Rename Tag",
+    id: "Ubah Nama Tag",
+  },
+  merge_tags: {
+    en: "Merge Tags",
+    id: "Gabungkan Tag",
+  },
+  delete_tag: {
+    en: "Delete Tag",
+    id: "Hapus Tag",
+  },
+  tag_name: {
+    en: "Tag name",
+    id: "Nama tag",
+  },
+  new_tag_name: {
+    en: "New tag name",
+    id: "Nama tag baru",
+  },
+  select_tag_to_merge: {
+    en: "Select tag to merge into",
+    id: "Pilih tag untuk digabungkan",
+  },
+  tag_rename_confirm: {
+    en: "Rename \"{oldName}\" to \"{newName}\"?",
+    id: "Ubah \"{oldName}\" menjadi \"{newName}\"?",
+  },
+  tag_merge_confirm: {
+    en: "Merge \"{source}\" into \"{target}\"? Tasks with \"{source}\" will be updated to use \"{target}\".",
+    id: "Gabungkan \"{source}\" ke \"{target}\"? Tugas dengan \"{source}\" akan diperbarui ke \"{target}\".",
+  },
+  tag_delete_confirm: {
+    en: "Delete tag \"{name}\"? It will be removed from all tasks.",
+    id: "Hapus tag \"{name}\"? Tag akan dihapus dari semua tugas.",
+  },
+  no_tags_yet: {
+    en: "No tags yet",
+    id: "Belum ada tag",
+  },
+  create_tags_description: {
+    en: "Tags are created automatically when you add them to tasks.",
+    id: "Tag dibuat secara otomatis saat Anda menambahkannya ke tugas.",
+  },
+  filter_any_selected: {
+    en: "Any selected",
+    id: "Salah satu yang dipilih",
+  },
+  tag_count_tasks: {
+    en: "{count} tasks",
+    id: "{count} tugas",
+  },
 };

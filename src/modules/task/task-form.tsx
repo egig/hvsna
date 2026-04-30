@@ -9,6 +9,7 @@ import type { Task } from "./types";
 import { useSettings } from "src/modules/settings/useSettings";
 import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
+import { TagInput } from "./tag-input";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -98,6 +99,12 @@ export default function TaskForm({
         style={{ resize: "none" }}
       />
 
+        <TagInput
+          selectedTags={formData.tags}
+          onTagsChange={(tags) => updateFormData({ tags })}
+          disabled={isSubmitting}
+        />
+
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput
           hijriDate={formData.scheduleAt.dateHijri}
@@ -140,7 +147,9 @@ export default function TaskForm({
             disabled={isSubmitting || projectIdPreselected}
           />
         )}
+        
       </div>
+
 
       <div className="flex justify-end p-4">
         {isDesktop ? (

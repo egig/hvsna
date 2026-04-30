@@ -28,12 +28,14 @@ export default function Tasks() {
     unscheduledFilter,
     taskTypeFilter,
     projectIdFilter,
+    tagFilter,
     setStatusFilter,
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
     setTaskTypeFilter,
     setProjectIdFilter,
+    setTagFilter,
     clearFilters,
   } = useTasks();
 
@@ -48,7 +50,8 @@ export default function Tasks() {
       !!dateRangeFilter ||
       unscheduledFilter ||
       taskTypeFilter !== "all" ||
-      !!projectIdFilter
+      !!projectIdFilter ||
+      tagFilter.length > 0
     );
   };
 
@@ -133,12 +136,14 @@ export default function Tasks() {
           unscheduledFilter={unscheduledFilter}
           taskTypeFilter={taskTypeFilter}
           projectIdFilter={projectIdFilter}
+          tagFilter={tagFilter}
           onStatusFilterChange={setStatusFilter}
           onDateRangeFilterChange={setDateRangeFilter}
           onSearchTextFilterChange={setSearchTextFilter}
           onUnscheduledFilterChange={setUnscheduledFilter}
           onTaskTypeFilterChange={setTaskTypeFilter}
           onProjectIdFilterChange={setProjectIdFilter}
+          onTagFilterChange={setTagFilter}
           onClear={clearFilters}
         />
       </Modal>

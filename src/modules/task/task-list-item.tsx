@@ -7,6 +7,7 @@ import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useHijriDate } from "../calendar/hijri";
+import { TagList } from "./tag-input";
 
 interface TaskListItemProps {
   task: Task;
@@ -242,6 +243,10 @@ export function TaskListItem({
             >
               {formatScheduledDate(task, location.state?.context)}
             </p>
+          )}
+
+          {task.tags && task.tags.length > 0 && (
+            <TagList tags={task.tags} className="mt-1.5" />
           )}
         </div>
       </div>

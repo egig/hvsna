@@ -34,6 +34,7 @@ import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import { Inbox } from "./modules/task/inbox";
 import Browse from "./modules/task/browse";
+import TagManagementPage from "./modules/task/tag-management-page";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -95,6 +96,7 @@ export const AppRoutes = () => {
             <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
             {!isDesktop && <Route path="browse" element={<Browse />} />}
+            <Route path="tags" element={<TagManagementPage />} />
             <Route path="project/:projectId" element={<ProjectDetail />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}

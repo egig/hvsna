@@ -33,6 +33,7 @@ export class Task {
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
   projectId?: string;
+  tags?: string[];
 
   constructor(a: Partial<Task>) {
     Object.assign(this, a);
@@ -68,6 +69,7 @@ export interface TaskCreateInput {
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   projectId?: string;
+  tags?: string[];
 }
 
 export interface TaskUpdateInput {
@@ -87,6 +89,7 @@ export interface TaskUpdateInput {
   hijriDateOffset?: number;
   removeTime?: boolean;
   projectId?: string | null;
+  tags?: string[] | null;
 }
 
 export interface TaskChange {
@@ -109,6 +112,7 @@ export type TaskQuery = {
   searchText?: string;
   projectId?: string;
   taskType?: TaskTypeFilter;
+  tags?: string[];
 };
 
 export class Project {
