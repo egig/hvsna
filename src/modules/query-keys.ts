@@ -9,5 +9,5 @@ export const queryKeys = {
   projects: (filters: string) => ["projects", filters] as const,
   project: (id: string) => ["project", id] as const,
   inboxTasks: () => ["inbox-tasks"] as const,
-  allTags: () => ["all-tags"] as const,
+  allTasks: () => ["all-tasks"] as const,
 } as const;

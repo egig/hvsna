@@ -566,7 +566,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "projectId", "noDate", "atEpochMillis"],
+        fields: ["type", "status", "projectId", "noDate", "atEpochMillis", "tags"],
       },
     });
 
@@ -583,6 +583,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         { projectId: "asc" },
         { noDate: "asc" },
         { atEpochMillis: "asc" },
+        { tags: "asc" },
       ] as any,
       limit,
       skip: offset,

@@ -1,8 +1,9 @@
 import { useCallback, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
+import { useAllTasks } from "./use-all-tasks";
 import log from "../logger";
 
 export interface TagInfo {
@@ -15,13 +16,7 @@ export function useTags() {
   const taskUseCases = createTaskUseCases(db);
   const queryClient = useQueryClient();
 
-  // Query all tasks to extract tags
-  const allTasksQuery = useQuery({
-    queryKey: queryKeys.allTags(),
-    queryFn: () => taskUseCases.getTasks(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
+  const allTasksQuery = useAllTasks();
   const tasks = allTasksQuery.data || [];
 
   // Extract unique tags with usage counts
@@ -47,8 +42,7 @@ export function useTags() {
   const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
 
   const refreshTags = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.allTags() });
-    // Also invalidate browsed tasks since tag changes affect task data
+    queryClient.invalidateQueries({ queryKey: queryKeys.allTasks() });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
   }, [queryClient]);
 
