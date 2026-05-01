@@ -6,6 +6,8 @@ import {
   HvEdit,
   HvTrash2,
   HvPanelLeft,
+  HvChartArea,
+  HvChartAreaFilled,
 } from "@/modules/icons";
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
@@ -111,8 +113,8 @@ export function DesktopSidebar({
     {
       path: "/finance",
       label: t("finance"),
-      icon: <HvWallet />,
-      activeIcon: <HvWallet />,
+      icon: <HvChartArea />,
+      activeIcon: <HvChartAreaFilled />,
       context: "finance",
     },
     {
@@ -167,7 +169,7 @@ export function DesktopSidebar({
     <div
       className={`${
         "w-full h-full"
-      } bg-white border-r border-gray-200 flex flex-col overflow-hidden`}
+      } bg-white border-gray-200 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
         {!collapsed && (

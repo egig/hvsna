@@ -9,7 +9,7 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { EmptyState } from "../components/empty-state";
 import { Wallet } from "lucide-react";
-import { HvPlus, HvLandmark } from "../icons";
+import { HvPlus, HvLandmark, HvWallet } from "../icons";
 import { parseHijriDateString } from "../task/task-form-helpers";
 import type { FinanceEntry } from "../../domain/finance/IFinanceRepository";
 import { Page } from "../navigation";
@@ -74,7 +74,7 @@ function FinancePage() {
                 aria-label={t("accounts") || "Accounts"}
                 className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <HvLandmark size={20} />
+                <HvWallet size={20} />
               </Link>
               <div className="hidden md:block">
                 <NavActionButton

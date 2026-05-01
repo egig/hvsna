@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Collapsible } from "@base-ui/react/collapsible";
 import {
   HvChevronRight,
@@ -39,16 +40,66 @@ interface WeekViewColumnProps {
   droppable?: boolean;
 }
 
+function DraggableTaskCard({
+  task,
+  isCompleted,
+  isOverdue,
+  onEdit,
+}: {
+  task: Task;
+  isCompleted: boolean;
+  isOverdue: boolean;
+  onEdit: (task: Task) => void;
+}) {
+  const { setNodeRef, listeners, attributes, transform, isDragging } =
+    useDraggable({ id: task.id! });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={
+        transform
+          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+          : undefined
+      }
+      className={[
+        "rounded-sm border bg-white dark:bg-gray-900",
+        "shadow-xs hover:shadow-md transition-shadow",
+        "cursor-grab active:cursor-grabbing select-none overflow-hidden",
+        isDragging ? "opacity-40" : "",
+        isCompleted
+          ? "border-gray-100 dark:border-gray-800 opacity-60"
+          : isOverdue
+          ? "border-red-200 dark:border-red-900"
+          : "border-gray-200 dark:border-gray-700",
+      ].join(" ")}
+    >
+      <TaskListItem
+        task={task}
+        onEdit={onEdit}
+        showGoalInfo={false}
+        showDateTime={false}
+        className="!border-b-0"
+      />
+    </div>
+  );
+}
+
 function WeekViewColumn({
   day,
   tasks,
   prayerTimings,
   isToday,
-  droppable: _droppable,
+  droppable,
 }: WeekViewColumnProps) {
   const { t } = useLanguageContext();
   const { openEditTaskForm } = useTaskContext();
   const { toHijriDate, formatDate } = useHijriDate();
+
+  const dateStr = toLocalDateStr(day);
+  const { setNodeRef, isOver } = useDroppable({ id: dateStr, disabled: !droppable });
 
   const handleEditTask = useCallback(
     (task: Task) => openEditTaskForm(task.id as string),
@@ -59,7 +110,7 @@ function WeekViewColumn({
   const hijriMainLabel = formatDate(hijriDate, "D MMMM");
   const gregorianSubLabel = day.toLocaleDateString(undefined, {
     weekday: "short",
-    day: "numeric", 
+    day: "numeric",
     month: "short",
   });
 
@@ -81,9 +132,12 @@ function WeekViewColumn({
 
   return (
     <div
-      data-date={toLocalDateStr(day)}
-      data-droppable={_droppable ?? false}
-      className="flex flex-col min-w-[200px] flex-1"
+      ref={setNodeRef}
+      data-date={dateStr}
+      className={[
+        "flex flex-col min-w-[200px] flex-1 transition-colors",
+        isOver && droppable ? "bg-blue-50 dark:bg-blue-950/20 ring-1 ring-inset ring-blue-200 dark:ring-blue-800 rounded" : "",
+      ].join(" ")}
     >
       {/* Column header: Hijri date as main title, Gregorian as subtitle */}
       <div
@@ -134,29 +188,13 @@ function WeekViewColumn({
               const taskCards = (
                 <div className="space-y-1.5">
                   {group.tasks.map((task: Task) => (
-                    <div
+                    <DraggableTaskCard
                       key={task.id}
-                      data-task-id={task.id}
-                      className={[
-                        "rounded-sm border bg-white dark:bg-gray-900",
-                        "shadow-xs hover:shadow-md transition-shadow",
-                        "cursor-grab active:cursor-grabbing select-none",
-                        "overflow-hidden",
-                        group.isCompleted
-                          ? "border-gray-100 dark:border-gray-800 opacity-60"
-                          : group.isOverdue
-                          ? "border-red-200 dark:border-red-900"
-                          : "border-gray-200 dark:border-gray-700",
-                      ].join(" ")}
-                    >
-                      <TaskListItem
-                        task={task}
-                        onEdit={handleEditTask}
-                        showGoalInfo={false}
-                        showDateTime={false}
-                        className="!border-b-0"
-                      />
-                    </div>
+                      task={task}
+                      isCompleted={!!group.isCompleted}
+                      isOverdue={!!group.isOverdue}
+                      onEdit={handleEditTask}
+                    />
                   ))}
                 </div>
               );

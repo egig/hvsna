@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { DndContext, DragOverlay, useDraggable, useDroppable } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
 import {
   HvCalendar,
   HvLayoutList,
@@ -18,6 +20,8 @@ import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "../task/task-context";
 import { useScreenSize } from "../components/screen-size-wrapper";
+import { useHijriDate } from "../calendar/hijri/use-hijri-date";
+import { createPortal } from "react-dom";
 
 type ViewMode = "list" | "week";
 type MobileTab = "upcoming" | "inbox";
@@ -30,6 +34,7 @@ function UpcomingContent({
   formatScheduledDate,
   handleEditTask,
   t,
+  droppable,
 }: {
   upcomingTasks: Task[];
   taskGroupsWithLabels: Record<string, { label: string; tasks: Task[] }>;
@@ -38,11 +43,12 @@ function UpcomingContent({
   formatScheduledDate: (task: Task) => string;
   handleEditTask: (task: Task) => void;
   t: (key: string) => string;
+  droppable?: boolean;
 }) {
   return (
     <div className={isReady ? "visible" : "invisible"}>
       {effectiveMode === "week" ? (
-        <WeekView upcomingTasks={upcomingTasks} />
+        <WeekView upcomingTasks={upcomingTasks} droppable={droppable} />
       ) : upcomingTasks.length === 0 ? (
         <EmptyState
           icon={<HvCalendar className="w-full h-full" />}
@@ -123,10 +129,111 @@ function InboxContent({
   );
 }
 
+function DraggableInboxItem({
+  task,
+  onEdit,
+}: {
+  task: Task;
+  onEdit: (task: Task) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({ id: task.id! });
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={
+        transform
+          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
+          : undefined
+      }
+      className={isDragging ? "opacity-40" : "cursor-grab active:cursor-grabbing"}
+    >
+      <TaskListItem
+        task={task}
+        onEdit={onEdit}
+        showGoalInfo={false}
+        showDateTime={false}
+      />
+    </div>
+  );
+}
+
+function DroppableInboxSidebar({
+  inboxTasks,
+  inboxInitiated,
+  handleEditTask,
+  t,
+}: {
+  inboxTasks: Task[];
+  inboxInitiated: boolean;
+  handleEditTask: (task: Task) => void;
+  t: (key: string) => string;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: "inbox" });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={[
+        "flex-1 overflow-y-auto transition-colors rounded",
+        isOver
+          ? "bg-amber-50 dark:bg-amber-950/20 ring-1 ring-inset ring-amber-200 dark:ring-amber-800"
+          : "",
+      ].join(" ")}
+    >
+      {inboxInitiated &&
+        (inboxTasks.length === 0 ? (
+          <EmptyState
+            icon={<HvOutlineInbox className="w-full h-full" />}
+            title={t("no_tasks_in_inbox")}
+            description={t("tasks_without_schedule_or_list_will_appear_here")}
+          />
+        ) : (
+          <div className="space-y-2 p-2">
+            {inboxTasks.map((task) => (
+              <DraggableInboxItem
+                key={task.id}
+                task={task}
+                onEdit={handleEditTask}
+              />
+            ))}
+          </div>
+        ))}
+    </div>
+  );
+}
+
 export default function Tasks() {
   const { t } = useLanguageContext();
-  const { openEditTaskForm } = useTaskContext();
+  const { openEditTaskForm, updateTask } = useTaskContext();
   const { isDesktop } = useScreenSize();
+  const { toHijriDate } = useHijriDate();
+
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveTask(null);
+    const { active, over } = event;
+    if (!over) return;
+    const task =
+      inboxTasks.find((t) => t.id === active.id) ??
+      upcomingTasks.find((t) => t.id === active.id);
+    if (!task) return;
+    if (over.id === "inbox") {
+      updateTask(task.id!, { atDateHijri: "" });
+    } else {
+      const [y, m, d] = (over.id as string).split("-").map(Number);
+      const hijri = toHijriDate(new Date(y, m - 1, d));
+      const atDateHijri =
+        String(hijri.year).padStart(4, "0") +
+        String(hijri.month).padStart(2, "0") +
+        String(hijri.day).padStart(2, "0");
+      updateTask(task.id!, { atDateHijri });
+    }
+  };
 
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const stored = localStorage.getItem("upcoming-view-mode");
@@ -203,44 +310,53 @@ export default function Tasks() {
   if (isDesktop) {
     return (
       <PageTransition>
-        <div className="flex h-full">
-          {/* Main upcoming content */}
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <Navbar
-              showBackButton={false}
-              title={t("tasks")}
-              rightAction={viewToggle}
-            />
-            <div className="flex-1 overflow-y-auto">
-              <div className={effectiveMode === "week" ? "" : "max-w-2xl mx-auto w-full"}>
-                {initiated && error && (
-                  <div className="text-center py-8">
-                    <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-                  </div>
-                )}
-                <UpcomingContent
-                  upcomingTasks={upcomingTasks}
-                  taskGroupsWithLabels={taskGroupsWithLabels}
-                  isReady={isReady}
-                  effectiveMode={effectiveMode}
-                  formatScheduledDate={formatScheduledDate}
-                  handleEditTask={handleEditTask}
-                  t={t}
-                />
+        <DndContext
+          onDragStart={(e) => {
+            const task =
+              inboxTasks.find((t) => t.id === e.active.id) ??
+              upcomingTasks.find((t) => t.id === e.active.id);
+            setActiveTask(task ?? null);
+          }}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex h-full">
+            {/* Main upcoming content */}
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <Navbar
+                showBackButton={false}
+                title={t("tasks")}
+                rightAction={viewToggle}
+              />
+              <div className="flex-1 overflow-y-auto">
+                <div className={effectiveMode === "week" ? "" : "max-w-2xl mx-auto w-full"}>
+                  {initiated && error && (
+                    <div className="text-center py-8">
+                      <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
+                    </div>
+                  )}
+                  <UpcomingContent
+                    upcomingTasks={upcomingTasks}
+                    taskGroupsWithLabels={taskGroupsWithLabels}
+                    isReady={isReady}
+                    effectiveMode={effectiveMode}
+                    formatScheduledDate={formatScheduledDate}
+                    handleEditTask={handleEditTask}
+                    t={t}
+                    droppable
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Inbox sidebar */}
-          <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-              <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
-              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {t("inbox") || "Inbox"}
-              </h2>
-            </div>
-            <div className="flex-1 overflow-y-auto">
-              <InboxContent
+            {/* Inbox sidebar */}
+            <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {t("inbox") || "Inbox"}
+                </h2>
+              </div>
+              <DroppableInboxSidebar
                 inboxTasks={inboxTasks}
                 inboxInitiated={inboxInitiated}
                 handleEditTask={handleEditTask}
@@ -248,7 +364,20 @@ export default function Tasks() {
               />
             </div>
           </div>
-        </div>
+
+          {createPortal(<DragOverlay>
+            {activeTask && (
+              <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
+                <TaskListItem
+                  task={activeTask}
+                  onEdit={() => {}}
+                  showGoalInfo={false}
+                  showDateTime={false}
+                />
+              </div>
+            )}
+          </DragOverlay>, document.body)}
+        </DndContext>
       </PageTransition>
     );
   }

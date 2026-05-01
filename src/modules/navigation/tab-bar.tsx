@@ -10,6 +10,8 @@ import {
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
   HvWallet,
+  HvChartArea,
+  HvChartAreaFilled,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -28,8 +30,8 @@ export function TabBar() {
     {
       path: "/finance",
       label: t("finance"),
-      icon: <HvWallet />,
-      activeIcon: <HvWallet />,
+      icon: <HvChartArea />,
+      activeIcon: <HvChartAreaFilled />,
       context: "finance",
     },
     {

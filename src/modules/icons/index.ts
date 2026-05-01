@@ -65,6 +65,8 @@ export {
   TbLayoutList as HvLayoutList,
   TbLayoutListFilled as HvLayoutListFilled,
   TbSettingsFilled as HvSettingsFilled,
+  TbChartArea as HvChartArea,
+  TbChartAreaFilled as HvChartAreaFilled,
 } from "react-icons/tb";
 
 export {

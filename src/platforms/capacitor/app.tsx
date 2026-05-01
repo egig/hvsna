@@ -2,7 +2,6 @@ import { MemoryRouter } from "react-router";
 import { AppRoutes } from "@/routes";
 import "@/app.css";
 import { PouchDBProvider } from "@/pouchdb";
-import DroppableContext from "@/modules/components/droppable-context";
 import { ScreenSizeProvider } from "@/modules/components/screen-size-wrapper";
 import type {
   Coordinate,
@@ -95,7 +94,6 @@ export default function App({
                   <ScreenSizeProvider onClose={handleBreakpointClose}>
                     <AuthProvider>
                       <SettingsProvider>
-                        <DroppableContext>
                           <PouchDBProvider dbInstance={db}>
                             <SyncProvider>
                               <LanguageProviderWrapper>
@@ -113,7 +111,6 @@ export default function App({
                               </LanguageProviderWrapper>
                             </SyncProvider>
                           </PouchDBProvider>
-                        </DroppableContext>
                       </SettingsProvider>
                     </AuthProvider>
                   </ScreenSizeProvider>
