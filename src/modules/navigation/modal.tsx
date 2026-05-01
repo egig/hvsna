@@ -83,7 +83,7 @@ export function Modal({
       onOpenChange={(open: boolean) => !open && onClose()}
     >
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+        <Drawer.Overlay className="fixed z-[1000] inset-0 bg-black/40" />
         <Drawer.Content
           className="bg-white z-[1000] rounded-t-[10px] fixed bottom-0 left-0 right-0 outline-none"
           data-testid={testId}

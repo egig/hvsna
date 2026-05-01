@@ -39,7 +39,7 @@ export function TabBar() {
       label: t("tasks"),
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
-      context: "upcoming",
+      context: "tasks",
     },
     {
       path: "/browse",

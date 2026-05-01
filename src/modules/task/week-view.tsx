@@ -254,7 +254,7 @@ function WeekViewColumn({
 
 export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   const { settings } = useSettings();
-  const { toHijriDate, formatDate } = useHijriDate();
+  const { toHijriDate, formatDate, getStartOfWeek, currentHijriDate } = useHijriDate();
   const [weekOffset, setWeekOffset] = useState(0);
   const [prayerTimings, setPrayerTimings] = useState<Record<
     string,
@@ -269,15 +269,14 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   }, [settings]);
 
   const days = useMemo(() => {
-    const base = new Date();
-    base.setHours(0, 0, 0, 0);
-    base.setDate(base.getDate() + weekOffset * 7);
+    const weekStart =  currentHijriDate.startOfWeek().toDate()
+    weekStart.setDate(weekStart.getDate() + weekOffset * 7);
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(base);
+      const d = new Date(weekStart);
       d.setDate(d.getDate() + i);
       return d;
     });
-  }, [weekOffset]);
+  }, [weekOffset, currentHijriDate]);
 
   const todayStr = useMemo(() => toLocalDateStr(new Date()), []);
 
