@@ -1,16 +1,38 @@
-import { HvCalendar } from "@/modules/icons";
+import { useState } from "react";
+import {
+  HvCalendar,
+  HvLayoutList,
+  HvCalendarMonth,
+} from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "../task/task-list-item";
 import { useUpcoming } from "../task/use-upcoming";
+import { WeekView } from "../task/week-view";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "../task/task-context";
+import { useScreenSize } from "../components/screen-size-wrapper";
+
+type ViewMode = "list" | "week";
 
 export default function Upcoming() {
   const { t } = useLanguageContext();
   const { openEditTaskForm } = useTaskContext();
+  const { isDesktop } = useScreenSize();
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const stored = localStorage.getItem("upcoming-view-mode");
+    return stored === "week" ? "week" : "list";
+  });
+
+  const effectiveMode: ViewMode = isDesktop ? viewMode : "list";
+
+  const toggleMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem("upcoming-view-mode", mode);
+  };
+
   const {
     upcomingTasks,
     taskGroups,
@@ -53,8 +75,46 @@ export default function Upcoming() {
 
   const isReady = initiated && !loading && !error;
 
+  const viewToggle = isDesktop && (
+    <div className="flex gap-0.5">
+      <button
+        onClick={() => toggleMode("list")}
+        title="List view"
+        className={[
+          "p-1.5 rounded-md transition-colors",
+          effectiveMode === "list"
+            ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+            : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
+        ].join(" ")}
+      >
+        <HvLayoutList className="size-4" />
+      </button>
+      <button
+        onClick={() => toggleMode("week")}
+        title="Week view"
+        className={[
+          "p-1.5 rounded-md transition-colors",
+          effectiveMode === "week"
+            ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+            : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
+        ].join(" ")}
+      >
+        <HvCalendarMonth className="size-4" />
+      </button>
+    </div>
+  );
+
   return (
-    <Page navbar={<Navbar showBackButton={false} title={t("upcoming")} />}>
+    <Page
+      fluid={effectiveMode === "week"}
+      navbar={
+        <Navbar
+          showBackButton={false}
+          title={t("upcoming")}
+          rightAction={viewToggle}
+        />
+      }
+    >
       {initiated && error && (
         <div className="text-center py-8">
           <div className="text-red-600 mb-4">{t("error_colon", { error })}</div>
@@ -62,7 +122,9 @@ export default function Upcoming() {
       )}
 
       <div className={isReady ? "visible" : "invisible"}>
-        {upcomingTasks.length === 0 ? (
+        {effectiveMode === "week" ? (
+          <WeekView upcomingTasks={upcomingTasks} />
+        ) : upcomingTasks.length === 0 ? (
           <EmptyState
             icon={<HvCalendar className="w-full h-full" />}
             title={t("no_upcoming_tasks")}
