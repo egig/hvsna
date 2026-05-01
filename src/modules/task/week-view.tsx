@@ -65,9 +65,6 @@ function DraggableTaskCard({
           : undefined
       }
       className={[
-        "rounded-sm border bg-white dark:bg-gray-900",
-        "shadow-xs hover:shadow-md transition-shadow",
-        "cursor-grab active:cursor-grabbing select-none overflow-hidden",
         isDragging ? "opacity-40" : "",
         isCompleted
           ? "border-gray-100 dark:border-gray-800 opacity-60"
@@ -81,7 +78,6 @@ function DraggableTaskCard({
         onEdit={onEdit}
         showGoalInfo={false}
         showDateTime={false}
-        className="!border-b-0"
       />
     </div>
   );
