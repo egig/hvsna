@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Outlet, useLocation, useParams } from "react-router";
+import { Allotment, type AllotmentHandle } from "allotment";
+import "allotment/dist/style.css";
 import { HvPlus, HvWallet } from "@/modules/icons";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";
@@ -37,7 +39,6 @@ function MobileLayout({
   params,
 }: MobileLayoutProps) {
   const { openCreateForm, formOpen: financeFormOpen, closeForm } = useFinanceContext();
-  const isToday = location?.state?.context === "today";
 
   return (
     <div className="h-[100dvh] flex flex-col">
@@ -104,58 +105,71 @@ export default function TabLayout() {
   const params = useParams();
   const { isDesktop } = useScreenSize();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const allotmentRef = useRef<AllotmentHandle>(null);
 
-  const handleTaskSuccess = () => {
-    closeTaskForm();
-  };
+  const handleTaskSuccess = () => closeTaskForm();
+  const handleTaskCancel = () => closeTaskForm();
+  const handleProjectCancel = () => closeProjectForm();
 
-  const handleTaskCancel = () => {
-    closeTaskForm();
-  };
+  const handleToggleSidebar = useCallback(() => {
+    const newCollapsed = !sidebarCollapsed;
+    setSidebarCollapsed(newCollapsed);
+    const newSize = newCollapsed ? 56 : 192;
+    allotmentRef.current?.resize([newSize, window.innerWidth - newSize]);
+  }, [sidebarCollapsed]);
 
-  const handleProjectCancel = () => {
-    closeProjectForm();
-  };
+  const handleSidebarChange = useCallback((sizes: number[]) => {
+    setSidebarCollapsed(sizes[0] < 120);
+  }, []);
 
   // Desktop Layout with side navigation
   if (isDesktop) {
     return (
-      <div className="flex h-screen">
-        {/* Side Navigation */}
-        <DesktopSidebar
-          openCreateTaskForm={openCreateTaskForm}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
-        />
+      <Allotment
+        ref={allotmentRef}
+        className="h-screen"
+        proportionalLayout={false}
+        onChange={handleSidebarChange}
+      >
+        {/* Sidebar pane */}
+        <Allotment.Pane preferredSize={192} minSize={56} maxSize={400} snap>
+          <DesktopSidebar
+            openCreateTaskForm={openCreateTaskForm}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={handleToggleSidebar}
+          />
+        </Allotment.Pane>
 
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col relative border-r border-gray-200">
-          <div className="flex-1 overflow-auto">
-            <Outlet />
+        {/* Main content pane */}
+        <Allotment.Pane minSize={400}>
+          <div className="flex flex-col h-full relative">
+            <div className="flex-1 overflow-auto">
+              <Outlet />
+            </div>
+
+            {/* Task Form Modal */}
+            <Modal isOpen={formOpen} onClose={handleTaskCancel}>
+              {editingTaskId && (
+                <TaskFormEdit
+                  taskId={editingTaskId}
+                  onSuccess={handleTaskSuccess}
+                />
+              )}
+              {!editingTaskId && (
+                <TaskForm
+                  onSuccess={handleTaskSuccess}
+                  onCancel={handleTaskCancel}
+                />
+              )}
+            </Modal>
+
+            {/* Project Form Modal */}
+            <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
+              <ProjectFormContainer />
+            </Modal>
           </div>
-
-          {/* Task Form Modal */}
-          <Modal isOpen={formOpen} onClose={handleTaskCancel}>
-            {editingTaskId && (
-              <TaskFormEdit
-                taskId={editingTaskId}
-                onSuccess={handleTaskSuccess}
-              />
-            )}
-            {!editingTaskId && (
-              <TaskForm
-                onSuccess={handleTaskSuccess}
-                onCancel={handleTaskCancel}
-              />
-            )}
-          </Modal>
-
-          {/* Project Form Modal */}
-          <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
-            <ProjectFormContainer />
-          </Modal>
-        </div>
-      </div>
+        </Allotment.Pane>
+      </Allotment>
     );
   }
 

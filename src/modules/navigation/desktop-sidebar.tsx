@@ -166,8 +166,8 @@ export function DesktopSidebar({
   return (
     <div
       className={`${
-        collapsed ? "w-14" : "w-48"
-      } bg-white border-r border-gray-200 flex flex-col transition-all duration-200`}
+        "w-full h-full"
+      } bg-white border-r border-gray-200 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
         {!collapsed && (
