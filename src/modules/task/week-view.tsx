@@ -6,6 +6,7 @@ import {
   HvChevronDown,
   HvArrowLeft,
   HvArrowRight,
+  HvGripVertical,
 } from "@/modules/icons";
 import { useSettings } from "../settings/useSettings";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
@@ -57,14 +58,14 @@ function DraggableTaskCard({
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       style={
         transform
           ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
           : undefined
       }
       className={[
+        "rounded-sm border bg-white dark:bg-gray-900 flex items-stretch",
+        "shadow-xs hover:shadow-md transition-shadow overflow-hidden",
         isDragging ? "opacity-40" : "",
         isCompleted
           ? "border-gray-100 dark:border-gray-800 opacity-60"
@@ -73,12 +74,22 @@ function DraggableTaskCard({
           : "border-gray-200 dark:border-gray-700",
       ].join(" ")}
     >
-      <TaskListItem
-        task={task}
-        onEdit={onEdit}
-        showGoalInfo={false}
-        showDateTime={false}
-      />
+      <div
+        {...listeners}
+        {...attributes}
+        className="flex items-center px-1 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500 shrink-0 touch-none"
+      >
+        <HvGripVertical className="size-3" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <TaskListItem
+          task={task}
+          onEdit={onEdit}
+          showGoalInfo={false}
+          showDateTime={false}
+          className="!border-b-0"
+        />
+      </div>
     </div>
   );
 }

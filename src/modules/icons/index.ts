@@ -22,6 +22,7 @@ export {
   Filter as HvFilter,
   FilterX as HvFilterX,
   Globe as HvGlobe,
+  GripVertical as HvGripVertical,
   Home as HvHome,
   Info as HvInfo,
   Languages as HvLanguages,
