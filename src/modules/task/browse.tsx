@@ -1,4 +1,4 @@
-import { HvPlus, HvList, HvSettings, HvSearch, HvTag } from "@/modules/icons";
+import { HvPlus, HvList, HvSettings, HvSearch, HvTag, HvWallet } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";

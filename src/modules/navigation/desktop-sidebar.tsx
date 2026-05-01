@@ -32,6 +32,7 @@ import {
   HvOutlineInbox,
   HvHiInbox,
   HvTag,
+  HvWallet,
 } from "@/modules/icons";
 import { UserRound } from "lucide-react";
 
@@ -135,6 +136,13 @@ export function DesktopSidebar({
       icon: <HvTag />,
       activeIcon: <HvTag />,
       context: "tags",
+    },
+    {
+      path: "/finance",
+      label: t("finance"),
+      icon: <HvWallet />,
+      activeIcon: <HvWallet />,
+      context: "finance",
     },
   ];
 

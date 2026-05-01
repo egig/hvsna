@@ -73,3 +73,5 @@ export {
   HiOutlineInbox as HvOutlineInbox,
   HiInbox as HvHiInbox,
 } from "react-icons/hi2";
+
+export { Wallet as HvWallet } from "lucide-react";

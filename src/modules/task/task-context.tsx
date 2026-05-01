@@ -39,7 +39,7 @@ interface TaskContextType {
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
-  openCreateTaskForm: (options?: { listId?: string }) => void;
+  openCreateTaskForm: (options?: { projectId?: string }) => void;
   openEditTaskForm: (taskId: string, options?: { listId?: string }) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;

@@ -13,6 +13,7 @@ import {
   HvEllipsisHorizontalCircle,
   HvOutlineInbox,
   HvHiInbox,
+  HvWallet,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -21,6 +22,13 @@ export function TabBar() {
   const { isDesktop } = useScreenSize();
 
   const tabs = [
+    {
+      path: "/finance",
+      label: t("finance"),
+      icon: <HvWallet />,
+      activeIcon: <HvWallet />,
+      context: "finance",
+    },
     {
       path: "/",
       label: t("today"),

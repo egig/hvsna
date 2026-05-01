@@ -82,7 +82,7 @@ export default function TabLayout() {
       </div>
 
       {/* FAB Button for Mobile */}
-      {location?.state?.context !== "browse" && (
+      { ["browser", "finance"].indexOf(location?.state?.context) === -1 && (
         <button
           onClick={() => {
             openCreateTaskForm({
