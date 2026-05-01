@@ -116,13 +116,6 @@ export function DesktopSidebar({
       context: "finance",
     },
     {
-      path: "/accounts",
-      label: t("accounts") || "Accounts",
-      icon: <HvLandmark />,
-      activeIcon: <HvLandmark />,
-      context: "accounts",
-    },
-    {
       path: "/tasks",
       label: t("tasks"),
       icon: <HvCalendarMonth />,

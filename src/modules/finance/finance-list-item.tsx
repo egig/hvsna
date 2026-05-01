@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { parseHijriDateString } from "../task/task-form-helpers";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { useFinanceContext } from "./finance-context";
-import { HvEdit2, HvTrash2 } from "../icons";
+import { HvTrash2 } from "../icons";
 import type { FinanceEntry } from "../../domain/finance/IFinanceRepository";
 
 interface FinanceListItemProps {
@@ -31,11 +31,11 @@ function formatEntryDate(dateHijri: string): string {
 export function FinanceListItem({ entry }: FinanceListItemProps) {
   const { t } = useLanguageContext();
   const { openEditForm, deleteEntry } = useFinanceContext();
-  const [showActions, setShowActions] = useState(false);
 
   const isIncome = entry.type === "income";
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!entry.id) return;
     if (confirm(t("delete_entry") || "Delete this entry?")) {
       await deleteEntry(entry.id);
@@ -44,9 +44,11 @@ export function FinanceListItem({ entry }: FinanceListItemProps) {
 
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 last:border-0"
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      role="button"
+      tabIndex={0}
+      onClick={() => entry.id && openEditForm(entry.id)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") entry.id && openEditForm(entry.id); }}
+      className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 last:border-0 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
     >
       {/* Type indicator */}
       <div
@@ -60,10 +62,15 @@ export function FinanceListItem({ entry }: FinanceListItemProps) {
         <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
           {entry.description}
         </p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
           {entry.dateHijri && (
             <span className="text-xs text-gray-400 dark:text-gray-500">
               {formatEntryDate(entry.dateHijri)}
+            </span>
+          )}
+          {entry.account && (
+            <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+              {entry.account}
             </span>
           )}
           {entry.category && (
@@ -79,7 +86,7 @@ export function FinanceListItem({ entry }: FinanceListItemProps) {
         )}
       </div>
 
-      {/* Amount */}
+      {/* Amount + delete */}
       <div className="flex items-center gap-2 flex-shrink-0">
         <span
           className={`text-base font-semibold ${
@@ -91,26 +98,13 @@ export function FinanceListItem({ entry }: FinanceListItemProps) {
           {isIncome ? "+" : "-"}
           {formatAmount(entry.amount ?? 0)}
         </span>
-
-        {/* Desktop hover actions */}
-        {showActions && entry.id && (
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => openEditForm(entry.id!)}
-              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded"
-              title={t("edit_entry")}
-            >
-              <HvEdit2 size={14} />
-            </button>
-            <button
-              onClick={handleDelete}
-              className="p-1 text-gray-400 hover:text-red-500 rounded"
-              title={t("delete_entry")}
-            >
-              <HvTrash2 size={14} />
-            </button>
-          </div>
-        )}
+        <button
+          onClick={handleDelete}
+          className="p-1.5 -mr-1 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-danger-color)] dark:hover:text-[var(--hvsna-danger-color)] rounded transition-colors"
+          title={t("delete_entry")}
+        >
+          <HvTrash2 size={14} />
+        </button>
       </div>
     </div>
   );

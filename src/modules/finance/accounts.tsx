@@ -5,6 +5,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { HvPlus, HvEdit2, HvTrash2, HvX } from "../icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { useFinanceAccounts, useFinanceAccountMutations } from "./use-finance-accounts";
+import { useFinanceEntries } from "./use-finance-entries";
 import type { FinanceAccount } from "../../domain/finance/IFinanceAccountRepository";
 
 const ACCOUNT_EMOJIS = ["💵", "🏦", "💳", "📱", "💰", "🪙", "🏧", "💼"];
@@ -83,22 +84,31 @@ function AccountForm({ initial, onSubmit, onCancel, submitting }: AccountFormPro
   );
 }
 
+function formatBalance(amount: number): string {
+  return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
 interface AccountRowProps {
   account: FinanceAccount;
+  balance: number;
   onEdit: (account: FinanceAccount) => void;
   onDelete: (account: FinanceAccount) => void;
 }
 
-function AccountRow({ account, onEdit, onDelete }: AccountRowProps) {
+function AccountRow({ account, balance, onEdit, onDelete }: AccountRowProps) {
   const { t } = useLanguageContext();
+  const isPositive = balance >= 0;
   return (
     <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 last:border-0">
-      <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-lg flex-shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
         {account.icon || "💵"}
       </div>
-      <span className="flex-1 text-sm font-medium text-gray-900 dark:text-white">
-        {account.name}
-      </span>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-white">{account.name}</p>
+        <p className={`text-xs font-semibold mt-0.5 ${isPositive ? "text-green-600 dark:text-green-400" : "text-[var(--hvsna-danger-color)]"}`}>
+          {isPositive ? "+" : ""}{formatBalance(balance)}
+        </p>
+      </div>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onEdit(account)}
@@ -122,7 +132,19 @@ function AccountRow({ account, onEdit, onDelete }: AccountRowProps) {
 export default function AccountsPage() {
   const { t } = useLanguageContext();
   const { data: accounts = [], isLoading } = useFinanceAccounts();
+  const { data: entries = [] } = useFinanceEntries();
   const { createAccount, updateAccount, deleteAccount } = useFinanceAccountMutations();
+
+  const balanceByAccount = React.useMemo(() => {
+    const map = new Map<string, number>();
+    for (const entry of entries) {
+      if (!entry.account) continue;
+      const current = map.get(entry.account) ?? 0;
+      const delta = (entry.amount ?? 0) * (entry.type === "income" ? 1 : -1);
+      map.set(entry.account, current + delta);
+    }
+    return map;
+  }, [entries]);
 
   const [mode, setMode] = useState<"idle" | "create" | "edit">("idle");
   const [editingAccount, setEditingAccount] = useState<FinanceAccount | null>(null);
@@ -244,6 +266,7 @@ export default function AccountsPage() {
                 <AccountRow
                   key={account.id}
                   account={account}
+                  balance={balanceByAccount.get(account.name) ?? 0}
                   onEdit={startEdit}
                   onDelete={handleDelete}
                 />

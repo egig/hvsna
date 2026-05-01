@@ -60,8 +60,7 @@ export default function Browse() {
 
       {/* Navigation Menu Items */}
       <div className="mb-6 space-y-1">
-        <MenuItem icon={HvOutlineInbox} title={t("inbox") || "Inbox"} to="/inbox" />
-        <MenuItem icon={HvSearch} title={t("search") || "Search"} to="/tasks" />
+        <MenuItem icon={HvSearch} title={t("search") || "Search"} to="/search" />
         <MenuItem icon={HvTag} title={t("tags") || "Tags"} to="/tags" />
       </div>
 
