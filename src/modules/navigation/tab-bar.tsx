@@ -23,13 +23,6 @@ export function TabBar() {
 
   const tabs = [
     {
-      path: "/finance",
-      label: t("finance"),
-      icon: <HvWallet />,
-      activeIcon: <HvWallet />,
-      context: "finance",
-    },
-    {
       path: "/",
       label: t("today"),
       icon: <HvCalendar />,
@@ -37,18 +30,18 @@ export function TabBar() {
       context: "today",
     },
     {
+      path: "/finance",
+      label: t("finance"),
+      icon: <HvWallet />,
+      activeIcon: <HvWallet />,
+      context: "finance",
+    },
+    {
       path: "/upcoming",
       label: t("upcoming"),
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
-    },
-    {
-      path: "/inbox",
-      label: t("inbox"),
-      icon: <HvOutlineInbox />,
-      activeIcon: <HvHiInbox />,
-      context: "inbox",
     },
     {
       path: "/browse",

@@ -9,7 +9,7 @@ import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { HvChevronRight, HvChevronDown, HvCheck } from "@/modules/icons";
+import { HvChevronRight, HvChevronDown, HvCheck, HvWallet } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
 import {
@@ -17,13 +17,120 @@ import {
   getPrayerTimesWithFallback,
 } from "../prayer-time-utils";
 import logger from "src/modules/logger";
+import { useFinanceContext } from "../finance/finance-context";
+import { useFinanceEntries } from "../finance/use-finance-entries";
+import { formatHijriDateString } from "./task-form-helpers";
+
+function TodayFinanceSummary() {
+  const { t } = useLanguageContext();
+  const { openCreateForm } = useFinanceContext();
+  const { getToday } = useHijriDate();
+  const { data: entries = [] } = useFinanceEntries();
+
+  const todayKey = useMemo(() => {
+    const d = getToday();
+    return formatHijriDateString(d.year, d.month, d.day);
+  }, [getToday]);
+
+  const todayEntries = useMemo(
+    () => entries.filter((e) => e.dateHijri === todayKey),
+    [entries, todayKey]
+  );
+
+  const { income, expense } = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    for (const e of todayEntries) {
+      if (e.type === "income") income += e.amount ?? 0;
+      else expense += e.amount ?? 0;
+    }
+    return { income, expense };
+  }, [todayEntries]);
+
+  const recent = useMemo(
+    () => [...todayEntries].sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0)).slice(0, 3),
+    [todayEntries]
+  );
+
+  const fmt = (n: number) =>
+    n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+  if (income === 0 && expense === 0 && todayEntries.length === 0) {
+    return (
+      <button
+        onClick={openCreateForm}
+        className="mx-4 mt-4 mb-1 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 text-sm w-[calc(100%-2rem)] hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+      >
+        <HvWallet size={15} />
+        <span>{t("log_entry") || "Log finance entry"}</span>
+      </button>
+    );
+  }
+
+  return (
+    <div className="mx-4 mt-4 mb-1 rounded-xl bg-gray-50 dark:bg-gray-800/60 overflow-hidden">
+      {/* Totals row */}
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100 dark:border-gray-700/60">
+        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+          {t("balance") || "Today"}
+        </span>
+        <div className="flex items-center gap-3">
+          {income > 0 && (
+            <span className="text-xs font-medium" style={{ color: "var(--hvsna-success-color)" }}>
+              +{fmt(income)}
+            </span>
+          )}
+          {expense > 0 && (
+            <span className="text-xs font-medium" style={{ color: "var(--hvsna-danger-color)" }}>
+              -{fmt(expense)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Recent entries */}
+      {recent.map((entry) => (
+        <div
+          key={entry.id}
+          className="flex items-center gap-2.5 px-3 py-2 border-b border-gray-100 dark:border-gray-700/40 last:border-0"
+        >
+          <div
+            className="w-1 h-4 rounded-full flex-shrink-0"
+            style={{
+              backgroundColor:
+                entry.type === "income"
+                  ? "var(--hvsna-success-color)"
+                  : "var(--hvsna-danger-color)",
+            }}
+          />
+          <span className="flex-1 text-xs text-gray-600 dark:text-gray-300 truncate">
+            {entry.note || entry.category || "—"}
+          </span>
+          <span
+            className="text-xs font-semibold flex-shrink-0"
+            style={{
+              color:
+                entry.type === "income"
+                  ? "var(--hvsna-success-color)"
+                  : "var(--hvsna-danger-color)",
+            }}
+          >
+            {entry.type === "income" ? "+" : "-"}
+            {fmt(entry.amount ?? 0)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 
 interface TodayTasksProps {
   tasks: Task[];
   completedTasks?: Task[];
 }
 
-export function Today() {
+function TodayContent() {
   const { t } = useLanguageContext();
   const {
     todayTasks,
@@ -47,6 +154,7 @@ export function Today() {
   return (
     <Page navbarLarge={<LargeNavbar title={pageTitle} subtitle={subTitle} />}>
       <div className={initiated ? "visible" : "invisible"}>
+        <TodayFinanceSummary />
         {!hasLocation && (
           <a
             href="/settings/general"
@@ -71,8 +179,13 @@ export function Today() {
           <TodayTasks tasks={todayTasks} completedTasks={todayCompletedTasks} />
         )}
       </div>
+
     </Page>
   );
+}
+
+export function Today() {
+  return <TodayContent />;
 }
 
 // Fallback function for original grouping logic (used while prayer times are loading)

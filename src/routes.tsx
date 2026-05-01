@@ -18,7 +18,7 @@ import {
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import GeneralSettings from "./modules/settings/pages/general-settings";
 import { AnimatePresence } from "framer-motion";
-import Tasks from "./modules/task/tasks";
+import Search from "./modules/task/search";
 import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
@@ -93,7 +93,7 @@ export const AppRoutes = () => {
             }
           >
             <Route index element={<Today />} />
-            <Route path="tasks" element={<Tasks />} />
+            <Route path="search" element={<Search />} />
             <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
             {!isDesktop && <Route path="browse" element={<Browse />} />}

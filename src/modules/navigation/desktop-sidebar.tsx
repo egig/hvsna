@@ -110,6 +110,13 @@ export function DesktopSidebar({
       context: "today",
     },
     {
+      path: "/finance",
+      label: t("finance"),
+      icon: <HvWallet />,
+      activeIcon: <HvWallet />,
+      context: "finance",
+    },
+    {
       path: "/upcoming",
       label: t("upcoming"),
       icon: <HvCalendarMonth />,
@@ -124,7 +131,7 @@ export function DesktopSidebar({
       context: "inbox",
     },
     {
-      path: "/tasks",
+      path: "/search",
       label: t("search"),
       icon: <HvSearch />,
       activeIcon: <HvSearch />,
@@ -136,13 +143,6 @@ export function DesktopSidebar({
       icon: <HvTag />,
       activeIcon: <HvTag />,
       context: "tags",
-    },
-    {
-      path: "/finance",
-      label: t("finance"),
-      icon: <HvWallet />,
-      activeIcon: <HvWallet />,
-      context: "finance",
     },
   ];
 

@@ -16,6 +16,7 @@ import { SnackbarProvider } from "@/modules/components/snackbar-provider";
 import { ErrorBoundary } from "@/modules/components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/modules/query-client";
+import { FinanceProvider } from "@/modules/finance/finance-context";
 import { TaskProvider } from "@/modules/task/task-context";
 import { ProjectProvider } from "@/modules/task/project-context";
 import { AuthProvider } from "@/modules/auth";
@@ -98,7 +99,8 @@ export default function App({
                           <PouchDBProvider dbInstance={db}>
                             <SyncProvider>
                               <LanguageProviderWrapper>
-                                <TaskProvider>
+                                <FinanceProvider>
+                                  <TaskProvider>
                                   <ProjectProvider>
                                     <MemoryRouter>
                                       <PostHogSessionTracker platform="capacitor" />
@@ -106,6 +108,8 @@ export default function App({
                                     </MemoryRouter>
                                   </ProjectProvider>
                                 </TaskProvider>
+                                </FinanceProvider>
+                                
                               </LanguageProviderWrapper>
                             </SyncProvider>
                           </PouchDBProvider>

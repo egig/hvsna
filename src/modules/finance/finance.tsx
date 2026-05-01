@@ -147,15 +147,6 @@ function FinancePage() {
         )}
       </div>
 
-      {/* Mobile FAB */}
-      <button
-        onClick={openCreateForm}
-        aria-label={t("log_entry")}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full bg-[var(--hvsna-primary-color)] text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform z-50"
-      >
-        <HvPlus size={24} />
-      </button>
-
       {/* Form modal */}
       <Modal isOpen={formOpen} onClose={closeForm} noPadding>
         <FinanceForm />

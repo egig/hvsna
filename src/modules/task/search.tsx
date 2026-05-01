@@ -9,7 +9,7 @@ import TaskListItem from "src/modules/task/task-list-item";
 import { useTasks } from "./use-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
-export default function Tasks() {
+export default function Search() {
   const { t } = useLanguageContext();
   const [filterModalOpened, setFilterModalOpened] = useState(false);
 
