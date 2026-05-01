@@ -31,6 +31,7 @@ import {
   HvSettingsFilled,
   HvTag,
   HvWallet,
+  HvLandmark,
 } from "@/modules/icons";
 import { UserRound } from "lucide-react";
 
@@ -113,6 +114,13 @@ export function DesktopSidebar({
       icon: <HvWallet />,
       activeIcon: <HvWallet />,
       context: "finance",
+    },
+    {
+      path: "/accounts",
+      label: t("accounts") || "Accounts",
+      icon: <HvLandmark />,
+      activeIcon: <HvLandmark />,
+      context: "accounts",
     },
     {
       path: "/tasks",

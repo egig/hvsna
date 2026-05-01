@@ -6,6 +6,7 @@ export class FinanceEntry {
   amount?: number;
   description?: string;
   category?: string;
+  account?: string;
   dateHijri?: string;
   note?: string;
   createdAt?: number;
@@ -17,6 +18,7 @@ export interface FinanceEntryCreateInput {
   amount: number;
   description?: string;
   category?: string;
+  account?: string;
   dateHijri: string;
   note?: string;
 }
@@ -26,6 +28,7 @@ export interface FinanceEntryUpdateInput {
   amount?: number;
   description?: string;
   category?: string;
+  account?: string;
   dateHijri?: string;
   note?: string;
 }

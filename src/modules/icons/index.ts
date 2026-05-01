@@ -75,3 +75,4 @@ export {
 } from "react-icons/hi2";
 
 export { Wallet as HvWallet } from "lucide-react";
+export { Landmark as HvLandmark } from "lucide-react";

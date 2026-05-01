@@ -17,6 +17,7 @@ class PouchDBFinanceDocument {
   amount?: number;
   description?: string;
   category?: string;
+  account?: string;
   dateHijri?: string;
   note?: string;
   createdAt: number = Date.now();
@@ -33,6 +34,7 @@ class PouchDBFinanceDocument {
     entry.amount = this.amount;
     entry.description = this.description;
     entry.category = this.category;
+    entry.account = this.account;
     entry.dateHijri = this.dateHijri;
     entry.note = this.note;
     entry.createdAt = this.createdAt;
@@ -48,6 +50,7 @@ class PouchDBFinanceDocument {
       amount: e.amount,
       description: e.description,
       category: e.category,
+      account: e.account,
       dateHijri: e.dateHijri,
       note: e.note,
       createdAt: e.createdAt,
@@ -93,6 +96,7 @@ export class PouchDBFinanceRepository implements IFinanceRepository {
     entry.amount = input.amount;
     entry.description = input.description;
     entry.category = input.category;
+    entry.account = input.account;
     entry.dateHijri = input.dateHijri;
     entry.note = input.note;
     entry.createdAt = now;

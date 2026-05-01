@@ -9,6 +9,7 @@ import { DatePrayerInput } from "../task/date-prayer-input";
 import { HvSearch, HvX } from "../icons";
 import { Modal } from "../navigation";
 import type { FinanceEntryType } from "../../domain/finance/IFinanceRepository";
+import { useFinanceAccounts } from "./use-finance-accounts";
 
 // --- Category Picker Modal ---
 
@@ -131,6 +132,60 @@ function CategoryPickerModal({
   );
 }
 
+// --- Account Picker Modal ---
+
+interface AccountPickerModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedAccount: string | undefined;
+  accounts: { id?: string; name: string; icon?: string }[];
+  onSelect: (name: string) => void;
+}
+
+function AccountPickerModal({
+  isOpen,
+  onClose,
+  selectedAccount,
+  accounts,
+  onSelect,
+}: AccountPickerModalProps) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Account" noPadding>
+      <ul className="overflow-y-auto max-h-80">
+        {accounts.length === 0 && (
+          <li className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+            No accounts — add some on the Accounts page
+          </li>
+        )}
+        {accounts.map((acc) => {
+          const isSelected = selectedAccount === acc.name;
+          return (
+            <li key={acc.id ?? acc.name}>
+              <button
+                type="button"
+                onClick={() => { onSelect(acc.name); onClose(); }}
+                className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center gap-3 ${
+                  isSelected
+                    ? "font-semibold text-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
+                    : "text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                }`}
+              >
+                <span className="text-base">{acc.icon || "💵"}</span>
+                <span className="flex-1">{acc.name}</span>
+                {isSelected && (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0 text-[var(--hvsna-primary-color)]">
+                    <path d="M13 4L6 11L3 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </Modal>
+  );
+}
+
 // --- Finance Form ---
 
 interface FinanceFormProps {
@@ -142,6 +197,7 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
   const { t } = useLanguageContext();
   const { createEntry, updateEntry, editingEntryId, closeForm } = useFinanceContext();
   const { data: entries } = useFinanceEntries();
+  const { data: accounts = [] } = useFinanceAccounts();
   const { getToday } = useHijriDate();
 
   const today = getToday();
@@ -150,8 +206,10 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
   const [amount, setAmount] = useState("");
   const [selectedDate, setSelectedDate] = useState<HijriDate | null>(today);
   const [category, setCategory] = useState<string>("");
+  const [account, setAccount] = useState<string>("");
   const [note, setNote] = useState("");
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -170,6 +228,7 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
       setEntryType(editingEntry.type ?? "expense");
       setAmount(editingEntry.amount?.toString() ?? "");
       setCategory(editingEntry.category ?? "");
+      setAccount(editingEntry.account ?? "");
       setNote(editingEntry.note ?? "");
     }
   }, [editingEntry]);
@@ -209,6 +268,7 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
           type: entryType,
           amount: parsedAmount,
           category: category || undefined,
+          account: account || undefined,
           dateHijri,
           note: note.trim() || undefined,
         });
@@ -217,6 +277,7 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
           type: entryType,
           amount: parsedAmount,
           category: category || undefined,
+          account: account || undefined,
           dateHijri,
           note: note.trim() || undefined,
         });
@@ -310,6 +371,41 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
             />
           </div>
 
+          {/* Account */}
+          <div>
+            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              {t("account") || "Account"}
+            </label>
+            <button
+              type="button"
+              onClick={() => setAccountModalOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 min-h-[40px] w-full text-left cursor-pointer"
+            >
+              {account ? (
+                <span className="inline-flex items-center gap-1.5 text-sm text-gray-900 dark:text-white">
+                  <span>{accounts.find((a) => a.name === account)?.icon || "💵"}</span>
+                  <span>{account}</span>
+                </span>
+              ) : (
+                <span className="text-sm text-gray-400">{t("select_account") || "Select account..."}</span>
+              )}
+              {account && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Clear account"
+                  className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  onClick={(e) => { e.stopPropagation(); setAccount(""); }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); setAccount(""); }
+                  }}
+                >
+                  <HvX size={14} />
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* Amount */}
           <div>
             <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
@@ -391,6 +487,14 @@ export function FinanceForm({ onSuccess, onCancel }: FinanceFormProps) {
         allCategories={allCategories}
         onSelect={selectCategory}
         onCreate={createCategory}
+      />
+
+      <AccountPickerModal
+        isOpen={accountModalOpen}
+        onClose={() => setAccountModalOpen(false)}
+        selectedAccount={account || undefined}
+        accounts={accounts}
+        onSelect={(name) => setAccount(name)}
       />
     </div>
   );

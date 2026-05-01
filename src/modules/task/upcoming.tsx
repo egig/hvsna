@@ -208,7 +208,7 @@ export default function Tasks() {
           <div className="flex flex-col flex-1 overflow-hidden">
             <Navbar
               showBackButton={false}
-              title={t("upcoming")}
+              title={t("tasks")}
               rightAction={viewToggle}
             />
             <div className="flex-1 overflow-y-auto">

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router";
 import { FinanceProvider, useFinanceContext } from "./finance-context";
 import { useFinanceEntries, useFinanceSummary } from "./use-finance-entries";
 import { FinanceListItem } from "./finance-list-item";
@@ -8,7 +9,7 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { EmptyState } from "../components/empty-state";
 import { Wallet } from "lucide-react";
-import { HvPlus } from "../icons";
+import { HvPlus, HvLandmark } from "../icons";
 import { parseHijriDateString } from "../task/task-form-helpers";
 import type { FinanceEntry } from "../../domain/finance/IFinanceRepository";
 import { Page } from "../navigation";
@@ -67,14 +68,23 @@ function FinancePage() {
           title={t("finance")}
           showBackButton={false}
           rightAction={
-            <div className="hidden md:block">
-              <NavActionButton
-                variant="neutral"
-                onClick={openCreateForm}
-                aria-label={t("log_entry")}
+            <div className="flex items-center gap-1">
+              <Link
+                to="/accounts"
+                aria-label={t("accounts") || "Accounts"}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <HvPlus size={20} />
-              </NavActionButton>
+                <HvLandmark size={20} />
+              </Link>
+              <div className="hidden md:block">
+                <NavActionButton
+                  variant="neutral"
+                  onClick={openCreateForm}
+                  aria-label={t("log_entry")}
+                >
+                  <HvPlus size={20} />
+                </NavActionButton>
+              </div>
             </div>
           }
         />

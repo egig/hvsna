@@ -11,4 +11,5 @@ export const queryKeys = {
   inboxTasks: () => ["inbox-tasks"] as const,
   allTasks: () => ["all-tasks"] as const,
   financeEntries: (filters?: string) => ["finance-entries", filters] as const,
+  financeAccounts: () => ["finance-accounts"] as const,
 } as const;
