@@ -7,12 +7,8 @@ import {
   HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
-  HvFileFilled,
-  HvList,
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
-  HvOutlineInbox,
-  HvHiInbox,
   HvWallet,
 } from "@/modules/icons";
 
@@ -37,8 +33,8 @@ export function TabBar() {
       context: "finance",
     },
     {
-      path: "/upcoming",
-      label: t("upcoming"),
+      path: "/tasks",
+      label: t("tasks"),
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",

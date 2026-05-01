@@ -29,8 +29,6 @@ import {
   HvSearch,
   HvSettings,
   HvSettingsFilled,
-  HvOutlineInbox,
-  HvHiInbox,
   HvTag,
   HvWallet,
 } from "@/modules/icons";
@@ -117,18 +115,11 @@ export function DesktopSidebar({
       context: "finance",
     },
     {
-      path: "/upcoming",
-      label: t("upcoming"),
+      path: "/tasks",
+      label: t("tasks"),
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
-    },
-    {
-      path: "/inbox",
-      label: t("inbox") || "Inbox",
-      icon: <HvOutlineInbox />,
-      activeIcon: <HvHiInbox />,
-      context: "inbox",
     },
     {
       path: "/search",

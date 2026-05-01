@@ -23,7 +23,7 @@ import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
 import ProjectDetail from "./modules/task/project-detail";
-import Upcoming from "./modules/task/upcoming";
+import Tasks from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
 import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
@@ -32,7 +32,6 @@ import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
-import { Inbox } from "./modules/task/inbox";
 import Browse from "./modules/task/browse";
 import TagManagementPage from "./modules/task/tag-management-page";
 import Finance from "./modules/finance/finance";
@@ -94,8 +93,7 @@ export const AppRoutes = () => {
           >
             <Route index element={<Today />} />
             <Route path="search" element={<Search />} />
-            <Route path="upcoming" element={<Upcoming />} />
-            <Route path="inbox" element={<Inbox />} />
+            <Route path="tasks" element={<Tasks />} />
             {!isDesktop && <Route path="browse" element={<Browse />} />}
             <Route path="tags" element={<TagManagementPage />} />
             <Route path="finance" element={<Finance />} />
