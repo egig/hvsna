@@ -12,4 +12,7 @@ export const queryKeys = {
   allTasks: () => ["all-tasks"] as const,
   financeEntries: (filters?: string) => ["finance-entries", filters] as const,
   financeAccounts: () => ["finance-accounts"] as const,
+  trackers: () => ["trackers"] as const,
+  trackerLogs: (trackerId: string) => ["tracker-logs", trackerId] as const,
+  trackerStats: (trackerId: string) => ["tracker-stats", trackerId] as const,
 } as const;

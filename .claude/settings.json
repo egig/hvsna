@@ -3,7 +3,8 @@
     "allow": [
       "mcp__plugin_claude-mem_mcp-search__smart_outline",
       "mcp__plugin_claude-mem_mcp-search__get_observations",
-      "mcp__plugin_claude-mem_mcp-search__smart_unfold"
+      "mcp__plugin_claude-mem_mcp-search__smart_unfold",
+      "Bash(grep -n \"const { toHijriDate, formatDate } = useHijriDate\" /Users/egig/workspace/hvsna/src/modules/task/week-view.tsx)"
     ]
   }
 }

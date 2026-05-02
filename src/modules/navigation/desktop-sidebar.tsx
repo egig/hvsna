@@ -111,11 +111,11 @@ export function DesktopSidebar({
       context: "today",
     },
     {
-      path: "/finance",
-      label: t("finance"),
+      path: "/tracks",
+      label: t("tracks") || "Tracks",
       icon: <HvChartArea />,
       activeIcon: <HvChartAreaFilled />,
-      context: "finance",
+      context: "tracks",
     },
     {
       path: "/tasks",

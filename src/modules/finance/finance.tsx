@@ -66,7 +66,6 @@ function FinancePage() {
       navbar={
         <Navbar
           title={t("finance")}
-          showBackButton={false}
           rightAction={
             <div className="flex items-center gap-1">
               <Link

@@ -36,6 +36,8 @@ import Browse from "./modules/task/browse";
 import TagManagementPage from "./modules/task/tag-management-page";
 import Finance from "./modules/finance/finance";
 import AccountsPage from "./modules/finance/accounts";
+import Tracks from "./modules/tracker/tracks";
+import TrackerDetail from "./modules/tracker/tracker-detail";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -97,6 +99,8 @@ export const AppRoutes = () => {
             <Route path="tasks" element={<Tasks />} />
             {!isDesktop && <Route path="browse" element={<Browse />} />}
             <Route path="tags" element={<TagManagementPage />} />
+            <Route path="tracks" element={<Tracks />} />
+            <Route path="tracks/:id" element={<TrackerDetail />} />
             <Route path="finance" element={<Finance />} />
             <Route path="accounts" element={<AccountsPage />} />
             <Route path="project/:projectId" element={<ProjectDetail />} />
