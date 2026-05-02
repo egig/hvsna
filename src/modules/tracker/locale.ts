@@ -36,5 +36,5 @@ export const trackerTranslations = {
   no_logs_description: { en: "Tap the button below to log your first entry", id: "Ketuk tombol di bawah untuk mencatat entri pertama" },
   log_note_placeholder: { en: "Note (optional)", id: "Catatan (opsional)" },
   value_label: { en: "Value", id: "Nilai" },
-  undo: { en: "Undo (+/-)", id: "Batalkan (+/-)" },
+  log_undo: { en: "Undo (+/-)", id: "Batalkan (+/-)" },
 };

@@ -117,7 +117,7 @@ function LogForm({ trackerId, trackerType, trackerColor, trackerUnit, todayDateH
                   : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400"
               }`}
             >
-              {t("undo") || "Undo / No"}
+              {t("log_undo") || "Undo / No"}
             </button>
           </div>
         ) : trackerType === "tally" ? (

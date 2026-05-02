@@ -152,6 +152,7 @@ export function TrackerForm({ editingId, onClose }: TrackerFormProps) {
                 key={opt.value}
                 type="button"
                 onClick={() => setType(opt.value)}
+                disabled={!!editingId}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-colors ${
                   type === opt.value
                     ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10"
