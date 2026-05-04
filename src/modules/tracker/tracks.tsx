@@ -1,5 +1,3 @@
-import React from "react";
-import { Link } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTrackers } from "./use-trackers";
 import { TrackerProvider, useTrackerContext } from "./tracker-context";
@@ -10,43 +8,11 @@ import { Modal } from "../navigation/modal";
 import { Page } from "../navigation";
 import { NavActionButton } from "../components/nav-action-button";
 import { HvPlus } from "../icons";
-import { useFinanceSummary } from "../finance/use-finance-entries";
 
 function formatBalance(amount: number): string {
   return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
-function FinanceCard() {
-  const { t } = useLanguageContext();
-  const { data: summary } = useFinanceSummary();
-  const balance = summary?.balance ?? 0;
-
-  return (
-    <Link
-      to="/finance"
-      className="flex flex-col p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform"
-    >
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-2xl">💰</span>
-      </div>
-      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-1">
-        {t("finance") || "Finance"}
-      </p>
-      <p
-        className={`text-2xl font-bold mt-0.5 ${
-          balance >= 0
-            ? "text-[var(--hvsna-success-color)]"
-            : "text-[var(--hvsna-danger-color)]"
-        }`}
-      >
-        {balance >= 0 ? "+" : ""}{formatBalance(balance)}
-      </p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-        {t("balance") || "Balance"}
-      </p>
-    </Link>
-  );
-}
 
 function TracksPage() {
   const { t } = useLanguageContext();
@@ -79,7 +45,6 @@ function TracksPage() {
           <div className="px-4 pt-4">
             {/* Card grid */}
             <div className="grid grid-cols-2 gap-3">
-              <FinanceCard />
               {trackers.map((tracker) => (
                 <TrackerCard
                   key={tracker.id}

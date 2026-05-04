@@ -34,8 +34,6 @@ import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import Browse from "./modules/task/browse";
 import TagManagementPage from "./modules/task/tag-management-page";
-import Finance from "./modules/finance/finance";
-import AccountsPage from "./modules/finance/accounts";
 import Tracks from "./modules/tracker/tracks";
 import TrackerDetail from "./modules/tracker/tracker-detail";
 
@@ -105,8 +103,6 @@ export const AppRoutes = () => {
             {!isDesktop && <Route path="tags" element={<TagManagementPage />} />}
             <Route path="tracks" element={<Tracks />} />
             <Route path="tracks/:id" element={<TrackerDetail />} />
-            <Route path="finance" element={<Finance />} />
-            <Route path="accounts" element={<AccountsPage />} />
             <Route path="project/:projectId" element={<ProjectDetail />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}

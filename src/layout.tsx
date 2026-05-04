@@ -12,8 +12,6 @@ import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
 import { useProjectContext } from "./modules/task/project-context";
 import ProjectFormContainer from "./modules/task/project-form-container";
-import { useFinanceContext } from "./modules/finance/finance-context";
-import { FinanceForm } from "./modules/finance/finance-form";
 
 interface MobileLayoutProps {
   formOpen: boolean;
@@ -38,7 +36,6 @@ function MobileLayout({
   location,
   params,
 }: MobileLayoutProps) {
-  const { openCreateForm, formOpen: financeFormOpen, closeForm } = useFinanceContext();
 
   return (
     <div className="h-[100dvh] flex flex-col">
@@ -58,17 +55,6 @@ function MobileLayout({
         </button>
       )}
 
-      {/* Finance FAB — today page only */}
-      {["finance", "today"].indexOf(location?.state?.context) !== -1  && (
-        <button
-          onClick={openCreateForm}
-          className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-          style={{ backgroundColor: "var(--hvsna-success-color)" }}
-          aria-label="Log finance entry"
-        >
-          <HvWallet size={22} />
-        </button>
-      )}
 
       <div className="flex-shrink-0">
         <TabBar />
@@ -87,11 +73,6 @@ function MobileLayout({
       {/* Project Form Modal */}
       <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
         <ProjectFormContainer />
-      </Modal>
-
-      {/* Finance Form Modal */}
-      <Modal isOpen={financeFormOpen} onClose={closeForm} noPadding>
-        <FinanceForm />
       </Modal>
     </div>
   );

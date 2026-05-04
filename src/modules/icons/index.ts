@@ -2,6 +2,7 @@
 export {
   AlertCircle as HvAlertCircle,
   AlertTriangle as HvAlertTriangle,
+  ArrowDown as HvArrowDown,
   ArrowLeft as HvArrowLeft,
   ArrowRight as HvArrowRight,
   ArrowUp as HvArrowUp,
@@ -68,6 +69,8 @@ export {
   TbSettingsFilled as HvSettingsFilled,
   TbChartArea as HvChartArea,
   TbChartAreaFilled as HvChartAreaFilled,
+  TbSquareCheck as HvSquareCheck,  
+  TbSquareCheckFilled as HvSquareCheckFilled  
 } from "react-icons/tb";
 
 export {
@@ -79,3 +82,6 @@ export {
 
 export { Wallet as HvWallet } from "lucide-react";
 export { Landmark as HvLandmark } from "lucide-react";
+export { Target as HvTarget } from "lucide-react";
+export { Scale as HvScale } from "lucide-react";
+export { AiOutlineProject as HvProjectOutline, AiFillProject as HvProjectFilled } from "react-icons/ai"

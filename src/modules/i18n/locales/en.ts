@@ -7,7 +7,6 @@ import { syncTranslations } from "../../sync/locale";
 import { onboardingTranslations } from "../../onboarding/locale";
 import { commonTranslations } from "../../locale";
 import { authTranslations } from "../../auth/locale";
-import { financeTranslations } from "../../finance/locale";
 import { trackerTranslations } from "../../tracker/locale";
 import type { Translations } from "../language";
 
@@ -22,6 +21,5 @@ export const translations: Translations = {
   ...datetimeTranslations,
   ...syncTranslations,
   ...onboardingTranslations,
-  ...financeTranslations,
   ...trackerTranslations,
 };

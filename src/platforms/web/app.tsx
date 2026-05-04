@@ -25,7 +25,6 @@ import { PostHogSessionTracker } from "../../modules/posthog/posthog-session-tra
 import { PlatformProvider } from "../../modules/platform";
 import { EnsureRequiredParams } from "../../modules/components/ensure-required-params";
 import log from "../../modules/logger";
-import { FinanceProvider } from "@/modules/finance/finance-context";
 
 export interface AppConfig {
   basePath?: string;
@@ -100,7 +99,6 @@ export default function App({
                           <PouchDBProvider dbInstance={db}>
                             <SyncProvider>
                               <LanguageProviderWrapper>
-                                <FinanceProvider>
                                 <TaskProvider>
                                   <ProjectProvider>
                                     <BrowserRouter
@@ -111,7 +109,6 @@ export default function App({
                                     </BrowserRouter>
                                   </ProjectProvider>
                                 </TaskProvider>
-                                </FinanceProvider>
                                 
                               </LanguageProviderWrapper>
                             </SyncProvider>

@@ -3,14 +3,14 @@ import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import {
-  HvCalendarMonth,
-  HvCalendarMonthFilled,
-  HvOutlineEllipsisHorizontalCircle,
-  HvEllipsisHorizontalCircle,
   HvChartArea,
   HvChartAreaFilled,
   HvSettings,
   HvSettingsFilled,
+  HvProjectOutline,
+  HvProjectFilled,
+  HvSquareCheck,
+  HvSquareCheckFilled
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -22,8 +22,8 @@ export function TabBar() {
     {
       path: "/tasks",
       label: t("tasks"),
-      icon: <HvCalendarMonth />,
-      activeIcon: <HvCalendarMonthFilled />,
+      icon: <HvSquareCheck />,
+      activeIcon: <HvSquareCheckFilled />,
       context: "tasks",
     },
     {
@@ -36,8 +36,8 @@ export function TabBar() {
     {
       path: "/projects",
       label: t("projects") || "Projects",
-      icon: <HvOutlineEllipsisHorizontalCircle />,
-      activeIcon: <HvEllipsisHorizontalCircle />,
+      icon: <HvProjectOutline />,
+      activeIcon: <HvProjectFilled/>,
       context: "projects",
     },
     {

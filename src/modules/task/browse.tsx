@@ -2,7 +2,6 @@ import { HvPlus, HvList, HvSettings, HvOutlineInbox } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";
-import { NavActionButton } from "../components/nav-action-button";
 import { Button as Button2 } from "../components/button";
 import { useProjects } from "./use-projects";
 import { useProjectContext } from "./project-context";
