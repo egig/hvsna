@@ -23,7 +23,7 @@ import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
 import ProjectDetail from "./modules/task/project-detail";
-import Tasks from "./modules/task/upcoming";
+import Tasks from "./modules/task/tasks";
 import SyncPage from "./modules/sync/sync";
 import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";

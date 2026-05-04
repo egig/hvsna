@@ -17,15 +17,15 @@ import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
 import { PageTransition } from "../navigation/page-transition";
 import { EmptyState } from "../components/empty-state";
-import TaskListItem from "../task/task-list-item";
-import { useUpcoming } from "../task/use-upcoming";
-import { useInbox } from "../task/use-inbox";
-import { useToday } from "../task/use-today";
-import { WeekView } from "../task/week-view";
+import TaskListItem from "./task-list-item";
+import { useUpcoming } from "./use-upcoming";
+import { useInbox } from "./use-inbox";
+import { useToday } from "./use-today";
+import { WeekView } from "./week-view";
 import { TodayContent } from "./today";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import { useTaskContext } from "../task/task-context";
+import { useTaskContext } from "./task-context";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { createPortal } from "react-dom";
@@ -422,11 +422,11 @@ export default function Tasks() {
               {effectiveMode === "list" ? (
                 <>
                   {/* Today Column */}
-                  <div className="w-1/3 border-r border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden">
-                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <div className="w-1/3 flex flex-col overflow-hidden">
+                    <div className="px-4 py-3 flex-shrink-0">
+                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                         {t("today")}
-                      </span>
+                      </h2>
                     </div>
                     <div className="flex-1 overflow-y-auto">
                       <TodayColumn
@@ -441,11 +441,11 @@ export default function Tasks() {
                   </div>
 
                   {/* Upcoming Column */}
-                  <div className="w-1/3 border-r border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden">
-                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                  <div className="w-1/3 flex flex-col overflow-hidden">
+                    <div className="px-4 py-3 flex-shrink-0">
+                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                         {t("upcoming")}
-                      </span>
+                      </h2>
                     </div>
                     <div className="flex-1 overflow-y-auto">
                       {initiated && error && (
@@ -468,10 +468,10 @@ export default function Tasks() {
 
                   {/* Inbox Column */}
                   <div className="w-1/3 flex flex-col overflow-hidden">
-                    <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    <div className="px-4 py-3 flex-shrink-0">
+                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                         {t("inbox") || "Inbox"}
-                      </span>
+                      </h2>
                     </div>
                     <div className="flex-1 overflow-y-auto">
                       <DroppableInboxSidebar
