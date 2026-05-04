@@ -1,4 +1,4 @@
-import { HvPlus, HvList, HvSettings, HvSearch, HvTag, HvOutlineInbox } from "@/modules/icons";
+import { HvPlus, HvList, HvSettings, HvOutlineInbox } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";
@@ -32,17 +32,8 @@ export default function Browse() {
     <Page
       navbar={
         <Navbar
-          title={t("browse")}
+          title={t("projects") || "Projects"}
           showBackButton={false}
-          rightAction={
-            <NavActionButton
-              variant="neutral"
-              onClick={handleGoToSettings}
-              aria-label={t("settings") || "Settings"}
-            >
-              <HvSettings size={20} />
-            </NavActionButton>
-          }
         />
       }
     >
@@ -58,11 +49,6 @@ export default function Browse() {
         </div>
       )}
 
-      {/* Navigation Menu Items */}
-      <div className="mb-6 space-y-1">
-        <MenuItem icon={HvSearch} title={t("search") || "Search"} to="/search" />
-        <MenuItem icon={HvTag} title={t("tags") || "Tags"} to="/tags" />
-      </div>
 
       {!loading && initiated && projects.length === 0 && (
         <div className="text-center py-12">

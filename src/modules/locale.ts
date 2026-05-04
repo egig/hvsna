@@ -373,18 +373,18 @@ export const commonTranslations = {
     id: "Notifikasi hanya digunakan untuk pengingat tugas dan disimpan secara lokal",
   },
 
-  // Inbox
+  // Unscheduled
   inbox: {
-    en: "Inbox",
-    id: "Inbox",
+    en: "Unscheduled",
+    id: "Tanpa Jadwal",
   },
   no_tasks_in_inbox: {
-    en: "No tasks in inbox",
-    id: "Tidak ada tugas di kotak masuk",
+    en: "No unscheduled tasks",
+    id: "Tidak ada tugas tanpa jadwal",
   },
   tasks_without_schedule_or_list_will_appear_here: {
-    en: "Tasks without schedule or list will appear here",
-    id: "Tugas tanpa jadwal atau daftar akan muncul di sini",
+    en: "Tasks without a date will appear here",
+    id: "Tugas tanpa tanggal akan muncul di sini",
   },
 
   // Authentication

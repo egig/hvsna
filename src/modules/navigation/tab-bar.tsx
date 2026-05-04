@@ -3,15 +3,14 @@ import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import {
-  HvCalendar,
-  HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
-  HvWallet,
   HvChartArea,
   HvChartAreaFilled,
+  HvSettings,
+  HvSettingsFilled,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -21,11 +20,11 @@ export function TabBar() {
 
   const tabs = [
     {
-      path: "/",
-      label: t("today"),
-      icon: <HvCalendar />,
-      activeIcon: <HvCalendarFilled />,
-      context: "today",
+      path: "/tasks",
+      label: t("tasks"),
+      icon: <HvCalendarMonth />,
+      activeIcon: <HvCalendarMonthFilled />,
+      context: "tasks",
     },
     {
       path: "/tracks",
@@ -35,18 +34,18 @@ export function TabBar() {
       context: "tracks",
     },
     {
-      path: "/tasks",
-      label: t("tasks"),
-      icon: <HvCalendarMonth />,
-      activeIcon: <HvCalendarMonthFilled />,
-      context: "tasks",
-    },
-    {
-      path: "/browse",
-      label: t("Browse"),
+      path: "/projects",
+      label: t("projects") || "Projects",
       icon: <HvOutlineEllipsisHorizontalCircle />,
       activeIcon: <HvEllipsisHorizontalCircle />,
-      context: "browse",
+      context: "projects",
+    },
+    {
+      path: "/settings",
+      label: t("settings") || "Settings",
+      icon: <HvSettings />,
+      activeIcon: <HvSettingsFilled />,
+      context: "settings",
     },
   ];
 

@@ -22,13 +22,13 @@ export function useInbox() {
 
   // Query for inbox tasks - tasks with no schedule (noDate=1) and no listId
   const inboxTasksQuery = useQuery({
-    queryKey: queryKeys.inboxTasks(),
+    queryKey: queryKeys.unscheduledTasks(),
     queryFn: () => taskUseCases.getUnscheduledTasks(),
     enabled: hijriCalInititated,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
-  const pageTitle = "Inbox";
+  const pageTitle = "Unscheduled";
   const subTitle = formatDate(today, "full");
 
   // Combine loading states

@@ -31,7 +31,7 @@ export interface ITaskRepository {
     offset?: number,
     limit?: number
   ): Promise<Task[]>;
-  findInboxTasks(): Promise<Task[]>;
+  findUnscheduledTasks(): Promise<Task[]>;
   findTasksByProjectId(
     projectId: string,
     offset?: number,

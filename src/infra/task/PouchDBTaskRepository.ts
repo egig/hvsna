@@ -626,10 +626,10 @@ export class PouchDBTaskRepository implements ITaskRepository {
     );
   }
 
-  async findInboxTasks(): Promise<Task[]> {
+  async findUnscheduledTasks(): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "noDate", "projectId", "status", "createdAt"],
+        fields: ["type", "noDate", "status", "createdAt"],
       },
     });
 
@@ -637,14 +637,12 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         noDate: 1, // No schedule
-        projectId: { $eq: null }, // No projectId (null or undefined)
         status: 0, // Not completed
         createdAt: { $gte: null },
       },
       sort: [
         { type: "asc" },
         { noDate: "asc" },
-        { projectId: "asc" },
         { status: "asc" },
         { createdAt: "asc" },
       ] as any,

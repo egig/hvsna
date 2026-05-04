@@ -21,14 +21,10 @@ import { useTasks } from "../task/use-tasks";
 import { useState } from "react";
 import { useAuth } from "../auth/use-auth";
 import {
-  HvSquareRoundedPlusFilled,
-  HvCalendar,
-  HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
   HvLayoutList,
   HvLayoutListFilled,
-  HvSearch,
   HvSettings,
   HvSettingsFilled,
   HvTag,
@@ -38,13 +34,11 @@ import {
 import { UserRound } from "lucide-react";
 
 interface DesktopSidebarProps {
-  openCreateTaskForm?: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
 export function DesktopSidebar({
-  openCreateTaskForm,
   collapsed = false,
   onToggleCollapse,
 }: DesktopSidebarProps) {
@@ -104,20 +98,6 @@ export function DesktopSidebar({
 
   const tabs = [
     {
-      path: "/",
-      label: t("today"),
-      icon: <HvCalendar />,
-      activeIcon: <HvCalendarFilled />,
-      context: "today",
-    },
-    {
-      path: "/tracks",
-      label: t("tracks") || "Tracks",
-      icon: <HvChartArea />,
-      activeIcon: <HvChartAreaFilled />,
-      context: "tracks",
-    },
-    {
       path: "/tasks",
       label: t("tasks"),
       icon: <HvCalendarMonth />,
@@ -125,18 +105,11 @@ export function DesktopSidebar({
       context: "upcoming",
     },
     {
-      path: "/search",
-      label: t("search"),
-      icon: <HvSearch />,
-      activeIcon: <HvSearch />,
-      context: "all",
-    },
-    {
-      path: "/tags",
-      label: t("tags") || "Tags",
-      icon: <HvTag />,
-      activeIcon: <HvTag />,
-      context: "tags",
+      path: "/tracks",
+      label: t("tracks") || "Tracks",
+      icon: <HvChartArea />,
+      activeIcon: <HvChartAreaFilled />,
+      context: "tracks",
     },
   ];
 
@@ -226,24 +199,6 @@ export function DesktopSidebar({
         </button>
       </div>
 
-      {openCreateTaskForm && (
-        <div className="pt-4 px-2 mb-2">
-          <button
-            onClick={() => {
-              openCreateTaskForm();
-            }}
-            className={`flex items-center w-full px-3 py-2 font-bold text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors ${
-              collapsed ? "justify-center" : "space-x-1"
-            }`}
-            aria-label="Add new task"
-          >
-            <HvSquareRoundedPlusFilled size={20} />
-            {!collapsed && (
-              <span className="font-medium text-sm">{t("add_new_task")}</span>
-            )}
-          </button>
-        </div>
-      )}
 
       <div className="flex-1 p-2 space-y-2">
         {mainTabs.map((tab) => {
@@ -340,9 +295,9 @@ export function DesktopSidebar({
             {projects.length > 5 && (
               <div className="mt-2">
                 <Link
-                  to="/browse"
+                  to="/projects"
                   className={`text-xs transition-colors ${
-                    location.pathname === "/browse"
+                    location.pathname === "/projects"
                       ? "text-blue-700 font-medium"
                       : "text-gray-500 hover:text-gray-700"
                   }`}

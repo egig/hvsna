@@ -47,7 +47,7 @@ function MobileLayout({
       </div>
 
       {/* Task FAB */}
-      {["tasks"].indexOf(location?.state?.context) != -1 && (
+      {["tasks", "today"].indexOf(location?.state?.context) != -1 && (
         <button
           onClick={() => openCreateTaskForm({ projectId: (params as Record<string, string>).projectId })}
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
@@ -134,7 +134,6 @@ export default function TabLayout() {
         {/* Sidebar pane */}
         <Allotment.Pane preferredSize={192} minSize={56} maxSize={400} snap>
           <DesktopSidebar
-            openCreateTaskForm={openCreateTaskForm}
             collapsed={sidebarCollapsed}
             onToggleCollapse={handleToggleSidebar}
           />

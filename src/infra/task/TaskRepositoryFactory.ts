@@ -39,7 +39,7 @@ export interface ITaskAndProjectRepository {
     offset?: number,
     limit?: number
   ): Promise<Task[]>;
-  findInboxTasks(): Promise<Task[]>;
+  findUnscheduledTasks(): Promise<Task[]>;
   findTasksByProjectId(
     projectId: string,
     offset?: number,
@@ -84,7 +84,7 @@ export function createTaskRepository(dbName?: string): ITaskAndProjectRepository
     findTodayCompletedTasks: taskRepo.findTodayCompletedTasks.bind(taskRepo),
     findTasksAfter: taskRepo.findTasksAfter.bind(taskRepo),
     findBrowsedTasks: taskRepo.findBrowsedTasks.bind(taskRepo),
-    findInboxTasks: taskRepo.findInboxTasks.bind(taskRepo),
+    findUnscheduledTasks: taskRepo.findUnscheduledTasks.bind(taskRepo),
     findTasksByProjectId: taskRepo.findTasksByProjectId.bind(taskRepo),
     completeTask: taskRepo.completeTask.bind(taskRepo),
     reopenTask: taskRepo.reopenTask.bind(taskRepo),

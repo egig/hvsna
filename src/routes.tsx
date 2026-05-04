@@ -49,6 +49,10 @@ const desktopSettingsSections: SettingsSection[] = [
     path: "/settings/general",
   },
   {
+    ...defaultSettingsSections.find((s) => s.id === "tags")!,
+    path: "/tags",
+  },
+  {
     ...defaultSettingsSections.find((s) => s.id === "prayer-time-fallback")!,
     path: "/settings/prayer-time-fallback",
   },
@@ -94,11 +98,11 @@ export const AppRoutes = () => {
               </OnboardingGuard>
             }
           >
-            <Route index element={<Today />} />
+            <Route index element={<Navigate to="/tasks" replace />} />
             <Route path="search" element={<Search />} />
             <Route path="tasks" element={<Tasks />} />
-            {!isDesktop && <Route path="browse" element={<Browse />} />}
-            <Route path="tags" element={<TagManagementPage />} />
+            {!isDesktop && <Route path="projects" element={<Browse />} />}
+            {!isDesktop && <Route path="tags" element={<TagManagementPage />} />}
             <Route path="tracks" element={<Tracks />} />
             <Route path="tracks/:id" element={<TrackerDetail />} />
             <Route path="finance" element={<Finance />} />
@@ -138,6 +142,7 @@ export const AppRoutes = () => {
               path="settings/prayer-time-fallback"
               element={<PrayerTimeFallback />}
             />
+            <Route path="tags" element={<TagManagementPage />} />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />

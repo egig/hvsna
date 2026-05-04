@@ -240,7 +240,7 @@ export class TaskUseCases {
   }
 
   async getUnscheduledTasks(): Promise<Task[]> {
-    return await this.taskRepository.findInboxTasks();
+    return await this.taskRepository.findUnscheduledTasks();
   }
 
   async getOverdueTasks(): Promise<Task[]> {
