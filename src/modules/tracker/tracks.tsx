@@ -10,8 +10,6 @@ import { Modal } from "../navigation/modal";
 import { Page } from "../navigation";
 import { NavActionButton } from "../components/nav-action-button";
 import { HvPlus } from "../icons";
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { formatHijriDateString } from "../task/task-form-helpers";
 import { useFinanceSummary } from "../finance/use-finance-entries";
 
 function formatBalance(amount: number): string {
@@ -54,13 +52,6 @@ function TracksPage() {
   const { t } = useLanguageContext();
   const { data: trackers = [], isLoading } = useTrackers();
   const { formOpen, editingTrackerId, openCreateForm, closeForm } = useTrackerContext();
-  const { currentHijriDate } = useHijriDate();
-  const todayDateHijri = formatHijriDateString(
-    currentHijriDate.year,
-    currentHijriDate.month,
-    currentHijriDate.day
-  );
-
   return (
     <Page
       navbar={
@@ -93,7 +84,7 @@ function TracksPage() {
                 <TrackerCard
                   key={tracker.id}
                   tracker={tracker}
-                  todayDateHijri={todayDateHijri}
+                  todayTimestamp={Date.now()}
                 />
               ))}
               {/* Add new tracker card */}

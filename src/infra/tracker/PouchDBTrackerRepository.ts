@@ -6,6 +6,7 @@ import type {
   TrackerCreateInput,
   TrackerUpdateInput,
   TrackerLogCreateInput,
+  TrackerLogUpdateInput,
   TrackerQuery,
 } from "../../domain/tracker/ITrackerRepository";
 import { Tracker, TrackerLog } from "../../domain/tracker/ITrackerRepository";
@@ -22,6 +23,14 @@ class PouchDBTrackerDocument {
   createdAt: number = Date.now();
   updatedAt: number = Date.now();
 
+  // goal fields
+  frequency?: string;
+  targetValue?: number;
+  targetMin?: number;
+  targetMax?: number;
+  startDateHijri?: string;
+  endDateHijri?: string;
+
   constructor(o: any) {
     Object.assign(this, o);
   }
@@ -36,6 +45,12 @@ class PouchDBTrackerDocument {
     t.emoji = this.emoji;
     t.createdAt = this.createdAt;
     t.updatedAt = this.updatedAt;
+    t.frequency = this.frequency as any;
+    t.targetValue = this.targetValue;
+    t.targetMin = this.targetMin;
+    t.targetMax = this.targetMax;
+    t.startDateHijri = this.startDateHijri;
+    t.endDateHijri = this.endDateHijri;
     return t;
   }
 }
@@ -46,8 +61,11 @@ class PouchDBTrackerLogDocument {
   type: "tracker_log" = "tracker_log";
   trackerId?: string;
   value?: number;
+  valueBool?: boolean;
+  valueMin?: number;
+  valueMax?: number;
   note?: string;
-  dateHijri?: string;
+  occurredAt?: number;
   createdAt: number = Date.now();
 
   constructor(o: any) {
@@ -59,8 +77,12 @@ class PouchDBTrackerLogDocument {
     l.id = this._id;
     l.trackerId = this.trackerId;
     l.value = this.value;
+    l.valueBool = this.valueBool;
+    l.valueMin = this.valueMin;
+    l.valueMax = this.valueMax;
     l.note = this.note;
-    l.dateHijri = this.dateHijri;
+    // fall back to createdAt for documents that pre-date this field
+    l.occurredAt = this.occurredAt ?? this.createdAt;
     l.createdAt = this.createdAt;
     return l;
   }
@@ -103,6 +125,12 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
       unit: input.unit,
       color: input.color,
       emoji: input.emoji,
+      frequency: input.frequency,
+      targetValue: input.targetValue,
+      targetMin: input.targetMin,
+      targetMax: input.targetMax,
+      startDateHijri: input.startDateHijri,
+      endDateHijri: input.endDateHijri,
       createdAt: now,
       updatedAt: now,
     });
@@ -119,6 +147,12 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
     if (input.unit !== undefined) doc.unit = input.unit;
     if (input.color !== undefined) doc.color = input.color;
     if (input.emoji !== undefined) doc.emoji = input.emoji;
+    if (input.frequency !== undefined) doc.frequency = input.frequency;
+    if (input.targetValue !== undefined) doc.targetValue = input.targetValue;
+    if (input.targetMin !== undefined) doc.targetMin = input.targetMin;
+    if (input.targetMax !== undefined) doc.targetMax = input.targetMax;
+    if (input.startDateHijri !== undefined) doc.startDateHijri = input.startDateHijri;
+    if (input.endDateHijri !== undefined) doc.endDateHijri = input.endDateHijri;
     doc.updatedAt = Date.now();
     await this.db.put(doc);
     return doc.toTracker();
@@ -167,11 +201,27 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
       _id: generatePrefixedUUID("tracker_log_"),
       trackerId: input.trackerId,
       value: input.value,
+      valueBool: input.valueBool,
+      valueMin: input.valueMin,
+      valueMax: input.valueMax,
       note: input.note,
-      dateHijri: input.dateHijri,
+      occurredAt: input.occurredAt ?? now,
       createdAt: now,
     });
     delete (doc as any)._rev;
+    await this.db.put(doc);
+    return doc.toTrackerLog();
+  }
+
+  async updateLog(id: string, input: TrackerLogUpdateInput): Promise<TrackerLog> {
+    const existingDoc: any = await this.db.get(id);
+    const doc = new PouchDBTrackerLogDocument(existingDoc);
+    if (input.value !== undefined) doc.value = input.value;
+    if (input.valueBool !== undefined) doc.valueBool = input.valueBool;
+    if (input.valueMin !== undefined) doc.valueMin = input.valueMin;
+    if (input.valueMax !== undefined) doc.valueMax = input.valueMax;
+    if (input.note !== undefined) doc.note = input.note;
+    if (input.occurredAt !== undefined) doc.occurredAt = input.occurredAt;
     await this.db.put(doc);
     return doc.toTrackerLog();
   }
@@ -190,7 +240,6 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
       createdAt: { $gte: null },
     };
     if (query?.trackerId) selector.trackerId = query.trackerId;
-    if (query?.dateHijri) selector.dateHijri = query.dateHijri;
 
     const result = await this.db.find({
       selector,

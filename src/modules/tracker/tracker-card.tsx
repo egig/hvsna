@@ -1,33 +1,29 @@
-import React from "react";
 import { useNavigate } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useTrackerLogs } from "./use-tracker-logs";
 import { useTrackerStats } from "./use-tracker-stats";
-import type { Tracker } from "../../domain/tracker/ITrackerRepository";
+import type { Tracker, TrackerEvalStatus } from "../../domain/tracker/ITrackerRepository";
 
-const COLOR_MAP: Record<string, string> = {
-  blue: "#3b82f6",
-  green: "#22c55e",
-  purple: "#a855f7",
-  orange: "#f97316",
-  red: "#ef4444",
-  pink: "#ec4899",
-  teal: "#14b8a6",
-  yellow: "#eab308",
+const STATUS_COLOR: Record<TrackerEvalStatus, string> = {
+  on_track: "#22c55e",
+  at_risk: "#f97316",
+  off_track: "#ef4444",
+  achieved: "#22c55e",
+  failed: "#ef4444",
 };
+
+const GOAL_TYPES = new Set(["habit", "build_up", "cut_down", "target", "range"]);
 
 interface TrackerCardProps {
   tracker: Tracker;
-  todayDateHijri?: string;
+  todayTimestamp?: number;
 }
 
-export function TrackerCard({ tracker, todayDateHijri }: TrackerCardProps) {
+export function TrackerCard({ tracker, todayTimestamp }: TrackerCardProps) {
   const { t } = useLanguageContext();
   const navigate = useNavigate();
-  const { data: stats } = useTrackerStats(tracker.id!, todayDateHijri);
+  const { data: stats } = useTrackerStats(tracker.id!, todayTimestamp);
 
-  const color = COLOR_MAP[tracker.color ?? "blue"] ?? "#3b82f6";
-  const emoji = tracker.emoji || (tracker.type === "binary" ? "✅" : tracker.type === "tally" ? "🔢" : "📊");
+  const isGoalType = GOAL_TYPES.has(tracker.type ?? "");
 
   const getDisplayValue = () => {
     if (!stats) return "–";
@@ -36,6 +32,10 @@ export function TrackerCard({ tracker, todayDateHijri }: TrackerCardProps) {
       if (val === null) return "–";
       return val > 0 ? t("yes") || "Yes" : t("no_label") || "No";
     }
+    if (tracker.type === "habit") {
+      const todayDone = (stats.todayTotal ?? 0) > 0;
+      return todayDone ? t("yes") || "Yes" : "–";
+    }
     if (tracker.type === "tally") {
       return String(stats.todayTotal ?? 0);
     }
@@ -43,26 +43,65 @@ export function TrackerCard({ tracker, todayDateHijri }: TrackerCardProps) {
   };
 
   const getSubLabel = () => {
-    if (tracker.type === "binary") return t("stat_today") || "Today";
+    if (tracker.type === "binary" || tracker.type === "habit") return t("stat_today") || "Today";
     if (tracker.type === "tally") return t("stat_today") || "Today";
     return tracker.unit ? `${t("stat_today") || "Today"} (${tracker.unit})` : t("stat_today") || "Today";
   };
 
+  const progress = isGoalType && stats?.currentScore !== undefined
+    ? Math.min(100, Math.max(0, stats.currentScore))
+    : undefined;
+
+  const streak = tracker.type === "habit" && stats?.currentStreak !== undefined && stats.currentStreak > 1
+    ? stats.currentStreak
+    : undefined;
+
+  const status = isGoalType ? stats?.currentStatus : undefined;
+
   return (
     <button
       onClick={() => navigate(`/tracks/${tracker.id}`)}
-      className="flex flex-col p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform text-left w-full"
+      className="flex flex-col rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 cursor-pointer active:scale-[0.98] transition-transform text-left w-full overflow-hidden"
     >
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-2xl">{emoji}</span>
+      <div className="flex flex-col p-4">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+          {tracker.name}
+        </p>
+        {status && (
+          <span
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ backgroundColor: STATUS_COLOR[status] }}
+            title={status.replace("_", " ")}
+          />
+        )}
       </div>
-      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-1">
-        {tracker.name}
-      </p>
-      <p className="text-2xl font-bold mt-0.5" style={{ color }}>
+      <p className="text-2xl font-bold mt-0.5 text-gray-900 dark:text-white">
         {getDisplayValue()}
       </p>
-      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{getSubLabel()}</p>
+      <div className="flex items-center justify-between mt-0.5">
+        <p className="text-xs text-gray-500 dark:text-gray-400">{getSubLabel()}</p>
+        {streak !== undefined && (
+          <p className="text-xs text-orange-500 font-medium">🔥 {streak}</p>
+        )}
+      </div>
+
+      {/* Progress bar for goal types */}
+      {progress !== undefined && (
+        <div className="mt-3 w-full">
+          <div className="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${progress}%`,
+                backgroundColor: status ? STATUS_COLOR[status] : "var(--hvsna-primary-color)",
+              }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 text-right">{progress}%</p>
+        </div>
+      )}
+      </div>
     </button>
   );
 }
