@@ -1,4 +1,3 @@
-import { gregorianToHijri } from "@tabby_ai/hijri-converter";
 import type { ITrackerRepository } from "../../domain/tracker/ITrackerRepository";
 import type {
   Tracker,
@@ -27,12 +26,6 @@ function dayRange(ts: number): [number, number] {
   const d = new Date(ts);
   const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   return [start, start + 86_399_999];
-}
-
-function timestampToHijriStr(ts: number): string {
-  const d = new Date(ts);
-  const h = gregorianToHijri({ year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() });
-  return `${String(h.year).padStart(4, "0")}${String(h.month).padStart(2, "0")}${String(h.day).padStart(2, "0")}`;
 }
 
 export class TrackerUseCases {
@@ -74,7 +67,7 @@ export class TrackerUseCases {
     return this.repository.findLogs(query);
   }
 
-  async getStats(trackerId: string, todayTimestamp?: number): Promise<TrackerStats> {
+  async getStats(trackerId: string, todayTimestamp?: number, weekStartDay = 5): Promise<TrackerStats> {
     const [tracker, logs] = await Promise.all([
       this.repository.findTrackerById(trackerId),
       this.repository.findLogs({ trackerId }),
@@ -100,8 +93,7 @@ export class TrackerUseCases {
     let currentStreak: number | undefined;
     let currentStatus: TrackerEvalStatus | undefined;
     if (tracker && todayTimestamp) {
-      const todayDateHijri = timestampToHijriStr(todayTimestamp);
-      const result = evaluate(tracker, logs, todayDateHijri);
+      const result = evaluate(tracker, logs, todayTimestamp, weekStartDay);
       currentScore = result.currentScore;
       currentStreak = result.currentStreak;
       currentStatus = result.currentStatus;

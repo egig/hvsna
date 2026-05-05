@@ -28,28 +28,31 @@ function logTimestamp(log: TrackerLog): number {
   return log.occurredAt ?? log.createdAt ?? 0;
 }
 
-function getPeriodStartTimestamp(todayDateHijri: string, frequency: string): number {
-  const todayTs = hijriToTimestamp(todayDateHijri);
-  if (frequency === "weekly") return todayTs - 6 * MS_PER_DAY;
+function getPeriodStartTimestamp(todayTimestamp: number, frequency: string, weekStartDay = 5): number {
+  if (frequency === "weekly") {
+    const d = new Date(todayTimestamp);
+    const daysBack = (d.getDay() - weekStartDay + 7) % 7;
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate() - daysBack);
+    return start.getTime();
+  }
   if (frequency === "monthly") {
-    const year = parseInt(todayDateHijri.substring(0, 4));
-    const month = parseInt(todayDateHijri.substring(4, 6));
-    const g = hijriToGregorian({ year, month, day: 1 });
+    const d = new Date(todayTimestamp);
+    const h = gregorianToHijri({ year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() });
+    const g = hijriToGregorian({ year: h.year, month: h.month, day: 1 });
     return new Date(g.year, g.month - 1, g.day).getTime();
   }
-  return todayTs;
+  return todayTimestamp;
 }
 
-function getLogsInCurrentPeriod(logs: TrackerLog[], frequency: string, todayDateHijri: string): TrackerLog[] {
-  const periodStart = getPeriodStartTimestamp(todayDateHijri, frequency);
-  const todayTs = hijriToTimestamp(todayDateHijri);
+function getLogsInCurrentPeriod(logs: TrackerLog[], frequency: string, todayTimestamp: number, weekStartDay = 5): TrackerLog[] {
+  const periodStart = getPeriodStartTimestamp(todayTimestamp, frequency, weekStartDay);
   return logs.filter((log) => {
     const ts = logTimestamp(log);
-    return ts >= periodStart && ts <= todayTs + MS_PER_DAY - 1;
+    return ts >= periodStart && ts <= todayTimestamp + MS_PER_DAY - 1;
   });
 }
 
-function calcHabitStreak(logs: TrackerLog[], todayDateHijri: string): number {
+function calcHabitStreak(logs: TrackerLog[], todayTimestamp: number): number {
   // Collect unique Hijri date strings where a "done" log exists
   const doneDates = new Set<string>();
   for (const l of logs) {
@@ -64,7 +67,7 @@ function calcHabitStreak(logs: TrackerLog[], todayDateHijri: string): number {
   const sorted = Array.from(doneDates).sort((a, b) => b.localeCompare(a));
 
   // Allow the current day to not yet be logged (streak still intact from yesterday)
-  let current = todayDateHijri;
+  let current = timestampToHijriStr(todayTimestamp);
   if (!doneDates.has(current) && sorted[0]) {
     const diff = Math.round(
       (hijriToTimestamp(current) - hijriToTimestamp(sorted[0])) / MS_PER_DAY
@@ -100,7 +103,8 @@ function scoreToStatus(score: number, isExpired: boolean): TrackerEvalStatus {
 export function evaluate(
   tracker: Tracker,
   logs: TrackerLog[],
-  todayDateHijri: string
+  todayTimestamp: number,
+  weekStartDay = 5
 ): EvaluationResult {
   const now = Date.now();
   const type = tracker.type;
@@ -109,19 +113,19 @@ export function evaluate(
     return { currentScore: undefined, currentStreak: undefined, currentStatus: undefined, lastEvaluatedAt: now };
   }
 
-  const isExpired = tracker.endDateHijri ? todayDateHijri > tracker.endDateHijri : false;
+  const todayHijri = timestampToHijriStr(todayTimestamp);
+  const isExpired = tracker.endDateHijri ? todayHijri > tracker.endDateHijri : false;
   const frequency = tracker.frequency ?? "daily";
-  const periodLogs = getLogsInCurrentPeriod(logs, frequency, todayDateHijri);
+  const periodLogs = getLogsInCurrentPeriod(logs, frequency, todayTimestamp, weekStartDay);
 
   let score: number | undefined;
   let streak: number | undefined;
 
   if (type === "habit") {
-    streak = calcHabitStreak(logs, todayDateHijri);
+    streak = calcHabitStreak(logs, todayTimestamp);
 
-    const periodStart = getPeriodStartTimestamp(todayDateHijri, frequency);
-    const todayTs = hijriToTimestamp(todayDateHijri);
-    const daysInPeriod = Math.max(1, Math.round((todayTs - periodStart) / MS_PER_DAY) + 1);
+    const periodStart = getPeriodStartTimestamp(todayTimestamp, frequency, weekStartDay);
+    const daysInPeriod = Math.max(1, Math.round((todayTimestamp - periodStart) / MS_PER_DAY) + 1);
 
     const doneDays = new Set(
       periodLogs

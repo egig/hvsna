@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTrackers } from "./use-trackers";
 import type { TrackerType, TrackerFrequency } from "../../domain/tracker/ITrackerRepository";
