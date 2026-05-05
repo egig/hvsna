@@ -149,7 +149,8 @@ export const useTaskFormEdit = (
         hijriDateOffset: offset,
         prayerTime: (formData.scheduleAt.prayerTime as PrayerTime) || undefined,
         removeTime: removeTime,
-        projectId: formData.projectId === "" ? null : formData.projectId || undefined,
+        projectId:
+          formData.projectId === "" ? null : formData.projectId || undefined,
         tags: formData.tags.length > 0 ? formData.tags : null,
       };
 

@@ -43,7 +43,9 @@ export const ProjectProvider: React.FC<{
   };
 
   return (
-    <ProjectContext.Provider value={contextValue}>{children}</ProjectContext.Provider>
+    <ProjectContext.Provider value={contextValue}>
+      {children}
+    </ProjectContext.Provider>
   );
 };
 

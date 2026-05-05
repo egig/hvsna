@@ -24,7 +24,9 @@ class PouchDBTrackerDocument {
   updatedAt: number = Date.now();
 
   // goal fields
-  frequency?: string;
+  period?: string;
+  condition?: string;
+  startingValue?: number;
   targetValue?: number;
   targetMin?: number;
   targetMax?: number;
@@ -45,7 +47,9 @@ class PouchDBTrackerDocument {
     t.emoji = this.emoji;
     t.createdAt = this.createdAt;
     t.updatedAt = this.updatedAt;
-    t.frequency = this.frequency as any;
+    t.period = this.period as any;
+    t.condition = this.condition as any;
+    t.startingValue = this.startingValue;
     t.targetValue = this.targetValue;
     t.targetMin = this.targetMin;
     t.targetMax = this.targetMax;
@@ -104,7 +108,10 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
       PouchDB.plugin(require("pouchdb-adapter-cordova-sqlite"));
       return new PouchDB(dbName, { adapter: "cordova-sqlite" });
     } catch (error) {
-      console.warn("Failed to load SQLite adapter, falling back to IndexedDB:", error);
+      console.warn(
+        "Failed to load SQLite adapter, falling back to IndexedDB:",
+        error
+      );
       return new PouchDB(dbName);
     }
   }
@@ -125,7 +132,9 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
       unit: input.unit,
       color: input.color,
       emoji: input.emoji,
-      frequency: input.frequency,
+      period: input.period,
+      condition: input.condition,
+      startingValue: input.startingValue,
       targetValue: input.targetValue,
       targetMin: input.targetMin,
       targetMax: input.targetMax,
@@ -147,11 +156,15 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
     if (input.unit !== undefined) doc.unit = input.unit;
     if (input.color !== undefined) doc.color = input.color;
     if (input.emoji !== undefined) doc.emoji = input.emoji;
-    if (input.frequency !== undefined) doc.frequency = input.frequency;
+    if (input.period !== undefined) doc.period = input.period;
+    if (input.condition !== undefined) doc.condition = input.condition;
+    if (input.startingValue !== undefined)
+      doc.startingValue = input.startingValue;
     if (input.targetValue !== undefined) doc.targetValue = input.targetValue;
     if (input.targetMin !== undefined) doc.targetMin = input.targetMin;
     if (input.targetMax !== undefined) doc.targetMax = input.targetMax;
-    if (input.startDateHijri !== undefined) doc.startDateHijri = input.startDateHijri;
+    if (input.startDateHijri !== undefined)
+      doc.startDateHijri = input.startDateHijri;
     if (input.endDateHijri !== undefined) doc.endDateHijri = input.endDateHijri;
     doc.updatedAt = Date.now();
     await this.db.put(doc);
@@ -213,7 +226,10 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
     return doc.toTrackerLog();
   }
 
-  async updateLog(id: string, input: TrackerLogUpdateInput): Promise<TrackerLog> {
+  async updateLog(
+    id: string,
+    input: TrackerLogUpdateInput
+  ): Promise<TrackerLog> {
     const existingDoc: any = await this.db.get(id);
     const doc = new PouchDBTrackerLogDocument(existingDoc);
     if (input.value !== undefined) doc.value = input.value;
@@ -243,7 +259,7 @@ export class PouchDBTrackerRepository implements ITrackerRepository {
 
     const result = await this.db.find({
       selector,
-      sort: [{ type: "asc" }, { createdAt: "desc" }],
+      sort: [{ type: "desc" }, { createdAt: "desc" }],
     });
     return (result as any).docs.map((doc: any) =>
       new PouchDBTrackerLogDocument(doc).toTrackerLog()

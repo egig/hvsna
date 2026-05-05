@@ -93,7 +93,9 @@ function TagPickerModal({
 
           {!loading && filtered.length === 0 && !showCreate && (
             <li className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
-              {search.trim() ? "No matching tags" : "Type to search or create a tag"}
+              {search.trim()
+                ? "No matching tags"
+                : "Type to search or create a tag"}
             </li>
           )}
 
@@ -104,7 +106,8 @@ function TagPickerModal({
                 onClick={handleCreate}
                 className="w-full text-left px-4 py-3 text-sm text-[var(--hvsna-primary-color)] transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700"
               >
-                <span className="mr-1 font-medium">+</span> Create tag &ldquo;{normalizedSearch}&rdquo;
+                <span className="mr-1 font-medium">+</span> Create tag &ldquo;
+                {normalizedSearch}&rdquo;
               </button>
             </li>
           )}
@@ -243,7 +246,9 @@ export function TagList({ tags, onTagClick, className = "" }: TagListProps) {
           key={tag}
           onClick={() => onTagClick?.(tag)}
           className={`inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs ${
-            onTagClick ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600" : ""
+            onTagClick
+              ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
+              : ""
           }`}
         >
           {tag}

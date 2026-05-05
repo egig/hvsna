@@ -13,8 +13,14 @@ import { NavActionButton } from "../components/nav-action-button";
 import { EmptyState } from "../components/empty-state";
 import { HvEdit2, HvTrash2, HvPlus, HvX } from "../icons";
 import { gregorianToHijri } from "@tabby_ai/hijri-converter";
-import { formatHijriDateString, parseHijriDateString } from "../task/task-form-helpers";
-import type { TrackerLog, TrackerEvalStatus } from "../../domain/tracker/ITrackerRepository";
+import {
+  formatHijriDateString,
+  parseHijriDateString,
+} from "../task/task-form-helpers";
+import type {
+  TrackerLog,
+  TrackerEvalStatus,
+} from "../../domain/tracker/ITrackerRepository";
 
 const STATUS_LABEL: Record<TrackerEvalStatus, string> = {
   on_track: "On Track",
@@ -32,11 +38,15 @@ const STATUS_COLOR: Record<TrackerEvalStatus, string> = {
   failed: "#ef4444",
 };
 
-const GOAL_TYPES = new Set(["habit", "build_up", "cut_down", "target", "range"]);
+const GOAL_TYPES = new Set(["habit", "build_up", "cut_down"]);
 
 function timestampToHijriStr(ts: number): string {
   const d = new Date(ts);
-  const h = gregorianToHijri({ year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() });
+  const h = gregorianToHijri({
+    year: d.getFullYear(),
+    month: d.getMonth() + 1,
+    day: d.getDate(),
+  });
   return formatHijriDateString(h.year, h.month, h.day);
 }
 
@@ -52,7 +62,10 @@ function formatHijriKey(dateHijri: string): string {
 /** Returns today's date as a "YYYY-MM-DD" string for <input type="date"> */
 function todayGregorianStr(): string {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 /** Converts a "YYYY-MM-DD" string to a timestamp.
@@ -79,6 +92,7 @@ function groupLogsByDate(logs: TrackerLog[]): Map<string, TrackerLog[]> {
 interface LogFormProps {
   trackerType: string;
   trackerUnit?: string;
+  trackerCondition?: string;
   defaultOccurredAt?: number;
   initialValue?: string;
   initialNote?: string;
@@ -86,14 +100,26 @@ interface LogFormProps {
   onSubmit: (value: number, note: string, occurredAt: number) => Promise<void>;
 }
 
-function LogForm({ trackerType, trackerUnit, defaultOccurredAt, initialValue, initialNote, onClose, onSubmit }: LogFormProps) {
+function LogForm({
+  trackerType,
+  trackerUnit,
+  trackerCondition,
+  defaultOccurredAt,
+  initialValue,
+  initialNote,
+  onClose,
+  onSubmit,
+}: LogFormProps) {
   const { t } = useLanguageContext();
   const [value, setValue] = useState(initialValue ?? "1");
   const [note, setNote] = useState(initialNote ?? "");
   const [occurDate, setOccurDate] = useState(() => {
     const ts = defaultOccurredAt ?? Date.now();
     const d = new Date(ts);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(d.getDate()).padStart(2, "0")}`;
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +142,11 @@ function LogForm({ trackerType, trackerUnit, defaultOccurredAt, initialValue, in
     }
   };
 
-  const isBooleanType = trackerType === "binary" || trackerType === "habit";
+  const isBooleanType =
+    trackerType === "binary" ||
+    (trackerType === "habit" &&
+      trackerCondition !== "threshold" &&
+      trackerCondition !== "range");
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
@@ -124,13 +154,19 @@ function LogForm({ trackerType, trackerUnit, defaultOccurredAt, initialValue, in
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">
           {t("log_value") || "Log"}
         </h2>
-        <button type="button" onClick={onClose} className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors">
+        <button
+          type="button"
+          onClick={onClose}
+          className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+        >
           <HvX size={18} />
         </button>
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        {error && <p className="text-sm text-[var(--hvsna-danger-color)]">{error}</p>}
+        {error && (
+          <p className="text-sm text-[var(--hvsna-danger-color)]">{error}</p>
+        )}
 
         {isBooleanType ? (
           <div className="flex gap-3">
@@ -173,7 +209,9 @@ function LogForm({ trackerType, trackerUnit, defaultOccurredAt, initialValue, in
                 onChange={(e) => setValue(e.target.value)}
                 className="w-20 text-center text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-b-2 border-gray-300 dark:border-gray-600 focus:outline-none focus:border-[var(--hvsna-primary-color)] pb-1"
               />
-              {trackerUnit && <p className="text-xs text-gray-400 mt-1">{trackerUnit}</p>}
+              {trackerUnit && (
+                <p className="text-xs text-gray-400 mt-1">{trackerUnit}</p>
+              )}
             </div>
             <button
               type="button"
@@ -242,9 +280,16 @@ function TrackerDetailPage() {
   const navigate = useNavigate();
   const { t } = useLanguageContext();
   const { data: trackers = [], deleteTracker } = useTrackers();
-  const { formOpen, editingTrackerId, openEditForm, closeForm } = useTrackerContext();
+  const { formOpen, editingTrackerId, openEditForm, closeForm } =
+    useTrackerContext();
 
-  const { data: logs = [], isLoading: logsLoading, createLog, updateLog, deleteLog } = useTrackerLogs(id!);
+  const {
+    data: logs = [],
+    isLoading: logsLoading,
+    createLog,
+    updateLog,
+    deleteLog,
+  } = useTrackerLogs(id!);
   const { data: stats } = useTrackerStats(id!, Date.now());
   const tracker = trackers.find((t) => t.id === id);
 
@@ -264,18 +309,40 @@ function TrackerDetailPage() {
   const isGoalType = GOAL_TYPES.has(tracker.type ?? "");
 
   const handleDelete = async () => {
-    if (!confirm(t("delete_tracker_confirm") || "Delete this tracker and all its logs?")) return;
+    if (
+      !confirm(
+        t("delete_tracker_confirm") || "Delete this tracker and all its logs?"
+      )
+    )
+      return;
     await deleteTracker(tracker.id!);
     navigate("/tracks");
   };
 
-  const handleLogSubmit = async (value: number, note: string, occurredAt: number) => {
-    await createLog({ trackerId: id!, value, note: note || undefined, occurredAt });
+  const handleLogSubmit = async (
+    value: number,
+    note: string,
+    occurredAt: number
+  ) => {
+    await createLog({
+      trackerId: id!,
+      value,
+      note: note || undefined,
+      occurredAt,
+    });
   };
 
-  const handleEditLogSubmit = async (value: number, note: string, occurredAt: number) => {
+  const handleEditLogSubmit = async (
+    value: number,
+    note: string,
+    occurredAt: number
+  ) => {
     if (!editingLog?.id) return;
-    await updateLog(editingLog.id, { value, note: note || undefined, occurredAt });
+    await updateLog(editingLog.id, {
+      value,
+      note: note || undefined,
+      occurredAt,
+    });
   };
 
   const handleDeleteLog = async (logId: string) => {
@@ -283,14 +350,22 @@ function TrackerDetailPage() {
     await deleteLog(logId);
   };
 
-  const sortedLogs = [...logs].sort((a, b) => (b.occurredAt ?? b.createdAt ?? 0) - (a.occurredAt ?? a.createdAt ?? 0));
+  const sortedLogs = [...logs].sort(
+    (a, b) =>
+      (b.occurredAt ?? b.createdAt ?? 0) - (a.occurredAt ?? a.createdAt ?? 0)
+  );
   const grouped = groupLogsByDate(sortedLogs);
-  const groupKeys = Array.from(grouped.keys()).sort((a, b) => b.localeCompare(a));
+  const groupKeys = Array.from(grouped.keys()).sort((a, b) =>
+    b.localeCompare(a)
+  );
 
   // For target type: map each log id → direction vs prior log (chronological order)
   const logDelta = new Map<string, "up" | "down" | "same">();
-  if (tracker.type === "target") {
-    const asc = [...logs].sort((a, b) => (a.occurredAt ?? a.createdAt ?? 0) - (b.occurredAt ?? b.createdAt ?? 0));
+  if (tracker.accumulate === false) {
+    const asc = [...logs].sort(
+      (a, b) =>
+        (a.occurredAt ?? a.createdAt ?? 0) - (b.occurredAt ?? b.createdAt ?? 0)
+    );
     for (let i = 1; i < asc.length; i++) {
       const prev = asc[i - 1].value ?? 0;
       const curr = asc[i].value ?? 0;
@@ -299,40 +374,67 @@ function TrackerDetailPage() {
     }
   }
 
-  const progress = isGoalType && stats?.currentScore !== undefined
-    ? Math.min(100, Math.max(0, stats.currentScore))
-    : undefined;
+  const progress =
+    isGoalType && stats?.currentScore !== undefined
+      ? Math.min(100, Math.max(0, stats.currentScore))
+      : undefined;
 
   const getStatDisplay = () => {
     if (!stats) return null;
-    if (tracker.type === "binary" || tracker.type === "habit") {
+    if (
+      tracker.type === "binary" ||
+      (tracker.type === "habit" &&
+        tracker.condition !== "threshold" &&
+        tracker.condition !== "range")
+    ) {
       return (
         <>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{t("stat_today") || "Today"}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("stat_today") || "Today"}
+            </p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {stats.lastValue === null ? "–" : stats.lastValue > 0 ? t("yes") || "Yes" : t("no_label") || "No"}
+              {stats.lastValue === null
+                ? "–"
+                : stats.lastValue > 0
+                ? t("yes") || "Yes"
+                : t("no_label") || "No"}
             </p>
           </div>
           {tracker.type === "habit" && stats?.currentStreak !== undefined && (
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Streak</p>
-              <p className="text-2xl font-bold text-orange-500">🔥 {stats.currentStreak}</p>
+              <p className="text-2xl font-bold text-orange-500">
+                🔥 {stats.currentStreak}
+              </p>
             </div>
           )}
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{t("stat_count") || "Entries"}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.count}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("stat_count") || "Entries"}
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {stats.count}
+            </p>
           </div>
         </>
       );
     }
-    if (tracker.type === "target") {
-      const delta = stats.lastValue !== null && stats.previousValue !== null
-        ? stats.lastValue - stats.previousValue
-        : null;
-      const deltaColor = delta === null ? undefined : delta > 0 ? "#22c55e" : delta < 0 ? "#ef4444" : undefined;
-      const deltaArrow = delta === null ? null : delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
+    if (tracker.accumulate === false) {
+      const delta =
+        stats.lastValue !== null && stats.previousValue !== null
+          ? stats.lastValue - stats.previousValue
+          : null;
+      const deltaColor =
+        delta === null
+          ? undefined
+          : delta > 0
+          ? "#22c55e"
+          : delta < 0
+          ? "#ef4444"
+          : undefined;
+      const deltaArrow =
+        delta === null ? null : delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
       return (
         <>
           <div>
@@ -344,15 +446,22 @@ function TrackerDetailPage() {
                 {stats.lastValue ?? "–"}
               </p>
               {deltaArrow && (
-                <span className="text-sm font-bold" style={{ color: deltaColor }}>
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: deltaColor }}
+                >
                   {deltaArrow} {Math.abs(delta!)}
                 </span>
               )}
             </div>
           </div>
           <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{t("stat_count") || "Entries"}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.count}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("stat_count") || "Entries"}
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {stats.count}
+            </p>
           </div>
         </>
       );
@@ -361,29 +470,44 @@ function TrackerDetailPage() {
       <>
         <div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {t("stat_today") || "Today"} {tracker.unit ? `(${tracker.unit})` : ""}
+            {t("stat_today") || "Today"}{" "}
+            {tracker.unit ? `(${tracker.unit})` : ""}
           </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.todayTotal}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            {stats.todayTotal}
+          </p>
         </div>
         <div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {t("stat_total") || "Total"} {tracker.unit ? `(${tracker.unit})` : ""}
+            {t("stat_total") || "Total"}{" "}
+            {tracker.unit ? `(${tracker.unit})` : ""}
           </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            {stats.total}
+          </p>
         </div>
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">{t("stat_count") || "Entries"}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.count}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {t("stat_count") || "Entries"}
+          </p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+            {stats.count}
+          </p>
         </div>
       </>
     );
   };
 
   const formatLogValue = (log: TrackerLog) => {
-    if (tracker.type === "binary" || tracker.type === "habit") {
+    if (
+      tracker.type === "binary" ||
+      (tracker.type === "habit" &&
+        tracker.condition !== "threshold" &&
+        tracker.condition !== "range")
+    ) {
       return log.value! > 0 ? t("yes") || "Yes" : t("log_undo") || "Undo";
     }
-    if (tracker.type === "target") {
+    if (tracker.accumulate === false) {
       return `${log.value ?? 0}${tracker.unit ? ` ${tracker.unit}` : ""}`;
     }
     const prefix = (log.value ?? 0) > 0 ? "+" : "";
@@ -438,7 +562,9 @@ function TrackerDetailPage() {
                     {STATUS_LABEL[stats.currentStatus]}
                   </span>
                   {progress !== undefined && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{progress}%</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {progress}%
+                    </span>
                   )}
                 </div>
               )}
@@ -458,7 +584,7 @@ function TrackerDetailPage() {
               {tracker.targetValue && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                   Goal: {tracker.targetValue} {tracker.unit ?? ""}
-                  {tracker.frequency ? ` / ${tracker.frequency}` : ""}
+                  {tracker.period ? ` / ${tracker.period}` : ""}
                 </p>
               )}
               {tracker.endDateHijri && (
@@ -484,9 +610,14 @@ function TrackerDetailPage() {
             </div>
           ) : logs.length === 0 ? (
             <EmptyState
-              icon={<div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700" />}
+              icon={
+                <div className="w-full h-full rounded-full bg-gray-200 dark:bg-gray-700" />
+              }
               title={t("no_logs_yet") || "No logs yet"}
-              description={t("no_logs_description") || "Tap the button below to log your first entry"}
+              description={
+                t("no_logs_description") ||
+                "Tap the button below to log your first entry"
+              }
             />
           ) : (
             <div className="mt-1">
@@ -503,23 +634,43 @@ function TrackerDetailPage() {
                         key={log.id}
                         className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 last:border-0"
                       >
-                        <div
-                          className="w-1 self-stretch rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"
-                        />
+                        <div className="w-1 self-stretch rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <p
                               className="text-base font-semibold"
-                              style={{ color: (log.value ?? 0) < 0 ? "var(--hvsna-danger-color)" : "inherit" }}
+                              style={{
+                                color:
+                                  (log.value ?? 0) < 0
+                                    ? "var(--hvsna-danger-color)"
+                                    : "inherit",
+                              }}
                             >
                               {formatLogValue(log)}
                             </p>
-                            {tracker.type === "target" && log.id && logDelta.has(log.id) && (() => {
-                              const dir = logDelta.get(log.id!);
-                              if (dir === "up") return <span className="text-xs font-bold text-green-500">↑</span>;
-                              if (dir === "down") return <span className="text-xs font-bold text-red-500">↓</span>;
-                              return <span className="text-xs text-gray-400">→</span>;
-                            })()}
+                            {tracker.accumulate === false &&
+                              log.id &&
+                              logDelta.has(log.id) &&
+                              (() => {
+                                const dir = logDelta.get(log.id!);
+                                if (dir === "up")
+                                  return (
+                                    <span className="text-xs font-bold text-green-500">
+                                      ↑
+                                    </span>
+                                  );
+                                if (dir === "down")
+                                  return (
+                                    <span className="text-xs font-bold text-red-500">
+                                      ↓
+                                    </span>
+                                  );
+                                return (
+                                  <span className="text-xs text-gray-400">
+                                    →
+                                  </span>
+                                );
+                              })()}
                           </div>
                           {log.note && (
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">
@@ -528,7 +679,10 @@ function TrackerDetailPage() {
                           )}
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                             {log.occurredAt
-                              ? new Date(log.occurredAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                              ? new Date(log.occurredAt).toLocaleTimeString(
+                                  [],
+                                  { hour: "2-digit", minute: "2-digit" }
+                                )
                               : ""}
                           </p>
                         </div>
@@ -568,21 +722,31 @@ function TrackerDetailPage() {
       </button>
 
       {/* New log modal */}
-      <Modal isOpen={logFormOpen} onClose={() => setLogFormOpen(false)} noPadding>
+      <Modal
+        isOpen={logFormOpen}
+        onClose={() => setLogFormOpen(false)}
+        noPadding
+      >
         <LogForm
           trackerType={tracker.type ?? "tally"}
           trackerUnit={tracker.unit}
+          trackerCondition={tracker.condition}
           onClose={() => setLogFormOpen(false)}
           onSubmit={handleLogSubmit}
         />
       </Modal>
 
       {/* Edit log modal */}
-      <Modal isOpen={Boolean(editingLog)} onClose={() => setEditingLog(null)} noPadding>
+      <Modal
+        isOpen={Boolean(editingLog)}
+        onClose={() => setEditingLog(null)}
+        noPadding
+      >
         {editingLog && (
           <LogForm
             trackerType={tracker.type ?? "tally"}
             trackerUnit={tracker.unit}
+            trackerCondition={tracker.condition}
             defaultOccurredAt={editingLog.occurredAt}
             initialValue={editingLog.value?.toString() ?? "1"}
             initialNote={editingLog.note ?? ""}

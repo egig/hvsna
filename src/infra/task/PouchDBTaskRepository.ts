@@ -238,7 +238,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
     delete doc._rev;
 
-    console.log("create task with", doc)
+    console.log("create task with", doc);
     await this.db.put(doc);
 
     return newTask;
@@ -570,7 +570,14 @@ export class PouchDBTaskRepository implements ITaskRepository {
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "projectId", "noDate", "atEpochMillis", "tags"],
+        fields: [
+          "type",
+          "status",
+          "projectId",
+          "noDate",
+          "atEpochMillis",
+          "tags",
+        ],
       },
     });
 

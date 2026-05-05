@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
 
 interface TrackerContextType {
   formOpen: boolean;
@@ -10,7 +15,9 @@ interface TrackerContextType {
 
 const TrackerContext = createContext<TrackerContextType | undefined>(undefined);
 
-export const TrackerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const TrackerProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [formOpen, setFormOpen] = useState(false);
   const [editingTrackerId, setEditingTrackerId] = useState<string | null>(null);
 
@@ -31,7 +38,13 @@ export const TrackerProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   return (
     <TrackerContext.Provider
-      value={{ formOpen, editingTrackerId, openCreateForm, openEditForm, closeForm }}
+      value={{
+        formOpen,
+        editingTrackerId,
+        openCreateForm,
+        openEditForm,
+        closeForm,
+      }}
     >
       {children}
     </TrackerContext.Provider>
@@ -40,6 +53,7 @@ export const TrackerProvider: React.FC<{ children: ReactNode }> = ({ children })
 
 export const useTrackerContext = (): TrackerContextType => {
   const ctx = useContext(TrackerContext);
-  if (!ctx) throw new Error("useTrackerContext must be used within TrackerProvider");
+  if (!ctx)
+    throw new Error("useTrackerContext must be used within TrackerProvider");
   return ctx;
 };

@@ -109,7 +109,6 @@ export default function App({
                                     </BrowserRouter>
                                   </ProjectProvider>
                                 </TaskProvider>
-                                
                               </LanguageProviderWrapper>
                             </SyncProvider>
                           </PouchDBProvider>

@@ -543,16 +543,16 @@ export const taskTranslations = {
     id: "Pilih tag untuk digabungkan",
   },
   tag_rename_confirm: {
-    en: "Rename \"{oldName}\" to \"{newName}\"?",
-    id: "Ubah \"{oldName}\" menjadi \"{newName}\"?",
+    en: 'Rename "{oldName}" to "{newName}"?',
+    id: 'Ubah "{oldName}" menjadi "{newName}"?',
   },
   tag_merge_confirm: {
-    en: "Merge \"{source}\" into \"{target}\"? Tasks with \"{source}\" will be updated to use \"{target}\".",
-    id: "Gabungkan \"{source}\" ke \"{target}\"? Tugas dengan \"{source}\" akan diperbarui ke \"{target}\".",
+    en: 'Merge "{source}" into "{target}"? Tasks with "{source}" will be updated to use "{target}".',
+    id: 'Gabungkan "{source}" ke "{target}"? Tugas dengan "{source}" akan diperbarui ke "{target}".',
   },
   tag_delete_confirm: {
-    en: "Delete tag \"{name}\"? It will be removed from all tasks.",
-    id: "Hapus tag \"{name}\"? Tag akan dihapus dari semua tugas.",
+    en: 'Delete tag "{name}"? It will be removed from all tasks.',
+    id: 'Hapus tag "{name}"? Tag akan dihapus dari semua tugas.',
   },
   no_tags_yet: {
     en: "No tags yet",

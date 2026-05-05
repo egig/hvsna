@@ -7,7 +7,12 @@ import type { Task, PrayerTime } from "src/modules/task/types";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
-import { HvChevronRight, HvChevronDown, HvCheck, HvWallet } from "@/modules/icons";
+import {
+  HvChevronRight,
+  HvChevronDown,
+  HvCheck,
+  HvWallet,
+} from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
 import {
@@ -15,7 +20,6 @@ import {
   getPrayerTimesWithFallback,
 } from "../prayer-time-utils";
 import logger from "src/modules/logger";
-
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -47,8 +51,14 @@ export function TodayContent() {
     <div className={initiated ? "visible" : "invisible"}>
       {pageTitle && (
         <div className="px-4 pt-4 pb-2">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">{pageTitle}</h2>
-          {subTitle && <p className="text-sm text-gray-500 dark:text-gray-400">{subTitle}</p>}
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            {pageTitle}
+          </h2>
+          {subTitle && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {subTitle}
+            </p>
+          )}
         </div>
       )}
       {!hasLocation && (

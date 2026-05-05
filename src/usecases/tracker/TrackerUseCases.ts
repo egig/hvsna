@@ -69,21 +69,28 @@ export class TrackerUseCases {
     return this.repository.findLogs(query);
   }
 
-  async getStats(trackerId: string, todayTimestamp?: number, weekStartDay = 5): Promise<TrackerStats> {
+  async getStats(
+    trackerId: string,
+    todayTimestamp?: number,
+    weekStartDay = 5
+  ): Promise<TrackerStats> {
     const [tracker, logs] = await Promise.all([
       this.repository.findTrackerById(trackerId),
       this.repository.findLogs({ trackerId }),
     ]);
 
     const byOccurred = [...logs].sort(
-      (a, b) => (b.occurredAt ?? b.createdAt ?? 0) - (a.occurredAt ?? a.createdAt ?? 0)
+      (a, b) =>
+        (b.occurredAt ?? b.createdAt ?? 0) - (a.occurredAt ?? a.createdAt ?? 0)
     );
     const values = logs.map((l) => l.value ?? 0);
     const total = values.reduce((s, v) => s + v, 0);
     const count = logs.length;
     const average = count > 0 ? total / count : 0;
-    const lastValue = byOccurred.length > 0 ? (byOccurred[0].value ?? null) : null;
-    const previousValue = byOccurred.length > 1 ? (byOccurred[1].value ?? null) : null;
+    const lastValue =
+      byOccurred.length > 0 ? byOccurred[0].value ?? null : null;
+    const previousValue =
+      byOccurred.length > 1 ? byOccurred[1].value ?? null : null;
 
     let todayTotal = 0;
     let todayDone = false;
@@ -94,9 +101,10 @@ export class TrackerUseCases {
         return ts >= dayStart && ts <= dayEnd;
       });
       todayTotal = todayLogs.reduce((s, l) => s + (l.value ?? 0), 0);
-      todayDone = tracker?.targetValue && tracker.targetValue > 0
-        ? todayTotal >= tracker.targetValue
-        : todayLogs.some(isDoneLog);
+      todayDone =
+        tracker?.targetValue && tracker.targetValue > 0
+          ? todayTotal >= tracker.targetValue
+          : todayLogs.some(isDoneLog);
     }
 
     let currentScore: number | undefined;
@@ -109,6 +117,17 @@ export class TrackerUseCases {
       currentStatus = result.currentStatus;
     }
 
-    return { total, count, average, lastValue, previousValue, todayTotal, todayDone, currentScore, currentStreak, currentStatus };
+    return {
+      total,
+      count,
+      average,
+      lastValue,
+      previousValue,
+      todayTotal,
+      todayDone,
+      currentScore,
+      currentStreak,
+      currentStatus,
+    };
   }
 }

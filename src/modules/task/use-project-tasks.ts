@@ -44,7 +44,11 @@ export function useProjectTasks({
     const currentData = projectTasksQuery.data || [];
     const currentLength = currentData.length;
 
-    if (projectTasksQuery.isFetching || projectTasksQuery.isPending || !hasMore) {
+    if (
+      projectTasksQuery.isFetching ||
+      projectTasksQuery.isPending ||
+      !hasMore
+    ) {
       return;
     }
 

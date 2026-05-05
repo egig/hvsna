@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { DndContext, DragOverlay, useDraggable, useDroppable } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragOverlay,
+  useDraggable,
+  useDroppable,
+} from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
   HvCalendar,
@@ -322,10 +327,7 @@ export default function Tasks() {
     formatScheduledDate,
   } = useUpcoming();
 
-  const {
-    inboxTasks,
-    initiated: inboxInitiated,
-  } = useInbox();
+  const { inboxTasks, initiated: inboxInitiated } = useInbox();
 
   const {
     todayTasks,
@@ -488,7 +490,13 @@ export default function Tasks() {
                   {/* Week View: Main content + Inbox sidebar */}
                   <div className="flex flex-col flex-1 overflow-hidden">
                     <div className="flex-1 overflow-y-auto">
-                      <div className={effectiveMode === "week" ? "" : "max-w-2xl mx-auto w-full"}>
+                      <div
+                        className={
+                          effectiveMode === "week"
+                            ? ""
+                            : "max-w-2xl mx-auto w-full"
+                        }
+                      >
                         {initiated && error && (
                           <div className="text-center py-8">
                             <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
@@ -528,18 +536,21 @@ export default function Tasks() {
             </div>
           </div>
 
-          {createPortal(<DragOverlay>
-            {activeTask && (
-              <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
-                <TaskListItem
-                  task={activeTask}
-                  onEdit={() => {}}
-                  showGoalInfo={false}
-                  showDateTime={false}
-                />
-              </div>
-            )}
-          </DragOverlay>, document.body)}
+          {createPortal(
+            <DragOverlay>
+              {activeTask && (
+                <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
+                  <TaskListItem
+                    task={activeTask}
+                    onEdit={() => {}}
+                    showGoalInfo={false}
+                    showDateTime={false}
+                  />
+                </div>
+              )}
+            </DragOverlay>,
+            document.body
+          )}
         </DndContext>
       </PageTransition>
     );

@@ -3,7 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTrackerUseCases } from "../../usecases/tracker/TrackerUseCasesFactory";
 import { queryKeys } from "../query-keys";
-import type { TrackerLogCreateInput, TrackerLogUpdateInput } from "../../domain/tracker/ITrackerRepository";
+import type {
+  TrackerLogCreateInput,
+  TrackerLogUpdateInput,
+} from "../../domain/tracker/ITrackerRepository";
 
 export function useTrackerLogs(trackerId: string) {
   const { db } = usePouchDB();
@@ -11,8 +14,12 @@ export function useTrackerLogs(trackerId: string) {
   const queryClient = useQueryClient();
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: queryKeys.trackerLogs(trackerId) });
-    queryClient.invalidateQueries({ queryKey: queryKeys.trackerStats(trackerId) });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.trackerLogs(trackerId),
+    });
+    queryClient.invalidateQueries({
+      queryKey: queryKeys.trackerStats(trackerId),
+    });
     queryClient.invalidateQueries({ queryKey: queryKeys.trackers() });
   };
 
@@ -41,8 +48,10 @@ export function useTrackerLogs(trackerId: string) {
 
   return {
     ...query,
-    createLog: (input: TrackerLogCreateInput) => createMutation.mutateAsync(input),
-    updateLog: (id: string, input: TrackerLogUpdateInput) => updateMutation.mutateAsync({ id, input }),
+    createLog: (input: TrackerLogCreateInput) =>
+      createMutation.mutateAsync(input),
+    updateLog: (id: string, input: TrackerLogUpdateInput) =>
+      updateMutation.mutateAsync({ id, input }),
     deleteLog: (id: string) => deleteMutation.mutateAsync(id),
   };
 }

@@ -211,14 +211,14 @@ export default function TaskFormEdit({
         onFocus={() => setIsFormFocused(true)}
         onBlur={() => setIsFormFocused(false)}
       />
-        <TagInput
-          selectedTags={formData.tags}
-          onTagsChange={(tags) => {
-            updateFormData({ tags });
-            setIsFormDirty(true);
-          }}
-          disabled={isSubmitting}
-        />
+      <TagInput
+        selectedTags={formData.tags}
+        onTagsChange={(tags) => {
+          updateFormData({ tags });
+          setIsFormDirty(true);
+        }}
+        disabled={isSubmitting}
+      />
 
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput

@@ -36,7 +36,6 @@ function MobileLayout({
   location,
   params,
 }: MobileLayoutProps) {
-
   return (
     <div className="h-[100dvh] flex flex-col">
       <div className="flex-1 overflow-hidden">
@@ -46,7 +45,11 @@ function MobileLayout({
       {/* Task FAB */}
       {["tasks", "today"].indexOf(location?.state?.context) != -1 && (
         <button
-          onClick={() => openCreateTaskForm({ projectId: (params as Record<string, string>).projectId })}
+          onClick={() =>
+            openCreateTaskForm({
+              projectId: (params as Record<string, string>).projectId,
+            })
+          }
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
           aria-label="Add new task"
           data-testid="fab-add-task"
@@ -54,7 +57,6 @@ function MobileLayout({
           <HvPlus size={24} />
         </button>
       )}
-
 
       <div className="flex-shrink-0">
         <TabBar />
@@ -155,16 +157,16 @@ export default function TabLayout() {
 
   // Mobile Layout with bottom tabs
   return (
-      <MobileLayout
-        formOpen={formOpen}
-        editingTaskId={editingTaskId}
-        projectFormOpen={projectFormOpen}
-        handleTaskSuccess={handleTaskSuccess}
-        handleTaskCancel={handleTaskCancel}
-        handleProjectCancel={handleProjectCancel}
-        openCreateTaskForm={openCreateTaskForm}
-        location={location}
-        params={params}
-      />
+    <MobileLayout
+      formOpen={formOpen}
+      editingTaskId={editingTaskId}
+      projectFormOpen={projectFormOpen}
+      handleTaskSuccess={handleTaskSuccess}
+      handleTaskCancel={handleTaskCancel}
+      handleProjectCancel={handleProjectCancel}
+      openCreateTaskForm={openCreateTaskForm}
+      location={location}
+      params={params}
+    />
   );
 }

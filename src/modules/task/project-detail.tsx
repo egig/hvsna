@@ -104,7 +104,11 @@ export default function ProjectDetail() {
 
   if (!currentProject) {
     return (
-      <Page navbar={<Navbar title={t("project_not_found") || "Project Not Found"} />}>
+      <Page
+        navbar={
+          <Navbar title={t("project_not_found") || "Project Not Found"} />
+        }
+      >
         <div className="text-center py-12">
           <HvList size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">

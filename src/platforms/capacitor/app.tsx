@@ -93,20 +93,20 @@ export default function App({
                   <ScreenSizeProvider onClose={handleBreakpointClose}>
                     <AuthProvider>
                       <SettingsProvider>
-                          <PouchDBProvider dbInstance={db}>
-                            <SyncProvider>
-                              <LanguageProviderWrapper>
-                                  <TaskProvider>
-                                  <ProjectProvider>
-                                    <MemoryRouter>
-                                      <PostHogSessionTracker platform="capacitor" />
-                                      <AppRoutes />
-                                    </MemoryRouter>
-                                  </ProjectProvider>
-                                </TaskProvider>
-                              </LanguageProviderWrapper>
-                            </SyncProvider>
-                          </PouchDBProvider>
+                        <PouchDBProvider dbInstance={db}>
+                          <SyncProvider>
+                            <LanguageProviderWrapper>
+                              <TaskProvider>
+                                <ProjectProvider>
+                                  <MemoryRouter>
+                                    <PostHogSessionTracker platform="capacitor" />
+                                    <AppRoutes />
+                                  </MemoryRouter>
+                                </ProjectProvider>
+                              </TaskProvider>
+                            </LanguageProviderWrapper>
+                          </SyncProvider>
+                        </PouchDBProvider>
                       </SettingsProvider>
                     </AuthProvider>
                   </ScreenSizeProvider>

@@ -100,7 +100,9 @@ export const AppRoutes = () => {
             <Route path="search" element={<Search />} />
             <Route path="tasks" element={<Tasks />} />
             {!isDesktop && <Route path="projects" element={<Browse />} />}
-            {!isDesktop && <Route path="tags" element={<TagManagementPage />} />}
+            {!isDesktop && (
+              <Route path="tags" element={<TagManagementPage />} />
+            )}
             <Route path="tracks" element={<Tracks />} />
             <Route path="tracks/:id" element={<TrackerDetail />} />
             <Route path="project/:projectId" element={<ProjectDetail />} />

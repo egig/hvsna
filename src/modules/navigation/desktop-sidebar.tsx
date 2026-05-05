@@ -90,9 +90,7 @@ export function DesktopSidebar({
   // Helper to get tasks for a list (filters open tasks and groups by list ID)
   const getProjectTasks = (projectId: string) => {
     return tasks.filter(
-      (task) =>
-        task.status === 0 &&
-        task.projectId === projectId
+      (task) => task.status === 0 && task.projectId === projectId
     );
   };
 
@@ -140,9 +138,7 @@ export function DesktopSidebar({
 
   return (
     <div
-      className={`${
-        "w-full h-full"
-      } bg-white border-gray-200 flex flex-col overflow-hidden`}
+      className={`${"w-full h-full"} bg-white border-gray-200 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
         {!collapsed && (
@@ -199,7 +195,6 @@ export function DesktopSidebar({
         </button>
       </div>
 
-
       <div className="flex-1 p-2 space-y-2">
         {mainTabs.map((tab) => {
           const isActive = getIsActive(tab.path);
@@ -244,7 +239,8 @@ export function DesktopSidebar({
                 </div>
               ) : projects.length > 0 ? (
                 projects.slice(0, 5).map((project) => {
-                  const isActive = location.pathname === `/project/${project.id}`;
+                  const isActive =
+                    location.pathname === `/project/${project.id}`;
                   return (
                     <div key={project.id} className="group relative">
                       <Link

@@ -13,7 +13,9 @@ import type {
 export function createTaskUseCases(db: PouchDB.Database): TaskUseCases {
   const notificationsProvider = createNotificationsProvider();
   const taskRepository: ITaskRepository = new PouchDBTaskRepository(db);
-  const projectRepository: IProjectRepository = new PouchDBProjectRepository(db);
+  const projectRepository: IProjectRepository = new PouchDBProjectRepository(
+    db
+  );
 
   return new TaskUseCases(
     notificationsProvider,

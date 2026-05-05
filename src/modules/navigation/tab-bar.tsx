@@ -10,7 +10,7 @@ import {
   HvProjectOutline,
   HvProjectFilled,
   HvSquareCheck,
-  HvSquareCheckFilled
+  HvSquareCheckFilled,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -37,7 +37,7 @@ export function TabBar() {
       path: "/projects",
       label: t("projects") || "Projects",
       icon: <HvProjectOutline />,
-      activeIcon: <HvProjectFilled/>,
+      activeIcon: <HvProjectFilled />,
       context: "projects",
     },
     {

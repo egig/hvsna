@@ -258,8 +258,7 @@ export default function TagManagementPage() {
       >
         <div className="p-4 space-y-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            {selectedTag &&
-              t("tag_delete_confirm", { name: selectedTag.name })}
+            {selectedTag && t("tag_delete_confirm", { name: selectedTag.name })}
           </p>
           <div className="flex justify-end gap-2">
             <button

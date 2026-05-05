@@ -106,7 +106,10 @@ function WeekViewColumn({
   const { toHijriDate, formatDate } = useHijriDate();
 
   const dateStr = toLocalDateStr(day);
-  const { setNodeRef, isOver } = useDroppable({ id: dateStr, disabled: !droppable });
+  const { setNodeRef, isOver } = useDroppable({
+    id: dateStr,
+    disabled: !droppable,
+  });
 
   const handleEditTask = useCallback(
     (task: Task) => openEditTaskForm(task.id as string),
@@ -143,7 +146,9 @@ function WeekViewColumn({
       data-date={dateStr}
       className={[
         "flex flex-col min-w-[200px] flex-1 transition-colors",
-        isOver && droppable ? "bg-blue-50 dark:bg-blue-950/20 ring-1 ring-inset ring-blue-200 dark:ring-blue-800 rounded" : "",
+        isOver && droppable
+          ? "bg-blue-50 dark:bg-blue-950/20 ring-1 ring-inset ring-blue-200 dark:ring-blue-800 rounded"
+          : "",
       ].join(" ")}
     >
       {/* Column header: Hijri date as main title, Gregorian as subtitle */}
@@ -254,7 +259,8 @@ function WeekViewColumn({
 
 export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   const { settings } = useSettings();
-  const { toHijriDate, formatDate, getStartOfWeek, currentHijriDate } = useHijriDate();
+  const { toHijriDate, formatDate, getStartOfWeek, currentHijriDate } =
+    useHijriDate();
   const [weekOffset, setWeekOffset] = useState(0);
   const [prayerTimings, setPrayerTimings] = useState<Record<
     string,
@@ -269,7 +275,7 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   }, [settings]);
 
   const days = useMemo(() => {
-    const weekStart =  currentHijriDate.startOfWeek().toDate()
+    const weekStart = currentHijriDate.startOfWeek().toDate();
     weekStart.setDate(weekStart.getDate() + weekOffset * 7);
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date(weekStart);
@@ -294,7 +300,9 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
     (day: Date) =>
       upcomingTasks.filter((task) => {
         if (!task.atEpochMillis) return false;
-        return toLocalDateStr(new Date(task.atEpochMillis)) === toLocalDateStr(day);
+        return (
+          toLocalDateStr(new Date(task.atEpochMillis)) === toLocalDateStr(day)
+        );
       }),
     [upcomingTasks]
   );

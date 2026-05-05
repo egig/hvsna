@@ -4,22 +4,26 @@ import { usePouchDB } from "../../pouchdb";
 import { createTrackerUseCases } from "../../usecases/tracker/TrackerUseCasesFactory";
 import { queryKeys } from "../query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import type { Tracker, TrackerEvalStatus } from "../../domain/tracker/ITrackerRepository";
+import type {
+  Tracker,
+  TrackerEvalStatus,
+} from "../../domain/tracker/ITrackerRepository";
 
 function startOfDay(ts: number): number {
   const d = new Date(ts);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 }
 
-const STATUS_META: Record<TrackerEvalStatus, { label: string; color: string }> = {
-  on_track:  { label: "On track",  color: "#22c55e" },
-  achieved:  { label: "Achieved",  color: "#22c55e" },
-  at_risk:   { label: "At risk",   color: "#f97316" },
-  off_track: { label: "Off track", color: "#ef4444" },
-  failed:    { label: "Failed",    color: "#ef4444" },
-};
+const STATUS_META: Record<TrackerEvalStatus, { label: string; color: string }> =
+  {
+    on_track: { label: "On track", color: "#22c55e" },
+    achieved: { label: "Achieved", color: "#22c55e" },
+    at_risk: { label: "At risk", color: "#f97316" },
+    off_track: { label: "Off track", color: "#ef4444" },
+    failed: { label: "Failed", color: "#ef4444" },
+  };
 
-const GOAL_TYPES = new Set(["habit", "build_up", "cut_down", "target", "range"]);
+const GOAL_TYPES = new Set(["habit", "build_up", "cut_down"]);
 
 interface Props {
   trackers: Tracker[];
@@ -66,7 +70,8 @@ export function TrackerSummaryCard({ trackers, todayTimestamp }: Props) {
   const badCount = (tally.off_track ?? 0) + (tally.failed ?? 0);
   const unknownCount = goalTotal - goodCount - warnCount - badCount;
 
-  const healthPct = goalTotal > 0 ? Math.round((goodCount / goalTotal) * 100) : null;
+  const healthPct =
+    goalTotal > 0 ? Math.round((goodCount / goalTotal) * 100) : null;
 
   const statusEntries = (Object.entries(tally) as [TrackerEvalStatus, number][])
     .filter(([, count]) => count > 0)
@@ -89,7 +94,9 @@ export function TrackerSummaryCard({ trackers, todayTimestamp }: Props) {
           <div className="w-4 h-4 border-2 border-gray-300 border-t-[var(--hvsna-primary-color)] rounded-full animate-spin" />
         </div>
       ) : goalTotal === 0 ? (
-        <p className="text-xs text-gray-400 dark:text-gray-500">No goal trackers yet</p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          No goal trackers yet
+        </p>
       ) : (
         <>
           {/* Segmented bar */}

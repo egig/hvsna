@@ -69,8 +69,8 @@ export {
   TbSettingsFilled as HvSettingsFilled,
   TbChartArea as HvChartArea,
   TbChartAreaFilled as HvChartAreaFilled,
-  TbSquareCheck as HvSquareCheck,  
-  TbSquareCheckFilled as HvSquareCheckFilled  
+  TbSquareCheck as HvSquareCheck,
+  TbSquareCheckFilled as HvSquareCheckFilled,
 } from "react-icons/tb";
 
 export {
@@ -84,4 +84,7 @@ export { Wallet as HvWallet } from "lucide-react";
 export { Landmark as HvLandmark } from "lucide-react";
 export { Target as HvTarget } from "lucide-react";
 export { Scale as HvScale } from "lucide-react";
-export { AiOutlineProject as HvProjectOutline, AiFillProject as HvProjectFilled } from "react-icons/ai"
+export {
+  AiOutlineProject as HvProjectOutline,
+  AiFillProject as HvProjectFilled,
+} from "react-icons/ai";

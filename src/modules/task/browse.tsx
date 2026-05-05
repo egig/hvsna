@@ -30,10 +30,7 @@ export default function Browse() {
   return (
     <Page
       navbar={
-        <Navbar
-          title={t("projects") || "Projects"}
-          showBackButton={false}
-        />
+        <Navbar title={t("projects") || "Projects"} showBackButton={false} />
       }
     >
       {loading && !initiated && (
@@ -47,7 +44,6 @@ export default function Browse() {
           {error}
         </div>
       )}
-
 
       {!loading && initiated && projects.length === 0 && (
         <div className="text-center py-12">

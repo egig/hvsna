@@ -3,7 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTrackerUseCases } from "../../usecases/tracker/TrackerUseCasesFactory";
 import { queryKeys } from "../query-keys";
-import type { TrackerCreateInput, TrackerUpdateInput } from "../../domain/tracker/ITrackerRepository";
+import type {
+  TrackerCreateInput,
+  TrackerUpdateInput,
+} from "../../domain/tracker/ITrackerRepository";
 
 export function useTrackers() {
   const { db } = usePouchDB();
@@ -42,7 +45,8 @@ export function useTrackers() {
 
   return {
     ...query,
-    createTracker: (input: TrackerCreateInput) => createMutation.mutateAsync(input),
+    createTracker: (input: TrackerCreateInput) =>
+      createMutation.mutateAsync(input),
     updateTracker: (id: string, input: TrackerUpdateInput) =>
       updateMutation.mutateAsync({ id, input }),
     deleteTracker: (id: string) => deleteMutation.mutateAsync(id),

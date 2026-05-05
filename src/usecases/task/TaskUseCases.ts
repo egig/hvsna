@@ -90,7 +90,10 @@ export class TaskUseCases {
     return await this.projectRepository.create(input);
   }
 
-  async updateProject(projectId: string, updates: ProjectUpdateInput): Promise<Project> {
+  async updateProject(
+    projectId: string,
+    updates: ProjectUpdateInput
+  ): Promise<Project> {
     return await this.projectRepository.update(projectId, updates);
   }
 

@@ -54,14 +54,19 @@ export interface ITaskAndProjectRepository {
   deleteProject(id: string): Promise<void>;
   findProjectById(id: string): Promise<Project | null>;
   findProjects(query?: ProjectQuery): Promise<Project[]>;
-  findProjectsWithPagination(offset: number, limit?: number): Promise<Project[]>;
+  findProjectsWithPagination(
+    offset: number,
+    limit?: number
+  ): Promise<Project[]>;
 }
 
 /**
  * Factory function to create a task repository with automatic platform detection
  * The repository will automatically use SQLite on native platforms and IndexedDB on web
  */
-export function createTaskRepository(dbName?: string): ITaskAndProjectRepository {
+export function createTaskRepository(
+  dbName?: string
+): ITaskAndProjectRepository {
   // Create a single database instance that both repositories will share
   const db = PouchDBTaskRepository.createDatabase(dbName);
 
@@ -95,7 +100,8 @@ export function createTaskRepository(dbName?: string): ITaskAndProjectRepository
     deleteProject: projectRepo.delete.bind(projectRepo),
     findProjectById: projectRepo.findById.bind(projectRepo),
     findProjects: projectRepo.find.bind(projectRepo),
-    findProjectsWithPagination: projectRepo.findWithPagination.bind(projectRepo),
+    findProjectsWithPagination:
+      projectRepo.findWithPagination.bind(projectRepo),
   };
 }
 
