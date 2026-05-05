@@ -55,8 +55,12 @@ function todayGregorianStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Converts a "YYYY-MM-DD" string to a local-midnight timestamp */
+/** Converts a "YYYY-MM-DD" string to a timestamp.
+ *  For today: uses Date.now() to preserve the actual time of logging.
+ *  For past dates: midnight is used since no time is available. */
 function dateStrToTimestamp(str: string): number {
+  const today = todayGregorianStr();
+  if (str === today) return Date.now();
   const [y, m, d] = str.split("-").map(Number);
   return new Date(y, m - 1, d).getTime();
 }
