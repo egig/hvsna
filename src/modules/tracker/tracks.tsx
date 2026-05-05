@@ -2,6 +2,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTrackers } from "./use-trackers";
 import { TrackerProvider, useTrackerContext } from "./tracker-context";
 import { TrackerCard } from "./tracker-card";
+import { TrackerSummaryCard } from "./tracker-summary-card";
 import { TrackerForm } from "./tracker-form";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
@@ -45,6 +46,7 @@ function TracksPage() {
           <div className="px-4 pt-4">
             {/* Card grid */}
             <div className="grid grid-cols-2 gap-3">
+              <TrackerSummaryCard trackers={trackers} todayTimestamp={Date.now()} />
               {trackers.map((tracker) => (
                 <TrackerCard
                   key={tracker.id}

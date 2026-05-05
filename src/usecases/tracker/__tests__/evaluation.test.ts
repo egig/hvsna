@@ -297,3 +297,57 @@ describe("expired tracker", () => {
     expect(currentStatus).toBe("on_track");
   });
 });
+
+// ── habit with targetValue (quantified habit) ────────────────────────────────
+
+describe("habit — quantified (targetValue)", () => {
+  const tracker = makeTracker({ type: "habit", frequency: "daily", targetValue: 8 });
+
+  it("scores 100 and streak=1 when today's total meets target", () => {
+    const logs = [
+      makeLog(TODAY, { value: 5 }),
+      makeLog(TODAY, { value: 3 }),
+    ];
+    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
+    expect(currentScore).toBe(100);
+    expect(currentStreak).toBe(1);
+  });
+
+  it("scores 0 when today's total is below target", () => {
+    const logs = [makeLog(TODAY, { value: 5 })];
+    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
+    expect(currentScore).toBe(0);
+    expect(currentStreak).toBe(0);
+  });
+
+  it("streak counts consecutive days that each meet target", () => {
+    const logs = [
+      makeLog(TODAY, { value: 8 }),
+      makeLog(daysAgo(1), { value: 10 }),
+      makeLog(daysAgo(2), { value: 8 }),
+    ];
+    const { currentStreak } = evaluate(tracker, logs, TODAY);
+    expect(currentStreak).toBe(3);
+  });
+
+  it("streak breaks when one day is below target", () => {
+    const logs = [
+      makeLog(TODAY, { value: 8 }),
+      makeLog(daysAgo(1), { value: 4 }), // below target
+      makeLog(daysAgo(2), { value: 8 }),
+    ];
+    const { currentStreak } = evaluate(tracker, logs, TODAY);
+    expect(currentStreak).toBe(1);
+  });
+
+  it("partial logs accumulate within a day toward target", () => {
+    // 3 logs during the day summing to exactly 8
+    const logs = [
+      makeLog(TODAY, { value: 3 }),
+      makeLog(TODAY, { value: 3 }),
+      makeLog(TODAY, { value: 2 }),
+    ];
+    const { currentScore } = evaluate(tracker, logs, TODAY);
+    expect(currentScore).toBe(100);
+  });
+});

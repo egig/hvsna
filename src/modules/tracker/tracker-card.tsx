@@ -33,17 +33,27 @@ export function TrackerCard({ tracker, todayTimestamp }: TrackerCardProps) {
       return val > 0 ? t("yes") || "Yes" : t("no_label") || "No";
     }
     if (tracker.type === "habit") {
-      const todayDone = (stats.todayTotal ?? 0) > 0;
-      return todayDone ? t("yes") || "Yes" : "–";
+      if (tracker.targetValue && tracker.targetValue > 0) {
+        const unit = tracker.unit ? ` ${tracker.unit}` : "";
+        return `${stats.todayTotal ?? 0}/${tracker.targetValue}${unit}`;
+      }
+      return stats.currentStreak && stats.currentStreak > 0 ? String(stats.currentStreak) : "–";
     }
     if (tracker.type === "tally") {
       return String(stats.todayTotal ?? 0);
+    }
+    if (tracker.type === "target" || tracker.type === "range") {
+      return stats.lastValue !== null && stats.lastValue !== undefined ? String(stats.lastValue) : "–";
     }
     return stats.todayTotal !== undefined ? String(stats.todayTotal) : "–";
   };
 
   const getSubLabel = () => {
-    if (tracker.type === "binary" || tracker.type === "habit") return t("stat_today") || "Today";
+    if (tracker.type === "habit") {
+      if (tracker.targetValue && tracker.targetValue > 0) return t("stat_today") || "Today";
+      return stats?.currentStreak && stats.currentStreak > 0 ? "day streak" : t("stat_today") || "Today";
+    }
+    if (tracker.type === "binary") return t("stat_today") || "Today";
     if (tracker.type === "tally") return t("stat_today") || "Today";
     return tracker.unit ? `${t("stat_today") || "Today"} (${tracker.unit})` : t("stat_today") || "Today";
   };
@@ -52,7 +62,8 @@ export function TrackerCard({ tracker, todayTimestamp }: TrackerCardProps) {
     ? Math.min(100, Math.max(0, stats.currentScore))
     : undefined;
 
-  const streak = tracker.type === "habit" && stats?.currentStreak !== undefined && stats.currentStreak > 1
+  const isQuantifiedHabit = tracker.type === "habit" && tracker.targetValue && tracker.targetValue > 0;
+  const streak = isQuantifiedHabit && stats?.currentStreak !== undefined && stats.currentStreak > 1
     ? stats.currentStreak
     : undefined;
 

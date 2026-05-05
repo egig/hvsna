@@ -6,7 +6,6 @@ import {
   HvX,
   HvRepeat,
   HvArrowUp,
-  HvArrowDown,
   HvTarget,
   HvScale,
   HvChevronLeft,
@@ -18,10 +17,10 @@ interface TrackerFormProps {
   onClose: () => void;
 }
 
-const GOAL_TYPES: TrackerType[] = ["habit", "build_up", "cut_down", "target", "range"];
-const NEEDS_TARGET: TrackerType[] = ["build_up", "cut_down", "target"];
+const GOAL_TYPES: TrackerType[] = ["habit", "build_up", "target", "range"];
+const NEEDS_TARGET: TrackerType[] = ["habit", "build_up", "target"];
 const NEEDS_RANGE: TrackerType[] = ["range"];
-const NEEDS_UNIT: TrackerType[] = ["build_up", "cut_down", "target", "range"];
+const NEEDS_UNIT: TrackerType[] = ["habit", "build_up", "target", "range"];
 
 function TextInput({
   value,
@@ -57,8 +56,7 @@ const TYPE_META: {
   icon: HvIcon;
 }[] = [
   { value: "habit", labelKey: "tracker_habit", labelFallback: "Habit", descKey: "tracker_habit_desc", descFallback: "Build a daily habit", icon: HvRepeat },
-  { value: "build_up", labelKey: "tracker_build_up", labelFallback: "Build Up", descKey: "tracker_build_up_desc", descFallback: "Accumulate toward a goal", icon: HvArrowUp },
-  { value: "cut_down", labelKey: "tracker_cut_down", labelFallback: "Cut Down", descKey: "tracker_cut_down_desc", descFallback: "Reduce toward a target", icon: HvArrowDown },
+  { value: "build_up", labelKey: "tracker_build_up", labelFallback: "Accumulate", descKey: "tracker_build_up_desc", descFallback: "Track progress toward a goal", icon: HvArrowUp },
   { value: "target", labelKey: "tracker_target", labelFallback: "Target", descKey: "tracker_target_desc", descFallback: "Reach a specific value", icon: HvTarget },
   { value: "range", labelKey: "tracker_range", labelFallback: "Range", descKey: "tracker_range_desc", descFallback: "Stay within bounds", icon: HvScale },
 ];
@@ -72,6 +70,7 @@ export function TrackerForm({ editingId, onClose }: TrackerFormProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState(existing?.name ?? "");
   const [type, setType] = useState<TrackerType>(existing?.type ?? "habit");
+  const [direction, setDirection] = useState<"up" | "down">(existing?.direction ?? "up");
   const [unit, setUnit] = useState(existing?.unit ?? "");
   const [frequency, setFrequency] = useState<TrackerFrequency>(existing?.frequency ?? "daily");
   const [targetValue, setTargetValue] = useState(existing?.targetValue?.toString() ?? "");
@@ -85,6 +84,7 @@ export function TrackerForm({ editingId, onClose }: TrackerFormProps) {
     if (existing) {
       setName(existing.name ?? "");
       setType(existing.type ?? "habit");
+      setDirection(existing.direction ?? (existing.type === "cut_down" ? "down" : "up"));
       setUnit(existing.unit ?? "");
       setFrequency(existing.frequency ?? "daily");
       setTargetValue(existing.targetValue?.toString() ?? "");
@@ -123,9 +123,10 @@ export function TrackerForm({ editingId, onClose }: TrackerFormProps) {
     try {
       const payload = {
         name: trimmed,
-        type,
+        type: type === "cut_down" ? "build_up" as const : type,
         unit: unit.trim() || undefined,
-        frequency: isGoalType ? frequency : undefined,
+        frequency: isGoalType && type !== "target" ? frequency : undefined,
+        direction: type === "build_up" || type === "cut_down" ? direction : undefined,
         targetValue: NEEDS_TARGET.includes(type) && targetValue ? parseFloat(targetValue) : undefined,
         targetMin: NEEDS_RANGE.includes(type) && targetMin ? parseFloat(targetMin) : undefined,
         targetMax: NEEDS_RANGE.includes(type) && targetMax ? parseFloat(targetMax) : undefined,
@@ -256,34 +257,61 @@ export function TrackerForm({ editingId, onClose }: TrackerFormProps) {
 
             {isGoalType && (
               <>
-                {/* Frequency */}
-                <div>
-                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-                    {t("tracker_frequency") || "Frequency"}
-                  </p>
-                  <div className="flex gap-2">
-                    {frequencyOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setFrequency(opt.value)}
-                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                          frequency === opt.value
-                            ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10 text-[var(--hvsna-primary-color)]"
-                            : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                {/* Frequency — not applicable for target (point-in-time milestone) */}
+                {type !== "target" && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                      {t("tracker_frequency") || "Frequency"}
+                    </p>
+                    <div className="flex gap-2">
+                      {frequencyOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setFrequency(opt.value)}
+                          className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                            frequency === opt.value
+                              ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10 text-[var(--hvsna-primary-color)]"
+                              : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Direction — only for accumulate type */}
+                {(type === "build_up" || type === "cut_down") && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                      Direction
+                    </p>
+                    <div className="flex gap-2">
+                      {([["up", "↑ Build up"], ["down", "↓ Cut down"]] as const).map(([dir, label]) => (
+                        <button
+                          key={dir}
+                          type="button"
+                          onClick={() => setDirection(dir)}
+                          className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                            direction === dir
+                              ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10 text-[var(--hvsna-primary-color)]"
+                              : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Target value */}
                 {NEEDS_TARGET.includes(type) && (
                   <div>
                     <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-                      {t("tracker_target_value") || "Target"} {unit ? `(${unit})` : ""}
+                      {t("tracker_target_value") || (type === "habit" ? "Daily target" : "Target")} {unit ? `(${unit})` : ""}
                     </label>
                     <TextInput
                       type="number"

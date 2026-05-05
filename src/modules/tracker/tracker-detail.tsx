@@ -283,6 +283,18 @@ function TrackerDetailPage() {
   const grouped = groupLogsByDate(sortedLogs);
   const groupKeys = Array.from(grouped.keys()).sort((a, b) => b.localeCompare(a));
 
+  // For target type: map each log id → direction vs prior log (chronological order)
+  const logDelta = new Map<string, "up" | "down" | "same">();
+  if (tracker.type === "target") {
+    const asc = [...logs].sort((a, b) => (a.occurredAt ?? a.createdAt ?? 0) - (b.occurredAt ?? b.createdAt ?? 0));
+    for (let i = 1; i < asc.length; i++) {
+      const prev = asc[i - 1].value ?? 0;
+      const curr = asc[i].value ?? 0;
+      const id = asc[i].id!;
+      logDelta.set(id, curr > prev ? "up" : curr < prev ? "down" : "same");
+    }
+  }
+
   const progress = isGoalType && stats?.currentScore !== undefined
     ? Math.min(100, Math.max(0, stats.currentScore))
     : undefined;
@@ -304,6 +316,36 @@ function TrackerDetailPage() {
               <p className="text-2xl font-bold text-orange-500">🔥 {stats.currentStreak}</p>
             </div>
           )}
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("stat_count") || "Entries"}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.count}</p>
+          </div>
+        </>
+      );
+    }
+    if (tracker.type === "target") {
+      const delta = stats.lastValue !== null && stats.previousValue !== null
+        ? stats.lastValue - stats.previousValue
+        : null;
+      const deltaColor = delta === null ? undefined : delta > 0 ? "#22c55e" : delta < 0 ? "#ef4444" : undefined;
+      const deltaArrow = delta === null ? null : delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
+      return (
+        <>
+          <div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Latest {tracker.unit ? `(${tracker.unit})` : ""}
+            </p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.lastValue ?? "–"}
+              </p>
+              {deltaArrow && (
+                <span className="text-sm font-bold" style={{ color: deltaColor }}>
+                  {deltaArrow} {Math.abs(delta!)}
+                </span>
+              )}
+            </div>
+          </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">{t("stat_count") || "Entries"}</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.count}</p>
@@ -336,6 +378,9 @@ function TrackerDetailPage() {
   const formatLogValue = (log: TrackerLog) => {
     if (tracker.type === "binary" || tracker.type === "habit") {
       return log.value! > 0 ? t("yes") || "Yes" : t("log_undo") || "Undo";
+    }
+    if (tracker.type === "target") {
+      return `${log.value ?? 0}${tracker.unit ? ` ${tracker.unit}` : ""}`;
     }
     const prefix = (log.value ?? 0) > 0 ? "+" : "";
     return `${prefix}${log.value}${tracker.unit ? ` ${tracker.unit}` : ""}`;
@@ -458,12 +503,20 @@ function TrackerDetailPage() {
                           className="w-1 self-stretch rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600"
                         />
                         <div className="flex-1 min-w-0">
-                          <p
-                            className="text-base font-semibold"
-                            style={{ color: (log.value ?? 0) < 0 ? "var(--hvsna-danger-color)" : "inherit" }}
-                          >
-                            {formatLogValue(log)}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p
+                              className="text-base font-semibold"
+                              style={{ color: (log.value ?? 0) < 0 ? "var(--hvsna-danger-color)" : "inherit" }}
+                            >
+                              {formatLogValue(log)}
+                            </p>
+                            {tracker.type === "target" && log.id && logDelta.has(log.id) && (() => {
+                              const dir = logDelta.get(log.id!);
+                              if (dir === "up") return <span className="text-xs font-bold text-green-500">↑</span>;
+                              if (dir === "down") return <span className="text-xs font-bold text-red-500">↓</span>;
+                              return <span className="text-xs text-gray-400">→</span>;
+                            })()}
+                          </div>
                           {log.note && (
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">
                               {log.note}

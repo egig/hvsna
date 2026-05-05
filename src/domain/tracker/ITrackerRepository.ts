@@ -24,6 +24,7 @@ export class Tracker {
 
   // goal fields (new, optional — absent on old documents)
   frequency?: TrackerFrequency;
+  direction?: "up" | "down";
   targetValue?: number;
   targetMin?: number;
   targetMax?: number;
@@ -38,6 +39,7 @@ export interface TrackerCreateInput {
   color?: string;
   emoji?: string;
   frequency?: TrackerFrequency;
+  direction?: "up" | "down";
   targetValue?: number;
   targetMin?: number;
   targetMax?: number;
@@ -52,6 +54,7 @@ export interface TrackerUpdateInput {
   color?: string;
   emoji?: string;
   frequency?: TrackerFrequency;
+  direction?: "up" | "down";
   targetValue?: number;
   targetMin?: number;
   targetMax?: number;

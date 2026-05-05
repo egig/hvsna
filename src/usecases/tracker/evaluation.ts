@@ -28,6 +28,28 @@ function logTimestamp(log: TrackerLog): number {
   return log.occurredAt ?? log.createdAt ?? 0;
 }
 
+export function isDoneLog(log: TrackerLog): boolean {
+  return log.valueBool === true || (log.value !== undefined && log.value > 0);
+}
+
+function isDoneDayForHabit(dayLogs: TrackerLog[], targetValue?: number): boolean {
+  if (targetValue && targetValue > 0) {
+    return dayLogs.reduce((s, l) => s + (l.value ?? 0), 0) >= targetValue;
+  }
+  return dayLogs.some(isDoneLog);
+}
+
+function groupByHijriDate(logs: TrackerLog[]): Map<string, TrackerLog[]> {
+  const map = new Map<string, TrackerLog[]>();
+  for (const log of logs) {
+    const key = timestampToHijriStr(logTimestamp(log));
+    const group = map.get(key);
+    if (group) group.push(log);
+    else map.set(key, [log]);
+  }
+  return map;
+}
+
 function getPeriodStartTimestamp(todayTimestamp: number, frequency: string, weekStartDay = 5): number {
   if (frequency === "weekly") {
     const d = new Date(todayTimestamp);
@@ -52,14 +74,12 @@ function getLogsInCurrentPeriod(logs: TrackerLog[], frequency: string, todayTime
   });
 }
 
-function calcHabitStreak(logs: TrackerLog[], todayTimestamp: number): number {
-  // Collect unique Hijri date strings where a "done" log exists
+function calcHabitStreak(logs: TrackerLog[], todayTimestamp: number, targetValue?: number): number {
+  const byDate = groupByHijriDate(logs);
+
   const doneDates = new Set<string>();
-  for (const l of logs) {
-    if (l.valueBool === true || (l.value !== undefined && l.value > 0)) {
-      const ts = logTimestamp(l);
-      if (ts > 0) doneDates.add(timestampToHijriStr(ts));
-    }
+  for (const [date, dayLogs] of byDate) {
+    if (isDoneDayForHabit(dayLogs, targetValue)) doneDates.add(date);
   }
 
   if (doneDates.size === 0) return 0;
@@ -122,27 +142,25 @@ export function evaluate(
   let streak: number | undefined;
 
   if (type === "habit") {
-    streak = calcHabitStreak(logs, todayTimestamp);
+    streak = calcHabitStreak(logs, todayTimestamp, tracker.targetValue);
 
     const periodStart = getPeriodStartTimestamp(todayTimestamp, frequency, weekStartDay);
     const daysInPeriod = Math.max(1, Math.round((todayTimestamp - periodStart) / MS_PER_DAY) + 1);
 
-    const doneDays = new Set(
-      periodLogs
-        .filter((l) => l.valueBool === true || (l.value !== undefined && l.value > 0))
-        .map((l) => timestampToHijriStr(logTimestamp(l)))
-    ).size;
+    const periodByDate = groupByHijriDate(periodLogs);
+    let doneDays = 0;
+    for (const dayLogs of periodByDate.values()) {
+      if (isDoneDayForHabit(dayLogs, tracker.targetValue)) doneDays++;
+    }
 
     score = clamp(Math.round((doneDays / daysInPeriod) * 100), 0, 100);
-  } else if (type === "build_up") {
+  } else if (type === "build_up" || type === "cut_down") {
     if (tracker.targetValue && tracker.targetValue > 0) {
+      const direction = tracker.direction ?? (type === "cut_down" ? "down" : "up");
       const actual = periodLogs.reduce((s, l) => s + (l.value ?? 0), 0);
-      score = clamp(Math.round((actual / tracker.targetValue) * 100), 0, 100);
-    }
-  } else if (type === "cut_down") {
-    if (tracker.targetValue && tracker.targetValue > 0) {
-      const actual = periodLogs.reduce((s, l) => s + (l.value ?? 0), 0);
-      score = clamp(Math.round((1 - actual / tracker.targetValue) * 100), 0, 100);
+      score = direction === "down"
+        ? clamp(Math.round((1 - actual / tracker.targetValue) * 100), 0, 100)
+        : clamp(Math.round((actual / tracker.targetValue) * 100), 0, 100);
     }
   } else if (type === "target") {
     if (tracker.targetValue && tracker.targetValue > 0) {
