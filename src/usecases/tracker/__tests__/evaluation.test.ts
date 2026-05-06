@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { evaluate } from "../evaluation";
 import type {
-  Tracker,
+  EvaluationConfig,
   TrackerLog,
 } from "../../../domain/tracker/ITrackerRepository";
 
@@ -14,8 +14,15 @@ function daysAgo(n: number): number {
   return TODAY - n * DAY;
 }
 
-function makeTracker(overrides: Partial<Tracker> = {}): Tracker {
-  return { id: "t1", name: "Test", ...overrides } as Tracker;
+function makeEvaluation(
+  overrides: Partial<EvaluationConfig> = {}
+): EvaluationConfig {
+  return {
+    id: "e1",
+    metric: "count",
+    window: "today",
+    ...overrides,
+  } as EvaluationConfig;
 }
 
 function makeLog(
@@ -25,46 +32,42 @@ function makeLog(
   return { id: "l", trackerId: "t1", occurredAt, ...overrides } as TrackerLog;
 }
 
-// ── Legacy types ────────────────────────────────────────────────────────────
+// ── Toggle metrics ──────────────────────────────────────────────────────────
 
-describe("legacy types", () => {
-  it.each(["numeric", "binary", "tally"] as const)(
-    "%s returns undefined scores",
-    (type) => {
-      const result = evaluate(makeTracker({ type }), [], TODAY);
-      expect(result.currentScore).toBeUndefined();
-      expect(result.currentStreak).toBeUndefined();
-      expect(result.currentStatus).toBeUndefined();
-    }
-  );
+describe("toggle — count", () => {
+  const evaluation = makeEvaluation({ metric: "count", window: "today" });
+
+  it("returns 1 when logged today", () => {
+    const logs = [makeLog(TODAY, { valueBool: true })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(1);
+  });
+
+  it("returns 0 when no logs", () => {
+    const result = evaluate(evaluation, [], TODAY);
+    expect(result.value).toBe(0);
+  });
+
+  it("ignores logs from yesterday", () => {
+    const logs = [makeLog(daysAgo(1), { valueBool: true })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(0);
+  });
 });
 
-// ── habit ───────────────────────────────────────────────────────────────────
+describe("toggle — streak", () => {
+  const evaluation = makeEvaluation({ metric: "streak", window: "7d" });
 
-describe("habit — daily", () => {
-  const tracker = makeTracker({ type: "habit", period: "daily" });
-
-  it("scores 100 when logged today", () => {
+  it("returns 1 streak when logged today", () => {
     const logs = [makeLog(TODAY, { valueBool: true })];
-    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
-    expect(currentStreak).toBe(1);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(1);
   });
 
-  it("scores 0 when not logged today but counts streak from yesterday", () => {
-    const logs = [makeLog(daysAgo(1), { valueBool: true })];
-    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(0);
-    expect(currentStreak).toBe(1);
-  });
-
-  it("streak breaks when there is a gap", () => {
-    const logs = [
-      makeLog(daysAgo(3), { valueBool: true }),
-      makeLog(daysAgo(1), { valueBool: true }),
-    ];
-    const { currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentStreak).toBe(1);
+  it("returns 0 when no done logs", () => {
+    const logs = [makeLog(TODAY, { valueBool: false })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(0);
   });
 
   it("counts consecutive-day streak", () => {
@@ -73,289 +76,307 @@ describe("habit — daily", () => {
       makeLog(daysAgo(1), { valueBool: true }),
       makeLog(daysAgo(2), { valueBool: true }),
     ];
-    const { currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentStreak).toBe(3);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(3);
   });
 
-  it("returns 0 streak when no done logs", () => {
-    const logs = [makeLog(TODAY, { valueBool: false })];
-    const { currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentStreak).toBe(0);
+  it("streak breaks when there is a gap", () => {
+    const logs = [
+      makeLog(TODAY, { valueBool: true }),
+      makeLog(daysAgo(3), { valueBool: true }),
+      makeLog(daysAgo(1), { valueBool: true }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(2);
   });
 });
 
-describe("habit — weekly (weekStartDay=5/Friday)", () => {
-  // TODAY = May 5 (Tuesday), weekStartDay=5 → week started May 1 (Friday) → 5 days in period
-  const tracker = makeTracker({ type: "habit", period: "weekly" });
+describe("toggle — consistency", () => {
+  const evaluation = makeEvaluation({ metric: "consistency", window: "7d" });
 
-  it("scores 100 when all 5 days of the week are logged", () => {
-    const logs = [0, 1, 2, 3, 4].map((n) =>
+  it("returns 100 when all 7 days are done", () => {
+    const logs = [0, 1, 2, 3, 4, 5, 6].map((n) =>
       makeLog(daysAgo(n), { valueBool: true })
     );
-    const { currentScore } = evaluate(tracker, logs, TODAY, 5);
-    expect(currentScore).toBe(100);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(100);
   });
 
-  it("scores 20 when 1 of 5 days is logged", () => {
+  it("returns ~14.3 when 1 of 7 days is done", () => {
     const logs = [makeLog(TODAY, { valueBool: true })];
-    const { currentScore } = evaluate(tracker, logs, TODAY, 5);
-    expect(currentScore).toBe(20);
-  });
-
-  it("excludes logs from before the week start", () => {
-    const logs = [makeLog(daysAgo(5), { valueBool: true })]; // April 30, before May 1 Friday start
-    const { currentScore } = evaluate(tracker, logs, TODAY, 5);
-    expect(currentScore).toBe(0);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBeCloseTo(14.286, 1);
   });
 });
 
-// ── build_up ─────────────────────────────────────────────────────────────────
+describe("toggle — rate", () => {
+  const evaluation = makeEvaluation({ metric: "rate", window: "7d" });
 
-describe("build_up", () => {
-  const tracker = makeTracker({
-    type: "build_up",
-    period: "daily",
-    targetValue: 100,
-  });
-
-  it("scores proportional to sum vs target", () => {
-    const logs = [makeLog(TODAY, { value: 60 })];
-    const { currentScore, currentStatus } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(60);
-    expect(currentStatus).toBe("at_risk");
-  });
-
-  it("clamps to 100 when sum exceeds target", () => {
-    const logs = [makeLog(TODAY, { value: 150 })];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
-  });
-
-  it("scores 0 with no logs", () => {
-    const { currentScore } = evaluate(tracker, [], TODAY);
-    expect(currentScore).toBe(0);
-  });
-
-  it("returns undefined score when targetValue is missing", () => {
-    const t = makeTracker({ type: "build_up", period: "daily" });
-    const { currentScore } = evaluate(
-      t,
-      [makeLog(TODAY, { value: 50 })],
-      TODAY
+  it("returns 1 when all days done", () => {
+    const logs = [0, 1, 2, 3, 4, 5, 6].map((n) =>
+      makeLog(daysAgo(n), { valueBool: true })
     );
-    expect(currentScore).toBeUndefined();
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(1);
   });
 
-  it("only counts logs within the current period", () => {
-    const logs = [
-      makeLog(TODAY, { value: 40 }),
-      makeLog(daysAgo(1), { value: 100 }), // yesterday — outside daily period
-    ];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(40);
+  it("returns 0 when no days done", () => {
+    const result = evaluate(evaluation, [], TODAY);
+    expect(result.value).toBe(0);
   });
 });
 
-// ── cut_down ─────────────────────────────────────────────────────────────────
+describe("toggle — gap", () => {
+  const evaluation = makeEvaluation({ metric: "gap", window: "7d" });
 
-describe("cut_down", () => {
-  const tracker = makeTracker({
-    type: "cut_down",
-    period: "daily",
-    targetValue: 100,
+  it("returns 0 when logged today", () => {
+    const logs = [makeLog(TODAY, { valueBool: true })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(0);
   });
 
-  it("scores 100 when no logs (stayed under)", () => {
-    const { currentScore } = evaluate(tracker, [], TODAY);
-    expect(currentScore).toBe(100);
-  });
-
-  it("scores 50 when at half the limit", () => {
-    const logs = [makeLog(TODAY, { value: 50 })];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(50);
-  });
-
-  it("scores 0 when at or over the limit", () => {
-    const logs = [makeLog(TODAY, { value: 100 })];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(0);
-  });
-
-  it("clamps to 0 when over the limit", () => {
-    const logs = [makeLog(TODAY, { value: 200 })];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(0);
+  it("returns days since last log", () => {
+    const logs = [makeLog(daysAgo(2), { valueBool: true })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(2);
   });
 });
 
-// ── status thresholds ────────────────────────────────────────────────────────
+// ── Add metrics ───────────────────────────────────────────────────────────────
 
-describe("status thresholds", () => {
-  const tracker = makeTracker({
-    type: "build_up",
-    period: "daily",
-    targetValue: 100,
-  });
+describe("add — sum", () => {
+  const evaluation = makeEvaluation({ metric: "sum", window: "today" });
 
-  it("on_track at >= 80", () => {
-    const { currentStatus } = evaluate(
-      tracker,
-      [makeLog(TODAY, { value: 80 })],
-      TODAY
-    );
-    expect(currentStatus).toBe("on_track");
-  });
-
-  it("at_risk between 50 and 79", () => {
-    const { currentStatus } = evaluate(
-      tracker,
-      [makeLog(TODAY, { value: 50 })],
-      TODAY
-    );
-    expect(currentStatus).toBe("at_risk");
-  });
-
-  it("off_track below 50", () => {
-    const { currentStatus } = evaluate(
-      tracker,
-      [makeLog(TODAY, { value: 30 })],
-      TODAY
-    );
-    expect(currentStatus).toBe("off_track");
-  });
-});
-
-// ── expiry ───────────────────────────────────────────────────────────────────
-
-describe("expired tracker", () => {
-  it("returns achieved when score is 100 and tracker expired", () => {
-    const tracker = makeTracker({
-      type: "build_up",
-      period: "daily",
-      targetValue: 100,
-      endDateHijri: "14460101", // clearly in the past
-    });
-    const logs = [makeLog(TODAY, { value: 100 })];
-    const { currentStatus } = evaluate(tracker, logs, TODAY);
-    expect(currentStatus).toBe("achieved");
-  });
-
-  it("returns failed when score < 100 and tracker expired", () => {
-    const tracker = makeTracker({
-      type: "build_up",
-      period: "daily",
-      targetValue: 100,
-      endDateHijri: "14460101",
-    });
-    const logs = [makeLog(TODAY, { value: 60 })];
-    const { currentStatus } = evaluate(tracker, logs, TODAY);
-    expect(currentStatus).toBe("failed");
-  });
-
-  it("uses normal status when not expired", () => {
-    const tracker = makeTracker({
-      type: "build_up",
-      period: "daily",
-      targetValue: 100,
-      endDateHijri: "14500101", // far future
-    });
-    const logs = [makeLog(TODAY, { value: 80 })];
-    const { currentStatus } = evaluate(tracker, logs, TODAY);
-    expect(currentStatus).toBe("on_track");
-  });
-});
-
-// ── habit with targetValue (quantified habit) ────────────────────────────────
-
-describe("habit — threshold", () => {
-  const tracker = makeTracker({
-    type: "habit",
-    period: "daily",
-    condition: "threshold",
-    targetValue: 8,
-  });
-
-  it("scores 100 and streak=1 when today's total meets target", () => {
+  it("sums values for today", () => {
     const logs = [makeLog(TODAY, { value: 5 }), makeLog(TODAY, { value: 3 })];
-    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
-    expect(currentStreak).toBe(1);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(8);
   });
 
-  it("scores 0 when today's total is below target", () => {
-    const logs = [makeLog(TODAY, { value: 5 })];
-    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(0);
-    expect(currentStreak).toBe(0);
-  });
-
-  it("streak counts consecutive days that each meet target", () => {
+  it("ignores yesterday's values", () => {
     const logs = [
-      makeLog(TODAY, { value: 8 }),
-      makeLog(daysAgo(1), { value: 10 }),
-      makeLog(daysAgo(2), { value: 8 }),
+      makeLog(TODAY, { value: 5 }),
+      makeLog(daysAgo(1), { value: 100 }),
     ];
-    const { currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentStreak).toBe(3);
-  });
-
-  it("streak breaks when one day is below target", () => {
-    const logs = [
-      makeLog(TODAY, { value: 8 }),
-      makeLog(daysAgo(1), { value: 4 }), // below target
-      makeLog(daysAgo(2), { value: 8 }),
-    ];
-    const { currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentStreak).toBe(1);
-  });
-
-  it("partial logs accumulate within a day toward target", () => {
-    // 3 logs during the day summing to exactly 8
-    const logs = [
-      makeLog(TODAY, { value: 3 }),
-      makeLog(TODAY, { value: 3 }),
-      makeLog(TODAY, { value: 2 }),
-    ];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(5);
   });
 });
 
-// ── habit — range ────────────────────────────────────────────────────────────
+describe("add — average", () => {
+  const evaluation = makeEvaluation({ metric: "average", window: "7d" });
 
-describe("habit — range", () => {
-  const tracker = makeTracker({
-    type: "habit",
-    period: "daily",
-    condition: "range",
-    targetMin: 10,
-    targetMax: 20,
+  it("computes average of values", () => {
+    const logs = [
+      makeLog(TODAY, { value: 10 }),
+      makeLog(daysAgo(1), { value: 20 }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(15);
   });
 
-  it("scores 100 when value is in range", () => {
-    const logs = [makeLog(TODAY, { value: 15 })];
-    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
-    expect(currentStreak).toBe(1);
+  it("returns 0 with no logs", () => {
+    const result = evaluate(evaluation, [], TODAY);
+    expect(result.value).toBe(0);
+  });
+});
+
+describe("add — per_day", () => {
+  const evaluation = makeEvaluation({ metric: "per_day", window: "7d" });
+
+  it("divides sum by window days", () => {
+    const logs = [makeLog(TODAY, { value: 70 })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(10);
+  });
+});
+
+describe("add — count", () => {
+  const evaluation = makeEvaluation({ metric: "count", window: "7d" });
+
+  it("counts logs in window", () => {
+    const logs = [
+      makeLog(TODAY, { value: 5 }),
+      makeLog(daysAgo(1), { value: 3 }),
+      makeLog(daysAgo(10), { value: 100 }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(2);
+  });
+});
+
+describe("add — min / max", () => {
+  it("returns min value", () => {
+    const evaluation = makeEvaluation({ metric: "min", window: "7d" });
+    const logs = [
+      makeLog(TODAY, { value: 5 }),
+      makeLog(daysAgo(1), { value: 3 }),
+    ];
+    expect(evaluate(evaluation, logs, TODAY).value).toBe(3);
   });
 
-  it("scores 0 when value is out of range", () => {
-    const logs = [makeLog(TODAY, { value: 5 })];
-    const { currentScore, currentStreak } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(0);
-    expect(currentStreak).toBe(0);
+  it("returns max value", () => {
+    const evaluation = makeEvaluation({ metric: "max", window: "7d" });
+    const logs = [
+      makeLog(TODAY, { value: 5 }),
+      makeLog(daysAgo(1), { value: 20 }),
+    ];
+    expect(evaluate(evaluation, logs, TODAY).value).toBe(20);
+  });
+});
+
+describe("add — trend", () => {
+  const evaluation = makeEvaluation({ metric: "trend", window: "7d" });
+
+  it("returns relative change from previous to latest", () => {
+    const logs = [
+      makeLog(TODAY, { value: 15 }),
+      makeLog(daysAgo(1), { value: 10 }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(0.5);
   });
 
-  it("uses valueMin when present", () => {
-    const logs = [makeLog(TODAY, { valueMin: 15, value: 5 })];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
-  });
-
-  it("accepts boundary values as in-range", () => {
+  it("returns 0 when only one log", () => {
     const logs = [makeLog(TODAY, { value: 10 })];
-    const { currentScore } = evaluate(tracker, logs, TODAY);
-    expect(currentScore).toBe(100);
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(0);
+  });
+});
+
+// ── Set metrics ─────────────────────────────────────────────────────────────
+
+describe("set — latest", () => {
+  const evaluation = makeEvaluation({ metric: "latest", window: "7d" });
+
+  it("returns most recent value", () => {
+    const logs = [
+      makeLog(TODAY, { value: 75 }),
+      makeLog(daysAgo(1), { value: 70 }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(75);
+  });
+});
+
+describe("set — delta", () => {
+  const evaluation = makeEvaluation({ metric: "delta", window: "7d" });
+
+  it("returns difference between latest and previous", () => {
+    const logs = [
+      makeLog(TODAY, { value: 75 }),
+      makeLog(daysAgo(1), { value: 70 }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(5);
+  });
+
+  it("returns negative delta when decreased", () => {
+    const logs = [
+      makeLog(TODAY, { value: 65 }),
+      makeLog(daysAgo(1), { value: 70 }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(-5);
+  });
+
+  it("returns 0 with fewer than 2 logs", () => {
+    const logs = [makeLog(TODAY, { value: 70 })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(0);
+  });
+});
+
+// ── Comparison / success ──────────────────────────────────────────────────────
+
+describe("comparison operators", () => {
+  it("success = true when value >= target", () => {
+    const evaluation = makeEvaluation({
+      metric: "count",
+      window: "today",
+      operator: ">=",
+      target: 3,
+    });
+    const logs = [
+      makeLog(TODAY, { valueBool: true }),
+      makeLog(TODAY, { valueBool: true }),
+      makeLog(TODAY, { valueBool: true }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(3);
+    expect(result.success).toBe(true);
+  });
+
+  it("success = false when value < target", () => {
+    const evaluation = makeEvaluation({
+      metric: "count",
+      window: "today",
+      operator: ">=",
+      target: 5,
+    });
+    const logs = [makeLog(TODAY, { valueBool: true })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(1);
+    expect(result.success).toBe(false);
+  });
+
+  it("success = true with <= operator", () => {
+    const evaluation = makeEvaluation({
+      metric: "sum",
+      window: "today",
+      operator: "<=",
+      target: 10,
+    });
+    const logs = [makeLog(TODAY, { value: 5 })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.success).toBe(true);
+  });
+
+  it("success = true with == operator", () => {
+    const evaluation = makeEvaluation({
+      metric: "count",
+      window: "today",
+      operator: "==",
+      target: 2,
+    });
+    const logs = [
+      makeLog(TODAY, { valueBool: true }),
+      makeLog(TODAY, { valueBool: true }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.success).toBe(true);
+  });
+
+  it("success is undefined when no target set", () => {
+    const evaluation = makeEvaluation({ metric: "count", window: "today" });
+    const logs = [makeLog(TODAY, { valueBool: true })];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.success).toBeUndefined();
+  });
+});
+
+// ── Window filtering ──────────────────────────────────────────────────────────
+
+describe("window filtering", () => {
+  it("7d window includes logs from last 7 days", () => {
+    const evaluation = makeEvaluation({ metric: "count", window: "7d" });
+    const logs = [
+      makeLog(TODAY, { valueBool: true }),
+      makeLog(daysAgo(6), { valueBool: true }),
+      makeLog(daysAgo(8), { valueBool: true }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(2);
+  });
+
+  it("30d window includes logs from last 30 days", () => {
+    const evaluation = makeEvaluation({ metric: "count", window: "30d" });
+    const logs = [
+      makeLog(TODAY, { valueBool: true }),
+      makeLog(daysAgo(29), { valueBool: true }),
+      makeLog(daysAgo(31), { valueBool: true }),
+    ];
+    const result = evaluate(evaluation, logs, TODAY);
+    expect(result.value).toBe(2);
   });
 });

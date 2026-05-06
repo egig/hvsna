@@ -42,10 +42,6 @@ function TracksPage() {
           <div className="px-4 pt-4">
             {/* Card grid */}
             <div className="grid grid-cols-2 gap-3">
-              <TrackerSummaryCard
-                trackers={trackers}
-                todayTimestamp={Date.now()}
-              />
               {trackers.map((tracker) => (
                 <TrackerCard
                   key={tracker.id}

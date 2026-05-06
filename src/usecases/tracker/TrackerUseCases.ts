@@ -7,9 +7,10 @@ import type {
   TrackerLogCreateInput,
   TrackerLogUpdateInput,
   TrackerQuery,
-  TrackerEvalStatus,
+  EvaluationConfig,
+  EvaluationResult,
 } from "../../domain/tracker/ITrackerRepository";
-import { evaluate, isDoneLog } from "./evaluation";
+import { evaluate } from "./evaluation";
 
 export interface TrackerStats {
   total: number;
@@ -19,9 +20,7 @@ export interface TrackerStats {
   previousValue: number | null;
   todayTotal: number;
   todayDone: boolean;
-  currentScore: number | undefined;
-  currentStreak: number | undefined;
-  currentStatus: TrackerEvalStatus | undefined;
+  streak: number;
 }
 
 function dayRange(ts: number): [number, number] {
@@ -69,15 +68,30 @@ export class TrackerUseCases {
     return this.repository.findLogs(query);
   }
 
+  async getEvaluationResult(
+    trackerId: string,
+    evaluationId: string,
+    todayTimestamp?: number
+  ): Promise<EvaluationResult> {
+    const tracker = await this.repository.findTrackerById(trackerId);
+    const evaluation = tracker?.evaluations?.find((e) => e.id === evaluationId);
+    if (!evaluation) {
+      return {
+        evaluationId: evaluationId,
+        metric: "unknown",
+        value: 0,
+        window: "today",
+      };
+    }
+    const logs = await this.repository.findLogs({ trackerId });
+    return evaluate(evaluation, logs, todayTimestamp ?? Date.now());
+  }
+
   async getStats(
     trackerId: string,
-    todayTimestamp?: number,
-    weekStartDay = 5
+    todayTimestamp?: number
   ): Promise<TrackerStats> {
-    const [tracker, logs] = await Promise.all([
-      this.repository.findTrackerById(trackerId),
-      this.repository.findLogs({ trackerId }),
-    ]);
+    const logs = await this.repository.findLogs({ trackerId });
 
     const byOccurred = [...logs].sort(
       (a, b) =>
@@ -101,20 +115,45 @@ export class TrackerUseCases {
         return ts >= dayStart && ts <= dayEnd;
       });
       todayTotal = todayLogs.reduce((s, l) => s + (l.value ?? 0), 0);
-      todayDone =
-        tracker?.targetValue && tracker.targetValue > 0
-          ? todayTotal >= tracker.targetValue
-          : todayLogs.some(isDoneLog);
+      todayDone = todayLogs.some((l) => l.valueBool === true) || todayTotal > 0;
     }
 
-    let currentScore: number | undefined;
-    let currentStreak: number | undefined;
-    let currentStatus: TrackerEvalStatus | undefined;
-    if (tracker && todayTimestamp) {
-      const result = evaluate(tracker, logs, todayTimestamp, weekStartDay);
-      currentScore = result.currentScore;
-      currentStreak = result.currentStreak;
-      currentStatus = result.currentStatus;
+    // Calculate streak - consecutive days with logs
+    let streak = 0;
+    if (todayTimestamp && count > 0) {
+      const MS_PER_DAY = 86_400_000;
+      const logDates = new Set<number>();
+      logs.forEach((l) => {
+        const ts = l.occurredAt ?? l.createdAt ?? 0;
+        const dayStart = Math.floor(ts / MS_PER_DAY) * MS_PER_DAY;
+        logDates.add(dayStart);
+      });
+
+      const sortedDates = Array.from(logDates).sort((a, b) => b - a);
+      const todayDayStart =
+        Math.floor(todayTimestamp / MS_PER_DAY) * MS_PER_DAY;
+
+      // Allow current day to not yet be logged (streak intact from yesterday)
+      let currentDay = todayDayStart;
+      if (!logDates.has(todayDayStart) && sortedDates.length > 0) {
+        const diff = (todayDayStart - sortedDates[0]) / MS_PER_DAY;
+        if (diff > 1) {
+          streak = 0;
+        } else {
+          currentDay = sortedDates[0];
+        }
+      }
+
+      // Count consecutive days
+      streak = 0;
+      for (const date of sortedDates) {
+        if (date === currentDay) {
+          streak++;
+          currentDay -= MS_PER_DAY;
+        } else {
+          break;
+        }
+      }
     }
 
     return {
@@ -125,9 +164,7 @@ export class TrackerUseCases {
       previousValue,
       todayTotal,
       todayDone,
-      currentScore,
-      currentStreak,
-      currentStatus,
+      streak,
     };
   }
 }

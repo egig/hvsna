@@ -3,15 +3,24 @@ import { useParams, useNavigate } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTrackers } from "./use-trackers";
 import { useTrackerLogs } from "./use-tracker-logs";
-import { useTrackerStats } from "./use-tracker-stats";
+import { useTrackerEvaluations } from "./use-tracker-evaluations";
+import { useTrackerEvaluationResult } from "./use-tracker-evaluation-result";
 import { TrackerProvider, useTrackerContext } from "./tracker-context";
 import { TrackerForm } from "./tracker-form";
+import { TrackerEvaluationForm } from "./tracker-evaluation-form";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { Page } from "../navigation";
 import { NavActionButton } from "../components/nav-action-button";
 import { EmptyState } from "../components/empty-state";
-import { HvEdit2, HvTrash2, HvPlus, HvX } from "../icons";
+import {
+  HvEdit2,
+  HvTrash2,
+  HvPlus,
+  HvX,
+  HvArrowUp,
+  HvArrowDown,
+} from "../icons";
 import { gregorianToHijri } from "@tabby_ai/hijri-converter";
 import {
   formatHijriDateString,
@@ -19,26 +28,8 @@ import {
 } from "../task/task-form-helpers";
 import type {
   TrackerLog,
-  TrackerEvalStatus,
+  EvaluationConfig,
 } from "../../domain/tracker/ITrackerRepository";
-
-const STATUS_LABEL: Record<TrackerEvalStatus, string> = {
-  on_track: "On Track",
-  at_risk: "At Risk",
-  off_track: "Off Track",
-  achieved: "Achieved",
-  failed: "Failed",
-};
-
-const STATUS_COLOR: Record<TrackerEvalStatus, string> = {
-  on_track: "#22c55e",
-  at_risk: "#f97316",
-  off_track: "#ef4444",
-  achieved: "#22c55e",
-  failed: "#ef4444",
-};
-
-const GOAL_TYPES = new Set(["habit", "build_up", "cut_down"]);
 
 function timestampToHijriStr(ts: number): string {
   const d = new Date(ts);
@@ -59,7 +50,6 @@ function formatHijriKey(dateHijri: string): string {
   }
 }
 
-/** Returns today's date as a "YYYY-MM-DD" string for <input type="date"> */
 function todayGregorianStr(): string {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
@@ -68,9 +58,6 @@ function todayGregorianStr(): string {
   )}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Converts a "YYYY-MM-DD" string to a timestamp.
- *  For today: uses Date.now() to preserve the actual time of logging.
- *  For past dates: midnight is used since no time is available. */
 function dateStrToTimestamp(str: string): number {
   const today = todayGregorianStr();
   if (str === today) return Date.now();
@@ -92,7 +79,6 @@ function groupLogsByDate(logs: TrackerLog[]): Map<string, TrackerLog[]> {
 interface LogFormProps {
   trackerType: string;
   trackerUnit?: string;
-  trackerCondition?: string;
   defaultOccurredAt?: number;
   initialValue?: string;
   initialNote?: string;
@@ -103,7 +89,6 @@ interface LogFormProps {
 function LogForm({
   trackerType,
   trackerUnit,
-  trackerCondition,
   defaultOccurredAt,
   initialValue,
   initialNote,
@@ -142,11 +127,7 @@ function LogForm({
     }
   };
 
-  const isBooleanType =
-    trackerType === "binary" ||
-    (trackerType === "habit" &&
-      trackerCondition !== "threshold" &&
-      trackerCondition !== "range");
+  const isBinary = trackerType === "toggle";
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
@@ -168,7 +149,7 @@ function LogForm({
           <p className="text-sm text-[var(--hvsna-danger-color)]">{error}</p>
         )}
 
-        {isBooleanType ? (
+        {isBinary ? (
           <div className="flex gap-3">
             <button
               type="button"
@@ -191,34 +172,6 @@ function LogForm({
               }`}
             >
               {t("log_undo") || "Undo / No"}
-            </button>
-          </div>
-        ) : trackerType === "tally" ? (
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => setValue(String(parseInt(value || "0") - 1))}
-              className="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 text-xl font-bold text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              −
-            </button>
-            <div className="flex-1 text-center">
-              <input
-                type="number"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="w-20 text-center text-2xl font-bold text-gray-900 dark:text-white bg-transparent border-b-2 border-gray-300 dark:border-gray-600 focus:outline-none focus:border-[var(--hvsna-primary-color)] pb-1"
-              />
-              {trackerUnit && (
-                <p className="text-xs text-gray-400 mt-1">{trackerUnit}</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => setValue(String(parseInt(value || "0") + 1))}
-              className="w-12 h-12 rounded-full border-2 text-xl font-bold text-white flex items-center justify-center transition-colors bg-[var(--hvsna-primary-color)] border-[var(--hvsna-primary-color)]"
-            >
-              +
             </button>
           </div>
         ) : (
@@ -247,7 +200,6 @@ function LogForm({
           />
         </div>
 
-        {/* Occurrence date */}
         <div>
           <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
             {t("log_occurred_at") || "Occurrence date"}
@@ -275,6 +227,90 @@ function LogForm({
   );
 }
 
+interface EvaluationCardProps {
+  trackerId: string;
+  evaluation: EvaluationConfig;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function EvaluationCard({
+  trackerId,
+  evaluation,
+  onEdit,
+  onDelete,
+}: EvaluationCardProps) {
+  const { t } = useLanguageContext();
+  const { data: result } = useTrackerEvaluationResult(
+    trackerId,
+    evaluation.id,
+    Date.now()
+  );
+
+  const value = result?.value;
+  const success = result?.success;
+  const metric = result?.metric;
+  const target = result?.target;
+
+  return (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-900">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+            {evaluation.label || metric}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-xs text-gray-400 capitalize">
+              {t(`metric_${evaluation.metric}`) || evaluation.metric} ·{" "}
+              {typeof evaluation.window === "string"
+                ? t(`window_${evaluation.window}`) || evaluation.window
+                : t("window_custom") || "custom"}
+            </span>
+            {success !== undefined && (
+              <span
+                className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                  success
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {success ? t("eval_pass") || "Pass" : t("eval_fail") || "Fail"}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          <button
+            onClick={onEdit}
+            className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-primary-color)] rounded transition-colors"
+          >
+            <HvEdit2 size={14} />
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-danger-color)] rounded transition-colors"
+          >
+            <HvTrash2 size={14} />
+          </button>
+        </div>
+      </div>
+
+      {value !== undefined && (
+        <div className="flex items-baseline gap-2 mt-1">
+          <span className="text-lg font-bold text-gray-900 dark:text-white">
+            {value}
+          </span>
+          {target !== undefined && (
+            <span className="text-xs text-gray-400">
+              {evaluation.operator} {target}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TrackerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -290,11 +326,19 @@ function TrackerDetailPage() {
     updateLog,
     deleteLog,
   } = useTrackerLogs(id!);
-  const { data: stats } = useTrackerStats(id!, Date.now());
+  const { data: evaluations = [], updateEvaluations } = useTrackerEvaluations(
+    id!
+  );
+
   const tracker = trackers.find((t) => t.id === id);
 
   const [logFormOpen, setLogFormOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<TrackerLog | null>(null);
+  const [evalFormOpen, setEvalFormOpen] = useState(false);
+  const [editingEvaluation, setEditingEvaluation] =
+    useState<EvaluationConfig | null>(null);
+
+  console.log("tracker", tracker);
 
   if (!tracker) {
     return (
@@ -305,8 +349,6 @@ function TrackerDetailPage() {
       </Page>
     );
   }
-
-  const isGoalType = GOAL_TYPES.has(tracker.type ?? "");
 
   const handleDelete = async () => {
     if (
@@ -350,6 +392,13 @@ function TrackerDetailPage() {
     await deleteLog(logId);
   };
 
+  const handleDeleteEvaluation = async (evalId: string) => {
+    if (!confirm(t("evaluation_delete_confirm") || "Delete this evaluation?"))
+      return;
+    const remaining = evaluations.filter((e) => e.id !== evalId);
+    await updateEvaluations(id!, remaining);
+  };
+
   const sortedLogs = [...logs].sort(
     (a, b) =>
       (b.occurredAt ?? b.createdAt ?? 0) - (a.occurredAt ?? a.createdAt ?? 0)
@@ -359,159 +408,14 @@ function TrackerDetailPage() {
     b.localeCompare(a)
   );
 
-  // For target type: map each log id → direction vs prior log (chronological order)
-  const logDelta = new Map<string, "up" | "down" | "same">();
-  if (tracker.accumulate === false) {
-    const asc = [...logs].sort(
-      (a, b) =>
-        (a.occurredAt ?? a.createdAt ?? 0) - (b.occurredAt ?? b.createdAt ?? 0)
-    );
-    for (let i = 1; i < asc.length; i++) {
-      const prev = asc[i - 1].value ?? 0;
-      const curr = asc[i].value ?? 0;
-      const id = asc[i].id!;
-      logDelta.set(id, curr > prev ? "up" : curr < prev ? "down" : "same");
-    }
-  }
-
-  const progress =
-    isGoalType && stats?.currentScore !== undefined
-      ? Math.min(100, Math.max(0, stats.currentScore))
-      : undefined;
-
-  const getStatDisplay = () => {
-    if (!stats) return null;
-    if (
-      tracker.type === "binary" ||
-      (tracker.type === "habit" &&
-        tracker.condition !== "threshold" &&
-        tracker.condition !== "range")
-    ) {
-      return (
-        <>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t("stat_today") || "Today"}
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {stats.lastValue === null
-                ? "–"
-                : stats.lastValue > 0
-                ? t("yes") || "Yes"
-                : t("no_label") || "No"}
-            </p>
-          </div>
-          {tracker.type === "habit" && stats?.currentStreak !== undefined && (
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Streak</p>
-              <p className="text-2xl font-bold text-orange-500">
-                🔥 {stats.currentStreak}
-              </p>
-            </div>
-          )}
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t("stat_count") || "Entries"}
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {stats.count}
-            </p>
-          </div>
-        </>
-      );
-    }
-    if (tracker.accumulate === false) {
-      const delta =
-        stats.lastValue !== null && stats.previousValue !== null
-          ? stats.lastValue - stats.previousValue
-          : null;
-      const deltaColor =
-        delta === null
-          ? undefined
-          : delta > 0
-          ? "#22c55e"
-          : delta < 0
-          ? "#ef4444"
-          : undefined;
-      const deltaArrow =
-        delta === null ? null : delta > 0 ? "↑" : delta < 0 ? "↓" : "→";
-      return (
-        <>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Latest {tracker.unit ? `(${tracker.unit})` : ""}
-            </p>
-            <div className="flex items-baseline gap-1.5">
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {stats.lastValue ?? "–"}
-              </p>
-              {deltaArrow && (
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: deltaColor }}
-                >
-                  {deltaArrow} {Math.abs(delta!)}
-                </span>
-              )}
-            </div>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t("stat_count") || "Entries"}
-            </p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {stats.count}
-            </p>
-          </div>
-        </>
-      );
-    }
-    return (
-      <>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {t("stat_today") || "Today"}{" "}
-            {tracker.unit ? `(${tracker.unit})` : ""}
-          </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {stats.todayTotal}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {t("stat_total") || "Total"}{" "}
-            {tracker.unit ? `(${tracker.unit})` : ""}
-          </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {stats.total}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {t("stat_count") || "Entries"}
-          </p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
-            {stats.count}
-          </p>
-        </div>
-      </>
-    );
-  };
-
   const formatLogValue = (log: TrackerLog) => {
-    if (
-      tracker.type === "binary" ||
-      (tracker.type === "habit" &&
-        tracker.condition !== "threshold" &&
-        tracker.condition !== "range")
-    ) {
-      return log.value! > 0 ? t("yes") || "Yes" : t("log_undo") || "Undo";
-    }
-    if (tracker.accumulate === false) {
-      return `${log.value ?? 0}${tracker.unit ? ` ${tracker.unit}` : ""}`;
+    if (tracker.inputMode === "toggle") {
+      return (log.value ?? 0) > 0 ? t("yes") || "Yes" : t("log_undo") || "Undo";
     }
     const prefix = (log.value ?? 0) > 0 ? "+" : "";
-    return `${prefix}${log.value}${tracker.unit ? ` ${tracker.unit}` : ""}`;
+    return `${prefix}${log.value ?? 0}${
+      tracker.unit ? ` ${tracker.unit}` : ""
+    }`;
   };
 
   return (
@@ -541,57 +445,42 @@ function TrackerDetailPage() {
       }
     >
       <div className="flex-1 overflow-y-auto pb-24">
-        {/* Stats card */}
-        <div className="mx-4 mt-4 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800 p-4">
-          <div className="flex justify-between items-start gap-4 flex-wrap">
-            {getStatDisplay()}
+        {/* Evaluations section */}
+        <div className="mx-4 mt-4 mb-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              {t("evaluations") || "Evaluations"}
+            </span>
+            <button
+              onClick={() => {
+                setEditingEvaluation(null);
+                setEvalFormOpen(true);
+              }}
+              className="flex items-center gap-1 text-xs text-[var(--hvsna-primary-color)] font-medium"
+            >
+              <HvPlus size={14} />
+              {t("evaluation_new") || "New"}
+            </button>
           </div>
 
-          {/* Goal status + progress */}
-          {isGoalType && (
-            <div className="mt-4">
-              {stats?.currentStatus && (
-                <div className="flex items-center justify-between mb-2">
-                  <span
-                    className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                    style={{
-                      backgroundColor: STATUS_COLOR[stats.currentStatus] + "22",
-                      color: STATUS_COLOR[stats.currentStatus],
-                    }}
-                  >
-                    {STATUS_LABEL[stats.currentStatus]}
-                  </span>
-                  {progress !== undefined && (
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {progress}%
-                    </span>
-                  )}
-                </div>
-              )}
-              {progress !== undefined && (
-                <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{
-                      width: `${progress}%`,
-                      backgroundColor: stats?.currentStatus
-                        ? STATUS_COLOR[stats.currentStatus]
-                        : "var(--hvsna-primary-color)",
-                    }}
-                  />
-                </div>
-              )}
-              {tracker.targetValue && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  Goal: {tracker.targetValue} {tracker.unit ?? ""}
-                  {tracker.period ? ` / ${tracker.period}` : ""}
-                </p>
-              )}
-              {tracker.endDateHijri && (
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                  Deadline: {formatHijriKey(tracker.endDateHijri)}
-                </p>
-              )}
+          {evaluations.length === 0 ? (
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              {t("no_evaluations_yet") || "No evaluations yet"}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {evaluations.map((ev) => (
+                <EvaluationCard
+                  key={ev.id}
+                  trackerId={id!}
+                  evaluation={ev}
+                  onEdit={() => {
+                    setEditingEvaluation(ev);
+                    setEvalFormOpen(true);
+                  }}
+                  onDelete={() => ev.id && handleDeleteEvaluation(ev.id)}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -629,81 +518,88 @@ function TrackerDetailPage() {
                     </span>
                   </div>
                   <div>
-                    {grouped.get(dateKey)!.map((log) => (
-                      <div
-                        key={log.id}
-                        className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 last:border-0"
-                      >
-                        <div className="w-1 self-stretch rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p
-                              className="text-base font-semibold"
-                              style={{
-                                color:
-                                  (log.value ?? 0) < 0
-                                    ? "var(--hvsna-danger-color)"
-                                    : "inherit",
-                              }}
-                            >
-                              {formatLogValue(log)}
+                    {grouped.get(dateKey)!.map((log, index) => {
+                      const allLogs = grouped.get(dateKey)!;
+                      const nextLog =
+                        index < allLogs.length - 1 ? allLogs[index + 1] : null;
+                      const showIndicator =
+                        tracker.inputMode === "set" &&
+                        nextLog &&
+                        log.value !== undefined &&
+                        nextLog.value !== undefined;
+                      const isUp = showIndicator && log.value! > nextLog.value!;
+                      const isDown =
+                        showIndicator && log.value! < nextLog.value!;
+
+                      return (
+                        <div
+                          key={log.id}
+                          className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 last:border-0"
+                        >
+                          <div className="w-1 self-stretch rounded-full flex-shrink-0 bg-gray-300 dark:bg-gray-600" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p
+                                className="text-base font-semibold"
+                                style={{
+                                  color:
+                                    (log.value ?? 0) < 0
+                                      ? "var(--hvsna-danger-color)"
+                                      : "inherit",
+                                }}
+                              >
+                                {formatLogValue(log)}
+                              </p>
+                              {showIndicator && (
+                                <div className="flex items-center gap-1">
+                                  {isUp && (
+                                    <HvArrowUp
+                                      size={14}
+                                      className="text-green-500"
+                                    />
+                                  )}
+                                  {isDown && (
+                                    <HvArrowDown
+                                      size={14}
+                                      className="text-red-500"
+                                    />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            {log.note && (
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">
+                                {log.note}
+                              </p>
+                            )}
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                              {log.occurredAt
+                                ? new Date(log.occurredAt).toLocaleTimeString(
+                                    [],
+                                    { hour: "2-digit", minute: "2-digit" }
+                                  )
+                                : ""}
                             </p>
-                            {tracker.accumulate === false &&
-                              log.id &&
-                              logDelta.has(log.id) &&
-                              (() => {
-                                const dir = logDelta.get(log.id!);
-                                if (dir === "up")
-                                  return (
-                                    <span className="text-xs font-bold text-green-500">
-                                      ↑
-                                    </span>
-                                  );
-                                if (dir === "down")
-                                  return (
-                                    <span className="text-xs font-bold text-red-500">
-                                      ↓
-                                    </span>
-                                  );
-                                return (
-                                  <span className="text-xs text-gray-400">
-                                    →
-                                  </span>
-                                );
-                              })()}
                           </div>
-                          {log.note && (
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">
-                              {log.note}
-                            </p>
-                          )}
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                            {log.occurredAt
-                              ? new Date(log.occurredAt).toLocaleTimeString(
-                                  [],
-                                  { hour: "2-digit", minute: "2-digit" }
-                                )
-                              : ""}
-                          </p>
+                          <div className="flex items-center gap-1 -mr-1">
+                            <button
+                              onClick={() => setEditingLog(log)}
+                              className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-primary-color)] rounded transition-colors"
+                              title={t("edit_tracker") || "Edit"}
+                            >
+                              <HvEdit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => log.id && handleDeleteLog(log.id)}
+                              className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-danger-color)] rounded transition-colors"
+                              title={t("delete_log") || "Delete log"}
+                            >
+                              <HvTrash2 size={14} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 -mr-1">
-                          <button
-                            onClick={() => setEditingLog(log)}
-                            className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-primary-color)] rounded transition-colors"
-                            title={t("edit_tracker") || "Edit"}
-                          >
-                            <HvEdit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => log.id && handleDeleteLog(log.id)}
-                            className="p-1.5 text-gray-300 dark:text-gray-600 hover:text-[var(--hvsna-danger-color)] rounded transition-colors"
-                            title={t("delete_log") || "Delete log"}
-                          >
-                            <HvTrash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -728,9 +624,8 @@ function TrackerDetailPage() {
         noPadding
       >
         <LogForm
-          trackerType={tracker.type ?? "tally"}
+          trackerType={tracker.inputMode ?? "add"}
           trackerUnit={tracker.unit}
-          trackerCondition={tracker.condition}
           onClose={() => setLogFormOpen(false)}
           onSubmit={handleLogSubmit}
         />
@@ -744,9 +639,8 @@ function TrackerDetailPage() {
       >
         {editingLog && (
           <LogForm
-            trackerType={tracker.type ?? "tally"}
+            trackerType={tracker.inputMode ?? "add"}
             trackerUnit={tracker.unit}
-            trackerCondition={tracker.condition}
             defaultOccurredAt={editingLog.occurredAt}
             initialValue={editingLog.value?.toString() ?? "1"}
             initialNote={editingLog.note ?? ""}
@@ -754,6 +648,25 @@ function TrackerDetailPage() {
             onSubmit={handleEditLogSubmit}
           />
         )}
+      </Modal>
+
+      {/* Evaluation form modal */}
+      <Modal
+        isOpen={evalFormOpen}
+        onClose={() => {
+          setEvalFormOpen(false);
+          setEditingEvaluation(null);
+        }}
+        noPadding
+      >
+        <TrackerEvaluationForm
+          trackerId={id!}
+          editing={editingEvaluation}
+          onClose={() => {
+            setEvalFormOpen(false);
+            setEditingEvaluation(null);
+          }}
+        />
       </Modal>
 
       {/* Edit tracker modal */}
