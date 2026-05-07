@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTrackers } from "./use-trackers";
-import type { InputMode } from "../../domain/tracker/ITrackerRepository";
+import type { InputMode, Tracker } from "../../domain/tracker/ITrackerRepository";
 import { HvX } from "../icons";
 
 interface TrackerFormProps {
@@ -37,7 +37,7 @@ export function TrackerForm({ editingId, onClose }: TrackerFormProps) {
   const { data: trackers, createTracker, updateTracker } = useTrackers();
 
   const existing = editingId
-    ? trackers?.find((tr) => tr.id === editingId)
+    ? trackers?.find((tr: Tracker) => tr.id === editingId)
     : null;
 
   const [name, setName] = useState(existing?.name ?? "");

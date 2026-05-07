@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useTrackers } from "../tracker/use-trackers";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Modal } from "../navigation/modal";
 import { HvX } from "../icons";
@@ -86,7 +85,6 @@ export function ProjectEvaluationPicker({
   existingRefs,
 }: ProjectEvaluationPickerProps) {
   const { t } = useLanguageContext();
-  const { data: trackers = [] } = useTrackers();
 
   const [step, setStep] = useState<"tracker" | "evaluations">("tracker");
   const [selectedTracker, setSelectedTracker] = useState<Tracker | null>(null);
@@ -155,123 +153,7 @@ export function ProjectEvaluationPicker({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          {step === "tracker" ? (
-            <div className="space-y-2">
-              {trackers.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8">
-                  {t("no_trackers") || "No trackers available"}
-                </p>
-              ) : (
-                trackers.map((tracker) => (
-                  <button
-                    key={tracker.id}
-                    onClick={() => handleTrackerSelect(tracker)}
-                    className="w-full text-left px-3 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{tracker.emoji || "📊"}</span>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {tracker.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {tracker.evaluations?.length || 0}{" "}
-                          {t("evaluations") || "evaluations"}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ))
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <button
-                onClick={() => setStep("tracker")}
-                className="text-xs text-[var(--hvsna-primary-color)] font-medium mb-2"
-              >
-                ← {t("back") || "Back"}
-              </button>
-
-              {(selectedTracker?.evaluations || []).map((evalConfig) => {
-                const isSelected = selectedEvalIds.has(evalConfig.id);
-                const key = `${selectedTracker!.id}:${evalConfig.id}`;
-                const alreadyLinked = existingKeys.has(key);
-
-                return (
-                  <button
-                    key={evalConfig.id}
-                    onClick={() => !alreadyLinked && toggleEval(evalConfig.id)}
-                    disabled={alreadyLinked}
-                    className={`w-full text-left px-3 py-3 rounded-lg border transition-colors ${
-                      alreadyLinked
-                        ? "border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed"
-                        : isSelected
-                        ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10"
-                        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div
-                        className={`mt-0.5 w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
-                          isSelected
-                            ? "bg-[var(--hvsna-primary-color)] border-[var(--hvsna-primary-color)]"
-                            : "border-gray-300 dark:border-gray-600"
-                        }`}
-                      >
-                        {isSelected && (
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {evalConfig.label || evalConfig.metric}
-                          {alreadyLinked && (
-                            <span className="ml-1.5 text-xs text-gray-400 font-normal">
-                              ({t("already_linked") || "already linked"})
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {metricLabel(
-                            evalConfig.metric as string,
-                            selectedTracker?.inputMode || "toggle",
-                            t
-                          )}
-                          {" · "}
-                          {windowLabel(evalConfig.window, t)}
-                          {evalConfig.operator && evalConfig.target !== undefined
-                            ? ` · ${evalConfig.operator} ${evalConfig.target}`
-                            : ""}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-
-              {(selectedTracker?.evaluations || []).length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-8">
-                  {t("no_evaluations_in_tracker") ||
-                    "No evaluations in this tracker"}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+        
 
         {step === "evaluations" && selectedEvalIds.size > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800">

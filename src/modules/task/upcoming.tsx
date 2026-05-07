@@ -11,7 +11,6 @@ import {
   HvCalendar,
   HvLayoutList,
   HvCalendarMonth,
-  HvCalendarMonthFilled,
   HvOutlineInbox,
   HvHiInbox,
   HvGripVertical,
@@ -27,7 +26,6 @@ import { useUpcoming } from "./use-upcoming";
 import { useInbox } from "./use-inbox";
 import { useToday } from "./use-today";
 import { WeekView } from "./week-view";
-import { TodayContent } from "./today";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "./task-context";
@@ -309,7 +307,6 @@ export default function Tasks() {
     const stored = localStorage.getItem("upcoming-view-mode");
     return stored === "week" ? "week" : "list";
   });
-  const [activeTab, setActiveTab] = useState<MobileTab>("today");
 
   const effectiveMode: ViewMode = isDesktop ? viewMode : "list";
 
@@ -355,13 +352,6 @@ export default function Tasks() {
 
   const navbarActions = isDesktop && (
     <div className="flex items-center gap-1">
-      <button
-        onClick={() => openCreateTaskForm()}
-        title={t("add_new_task")}
-        className="p-1.5 rounded-md text-[var(--hvsna-primary-color)] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      >
-        <HvSquareRoundedPlusFilled className="size-5" />
-      </button>
       <button
         onClick={() => navigate("/search")}
         title={t("search")}
@@ -414,77 +404,32 @@ export default function Tasks() {
             {/* Single shared navbar */}
             <Navbar
               showBackButton={false}
-              title={t("tasks")}
+              title={t("upcoming")}
               rightAction={navbarActions}
             />
 
             {/* Content area */}
             <div className="flex-1 flex overflow-hidden">
-              {/* 3-Column Layout for List View, 2-Column for Week View */}
               {effectiveMode === "list" ? (
-                <>
-                  {/* Today Column */}
-                  <div className="w-1/3 flex flex-col overflow-hidden">
-                    <div className="px-4 py-3 flex-shrink-0">
-                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                        {t("today")}
-                      </h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      <TodayColumn
-                        todayTasks={todayTasks}
-                        todayCompletedTasks={todayCompletedTasks}
-                        todayInitiated={todayInitiated}
-                        todayError={todayError}
-                        handleEditTask={handleEditTask}
-                        t={t}
-                      />
-                    </div>
+                <div className="flex-1 overflow-y-auto">
+                  <div className="max-w-4xl mx-auto">
+                    {initiated && error && (
+                      <div className="text-center py-8">
+                        <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
+                      </div>
+                    )}
+                    <UpcomingContent
+                      upcomingTasks={upcomingTasks}
+                      taskGroupsWithLabels={taskGroupsWithLabels}
+                      isReady={isReady}
+                      effectiveMode="list"
+                      formatScheduledDate={formatScheduledDate}
+                      handleEditTask={handleEditTask}
+                      t={t}
+                      droppable={false}
+                    />
                   </div>
-
-                  {/* Upcoming Column */}
-                  <div className="w-1/3 flex flex-col overflow-hidden">
-                    <div className="px-4 py-3 flex-shrink-0">
-                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                        {t("upcoming")}
-                      </h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      {initiated && error && (
-                        <div className="text-center py-8">
-                          <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-                        </div>
-                      )}
-                      <UpcomingContent
-                        upcomingTasks={upcomingTasks}
-                        taskGroupsWithLabels={taskGroupsWithLabels}
-                        isReady={isReady}
-                        effectiveMode="list"
-                        formatScheduledDate={formatScheduledDate}
-                        handleEditTask={handleEditTask}
-                        t={t}
-                        droppable={false}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Inbox Column */}
-                  <div className="w-1/3 flex flex-col overflow-hidden">
-                    <div className="px-4 py-3 flex-shrink-0">
-                      <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                        {t("inbox") || "Inbox"}
-                      </h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      <DroppableInboxSidebar
-                        inboxTasks={inboxTasks}
-                        inboxInitiated={inboxInitiated}
-                        handleEditTask={handleEditTask}
-                        t={t}
-                      />
-                    </div>
-                  </div>
-                </>
+                </div>
               ) : (
                 <>
                   {/* Week View: Main content + Inbox sidebar */}
@@ -556,84 +501,30 @@ export default function Tasks() {
     );
   }
 
-  // Mobile: tabbed view
-  const mobileTabs = (
-    <div className="sticky top-0 z-10 flex border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-      <button
-        onClick={() => setActiveTab("today")}
-        className={[
-          "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors border-b-2",
-          activeTab === "today"
-            ? "border-[var(--hvsna-primary-color)] text-[var(--hvsna-primary-color)]"
-            : "border-transparent text-gray-500 dark:text-gray-400",
-        ].join(" ")}
-      >
-        <HvCalendar className="size-4" />
-        {t("today")}
-      </button>
-      <button
-        onClick={() => setActiveTab("upcoming")}
-        className={[
-          "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors border-b-2",
-          activeTab === "upcoming"
-            ? "border-[var(--hvsna-primary-color)] text-[var(--hvsna-primary-color)]"
-            : "border-transparent text-gray-500 dark:text-gray-400",
-        ].join(" ")}
-      >
-        <HvCalendarMonth className="size-4" />
-        {t("upcoming")}
-      </button>
-      <button
-        onClick={() => setActiveTab("inbox")}
-        className={[
-          "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium transition-colors border-b-2",
-          activeTab === "inbox"
-            ? "border-[var(--hvsna-primary-color)] text-[var(--hvsna-primary-color)]"
-            : "border-transparent text-gray-500 dark:text-gray-400",
-        ].join(" ")}
-      >
-        <HvOutlineInbox className="size-4" />
-        {t("inbox") || "Unscheduled"}
-      </button>
-    </div>
-  );
-
   return (
     <Page
       navbar={
         <Navbar
           showBackButton={false}
-          title={t("tasks")}
+          title={t("upcoming")}
           rightAction={navbarActions}
         />
       }
     >
-      {mobileTabs}
-      {activeTab === "today" && <TodayContent />}
-      {initiated && error && activeTab === "upcoming" && (
+      {initiated && error && (
         <div className="text-center py-8">
           <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
         </div>
       )}
-      {activeTab === "upcoming" && (
-        <UpcomingContent
-          upcomingTasks={upcomingTasks}
-          taskGroupsWithLabels={taskGroupsWithLabels}
-          isReady={isReady}
-          effectiveMode="list"
-          formatScheduledDate={formatScheduledDate}
-          handleEditTask={handleEditTask}
-          t={t}
-        />
-      )}
-      {activeTab === "inbox" && (
-        <InboxContent
-          inboxTasks={inboxTasks}
-          inboxInitiated={inboxInitiated}
-          handleEditTask={handleEditTask}
-          t={t}
-        />
-      )}
+      <UpcomingContent
+        upcomingTasks={upcomingTasks}
+        taskGroupsWithLabels={taskGroupsWithLabels}
+        isReady={isReady}
+        effectiveMode="list"
+        formatScheduledDate={formatScheduledDate}
+        handleEditTask={handleEditTask}
+        t={t}
+      />
     </Page>
   );
 }

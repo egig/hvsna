@@ -119,7 +119,7 @@ export interface TrackerUpdateInput {
 
 export class TrackerLog {
   id?: string;
-  trackerId?: string;
+  recurringTaskId?: string; // Renamed from trackerId to link to RecurringTask
   value?: number;
   valueBool?: boolean;
   note?: string;
@@ -129,7 +129,7 @@ export class TrackerLog {
 }
 
 export interface TrackerLogCreateInput {
-  trackerId: string;
+  recurringTaskId: string; // Renamed from trackerId to link to RecurringTask
   value?: number;
   valueBool?: boolean;
   note?: string;
@@ -145,7 +145,7 @@ export interface TrackerLogUpdateInput {
 }
 
 export interface TrackerQuery {
-  trackerId?: string;
+  recurringTaskId?: string; // Renamed from trackerId to link to RecurringTask
 }
 
 // ---------- Evaluation Result ----------

@@ -1,4 +1,5 @@
 import type { PrayerTime, TaskRepeat } from "./types";
+import type { InputMode, EvaluationConfig } from "../../domain/tracker/ITrackerRepository";
 
 export interface RecurringTask {
   id: string;
@@ -22,6 +23,12 @@ export interface RecurringTask {
   repeatEndOccurrences?: number; // used when repeatEnd = "after_occurrences"
   created_at?: number;
   updated_at?: number;
+  asTracker?: boolean; // If true, this is a tracker task with logging capabilities
+  inputMode?: InputMode; // "toggle" | "add" | "set" — only when asTracker is true
+  unit?: string; // Unit for tracker values (e.g., "cups", "kg") — only when asTracker is true
+  target?: string; // Target value for tracking goals
+  period?: string; // Period for evaluation: "day" | "week" | "month"
+  evaluations?: EvaluationConfig[]; // Evaluation configs for future Stage 6
 }
 
 export interface RecurringTaskCreateInput {
@@ -43,6 +50,12 @@ export interface RecurringTaskCreateInput {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndDate?: string;
   repeatEndOccurrences?: number;
+  asTracker?: boolean;
+  inputMode?: InputMode;
+  unit?: string;
+  target?: string;
+  period?: string;
+  evaluations?: EvaluationConfig[];
 }
 
 export interface RecurringTaskUpdateInput {
@@ -63,6 +76,12 @@ export interface RecurringTaskUpdateInput {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndDate?: string;
   repeatEndOccurrences?: number;
+  asTracker?: boolean;
+  inputMode?: InputMode;
+  unit?: string;
+  target?: string;
+  period?: string;
+  evaluations?: EvaluationConfig[];
 }
 
 export interface RecurringTaskChange {

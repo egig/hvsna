@@ -36,11 +36,28 @@ interface TaskContextType {
   reset: () => void;
   generateOccurrencesForTemplate: (template: RecurringTask) => Promise<void>;
 
+  // Tracker log modal state
+  trackerLogTask: {
+    taskId: string;
+    taskName: string;
+    inputMode: "toggle" | "add" | "set";
+    unit?: string;
+    recurringTaskId: string;
+  } | null;
+  setTrackerLogTask: (task: {
+    taskId: string;
+    taskName: string;
+    inputMode: "toggle" | "add" | "set";
+    unit?: string;
+    recurringTaskId: string;
+  } | null) => void;
+  submitTrackerLog: (log: { value: number; note?: string; occurredAt: number }) => Promise<void>;
+
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
   openCreateTaskForm: (options?: { projectId?: string }) => void;
-  openEditTaskForm: (taskId: string, options?: { listId?: string }) => void;
+  openEditTaskForm: (taskId: string, options?: { projectId?: string }) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;
   preselectedListId: string | null;
@@ -68,6 +85,15 @@ export const TaskProvider: React.FC<{
   const [preselectedListId, setPreselectedListId] = useState<string | null>(
     null
   );
+
+  // Tracker log modal state
+  const [trackerLogTask, setTrackerLogTask] = useState<{
+    taskId: string;
+    taskName: string;
+    inputMode: "toggle" | "add" | "set";
+    unit?: string;
+    recurringTaskId: string;
+  } | null>(null);
 
   useEffect(() => {
     if (taskId) {
@@ -109,15 +135,15 @@ export const TaskProvider: React.FC<{
   };
 
   // Local form functions
-  const openCreateTaskForm = (options?: { listId?: string }) => {
+  const openCreateTaskForm = (options?: { projectId?: string }) => {
     setEditingTaskId(null);
-    setPreselectedListId(options?.listId || null);
+    setPreselectedListId(options?.projectId || null);
     setFormOpen(true);
   };
 
-  const openEditTaskForm = (taskId: string, options?: { listId?: string }) => {
+  const openEditTaskForm = (taskId: string, options?: { projectId?: string }) => {
     setEditingTaskId(taskId);
-    setPreselectedListId(options?.listId || null);
+    setPreselectedListId(options?.projectId || null);
     setFormOpen(true);
   };
 
@@ -125,6 +151,55 @@ export const TaskProvider: React.FC<{
     setEditingTaskId(null);
     setPreselectedListId(null);
     setFormOpen(false);
+  };
+
+  const submitTrackerLog = async (log: { value: number; note?: string; occurredAt: number }) => {
+    if (!trackerLogTask) return;
+
+    try {
+      // Create a TrackerLog entry
+      const trackerLogDoc = {
+        _id: `tlog_${crypto.randomUUID()}`,
+        recurringTaskId: trackerLogTask.recurringTaskId,
+        value: log.value,
+        note: log.note,
+        occurredAt: log.occurredAt,
+        createdAt: Date.now(),
+      };
+
+      await db.put(trackerLogDoc);
+
+      // Update the task status to 2 (logged) and add log entry
+      const currentTask = await taskUseCases.getTaskById(trackerLogTask.taskId);
+      if (currentTask) {
+        const newLogEntry = {
+          value: log.value,
+          note: log.note,
+          occurredAt: log.occurredAt,
+        };
+
+        const existingLogEntries = currentTask.logEntries || [];
+        await taskUseCases.updateTask(trackerLogTask.taskId, {
+          status: 2,
+          logEntries: [...existingLogEntries, newLogEntry],
+        });
+      }
+
+      // Cancel reminders for tracker tasks
+      if (settings.notifications) {
+        try {
+          await ReminderService.cancelTaskReminders(trackerLogTask.taskId);
+        } catch (error) {
+          logger.error("Failed to cancel task reminders:", error);
+        }
+      }
+
+      invalidateTaskQueries();
+      setTrackerLogTask(null);
+    } catch (error) {
+      logger.error("Failed to submit tracker log:", error);
+      throw error;
+    }
   };
 
   const updateTaskWithLog = async (
@@ -141,7 +216,33 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for completing tasks
   const completeTaskMutation = useMutation({
-    mutationFn: (id: string) => taskUseCases.completeTask(id),
+    mutationFn: async (id: string) => {
+      // Check if this is a tracker task
+      const currentTask = await taskUseCases.getTaskById(id);
+      if (currentTask?.recurringTaskId) {
+        // Load the parent template to check if it's a tracker
+        try {
+          const templateDoc = await db.get(currentTask.recurringTaskId);
+          const template = templateDoc as unknown as RecurringTask;
+          if (template?.asTracker) {
+            // This is a tracker task - open log modal instead of completing
+            setTrackerLogTask({
+              taskId: id,
+              taskName: currentTask.name || "",
+              inputMode: template.inputMode || "toggle",
+              unit: template.unit,
+              recurringTaskId: currentTask.recurringTaskId,
+            });
+            return currentTask; // Return without completing
+          }
+        } catch (err) {
+          logger.error("Failed to load recurring task template:", err);
+          // Fall through to normal completion if template not found
+        }
+      }
+      // Normal task completion
+      return taskUseCases.completeTask(id);
+    },
     onSuccess: async (updatedTask: Task, id) => {
       // Cancel reminders when task is completed
       if (settings.notifications) {
@@ -314,6 +415,9 @@ export const TaskProvider: React.FC<{
     reset: () => setTask(null),
     generateOccurrencesForTemplate: (template: RecurringTask) =>
       generateOccurrencesMutation.mutateAsync(template),
+    trackerLogTask,
+    setTrackerLogTask,
+    submitTrackerLog,
     editingTaskId,
     formOpen,
     openCreateTaskForm,

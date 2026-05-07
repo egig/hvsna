@@ -44,7 +44,6 @@ export const useTaskForm = (
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { projects } = useProjects();
-  const { db } = usePouchDB();
   const { createRecurringTask } = useRecurringTasks();
 
   // Use useHijriDate hook instead of manual settings extraction
@@ -73,6 +72,9 @@ export const useTaskForm = (
       endOccurrences: 1,
     },
     tags: [],
+    asTracker: false,
+    inputMode: undefined,
+    unit: undefined,
   });
 
   // Helper functions for updating state
@@ -93,6 +95,13 @@ export const useTaskForm = (
       repeat: { ...prev.repeat, ...updates },
     }));
   };
+
+  // Set repeat to daily when asTracker is enabled
+  useEffect(() => {
+    if (formData.asTracker && formData.repeat.repeat === "none") {
+      updateRepeatConfig({ repeat: "daily" });
+    }
+  }, [formData.asTracker]);
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const taskData = Object.fromEntries(submittedFormData) as unknown as {
@@ -121,6 +130,8 @@ export const useTaskForm = (
       const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
 
+      console.log("taskData", taskData)
+
       if (isRecurring && taskData.atDateHijri) {
         // Create a RecurringTask template, then generate all instances
         const template = await createRecurringTask({
@@ -141,6 +152,11 @@ export const useTaskForm = (
           repeatEnd: formData.repeat.end,
           repeatEndDate: formData.repeat.endDate as string,
           repeatEndOccurrences: formData.repeat.endOccurrences,
+          asTracker: formData.asTracker,
+          inputMode: formData.inputMode,
+          unit: formData.unit,
+          target: formData.target,
+          period: formData.period,
         });
 
         await generateOccurrencesForTemplate(template);

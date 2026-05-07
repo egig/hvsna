@@ -23,8 +23,10 @@ import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
 import ProjectDetail from "./modules/task/project-detail";
-import Tasks from "./modules/task/tasks";
+import Tasks from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
+import { Inbox } from "./modules/task/inbox";
+import { Insight } from "./modules/task/insight";
 import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
 import SignInPage from "./modules/auth/pages/signin";
@@ -34,8 +36,6 @@ import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import Browse from "./modules/task/browse";
 import TagManagementPage from "./modules/task/tag-management-page";
-import Tracks from "./modules/tracker/tracks";
-import TrackerDetail from "./modules/tracker/tracker-detail";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -96,15 +96,16 @@ export const AppRoutes = () => {
               </OnboardingGuard>
             }
           >
-            <Route index element={<Navigate to="/tasks" replace />} />
+            <Route index element={<Navigate to="/today" replace />} />
             <Route path="search" element={<Search />} />
-            <Route path="tasks" element={<Tasks />} />
+            <Route path="today" element={<Today />} />
+            <Route path="upcoming" element={<Tasks />} />
+            <Route path="inbox" element={<Inbox />} />
+            <Route path="insight" element={<Insight />} />
             {!isDesktop && <Route path="projects" element={<Browse />} />}
             {!isDesktop && (
               <Route path="tags" element={<TagManagementPage />} />
             )}
-            <Route path="tracks" element={<Tracks />} />
-            <Route path="tracks/:id" element={<TrackerDetail />} />
             <Route path="project/:projectId" element={<ProjectDetail />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}

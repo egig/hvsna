@@ -51,6 +51,10 @@ export function TaskListItem({
         return (
           <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
         );
+      case 2:
+        return (
+          <HvCheckSquare2 strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />
+        );
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
       default:
@@ -62,6 +66,8 @@ export function TaskListItem({
     switch (status) {
       case 1:
         return "line-through text-gray-400";
+      case 2:
+        return "text-[var(--hvsna-primary-color)]"; // Logged (tracker) - color change, no strikethrough
       case 0:
         return "text-gray-800";
       default:

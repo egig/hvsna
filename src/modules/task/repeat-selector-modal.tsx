@@ -30,6 +30,7 @@ interface RepeatSelectorModalProps {
   repeatEndDate?: string | null;
   repeatEndOccurrences?: number;
   onSelectEndDate: () => void;
+  forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
 }
 
 const REPEAT_UNITS: { value: TaskRepeat; labelKey: string }[] = [
@@ -74,6 +75,7 @@ export function RepeatSelectorModal({
   repeatEndDate = null,
   repeatEndOccurrences: repeatEndOccurrencesProp = 1,
   onSelectEndDate,
+  forceRepeat = false,
 }: RepeatSelectorModalProps) {
   const { t } = useLanguageContext();
 
@@ -306,15 +308,17 @@ export function RepeatSelectorModal({
       </div>
 
       {/* Remove repeat */}
-      <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-        <button
-          type="button"
-          onClick={() => handlePresetTap("none")}
-          className="w-full px-4 py-3 text-red-600 hover:text-red-700 transition-colors text-sm font-medium"
-        >
-          {t("no_repeat")}
-        </button>
-      </div>
+      {!forceRepeat && (
+        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <button
+            type="button"
+            onClick={() => handlePresetTap("none")}
+            className="w-full px-4 py-3 text-red-600 hover:text-red-700 transition-colors text-sm font-medium"
+          >
+            {t("no_repeat")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

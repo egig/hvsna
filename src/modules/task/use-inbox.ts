@@ -7,8 +7,6 @@ import { queryKeys } from "../query-keys";
 import type { Task } from "../task/types";
 
 export function useInbox() {
-  const { dayNames, hijriMonthNames, gregorianMonthNames } =
-    useDateTranslationHelper();
   const {
     getToday,
     formatDate,
@@ -28,7 +26,7 @@ export function useInbox() {
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
-  const pageTitle = "Unscheduled";
+  const pageTitle = "Inbox";
   const subTitle = formatDate(today, "full");
 
   // Combine loading states

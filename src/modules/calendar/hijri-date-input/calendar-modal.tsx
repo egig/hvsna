@@ -34,6 +34,7 @@ interface CalendarModalProps {
   selectedRepeatEnd?: RepeatEnd;
   selectedRepeatEndDate?: string | null;
   selectedRepeatEndOccurrences?: number;
+  forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onConfirm: (
     date: HijriDate | null,
     time: string | null,
@@ -74,6 +75,7 @@ export function CalendarModal({
   selectedRepeatEnd = "never",
   selectedRepeatEndDate = null,
   selectedRepeatEndOccurrences = 1,
+  forceRepeat = false,
   onConfirm,
 }: CalendarModalProps) {
   const { t, language } = useLanguageContext();
@@ -574,6 +576,7 @@ export function CalendarModal({
           repeatEnd={tempRepeatEnd}
           repeatEndDate={tempRepeatEndDate}
           repeatEndOccurrences={tempRepeatEndOccurrences}
+          forceRepeat={forceRepeat}
           onBack={() => setView("date")}
           onSelectEndDate={() => setView("repeat_end_date")}
           onConfirm={(repeat, interval, repeatEnd, endDate, endOccurrences) => {

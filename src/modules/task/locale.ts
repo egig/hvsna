@@ -624,4 +624,72 @@ export const taskTranslations = {
     en: "ago",
     id: "yang lalu",
   },
+
+  // Project health card
+  no_tasks: {
+    en: "No tasks",
+    id: "Tidak ada tugas",
+  },
+  healthy: {
+    en: "Healthy",
+    id: "Sehat",
+  },
+  at_risk: {
+    en: "At Risk",
+    id: "Berisiko",
+  },
+  critical: {
+    en: "Critical",
+    id: "Kritis",
+  },
+  eval_passing: {
+    en: "evals passing",
+    id: "eval berhasil",
+  },
+  failing: {
+    en: "failing",
+    id: "gagal",
+  },
+  pending_eval: {
+    en: "eval pending",
+    id: "eval tertunda",
+  },
+
+  // Tracker log modal
+  log_tracker: {
+    en: "Log Tracker",
+    id: "Catat Pelacak",
+  },
+  log_for: {
+    en: "Log for",
+    id: "Catat untuk",
+  },
+  amount_to_add: {
+    en: "Amount to add",
+    id: "Jumlah yang ditambahkan",
+  },
+  current_value: {
+    en: "Current value",
+    id: "Nilai saat ini",
+  },
+  note_optional: {
+    en: "Note (optional)",
+    id: "Catatan (opsional)",
+  },
+  add_a_note: {
+    en: "Add a note...",
+    id: "Tambahkan catatan...",
+  },
+  log: {
+    en: "Log",
+    id: "Catat",
+  },
+  yes: {
+    en: "Yes",
+    id: "Ya",
+  },
+  no: {
+    en: "No",
+    id: "Tidak",
+  },
 };

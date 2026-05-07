@@ -12,6 +12,7 @@ import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
 import { useProjectContext } from "./modules/task/project-context";
 import ProjectFormContainer from "./modules/task/project-form-container";
+import { TrackerLogModal } from "./modules/task/tracker-log-modal";
 
 interface MobileLayoutProps {
   formOpen: boolean;
@@ -36,6 +37,8 @@ function MobileLayout({
   location,
   params,
 }: MobileLayoutProps) {
+  const { trackerLogTask, setTrackerLogTask, submitTrackerLog } = useTaskContext();
+
   return (
     <div className="h-[100dvh] flex flex-col">
       <div className="flex-1 overflow-hidden">
@@ -43,7 +46,7 @@ function MobileLayout({
       </div>
 
       {/* Task FAB */}
-      {["tasks", "today"].indexOf(location?.state?.context) != -1 && (
+      {["today", "upcoming"].indexOf(location?.state?.context) != -1 && (
         <button
           onClick={() =>
             openCreateTaskForm({
@@ -76,12 +79,22 @@ function MobileLayout({
       <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
         <ProjectFormContainer />
       </Modal>
+
+      {/* Tracker Log Modal */}
+      <TrackerLogModal
+        isOpen={!!trackerLogTask}
+        onClose={() => setTrackerLogTask(null)}
+        onSubmit={submitTrackerLog}
+        taskName={trackerLogTask?.taskName || ""}
+        inputMode={trackerLogTask?.inputMode || "toggle"}
+        unit={trackerLogTask?.unit}
+      />
     </div>
   );
 }
 
 export default function TabLayout() {
-  const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm } =
+  const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm, trackerLogTask, setTrackerLogTask, submitTrackerLog } =
     useTaskContext();
   const { formOpen: projectFormOpen, closeProjectForm } = useProjectContext();
   const location = useLocation();
@@ -149,6 +162,16 @@ export default function TabLayout() {
             <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
               <ProjectFormContainer />
             </Modal>
+
+            {/* Tracker Log Modal */}
+            <TrackerLogModal
+              isOpen={!!trackerLogTask}
+              onClose={() => setTrackerLogTask(null)}
+              onSubmit={submitTrackerLog}
+              taskName={trackerLogTask?.taskName || ""}
+              inputMode={trackerLogTask?.inputMode || "toggle"}
+              unit={trackerLogTask?.unit}
+            />
           </div>
         </Allotment.Pane>
       </Allotment>

@@ -7,10 +7,12 @@ import {
   HvChartAreaFilled,
   HvSettings,
   HvSettingsFilled,
-  HvProjectOutline,
-  HvProjectFilled,
-  HvSquareCheck,
-  HvSquareCheckFilled,
+  HvCalendarFilled,
+  HvCalendarMonth,
+  HvCalendarMonthFilled,
+  HvOutlineInbox,
+  HvHiInbox,
+  HvCalendar,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -20,32 +22,32 @@ export function TabBar() {
 
   const tabs = [
     {
-      path: "/tasks",
-      label: t("tasks"),
-      icon: <HvSquareCheck />,
-      activeIcon: <HvSquareCheckFilled />,
-      context: "tasks",
+      path: "/today",
+      label: t("today"),
+      icon: <HvCalendar />,
+      activeIcon: <HvCalendarFilled />,
+      context: "today",
     },
     {
-      path: "/tracks",
-      label: t("tracks") || "Tracks",
+      path: "/upcoming",
+      label: t("upcoming"),
+      icon: <HvCalendarMonth />,
+      activeIcon: <HvCalendarMonthFilled />,
+      context: "upcoming",
+    },
+    {
+      path: "/inbox",
+      label: t("inbox") || "Inbox",
+      icon: <HvOutlineInbox />,
+      activeIcon: <HvHiInbox />,
+      context: "inbox",
+    },
+    {
+      path: "/insight",
+      label: t("insight") || "Insight",
       icon: <HvChartArea />,
       activeIcon: <HvChartAreaFilled />,
-      context: "tracks",
-    },
-    {
-      path: "/projects",
-      label: t("projects") || "Projects",
-      icon: <HvProjectOutline />,
-      activeIcon: <HvProjectFilled />,
-      context: "projects",
-    },
-    {
-      path: "/settings",
-      label: t("settings") || "Settings",
-      icon: <HvSettings />,
-      activeIcon: <HvSettingsFilled />,
-      context: "settings",
+      context: "insight",
     },
   ];
 
