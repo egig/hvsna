@@ -570,4 +570,58 @@ export const taskTranslations = {
     en: "{count} tasks",
     id: "{count} tugas",
   },
+
+  // Project tracker evaluations
+  linked_evaluations: {
+    en: "Linked Evaluations",
+    id: "Evaluasi Tertaut",
+  },
+  link: {
+    en: "Link",
+    id: "Tautkan",
+  },
+  no_linked_evaluations: {
+    en: "No tracker evaluations linked. Tap + to link one.",
+    id: "Tidak ada evaluasi pelacak yang tertaut. Ketuk + untuk menautkan.",
+  },
+  select_tracker: {
+    en: "Select Tracker",
+    id: "Pilih Pelacak",
+  },
+  select_evaluations: {
+    en: "Select Evaluations",
+    id: "Pilih Evaluasi",
+  },
+  no_trackers: {
+    en: "No trackers available",
+    id: "Tidak ada pelacak tersedia",
+  },
+  already_linked: {
+    en: "already linked",
+    id: "sudah tertaut",
+  },
+  no_evaluations_in_tracker: {
+    en: "No evaluations in this tracker",
+    id: "Tidak ada evaluasi di pelacak ini",
+  },
+  link_selected: {
+    en: "Link",
+    id: "Tautkan",
+  },
+  last_log: {
+    en: "Last log",
+    id: "Catatan terakhir",
+  },
+  remove: {
+    en: "Remove",
+    id: "Hapus",
+  },
+  back: {
+    en: "Back",
+    id: "Kembali",
+  },
+  ago: {
+    en: "ago",
+    id: "yang lalu",
+  },
 };

@@ -5,6 +5,7 @@ import { useTrackers } from "./use-trackers";
 import { useTrackerLogs } from "./use-tracker-logs";
 import { useTrackerEvaluations } from "./use-tracker-evaluations";
 import { useTrackerEvaluationResult } from "./use-tracker-evaluation-result";
+import { EvaluationResultBadge } from "./evaluation-result-badge";
 import { TrackerProvider, useTrackerContext } from "./tracker-context";
 import { TrackerForm } from "./tracker-form";
 import { TrackerEvaluationForm } from "./tracker-evaluation-form";
@@ -247,10 +248,8 @@ function EvaluationCard({
     Date.now()
   );
 
-  const value = result?.value;
   const success = result?.success;
   const metric = result?.metric;
-  const target = result?.target;
 
   return (
     <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-900">
@@ -295,18 +294,7 @@ function EvaluationCard({
         </div>
       </div>
 
-      {value !== undefined && (
-        <div className="flex items-baseline gap-2 mt-1">
-          <span className="text-lg font-bold text-gray-900 dark:text-white">
-            {value}
-          </span>
-          {target !== undefined && (
-            <span className="text-xs text-gray-400">
-              {evaluation.operator} {target}
-            </span>
-          )}
-        </div>
-      )}
+      <EvaluationResultBadge result={result || null} operator={evaluation.operator} />
     </div>
   );
 }

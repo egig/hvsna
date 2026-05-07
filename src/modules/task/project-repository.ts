@@ -15,6 +15,7 @@ class PouchDBProjectDocument {
   description?: string;
   color?: string = "#3B82F6";
   icon?: string = "project";
+  trackerEvaluationRefs?: any[];
   createdAt: number = new Date().valueOf();
   updatedAt: number = new Date().valueOf();
 
@@ -29,6 +30,7 @@ class PouchDBProjectDocument {
       name: this.name || "",
       description: this.description || "",
       color: this.color || "#3B82F6",
+      trackerEvaluationRefs: this.trackerEvaluationRefs,
       // icon: this.icon || "project",
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
@@ -69,6 +71,7 @@ export class ProjectRepository {
       name: input.name,
       description: input.description,
       color: input.color || "#3B82F6",
+      trackerEvaluationRefs: input.trackerEvaluationRefs,
       createdAt: now,
       updatedAt: now,
     });

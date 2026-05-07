@@ -122,6 +122,7 @@ export class Project {
   name?: string;
   description?: string;
   color?: string;
+  trackerEvaluationRefs?: TrackerEvaluationRef[];
   createdAt?: number;
   updatedAt?: number;
 
@@ -134,12 +135,14 @@ export interface ProjectCreateInput {
   name: string;
   description?: string;
   color?: string;
+  trackerEvaluationRefs?: TrackerEvaluationRef[];
 }
 
 export interface ProjectUpdateInput {
   name?: string;
   description?: string;
   color?: string;
+  trackerEvaluationRefs?: TrackerEvaluationRef[];
 }
 
 export interface ProjectChange {
@@ -148,6 +151,11 @@ export interface ProjectChange {
   type: "create" | "update" | "delete";
   timestamp: Date;
   data: Project | ProjectUpdateInput;
+}
+
+export interface TrackerEvaluationRef {
+  trackerId: string;
+  evaluationId: string;
 }
 
 export type ProjectQuery = {

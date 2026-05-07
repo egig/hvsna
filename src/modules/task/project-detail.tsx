@@ -1,6 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router";
-import { HvList, HvEdit2, HvTrash2, HvMoreVertical } from "@/modules/icons";
+import {
+  HvList,
+  HvEdit2,
+  HvTrash2,
+  HvMoreVertical,
+  HvPlus,
+} from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -9,7 +15,9 @@ import { useProjectTasks } from "./use-project-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useProjectContext } from "./project-context";
 import { DeleteProjectModal } from "./delete-project-modal";
-import type { Project, Task } from "./types";
+import { ProjectEvaluationCard } from "./project-evaluation-card";
+import { ProjectEvaluationPicker } from "./project-evaluation-picker";
+import type { Project, Task, TrackerEvaluationRef } from "./types";
 import TaskListItem from "./task-list-item";
 import { useTaskContext } from "./task-context";
 import { useScreenSize } from "../system";
@@ -27,6 +35,7 @@ export default function ProjectDetail() {
     loading: listsLoading,
     error: listsError,
     getProject,
+    updateProject,
     deleteProject,
     updating: isUpdatingProject,
   } = useProjects();
@@ -40,6 +49,7 @@ export default function ProjectDetail() {
 
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const handleEditProject = () => {
     if (currentProject) {
@@ -66,6 +76,36 @@ export default function ProjectDetail() {
       navigate("/browse");
     }
   };
+
+  const handleAddRefs = useCallback(
+    async (newRefs: TrackerEvaluationRef[]) => {
+      if (!currentProject?.id) return;
+      const currentRefs = currentProject.trackerEvaluationRefs || [];
+      const merged = [...currentRefs, ...newRefs];
+      await updateProject(currentProject.id, {
+        trackerEvaluationRefs: merged,
+      });
+      // Refresh project data
+      const updated = await getProject(currentProject.id);
+      if (updated) setCurrentProject(updated);
+    },
+    [currentProject, updateProject, getProject]
+  );
+
+  const handleRemoveRef = useCallback(
+    async (index: number) => {
+      if (!currentProject?.id) return;
+      const currentRefs = currentProject.trackerEvaluationRefs || [];
+      const filtered = currentRefs.filter((_, i) => i !== index);
+      await updateProject(currentProject.id, {
+        trackerEvaluationRefs: filtered,
+      });
+      // Refresh project data
+      const updated = await getProject(currentProject.id);
+      if (updated) setCurrentProject(updated);
+    },
+    [currentProject, updateProject, getProject]
+  );
 
   // Load list details
   useEffect(() => {
@@ -165,10 +205,45 @@ export default function ProjectDetail() {
       }
     >
       {currentProject.description && (
-        <div className="px-4 py-2 border-b border-gray-200">
-          <p className="text-gray-600 text-sm">{currentProject.description}</p>
+        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
+            {currentProject.description}
+          </p>
         </div>
       )}
+
+      {/* Evaluation Dashboard */}
+      <div className="px-4 pt-4 pb-2">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            {t("linked_evaluations") || "Linked Evaluations"}
+          </span>
+          <button
+            onClick={() => setPickerOpen(true)}
+            className="flex items-center gap-1 text-xs text-[var(--hvsna-primary-color)] font-medium"
+          >
+            <HvPlus size={14} />
+            {t("link") || "Link"}
+          </button>
+        </div>
+
+        {(currentProject.trackerEvaluationRefs || []).length === 0 ? (
+          <p className="text-xs text-gray-400 dark:text-gray-500 py-2">
+            {t("no_linked_evaluations") ||
+              "No tracker evaluations linked. Tap + to link one."}
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {(currentProject.trackerEvaluationRefs || []).map((ref, index) => (
+              <ProjectEvaluationCard
+                key={`${ref.trackerId}-${ref.evaluationId}`}
+                ref={ref}
+                onRemove={() => handleRemoveRef(index)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       {tasksLoading && (
         <div className="flex justify-center items-center h-32">
@@ -217,6 +292,14 @@ export default function ProjectDetail() {
         onConfirm={confirmDeleteProject}
         projectName={currentProject?.name || ""}
         tasks={tasks}
+      />
+
+      {/* Evaluation Picker */}
+      <ProjectEvaluationPicker
+        isOpen={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onConfirm={handleAddRefs}
+        existingRefs={currentProject.trackerEvaluationRefs || []}
       />
     </Page>
   );

@@ -167,24 +167,6 @@ export function createEvaluation<T extends InputMode>(
   return config;
 }
 
-// Legacy types (kept for backward compat during migration)
-/** @deprecated Use EvaluationConfig */
-export interface TrackerEvaluation {
-  id?: string;
-  trackerId: string;
-  name: string;
-  type: "consistency" | "progress";
-  period: "daily" | "weekly" | "monthly";
-  condition: "count" | "build_up" | "cut_down" | "range";
-  startingValue?: number;
-  targetValue?: number;
-  targetMin?: number;
-  targetMax?: number;
-  startAt?: number;
-  endAt?: number;
-  createdAt?: number;
-  updatedAt?: number;
-}
 
 /** @deprecated */
 export type TrackerFrequency = "daily" | "weekly" | "monthly";
