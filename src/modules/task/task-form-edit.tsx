@@ -237,7 +237,10 @@ export default function TaskFormEdit({
               {t("tracker_type") || "Type"}
             </label>
             <div className="text-sm text-gray-900 dark:text-white">
-              {inputModeOptions.find((opt) => opt.value === formData.inputMode)?.label}
+              {
+                inputModeOptions.find((opt) => opt.value === formData.inputMode)
+                  ?.label
+              }
             </div>
           </div>
 
@@ -253,7 +256,9 @@ export default function TaskFormEdit({
                 updateFormData({ unit: e.target.value });
                 setIsFormDirty(true);
               }}
-              placeholder={t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."}
+              placeholder={
+                t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."
+              }
               disabled={isSubmitting}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
             />
@@ -271,7 +276,9 @@ export default function TaskFormEdit({
                 updateFormData({ target: e.target.value });
                 setIsFormDirty(true);
               }}
-              placeholder={t("tracker_target_placeholder") || "e.g. 8, 10000, 30..."}
+              placeholder={
+                t("tracker_target_placeholder") || "e.g. 8, 10000, 30..."
+              }
               disabled={isSubmitting}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
             />

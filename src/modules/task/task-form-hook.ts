@@ -130,7 +130,7 @@ export const useTaskForm = (
       const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
 
-      console.log("taskData", taskData)
+      console.log("taskData", taskData);
 
       if (isRecurring && taskData.atDateHijri) {
         // Create a RecurringTask template, then generate all instances

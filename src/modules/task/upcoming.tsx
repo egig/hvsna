@@ -350,8 +350,15 @@ export default function Tasks() {
   const isReady = initiated && !loading && !error;
   const navigate = useNavigate();
 
-  const navbarActions = isDesktop && (
+  const navbarActions = (
     <div className="flex items-center gap-1">
+      <button
+        onClick={() => navigate("/inbox")}
+        title={t("inbox") || "Inbox"}
+        className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <HvOutlineInbox className="size-4" />
+      </button>
       <button
         onClick={() => navigate("/search")}
         title={t("search")}
@@ -359,32 +366,34 @@ export default function Tasks() {
       >
         <HvSearch className="size-4" />
       </button>
-      <div className="flex gap-0.5">
-        <button
-          onClick={() => toggleMode("list")}
-          title="List view"
-          className={[
-            "p-1.5 rounded-md transition-colors",
-            effectiveMode === "list"
-              ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-              : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
-          ].join(" ")}
-        >
-          <HvLayoutList className="size-4" />
-        </button>
-        <button
-          onClick={() => toggleMode("week")}
-          title="Week view"
-          className={[
-            "p-1.5 rounded-md transition-colors",
-            effectiveMode === "week"
-              ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
-              : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
-          ].join(" ")}
-        >
-          <HvCalendarMonth className="size-4" />
-        </button>
-      </div>
+      {isDesktop && (
+        <div className="flex gap-0.5">
+          <button
+            onClick={() => toggleMode("list")}
+            title="List view"
+            className={[
+              "p-1.5 rounded-md transition-colors",
+              effectiveMode === "list"
+                ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
+            ].join(" ")}
+          >
+            <HvLayoutList className="size-4" />
+          </button>
+          <button
+            onClick={() => toggleMode("week")}
+            title="Week view"
+            className={[
+              "p-1.5 rounded-md transition-colors",
+              effectiveMode === "week"
+                ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+                : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
+            ].join(" ")}
+          >
+            <HvCalendarMonth className="size-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 

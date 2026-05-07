@@ -71,12 +71,18 @@ export const useTaskFormEdit = (
   const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
     useTaskContext();
   const { projects } = useProjects();
-  const { createRecurringTask, deleteRecurringTask, updateRecurringTask, getRecurringTask } =
-    useRecurringTasks();
+  const {
+    createRecurringTask,
+    deleteRecurringTask,
+    updateRecurringTask,
+    getRecurringTask,
+  } = useRecurringTasks();
   const { db } = usePouchDB();
 
   const [task, setTask] = useState<Task | null>(null);
-  const [parentTemplate, setParentTemplate] = useState<RecurringTask | null>(null);
+  const [parentTemplate, setParentTemplate] = useState<RecurringTask | null>(
+    null
+  );
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createHijriDate } = useHijriDate();

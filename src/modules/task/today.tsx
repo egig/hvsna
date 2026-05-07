@@ -30,12 +30,7 @@ interface TodayTasksProps {
 
 export function TodayContent() {
   const { t } = useLanguageContext();
-  const {
-    todayTasks,
-    todayCompletedTasks,
-    error,
-    initiated,
-  } = useToday();
+  const { todayTasks, todayCompletedTasks, error, initiated } = useToday();
   const { settings } = useSettings();
   const hasLocation = !!(
     settings.coordinate?.latitude && settings.coordinate?.longitude
@@ -78,13 +73,18 @@ export function TodayContent() {
 
 export function Today() {
   const { t } = useLanguageContext();
-  const {
-    pageTitle,
-    subTitle,
-  } = useToday();
+  const { pageTitle, subTitle } = useToday();
 
   return (
-    <Page navbarLarge={<LargeNavbar  showBackButton={false} title={pageTitle} subtitle={subTitle} />}>
+    <Page
+      navbarLarge={
+        <LargeNavbar
+          showBackButton={false}
+          title={pageTitle}
+          subtitle={subTitle}
+        />
+      }
+    >
       <TodayContent />
     </Page>
   );

@@ -122,11 +122,11 @@ export function DesktopSidebar({
       context: "inbox",
     },
     {
-      path: "/insight",
-      label: t("insight") || "Insight",
+      path: "/tracks",
+      label: t("tracks") || "Tracks",
       icon: <HvChartArea />,
       activeIcon: <HvChartAreaFilled />,
-      context: "insight",
+      context: "tracks",
     },
   ];
 
@@ -227,7 +227,9 @@ export function DesktopSidebar({
             <HvSquareRoundedPlusFilled />
           </span>
           {!collapsed && (
-            <span className="text-sm">{t("add_new_task") || "Add new task"}</span>
+            <span className="text-sm">
+              {t("add_new_task") || "Add new task"}
+            </span>
           )}
         </button>
         {mainTabs.map((tab) => {

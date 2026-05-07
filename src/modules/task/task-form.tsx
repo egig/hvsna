@@ -90,9 +90,13 @@ export default function TaskForm({
           type="button"
           onClick={() => updateFormData({ asTracker: !formData.asTracker })}
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            formData.asTracker ? "bg-[var(--hvsna-primary-color)]" : "bg-gray-300 dark:bg-gray-600"
+            formData.asTracker
+              ? "bg-[var(--hvsna-primary-color)]"
+              : "bg-gray-300 dark:bg-gray-600"
           }`}
-          aria-label={formData.asTracker ? "Disable tracker mode" : "Enable tracker mode"}
+          aria-label={
+            formData.asTracker ? "Disable tracker mode" : "Enable tracker mode"
+          }
         >
           <span
             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -130,7 +134,6 @@ export default function TaskForm({
         disabled={isSubmitting}
       />
 
-
       {/* Tracker fields - only visible when asTracker is true */}
       {formData.asTracker && (
         <>
@@ -166,7 +169,9 @@ export default function TaskForm({
               type="text"
               value={formData.unit || ""}
               onChange={(e) => updateFormData({ unit: e.target.value })}
-              placeholder={t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."}
+              placeholder={
+                t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."
+              }
               disabled={isSubmitting}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
             />
@@ -181,7 +186,9 @@ export default function TaskForm({
               type="number"
               value={formData.target || ""}
               onChange={(e) => updateFormData({ target: e.target.value })}
-              placeholder={t("tracker_target_placeholder") || "e.g. 8, 10000, 30..."}
+              placeholder={
+                t("tracker_target_placeholder") || "e.g. 8, 10000, 30..."
+              }
               disabled={isSubmitting}
               className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
             />
@@ -206,7 +213,7 @@ export default function TaskForm({
         </>
       )}
 
-      <div className="flex flex-wrap gap-3 px-4">
+      <div className="flex flex-wrap gap-3 px-4 py-2">
         {formData.asTracker ? (
           <DatePrayerInput
             hijriDate={formData.scheduleAt.dateHijri}

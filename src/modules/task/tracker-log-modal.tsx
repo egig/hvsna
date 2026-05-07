@@ -45,7 +45,9 @@ export function TrackerLogModal({
             type="button"
             onClick={() => setValueBool(!valueBool)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              valueBool ? "bg-[var(--hvsna-primary-color)]" : "bg-gray-300 dark:bg-gray-600"
+              valueBool
+                ? "bg-[var(--hvsna-primary-color)]"
+                : "bg-gray-300 dark:bg-gray-600"
             }`}
           >
             <span
@@ -71,7 +73,11 @@ export function TrackerLogModal({
             placeholder="0"
             className="w-24 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
           />
-          {unit && <span className="text-sm text-gray-500 dark:text-gray-400">{unit}</span>}
+          {unit && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {unit}
+            </span>
+          )}
         </div>
       );
     }
@@ -86,7 +92,11 @@ export function TrackerLogModal({
             placeholder="0"
             className="w-24 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
           />
-          {unit && <span className="text-sm text-gray-500 dark:text-gray-400">{unit}</span>}
+          {unit && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {unit}
+            </span>
+          )}
         </div>
       );
     }
@@ -102,16 +112,19 @@ export function TrackerLogModal({
     >
       <div className="flex flex-col gap-4 p-2">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          {t("log_for") || "Log for"}: <span className="font-medium text-gray-900 dark:text-gray-100">{taskName}</span>
+          {t("log_for") || "Log for"}:{" "}
+          <span className="font-medium text-gray-900 dark:text-gray-100">
+            {taskName}
+          </span>
         </div>
 
         <div>
           <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">
             {inputMode === "toggle"
-              ? (t("value") || "Value")
+              ? t("value") || "Value"
               : inputMode === "add"
-              ? (t("amount_to_add") || "Amount to add")
-              : (t("current_value") || "Current value")}
+              ? t("amount_to_add") || "Amount to add"
+              : t("current_value") || "Current value"}
           </label>
           {renderInput()}
         </div>

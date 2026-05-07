@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTrackers } from "./use-trackers";
-import type { InputMode, Tracker } from "../../domain/tracker/ITrackerRepository";
+import type {
+  InputMode,
+  Tracker,
+} from "../../domain/tracker/ITrackerRepository";
 import { HvX } from "../icons";
 
 interface TrackerFormProps {

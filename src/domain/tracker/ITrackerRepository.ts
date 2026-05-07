@@ -167,7 +167,6 @@ export function createEvaluation<T extends InputMode>(
   return config;
 }
 
-
 /** @deprecated */
 export type TrackerFrequency = "daily" | "weekly" | "monthly";
 /** @deprecated */

@@ -28,7 +28,8 @@ export function TaskListItem({
   showDateTime = false,
   formatDate,
 }: TaskListItemProps) {
-  const { completeTask, reopenTask } = useTaskListItem();
+  const { completeTask, reopenTask, checkAndHandleTrackerTask } =
+    useTaskListItem();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
@@ -53,7 +54,11 @@ export function TaskListItem({
         );
       case 2:
         return (
-          <HvCheckSquare2 strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />
+          <HvCheckSquare2
+            strokeWidth={1}
+            size={24}
+            className="text-[var(--hvsna-primary-color)]"
+          />
         );
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
@@ -133,13 +138,20 @@ export function TaskListItem({
     }
   };
 
-  const handleStatusClick = (e: React.MouseEvent) => {
+  const handleStatusClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     let updatePromise: Promise<Task>;
     let nextStatus: TaskStatus;
 
     if (task.status === 0) {
+      // Check if this is a tracker task before completing
+      const isTracker = await checkAndHandleTrackerTask(task);
+      if (isTracker) {
+        // Tracker modal opened, don't complete the task
+        return;
+      }
+
       // Complete the task
       updatePromise = completeTask(task.id as string);
       nextStatus = 1;

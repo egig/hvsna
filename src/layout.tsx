@@ -37,7 +37,8 @@ function MobileLayout({
   location,
   params,
 }: MobileLayoutProps) {
-  const { trackerLogTask, setTrackerLogTask, submitTrackerLog } = useTaskContext();
+  const { trackerLogTask, setTrackerLogTask, submitTrackerLog } =
+    useTaskContext();
 
   return (
     <div className="h-[100dvh] flex flex-col">
@@ -94,8 +95,15 @@ function MobileLayout({
 }
 
 export default function TabLayout() {
-  const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm, trackerLogTask, setTrackerLogTask, submitTrackerLog } =
-    useTaskContext();
+  const {
+    formOpen,
+    editingTaskId,
+    openCreateTaskForm,
+    closeTaskForm,
+    trackerLogTask,
+    setTrackerLogTask,
+    submitTrackerLog,
+  } = useTaskContext();
   const { formOpen: projectFormOpen, closeProjectForm } = useProjectContext();
   const location = useLocation();
   const params = useParams();

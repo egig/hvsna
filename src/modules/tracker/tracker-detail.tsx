@@ -294,7 +294,10 @@ function EvaluationCard({
         </div>
       </div>
 
-      <EvaluationResultBadge result={result || null} operator={evaluation.operator} />
+      <EvaluationResultBadge
+        result={result || null}
+        operator={evaluation.operator}
+      />
     </div>
   );
 }

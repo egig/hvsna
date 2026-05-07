@@ -37,14 +37,10 @@ export function EvaluationResultBadge({
       {isPass !== undefined && (
         <span
           className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-            isPass
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
+            isPass ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
           }`}
         >
-          {isPass
-            ? t("eval_pass") || "Pass"
-            : t("eval_fail") || "Fail"}
+          {isPass ? t("eval_pass") || "Pass" : t("eval_fail") || "Fail"}
         </span>
       )}
     </div>

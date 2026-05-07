@@ -387,10 +387,10 @@ export const commonTranslations = {
     id: "Tugas tanpa tanggal akan muncul di sini",
   },
 
-  // Insight
-  insight: {
-    en: "Insight",
-    id: "Wawasan",
+  // Tracks
+  tracks: {
+    en: "Tracks",
+    id: "Jejak",
   },
   no_trackers: {
     en: "No trackers",

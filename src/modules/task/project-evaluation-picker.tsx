@@ -2,7 +2,10 @@ import { useState, useMemo } from "react";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Modal } from "../navigation/modal";
 import { HvX } from "../icons";
-import type { Tracker, EvaluationConfig } from "../../domain/tracker/ITrackerRepository";
+import type {
+  Tracker,
+  EvaluationConfig,
+} from "../../domain/tracker/ITrackerRepository";
 import type { TrackerEvaluationRef } from "./types";
 
 interface ProjectEvaluationPickerProps {
@@ -34,7 +37,10 @@ function getMetricsForMode(mode: string, t: (key: string) => string) {
     { value: "min", label: t("metric_min") || "Min" },
     { value: "max", label: t("metric_max") || "Max" },
     { value: "trend", label: t("metric_trend") || "Trend" },
-    { value: "distribution", label: t("metric_distribution") || "Distribution" },
+    {
+      value: "distribution",
+      label: t("metric_distribution") || "Distribution",
+    },
   ];
 
   const SET_METRICS: { value: string; label: string }[] = [
@@ -46,7 +52,10 @@ function getMetricsForMode(mode: string, t: (key: string) => string) {
     { value: "max", label: t("metric_max") || "Max" },
     { value: "previous", label: t("metric_previous") || "Previous" },
     { value: "gap", label: t("metric_gap") || "Gap" },
-    { value: "distribution", label: t("metric_distribution") || "Distribution" },
+    {
+      value: "distribution",
+      label: t("metric_distribution") || "Distribution",
+    },
   ];
 
   if (mode === "toggle") return TOGGLE_METRICS;
@@ -88,7 +97,9 @@ export function ProjectEvaluationPicker({
 
   const [step, setStep] = useState<"tracker" | "evaluations">("tracker");
   const [selectedTracker, setSelectedTracker] = useState<Tracker | null>(null);
-  const [selectedEvalIds, setSelectedEvalIds] = useState<Set<string>>(new Set());
+  const [selectedEvalIds, setSelectedEvalIds] = useState<Set<string>>(
+    new Set()
+  );
 
   const existingKeys = useMemo(() => {
     return new Set(existingRefs.map((r) => `${r.trackerId}:${r.evaluationId}`));
@@ -153,17 +164,16 @@ export function ProjectEvaluationPicker({
           </button>
         </div>
 
-        
-
         {step === "evaluations" && selectedEvalIds.size > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800">
             <button
               onClick={handleConfirm}
               className="w-full py-2.5 rounded-lg bg-[var(--hvsna-primary-color)] text-white text-sm font-medium transition-opacity hover:opacity-90"
             >
-              {t("link_selected") || `Link ${selectedEvalIds.size} evaluation${
-                selectedEvalIds.size > 1 ? "s" : ""
-              }`}
+              {t("link_selected") ||
+                `Link ${selectedEvalIds.size} evaluation${
+                  selectedEvalIds.size > 1 ? "s" : ""
+                }`}
             </button>
           </div>
         )}

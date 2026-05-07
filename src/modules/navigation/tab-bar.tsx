@@ -10,8 +10,6 @@ import {
   HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
-  HvOutlineInbox,
-  HvHiInbox,
   HvCalendar,
 } from "@/modules/icons";
 
@@ -36,18 +34,18 @@ export function TabBar() {
       context: "upcoming",
     },
     {
-      path: "/inbox",
-      label: t("inbox") || "Inbox",
-      icon: <HvOutlineInbox />,
-      activeIcon: <HvHiInbox />,
-      context: "inbox",
-    },
-    {
-      path: "/insight",
-      label: t("insight") || "Insight",
+      path: "/tracks",
+      label: t("tracks") || "Tracks",
       icon: <HvChartArea />,
       activeIcon: <HvChartAreaFilled />,
-      context: "insight",
+      context: "tracks",
+    },
+    {
+      path: "/settings",
+      label: t("settings") || "Settings",
+      icon: <HvSettings />,
+      activeIcon: <HvSettingsFilled />,
+      context: "settings",
     },
   ];
 

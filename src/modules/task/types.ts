@@ -34,7 +34,6 @@ export class Task {
   hijriDateOffset?: number;
   projectId?: string | null = null;
   tags?: string[] | null = null;
-  logEntries?: { value: number; note?: string; occurredAt: number }[];
 
   constructor(a: Partial<Task>) {
     Object.assign(this, a);

@@ -26,7 +26,7 @@ import ProjectDetail from "./modules/task/project-detail";
 import Tasks from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
 import { Inbox } from "./modules/task/inbox";
-import { Insight } from "./modules/task/insight";
+import { Tracks } from "./modules/task/tracks";
 import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
 import SignInPage from "./modules/auth/pages/signin";
@@ -101,7 +101,7 @@ export const AppRoutes = () => {
             <Route path="today" element={<Today />} />
             <Route path="upcoming" element={<Tasks />} />
             <Route path="inbox" element={<Inbox />} />
-            <Route path="insight" element={<Insight />} />
+            <Route path="tracks" element={<Tracks />} />
             {!isDesktop && <Route path="projects" element={<Browse />} />}
             {!isDesktop && (
               <Route path="tags" element={<TagManagementPage />} />
