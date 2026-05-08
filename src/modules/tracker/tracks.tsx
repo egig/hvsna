@@ -1,10 +1,11 @@
 import React from "react";
 import { Page } from "../navigation";
 import { Navbar } from "../navigation/navbar";
-import { useTrackers } from "../tracker/useTrackers";
-import { useTrackerLogs } from "../tracker/useTrackerLogs";
+import { useTrackers } from "./useTrackers";
+import { useTrackerLogs } from "./useTrackerLogs";
 import { EmptyState } from "../components/empty-state";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useAppNavigation } from "../navigation/use-app-navigation";
 import { HvChartArea } from "@/modules/icons";
 import type { Tracker } from "../../domain/tracker/Tracker";
 
@@ -15,6 +16,7 @@ interface TrackerCardProps {
 function TrackerCard({ tracker }: TrackerCardProps) {
   const { t } = useLanguageContext();
   const { getLatestLog } = useTrackerLogs();
+  const { navigate } = useAppNavigation();
   const [latestLog, setLatestLog] = React.useState<any>(null);
 
   React.useEffect(() => {
@@ -48,7 +50,10 @@ function TrackerCard({ tracker }: TrackerCardProps) {
       : t("last_value") || "Last value";
 
   return (
-    <div className="rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4">
+    <button
+      onClick={() => navigate(`/tracker/${tracker.id}`)}
+      className="w-full text-left rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
+    >
       <p className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-2">
         {tracker.name}
       </p>
@@ -58,7 +63,7 @@ function TrackerCard({ tracker }: TrackerCardProps) {
       <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         {subLabel}
       </p>
-    </div>
+    </button>
   );
 }
 

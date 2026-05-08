@@ -12,7 +12,7 @@ import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
 import { useProjectContext } from "./modules/task/project-context";
 import ProjectFormContainer from "./modules/task/project-form-container";
-import { TrackerLogModal } from "./modules/task/tracker-log-modal";
+import { TrackerLogModal } from "./modules/tracker/tracker-log-modal";
 
 interface MobileLayoutProps {
   formOpen: boolean;

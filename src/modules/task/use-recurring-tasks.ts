@@ -17,8 +17,6 @@ export function useRecurringTasks() {
       setLoading(true);
       setError(null);
 
-      console.log("create rtask", input);
-
       try {
         const id = input.id || `rtask_${crypto.randomUUID()}`;
         const now = Date.now();

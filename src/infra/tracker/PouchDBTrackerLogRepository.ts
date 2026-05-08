@@ -141,7 +141,6 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
       };
     }
 
-    console.log(mangoQuery)
     const result = await this.db.find(mangoQuery);
 
     return (result as any).docs.map((doc: any) => doc as unknown as TrackerLog);

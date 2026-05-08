@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   HvArrowUp,
   HvTrash2,
@@ -10,8 +10,10 @@ import { NavActionButton } from "../components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
+import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
+import { useAppNavigation } from "../navigation/use-app-navigation";
 import type { Task } from "./types";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
@@ -19,7 +21,6 @@ import TaskPreview from "./task-preview";
 import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
-import type { InputMode } from "../../domain/tracker/ITrackerRepository";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -36,6 +37,8 @@ export default function TaskFormEdit({
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
   const { isDesktop } = useScreenSize();
+  const { navigate } = useAppNavigation();
+  const { closeTaskForm } = useTaskContext();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isFormFocused, setIsFormFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
@@ -63,12 +66,6 @@ export default function TaskFormEdit({
   } = useTaskFormEdit(taskId, onSuccess, onError, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
-
-  const inputModeOptions: { value: InputMode; label: string }[] = [
-    { value: "toggle", label: t("tracker_type_toggle") || "Yes / No" },
-    { value: "add", label: t("tracker_type_add") || "Add amount" },
-    { value: "set", label: t("tracker_type_set") || "Record current" },
-  ];
 
   useEffect(() => {
     if (isDesktop && nameInputRef.current) {
@@ -228,82 +225,27 @@ export default function TaskFormEdit({
         disabled={isSubmitting}
       />
 
-      {/* Tracker fields - always visible for tracker tasks */}
+      {/* Tracker Card - clickable to go to Tracker Detail */}
       {formData.asTracker && (
-        <>
-          {/* Input mode selector */}
-          <div className="px-4 py-2">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">
-              {t("tracker_type") || "Type"}
-            </label>
-            <div className="text-sm text-gray-900 dark:text-white">
-              {
-                inputModeOptions.find((opt) => opt.value === formData.inputMode)
-                  ?.label
-              }
-            </div>
-          </div>
-
-          {/* Unit input */}
-          <div className="px-4 py-2">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-              {t("tracker_unit") || "Unit (optional)"}
-            </label>
-            <input
-              type="text"
-              value={formData.unit || ""}
-              onChange={(e) => {
-                updateFormData({ unit: e.target.value });
-                setIsFormDirty(true);
-              }}
-              placeholder={
-                t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."
-              }
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
-            />
-          </div>
-
-          {/* Target input */}
-          <div className="px-4 py-2">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-              {t("tracker_target") || "Target (optional)"}
-            </label>
-            <input
-              type="number"
-              value={formData.target || ""}
-              onChange={(e) => {
-                updateFormData({ target: e.target.value });
-                setIsFormDirty(true);
-              }}
-              placeholder={
-                t("tracker_target_placeholder") || "e.g. 8, 10000, 30..."
-              }
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
-            />
-          </div>
-
-          {/* Period selector */}
-          <div className="px-4 py-2">
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-              {t("tracker_period") || "Period"}
-            </label>
-            <select
-              value={formData.period || "day"}
-              onChange={(e) => {
-                updateFormData({ period: e.target.value });
-                setIsFormDirty(true);
-              }}
-              disabled={isSubmitting}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
-            >
-              <option value="day">{t("period_day") || "Day"}</option>
-              <option value="week">{t("period_week") || "Week"}</option>
-              <option value="month">{t("period_month") || "Month"}</option>
-            </select>
-          </div>
-        </>
+        <div className="px-4 py-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeTaskForm();
+              navigate(`/tracker/${task?.recurringTaskId}`);
+            }}
+            className="w-full text-left rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
+          >
+            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              {t("view_tracker") || "View Tracker"}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("view_tracker_description") || "Tap to view tracker details and history"}
+            </p>
+          </button>
+        </div>
       )}
 
       <div className="flex flex-wrap gap-3 px-4">

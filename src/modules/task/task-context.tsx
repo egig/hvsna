@@ -183,9 +183,14 @@ export const TaskProvider: React.FC<{
       // Update the task status to 2 (logged)
       const currentTask = await taskUseCases.getTaskById(trackerLogTask.taskId);
       if (currentTask) {
-        await taskUseCases.updateTask(trackerLogTask.taskId, {
+        logger.info("Updating task status to 2 (logged) for task:", trackerLogTask.taskId);
+        logger.info("Current task status before update:", currentTask.status);
+        const updatedTask = await taskUseCases.updateTask(trackerLogTask.taskId, {
           status: 2,
         });
+        logger.info("Task status updated successfully, new status:", updatedTask.status);
+      } else {
+        logger.error("Task not found for logging:", trackerLogTask.taskId);
       }
 
       // Cancel reminders for tracker tasks
@@ -197,7 +202,24 @@ export const TaskProvider: React.FC<{
         }
       }
 
+      logger.info("Invalidating task queries after status update");
       invalidateTaskQueries();
+
+      // Force refetch of specific queries
+      const today = getToday();
+      const todayString = today.toString();
+      const tomorrowString = today.next().toString();
+
+      logger.info("Force refetching today tasks");
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      logger.info("Force refetching upcoming tasks");
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+
+      logger.info("Task queries invalidated, setting trackerLogTask to null");
       setTrackerLogTask(null);
     } catch (error) {
       logger.error("Failed to submit tracker log:", error);

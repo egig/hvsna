@@ -692,4 +692,66 @@ export const taskTranslations = {
     en: "No",
     id: "Tidak",
   },
+
+  // Tracker translations
+  tracks: {
+    en: "Tracks",
+    id: "Pelacak",
+  },
+  no_trackers_description: {
+    en: "Trackers will appear here",
+    id: "Pelacak akan muncul di sini",
+  },
+  tracker_detail: {
+    en: "Tracker Detail",
+    id: "Detail Pelacak",
+  },
+  tracker_not_found: {
+    en: "Tracker not found",
+    id: "Pelacak tidak ditemukan",
+  },
+  toggle: {
+    en: "Toggle",
+    id: "Toggle",
+  },
+  set: {
+    en: "Set",
+    id: "Set",
+  },
+  period: {
+    en: "Period",
+    id: "Periode",
+  },
+  chart: {
+    en: "Chart",
+    id: "Grafik",
+  },
+  logs_history: {
+    en: "Logs History",
+    id: "Riwayat Catatan",
+  },
+  no_logs: {
+    en: "No logs yet",
+    id: "Belum ada catatan",
+  },
+  view_tracker: {
+    en: "View Tracker",
+    id: "Lihat Pelacak",
+  },
+  view_tracker_description: {
+    en: "Tap to view tracker details and history",
+    id: "Ketuk untuk melihat detail dan riwayat pelacak",
+  },
+  logs: {
+    en: "Logs",
+    id: "Catatan",
+  },
+  last_value: {
+    en: "Last value",
+    id: "Nilai terakhir",
+  },
+  logged: {
+    en: "Logged",
+    id: "Dicatat",
+  },
 };
