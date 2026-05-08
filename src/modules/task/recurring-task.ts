@@ -22,6 +22,7 @@ export interface RecurringTask {
   repeatEndOccurrences?: number; // used when repeatEnd = "after_occurrences"
   created_at?: number;
   updated_at?: number;
+  trackerId?: string; // Reference to the Tracker entity if this is a tracker task
 }
 
 export interface RecurringTaskCreateInput {
@@ -43,6 +44,7 @@ export interface RecurringTaskCreateInput {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndDate?: string;
   repeatEndOccurrences?: number;
+  trackerId?: string;
 }
 
 export interface RecurringTaskUpdateInput {
@@ -63,6 +65,7 @@ export interface RecurringTaskUpdateInput {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndDate?: string;
   repeatEndOccurrences?: number;
+  trackerId?: string;
 }
 
 export interface RecurringTaskChange {

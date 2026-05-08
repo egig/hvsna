@@ -375,8 +375,8 @@ export const commonTranslations = {
 
   // Unscheduled
   inbox: {
-    en: "Unscheduled",
-    id: "Tanpa Jadwal",
+    en: "Inbox",
+    id: "Inbox",
   },
   no_tasks_in_inbox: {
     en: "No unscheduled tasks",
@@ -385,6 +385,96 @@ export const commonTranslations = {
   tasks_without_schedule_or_list_will_appear_here: {
     en: "Tasks without a date will appear here",
     id: "Tugas tanpa tanggal akan muncul di sini",
+  },
+
+  // Tracks
+  tracks: {
+    en: "Tracks",
+    id: "Jejak",
+  },
+  no_trackers: {
+    en: "No trackers",
+    id: "Tidak ada pelacak",
+  },
+  no_trackers_description: {
+    en: "Trackers will appear here",
+    id: "Pelacak akan muncul di sini",
+  },
+  tracker_mode: {
+    en: "Tracker Mode",
+    id: "Mode Pelacak",
+  },
+  tracker_type: {
+    en: "Type",
+    id: "Tipe",
+  },
+  tracker_type_toggle: {
+    en: "Yes / No",
+    id: "Ya / Tidak",
+  },
+  tracker_type_add: {
+    en: "Add amount",
+    id: "Tambah jumlah",
+  },
+  tracker_type_set: {
+    en: "Record current",
+    id: "Catat saat ini",
+  },
+  tracker_unit: {
+    en: "Unit (optional)",
+    id: "Satuan (opsional)",
+  },
+  tracker_unit_placeholder: {
+    en: "e.g. cups, km, minutes...",
+    id: "misalnya cangkir, km, menit...",
+  },
+  tracker_target: {
+    en: "Target (optional)",
+    id: "Target (opsional)",
+  },
+  tracker_target_placeholder: {
+    en: "e.g. 8, 10000, 30...",
+    id: "misalnya 8, 10000, 30...",
+  },
+  tracker_period: {
+    en: "Period",
+    id: "Periode",
+  },
+  period_day: {
+    en: "Day",
+    id: "Hari",
+  },
+  period_week: {
+    en: "Week",
+    id: "Minggu",
+  },
+  period_month: {
+    en: "Month",
+    id: "Bulan",
+  },
+  track_frequency: {
+    en: "Track Frequency",
+    id: "Frekuensi Pelacakan",
+  },
+  track_daily: {
+    en: "Daily",
+    id: "Harian",
+  },
+  track_weekly: {
+    en: "Weekly",
+    id: "Mingguan",
+  },
+  track_monthly: {
+    en: "Monthly",
+    id: "Bulanan",
+  },
+  track_schedule: {
+    en: "Track Schedule",
+    id: "Jadwal Pelacakan",
+  },
+  no_repeat: {
+    en: "No repeat",
+    id: "Tidak ada pengulangan",
   },
 
   // Authentication
@@ -417,5 +507,9 @@ export const commonTranslations = {
   add_new_project: {
     en: "Add new project",
     id: "Tambah proyek baru",
+  },
+  add_new_task: {
+    en: "Add new task",
+    id: "Tambah tugas baru",
   },
 };

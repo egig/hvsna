@@ -1,7 +1,10 @@
-import { createTrackerRepository } from "../../infra/tracker/TrackerRepositoryFactory";
+import PouchDB from "pouchdb";
 import { TrackerUseCases } from "./TrackerUseCases";
+import { createTrackerRepositories } from "../../infra/tracker/TrackerRepositoryFactory";
 
 export function createTrackerUseCases(db: PouchDB.Database): TrackerUseCases {
-  const repository = createTrackerRepository(db);
-  return new TrackerUseCases(repository);
+  const { trackerRepository, trackerLogRepository } =
+    createTrackerRepositories(db);
+
+  return new TrackerUseCases(trackerRepository, trackerLogRepository);
 }

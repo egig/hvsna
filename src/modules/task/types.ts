@@ -1,4 +1,4 @@
-export type TaskStatus = 0 | 1;
+export type TaskStatus = 0 | 1 | 2; // 0=pending, 1=completed, 2=logged (tracker tasks only)
 export type TaskRepeat = "none" | "daily" | "weekly" | "monthly" | "yearly";
 export type PrayerTime =
   | "Fajr"
@@ -90,6 +90,7 @@ export interface TaskUpdateInput {
   removeTime?: boolean;
   projectId?: string | null;
   tags?: string[] | null;
+  logEntries?: { value: number; note?: string; occurredAt: number }[];
 }
 
 export interface TaskChange {

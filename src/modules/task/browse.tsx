@@ -1,7 +1,16 @@
-import { HvPlus, HvList, HvSettings, HvOutlineInbox } from "@/modules/icons";
+import {
+  HvPlus,
+  HvList,
+  HvSettings,
+  HvSearch,
+  HvTag,
+  HvOutlineInbox,
+  HvChartArea,
+} from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";
+import { NavActionButton } from "../components/nav-action-button";
 import { Button as Button2 } from "../components/button";
 import { useProjects } from "./use-projects";
 import { useProjectContext } from "./project-context";
@@ -30,7 +39,19 @@ export default function Browse() {
   return (
     <Page
       navbar={
-        <Navbar title={t("projects") || "Projects"} showBackButton={false} />
+        <Navbar
+          title={t("browse")}
+          showBackButton={false}
+          rightAction={
+            <NavActionButton
+              variant="neutral"
+              onClick={handleGoToSettings}
+              aria-label={t("settings") || "Settings"}
+            >
+              <HvSettings size={20} />
+            </NavActionButton>
+          }
+        />
       }
     >
       {loading && !initiated && (
@@ -44,6 +65,21 @@ export default function Browse() {
           {error}
         </div>
       )}
+
+      {/* Navigation Menu Items */}
+      <div className="mb-6 space-y-1">
+        <MenuItem
+          icon={HvSearch}
+          title={t("search") || "Search"}
+          to="/search"
+        />
+        <MenuItem icon={HvTag} title={t("tags") || "Tags"} to="/tags" />
+        <MenuItem
+          icon={HvChartArea}
+          title={t("trackers") || "Trackers"}
+          to="/tracks"
+        />
+      </div>
 
       {!loading && initiated && projects.length === 0 && (
         <div className="text-center py-12">

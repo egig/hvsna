@@ -28,7 +28,8 @@ export function TaskListItem({
   showDateTime = false,
   formatDate,
 }: TaskListItemProps) {
-  const { completeTask, reopenTask } = useTaskListItem();
+  const { completeTask, reopenTask, checkAndHandleTrackerTask } =
+    useTaskListItem();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
@@ -40,6 +41,8 @@ export function TaskListItem({
         return 1; // pending -> completed
       case 1:
         return 0; // completed -> pending
+      case 2:
+        return 2; // logged foreveer
       default:
         return 0;
     }
@@ -50,6 +53,14 @@ export function TaskListItem({
       case 1:
         return (
           <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
+        );
+      case 2:
+        return (
+          <HvCheckSquare2
+            strokeWidth={1}
+            size={24}
+            className="text-[var(--hvsna-primary-color)]"
+          />
         );
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
@@ -62,6 +73,8 @@ export function TaskListItem({
     switch (status) {
       case 1:
         return "line-through text-gray-400";
+      case 2:
+        return "text-[var(--hvsna-primary-color)]"; // Logged (tracker) - color change, no strikethrough
       case 0:
         return "text-gray-800";
       default:
@@ -127,13 +140,20 @@ export function TaskListItem({
     }
   };
 
-  const handleStatusClick = (e: React.MouseEvent) => {
+  const handleStatusClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
     let updatePromise: Promise<Task>;
     let nextStatus: TaskStatus;
 
     if (task.status === 0) {
+      // Check if this is a tracker task before completing
+      const isTracker = await checkAndHandleTrackerTask(task);
+      if (isTracker) {
+        // Tracker modal opened, don't complete the task
+        return;
+      }
+
       // Complete the task
       updatePromise = completeTask(task.id as string);
       nextStatus = 1;
@@ -198,8 +218,8 @@ export function TaskListItem({
   return (
     <motion.div
       className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${
-        className || ""
-      }`}
+        task.status === 2 ? "bg-[var(--hvsna-primary-color)]/5" : ""
+      } ${className || ""}`}
       onClick={handleItemClick}
       initial={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -221,11 +241,20 @@ export function TaskListItem({
         </button>
 
         <div className="flex-1 min-w-0">
-          <h3
-            className={`leading-6 ${getStatusColor(task.status as TaskStatus)}`}
-          >
-            {task.name}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3
+              className={`leading-6 ${getStatusColor(
+                task.status as TaskStatus
+              )}`}
+            >
+              {task.name}
+            </h3>
+            {task.status === 2 && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--hvsna-primary-color)] text-white font-medium">
+                {t("logged") || "Logged"}
+              </span>
+            )}
+          </div>
 
           {task.description && (
             <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">

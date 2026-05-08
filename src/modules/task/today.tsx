@@ -20,6 +20,8 @@ import {
   getPrayerTimesWithFallback,
 } from "../prayer-time-utils";
 import logger from "src/modules/logger";
+import { Page } from "../navigation";
+import { LargeNavbar } from "../navigation/navbar";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -28,14 +30,7 @@ interface TodayTasksProps {
 
 export function TodayContent() {
   const { t } = useLanguageContext();
-  const {
-    todayTasks,
-    todayCompletedTasks,
-    error,
-    pageTitle,
-    subTitle,
-    initiated,
-  } = useToday();
+  const { todayTasks, todayCompletedTasks, error, initiated } = useToday();
   const { settings } = useSettings();
   const hasLocation = !!(
     settings.coordinate?.latitude && settings.coordinate?.longitude
@@ -49,18 +44,6 @@ export function TodayContent() {
 
   return (
     <div className={initiated ? "visible" : "invisible"}>
-      {pageTitle && (
-        <div className="px-4 pt-4 pb-2">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-            {pageTitle}
-          </h2>
-          {subTitle && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {subTitle}
-            </p>
-          )}
-        </div>
-      )}
       {!hasLocation && (
         <a
           href="/settings/general"
@@ -89,7 +72,22 @@ export function TodayContent() {
 }
 
 export function Today() {
-  return <TodayContent />;
+  const { t } = useLanguageContext();
+  const { pageTitle, subTitle } = useToday();
+
+  return (
+    <Page
+      navbarLarge={
+        <LargeNavbar
+          showBackButton={false}
+          title={pageTitle}
+          subtitle={subTitle}
+        />
+      }
+    >
+      <TodayContent />
+    </Page>
+  );
 }
 
 // Fallback function for original grouping logic (used while prayer times are loading)

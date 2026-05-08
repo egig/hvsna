@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HvArrowUp } from "@/modules/icons";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useHijriDate } from "src/modules/calendar/hijri";
@@ -10,6 +10,7 @@ import { useSettings } from "src/modules/settings/useSettings";
 import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
+import type { InputMode } from "../../domain/tracker/types";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -49,6 +50,12 @@ export default function TaskForm({
       nameInputRef.current.focus();
     }
   }, []);
+
+  const inputModeOptions: { value: InputMode; label: string }[] = [
+    { value: "toggle", label: t("tracker_type_toggle") || "Yes / No" },
+    { value: "add", label: t("tracker_type_add") || "Add amount" },
+    { value: "set", label: t("tracker_type_set") || "Record current" },
+  ];
 
   useEffect(() => {
     if (["today", "upcoming"].includes(location.state?.context)) {
@@ -105,7 +112,7 @@ export default function TaskForm({
         disabled={isSubmitting}
       />
 
-      <div className="flex flex-wrap gap-3 px-4">
+      <div className="flex flex-wrap gap-3 px-4 py-2">
         <DatePrayerInput
           hijriDate={formData.scheduleAt.dateHijri}
           atTime={formData.scheduleAt.time}
@@ -116,6 +123,7 @@ export default function TaskForm({
           repeatEnd={formData.repeat.end}
           repeatEndDate={formData.repeat.endDate}
           repeatEndOccurrences={formData.repeat.endOccurrences}
+          forceRepeat={!!formData.inputMode}
           onRepeatChange={(
             repeat,
             interval,
@@ -134,8 +142,8 @@ export default function TaskForm({
           onChange={(hijriDate, time, prayerTime) => {
             updateScheduleAt({
               dateHijri: hijriDate,
-              time,
-              prayerTime,
+              time: time ?? undefined,
+              prayerTime: prayerTime ?? undefined,
             });
           }}
         />
@@ -148,6 +156,174 @@ export default function TaskForm({
           />
         )}
       </div>
+
+      {/* Tracker mode toggle - only visible when repeat is selected */}
+      {formData.repeat.repeat !== "none" && (
+        <>
+          {/* Track toggle */}
+          <div className="flex items-center justify-between px-4 py-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t("track") || "Track"}
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                if (formData.inputMode) {
+                  updateFormData({
+                    inputMode: undefined,
+                    unit: undefined,
+                    showGoalSettings: false,
+                    goalTarget: undefined,
+                    goalPeriod: undefined,
+                  });
+                } else {
+                  updateFormData({ inputMode: "toggle" });
+                }
+              }}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                formData.inputMode
+                  ? "bg-[var(--hvsna-primary-color)]"
+                  : "bg-gray-300 dark:bg-gray-600"
+              }`}
+              aria-label={
+                formData.inputMode
+                  ? "Disable tracker mode"
+                  : "Enable tracker mode"
+              }
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  formData.inputMode ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Tracker fields - only visible when inputMode is set */}
+          {formData.inputMode && (
+            <>
+              {/* Input mode selector */}
+              <div className="px-4 py-2">
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">
+                  {t("tracker_type") || "Type"}
+                </label>
+                <div className="flex gap-2">
+                  {inputModeOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateFormData({ inputMode: opt.value })}
+                      className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                        formData.inputMode === opt.value
+                          ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10 text-[var(--hvsna-primary-color)]"
+                          : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Unit input */}
+              <div className="px-4 py-2">
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
+                  {t("tracker_unit") || "Unit (optional)"}
+                </label>
+                <input
+                  type="text"
+                  value={formData.unit || ""}
+                  onChange={(e) => updateFormData({ unit: e.target.value })}
+                  placeholder={
+                    t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."
+                  }
+                  disabled={isSubmitting}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
+                />
+              </div>
+
+              {/* Set Goal toggle */}
+              <div className="flex items-center justify-between px-4 py-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t("set_goal") || "Set Goal"}
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateFormData({
+                      showGoalSettings: !formData.showGoalSettings,
+                    })
+                  }
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    formData.showGoalSettings
+                      ? "bg-[var(--hvsna-primary-color)]"
+                      : "bg-gray-300 dark:bg-gray-600"
+                  }`}
+                  aria-label={
+                    formData.showGoalSettings
+                      ? "Hide goal settings"
+                      : "Show goal settings"
+                  }
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      formData.showGoalSettings
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {/* Goal settings - only visible when showGoalSettings is true */}
+              {formData.showGoalSettings && (
+                <>
+                  {/* Target input */}
+                  <div className="px-4 py-2">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
+                      {t("tracker_target") || "Target (optional)"}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.goalTarget || ""}
+                      onChange={(e) =>
+                        updateFormData({ goalTarget: e.target.value })
+                      }
+                      placeholder={
+                        t("tracker_target_placeholder") ||
+                        "e.g. 8, 10000, 30..."
+                      }
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
+                    />
+                  </div>
+
+                  {/* Period selector */}
+                  <div className="px-4 py-2">
+                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
+                      {t("tracker_period") || "Period"}
+                    </label>
+                    <select
+                      value={formData.goalPeriod || "day"}
+                      onChange={(e) =>
+                        updateFormData({ goalPeriod: e.target.value })
+                      }
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
+                    >
+                      <option value="day">{t("period_day") || "Day"}</option>
+                      <option value="week">{t("period_week") || "Week"}</option>
+                      <option value="month">
+                        {t("period_month") || "Month"}
+                      </option>
+                    </select>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
 
       <div className="flex justify-end p-4">
         {isDesktop ? (

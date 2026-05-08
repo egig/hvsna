@@ -238,7 +238,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const doc = PouchDBTaskDocument.fromTaskItem(newTask);
     delete doc._rev;
 
-    console.log("create task with", doc);
     await this.db.put(doc);
 
     return newTask;

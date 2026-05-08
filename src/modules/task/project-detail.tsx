@@ -15,7 +15,6 @@ import { useProjectTasks } from "./use-project-tasks";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useProjectContext } from "./project-context";
 import { DeleteProjectModal } from "./delete-project-modal";
-import { ProjectEvaluationCard } from "./project-evaluation-card";
 import { ProjectEvaluationPicker } from "./project-evaluation-picker";
 import type { Project, Task, TrackerEvaluationRef } from "./types";
 import TaskListItem from "./task-list-item";
@@ -226,23 +225,6 @@ export default function ProjectDetail() {
             {t("link") || "Link"}
           </button>
         </div>
-
-        {(currentProject.trackerEvaluationRefs || []).length === 0 ? (
-          <p className="text-xs text-gray-400 dark:text-gray-500 py-2">
-            {t("no_linked_evaluations") ||
-              "No tracker evaluations linked. Tap + to link one."}
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {(currentProject.trackerEvaluationRefs || []).map((ref, index) => (
-              <ProjectEvaluationCard
-                key={`${ref.trackerId}-${ref.evaluationId}`}
-                ref={ref}
-                onRemove={() => handleRemoveRef(index)}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {tasksLoading && (

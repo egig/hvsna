@@ -1,87 +1,118 @@
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { useTrackers } from "./use-trackers";
-import { TrackerProvider, useTrackerContext } from "./tracker-context";
-import { TrackerCard } from "./tracker-card";
-import { TrackerSummaryCard } from "./tracker-summary-card";
-import { TrackerForm } from "./tracker-form";
-import { Navbar } from "../navigation/navbar";
-import { Modal } from "../navigation/modal";
+import React from "react";
 import { Page } from "../navigation";
-import { NavActionButton } from "../components/nav-action-button";
-import { HvPlus } from "../icons";
+import { Navbar } from "../navigation/navbar";
+import { useTrackers } from "./useTrackers";
+import { useTrackerLogs } from "./useTrackerLogs";
+import { EmptyState } from "../components/empty-state";
+import { useLanguageContext } from "../i18n/LanguageContext";
+import { useAppNavigation } from "../navigation/use-app-navigation";
+import { HvChartArea } from "@/modules/icons";
+import type { Tracker } from "../../domain/tracker/Tracker";
 
-function TracksPage() {
+interface TrackerCardProps {
+  tracker: Tracker;
+}
+
+function TrackerCard({ tracker }: TrackerCardProps) {
   const { t } = useLanguageContext();
-  const { data: trackers = [], isLoading } = useTrackers();
-  const { formOpen, editingTrackerId, openCreateForm, closeForm } =
-    useTrackerContext();
-  return (
-    <Page
-      navbar={
-        <Navbar
-          title={t("tracks") || "Tracks"}
-          showBackButton={false}
-          rightAction={
-            <NavActionButton
-              variant="neutral"
-              onClick={openCreateForm}
-              aria-label={t("new_tracker") || "New Tracker"}
-            >
-              <HvPlus size={20} />
-            </NavActionButton>
-          }
-        />
+  const { getLatestLog } = useTrackerLogs();
+  const { navigate } = useAppNavigation();
+  const [latestLog, setLatestLog] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const loadLatestLog = async () => {
+      try {
+        const log = await getLatestLog(tracker.id);
+        setLatestLog(log);
+      } catch (err) {
+        console.error("Failed to load latest log:", err);
       }
+    };
+
+    loadLatestLog();
+  }, [tracker.id, getLatestLog]);
+
+  const displayValue = () => {
+    if (tracker.inputMode === "toggle") {
+      return latestLog ? "1" : "–";
+    }
+    if (tracker.inputMode === "set") {
+      return latestLog !== null ? String(latestLog.value) : "–";
+    }
+    return latestLog !== null ? String(latestLog.value) : "–";
+  };
+
+  const subLabel =
+    tracker.inputMode === "toggle"
+      ? t("logs") || "Logs"
+      : tracker.unit
+      ? `${t("last_value") || "Last value"} (${tracker.unit})`
+      : t("last_value") || "Last value";
+
+  return (
+    <button
+      onClick={() => navigate(`/tracker/${tracker.id}`)}
+      className="w-full text-left rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
     >
-      <div className="flex-1 overflow-y-auto pb-4">
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="w-6 h-6 border-2 border-gray-300 border-t-[var(--hvsna-primary-color)] rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="px-4 pt-4">
-            {/* Card grid */}
-            <div className="grid grid-cols-2 gap-3">
-              {trackers.map((tracker) => (
-                <TrackerCard
-                  key={tracker.id}
-                  tracker={tracker}
-                  todayTimestamp={Date.now()}
-                />
-              ))}
-              {/* Add new tracker card */}
-              <button
-                onClick={openCreateForm}
-                className="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-[var(--hvsna-primary-color)] hover:text-[var(--hvsna-primary-color)] transition-colors min-h-[120px]"
-              >
-                <HvPlus size={24} />
-                <span className="text-xs mt-1">
-                  {t("new_tracker") || "New Tracker"}
-                </span>
-              </button>
-            </div>
-
-            {trackers.length === 0 && (
-              <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-                {t("no_trackers_description") ||
-                  "Create a tracker to start logging data"}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-
-      <Modal isOpen={formOpen} onClose={closeForm} noPadding>
-        <TrackerForm editingId={editingTrackerId} onClose={closeForm} />
-      </Modal>
-    </Page>
+      <p className="text-sm font-semibold text-gray-900 dark:text-white truncate mb-2">
+        {tracker.name}
+      </p>
+      <p className="text-2xl font-bold mt-0.5 text-gray-900 dark:text-white">
+        {displayValue()}
+      </p>
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        {subLabel}
+      </p>
+    </button>
   );
 }
 
-export default function Tracks() {
+export function Tracks() {
+  const { t } = useLanguageContext();
+  const { getTrackers, loading, error } = useTrackers();
+
+  const [trackers, setTrackers] = React.useState<Tracker[]>([]);
+
+  React.useEffect(() => {
+    const loadTrackers = async () => {
+      try {
+        const allTrackers = await getTrackers();
+        setTrackers(allTrackers);
+      } catch (err) {
+        console.error("Failed to load trackers:", err);
+      }
+    };
+
+    loadTrackers();
+  }, [getTrackers]);
+
   return (
-    <TrackerProvider>
-      <TracksPage />
-    </TrackerProvider>
+    <Page
+      navbar={<Navbar title={t("tracks") || "Tracks"} showBackButton={false} />}
+    >
+      <div className="p-4">
+        {loading ? (
+          <div className="text-center text-gray-500">
+            {t("loading") || "Loading..."}
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : trackers.length === 0 ? (
+          <EmptyState
+            icon={<HvChartArea className="w-full h-full" />}
+            title={t("no_trackers") || "No trackers"}
+            description={
+              t("no_trackers_description") || "Trackers will appear here"
+            }
+          />
+        ) : (
+          <div className="space-y-2">
+            {trackers.map((tracker) => (
+              <TrackerCard key={tracker.id} tracker={tracker} />
+            ))}
+          </div>
+        )}
+      </div>
+    </Page>
   );
 }

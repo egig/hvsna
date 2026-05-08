@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   HvArrowUp,
   HvTrash2,
@@ -10,8 +10,10 @@ import { NavActionButton } from "../components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
+import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
+import { useAppNavigation } from "../navigation/use-app-navigation";
 import type { Task } from "./types";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
@@ -35,6 +37,8 @@ export default function TaskFormEdit({
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
   const { isDesktop } = useScreenSize();
+  const { navigate } = useAppNavigation();
+  const { closeTaskForm } = useTaskContext();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isFormFocused, setIsFormFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
@@ -58,6 +62,7 @@ export default function TaskFormEdit({
     updateScheduleAt,
     updateRepeatConfig,
     projects,
+    wasTracker,
   } = useTaskFormEdit(taskId, onSuccess, onError, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -220,45 +225,111 @@ export default function TaskFormEdit({
         disabled={isSubmitting}
       />
 
+      {/* Tracker Card - clickable to go to Tracker Detail */}
+      {formData.asTracker && (
+        <div className="px-4 py-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeTaskForm();
+              navigate(`/tracker/${task?.recurringTaskId}`);
+            }}
+            className="w-full text-left rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
+          >
+            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              {t("view_tracker") || "View Tracker"}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("view_tracker_description") ||
+                "Tap to view tracker details and history"}
+            </p>
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3 px-4">
-        <DatePrayerInput
-          hijriDate={formData.scheduleAt.dateHijri as HijriDate}
-          atTime={formData.scheduleAt.time || ""}
-          prayerTime={formData.scheduleAt.prayerTime || ""}
-          isSubmitting={isSubmitting}
-          repeat={formData.repeat.repeat}
-          repeatInterval={formData.repeat.interval}
-          repeatEnd={formData.repeat.end}
-          repeatEndDate={formData.repeat.endDate}
-          repeatEndOccurrences={formData.repeat.endOccurrences}
-          onRepeatChange={(
-            repeat,
-            interval,
-            repeatEnd,
-            repeatEndDate,
-            repeatEndOccurrences
-          ) => {
-            updateRepeatConfig({
+        {formData.asTracker ? (
+          <DatePrayerInput
+            hijriDate={formData.scheduleAt.dateHijri as HijriDate}
+            atTime={formData.scheduleAt.time || ""}
+            prayerTime={formData.scheduleAt.prayerTime || ""}
+            isSubmitting={isSubmitting}
+            repeat={formData.repeat.repeat}
+            repeatInterval={formData.repeat.interval}
+            repeatEnd={formData.repeat.end}
+            repeatEndDate={formData.repeat.endDate}
+            repeatEndOccurrences={formData.repeat.endOccurrences}
+            forceRepeat={true}
+            onRepeatChange={(
               repeat,
               interval,
-              end: repeatEnd,
-              endDate: repeatEndDate,
-              endOccurrences: repeatEndOccurrences,
-            });
-            setIsFormDirty(true);
-          }}
-          onChange={(hijriDate, time, prayerTime) => {
-            updateScheduleAt({
-              dateHijri: hijriDate,
-              time: time ?? "",
-              prayerTime: prayerTime ?? "",
-            });
-            setIsFormDirty(true);
-            if (!time && !prayerTime) {
-              setRemoveTime(true);
-            }
-          }}
-        />
+              repeatEnd,
+              repeatEndDate,
+              repeatEndOccurrences
+            ) => {
+              updateRepeatConfig({
+                repeat,
+                interval,
+                end: repeatEnd,
+                endDate: repeatEndDate,
+                endOccurrences: repeatEndOccurrences,
+              });
+              setIsFormDirty(true);
+            }}
+            onChange={(hijriDate, time, prayerTime) => {
+              updateScheduleAt({
+                dateHijri: hijriDate,
+                time: time ?? "",
+                prayerTime: prayerTime ?? "",
+              });
+              setIsFormDirty(true);
+              if (!time && !prayerTime) {
+                setRemoveTime(true);
+              }
+            }}
+          />
+        ) : (
+          <DatePrayerInput
+            hijriDate={formData.scheduleAt.dateHijri as HijriDate}
+            atTime={formData.scheduleAt.time || ""}
+            prayerTime={formData.scheduleAt.prayerTime || ""}
+            isSubmitting={isSubmitting}
+            repeat={formData.repeat.repeat}
+            repeatInterval={formData.repeat.interval}
+            repeatEnd={formData.repeat.end}
+            repeatEndDate={formData.repeat.endDate}
+            repeatEndOccurrences={formData.repeat.endOccurrences}
+            onRepeatChange={(
+              repeat,
+              interval,
+              repeatEnd,
+              repeatEndDate,
+              repeatEndOccurrences
+            ) => {
+              updateRepeatConfig({
+                repeat,
+                interval,
+                end: repeatEnd,
+                endDate: repeatEndDate,
+                endOccurrences: repeatEndOccurrences,
+              });
+              setIsFormDirty(true);
+            }}
+            onChange={(hijriDate, time, prayerTime) => {
+              updateScheduleAt({
+                dateHijri: hijriDate,
+                time: time ?? "",
+                prayerTime: prayerTime ?? "",
+              });
+              setIsFormDirty(true);
+              if (!time && !prayerTime) {
+                setRemoveTime(true);
+              }
+            }}
+          />
+        )}
         {projects.length > 0 && (
           <ProjectSelector
             projects={projects}

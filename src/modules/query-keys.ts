@@ -13,5 +13,6 @@ export const queryKeys = {
   trackers: () => ["trackers"] as const,
   trackerLogs: (trackerId: string) => ["tracker-logs", trackerId] as const,
   trackerStats: (trackerId: string) => ["tracker-stats", trackerId] as const,
-  trackerLastLog: (trackerId: string) => ["tracker-last-log", trackerId] as const,
+  trackerLastLog: (trackerId: string) =>
+    ["tracker-last-log", trackerId] as const,
 } as const;

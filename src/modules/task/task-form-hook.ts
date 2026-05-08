@@ -10,6 +10,7 @@ import { formatHijriDateString } from "./task-form-helpers";
 import { useProjects } from "./use-projects";
 import { usePouchDB } from "../../pouchdb";
 import logger from "../logger";
+import { useTrackers } from "../tracker/useTrackers";
 import type {
   RepeatConfig,
   TaskFormData,
@@ -44,8 +45,8 @@ export const useTaskForm = (
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { projects } = useProjects();
-  const { db } = usePouchDB();
   const { createRecurringTask } = useRecurringTasks();
+  const { createTracker } = useTrackers();
 
   // Use useHijriDate hook instead of manual settings extraction
   const {
@@ -73,6 +74,9 @@ export const useTaskForm = (
       endOccurrences: 1,
     },
     tags: [],
+    showGoalSettings: false,
+    inputMode: undefined,
+    unit: undefined,
   });
 
   // Helper functions for updating state
@@ -93,6 +97,20 @@ export const useTaskForm = (
       repeat: { ...prev.repeat, ...updates },
     }));
   };
+
+  // Reset tracker settings when repeat is deselected
+  useEffect(() => {
+    if (formData.repeat.repeat === "none") {
+      updateFormData({
+        trackerId: undefined,
+        showGoalSettings: false,
+        inputMode: undefined,
+        unit: undefined,
+        goalTarget: undefined,
+        goalPeriod: undefined,
+      });
+    }
+  }, [formData.repeat.repeat]);
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const taskData = Object.fromEntries(submittedFormData) as unknown as {
@@ -120,6 +138,35 @@ export const useTaskForm = (
 
       const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
+      const isTracker = !!formData.inputMode;
+
+      let trackerId: string | undefined;
+
+      if (isTracker) {
+        // Create a Tracker entity
+        const goals =
+          formData.showGoalSettings && formData.goalTarget
+            ? [
+                {
+                  id: crypto.randomUUID(),
+                  name: "Goal",
+                  condition: "target",
+                  target: formData.goalTarget,
+                  period: formData.goalPeriod,
+                },
+              ]
+            : undefined;
+
+        const tracker = await createTracker({
+          name: taskData.taskName.trim(),
+          description: taskData.taskDescription?.trim() || undefined,
+          inputMode: formData.inputMode!,
+          unit: formData.unit,
+          goals,
+        });
+
+        trackerId = tracker.id;
+      }
 
       if (isRecurring && taskData.atDateHijri) {
         // Create a RecurringTask template, then generate all instances
@@ -141,6 +188,7 @@ export const useTaskForm = (
           repeatEnd: formData.repeat.end,
           repeatEndDate: formData.repeat.endDate as string,
           repeatEndOccurrences: formData.repeat.endOccurrences,
+          trackerId,
         });
 
         await generateOccurrencesForTemplate(template);
@@ -160,8 +208,8 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          projectId: formData.projectId || undefined,
-          tags: formData.tags.length > 0 ? formData.tags : undefined,
+          projectId: formData.projectId || null,
+          tags: formData.tags.length > 0 ? formData.tags : [],
         };
 
         const result = await createTask(taskInput);

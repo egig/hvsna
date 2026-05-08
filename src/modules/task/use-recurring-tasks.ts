@@ -35,12 +35,18 @@ export function useRecurringTasks() {
           long: input.long,
           timezone: input.timezone,
           hijriDateOffset: input.hijriDateOffset,
-          listId: input.listId,
+          projectId: input.projectId,
           created_at: now,
           updated_at: now,
           repeatEnd: input.repeatEnd,
           repeatEndDate: input.repeatEndDate,
           repeatEndOccurrences: input.repeatEndOccurrences,
+          asTracker: input.asTracker,
+          inputMode: input.inputMode,
+          unit: input.unit,
+          target: input.target,
+          period: input.period,
+          evaluations: input.evaluations,
         };
 
         const response = await db.put({

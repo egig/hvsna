@@ -1,170 +1,192 @@
 import type { ITrackerRepository } from "../../domain/tracker/ITrackerRepository";
+import type { ITrackerLogRepository } from "../../domain/tracker/ITrackerLogRepository";
 import type {
   Tracker,
-  TrackerLog,
   TrackerCreateInput,
   TrackerUpdateInput,
-  TrackerLogCreateInput,
-  TrackerLogUpdateInput,
-  TrackerQuery,
-  EvaluationConfig,
-  EvaluationResult,
-} from "../../domain/tracker/ITrackerRepository";
-import { evaluate } from "./evaluation";
+} from "../../domain/tracker/Tracker";
+import type { TrackerLog } from "../../domain/tracker/TrackerLog";
+import { TrackerNotFoundError } from "../../domain/tracker/TrackerErrors";
 
-export interface TrackerStats {
-  total: number;
-  count: number;
-  average: number;
-  lastValue: number | null;
-  previousValue: number | null;
-  todayTotal: number;
-  todayDone: boolean;
-  streak: number;
+export interface TrackerProgress {
+  currentValue: number;
+  targetValue: number | null;
+  percentage: number | null;
+  isComplete: boolean;
 }
 
-function dayRange(ts: number): [number, number] {
-  const d = new Date(ts);
-  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  return [start, start + 86_399_999];
+export interface TrackerStats {
+  count: number;
+  sum: number;
+  average: number;
 }
 
 export class TrackerUseCases {
-  constructor(private readonly repository: ITrackerRepository) {}
+  constructor(
+    private readonly trackerRepository: ITrackerRepository,
+    private readonly trackerLogRepository: ITrackerLogRepository
+  ) {}
 
-  createTracker(input: TrackerCreateInput): Promise<Tracker> {
-    return this.repository.createTracker(input);
+  async createTracker(input: TrackerCreateInput): Promise<Tracker> {
+    return await this.trackerRepository.create(input);
   }
 
-  updateTracker(id: string, input: TrackerUpdateInput): Promise<Tracker> {
-    return this.repository.updateTracker(id, input);
+  async updateTracker(id: string, input: TrackerUpdateInput): Promise<Tracker> {
+    return await this.trackerRepository.update(id, input);
   }
 
-  deleteTracker(id: string): Promise<void> {
-    return this.repository.deleteTracker(id);
-  }
-
-  getTracker(id: string): Promise<Tracker | null> {
-    return this.repository.findTrackerById(id);
-  }
-
-  getTrackers(): Promise<Tracker[]> {
-    return this.repository.findTrackers();
-  }
-
-  createLog(input: TrackerLogCreateInput): Promise<TrackerLog> {
-    return this.repository.createLog(input);
-  }
-
-  updateLog(id: string, input: TrackerLogUpdateInput): Promise<TrackerLog> {
-    return this.repository.updateLog(id, input);
-  }
-
-  deleteLog(id: string): Promise<void> {
-    return this.repository.deleteLog(id);
-  }
-
-  getLogs(query?: TrackerQuery): Promise<TrackerLog[]> {
-    return this.repository.findLogs(query);
-  }
-
-  async getEvaluationResult(
-    trackerId: string,
-    evaluationId: string,
-    todayTimestamp?: number
-  ): Promise<EvaluationResult> {
-    const tracker = await this.repository.findTrackerById(trackerId);
-    const evaluation = tracker?.evaluations?.find((e) => e.id === evaluationId);
-    if (!evaluation) {
-      return {
-        evaluationId: evaluationId,
-        metric: "unknown",
-        value: 0,
-        window: "today",
-      };
-    }
-    const logs = await this.repository.findLogs({ trackerId });
-    return evaluate(evaluation, logs, todayTimestamp ?? Date.now());
-  }
-
-  async getStats(
-    trackerId: string,
-    todayTimestamp?: number
-  ): Promise<TrackerStats> {
-    const logs = await this.repository.findLogs({ trackerId });
-
-    const byOccurred = [...logs].sort(
-      (a, b) =>
-        (b.occurredAt ?? b.createdAt ?? 0) - (a.occurredAt ?? a.createdAt ?? 0)
+  async deleteTracker(id: string): Promise<void> {
+    // Delete all logs associated with this tracker
+    const logs = await this.trackerLogRepository.findByTrackerId(id);
+    await Promise.all(
+      logs.map((log) => this.trackerLogRepository.delete(log.id))
     );
-    const values = logs.map((l) => l.value ?? 0);
-    const total = values.reduce((s, v) => s + v, 0);
-    const count = logs.length;
-    const average = count > 0 ? total / count : 0;
-    const lastValue =
-      byOccurred.length > 0 ? byOccurred[0].value ?? null : null;
-    const previousValue =
-      byOccurred.length > 1 ? byOccurred[1].value ?? null : null;
 
-    let todayTotal = 0;
-    let todayDone = false;
-    if (todayTimestamp) {
-      const [dayStart, dayEnd] = dayRange(todayTimestamp);
-      const todayLogs = logs.filter((l) => {
-        const ts = l.occurredAt ?? 0;
-        return ts >= dayStart && ts <= dayEnd;
-      });
-      todayTotal = todayLogs.reduce((s, l) => s + (l.value ?? 0), 0);
-      todayDone = todayLogs.some((l) => l.valueBool === true) || todayTotal > 0;
+    // Delete the tracker
+    await this.trackerRepository.delete(id);
+  }
+
+  async getTracker(id: string): Promise<Tracker | null> {
+    return await this.trackerRepository.findById(id);
+  }
+
+  async getTrackers(): Promise<Tracker[]> {
+    return await this.trackerRepository.findTrackers();
+  }
+
+  async logValue(
+    trackerId: string,
+    value: number,
+    note?: string,
+    occurredAt?: number
+  ): Promise<TrackerLog> {
+    const tracker = await this.trackerRepository.findById(trackerId);
+    if (!tracker) {
+      throw new TrackerNotFoundError(trackerId);
     }
 
-    // Calculate streak - consecutive days with logs
-    let streak = 0;
-    if (todayTimestamp && count > 0) {
-      const MS_PER_DAY = 86_400_000;
-      const logDates = new Set<number>();
-      logs.forEach((l) => {
-        const ts = l.occurredAt ?? l.createdAt ?? 0;
-        const dayStart = Math.floor(ts / MS_PER_DAY) * MS_PER_DAY;
-        logDates.add(dayStart);
-      });
+    return await this.trackerLogRepository.create({
+      trackerId,
+      value,
+      note,
+      occurredAt,
+    });
+  }
 
-      const sortedDates = Array.from(logDates).sort((a, b) => b - a);
-      const todayDayStart =
-        Math.floor(todayTimestamp / MS_PER_DAY) * MS_PER_DAY;
-
-      // Allow current day to not yet be logged (streak intact from yesterday)
-      let currentDay = todayDayStart;
-      if (!logDates.has(todayDayStart) && sortedDates.length > 0) {
-        const diff = (todayDayStart - sortedDates[0]) / MS_PER_DAY;
-        if (diff > 1) {
-          streak = 0;
-        } else {
-          currentDay = sortedDates[0];
-        }
-      }
-
-      // Count consecutive days
-      streak = 0;
-      for (const date of sortedDates) {
-        if (date === currentDay) {
-          streak++;
-          currentDay -= MS_PER_DAY;
-        } else {
-          break;
-        }
-      }
+  async getTrackerProgress(
+    trackerId: string,
+    period: "day" | "week" | "month"
+  ): Promise<TrackerProgress> {
+    const tracker = await this.trackerRepository.findById(trackerId);
+    if (!tracker) {
+      throw new TrackerNotFoundError(trackerId);
     }
+
+    const { startTime, endTime } = this.getPeriodTimestamps(period);
+    const logs = await this.trackerLogRepository.findByTimestampRange(
+      trackerId,
+      startTime,
+      endTime
+    );
+
+    const targetValue = tracker.target ? parseFloat(tracker.target) : null;
+    let currentValue = 0;
+
+    switch (tracker.inputMode) {
+      case "toggle":
+        currentValue = logs.length;
+        break;
+      case "add":
+        currentValue = logs.reduce((sum, log) => sum + log.value, 0);
+        break;
+      case "set":
+        currentValue = logs.length > 0 ? logs[0].value : 0;
+        break;
+    }
+
+    const percentage =
+      targetValue !== null && targetValue > 0
+        ? (currentValue / targetValue) * 100
+        : null;
+    const isComplete =
+      targetValue !== null ? currentValue >= targetValue : false;
 
     return {
-      total,
-      count,
-      average,
-      lastValue,
-      previousValue,
-      todayTotal,
-      todayDone,
-      streak,
+      currentValue,
+      targetValue,
+      percentage,
+      isComplete,
     };
+  }
+
+  async getTrackerStats(
+    trackerId: string,
+    period: "day" | "week" | "month"
+  ): Promise<TrackerStats> {
+    const { startTime, endTime } = this.getPeriodTimestamps(period);
+    const logs = await this.trackerLogRepository.findByTimestampRange(
+      trackerId,
+      startTime,
+      endTime
+    );
+
+    const count = logs.length;
+    const sum = logs.reduce((sum, log) => sum + log.value, 0);
+    const average = count > 0 ? sum / count : 0;
+
+    return {
+      count,
+      sum,
+      average,
+    };
+  }
+
+  async getRecentLogs(
+    trackerId: string,
+    limit: number = 10
+  ): Promise<TrackerLog[]> {
+    const logs = await this.trackerLogRepository.findByTrackerId(trackerId);
+    return logs.slice(0, limit);
+  }
+
+  async getLatestLog(trackerId: string): Promise<TrackerLog | null> {
+    return await this.trackerLogRepository.getLatestLog(trackerId);
+  }
+
+  private getPeriodTimestamps(period: "day" | "week" | "month"): {
+    startTime: number;
+    endTime: number;
+  } {
+    const now = Date.now();
+    const msPerDay = 24 * 60 * 60 * 1000;
+
+    let startTime: number;
+    let endTime: number;
+
+    switch (period) {
+      case "day":
+        // Start of today (midnight)
+        startTime = new Date().setHours(0, 0, 0, 0);
+        // End of today (end of day)
+        endTime = new Date().setHours(23, 59, 59, 999);
+        break;
+      case "week":
+        // Start of week (7 days ago)
+        startTime = now - 7 * msPerDay;
+        // End of week (now)
+        endTime = now;
+        break;
+      case "month":
+        // Start of month (30 days ago)
+        startTime = now - 30 * msPerDay;
+        // End of month (now)
+        endTime = now;
+        break;
+      default:
+        startTime = now;
+        endTime = now;
+    }
+
+    return { startTime, endTime };
   }
 }

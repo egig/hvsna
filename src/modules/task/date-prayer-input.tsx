@@ -18,6 +18,7 @@ interface DatePrayerInputProps {
   repeatEnd?: RepeatEnd;
   repeatEndDate?: string | null;
   repeatEndOccurrences?: number;
+  forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onRepeatChange?: (
     repeat: TaskRepeat,
     interval: number,
@@ -42,6 +43,7 @@ export function DatePrayerInput({
   repeatEnd = "never",
   repeatEndDate = null,
   repeatEndOccurrences = 1,
+  forceRepeat = false,
   onRepeatChange,
   onChange,
 }: DatePrayerInputProps) {
@@ -99,6 +101,7 @@ export function DatePrayerInput({
         selectedRepeatEnd={repeatEnd}
         selectedRepeatEndDate={repeatEndDate}
         selectedRepeatEndOccurrences={repeatEndOccurrences}
+        forceRepeat={forceRepeat}
         onConfirm={(
           date,
           time,

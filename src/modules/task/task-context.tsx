@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
+import { createTrackerUseCases } from "../../usecases/tracker/TrackerUseCasesFactory";
 import { queryKeys } from "../query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
@@ -36,11 +37,34 @@ interface TaskContextType {
   reset: () => void;
   generateOccurrencesForTemplate: (template: RecurringTask) => Promise<void>;
 
+  // Tracker log modal state
+  trackerLogTask: {
+    taskId: string;
+    taskName: string;
+    inputMode: "toggle" | "add" | "set";
+    unit?: string;
+    recurringTaskId: string;
+  } | null;
+  setTrackerLogTask: (
+    task: {
+      taskId: string;
+      taskName: string;
+      inputMode: "toggle" | "add" | "set";
+      unit?: string;
+      recurringTaskId: string;
+    } | null
+  ) => void;
+  submitTrackerLog: (log: {
+    value: number;
+    note?: string;
+    occurredAt: number;
+  }) => Promise<void>;
+
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
   openCreateTaskForm: (options?: { projectId?: string }) => void;
-  openEditTaskForm: (taskId: string, options?: { listId?: string }) => void;
+  openEditTaskForm: (taskId: string, options?: { projectId?: string }) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;
   preselectedListId: string | null;
@@ -60,6 +84,7 @@ export const TaskProvider: React.FC<{
   const { settings } = useSettings();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
+  const trackerUseCases = createTrackerUseCases(db);
   const [task, setTask] = useState<Task | null>(null);
 
   // Local form state
@@ -68,6 +93,15 @@ export const TaskProvider: React.FC<{
   const [preselectedListId, setPreselectedListId] = useState<string | null>(
     null
   );
+
+  // Tracker log modal state
+  const [trackerLogTask, setTrackerLogTask] = useState<{
+    taskId: string;
+    taskName: string;
+    inputMode: "toggle" | "add" | "set";
+    unit?: string;
+    recurringTaskId: string;
+  } | null>(null);
 
   useEffect(() => {
     if (taskId) {
@@ -109,15 +143,18 @@ export const TaskProvider: React.FC<{
   };
 
   // Local form functions
-  const openCreateTaskForm = (options?: { listId?: string }) => {
+  const openCreateTaskForm = (options?: { projectId?: string }) => {
     setEditingTaskId(null);
-    setPreselectedListId(options?.listId || null);
+    setPreselectedListId(options?.projectId || null);
     setFormOpen(true);
   };
 
-  const openEditTaskForm = (taskId: string, options?: { listId?: string }) => {
+  const openEditTaskForm = (
+    taskId: string,
+    options?: { projectId?: string }
+  ) => {
     setEditingTaskId(taskId);
-    setPreselectedListId(options?.listId || null);
+    setPreselectedListId(options?.projectId || null);
     setFormOpen(true);
   };
 
@@ -125,6 +162,78 @@ export const TaskProvider: React.FC<{
     setEditingTaskId(null);
     setPreselectedListId(null);
     setFormOpen(false);
+  };
+
+  const submitTrackerLog = async (log: {
+    value: number;
+    note?: string;
+    occurredAt: number;
+  }) => {
+    if (!trackerLogTask) return;
+
+    try {
+      // Create a TrackerLog entry using proper usecase
+      await trackerUseCases.logValue(
+        trackerLogTask.recurringTaskId,
+        log.value,
+        log.note,
+        log.occurredAt
+      );
+
+      // Update the task status to 2 (logged)
+      const currentTask = await taskUseCases.getTaskById(trackerLogTask.taskId);
+      if (currentTask) {
+        logger.info(
+          "Updating task status to 2 (logged) for task:",
+          trackerLogTask.taskId
+        );
+        logger.info("Current task status before update:", currentTask.status);
+        const updatedTask = await taskUseCases.updateTask(
+          trackerLogTask.taskId,
+          {
+            status: 2,
+          }
+        );
+        logger.info(
+          "Task status updated successfully, new status:",
+          updatedTask.status
+        );
+      } else {
+        logger.error("Task not found for logging:", trackerLogTask.taskId);
+      }
+
+      // Cancel reminders for tracker tasks
+      if (settings.notifications) {
+        try {
+          await ReminderService.cancelTaskReminders(trackerLogTask.taskId);
+        } catch (error) {
+          logger.error("Failed to cancel task reminders:", error);
+        }
+      }
+
+      logger.info("Invalidating task queries after status update");
+      invalidateTaskQueries();
+
+      // Force refetch of specific queries
+      const today = getToday();
+      const todayString = today.toString();
+      const tomorrowString = today.next().toString();
+
+      logger.info("Force refetching today tasks");
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.todayTasks(todayString),
+      });
+      logger.info("Force refetching upcoming tasks");
+      await queryClient.refetchQueries({
+        queryKey: queryKeys.upcomingTasks(tomorrowString),
+      });
+
+      logger.info("Task queries invalidated, setting trackerLogTask to null");
+      setTrackerLogTask(null);
+    } catch (error) {
+      logger.error("Failed to submit tracker log:", error);
+      throw error;
+    }
   };
 
   const updateTaskWithLog = async (
@@ -141,7 +250,9 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for completing tasks
   const completeTaskMutation = useMutation({
-    mutationFn: (id: string) => taskUseCases.completeTask(id),
+    mutationFn: async (id: string) => {
+      return taskUseCases.completeTask(id);
+    },
     onSuccess: async (updatedTask: Task, id) => {
       // Cancel reminders when task is completed
       if (settings.notifications) {
@@ -314,6 +425,9 @@ export const TaskProvider: React.FC<{
     reset: () => setTask(null),
     generateOccurrencesForTemplate: (template: RecurringTask) =>
       generateOccurrencesMutation.mutateAsync(template),
+    trackerLogTask,
+    setTrackerLogTask,
+    submitTrackerLog,
     editingTaskId,
     formOpen,
     openCreateTaskForm,

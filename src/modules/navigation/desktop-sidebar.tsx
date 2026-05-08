@@ -8,6 +8,20 @@ import {
   HvPanelLeft,
   HvChartArea,
   HvChartAreaFilled,
+  HvCalendar,
+  HvCalendarFilled,
+  HvCalendarMonth,
+  HvCalendarMonthFilled,
+  HvOutlineInbox,
+  HvHiInbox,
+  HvLayoutList,
+  HvLayoutListFilled,
+  HvSettings,
+  HvSettingsFilled,
+  HvTag,
+  HvWallet,
+  HvLandmark,
+  HvSquareRoundedPlusFilled,
 } from "@/modules/icons";
 import { Link, useLocation } from "react-router";
 import { Button } from "./button";
@@ -18,19 +32,9 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useProjectContext } from "../task/project-context";
 import { DeleteProjectModal } from "../task/delete-project-modal";
 import { useTasks } from "../task/use-tasks";
+import { useTaskContext } from "../task/task-context";
 import { useState } from "react";
 import { useAuth } from "../auth/use-auth";
-import {
-  HvCalendarMonth,
-  HvCalendarMonthFilled,
-  HvLayoutList,
-  HvLayoutListFilled,
-  HvSettings,
-  HvSettingsFilled,
-  HvTag,
-  HvWallet,
-  HvLandmark,
-} from "@/modules/icons";
 import { UserRound } from "lucide-react";
 
 interface DesktopSidebarProps {
@@ -47,6 +51,7 @@ export function DesktopSidebar({
   const { t } = useLanguageContext();
   const location = useLocation();
   const { openProjectForm } = useProjectContext();
+  const { openCreateTaskForm } = useTaskContext();
   const { user, isAuthenticated, logout } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
@@ -96,8 +101,15 @@ export function DesktopSidebar({
 
   const tabs = [
     {
-      path: "/tasks",
-      label: t("tasks"),
+      path: "/today",
+      label: t("today"),
+      icon: <HvCalendar />,
+      activeIcon: <HvCalendarFilled />,
+      context: "today",
+    },
+    {
+      path: "/upcoming",
+      label: t("upcoming"),
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
@@ -196,6 +208,23 @@ export function DesktopSidebar({
       </div>
 
       <div className="flex-1 p-2 space-y-2">
+        {/* Add Task Button */}
+        <button
+          onClick={() => openCreateTaskForm()}
+          className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors hover:bg-gray-100 ${
+            collapsed ? "justify-center" : "space-x-1"
+          }`}
+          aria-label={t("add_new_task") || "Add new task"}
+        >
+          <span className="text-xl">
+            <HvSquareRoundedPlusFilled />
+          </span>
+          {!collapsed && (
+            <span className="text-sm">
+              {t("add_new_task") || "Add new task"}
+            </span>
+          )}
+        </button>
         {mainTabs.map((tab) => {
           const isActive = getIsActive(tab.path);
           return (

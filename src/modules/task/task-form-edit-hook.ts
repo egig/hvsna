@@ -9,6 +9,7 @@ import { useProjects } from "./use-projects";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
+import type { RecurringTask } from "./recurring-task";
 import {
   promoteTaskToRecurring,
   demoteTaskFromRecurring,
@@ -46,6 +47,7 @@ export interface UseTaskFormReturn {
   removeTime: boolean;
   formData: EditFormData;
   projects: any[];
+  wasTracker: boolean; // True if the parent template is a tracker
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
   handleDeleteSingle: () => Promise<void>;
@@ -69,11 +71,18 @@ export const useTaskFormEdit = (
   const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
     useTaskContext();
   const { projects } = useProjects();
-  const { createRecurringTask, deleteRecurringTask, updateRecurringTask } =
-    useRecurringTasks();
+  const {
+    createRecurringTask,
+    deleteRecurringTask,
+    updateRecurringTask,
+    getRecurringTask,
+  } = useRecurringTasks();
   const { db } = usePouchDB();
 
   const [task, setTask] = useState<Task | null>(null);
+  const [parentTemplate, setParentTemplate] = useState<RecurringTask | null>(
+    null
+  );
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createHijriDate } = useHijriDate();
@@ -94,6 +103,9 @@ export const useTaskFormEdit = (
       endOccurrences: 1,
     },
     tags: [],
+    asTracker: false,
+    inputMode: undefined,
+    unit: undefined,
   });
 
   const updateFormData = (updates: Partial<EditFormData>) => {
@@ -188,6 +200,11 @@ export const useTaskFormEdit = (
               formData.repeat.end === "after_occurrences"
                 ? formData.repeat.endOccurrences
                 : undefined,
+            asTracker: formData.asTracker,
+            inputMode: formData.inputMode,
+            unit: formData.unit,
+            target: formData.target,
+            period: formData.period,
           },
           {
             createRecurringTask,
@@ -357,6 +374,11 @@ export const useTaskFormEdit = (
             repeat: pendingOperation.repeatConfig.repeat,
             repeatInterval: pendingOperation.repeatConfig.interval,
             projectId: pendingOperation.taskInput.projectId ?? undefined,
+            asTracker: formData.asTracker,
+            inputMode: formData.inputMode,
+            unit: formData.unit,
+            target: formData.target,
+            period: formData.period,
           },
           {
             updateTask,
@@ -415,8 +437,13 @@ export const useTaskFormEdit = (
         endDate: null,
         endOccurrences: 1,
       },
+      asTracker: parentTemplate?.asTracker || false,
+      inputMode: parentTemplate?.inputMode,
+      unit: parentTemplate?.unit,
+      target: parentTemplate?.target,
+      period: parentTemplate?.period,
     });
-  }, [task, createHijriDate]);
+  }, [task, createHijriDate, parentTemplate]);
 
   useEffect(() => {
     if (taskId) {
@@ -427,6 +454,23 @@ export const useTaskFormEdit = (
       });
     }
   }, [taskId, getTask]);
+
+  // Load parent RecurringTask template when task has recurringTaskId
+  useEffect(() => {
+    if (task?.recurringTaskId) {
+      getRecurringTask(task.recurringTaskId)
+        .then((template) => {
+          setParentTemplate(template);
+        })
+        .catch((err) => {
+          logger.error("Failed to load parent template:", err);
+        });
+    } else {
+      setParentTemplate(null);
+    }
+  }, [task?.recurringTaskId, getRecurringTask]);
+
+  const wasTracker = parentTemplate?.asTracker === true;
 
   return {
     task,
@@ -449,5 +493,6 @@ export const useTaskFormEdit = (
     updateScheduleAt,
     updateRepeatConfig,
     projects,
+    wasTracker,
   };
 };
