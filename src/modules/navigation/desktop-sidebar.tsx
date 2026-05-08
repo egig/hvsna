@@ -115,13 +115,6 @@ export function DesktopSidebar({
       context: "upcoming",
     },
     {
-      path: "/inbox",
-      label: t("inbox") || "Inbox",
-      icon: <HvOutlineInbox />,
-      activeIcon: <HvHiInbox />,
-      context: "inbox",
-    },
-    {
       path: "/tracks",
       label: t("tracks") || "Tracks",
       icon: <HvChartArea />,

@@ -1,54 +1,43 @@
 import React from "react";
 import { Page } from "../navigation";
 import { Navbar } from "../navigation/navbar";
-import { useRecurringTasks } from "./use-recurring-tasks";
+import { useTrackers } from "../tracker/useTrackers";
+import { useTrackerLogs } from "../tracker/useTrackerLogs";
 import { EmptyState } from "../components/empty-state";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { HvChartArea } from "@/modules/icons";
-import { usePouchDB } from "../../pouchdb";
-import type { RecurringTask } from "./recurring-task";
+import type { Tracker } from "../../domain/tracker/Tracker";
 
 interface TrackerCardProps {
-  tracker: RecurringTask;
+  tracker: Tracker;
 }
 
 function TrackerCard({ tracker }: TrackerCardProps) {
   const { t } = useLanguageContext();
-  const { db } = usePouchDB();
-  const [logCount, setLogCount] = React.useState<number>(0);
-  const [lastValue, setLastValue] = React.useState<number | null>(null);
+  const { getLatestLog } = useTrackerLogs();
+  const [latestLog, setLatestLog] = React.useState<any>(null);
 
   React.useEffect(() => {
-    const loadTrackerLogs = async () => {
+    const loadLatestLog = async () => {
       try {
-        const result = await db.allDocs({
-          startkey: `tlog_${tracker.id}_`,
-          endkey: `tlog_${tracker.id}_\uffff`,
-        });
-        setLogCount(result.rows.length);
-
-        if (result.rows.length > 0) {
-          const latestDoc = (await db.get(
-            result.rows[result.rows.length - 1].id
-          )) as any;
-          setLastValue(latestDoc.value);
-        }
+        const log = await getLatestLog(tracker.id);
+        setLatestLog(log);
       } catch (err) {
-        console.error("Failed to load tracker logs:", err);
+        console.error("Failed to load latest log:", err);
       }
     };
 
-    loadTrackerLogs();
-  }, [db, tracker.id]);
+    loadLatestLog();
+  }, [tracker.id, getLatestLog]);
 
   const displayValue = () => {
     if (tracker.inputMode === "toggle") {
-      return logCount > 0 ? String(logCount) : "–";
+      return latestLog ? "1" : "–";
     }
     if (tracker.inputMode === "set") {
-      return lastValue !== null ? String(lastValue) : "–";
+      return latestLog !== null ? String(latestLog.value) : "–";
     }
-    return logCount > 0 ? String(logCount) : "–";
+    return latestLog !== null ? String(latestLog.value) : "–";
   };
 
   const subLabel =
@@ -75,26 +64,22 @@ function TrackerCard({ tracker }: TrackerCardProps) {
 
 export function Tracks() {
   const { t } = useLanguageContext();
-  const { getRecurringTasks, loading, error } = useRecurringTasks();
+  const { getTrackers, loading, error } = useTrackers();
 
-  const [trackers, setTrackers] = React.useState<RecurringTask[]>([]);
+  const [trackers, setTrackers] = React.useState<Tracker[]>([]);
 
   React.useEffect(() => {
     const loadTrackers = async () => {
       try {
-        const allRecurringTasks = await getRecurringTasks();
-        console.log(allRecurringTasks, "add rtask");
-        const trackerTasks = allRecurringTasks.filter(
-          (task) => task.asTracker === true
-        );
-        setTrackers(trackerTasks);
+        const allTrackers = await getTrackers();
+        setTrackers(allTrackers);
       } catch (err) {
         console.error("Failed to load trackers:", err);
       }
     };
 
     loadTrackers();
-  }, [getRecurringTasks]);
+  }, [getTrackers]);
 
   return (
     <Page

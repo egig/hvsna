@@ -2,7 +2,7 @@ import type { PrayerTime, TaskRepeat } from "./types";
 import type {
   InputMode,
   EvaluationConfig,
-} from "../../domain/tracker/ITrackerRepository";
+} from "../../domain/tracker/types";
 
 export interface RecurringTask {
   id: string;

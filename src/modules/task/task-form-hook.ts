@@ -130,7 +130,6 @@ export const useTaskForm = (
       const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
 
-      console.log("taskData", taskData);
 
       if (isRecurring && taskData.atDateHijri) {
         // Create a RecurringTask template, then generate all instances
@@ -176,8 +175,8 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          projectId: formData.projectId || undefined,
-          tags: formData.tags.length > 0 ? formData.tags : undefined,
+          projectId: formData.projectId || null,
+          tags: formData.tags.length > 0 ? formData.tags : [],
         };
 
         const result = await createTask(taskInput);

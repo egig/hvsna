@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
+import { createTrackerUseCases } from "../../usecases/tracker/TrackerUseCasesFactory";
 import { queryKeys } from "../query-keys";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
@@ -83,6 +84,7 @@ export const TaskProvider: React.FC<{
   const { settings } = useSettings();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
+  const trackerUseCases = createTrackerUseCases(db);
   const [task, setTask] = useState<Task | null>(null);
 
   // Local form state
@@ -170,17 +172,13 @@ export const TaskProvider: React.FC<{
     if (!trackerLogTask) return;
 
     try {
-      // Create a TrackerLog entry
-      const trackerLogDoc = {
-        _id: `tlog_${crypto.randomUUID()}`,
-        recurringTaskId: trackerLogTask.recurringTaskId,
-        value: log.value,
-        note: log.note,
-        occurredAt: log.occurredAt,
-        createdAt: Date.now(),
-      };
-
-      await db.put(trackerLogDoc);
+      // Create a TrackerLog entry using proper usecase
+      await trackerUseCases.logValue(
+        trackerLogTask.recurringTaskId,
+        log.value,
+        log.note,
+        log.occurredAt
+      );
 
       // Update the task status to 2 (logged)
       const currentTask = await taskUseCases.getTaskById(trackerLogTask.taskId);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "../navigation/modal";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { InputMode } from "../../domain/tracker/ITrackerRepository";
+import type { InputMode } from "../../domain/tracker/types";
 
 interface TrackerLogModalProps {
   isOpen: boolean;
