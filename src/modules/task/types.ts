@@ -25,6 +25,7 @@ export class Task {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string | null;
+  trackerId?: string | null;
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
@@ -65,6 +66,7 @@ export interface TaskCreateInput {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string;
+  trackerId?: string;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
@@ -84,6 +86,7 @@ export interface TaskUpdateInput {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string | null;
+  trackerId?: string | null;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;

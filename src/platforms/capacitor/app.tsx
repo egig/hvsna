@@ -17,6 +17,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/modules/query-client";
 import { TaskProvider } from "@/modules/task/task-context";
 import { ProjectProvider } from "@/modules/task/project-context";
+import { TrackerProvider } from "@/modules/tracker/tracker-context";
 import { AuthProvider } from "@/modules/auth";
 import { SettingsProvider } from "@/modules/settings";
 import { SystemProvider } from "@/modules/system";
@@ -96,14 +97,16 @@ export default function App({
                         <PouchDBProvider dbInstance={db}>
                           <SyncProvider>
                             <LanguageProviderWrapper>
-                              <TaskProvider>
-                                <ProjectProvider>
-                                  <MemoryRouter>
-                                    <PostHogSessionTracker platform="capacitor" />
-                                    <AppRoutes />
-                                  </MemoryRouter>
-                                </ProjectProvider>
-                              </TaskProvider>
+                              <TrackerProvider>
+                                <TaskProvider>
+                                  <ProjectProvider>
+                                    <MemoryRouter>
+                                      <PostHogSessionTracker platform="capacitor" />
+                                      <AppRoutes />
+                                    </MemoryRouter>
+                                  </ProjectProvider>
+                                </TaskProvider>
+                              </TrackerProvider>
                             </LanguageProviderWrapper>
                           </SyncProvider>
                         </PouchDBProvider>

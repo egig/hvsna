@@ -7,6 +7,47 @@ import type {
 } from "../../domain/tracker/TrackerLog";
 import type { ITrackerLogRepository } from "../../domain/tracker/ITrackerLogRepository";
 
+class PouchDBTrackerLogDocument {
+  _id?: string;
+  _rev?: string | undefined;
+  type: "tlog" = "tlog";
+  trackerId?: string;
+  value?: number;
+  note?: string;
+  occurredAt?: number;
+  createdAt?: number;
+  updatedAt?: number;
+
+  constructor(o: any) {
+    Object.assign(this, o);
+  }
+
+  toTrackerLog(): TrackerLog {
+    return {
+      id: this._id || "",
+      trackerId: this.trackerId || "",
+      value: this.value || 0,
+      note: this.note,
+      occurredAt: this.occurredAt || 0,
+      createdAt: this.createdAt || 0,
+      updatedAt: this.updatedAt || 0,
+    };
+  }
+
+  static fromTrackerLog(t: TrackerLog): PouchDBTrackerLogDocument {
+    const doc = new PouchDBTrackerLogDocument(t);
+    doc._id = t.id;
+    doc._rev = (t as any)._rev;
+    doc.trackerId = t.trackerId;
+    doc.value = t.value;
+    doc.note = t.note;
+    doc.occurredAt = t.occurredAt;
+    doc.createdAt = t.createdAt;
+    doc.updatedAt = t.updatedAt;
+    return doc;
+  }
+}
+
 export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
   private readonly db: PouchDB.Database;
 
@@ -57,10 +98,10 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
       updatedAt: now,
     };
 
-    const response = await this.db.put({
-      _id: trackerLog.id,
-      ...trackerLog,
-    });
+    const doc = PouchDBTrackerLogDocument.fromTrackerLog(trackerLog);
+    delete doc._rev;
+
+    const response = await this.db.put(doc);
 
     return {
       ...trackerLog,
@@ -70,23 +111,29 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
 
   async update(id: string, input: TrackerLogUpdateInput): Promise<TrackerLog> {
     const existingDoc = await this.db.get(id);
-    const updateData = {
-      ...existingDoc,
+    const existingLog = new PouchDBTrackerLogDocument(
+      existingDoc
+    ).toTrackerLog();
+
+    const updateData: TrackerLog = {
+      ...existingLog,
       ...input,
       updatedAt: Date.now(),
     };
 
-    const response = await this.db.put(updateData);
-    const updatedDoc = {
+    const doc = PouchDBTrackerLogDocument.fromTrackerLog(updateData);
+    const response = await this.db.put(doc);
+
+    const updatedDoc = new PouchDBTrackerLogDocument({
       ...updateData,
       _rev: response.rev,
-    };
+    });
 
-    return updatedDoc as unknown as TrackerLog;
+    return updatedDoc.toTrackerLog();
   }
 
   async delete(id: string): Promise<void> {
-    const doc = await this.db.get(id);
+    const doc: PouchDBTrackerLogDocument = await this.db.get(id);
 
     if (!doc._rev) {
       throw new Error("Document revision is required for deletion");
@@ -97,8 +144,8 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
 
   async findById(id: string): Promise<TrackerLog | null> {
     try {
-      const doc = await this.db.get(id);
-      return doc as unknown as TrackerLog;
+      const doc: PouchDBTrackerLogDocument = await this.db.get(id);
+      return new PouchDBTrackerLogDocument(doc).toTrackerLog();
     } catch (err) {
       if ((err as any).status === 404) {
         return null;
@@ -110,14 +157,17 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
   async find(query?: TrackerLogQuery): Promise<TrackerLog[]> {
     await this.db.createIndex({
       index: {
-        fields: ["trackerId", "occurredAt"],
+        fields: ["type", "trackerId", "occurredAt"],
       },
     });
 
     const mangoQuery: any = {
-      selector: {},
+      selector: {
+        type: "tlog",
+      },
       sort: [
         {
+          type: "desc",
           trackerId: "desc",
           occurredAt: "desc",
         },
@@ -144,7 +194,9 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
 
     const result = await this.db.find(mangoQuery);
 
-    return (result as any).docs.map((doc: any) => doc as unknown as TrackerLog);
+    return (result as any).docs.map((doc: PouchDBTrackerLogDocument) =>
+      new PouchDBTrackerLogDocument(doc).toTrackerLog()
+    );
   }
 
   async findByTrackerId(trackerId: string): Promise<TrackerLog[]> {
@@ -160,6 +212,11 @@ export class PouchDBTrackerLogRepository implements ITrackerLogRepository {
   }
 
   async getLatestLog(trackerId: string): Promise<TrackerLog | null> {
+    console.log(
+      "call getLatestLog",
+      trackerId,
+      await this.db.allDocs({ include_docs: true })
+    );
     const logs = await this.find({ trackerId });
     return logs.length > 0 ? logs[0] : null;
   }

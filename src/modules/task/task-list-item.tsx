@@ -140,6 +140,11 @@ export function TaskListItem({
     }
   };
 
+  const handleLogClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    await checkAndHandleTrackerTask(task);
+  };
+
   const handleStatusClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -147,13 +152,6 @@ export function TaskListItem({
     let nextStatus: TaskStatus;
 
     if (task.status === 0) {
-      // Check if this is a tracker task before completing
-      const isTracker = await checkAndHandleTrackerTask(task);
-      if (isTracker) {
-        // Tracker modal opened, don't complete the task
-        return;
-      }
-
       // Complete the task
       updatePromise = completeTask(task.id as string);
       nextStatus = 1;
@@ -230,15 +228,27 @@ export function TaskListItem({
       layout
     >
       <div className="flex items-start gap-2">
-        <button
-          onClick={handleStatusClick}
-          className="p-0 shrink-0 leading-none transition-transform hover:scale-110 cursor-pointer"
-          style={{ marginTop: "1px" }}
-          aria-label={`Change status from ${task.status}`}
-          data-testid="status-toggle"
-        >
-          {getStatusIcon(task?.status || 0)}
-        </button>
+        {task.trackerId ? (
+          <button
+            onClick={handleLogClick}
+            className="px-3 py-1 shrink-0 text-sm font-medium bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded transition-colors cursor-pointer"
+            style={{ marginTop: "1px" }}
+            aria-label="Log tracker value"
+            data-testid="tracker-log-button"
+          >
+            {t("log") || "Log"}
+          </button>
+        ) : (
+          <button
+            onClick={handleStatusClick}
+            className="p-0 shrink-0 leading-none transition-transform hover:scale-110 cursor-pointer"
+            style={{ marginTop: "1px" }}
+            aria-label={`Change status from ${task.status}`}
+            data-testid="status-toggle"
+          >
+            {getStatusIcon(task?.status || 0)}
+          </button>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">

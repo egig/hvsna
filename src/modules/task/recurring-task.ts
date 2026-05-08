@@ -15,7 +15,7 @@ export interface RecurringTask {
   long?: number;
   timezone?: string;
   hijriDateOffset?: number;
-  projectId?: string;
+  projectId: string | null;
   tags?: string[];
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndDate?: string; // Hijri YYYYMMDD; used when repeatEnd = "on_date"

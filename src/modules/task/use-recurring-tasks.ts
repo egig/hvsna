@@ -6,11 +6,14 @@ import type {
   RecurringTaskUpdateInput,
 } from "./recurring-task";
 import { usePouchDB } from "../../pouchdb";
+import { createRecurringTaskUseCases } from "../../usecases/recurring-task/RecurringTaskUseCasesFactory";
 
 export function useRecurringTasks() {
   const { db } = usePouchDB();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const recurringTaskUseCases = createRecurringTaskUseCases(db);
 
   const createRecurringTask = useCallback(
     async (input: RecurringTaskCreateInput): Promise<RecurringTask> => {
@@ -18,46 +21,10 @@ export function useRecurringTasks() {
       setError(null);
 
       try {
-        const id = input.id || `rtask_${crypto.randomUUID()}`;
-        const now = Date.now();
-
-        const recurringTask: RecurringTask = {
-          id,
-          name: input.name,
-          description: input.description,
-          attributes: input.attributes,
-          repeat: input.repeat,
-          repeatInterval: input.repeatInterval ?? 1,
-          baseDateHijri: input.baseDateHijri,
-          atTime: input.atTime,
-          prayerTime: input.prayerTime,
-          lat: input.lat,
-          long: input.long,
-          timezone: input.timezone,
-          hijriDateOffset: input.hijriDateOffset,
-          projectId: input.projectId,
-          created_at: now,
-          updated_at: now,
-          repeatEnd: input.repeatEnd,
-          repeatEndDate: input.repeatEndDate,
-          repeatEndOccurrences: input.repeatEndOccurrences,
-          asTracker: input.asTracker,
-          inputMode: input.inputMode,
-          unit: input.unit,
-          target: input.target,
-          period: input.period,
-          evaluations: input.evaluations,
-        };
-
-        const response = await db.put({
-          _id: id,
-          ...recurringTask,
-        });
-
-        return {
-          ...recurringTask,
-          _rev: response.rev,
-        } as unknown as RecurringTask;
+        const recurringTask = await recurringTaskUseCases.createRecurringTask(
+          input
+        );
+        return recurringTask;
       } catch (err) {
         const errorMessage =
           err instanceof Error
@@ -69,7 +36,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db]
+    [recurringTaskUseCases]
   );
 
   const getRecurringTask = useCallback(
@@ -78,8 +45,11 @@ export function useRecurringTasks() {
       setError(null);
 
       try {
-        const doc = await db.get(id);
-        return doc as unknown as RecurringTask;
+        const recurringTask = await recurringTaskUseCases.getRecurringTask(id);
+        if (!recurringTask) {
+          throw new Error("Recurring task not found");
+        }
+        return recurringTask;
       } catch (err: any) {
         if (err.status === 404) {
           throw new Error("Recurring task not found");
@@ -92,7 +62,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db]
+    [recurringTaskUseCases]
   );
 
   const getRecurringTasks = useCallback(
@@ -101,24 +71,10 @@ export function useRecurringTasks() {
       setError(null);
 
       try {
-        const response = await db.allDocs({
-          include_docs: true,
-          startkey: "rtask_",
-          endkey: "rtask_\uffff",
-        });
-
-        let tasks = response.rows
-          .filter((row: any) => row.doc)
-          .map((row: any) => row.doc) as RecurringTask[];
-
-        // Apply filters if query is provided
-        if (query) {
-          if (query.repeat) {
-            tasks = tasks.filter((task) => task.repeat === query.repeat);
-          }
-        }
-
-        return tasks;
+        const recurringTasks = await recurringTaskUseCases.getRecurringTasks(
+          query
+        );
+        return recurringTasks;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to get recurring tasks";
@@ -128,7 +84,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db]
+    [recurringTaskUseCases]
   );
 
   const updateRecurringTask = useCallback(
@@ -140,24 +96,11 @@ export function useRecurringTasks() {
       setError(null);
 
       try {
-        const existingDoc = await db.get(id);
-
-        const updatedTask: RecurringTask = {
-          ...(existingDoc as unknown as RecurringTask),
-          ...input,
-          updated_at: Date.now(),
-        };
-
-        const response = await db.put({
-          _id: id,
-          _rev: existingDoc._rev,
-          ...updatedTask,
-        });
-
-        return {
-          ...updatedTask,
-          _rev: response.rev,
-        } as unknown as RecurringTask;
+        const recurringTask = await recurringTaskUseCases.updateRecurringTask(
+          id,
+          input
+        );
+        return recurringTask;
       } catch (err) {
         const errorMessage =
           err instanceof Error
@@ -169,7 +112,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db]
+    [recurringTaskUseCases]
   );
 
   const deleteRecurringTask = useCallback(
@@ -178,8 +121,7 @@ export function useRecurringTasks() {
       setError(null);
 
       try {
-        const doc = await db.get(id);
-        await db.remove(doc);
+        await recurringTaskUseCases.deleteRecurringTask(id);
       } catch (err) {
         const errorMessage =
           err instanceof Error
@@ -191,7 +133,7 @@ export function useRecurringTasks() {
         setLoading(false);
       }
     },
-    [db]
+    [recurringTaskUseCases]
   );
 
   return {

@@ -10,6 +10,7 @@ import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
+import { useTrackerContext } from "./modules/tracker/tracker-context";
 import { useProjectContext } from "./modules/task/project-context";
 import ProjectFormContainer from "./modules/task/project-form-container";
 import { TrackerLogModal } from "./modules/tracker/tracker-log-modal";
@@ -38,7 +39,7 @@ function MobileLayout({
   params,
 }: MobileLayoutProps) {
   const { trackerLogTask, setTrackerLogTask, submitTrackerLog } =
-    useTaskContext();
+    useTrackerContext();
 
   return (
     <div className="h-[100dvh] flex flex-col">
@@ -95,15 +96,10 @@ function MobileLayout({
 }
 
 export default function TabLayout() {
-  const {
-    formOpen,
-    editingTaskId,
-    openCreateTaskForm,
-    closeTaskForm,
-    trackerLogTask,
-    setTrackerLogTask,
-    submitTrackerLog,
-  } = useTaskContext();
+  const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm } =
+    useTaskContext();
+  const { trackerLogTask, setTrackerLogTask, submitTrackerLog } =
+    useTrackerContext();
   const { formOpen: projectFormOpen, closeProjectForm } = useProjectContext();
   const location = useLocation();
   const params = useParams();

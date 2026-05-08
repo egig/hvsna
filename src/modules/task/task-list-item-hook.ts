@@ -1,4 +1,5 @@
 import { useTaskContext } from "./task-context";
+import { useTrackerContext } from "../tracker/tracker-context";
 import type { Task, TaskStatus } from "./types";
 import { useHijriDate } from "../calendar/hijri";
 import { usePouchDB } from "../../pouchdb";
@@ -6,8 +7,8 @@ import { useTrackers } from "../tracker/useTrackers";
 import logger from "../logger";
 
 export const useTaskListItem = () => {
-  const { completeTask, reopenTask, setTrackerLogTask } = useTaskContext();
-  const { db } = usePouchDB();
+  const { completeTask, reopenTask } = useTaskContext();
+  const { setTrackerLogTask } = useTrackerContext();
   const { getTracker } = useTrackers();
 
   const completeTaskWithLog = async (id: string): Promise<Task> => {
@@ -23,12 +24,12 @@ export const useTaskListItem = () => {
   };
 
   const checkAndHandleTrackerTask = async (task: Task): Promise<boolean> => {
-    if (!task.recurringTaskId) {
+    if (!task.trackerId) {
       return false;
     }
 
     try {
-      const tracker = await getTracker(task.recurringTaskId);
+      const tracker = await getTracker(task.trackerId);
       if (tracker) {
         // This is a tracker task - open log modal instead of completing
         setTrackerLogTask({
@@ -36,7 +37,7 @@ export const useTaskListItem = () => {
           taskName: task.name || "",
           inputMode: tracker.inputMode || "toggle",
           unit: tracker.unit,
-          recurringTaskId: task.recurringTaskId,
+          trackerId: task.trackerId,
         });
         return true; // Handled as tracker
       }

@@ -47,6 +47,7 @@ class PouchDBTaskDocument {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string;
+  trackerId?: string | null = null;
   projectId?: string | null = null;
   tags?: string[] | null = null;
 
@@ -79,6 +80,7 @@ class PouchDBTaskDocument {
       repeat: this.repeat,
       repeatInterval: this.repeatInterval,
       recurringTaskId: this.recurringTaskId,
+      trackerId: this.trackerId,
       projectId: this.projectId,
       tags: this.tags,
     });
@@ -93,6 +95,7 @@ class PouchDBTaskDocument {
     a.long = t.long;
     a.hijriDateOffset = t.hijriDateOffset;
     a.projectId = t.projectId || null;
+    a.trackerId = t.trackerId || null;
     a.tags = t.tags || [];
 
     if (!!t.atDateHijri) {
@@ -231,6 +234,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
       repeat: input.repeat,
       repeatInterval: input.repeatInterval,
       recurringTaskId: input.recurringTaskId,
+      trackerId: input.trackerId,
       projectId: input.projectId,
       tags: input.tags,
     });
