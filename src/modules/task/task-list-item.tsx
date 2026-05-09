@@ -1,5 +1,10 @@
 import React, { useRef, useState } from "react";
-import { motion, useMotionValue, useAnimation, type PanInfo } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useAnimation,
+  type PanInfo,
+} from "framer-motion";
 import { HvSquare, HvCheckSquare2, HvCalendar, HvCheck } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -49,19 +54,40 @@ export function TaskListItem({
   const SWIPE_VELOCITY = 300;
 
   const snapBack = () =>
-    controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 40 } });
+    controls.start({
+      x: 0,
+      transition: { type: "spring", stiffness: 400, damping: 40 },
+    });
 
   const getStatusIcon = (status: TaskStatus, isTracker = false) => {
     if (isTracker) {
-      return status === 2
-        ? <HvCheckSquare2 strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />
-        : <HvSquare strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />;
+      return status === 2 ? (
+        <HvCheckSquare2
+          strokeWidth={1}
+          size={24}
+          className="text-[var(--hvsna-primary-color)]"
+        />
+      ) : (
+        <HvSquare
+          strokeWidth={1}
+          size={24}
+          className="text-[var(--hvsna-primary-color)]"
+        />
+      );
     }
     switch (status) {
       case 1:
-        return <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />;
+        return (
+          <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
+        );
       case 2:
-        return <HvCheckSquare2 strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />;
+        return (
+          <HvCheckSquare2
+            strokeWidth={1}
+            size={24}
+            className="text-[var(--hvsna-primary-color)]"
+          />
+        );
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
       default:
@@ -308,8 +334,14 @@ export function TaskListItem({
             onClick={task.trackerId ? handleLogClick : handleStatusClick}
             className="p-0 shrink-0 leading-none transition-transform hover:scale-110 cursor-pointer"
             style={{ marginTop: "1px" }}
-            aria-label={task.trackerId ? "Log tracker value" : `Change status from ${task.status}`}
-            data-testid={task.trackerId ? "tracker-log-button" : "status-toggle"}
+            aria-label={
+              task.trackerId
+                ? "Log tracker value"
+                : `Change status from ${task.status}`
+            }
+            data-testid={
+              task.trackerId ? "tracker-log-button" : "status-toggle"
+            }
           >
             {getStatusIcon(task?.status || 0, !!task.trackerId)}
           </button>

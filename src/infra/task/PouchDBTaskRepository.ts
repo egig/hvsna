@@ -707,6 +707,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         type: "task",
         recurringTaskId,
       },
+      limit: 2147483647,
     });
 
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>

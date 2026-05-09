@@ -757,12 +757,72 @@ export const taskTranslations = {
 
   // Task form tracker toggles
   track: {
-    en: "Track",
-    id: "Lakukan Pencatatan",
+    en: "Track this habit",
+    id: "Lacak Kebiasaan Ini",
+  },
+  track_description: {
+    en: "Log progress on each occurrence",
+    id: "Catat progres di setiap kejadian",
+  },
+  tracker_type: {
+    en: "How to log?",
+    id: "Cara mencatat?",
+  },
+  tracker_type_toggle: {
+    en: "Yes / No",
+    id: "Ya / Tidak",
+  },
+  tracker_type_toggle_desc: {
+    en: "Did you do it?",
+    id: "Apakah kamu melakukannya?",
+  },
+  tracker_type_add: {
+    en: "Add",
+    id: "Tambah",
+  },
+  tracker_type_add_desc: {
+    en: "Log a quantity",
+    id: "Catat jumlah",
+  },
+  tracker_type_set: {
+    en: "Record",
+    id: "Rekam",
+  },
+  tracker_type_set_desc: {
+    en: "Set current value",
+    id: "Atur nilai saat ini",
+  },
+  tracker_unit: {
+    en: "Unit",
+    id: "Satuan",
+  },
+  tracker_unit_placeholder: {
+    en: "cups, km, pages…",
+    id: "gelas, km, halaman…",
+  },
+  tracker_target_placeholder: {
+    en: "e.g. 8",
+    id: "mis. 8",
+  },
+  per: {
+    en: "per",
+    id: "per",
+  },
+  period_day: {
+    en: "Day",
+    id: "Hari",
+  },
+  period_week: {
+    en: "Week",
+    id: "Minggu",
+  },
+  period_month: {
+    en: "Month",
+    id: "Bulan",
   },
   set_goal: {
-    en: "Set Goal",
-    id: "Tetapkan Target",
+    en: "Set a target",
+    id: "Tetapkan target",
   },
 
   // Navigation

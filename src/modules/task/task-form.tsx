@@ -51,10 +51,26 @@ export default function TaskForm({
     }
   }, []);
 
-  const inputModeOptions: { value: InputMode; label: string }[] = [
-    { value: "toggle", label: t("tracker_type_toggle") || "Yes / No" },
-    { value: "add", label: t("tracker_type_add") || "Add amount" },
-    { value: "set", label: t("tracker_type_set") || "Record current" },
+  const inputModeOptions: {
+    value: InputMode;
+    label: string;
+    description: string;
+  }[] = [
+    {
+      value: "toggle",
+      label: t("tracker_type_toggle") || "Yes / No",
+      description: t("tracker_type_toggle_desc") || "Did you do it?",
+    },
+    {
+      value: "add",
+      label: t("tracker_type_add") || "Add",
+      description: t("tracker_type_add_desc") || "Log a quantity",
+    },
+    {
+      value: "set",
+      label: t("tracker_type_set") || "Record",
+      description: t("tracker_type_set_desc") || "Set current value",
+    },
   ];
 
   useEffect(() => {
@@ -77,7 +93,7 @@ export default function TaskForm({
 
   return (
     <form
-      className="h-[100%]"
+      className="h-full overflow-y-auto"
       onSubmit={async (e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget as HTMLFormElement);
@@ -157,159 +173,139 @@ export default function TaskForm({
         )}
       </div>
 
-      {/* Tracker mode toggle - only visible when repeat is selected */}
+      {/* Tracker section - only visible when repeat is selected */}
       {formData.repeat.repeat !== "none" && (
-        <>
-          {/* Track toggle */}
-          <div className="flex items-center justify-between px-4 py-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t("track") || "Track"}
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                if (formData.inputMode) {
-                  updateFormData({
-                    inputMode: undefined,
-                    unit: undefined,
-                    showGoalSettings: false,
-                    goalTarget: undefined,
-                    goalPeriod: undefined,
-                  });
-                } else {
-                  updateFormData({ inputMode: "toggle" });
-                }
-              }}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+        <div className="mx-4 my-1 rounded-xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+          {/* Header row — single toggle for the whole tracker */}
+          <button
+            type="button"
+            onClick={() => {
+              if (formData.inputMode) {
+                updateFormData({
+                  inputMode: undefined,
+                  unit: undefined,
+                  showGoalSettings: false,
+                  goalTarget: undefined,
+                  goalPeriod: undefined,
+                });
+              } else {
+                updateFormData({ inputMode: "toggle" });
+              }
+            }}
+            className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50 text-left"
+            aria-label={
+              formData.inputMode ? "Disable tracker" : "Enable tracker"
+            }
+          >
+            <div>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t("track") || "Track this habit"}
+              </span>
+              {!formData.inputMode && (
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {t("track_description") || "Log progress on each occurrence"}
+                </p>
+              )}
+            </div>
+            <div
+              className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
                 formData.inputMode
                   ? "bg-[var(--hvsna-primary-color)]"
                   : "bg-gray-300 dark:bg-gray-600"
               }`}
-              aria-label={
-                formData.inputMode
-                  ? "Disable tracker mode"
-                  : "Enable tracker mode"
-              }
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  formData.inputMode ? "translate-x-6" : "translate-x-1"
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                  formData.inputMode ? "translate-x-[18px]" : "translate-x-0.5"
                 }`}
               />
-            </button>
-          </div>
+            </div>
+          </button>
 
-          {/* Tracker fields - only visible when inputMode is set */}
+          {/* Expanded tracker settings */}
           {formData.inputMode && (
-            <>
-              {/* Input mode selector */}
-              <div className="px-4 py-2">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">
-                  {t("tracker_type") || "Type"}
-                </label>
-                <div className="flex gap-2">
+            <div className="px-4 py-3 space-y-4 border-t border-gray-100 dark:border-gray-800">
+              {/* How to log */}
+              <div>
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  {t("tracker_type") || "How to log?"}
+                </p>
+                <div className="grid grid-cols-3 gap-2">
                   {inputModeOptions.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => updateFormData({ inputMode: opt.value })}
-                      className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                      className={`py-3 px-2 rounded-lg border text-center transition-colors ${
                         formData.inputMode === opt.value
                           ? "border-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/10 text-[var(--hvsna-primary-color)]"
                           : "border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                     >
-                      {opt.label}
+                      <div className="text-xs font-medium">{opt.label}</div>
+                      <div className="text-[10px] opacity-60 mt-0.5">
+                        {opt.description}
+                      </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Unit input */}
-              <div className="px-4 py-2">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-                  {t("tracker_unit") || "Unit (optional)"}
-                </label>
+              {/* Unit — inline label + input */}
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500 dark:text-gray-400 w-8 shrink-0">
+                  {t("tracker_unit") || "Unit"}
+                </span>
                 <input
                   type="text"
                   value={formData.unit || ""}
                   onChange={(e) => updateFormData({ unit: e.target.value })}
                   placeholder={
-                    t("tracker_unit_placeholder") || "e.g. cups, km, minutes..."
+                    t("tracker_unit_placeholder") || "cups, km, pages…"
                   }
                   disabled={isSubmitting}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
                 />
               </div>
 
-              {/* Set Goal toggle */}
-              <div className="flex items-center justify-between px-4 py-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t("set_goal") || "Set Goal"}
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    updateFormData({
-                      showGoalSettings: !formData.showGoalSettings,
-                    })
-                  }
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    formData.showGoalSettings
-                      ? "bg-[var(--hvsna-primary-color)]"
-                      : "bg-gray-300 dark:bg-gray-600"
-                  }`}
-                  aria-label={
-                    formData.showGoalSettings
-                      ? "Hide goal settings"
-                      : "Show goal settings"
-                  }
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      formData.showGoalSettings
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    }`}
+              {/* Goal — checkbox + inline target/period */}
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer select-none py-1">
+                  <input
+                    type="checkbox"
+                    checked={formData.showGoalSettings}
+                    onChange={(e) =>
+                      updateFormData({ showGoalSettings: e.target.checked })
+                    }
+                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-[var(--hvsna-primary-color)] focus:ring-[var(--hvsna-primary-color)]"
                   />
-                </button>
-              </div>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    {t("set_goal") || "Set a target"}
+                  </span>
+                </label>
 
-              {/* Goal settings - only visible when showGoalSettings is true */}
-              {formData.showGoalSettings && (
-                <>
-                  {/* Target input */}
-                  <div className="px-4 py-2">
-                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-                      {t("tracker_target") || "Target (optional)"}
-                    </label>
+                {formData.showGoalSettings && (
+                  <div className="flex items-center gap-2 mt-2 pl-5">
                     <input
                       type="number"
                       value={formData.goalTarget || ""}
                       onChange={(e) =>
                         updateFormData({ goalTarget: e.target.value })
                       }
-                      placeholder={
-                        t("tracker_target_placeholder") ||
-                        "e.g. 8, 10000, 30..."
-                      }
+                      placeholder={t("tracker_target_placeholder") || "e.g. 8"}
                       disabled={isSubmitting}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
+                      className="w-20 px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
                     />
-                  </div>
-
-                  {/* Period selector */}
-                  <div className="px-4 py-2">
-                    <label className="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1.5">
-                      {t("tracker_period") || "Period"}
-                    </label>
+                    <span className="text-xs text-gray-400">
+                      {t("per") || "per"}
+                    </span>
                     <select
                       value={formData.goalPeriod || "day"}
                       onChange={(e) =>
                         updateFormData({ goalPeriod: e.target.value })
                       }
                       disabled={isSubmitting}
-                      className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
+                      className="flex-1 px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--hvsna-primary-color)] text-sm"
                     >
                       <option value="day">{t("period_day") || "Day"}</option>
                       <option value="week">{t("period_week") || "Week"}</option>
@@ -318,11 +314,11 @@ export default function TaskForm({
                       </option>
                     </select>
                   </div>
-                </>
-              )}
-            </>
+                )}
+              </div>
+            </div>
           )}
-        </>
+        </div>
       )}
 
       <div className="flex justify-end p-4">
