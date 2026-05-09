@@ -176,6 +176,7 @@ function DraggableInboxItem({
           showGoalInfo={false}
           showDateTime={false}
           className="!border-b-0"
+          disableSwipe
         />
       </div>
     </div>

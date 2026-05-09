@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { motion, time } from "framer-motion";
-import { HvSquare, HvCheckSquare2 } from "@/modules/icons";
+import React, { useRef, useState } from "react";
+import { motion, useMotionValue, useAnimation, type PanInfo } from "framer-motion";
+import { HvSquare, HvCheckSquare2, HvCalendar, HvCheck } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
+import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
 import { TagList } from "./tag-input";
+import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 
 interface TaskListItemProps {
   task: Task;
@@ -17,51 +19,49 @@ interface TaskListItemProps {
   className?: string;
   showDateTime?: boolean;
   formatDate?: (task: Task) => string;
+  disableSwipe?: boolean;
 }
 
 export function TaskListItem({
   task,
   onStatusChange,
   onEdit,
-  showGoalInfo = false,
+  showGoalInfo: _showGoalInfo = false,
   className = "",
   showDateTime = false,
   formatDate,
+  disableSwipe = false,
 }: TaskListItemProps) {
   const { completeTask, reopenTask, checkAndHandleTrackerTask } =
     useTaskListItem();
+  const { updateTask } = useTaskContext();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
   const { getToday, createHijriDate } = useHijriDate();
 
-  const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
-    switch (currentStatus) {
-      case 0:
-        return 1; // pending -> completed
-      case 1:
-        return 0; // completed -> pending
-      case 2:
-        return 2; // logged foreveer
-      default:
-        return 0;
-    }
-  };
+  const x = useMotionValue(0);
+  const controls = useAnimation();
+  const isDraggingRef = useRef(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
-  const getStatusIcon = (status: TaskStatus) => {
+  const SWIPE_THRESHOLD = 60;
+  const SWIPE_VELOCITY = 300;
+
+  const snapBack = () =>
+    controls.start({ x: 0, transition: { type: "spring", stiffness: 400, damping: 40 } });
+
+  const getStatusIcon = (status: TaskStatus, isTracker = false) => {
+    if (isTracker) {
+      return status === 2
+        ? <HvCheckSquare2 strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />
+        : <HvSquare strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />;
+    }
     switch (status) {
       case 1:
-        return (
-          <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
-        );
+        return <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />;
       case 2:
-        return (
-          <HvCheckSquare2
-            strokeWidth={1}
-            size={24}
-            className="text-[var(--hvsna-primary-color)]"
-          />
-        );
+        return <HvCheckSquare2 strokeWidth={1} size={24} className="text-[var(--hvsna-primary-color)]" />;
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
       default:
@@ -74,7 +74,7 @@ export function TaskListItem({
       case 1:
         return "line-through text-gray-400";
       case 2:
-        return "text-[var(--hvsna-primary-color)]"; // Logged (tracker) - color change, no strikethrough
+        return "text-[var(--hvsna-primary-color)]";
       case 0:
         return "text-gray-800";
       default:
@@ -114,7 +114,6 @@ export function TaskListItem({
       return t("tomorrow") + (time ? `, ${time}` : "");
     }
 
-    // Check if within next 7 days
     try {
       const taskDate = createHijriDate(
         parseInt(task.atDateHijri.slice(0, 4)),
@@ -128,12 +127,10 @@ export function TaskListItem({
           (1000 * 60 * 60 * 24)
       );
 
-      // If within next 7 days (2-7 days from now)
       if (daysDiff > 1 && daysDiff <= 7) {
         return taskDate.format("dddd") + (time ? `, ${time}` : "");
       }
 
-      // Otherwise show formatted date
       return taskDate.format("D MMMM") + (time ? `, ${time}` : "");
     } catch {
       return "";
@@ -147,16 +144,17 @@ export function TaskListItem({
 
   const handleStatusClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    await handleStatusAction();
+  };
 
+  const handleStatusAction = async () => {
     let updatePromise: Promise<Task>;
     let nextStatus: TaskStatus;
 
     if (task.status === 0) {
-      // Complete the task
       updatePromise = completeTask(task.id as string);
       nextStatus = 1;
     } else {
-      // Reopen the task
       updatePromise = reopenTask(task.id as string);
       nextStatus = 0;
     }
@@ -174,7 +172,6 @@ export function TaskListItem({
         <span>{`${t("status_changed_to")} ${statusText}`}</span>
         <button
           onClick={() => {
-            // Revert the change
             if (task.status === 0) {
               reopenTask(task.id as string).then(() => {
                 hideSnackbar(snackbarId);
@@ -207,88 +204,163 @@ export function TaskListItem({
     );
   };
 
+  const handleDragStart = () => {
+    isDraggingRef.current = true;
+  };
+
+  const handleDragEnd = async (_: PointerEvent, info: PanInfo) => {
+    const isRightSwipe =
+      info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY;
+    const isLeftSwipe =
+      info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY;
+
+    if (isRightSwipe) {
+      await snapBack();
+      if (task.trackerId) {
+        await checkAndHandleTrackerTask(task);
+      } else {
+        await handleStatusAction();
+      }
+    } else if (isLeftSwipe) {
+      await snapBack();
+      setIsScheduleModalOpen(true);
+    } else {
+      snapBack();
+    }
+
+    setTimeout(() => {
+      isDraggingRef.current = false;
+    }, 100);
+  };
+
   const handleItemClick = () => {
+    if (isDraggingRef.current) return;
     if (onEdit) {
       onEdit(task);
     }
   };
 
+  const handleScheduleConfirm = (
+    date: { format: (fmt: string) => string } | null,
+    time: string | null,
+    prayerTime: string | null,
+    repeat: "none" | "daily" | "weekly" | "monthly" | "yearly",
+    repeatInterval: number
+  ) => {
+    updateTask(task.id as string, {
+      atDateHijri: date ? date.format("YYYYMMDD") : undefined,
+      atTime: time ?? undefined,
+      prayerTime: (prayerTime as any) ?? undefined,
+      repeat: repeat ?? "none",
+      repeatInterval: repeatInterval ?? 1,
+    });
+    setIsScheduleModalOpen(false);
+  };
+
+  const contentBg =
+    task.status === 2
+      ? "bg-[var(--hvsna-primary-color)]/5 hover:bg-[var(--hvsna-primary-color)]/10"
+      : "bg-white hover:bg-gray-50";
+
   return (
     <motion.div
-      className={`w-full p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer ${
-        task.status === 2 ? "bg-[var(--hvsna-primary-color)]/5" : ""
-      } ${className || ""}`}
-      onClick={handleItemClick}
+      className={`relative overflow-hidden w-full border-b border-gray-200 ${className}`}
       initial={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{
-        duration: 0.2,
-        ease: "easeOut",
-      }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       layout
     >
-      <div className="flex items-start gap-2">
-        {task.trackerId ? (
+      {!disableSwipe && (
+        <>
+          <div className="absolute left-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center bg-[var(--hvsna-success-color)] text-white select-none">
+            <HvCheck size={22} strokeWidth={2} />
+            <span className="text-xs mt-1 font-medium">
+              {task.trackerId
+                ? t("log") || "Log"
+                : task.status === 0
+                ? t("complete") || "Done"
+                : t("reopen") || "Reopen"}
+            </span>
+          </div>
+          <div className="absolute right-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center bg-[var(--hvsna-primary-color)] text-white select-none">
+            <HvCalendar size={22} strokeWidth={2} />
+            <span className="text-xs mt-1 font-medium">
+              {t("schedule") || "Schedule"}
+            </span>
+          </div>
+        </>
+      )}
+
+      <motion.div
+        className={`relative z-10 w-full p-4 transition-colors cursor-pointer ${contentBg}`}
+        drag={disableSwipe ? false : "x"}
+        dragConstraints={{ left: -120, right: 120 }}
+        dragElastic={0.5}
+        dragDirectionLock
+        style={{ x }}
+        animate={controls}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onClick={handleItemClick}
+      >
+        <div className="flex items-start gap-2">
           <button
-            onClick={handleLogClick}
-            className="px-3 py-1 shrink-0 text-sm font-medium bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded transition-colors cursor-pointer"
-            style={{ marginTop: "1px" }}
-            aria-label="Log tracker value"
-            data-testid="tracker-log-button"
-          >
-            {t("log") || "Log"}
-          </button>
-        ) : (
-          <button
-            onClick={handleStatusClick}
+            onClick={task.trackerId ? handleLogClick : handleStatusClick}
             className="p-0 shrink-0 leading-none transition-transform hover:scale-110 cursor-pointer"
             style={{ marginTop: "1px" }}
-            aria-label={`Change status from ${task.status}`}
-            data-testid="status-toggle"
+            aria-label={task.trackerId ? "Log tracker value" : `Change status from ${task.status}`}
+            data-testid={task.trackerId ? "tracker-log-button" : "status-toggle"}
           >
-            {getStatusIcon(task?.status || 0)}
+            {getStatusIcon(task?.status || 0, !!task.trackerId)}
           </button>
-        )}
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3
-              className={`leading-6 ${getStatusColor(
-                task.status as TaskStatus
-              )}`}
-            >
-              {task.name}
-            </h3>
-            {task.status === 2 && (
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--hvsna-primary-color)] text-white font-medium">
-                {t("logged") || "Logged"}
-              </span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3
+                className={`leading-6 ${getStatusColor(
+                  task.status as TaskStatus
+                )}`}
+              >
+                {task.name}
+              </h3>
+              {task.status === 2 && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--hvsna-primary-color)] text-white font-medium">
+                  {t("logged") || "Logged"}
+                </span>
+              )}
+            </div>
+
+            {task.description && (
+              <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
+                {task.description}
+              </p>
+            )}
+
+            {showDateTime && !!task.atDateHijri && (
+              <p
+                className={`text-xs mt-0.5 ${
+                  task.isOverdue() && task.status !== 1
+                    ? "text-[var(--hvsna-danger-color)]"
+                    : "text-gray-500"
+                }`}
+              >
+                {formatScheduledDate(task, location.state?.context)}
+              </p>
+            )}
+
+            {task.tags && task.tags.length > 0 && (
+              <TagList tags={task.tags} className="mt-1.5" />
             )}
           </div>
-
-          {task.description && (
-            <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
-              {task.description}
-            </p>
-          )}
-
-          {showDateTime && !!task.atDateHijri && (
-            <p
-              className={`text-xs mt-0.5 ${
-                task.isOverdue() && task.status !== 1
-                  ? "text-[var(--hvsna-danger-color)]"
-                  : "text-gray-500"
-              }`}
-            >
-              {formatScheduledDate(task, location.state?.context)}
-            </p>
-          )}
-
-          {task.tags && task.tags.length > 0 && (
-            <TagList tags={task.tags} className="mt-1.5" />
-          )}
         </div>
-      </div>
+      </motion.div>
+
+      <CalendarModal
+        isOpen={isScheduleModalOpen}
+        onClose={() => setIsScheduleModalOpen(false)}
+        selectedDate={null}
+        onConfirm={handleScheduleConfirm as any}
+      />
     </motion.div>
   );
 }

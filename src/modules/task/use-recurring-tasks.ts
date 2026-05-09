@@ -6,7 +6,7 @@ import type {
   RecurringTaskUpdateInput,
 } from "./recurring-task";
 import { usePouchDB } from "../../pouchdb";
-import { createRecurringTaskUseCases } from "../../usecases/recurring-task/RecurringTaskUseCasesFactory";
+import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
 
 export function useRecurringTasks() {
   const { db } = usePouchDB();

@@ -1,4 +1,3 @@
-import type PouchDB from "pouchdb";
 import type {
   RecurringTask,
   RecurringTaskCreateInput,

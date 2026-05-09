@@ -1,6 +1,6 @@
 import PouchDB from "pouchdb";
 import { RecurringTaskUseCases } from "./RecurringTaskUseCases";
-import { PouchDBRecurringTaskRepository } from "../../infra/recurring-task/PouchDBRecurringTaskRepository";
+import { PouchDBRecurringTaskRepository } from "../../infra/task/PouchDBRecurringTaskRepository";
 import type { IRecurringTaskRepository } from "../../domain/task/IRecurringTaskRepository";
 
 export function createRecurringTaskUseCases(
