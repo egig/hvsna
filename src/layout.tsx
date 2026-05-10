@@ -10,19 +10,13 @@ import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
-import { useTrackerContext } from "./modules/tracker/tracker-context";
-import { useProjectContext } from "./modules/task/project-context";
-import ProjectFormContainer from "./modules/task/project-form-container";
-import { TrackerLogModal } from "./modules/tracker/tracker-log-modal";
 
 interface MobileLayoutProps {
   formOpen: boolean;
   editingTaskId: string | null;
-  projectFormOpen: boolean;
   handleTaskSuccess: () => void;
   handleTaskCancel: () => void;
-  handleProjectCancel: () => void;
-  openCreateTaskForm: (opts?: { projectId?: string }) => void;
+  openCreateTaskForm: () => void;
   location: ReturnType<typeof useLocation>;
   params: ReturnType<typeof useParams>;
 }
@@ -30,17 +24,12 @@ interface MobileLayoutProps {
 function MobileLayout({
   formOpen,
   editingTaskId,
-  projectFormOpen,
   handleTaskSuccess,
   handleTaskCancel,
-  handleProjectCancel,
   openCreateTaskForm,
   location,
   params,
 }: MobileLayoutProps) {
-  const { trackerLogTask, setTrackerLogTask, submitTrackerLog } =
-    useTrackerContext();
-
   return (
     <div className="h-[100dvh] flex flex-col">
       <div className="flex-1 overflow-hidden">
@@ -50,11 +39,7 @@ function MobileLayout({
       {/* Task FAB */}
       {["today", "upcoming"].indexOf(location?.state?.context) != -1 && (
         <button
-          onClick={() =>
-            openCreateTaskForm({
-              projectId: (params as Record<string, string>).projectId,
-            })
-          }
+          onClick={() => openCreateTaskForm()}
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
           aria-label="Add new task"
           data-testid="fab-add-task"
@@ -76,21 +61,6 @@ function MobileLayout({
           <TaskForm onSuccess={handleTaskSuccess} onCancel={handleTaskCancel} />
         )}
       </Modal>
-
-      {/* Project Form Modal */}
-      <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
-        <ProjectFormContainer />
-      </Modal>
-
-      {/* Tracker Log Modal */}
-      <TrackerLogModal
-        isOpen={!!trackerLogTask}
-        onClose={() => setTrackerLogTask(null)}
-        onSubmit={submitTrackerLog}
-        taskName={trackerLogTask?.taskName || ""}
-        inputMode={trackerLogTask?.inputMode || "toggle"}
-        unit={trackerLogTask?.unit}
-      />
     </div>
   );
 }
@@ -98,9 +68,6 @@ function MobileLayout({
 export default function TabLayout() {
   const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm } =
     useTaskContext();
-  const { trackerLogTask, setTrackerLogTask, submitTrackerLog } =
-    useTrackerContext();
-  const { formOpen: projectFormOpen, closeProjectForm } = useProjectContext();
   const location = useLocation();
   const params = useParams();
   const { isDesktop } = useScreenSize();
@@ -109,7 +76,6 @@ export default function TabLayout() {
 
   const handleTaskSuccess = () => closeTaskForm();
   const handleTaskCancel = () => closeTaskForm();
-  const handleProjectCancel = () => closeProjectForm();
 
   const handleToggleSidebar = useCallback(() => {
     const newCollapsed = !sidebarCollapsed;
@@ -161,21 +127,6 @@ export default function TabLayout() {
                 />
               )}
             </Modal>
-
-            {/* Project Form Modal */}
-            <Modal isOpen={projectFormOpen} onClose={handleProjectCancel}>
-              <ProjectFormContainer />
-            </Modal>
-
-            {/* Tracker Log Modal */}
-            <TrackerLogModal
-              isOpen={!!trackerLogTask}
-              onClose={() => setTrackerLogTask(null)}
-              onSubmit={submitTrackerLog}
-              taskName={trackerLogTask?.taskName || ""}
-              inputMode={trackerLogTask?.inputMode || "toggle"}
-              unit={trackerLogTask?.unit}
-            />
           </div>
         </Allotment.Pane>
       </Allotment>
@@ -187,10 +138,8 @@ export default function TabLayout() {
     <MobileLayout
       formOpen={formOpen}
       editingTaskId={editingTaskId}
-      projectFormOpen={projectFormOpen}
       handleTaskSuccess={handleTaskSuccess}
       handleTaskCancel={handleTaskCancel}
-      handleProjectCancel={handleProjectCancel}
       openCreateTaskForm={openCreateTaskForm}
       location={location}
       params={params}

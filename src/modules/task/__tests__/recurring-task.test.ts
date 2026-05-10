@@ -330,7 +330,6 @@ describe("generateOccurrencesForTemplate", () => {
       timezone: "Asia/Jakarta",
       lat: -6.2,
       long: 106.8,
-      projectId: "project_abc",
     });
 
     const repo = makeRepo();
@@ -346,7 +345,6 @@ describe("generateOccurrencesForTemplate", () => {
     expect(first.timezone).toBe("Asia/Jakarta");
     expect(first.lat).toBe(-6.2);
     expect(first.long).toBe(106.8);
-    expect(first.projectId).toBe("project_abc");
     expect(first.recurringTaskId).toBe("rtask_test");
   });
 

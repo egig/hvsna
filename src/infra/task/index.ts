@@ -1,7 +1,4 @@
-export {
-  PouchDBTaskRepository,
-  PouchDBProjectRepository,
-} from "./PouchDBTaskRepository";
+export { PouchDBTaskRepository } from "./PouchDBTaskRepository";
 
 export {
   createTaskRepository,

@@ -39,8 +39,8 @@ interface TaskContextType {
   // Form state management
   editingTaskId: string | null;
   formOpen: boolean;
-  openCreateTaskForm: (options?: { projectId?: string }) => void;
-  openEditTaskForm: (taskId: string, options?: { projectId?: string }) => void;
+  openCreateTaskForm: () => void;
+  openEditTaskForm: (taskId: string) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;
   preselectedListId: string | null;
@@ -109,18 +109,13 @@ export const TaskProvider: React.FC<{
   };
 
   // Local form functions
-  const openCreateTaskForm = (options?: { projectId?: string }) => {
+  const openCreateTaskForm = () => {
     setEditingTaskId(null);
-    setPreselectedListId(options?.projectId || null);
     setFormOpen(true);
   };
 
-  const openEditTaskForm = (
-    taskId: string,
-    options?: { projectId?: string }
-  ) => {
+  const openEditTaskForm = (taskId: string) => {
     setEditingTaskId(taskId);
-    setPreselectedListId(options?.projectId || null);
     setFormOpen(true);
   };
 

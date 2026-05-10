@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
@@ -7,10 +7,7 @@ import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
 import { formatHijriDateString } from "./task-form-helpers";
-import { useProjects } from "./use-projects";
-import { usePouchDB } from "../../pouchdb";
 import logger from "../logger";
-import { useTrackers } from "../tracker/useTrackers";
 import type {
   RepeatConfig,
   TaskFormData,
@@ -31,7 +28,6 @@ export interface UseTaskFormReturn {
   updateScheduleAt: (updates: Partial<TaskScheduleAt>) => void;
   updateRepeatConfig: (updates: Partial<RepeatConfig>) => void;
   projects: any[];
-  projectIdPreselected: boolean;
 }
 
 export const useTaskForm = (
@@ -44,11 +40,8 @@ export const useTaskForm = (
   const params = useParams();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
-  const { projects } = useProjects();
   const { createRecurringTask } = useRecurringTasks();
-  const { createTracker } = useTrackers();
 
-  // Use useHijriDate hook instead of manual settings extraction
   const {
     timezone,
     latitude,
@@ -57,7 +50,6 @@ export const useTaskForm = (
     getToday,
   } = useHijriDate();
 
-  // Consolidated state management
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
     scheduleAt: {
@@ -65,7 +57,6 @@ export const useTaskForm = (
       time: "",
       prayerTime: "",
     },
-    projectId: params.projectId || "",
     repeat: {
       repeat: "none",
       interval: 1,
@@ -74,12 +65,8 @@ export const useTaskForm = (
       endOccurrences: 1,
     },
     tags: [],
-    showGoalSettings: false,
-    inputMode: undefined,
-    unit: undefined,
   });
 
-  // Helper functions for updating state
   const updateFormData = (updates: Partial<TaskFormData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
   };
@@ -97,20 +84,6 @@ export const useTaskForm = (
       repeat: { ...prev.repeat, ...updates },
     }));
   };
-
-  // Reset tracker settings when repeat is deselected
-  useEffect(() => {
-    if (formData.repeat.repeat === "none") {
-      updateFormData({
-        trackerId: undefined,
-        showGoalSettings: false,
-        inputMode: undefined,
-        unit: undefined,
-        goalTarget: undefined,
-        goalPeriod: undefined,
-      });
-    }
-  }, [formData.repeat.repeat]);
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const taskData = Object.fromEntries(submittedFormData) as unknown as {
@@ -138,38 +111,8 @@ export const useTaskForm = (
 
       const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
-      const isTracker = !!formData.inputMode;
-
-      let trackerId: string | undefined;
-
-      if (isTracker) {
-        // Create a Tracker entity
-        const goals =
-          formData.showGoalSettings && formData.goalTarget
-            ? [
-                {
-                  id: crypto.randomUUID(),
-                  name: "Goal",
-                  condition: "target",
-                  target: formData.goalTarget,
-                  period: formData.goalPeriod,
-                },
-              ]
-            : undefined;
-
-        const tracker = await createTracker({
-          name: taskData.taskName.trim(),
-          description: taskData.taskDescription?.trim() || undefined,
-          inputMode: formData.inputMode!,
-          unit: formData.unit,
-          goals,
-        });
-
-        trackerId = tracker.id;
-      }
 
       if (isRecurring && taskData.atDateHijri) {
-        // Create a RecurringTask template, then generate all instances
         const template = await createRecurringTask({
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
@@ -183,12 +126,10 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          projectId: formData.projectId,
           tags: formData.tags,
           repeatEnd: formData.repeat.end,
           repeatEndDate: formData.repeat.endDate as string,
           repeatEndOccurrences: formData.repeat.endOccurrences,
-          trackerId,
         });
 
         await generateOccurrencesForTemplate(template);
@@ -208,7 +149,6 @@ export const useTaskForm = (
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
-          projectId: formData.projectId || null,
           tags: formData.tags.length > 0 ? formData.tags : [],
         };
 
@@ -246,8 +186,6 @@ export const useTaskForm = (
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    projects,
-    projectIdPreselected: !!params.projectId,
   };
 };
 

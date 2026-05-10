@@ -17,8 +17,6 @@ import { ErrorBoundary } from "../../modules/components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "../../modules/query-client";
 import { TaskProvider } from "../../modules/task/task-context";
-import { ProjectProvider } from "../../modules/task/project-context";
-import { TrackerProvider } from "../../modules/tracker/tracker-context";
 import { AuthProvider } from "../../modules/auth";
 import { SettingsProvider } from "../../modules/settings";
 import { SystemProvider } from "../../modules/system";
@@ -100,18 +98,14 @@ export default function App({
                           <PouchDBProvider dbInstance={db}>
                             <SyncProvider>
                               <LanguageProviderWrapper>
-                                <TrackerProvider>
-                                  <TaskProvider>
-                                    <ProjectProvider>
-                                      <BrowserRouter
-                                        basename={config.appBaseName || ""}
-                                      >
-                                        <PostHogSessionTracker platform="web" />
-                                        <AppRoutes />
-                                      </BrowserRouter>
-                                    </ProjectProvider>
-                                  </TaskProvider>
-                                </TrackerProvider>
+                                <TaskProvider>
+                                  <BrowserRouter
+                                    basename={config.appBaseName || ""}
+                                  >
+                                    <PostHogSessionTracker platform="web" />
+                                    <AppRoutes />
+                                  </BrowserRouter>
+                                </TaskProvider>
                               </LanguageProviderWrapper>
                             </SyncProvider>
                           </PouchDBProvider>

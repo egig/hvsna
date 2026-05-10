@@ -1,5 +1,5 @@
 /**
- * Format value according to tracker format
+ * Format a numeric value
  */
 export function formatValue(value: number, format?: "plain" | "idr"): string {
   if (format === "idr") {
@@ -16,7 +16,7 @@ export function formatValue(value: number, format?: "plain" | "idr"): string {
 }
 
 /**
- * Format value with unit according to tracker format
+ * Format a numeric value with unit
  */
 export function formatValueWithUnit(
   value: number,

@@ -1,21 +1,11 @@
 import { PouchDBTaskRepository } from "./PouchDBTaskRepository";
-import { PouchDBProjectRepository } from "./PouchDBTaskRepository";
-import type {
-  ITaskRepository,
-  IProjectRepository,
-} from "../../domain/task/ITaskRepository";
+import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import type {
   Task,
   TaskCreateInput,
   TaskUpdateInput,
   TaskQuery,
   TaskStatus,
-} from "../../modules/task/types";
-import type {
-  Project,
-  ProjectCreateInput,
-  ProjectUpdateInput,
-  ProjectQuery,
 } from "../../modules/task/types";
 
 /**
@@ -40,24 +30,8 @@ export interface ITaskAndProjectRepository {
     limit?: number
   ): Promise<Task[]>;
   findUnscheduledTasks(): Promise<Task[]>;
-  findTasksByProjectId(
-    projectId: string,
-    offset?: number,
-    limit?: number
-  ): Promise<Task[]>;
   completeTask(id: string): Promise<Task>;
   reopenTask(id: string): Promise<Task>;
-
-  // Project operations
-  createProject(input: ProjectCreateInput): Promise<Project>;
-  updateProject(id: string, input: ProjectUpdateInput): Promise<Project>;
-  deleteProject(id: string): Promise<void>;
-  findProjectById(id: string): Promise<Project | null>;
-  findProjects(query?: ProjectQuery): Promise<Project[]>;
-  findProjectsWithPagination(
-    offset: number,
-    limit?: number
-  ): Promise<Project[]>;
 }
 
 /**
@@ -72,7 +46,6 @@ export function createTaskRepository(
 
   // Create repositories with the shared database
   const taskRepo = new PouchDBTaskRepository(db);
-  const projectRepo = new PouchDBProjectRepository(db);
 
   // Combine both repositories into a single object with renamed methods
   return {
@@ -90,18 +63,8 @@ export function createTaskRepository(
     findTasksAfter: taskRepo.findTasksAfter.bind(taskRepo),
     findBrowsedTasks: taskRepo.findBrowsedTasks.bind(taskRepo),
     findUnscheduledTasks: taskRepo.findUnscheduledTasks.bind(taskRepo),
-    findTasksByProjectId: taskRepo.findTasksByProjectId.bind(taskRepo),
     completeTask: taskRepo.completeTask.bind(taskRepo),
     reopenTask: taskRepo.reopenTask.bind(taskRepo),
-
-    // Project operations
-    createProject: projectRepo.create.bind(projectRepo),
-    updateProject: projectRepo.update.bind(projectRepo),
-    deleteProject: projectRepo.delete.bind(projectRepo),
-    findProjectById: projectRepo.findById.bind(projectRepo),
-    findProjects: projectRepo.find.bind(projectRepo),
-    findProjectsWithPagination:
-      projectRepo.findWithPagination.bind(projectRepo),
   };
 }
 
@@ -113,11 +76,9 @@ export function createRepositories(dbName?: string) {
   const db = PouchDBTaskRepository.createDatabase(dbName);
 
   const taskRepo = new PouchDBTaskRepository(db);
-  const projectRepo = new PouchDBProjectRepository(db);
 
   return {
     taskRepository: taskRepo,
-    projectRepository: projectRepo,
   };
 }
 

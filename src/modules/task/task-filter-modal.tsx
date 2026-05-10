@@ -6,7 +6,6 @@ import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { ListInputSelect } from "../components/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { TaskStatus, TaskTypeFilter } from "./types";
-import { useProjects } from "./use-projects";
 import { useTags } from "./use-tags";
 
 interface TaskFilterModalProps {
@@ -17,7 +16,6 @@ interface TaskFilterModalProps {
   searchTextFilter: string;
   unscheduledFilter: boolean;
   taskTypeFilter: TaskTypeFilter;
-  projectIdFilter: string | null;
   tagFilter: string[];
   onStatusFilterChange: (value: TaskStatus | "all") => void;
   onDateRangeFilterChange: (
@@ -26,7 +24,6 @@ interface TaskFilterModalProps {
   onSearchTextFilterChange: (value: string) => void;
   onUnscheduledFilterChange: (value: boolean) => void;
   onTaskTypeFilterChange: (value: TaskTypeFilter) => void;
-  onProjectIdFilterChange: (id: string | null) => void;
   onTagFilterChange: (tags: string[]) => void;
   onClear: () => void;
 }
@@ -37,17 +34,14 @@ export default function TaskFilterModal({
   statusFilter,
   dateRangeFilter,
   unscheduledFilter,
-  projectIdFilter,
   tagFilter,
   onStatusFilterChange,
   onDateRangeFilterChange,
   onUnscheduledFilterChange,
-  onProjectIdFilterChange,
   onTagFilterChange,
   onClear,
 }: TaskFilterModalProps) {
   const { t } = useLanguageContext();
-  const { projects } = useProjects();
   const { tagNames } = useTags();
 
   const statusOptions = [
@@ -138,24 +132,6 @@ export default function TaskFilterModal({
             </div>
           </div>
         </div>
-
-        {/* Project Filter — only shown when user has projects */}
-        {projects.length > 0 && (
-          <ListInputSelect
-            label={t("project")}
-            value={projectIdFilter ?? ""}
-            onValueChange={(value) => {
-              onProjectIdFilterChange(value === "" ? null : value);
-            }}
-            options={[
-              { value: "", label: t("all_projects") },
-              ...projects.map((proj) => ({
-                value: proj.id ?? "",
-                label: proj.name ?? "",
-              })),
-            ]}
-          />
-        )}
 
         {/* Tag Filter */}
         {tagNames.length > 0 && (

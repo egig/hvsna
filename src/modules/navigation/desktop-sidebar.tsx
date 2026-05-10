@@ -6,8 +6,6 @@ import {
   HvEdit,
   HvTrash2,
   HvPanelLeft,
-  HvChartArea,
-  HvChartAreaFilled,
   HvCalendar,
   HvCalendarFilled,
   HvCalendarMonth,
@@ -27,10 +25,7 @@ import { Link, useLocation } from "react-router";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
 import { Modal } from "./modal";
-import { useProjects } from "../task/use-projects";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useProjectContext } from "../task/project-context";
-import { DeleteProjectModal } from "../task/delete-project-modal";
 import { useTasks } from "../task/use-tasks";
 import { useTaskContext } from "../task/task-context";
 import { useState } from "react";
@@ -92,13 +87,6 @@ export function DesktopSidebar({
     }
   };
 
-  // Helper to get tasks for a list (filters open tasks and groups by list ID)
-  const getProjectTasks = (projectId: string) => {
-    return tasks.filter(
-      (task) => task.status === 0 && task.projectId === projectId
-    );
-  };
-
   const tabs = [
     {
       path: "/today",
@@ -113,13 +101,6 @@ export function DesktopSidebar({
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
-    },
-    {
-      path: "/tracks",
-      label: t("tracks") || "Tracks",
-      icon: <HvChartArea />,
-      activeIcon: <HvChartAreaFilled />,
-      context: "tracks",
     },
   ];
 
@@ -246,93 +227,6 @@ export function DesktopSidebar({
             </Button>
           );
         })}
-
-        {!collapsed && (
-          <div className="p-2 mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold text-gray-500 tracking-wider">
-                {t("projects") || "Projects"}
-              </h3>
-              <button
-                onClick={() => openProjectForm()}
-                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
-                title={t("add_new_project")}
-              >
-                <HvPlus size={16} />
-              </button>
-            </div>
-            <div className="space-y-1">
-              {loading ? (
-                <div className="text-xs text-gray-400">
-                  {t("loading") || "Loading..."}
-                </div>
-              ) : projects.length > 0 ? (
-                projects.slice(0, 5).map((project) => {
-                  const isActive =
-                    location.pathname === `/project/${project.id}`;
-                  return (
-                    <div key={project.id} className="group relative">
-                      <Link
-                        to={`/project/${project.id}`}
-                        className={`flex items-center space-x-2 px-2 py-1.5 rounded-md text-sm transition-colors ${
-                          isActive
-                            ? "bg-gray-100"
-                            : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        <span className="truncate flex-1">{project.name}</span>
-                      </Link>
-
-                      <Menu.Root>
-                        <Menu.Trigger className="absolute right-1 top-1/2 -translate-y-1/2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                          <HvMoreVertical size={14} />
-                        </Menu.Trigger>
-                        <Menu.Portal>
-                          <Menu.Positioner>
-                            <Menu.Popup className="bg-white border border-gray-200 rounded-md shadow-lg min-w-[120px] py-1">
-                              <Menu.Item
-                                onClick={() => handleEditProject(project)}
-                                className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-                              >
-                                <HvEdit size={14} />
-                                <span>{t("edit")}</span>
-                              </Menu.Item>
-                              <Menu.Item
-                                onClick={() => handleDeleteProject(project)}
-                                className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                              >
-                                <HvTrash2 size={14} />
-                                <span>{t("delete")}</span>
-                              </Menu.Item>
-                            </Menu.Popup>
-                          </Menu.Positioner>
-                        </Menu.Portal>
-                      </Menu.Root>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-xs text-gray-400">
-                  {t("no_projects_yet") || "No projects yet"}
-                </div>
-              )}
-            </div>
-            {projects.length > 5 && (
-              <div className="mt-2">
-                <Link
-                  to="/projects"
-                  className={`text-xs transition-colors ${
-                    location.pathname === "/projects"
-                      ? "text-blue-700 font-medium"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {t("view_all_projects") || "View all projects"} →
-                </Link>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="border-t border-gray-100 p-2 space-y-2">

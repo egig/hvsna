@@ -26,7 +26,6 @@ export function useTasks() {
   } | null>(null);
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
-  const [projectIdFilter, setProjectIdFilter] = useState<string | null>(null);
   const [taskTypeFilter, setTaskTypeFilter] = useState<TaskTypeFilter>("all");
   const [tagFilter, setTagFilter] = useState<string[]>([]);
 
@@ -35,7 +34,6 @@ export function useTasks() {
     setDateRangeFilter(null);
     setSearchTextFilter("");
     setUnscheduledFilter(false);
-    setProjectIdFilter(null);
     setTaskTypeFilter("all");
     setTagFilter([]);
   }, []);
@@ -48,7 +46,6 @@ export function useTasks() {
       : "",
     searchTextFilter || "",
     unscheduledFilter ? "1" : "",
-    projectIdFilter || "",
     taskTypeFilter === "all" ? "" : taskTypeFilter,
     tagFilter.join(","),
   ].join("|");
@@ -78,11 +75,6 @@ export function useTasks() {
     // Add unscheduled filter
     if (unscheduledFilter) {
       query.unscheduled = 1;
-    }
-
-    // Add project filter
-    if (projectIdFilter) {
-      query.projectId = projectIdFilter;
     }
 
     // Add task type filter
@@ -280,7 +272,6 @@ export function useTasks() {
     dateRangeFilter,
     searchTextFilter,
     unscheduledFilter,
-    projectIdFilter,
     taskTypeFilter,
     tagFilter,
 
@@ -296,7 +287,6 @@ export function useTasks() {
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
-    setProjectIdFilter,
     setTaskTypeFilter,
     setTagFilter,
     clearFilters,

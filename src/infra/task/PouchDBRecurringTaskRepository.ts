@@ -24,14 +24,12 @@ class PouchDBRecurringTaskDocument {
   long?: number;
   timezone?: string;
   hijriDateOffset?: number;
-  projectId?: string | null = null;
   tags?: string[] | null = null;
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndDate?: string;
   repeatEndOccurrences?: number;
   created_at?: number;
   updated_at?: number;
-  trackerId?: string | null = null;
 
   constructor(o: any) {
     Object.assign(this, o);
@@ -53,14 +51,12 @@ class PouchDBRecurringTaskDocument {
       long: this.long,
       timezone: this.timezone,
       hijriDateOffset: this.hijriDateOffset,
-      projectId: this.projectId || null,
       tags: this.tags || undefined,
       repeatEnd: this.repeatEnd,
       repeatEndDate: this.repeatEndDate,
       repeatEndOccurrences: this.repeatEndOccurrences,
       created_at: this.created_at,
       updated_at: this.updated_at,
-      trackerId: this.trackerId || undefined,
     };
   }
 
@@ -82,14 +78,12 @@ class PouchDBRecurringTaskDocument {
     doc.long = t.long;
     doc.timezone = t.timezone;
     doc.hijriDateOffset = t.hijriDateOffset;
-    doc.projectId = t.projectId || null;
     doc.tags = t.tags;
     doc.repeatEnd = t.repeatEnd;
     doc.repeatEndDate = t.repeatEndDate;
     doc.repeatEndOccurrences = t.repeatEndOccurrences;
     doc.created_at = t.created_at;
     doc.updated_at = t.updated_at;
-    doc.trackerId = t.trackerId || null;
     return doc;
   }
 }
@@ -117,13 +111,11 @@ export class PouchDBRecurringTaskRepository
       long: input.long,
       timezone: input.timezone,
       hijriDateOffset: input.hijriDateOffset,
-      projectId: input.projectId || null,
       created_at: now,
       updated_at: now,
       repeatEnd: input.repeatEnd,
       repeatEndDate: input.repeatEndDate,
       repeatEndOccurrences: input.repeatEndOccurrences,
-      trackerId: input.trackerId,
       tags: input.tags,
     };
 

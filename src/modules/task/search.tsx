@@ -27,14 +27,12 @@ export default function Search() {
     searchTextFilter,
     unscheduledFilter,
     taskTypeFilter,
-    projectIdFilter,
     tagFilter,
     setStatusFilter,
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
     setTaskTypeFilter,
-    setProjectIdFilter,
     setTagFilter,
     clearFilters,
   } = useTasks();
@@ -50,7 +48,6 @@ export default function Search() {
       !!dateRangeFilter ||
       unscheduledFilter ||
       taskTypeFilter !== "all" ||
-      !!projectIdFilter ||
       tagFilter.length > 0
     );
   };
@@ -135,14 +132,12 @@ export default function Search() {
           searchTextFilter={searchTextFilter}
           unscheduledFilter={unscheduledFilter}
           taskTypeFilter={taskTypeFilter}
-          projectIdFilter={projectIdFilter}
           tagFilter={tagFilter}
           onStatusFilterChange={setStatusFilter}
           onDateRangeFilterChange={setDateRangeFilter}
           onSearchTextFilterChange={setSearchTextFilter}
           onUnscheduledFilterChange={setUnscheduledFilter}
           onTaskTypeFilterChange={setTaskTypeFilter}
-          onProjectIdFilterChange={setProjectIdFilter}
           onTagFilterChange={setTagFilter}
           onClear={clearFilters}
         />

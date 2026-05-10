@@ -1,4 +1,4 @@
-export type TaskStatus = 0 | 1 | 2; // 0=pending, 1=completed, 2=logged (tracker tasks only)
+export type TaskStatus = 0 | 1;
 export type TaskRepeat = "none" | "daily" | "weekly" | "monthly" | "yearly";
 export type PrayerTime =
   | "Fajr"
@@ -25,7 +25,6 @@ export class Task {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string | null;
-  trackerId?: string | null;
   attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
@@ -33,7 +32,6 @@ export class Task {
   prayerTime?: PrayerTime;
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
-  projectId?: string | null = null;
   tags?: string[] | null = null;
 
   constructor(a: Partial<Task>) {
@@ -66,11 +64,9 @@ export interface TaskCreateInput {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string;
-  trackerId?: string;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
-  projectId: string | null;
   tags: string[];
 }
 
@@ -86,12 +82,10 @@ export interface TaskUpdateInput {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string | null;
-  trackerId?: string | null;
   attributes?: Record<string, string>;
   prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   removeTime?: boolean;
-  projectId?: string | null;
   tags?: string[] | null;
   logEntries?: { value: number; note?: string; occurredAt: number }[];
 }
@@ -114,54 +108,6 @@ export type TaskQuery = {
   atEpochMillis?: number | { $gte?: number; $lte?: number };
   unscheduled?: number;
   searchText?: string;
-  projectId?: string;
   taskType?: TaskTypeFilter;
   tags?: string[];
-};
-
-export class Project {
-  id?: string;
-  rev?: string;
-  userId?: string;
-  name?: string;
-  description?: string;
-  color?: string;
-  trackerEvaluationRefs?: TrackerEvaluationRef[];
-  createdAt?: number;
-  updatedAt?: number;
-
-  constructor(a: Partial<Project>) {
-    Object.assign(this, a);
-  }
-}
-
-export interface ProjectCreateInput {
-  name: string;
-  description?: string;
-  color?: string;
-  trackerEvaluationRefs?: TrackerEvaluationRef[];
-}
-
-export interface ProjectUpdateInput {
-  name?: string;
-  description?: string;
-  color?: string;
-  trackerEvaluationRefs?: TrackerEvaluationRef[];
-}
-
-export interface ProjectChange {
-  id: string;
-  documentId: string;
-  type: "create" | "update" | "delete";
-  timestamp: Date;
-  data: Project | ProjectUpdateInput;
-}
-
-export interface TrackerEvaluationRef {
-  trackerId: string;
-  evaluationId: string;
-}
-
-export type ProjectQuery = {
-  searchText?: string;
 };

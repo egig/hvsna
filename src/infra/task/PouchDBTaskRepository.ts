@@ -8,20 +8,14 @@ import type {
   TaskStatus,
   TaskUpdateInput,
   PrayerTime,
-  ProjectCreateInput,
-  ProjectUpdateInput,
-  ProjectQuery,
 } from "../../modules/task/types";
-import { Task, Project } from "../../modules/task/types";
+import { Task } from "../../modules/task/types";
 import { generatePrefixedUUID } from "../../modules/uuid";
 import {
   parseHijriDateString,
   parseTimeString,
 } from "../../modules/task/task-form-helpers";
-import type {
-  ITaskRepository,
-  IProjectRepository,
-} from "../../domain/task/ITaskRepository";
+import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 
 class PouchDBTaskDocument {
   _id?: string;
@@ -47,8 +41,6 @@ class PouchDBTaskDocument {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string;
-  trackerId?: string | null = null;
-  projectId?: string | null = null;
   tags?: string[] | null = null;
 
   constructor(o: any) {
@@ -80,8 +72,6 @@ class PouchDBTaskDocument {
       repeat: this.repeat,
       repeatInterval: this.repeatInterval,
       recurringTaskId: this.recurringTaskId,
-      trackerId: this.trackerId,
-      projectId: this.projectId,
       tags: this.tags,
     });
   }
@@ -94,8 +84,6 @@ class PouchDBTaskDocument {
     a.lat = t.lat;
     a.long = t.long;
     a.hijriDateOffset = t.hijriDateOffset;
-    a.projectId = t.projectId || null;
-    a.trackerId = t.trackerId || null;
     a.tags = t.tags || [];
 
     if (!!t.atDateHijri) {
@@ -234,8 +222,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       repeat: input.repeat,
       repeatInterval: input.repeatInterval,
       recurringTaskId: input.recurringTaskId,
-      trackerId: input.trackerId,
-      projectId: input.projectId,
       tags: input.tags,
     });
 
@@ -336,10 +322,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     if (query?.status) {
       mangoQuery.selector.status = query.status;
-    }
-
-    if (query?.projectId) {
-      mangoQuery.selector.projectId = query.projectId;
     }
 
     if (query?.searchText && query.searchText.trim()) {
@@ -573,14 +555,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: [
-          "type",
-          "status",
-          "projectId",
-          "noDate",
-          "atEpochMillis",
-          "tags",
-        ],
+        fields: ["type", "status", "noDate", "atEpochMillis", "tags"],
       },
     });
 
@@ -588,7 +563,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: { $gte: 0 },
-        projectId: { $gte: null },
         noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
         tags: { $gte: null },
@@ -596,7 +570,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { projectId: "asc" },
         { noDate: "asc" },
         { atEpochMillis: "asc" },
         { tags: "asc" },
@@ -622,9 +595,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       }
       if (query.unscheduled !== undefined) {
         mangoQuery.selector.noDate = query.unscheduled;
-      }
-      if (query.projectId) {
-        mangoQuery.selector.projectId = query.projectId;
       }
       if (query.tags && query.tags.length > 0) {
         mangoQuery.selector.tags = { $in: query.tags };
@@ -664,39 +634,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
     );
   }
 
-  async findTasksByProjectId(
-    projectId: string,
-    offset: number = 0,
-    limit: number = 50
-  ): Promise<Task[]> {
-    await this.db.createIndex({
-      index: {
-        fields: ["type", "status", "projectId", "atEpochMillis"],
-      },
-    });
-
-    const mangoQuery = {
-      selector: {
-        type: "task",
-        status: { $gte: 0 }, // Include all statuses (0=pending, 1=completed)
-        projectId: projectId,
-      },
-      sort: [
-        { type: "asc" },
-        { status: "asc" },
-        { projectId: "asc" },
-        { atEpochMillis: "asc" },
-      ] as any,
-      limit,
-      skip: offset,
-    };
-
-    const result = await this.db.find(mangoQuery);
-    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
-      new PouchDBTaskDocument(doc).toTaskItem()
-    );
-  }
-
   async findByRecurringTaskId(recurringTaskId: string): Promise<Task[]> {
     await this.db.createIndex({
       index: { fields: ["type", "recurringTaskId"] },
@@ -719,135 +656,5 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const tasks = await this.findByRecurringTaskId(recurringTaskId);
     const pending = tasks.filter((t) => t.status !== 1);
     await Promise.all(pending.map((t) => this.delete(t.id!)));
-  }
-}
-
-export class PouchDBProjectRepository implements IProjectRepository {
-  private readonly db: PouchDB.Database;
-
-  constructor(dbOrName?: PouchDB.Database | string) {
-    if (dbOrName instanceof PouchDB) {
-      // Use provided database instance
-      this.db = dbOrName;
-    } else {
-      // Create database with appropriate adapter
-      this.db = PouchDBTaskRepository.createDatabase(dbOrName);
-    }
-  }
-
-  async create(input: ProjectCreateInput): Promise<Project> {
-    const now = Date.now().valueOf();
-
-    const newProject = new Project({
-      id: generatePrefixedUUID("project_"),
-      name: input.name,
-      description: input.description,
-      color: input.color,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    const doc = PouchDBProjectDocument.fromProjectItem(newProject);
-    delete doc._rev;
-
-    await this.db.put(doc);
-
-    return newProject;
-  }
-
-  async update(id: string, input: ProjectUpdateInput): Promise<Project> {
-    const existingDoc = await this.db.get(id);
-    const updateData = new PouchDBProjectDocument({
-      ...existingDoc,
-      updatedAt: Date.now(),
-    }).toProjectItem();
-
-    // Check if fields are inputted / undefined
-    Object.assign(
-      updateData,
-      Object.fromEntries(
-        Object.entries(input).filter(([_, v]) => v !== undefined)
-      )
-    );
-
-    const ud = PouchDBProjectDocument.fromProjectItem(updateData);
-    const response = await this.db.put(ud);
-    const updatedDoc = new PouchDBProjectDocument({
-      ...updateData,
-      _rev: response.rev,
-    });
-
-    return updatedDoc.toProjectItem();
-  }
-
-  async delete(id: string): Promise<void> {
-    const doc: PouchDBProjectDocument = await this.db.get(id);
-
-    if (!doc._rev) {
-      throw new Error("Document revision is required for deletion");
-    }
-
-    await this.db.remove(doc as any);
-  }
-
-  async findById(id: string): Promise<Project | null> {
-    try {
-      const doc: PouchDBProjectDocument = await this.db.get(id);
-      return new PouchDBProjectDocument(doc).toProjectItem();
-    } catch (err) {
-      if ((err as any).status === 404) {
-        return null;
-      }
-      throw err;
-    }
-  }
-
-  async find(query?: ProjectQuery): Promise<Project[]> {
-    await this.db.createIndex({
-      index: {
-        fields: ["type", "name"],
-      },
-    });
-
-    const mangoQuery: any = {
-      selector: {
-        type: "project",
-      },
-      sort: [{ type: "asc" }, { name: "asc" }],
-    };
-
-    if (query?.searchText && query.searchText.trim()) {
-      const searchLower = query.searchText.toLowerCase().trim();
-      mangoQuery.selector.$or = [
-        { name: { $regex: searchLower } },
-        { description: { $regex: searchLower } },
-      ];
-    }
-
-    const result = await this.db.find(mangoQuery);
-
-    return (result as any).docs.map((doc: PouchDBProjectDocument) =>
-      new PouchDBProjectDocument(doc).toProjectItem()
-    );
-  }
-
-  async findWithPagination(
-    offset: number,
-    limit: number = 20
-  ): Promise<Project[]> {
-    const mangoQuery = {
-      selector: {
-        type: "project",
-      },
-      sort: [{ _id: "asc" as const }],
-      limit,
-      skip: offset,
-    };
-
-    const result = await this.db.find(mangoQuery);
-
-    return (result as any).docs.map((doc: PouchDBProjectDocument) =>
-      new PouchDBProjectDocument(doc).toProjectItem()
-    );
   }
 }

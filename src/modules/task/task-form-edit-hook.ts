@@ -5,7 +5,6 @@ import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useSettings } from "../settings/useSettings";
 import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
-import { useProjects } from "./use-projects";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
@@ -47,7 +46,6 @@ export interface UseTaskFormReturn {
   removeTime: boolean;
   formData: EditFormData;
   projects: any[];
-  wasTracker: boolean; // True if the parent template is a tracker
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
   handleDeleteSingle: () => Promise<void>;
@@ -70,7 +68,6 @@ export const useTaskFormEdit = (
 ): UseTaskFormReturn => {
   const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
     useTaskContext();
-  const { projects } = useProjects();
   const {
     createRecurringTask,
     deleteRecurringTask,
@@ -94,7 +91,6 @@ export const useTaskFormEdit = (
 
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { dateHijri: null, time: "", prayerTime: "" },
-    projectId: "",
     repeat: {
       repeat: "none",
       interval: 1,
@@ -103,9 +99,6 @@ export const useTaskFormEdit = (
       endOccurrences: 1,
     },
     tags: [],
-    asTracker: false,
-    inputMode: undefined,
-    unit: undefined,
   });
 
   const updateFormData = (updates: Partial<EditFormData>) => {
@@ -161,8 +154,6 @@ export const useTaskFormEdit = (
         hijriDateOffset: offset,
         prayerTime: (formData.scheduleAt.prayerTime as PrayerTime) || undefined,
         removeTime: removeTime,
-        projectId:
-          formData.projectId === "" ? null : formData.projectId || undefined,
         tags: formData.tags.length > 0 ? formData.tags : null,
       };
 
@@ -189,7 +180,6 @@ export const useTaskFormEdit = (
             long: longitude,
             timezone: settings.timezone || "Asia/Jakarta",
             hijriDateOffset: offset,
-            projectId: formData.projectId || undefined,
             repeatEnd:
               formData.repeat.end === "never" ? undefined : formData.repeat.end,
             repeatEndDate:
@@ -200,11 +190,6 @@ export const useTaskFormEdit = (
               formData.repeat.end === "after_occurrences"
                 ? formData.repeat.endOccurrences
                 : undefined,
-            asTracker: formData.asTracker,
-            inputMode: formData.inputMode,
-            unit: formData.unit,
-            target: formData.target,
-            period: formData.period,
           },
           {
             createRecurringTask,
@@ -373,12 +358,6 @@ export const useTaskFormEdit = (
             prayerTime: pendingOperation.taskInput.prayerTime,
             repeat: pendingOperation.repeatConfig.repeat,
             repeatInterval: pendingOperation.repeatConfig.interval,
-            projectId: pendingOperation.taskInput.projectId ?? undefined,
-            asTracker: formData.asTracker,
-            inputMode: formData.inputMode,
-            unit: formData.unit,
-            target: formData.target,
-            period: formData.period,
           },
           {
             updateTask,
@@ -427,7 +406,6 @@ export const useTaskFormEdit = (
 
     setFormData({
       scheduleAt,
-      projectId: task.projectId || "",
       tags: task.tags || [],
       repeat: {
         repeat: task.repeat ?? "none",
@@ -437,11 +415,6 @@ export const useTaskFormEdit = (
         endDate: null,
         endOccurrences: 1,
       },
-      asTracker: parentTemplate?.asTracker || false,
-      inputMode: parentTemplate?.inputMode,
-      unit: parentTemplate?.unit,
-      target: parentTemplate?.target,
-      period: parentTemplate?.period,
     });
   }, [task, createHijriDate, parentTemplate]);
 
@@ -470,8 +443,6 @@ export const useTaskFormEdit = (
     }
   }, [task?.recurringTaskId, getRecurringTask]);
 
-  const wasTracker = parentTemplate?.asTracker === true;
-
   return {
     task,
     error: null,
@@ -493,6 +464,5 @@ export const useTaskFormEdit = (
     updateScheduleAt,
     updateRepeatConfig,
     projects,
-    wasTracker,
   };
 };

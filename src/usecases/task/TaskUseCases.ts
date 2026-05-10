@@ -3,33 +3,25 @@ import type {
   TaskUpdateInput,
   TaskQuery,
   TaskStatus,
-  ProjectCreateInput,
-  ProjectUpdateInput,
-  ProjectQuery,
 } from "../../modules/task/types";
-import { Task, Project } from "../../modules/task/types";
+import { Task } from "../../modules/task/types";
 import type {
   INotificationsProvider,
   TaskReminderOptions,
 } from "../../domain/notifications/INotificationsProvider";
-import type {
-  ITaskRepository,
-  IProjectRepository,
-} from "../../domain/task/ITaskRepository";
+import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import type { HijriDate } from "src/modules/calendar/hijri";
 
 export class TaskUseCases {
   constructor(
     private readonly notificationsProvider: INotificationsProvider,
-    private readonly taskRepository: ITaskRepository,
-    private readonly projectRepository: IProjectRepository
+    private readonly taskRepository: ITaskRepository
   ) {}
 
   // Task operations
   async createTask(input: TaskCreateInput): Promise<Task> {
     const task = await this.taskRepository.create(input);
 
-    // Schedule reminders if task has a time and is pending
     if (task.atEpochMillis && task.status === 0) {
       await this.scheduleTaskReminders(task);
     }
@@ -40,11 +32,9 @@ export class TaskUseCases {
   async updateTask(taskId: string, updates: TaskUpdateInput): Promise<Task> {
     const updatedTask = await this.taskRepository.update(taskId, updates);
 
-    // Update reminders if task has time and is pending
     if (updatedTask.atEpochMillis && updatedTask.status === 0) {
       await this.updateTaskReminders(updatedTask);
     } else {
-      // Cancel reminders if task no longer has time or is completed
       await this.cancelTaskReminders(taskId);
     }
 
@@ -52,10 +42,7 @@ export class TaskUseCases {
   }
 
   async deleteTask(taskId: string): Promise<void> {
-    // Cancel reminders before deleting
     await this.cancelTaskReminders(taskId);
-
-    // Delete the task from repository
     await this.taskRepository.delete(taskId);
   }
 
@@ -64,41 +51,19 @@ export class TaskUseCases {
   }
 
   async completeTask(taskId: string): Promise<Task> {
-    // Mark task as completed using repository method
     const updatedTask = await this.taskRepository.completeTask(taskId);
-
-    // Cancel reminders for completed tasks
     await this.cancelTaskReminders(taskId);
-
     return updatedTask;
   }
 
   async uncompleteTask(taskId: string): Promise<Task> {
-    // Mark task as pending again using repository method
     const updatedTask = await this.taskRepository.reopenTask(taskId);
 
-    // Reschedule reminders if task has time
     if (updatedTask.atEpochMillis) {
       await this.scheduleTaskReminders(updatedTask);
     }
 
     return updatedTask;
-  }
-
-  // Project operations
-  async createProject(input: ProjectCreateInput): Promise<Project> {
-    return await this.projectRepository.create(input);
-  }
-
-  async updateProject(
-    projectId: string,
-    updates: ProjectUpdateInput
-  ): Promise<Project> {
-    return await this.projectRepository.update(projectId, updates);
-  }
-
-  async deleteProject(projectId: string): Promise<void> {
-    await this.projectRepository.delete(projectId);
   }
 
   // Reminder operations
@@ -111,7 +76,6 @@ export class TaskUseCases {
     }
 
     try {
-      // Schedule pre-due reminder
       if (reminderMinutes > 0) {
         const preDueOptions: TaskReminderOptions = {
           taskId: task.id,
@@ -124,7 +88,6 @@ export class TaskUseCases {
         await this.notificationsProvider.scheduleTaskReminder(preDueOptions);
       }
 
-      // Schedule due time reminder
       const dueOptions: TaskReminderOptions = {
         taskId: task.id,
         taskName: task.name || "Untitled Task",
@@ -135,7 +98,6 @@ export class TaskUseCases {
 
       await this.notificationsProvider.scheduleTaskReminder(dueOptions);
 
-      // Schedule overdue reminder (30 minutes after due)
       const overdueOptions: TaskReminderOptions = {
         taskId: task.id,
         taskName: task.name || "Untitled Task",
@@ -155,11 +117,7 @@ export class TaskUseCases {
     reminderMinutes: number = 15
   ): Promise<void> {
     if (!task.id) return;
-
-    // Cancel existing reminders
     await this.cancelTaskReminders(task.id);
-
-    // Schedule new reminders
     await this.scheduleTaskReminders(task, reminderMinutes);
   }
 
@@ -171,7 +129,6 @@ export class TaskUseCases {
     }
   }
 
-  // Batch operations
   async scheduleMultipleTaskReminders(
     tasks: Task[],
     reminderMinutes: number = 15
@@ -184,28 +141,11 @@ export class TaskUseCases {
   }
 
   async completeMultipleTasks(taskIds: string[]): Promise<Task[]> {
-    const promises = taskIds.map((taskId) => this.completeTask(taskId));
-    return Promise.all(promises);
+    return Promise.all(taskIds.map((taskId) => this.completeTask(taskId)));
   }
 
   async deleteMultipleTasks(taskIds: string[]): Promise<void> {
-    const promises = taskIds.map((taskId) => this.deleteTask(taskId));
-    await Promise.all(promises);
-  }
-
-  // Utility methods
-  private calculateEpochMillis(hijriDate: string, time: string): number {
-    // This would use the HijriDate utilities to convert to epoch milliseconds
-    // Placeholder implementation
-    const [year, month, day] = hijriDate.split("-").map(Number);
-    const [hours, minutes] = time.split(":").map(Number);
-
-    // This is a simplified calculation - would need proper Hijri to Gregorian conversion
-    const date = new Date();
-    date.setFullYear(year, month - 1, day);
-    date.setHours(hours, minutes, 0, 0);
-
-    return date.getTime();
+    await Promise.all(taskIds.map((taskId) => this.deleteTask(taskId)));
   }
 
   // Query helpers
@@ -217,19 +157,6 @@ export class TaskUseCases {
     return await this.taskRepository.findById(taskId);
   }
 
-  async getProjects(query: ProjectQuery = {}): Promise<Project[]> {
-    return await this.projectRepository.find(query);
-  }
-
-  async getProjectById(projectId: string): Promise<Project | null> {
-    return await this.projectRepository.findById(projectId);
-  }
-
-  async getTasksByProjectId(projectId: string): Promise<Task[]> {
-    return await this.taskRepository.findTasksByProjectId(projectId);
-  }
-
-  // Search and filtering
   async searchTasks(searchText: string): Promise<Task[]> {
     return await this.getTasks({ searchText });
   }
@@ -249,8 +176,8 @@ export class TaskUseCases {
   async getOverdueTasks(): Promise<Task[]> {
     const now = Date.now();
     return await this.taskRepository.find({
-      status: 0, // pending
-      atEpochMillis: { $lte: now }, // overdue
+      status: 0,
+      atEpochMillis: { $lte: now },
     });
   }
 

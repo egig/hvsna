@@ -18,7 +18,6 @@ import type { Task } from "./types";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import TaskPreview from "./task-preview";
-import { ProjectSelector } from "./project-selector";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
 
@@ -61,8 +60,6 @@ export default function TaskFormEdit({
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    projects,
-    wasTracker,
   } = useTaskFormEdit(taskId, onSuccess, onError, onDelete);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -225,122 +222,45 @@ export default function TaskFormEdit({
         disabled={isSubmitting}
       />
 
-      {/* Tracker Card - clickable to go to Tracker Detail */}
-      {formData.asTracker && (
-        <div className="px-4 py-2">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              closeTaskForm();
-              navigate(`/tracker/${task?.recurringTaskId}`);
-            }}
-            className="w-full text-left rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 hover:bg-gray-100 dark:hover:bg-gray-700 active:bg-gray-200 dark:active:bg-gray-600 transition-colors"
-          >
-            <p className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
-              {t("view_tracker") || "View Tracker"}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {t("view_tracker_description") ||
-                "Tap to view tracker details and history"}
-            </p>
-          </button>
-        </div>
-      )}
-
       <div className="flex flex-wrap gap-3 px-4">
-        {formData.asTracker ? (
-          <DatePrayerInput
-            hijriDate={formData.scheduleAt.dateHijri as HijriDate}
-            atTime={formData.scheduleAt.time || ""}
-            prayerTime={formData.scheduleAt.prayerTime || ""}
-            isSubmitting={isSubmitting}
-            repeat={formData.repeat.repeat}
-            repeatInterval={formData.repeat.interval}
-            repeatEnd={formData.repeat.end}
-            repeatEndDate={formData.repeat.endDate}
-            repeatEndOccurrences={formData.repeat.endOccurrences}
-            forceRepeat={true}
-            onRepeatChange={(
+        <DatePrayerInput
+          hijriDate={formData.scheduleAt.dateHijri as HijriDate}
+          atTime={formData.scheduleAt.time || ""}
+          prayerTime={formData.scheduleAt.prayerTime || ""}
+          isSubmitting={isSubmitting}
+          repeat={formData.repeat.repeat}
+          repeatInterval={formData.repeat.interval}
+          repeatEnd={formData.repeat.end}
+          repeatEndDate={formData.repeat.endDate}
+          repeatEndOccurrences={formData.repeat.endOccurrences}
+          onRepeatChange={(
+            repeat,
+            interval,
+            repeatEnd,
+            repeatEndDate,
+            repeatEndOccurrences
+          ) => {
+            updateRepeatConfig({
               repeat,
               interval,
-              repeatEnd,
-              repeatEndDate,
-              repeatEndOccurrences
-            ) => {
-              updateRepeatConfig({
-                repeat,
-                interval,
-                end: repeatEnd,
-                endDate: repeatEndDate,
-                endOccurrences: repeatEndOccurrences,
-              });
-              setIsFormDirty(true);
-            }}
-            onChange={(hijriDate, time, prayerTime) => {
-              updateScheduleAt({
-                dateHijri: hijriDate,
-                time: time ?? "",
-                prayerTime: prayerTime ?? "",
-              });
-              setIsFormDirty(true);
-              if (!time && !prayerTime) {
-                setRemoveTime(true);
-              }
-            }}
-          />
-        ) : (
-          <DatePrayerInput
-            hijriDate={formData.scheduleAt.dateHijri as HijriDate}
-            atTime={formData.scheduleAt.time || ""}
-            prayerTime={formData.scheduleAt.prayerTime || ""}
-            isSubmitting={isSubmitting}
-            repeat={formData.repeat.repeat}
-            repeatInterval={formData.repeat.interval}
-            repeatEnd={formData.repeat.end}
-            repeatEndDate={formData.repeat.endDate}
-            repeatEndOccurrences={formData.repeat.endOccurrences}
-            onRepeatChange={(
-              repeat,
-              interval,
-              repeatEnd,
-              repeatEndDate,
-              repeatEndOccurrences
-            ) => {
-              updateRepeatConfig({
-                repeat,
-                interval,
-                end: repeatEnd,
-                endDate: repeatEndDate,
-                endOccurrences: repeatEndOccurrences,
-              });
-              setIsFormDirty(true);
-            }}
-            onChange={(hijriDate, time, prayerTime) => {
-              updateScheduleAt({
-                dateHijri: hijriDate,
-                time: time ?? "",
-                prayerTime: prayerTime ?? "",
-              });
-              setIsFormDirty(true);
-              if (!time && !prayerTime) {
-                setRemoveTime(true);
-              }
-            }}
-          />
-        )}
-        {projects.length > 0 && (
-          <ProjectSelector
-            projects={projects}
-            selectedProjectId={formData.projectId}
-            onProjectChange={(projectId) => {
-              setIsFormDirty(true);
-              updateFormData({ projectId });
-            }}
-            disabled={isSubmitting}
-          />
-        )}
+              end: repeatEnd,
+              endDate: repeatEndDate,
+              endOccurrences: repeatEndOccurrences,
+            });
+            setIsFormDirty(true);
+          }}
+          onChange={(hijriDate, time, prayerTime) => {
+            updateScheduleAt({
+              dateHijri: hijriDate,
+              time: time ?? "",
+              prayerTime: prayerTime ?? "",
+            });
+            setIsFormDirty(true);
+            if (!time && !prayerTime) {
+              setRemoveTime(true);
+            }
+          }}
+        />
       </div>
     </>
   );

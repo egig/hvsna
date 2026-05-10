@@ -37,8 +37,7 @@ export function TaskListItem({
   formatDate,
   disableSwipe = false,
 }: TaskListItemProps) {
-  const { completeTask, reopenTask, checkAndHandleTrackerTask } =
-    useTaskListItem();
+  const { completeTask, reopenTask } = useTaskListItem();
   const { updateTask } = useTaskContext();
   const location = useLocation();
   const { t } = useLanguageContext();
@@ -59,34 +58,11 @@ export function TaskListItem({
       transition: { type: "spring", stiffness: 400, damping: 40 },
     });
 
-  const getStatusIcon = (status: TaskStatus, isTracker = false) => {
-    if (isTracker) {
-      return status === 2 ? (
-        <HvCheckSquare2
-          strokeWidth={1}
-          size={24}
-          className="text-[var(--hvsna-primary-color)]"
-        />
-      ) : (
-        <HvSquare
-          strokeWidth={1}
-          size={24}
-          className="text-[var(--hvsna-primary-color)]"
-        />
-      );
-    }
+  const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
       case 1:
         return (
           <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
-        );
-      case 2:
-        return (
-          <HvCheckSquare2
-            strokeWidth={1}
-            size={24}
-            className="text-[var(--hvsna-primary-color)]"
-          />
         );
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
@@ -99,8 +75,6 @@ export function TaskListItem({
     switch (status) {
       case 1:
         return "line-through text-gray-400";
-      case 2:
-        return "text-[var(--hvsna-primary-color)]";
       case 0:
         return "text-gray-800";
       default:
@@ -161,11 +135,6 @@ export function TaskListItem({
     } catch {
       return "";
     }
-  };
-
-  const handleLogClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await checkAndHandleTrackerTask(task);
   };
 
   const handleStatusClick = async (e: React.MouseEvent) => {
@@ -242,11 +211,7 @@ export function TaskListItem({
 
     if (isRightSwipe) {
       await snapBack();
-      if (task.trackerId) {
-        await checkAndHandleTrackerTask(task);
-      } else {
-        await handleStatusAction();
-      }
+      await handleStatusAction();
     } else if (isLeftSwipe) {
       await snapBack();
       setIsScheduleModalOpen(true);
@@ -283,10 +248,7 @@ export function TaskListItem({
     setIsScheduleModalOpen(false);
   };
 
-  const contentBg =
-    task.status === 2
-      ? "bg-[var(--hvsna-primary-color)]/5 hover:bg-[var(--hvsna-primary-color)]/10"
-      : "bg-white hover:bg-gray-50";
+  const contentBg = "bg-white hover:bg-gray-50";
 
   return (
     <motion.div
@@ -301,9 +263,7 @@ export function TaskListItem({
           <div className="absolute left-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center bg-[var(--hvsna-success-color)] text-white select-none">
             <HvCheck size={22} strokeWidth={2} />
             <span className="text-xs mt-1 font-medium">
-              {task.trackerId
-                ? t("log") || "Log"
-                : task.status === 0
+              {task.status === 0
                 ? t("complete") || "Done"
                 : t("reopen") || "Reopen"}
             </span>
@@ -331,19 +291,13 @@ export function TaskListItem({
       >
         <div className="flex items-start gap-2">
           <button
-            onClick={task.trackerId ? handleLogClick : handleStatusClick}
+            onClick={handleStatusClick}
             className="p-0 shrink-0 leading-none transition-transform hover:scale-110 cursor-pointer"
             style={{ marginTop: "1px" }}
-            aria-label={
-              task.trackerId
-                ? "Log tracker value"
-                : `Change status from ${task.status}`
-            }
-            data-testid={
-              task.trackerId ? "tracker-log-button" : "status-toggle"
-            }
+            aria-label={`Change status from ${task.status}`}
+            data-testid="status-toggle"
           >
-            {getStatusIcon(task?.status || 0, !!task.trackerId)}
+            {getStatusIcon(task?.status || 0)}
           </button>
 
           <div className="flex-1 min-w-0">
@@ -355,11 +309,6 @@ export function TaskListItem({
               >
                 {task.name}
               </h3>
-              {task.status === 2 && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--hvsna-primary-color)] text-white font-medium">
-                  {t("logged") || "Logged"}
-                </span>
-              )}
             </div>
 
             {task.description && (

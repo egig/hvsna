@@ -29,7 +29,9 @@ export function Inbox() {
   }
 
   return (
-    <Page navbarLarge={<LargeNavbar title={pageTitle} showBackButton={true} />}>
+    <Page
+      navbarLarge={<LargeNavbar title={pageTitle} showBackButton={false} />}
+    >
       <div className={initiated ? "visible" : "invisible"}>
         {inboxTasks.length === 0 ? (
           <EmptyState
