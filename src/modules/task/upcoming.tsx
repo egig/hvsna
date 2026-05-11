@@ -49,7 +49,7 @@ function UpcomingContent({
   droppable?: boolean;
 }) {
   return (
-    <div className={isReady ? "visible" : "invisible"}>
+    <>
       {effectiveMode === "week" ? (
         <WeekView upcomingTasks={upcomingTasks} droppable={droppable} />
       ) : upcomingTasks.length === 0 ? (
@@ -90,7 +90,7 @@ function UpcomingContent({
             ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -165,7 +165,6 @@ function DraggableInboxItem({
           task={task}
           onEdit={onEdit}
           showGoalInfo={false}
-          showDateTime={false}
           className="!border-b-0"
           disableSwipe
         />
@@ -331,20 +330,37 @@ export default function Tasks() {
           onDragEnd={handleDragEnd}
         >
           <div className="flex flex-col h-full">
-            {/* Single shared navbar */}
-            <Navbar
-              showBackButton={false}
-              title={t("upcoming")}
-              rightAction={navbarActions}
-            />
+            {/* Split header row: main title + sidebar header at same level */}
+            <div className="flex shrink-0 border-b border-gray-200 dark:border-gray-800">
+              <div className="flex-1 flex items-center justify-between px-4 py-3">
+                <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  {t("upcoming")}
+                </h1>
+                {navbarActions}
+              </div>
+              <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex items-center gap-2 px-4 py-3 shrink-0">
+                <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {t("unscheduled") || "Unscheduled"}
+                </h2>
+              </div>
+            </div>
 
             {/* Content area: always two columns on desktop */}
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden min-h-0">
               {/* Main scheduled content */}
-              <div className="flex-1 overflow-y-auto">
+              <div
+                className={
+                  effectiveMode === "week"
+                    ? "flex-1 flex flex-col min-h-0 overflow-hidden"
+                    : "flex-1 overflow-y-auto"
+                }
+              >
                 <div
                   className={
-                    effectiveMode === "week" ? "" : "max-w-2xl mx-auto w-full"
+                    effectiveMode === "week"
+                      ? "flex-1 flex flex-col min-h-0"
+                      : "max-w-2xl mx-auto w-full"
                   }
                 >
                   {initiated && error && (
@@ -366,12 +382,6 @@ export default function Tasks() {
 
               {/* Inbox sidebar - always visible */}
               <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                  <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
-                  <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    {t("unscheduled") || "Undscheduled"}
-                  </h2>
-                </div>
                 {effectiveMode === "week" ? (
                   <DroppableInboxSidebar
                     inboxTasks={inboxTasks}
@@ -417,7 +427,6 @@ export default function Tasks() {
                     task={activeTask}
                     onEdit={() => {}}
                     showGoalInfo={false}
-                    showDateTime={false}
                   />
                 </div>
               )}
@@ -452,9 +461,9 @@ export default function Tasks() {
           {t("scheduled") || "Scheduled"}
         </button>
         <button
-          onClick={() => setMobileTab("inbox")}
+          onClick={() => setMobileTab("unscheduled")}
           className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
-            mobileTab === "inbox"
+            mobileTab === "unscheduled"
               ? "text-primary-600 border-b-2 border-primary-500"
               : "text-gray-500 dark:text-gray-400"
           }`}

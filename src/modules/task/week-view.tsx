@@ -145,7 +145,7 @@ function WeekViewColumn({
       ref={setNodeRef}
       data-date={dateStr}
       className={[
-        "flex flex-col min-w-[200px] flex-1 transition-colors",
+        "flex flex-col min-w-[200px] flex-1 transition-colors border-r border-gray-100 dark:border-gray-800",
         isOver && droppable
           ? "bg-blue-50 dark:bg-blue-950/20 ring-1 ring-inset ring-blue-200 dark:ring-blue-800 rounded"
           : "",
@@ -176,7 +176,7 @@ function WeekViewColumn({
       </div>
 
       {/* Task groups */}
-      <div className="px-2 pb-6">
+      <div className="flex-1 overflow-y-auto px-2 pb-4">
         {taskGroups.length === 0 ? (
           <div className="text-xs text-gray-300 dark:text-gray-600 text-center py-6">
             —
@@ -308,9 +308,9 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   );
 
   return (
-    <div>
+    <div className="h-full flex flex-col">
       {/* Week navigation bar — full width, does not scroll horizontally */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 dark:border-gray-800 shrink-0">
         <button
           onClick={() => setWeekOffset((o) => o - 1)}
           className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -343,8 +343,8 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
       </div>
 
       {/* Columns — horizontally scrollable, each column has fixed width */}
-      <div className="overflow-x-auto">
-        <div className="flex">
+      <div className="flex-1 overflow-x-auto min-h-0">
+        <div className="flex h-full">
           {days.map((day) => {
             const dateStr = toLocalDateStr(day);
             return (
