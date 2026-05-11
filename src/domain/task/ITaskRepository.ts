@@ -22,6 +22,7 @@ export interface ITaskRepository {
   findTasksBefore(beforeHijri: HijriDate): Promise<Task[]>;
   findTodayCompletedTasks(todayHijri: HijriDate): Promise<Task[]>;
   findTasksAfter(todayHijri: HijriDate): Promise<Task[]>;
+  findAllPending(limit: number): Promise<Task[]>;
   findBrowsedTasks(
     query?: any,
     offset?: number,

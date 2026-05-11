@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { HvPlus, HvCheck, HvFilter, HvFilterX } from "@/modules/icons";
+import { HvPlus, HvCheck, HvFilter } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { EmptyState } from "../components/empty-state";
@@ -18,17 +18,14 @@ export default function Search() {
     loading,
     initiated,
     error,
-    hasMore,
     refreshTasks,
     openEditPopup,
     handleInfiniteScroll,
-    statusFilter,
     dateRangeFilter,
     searchTextFilter,
     unscheduledFilter,
     taskTypeFilter,
     tagFilter,
-    setStatusFilter,
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
@@ -44,7 +41,6 @@ export default function Search() {
   const hasFilter = () => {
     return (
       searchTextFilter !== "" ||
-      statusFilter !== "all" ||
       !!dateRangeFilter ||
       unscheduledFilter ||
       taskTypeFilter !== "all" ||
@@ -111,7 +107,6 @@ export default function Search() {
                   key={task.id}
                   task={task}
                   onEdit={openEditPopup}
-                  showDateTime={true}
                 />
               ))}
             </>
@@ -128,13 +123,11 @@ export default function Search() {
         <TaskFilterModal
           isOpen={filterModalOpened}
           onClose={handleFilterModalClose}
-          statusFilter={statusFilter}
           dateRangeFilter={dateRangeFilter}
           searchTextFilter={searchTextFilter}
           unscheduledFilter={unscheduledFilter}
           taskTypeFilter={taskTypeFilter}
           tagFilter={tagFilter}
-          onStatusFilterChange={setStatusFilter}
           onDateRangeFilterChange={setDateRangeFilter}
           onSearchTextFilterChange={setSearchTextFilter}
           onUnscheduledFilterChange={setUnscheduledFilter}

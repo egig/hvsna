@@ -3,21 +3,18 @@ import { HvCheck, HvX } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
-import { ListInputSelect } from "../components/list-input-select";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { TaskStatus, TaskTypeFilter } from "./types";
+import type { TaskTypeFilter } from "./types";
 import { useTags } from "./use-tags";
 
 interface TaskFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  statusFilter: number | "all";
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
   unscheduledFilter: boolean;
   taskTypeFilter: TaskTypeFilter;
   tagFilter: string[];
-  onStatusFilterChange: (value: TaskStatus | "all") => void;
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null
   ) => void;
@@ -31,11 +28,9 @@ interface TaskFilterModalProps {
 export default function TaskFilterModal({
   isOpen,
   onClose,
-  statusFilter,
   dateRangeFilter,
   unscheduledFilter,
   tagFilter,
-  onStatusFilterChange,
   onDateRangeFilterChange,
   onUnscheduledFilterChange,
   onTagFilterChange,
@@ -43,12 +38,6 @@ export default function TaskFilterModal({
 }: TaskFilterModalProps) {
   const { t } = useLanguageContext();
   const { tagNames } = useTags();
-
-  const statusOptions = [
-    { value: "all" as const, label: t("all_status"), color: "bg-gray-500" },
-    { value: 0, label: t("to_do"), color: "bg-yellow-500" },
-    { value: 1, label: t("completed"), color: "bg-green-500" },
-  ];
 
   const handleClear = () => {
     onClear();
@@ -74,21 +63,6 @@ export default function TaskFilterModal({
         }
       />
       <div className="flex-1">
-        {/* Status Select */}
-        <ListInputSelect
-          label={t("status")}
-          value={statusFilter.toString()}
-          onValueChange={(value) => {
-            onStatusFilterChange(
-              value === "all" ? "all" : (parseInt(value) as TaskStatus)
-            );
-          }}
-          options={statusOptions.map((opt) => ({
-            value: opt.value.toString(),
-            label: opt.label,
-          }))}
-        />
-
         {/* Unscheduled Filter */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">

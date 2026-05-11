@@ -22,7 +22,7 @@ export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
   useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
-      const isDesktopDevice = width >= 768;
+      const isDesktopDevice = width >= 1080;
       setDesktop(isDesktopDevice);
     };
 

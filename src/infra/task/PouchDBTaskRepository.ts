@@ -514,6 +514,35 @@ export class PouchDBTaskRepository implements ITaskRepository {
     );
   }
 
+  async findAllPending(limit: number): Promise<Task[]> {
+    await this.db.createIndex({
+      index: {
+        fields: ["type", "status", "noDate", "atEpochMillis"],
+      },
+    });
+
+    const mangoQuery = {
+      selector: {
+        type: "task",
+        status: 0,
+        noDate: { $gte: 0 },
+        atEpochMillis: { $gte: null },
+      },
+      sort: [
+        { type: "asc" },
+        { status: "asc" },
+        { noDate: "asc" },
+        { atEpochMillis: "asc" },
+      ] as any,
+      limit,
+    };
+
+    const result = await this.db.find(mangoQuery);
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      new PouchDBTaskDocument(doc).toTaskItem()
+    );
+  }
+
   async findBrowsedTasks(
     query?: any,
     offset: number = 0,

@@ -91,21 +91,13 @@ export const TaskProvider: React.FC<{
   const invalidateTaskQueries = () => {
     const today = getToday();
     const todayString = today.toString();
-    const tomorrowString = today.next().toString();
 
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.todayTasks(todayString),
-    });
+    queryClient.invalidateQueries({ queryKey: queryKeys.pendingTasks() });
+    queryClient.invalidateQueries({ queryKey: queryKeys.completedTasks() });
     queryClient.invalidateQueries({
       queryKey: queryKeys.todayCompletedTasks(todayString),
     });
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.upcomingTasks(tomorrowString),
-    });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
-    queryClient.invalidateQueries({ queryKey: queryKeys.unscheduledTasks() });
-    queryClient.invalidateQueries({ queryKey: ["list-tasks"] });
-    queryClient.invalidateQueries({ queryKey: queryKeys.allTasks() });
   };
 
   // Local form functions

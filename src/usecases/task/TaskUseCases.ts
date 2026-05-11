@@ -149,6 +149,10 @@ export class TaskUseCases {
   }
 
   // Query helpers
+  async getAllPendingTasks(): Promise<Task[]> {
+    return await this.taskRepository.findAllPending(1000);
+  }
+
   async getTasks(query: TaskQuery = {}): Promise<Task[]> {
     return await this.taskRepository.findBrowsedTasks(query);
   }

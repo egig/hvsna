@@ -1,24 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../usecases/task";
-import { queryKeys } from "../query-keys";
+import { usePendingTasks } from "./use-pending-tasks";
 import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
-  const { getToday, getTomorrow, toHijriDate, formatDate, createHijriDate } =
-    useHijriDate();
-  const { db } = usePouchDB();
-  const taskUseCases = createTaskUseCases(db);
+  const { getToday, toHijriDate, formatDate } = useHijriDate();
 
   const today = getToday();
   const tomorrow = today.next();
   const endOfWeek = today.endOfWeek();
-  const tomorrowString = tomorrow.toString();
-  const upcomingTasksQuery = useQuery({
-    queryKey: queryKeys.upcomingTasks(tomorrowString),
-    queryFn: () => taskUseCases.getUpcomingTasks(today),
-  });
+
+  const pendingTasksQuery = usePendingTasks();
 
   const groupTasksByTimePeriod = (
     tasks: Task[]
@@ -41,7 +32,7 @@ export function useUpcoming() {
 
     const todayStartOfDay = today.startOfDay().toDate();
     const tomorrowStartOfDay = today.next().startOfDay().toDate();
-    const endOfWeek = today.endOfWeek().endOfDay();
+    const endOfWeekDate = today.endOfWeek().endOfDay();
 
     tasks.forEach((task) => {
       if (!task.atEpochMillis) {
@@ -52,7 +43,6 @@ export function useUpcoming() {
       try {
         const taskDate = new Date(task.atEpochMillis);
 
-        // Today
         if (taskDate >= todayStartOfDay && taskDate < tomorrowStartOfDay) {
           groups.today.tasks.push(task);
           return;
@@ -67,12 +57,11 @@ export function useUpcoming() {
           return;
         }
 
-        if (taskDate > tomorrowStartOfDay && taskDate <= endOfWeek.toDate()) {
+        if (taskDate > tomorrowStartOfDay && taskDate <= endOfWeekDate.toDate()) {
           groups.thisWeek.tasks.push(task);
           return;
         }
 
-        // This month: same Hijri month as today
         const taskHijriDate = toHijriDate(taskDate);
         if (
           taskHijriDate.year === today.year &&
@@ -82,10 +71,8 @@ export function useUpcoming() {
           return;
         }
 
-        // Later: everything else
         groups.later.tasks.push(task);
-      } catch (error) {
-        // If date parsing fails, put in unscheduled
+      } catch {
         groups.unscheduled.tasks.push(task);
       }
     });
@@ -93,20 +80,21 @@ export function useUpcoming() {
     return groups;
   };
 
-  // Group tasks by time period (derived state)
-  const groupedTasks = groupTasksByTimePeriod(upcomingTasksQuery.data || []);
+  // Upcoming = all pending tasks (scheduled from today onwards + unscheduled)
+  const upcomingTasks = pendingTasksQuery.data ?? [];
+  const groupedTasks = groupTasksByTimePeriod(upcomingTasks);
 
   return {
-    upcomingTasks: upcomingTasksQuery.data || [],
+    upcomingTasks,
     taskGroups: groupedTasks,
-    loading: upcomingTasksQuery.isPending,
-    initiated: !upcomingTasksQuery.isPending,
-    error: upcomingTasksQuery.error
-      ? upcomingTasksQuery.error instanceof Error
-        ? upcomingTasksQuery.error.message
+    loading: pendingTasksQuery.isPending,
+    initiated: !pendingTasksQuery.isPending,
+    error: pendingTasksQuery.error
+      ? pendingTasksQuery.error instanceof Error
+        ? pendingTasksQuery.error.message
         : "Unknown error"
       : null,
-    refreshTasks: () => upcomingTasksQuery.refetch(),
+    refreshTasks: () => pendingTasksQuery.refetch(),
     today,
     tomorrow,
     endOfWeek,

@@ -4,6 +4,7 @@ import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
+import { usePendingTasks } from "./use-pending-tasks";
 
 export function useToday() {
   const { dayNames, hijriMonthNames, gregorianMonthNames } =
@@ -14,20 +15,20 @@ export function useToday() {
 
   const today = getToday();
   const gregorianDate = today.toDate();
-  const todayString = today.toString(); // Use HijriDate string representation for query key
+  const todayString = today.toString();
 
-  const todayTasksQuery = useQuery({
-    queryKey: queryKeys.todayTasks(todayString),
-    queryFn: () => taskUseCases.getTodayTasks(today.endOfDay()),
-    enabled: hijriCalInititated,
-  });
+  const pendingTasksQuery = usePendingTasks();
 
-  // React Query for today's completed tasks
   const todayCompletedTasksQuery = useQuery({
     queryKey: queryKeys.todayCompletedTasks(todayString),
     queryFn: () => taskUseCases.findTodayCompletedTasks(today),
     enabled: hijriCalInititated,
   });
+
+  const endOfToday = today.endOfDay().toDate().valueOf();
+  const todayTasks = (pendingTasksQuery.data ?? []).filter(
+    (t) => t.noDate === 0 && t.atEpochMillis != null && t.atEpochMillis <= endOfToday
+  );
 
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
     hijriMonthNames[today.month - 1]
@@ -36,13 +37,12 @@ export function useToday() {
     gregorianMonthNames[gregorianDate.getMonth()]
   } ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
 
-  // Combine loading states
   const isLoading =
-    todayTasksQuery.isPending || todayCompletedTasksQuery.isPending;
-  const error = todayTasksQuery.error || todayCompletedTasksQuery.error;
+    pendingTasksQuery.isPending || todayCompletedTasksQuery.isPending;
+  const error = pendingTasksQuery.error || todayCompletedTasksQuery.error;
 
   return {
-    todayTasks: todayTasksQuery.data || [],
+    todayTasks,
     todayCompletedTasks: todayCompletedTasksQuery.data || [],
     initiated: !isLoading && hijriCalInititated,
     error: error
@@ -50,7 +50,6 @@ export function useToday() {
         ? error.message
         : "Unknown error"
       : null,
-    // Computed values from useDateTranslationHelper
     pageTitle,
     subTitle,
     gregorianDate,

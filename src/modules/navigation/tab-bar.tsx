@@ -8,6 +8,7 @@ import {
   HvCalendarMonthFilled,
   HvCalendar,
   HvSearch,
+  HvCheckCircle,
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
 } from "@/modules/icons";

@@ -1,15 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../usecases/task";
-import { queryKeys } from "../query-keys";
+import { usePendingTasks } from "./use-pending-tasks";
 
 export function useAllTasks() {
-  const { db } = usePouchDB();
-  const taskUseCases = createTaskUseCases(db);
-
-  return useQuery({
-    queryKey: queryKeys.allTasks(),
-    queryFn: () => taskUseCases.getTasks(),
-    staleTime: 1000 * 60 * 5,
-  });
+  return usePendingTasks();
 }

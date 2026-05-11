@@ -1,4 +1,4 @@
-import { HvSettings, HvHash } from "@/modules/icons";
+import { HvSettings, HvHash, HvOutlineEllipsisHorizontalCircle, HvCheckCircle, HvCheckSquare2 } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -17,6 +17,11 @@ export default function Browse() {
     <Page navbar={<Navbar title={t("browse")} showBackButton={false} />}>
       {/* Navigation Menu Items */}
       <div className="mb-6 space-y-1">
+        <MenuItem
+          icon={HvCheckSquare2}
+          title={t("completed") || "Completed"}
+          to="/completed"
+        />
         <MenuItem icon={HvHash} title={t("tags") || "Tags"} to="/tags" />
         <MenuItem
           icon={HvSettings}

@@ -5,6 +5,7 @@ import React from "react";
 import { useTags, normalizeTag } from "../use-tags";
 
 const mockGetTasks = vi.fn();
+const mockGetAllPendingTasks = vi.fn();
 const mockUpdateTask = vi.fn();
 
 // Mock the pouchdb hook
@@ -15,6 +16,7 @@ vi.mock("../../../pouchdb", () => ({
 // Mock task use cases
 let mockUseCases = {
   getTasks: mockGetTasks,
+  getAllPendingTasks: mockGetAllPendingTasks,
   updateTask: mockUpdateTask,
 };
 
@@ -65,9 +67,11 @@ describe("useTags", () => {
     mockGetTasks.mockReset();
     mockUpdateTask.mockReset();
     mockGetTasks.mockResolvedValue(mockTasks);
+    mockGetAllPendingTasks.mockResolvedValue(mockTasks);
     mockUpdateTask.mockResolvedValue({});
     mockUseCases = {
       getTasks: mockGetTasks,
+      getAllPendingTasks: mockGetAllPendingTasks,
       updateTask: mockUpdateTask,
     };
   });
@@ -98,10 +102,12 @@ describe("useTags", () => {
   });
 
   it("handles tasks with no tags", async () => {
-    mockGetTasks.mockResolvedValue([
+    const noTagTasks = [
       { id: "task_1", tags: undefined },
       { id: "task_2" },
-    ]);
+    ];
+    mockGetTasks.mockResolvedValue(noTagTasks);
+    mockGetAllPendingTasks.mockResolvedValue(noTagTasks);
 
     const { result } = renderHook(() => useTags(), {
       wrapper: createWrapper(),
@@ -114,9 +120,9 @@ describe("useTags", () => {
   });
 
   it("normalizes tags during extraction", async () => {
-    mockGetTasks.mockResolvedValue([
-      { id: "task_1", tags: ["Work", "WORK", " work "] },
-    ]);
+    const normalizedTasks = [{ id: "task_1", tags: ["Work", "WORK", " work "] }];
+    mockGetTasks.mockResolvedValue(normalizedTasks);
+    mockGetAllPendingTasks.mockResolvedValue(normalizedTasks);
 
     const { result } = renderHook(() => useTags(), {
       wrapper: createWrapper(),

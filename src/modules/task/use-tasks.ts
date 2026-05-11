@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
-import type { Task, TaskStatus, TaskQuery, TaskTypeFilter } from "./types";
+import type { Task, TaskQuery, TaskTypeFilter } from "./types";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import log from "../logger";
@@ -19,7 +19,6 @@ export function useTasks() {
   const taskUseCases = createTaskUseCases(db);
 
   // Local filter state
-  const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
   const [dateRangeFilter, setDateRangeFilter] = useState<{
     startDate: HijriDate;
     endDate: HijriDate;
@@ -30,7 +29,6 @@ export function useTasks() {
   const [tagFilter, setTagFilter] = useState<string[]>([]);
 
   const clearFilters = useCallback(() => {
-    setStatusFilter("all");
     setDateRangeFilter(null);
     setSearchTextFilter("");
     setUnscheduledFilter(false);
@@ -40,7 +38,6 @@ export function useTasks() {
 
   // Create filter key for React Query
   const filterKey = [
-    statusFilter === "all" ? "" : statusFilter.toString(),
     dateRangeFilter
       ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
       : "",
@@ -52,11 +49,7 @@ export function useTasks() {
 
   // Build query object for repository
   const buildQuery = (): TaskQuery => {
-    const query: TaskQuery = {};
-
-    if (statusFilter !== undefined && statusFilter !== "all") {
-      query.status = statusFilter as TaskStatus;
-    }
+    const query: TaskQuery = { status: 0 as const };
 
     if (searchTextFilter && searchTextFilter.trim()) {
       query.searchText = searchTextFilter;
@@ -268,7 +261,6 @@ export function useTasks() {
     isScrollable,
 
     // Filter state
-    statusFilter,
     dateRangeFilter,
     searchTextFilter,
     unscheduledFilter,
@@ -283,7 +275,6 @@ export function useTasks() {
     handleInfiniteScroll,
 
     // Filter actions
-    setStatusFilter,
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
