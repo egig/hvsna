@@ -40,7 +40,6 @@ export {
   Plus as HvPlus,
   Repeat as HvRepeat,
   RefreshCw as HvRefreshCw,
-  Search as HvSearch,
   Settings as HvSettings,
   Tag as HvTag,
   Tags as HvTags,
@@ -89,3 +88,6 @@ export {
   AiOutlineProject as HvProjectOutline,
   AiFillProject as HvProjectFilled,
 } from "react-icons/ai";
+
+
+export { BiSearch as HvSearch, BiSearchAlt as HvSearchAlt } from "react-icons/bi";

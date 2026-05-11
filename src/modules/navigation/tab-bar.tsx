@@ -11,6 +11,7 @@ import {
   HvCheckCircle,
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
+  HvSearchAlt,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -37,7 +38,7 @@ export function TabBar() {
       path: "/search",
       label: t("search") || "Search",
       icon: <HvSearch />,
-      activeIcon: <HvSearch />,
+      activeIcon: <HvSearchAlt />,
       context: "search",
     },
     {

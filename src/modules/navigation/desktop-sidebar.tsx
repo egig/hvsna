@@ -10,7 +10,9 @@ import {
   HvSettingsFilled,
   HvSearch,
   HvSquareRoundedPlusFilled,
-  HvCheckCircle,
+  HvSquareCheck,
+  HvSquareCheckFilled,
+  HvSearchAlt,
 } from "@/modules/icons";
 import { Link, useLocation } from "react-router";
 import { SidebarTagsSection } from "../task/sidebar-tags-section";
@@ -70,14 +72,14 @@ export function DesktopSidebar({
       path: "/search",
       label: t("search") || "Search",
       icon: <HvSearch />,
-      activeIcon: <HvSearch />,
+      activeIcon: <HvSearchAlt />,
       context: "search",
     },
     {
       path: "/completed",
       label: t("completed") || "Completed",
-      icon: <HvCheckCircle />,
-      activeIcon: <HvCheckCircle />,
+      icon: <HvSquareCheck />,
+      activeIcon: <HvSquareCheckFilled />,
       context: "completed",
     },
   ];
