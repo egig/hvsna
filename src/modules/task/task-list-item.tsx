@@ -22,7 +22,6 @@ interface TaskListItemProps {
   onEdit?: (task: Task) => void;
   showGoalInfo?: boolean;
   className?: string;
-  showDateTime?: boolean;
   formatDate?: (task: Task) => string;
   disableSwipe?: boolean;
 }
@@ -33,7 +32,6 @@ export function TaskListItem({
   onEdit,
   showGoalInfo: _showGoalInfo = false,
   className = "",
-  showDateTime = false,
   formatDate,
   disableSwipe = false,
 }: TaskListItemProps) {
@@ -248,6 +246,9 @@ export function TaskListItem({
     setIsScheduleModalOpen(false);
   };
 
+  const isOnTodayPage =
+    location.pathname === "/today" || location.pathname === "/tasks";
+
   const contentBg = "bg-white hover:bg-gray-50";
 
   return (
@@ -317,17 +318,15 @@ export function TaskListItem({
               </p>
             )}
 
-            {showDateTime && !!task.atDateHijri && (
-              <p
-                className={`text-xs mt-0.5 ${
-                  task.isOverdue() && task.status !== 1
-                    ? "text-[var(--hvsna-danger-color)]"
-                    : "text-gray-500"
-                }`}
-              >
-                {formatScheduledDate(task, location.state?.context)}
-              </p>
-            )}
+            <p
+              className={`text-xs mt-0.5 ${
+                task.isOverdue() && task.status !== 1
+                  ? "text-[var(--hvsna-danger-color)]"
+                  : "text-gray-500"
+              }`}
+            >
+              {formatScheduledDate(task, isOnTodayPage ? "today" : "upcoming")}
+            </p>
 
             {task.tags && task.tags.length > 0 && (
               <TagList tags={task.tags} className="mt-1.5" />

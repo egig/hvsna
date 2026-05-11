@@ -293,7 +293,6 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
                 onEdit={handleEditTask}
                 showGoalInfo={false}
                 className="transition-all hover:shadow-sm"
-                showDateTime={true}
               />
             ))}
           </div>

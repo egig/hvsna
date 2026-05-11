@@ -36,7 +36,6 @@ function UpcomingContent({
   taskGroupsWithLabels,
   isReady,
   effectiveMode,
-  formatScheduledDate,
   handleEditTask,
   t,
   droppable,
@@ -45,7 +44,6 @@ function UpcomingContent({
   taskGroupsWithLabels: Record<string, { label: string; tasks: Task[] }>;
   isReady: boolean;
   effectiveMode: ViewMode;
-  formatScheduledDate: (task: Task) => string;
   handleEditTask: (task: Task) => void;
   t: (key: string) => string;
   droppable?: boolean;
@@ -82,11 +80,9 @@ function UpcomingContent({
                 <>
                   {taskGroupsWithLabels[key].tasks.map((task: Task) => (
                     <TaskListItem
-                      showDateTime
                       key={task.id}
                       task={task}
                       onEdit={handleEditTask}
-                      formatDate={formatScheduledDate}
                     />
                   ))}
                 </>
@@ -252,7 +248,7 @@ export default function Tasks() {
     }
   };
 
-  const [mobileTab, setMobileTab] = useState<"scheduled" | "inbox">(
+  const [mobileTab, setMobileTab] = useState<"scheduled" | "unscheduled">(
     "scheduled"
   );
 
@@ -268,14 +264,8 @@ export default function Tasks() {
     localStorage.setItem("upcoming-view-mode", mode);
   };
 
-  const {
-    upcomingTasks,
-    taskGroups,
-    loading,
-    initiated,
-    error,
-    formatScheduledDate,
-  } = useUpcoming();
+  const { upcomingTasks, taskGroups, loading, initiated, error } =
+    useUpcoming();
 
   const { inboxTasks, initiated: inboxInitiated } = useInbox();
 
@@ -367,7 +357,6 @@ export default function Tasks() {
                     taskGroupsWithLabels={taskGroupsWithLabels}
                     isReady={isReady}
                     effectiveMode={effectiveMode}
-                    formatScheduledDate={formatScheduledDate}
                     handleEditTask={handleEditTask}
                     t={t}
                     droppable={effectiveMode === "week"}
@@ -380,7 +369,7 @@ export default function Tasks() {
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
                   <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
                   <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    {t("inbox") || "Inbox"}
+                    {t("unscheduled") || "Undscheduled"}
                   </h2>
                 </div>
                 {effectiveMode === "week" ? (
@@ -486,7 +475,6 @@ export default function Tasks() {
             taskGroupsWithLabels={taskGroupsWithLabels}
             isReady={isReady}
             effectiveMode="list"
-            formatScheduledDate={formatScheduledDate}
             handleEditTask={handleEditTask}
             t={t}
           />

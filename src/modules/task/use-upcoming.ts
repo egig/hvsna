@@ -20,18 +20,6 @@ export function useUpcoming() {
     queryFn: () => taskUseCases.getUpcomingTasks(today),
   });
 
-  const formatScheduledDate = (task: Task) => {
-    if (!task.atEpochMillis) return "No date set";
-
-    try {
-      const taskDate = new Date(task.atEpochMillis);
-      const hijriDateObj = toHijriDate(taskDate);
-      return formatDate(hijriDateObj, "YYYY M DD");
-    } catch {
-      return task.atDateHijri || "Invalid date";
-    }
-  };
-
   const groupTasksByTimePeriod = (
     tasks: Task[]
   ): {
@@ -118,7 +106,6 @@ export function useUpcoming() {
         ? upcomingTasksQuery.error.message
         : "Unknown error"
       : null,
-    formatScheduledDate,
     refreshTasks: () => upcomingTasksQuery.refetch(),
     today,
     tomorrow,
