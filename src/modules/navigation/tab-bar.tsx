@@ -3,18 +3,13 @@ import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import {
-  HvChartArea,
-  HvChartAreaFilled,
-  HvSettings,
-  HvSettingsFilled,
   HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
   HvCalendar,
+  HvSearch,
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
-  HvHiInbox,
-  HvOutlineInbox,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -38,11 +33,11 @@ export function TabBar() {
       context: "upcoming",
     },
     {
-      path: "/inbox",
-      label: t("inbox") || "Inbox",
-      icon: <HvOutlineInbox />,
-      activeIcon: <HvHiInbox />,
-      context: "inbox",
+      path: "/search",
+      label: t("search") || "Search",
+      icon: <HvSearch />,
+      activeIcon: <HvSearch />,
+      context: "search",
     },
     {
       path: "/browse",

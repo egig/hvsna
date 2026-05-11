@@ -9,7 +9,6 @@ import {
   HvLogOut,
   HvCalendar,
   HvClock,
-  HvTag,
 } from "@/modules/icons";
 import { Modal } from "../navigation/modal";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -198,11 +197,6 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
     id: "general",
     title: "General",
     icon: HvSettings,
-  },
-  {
-    id: "tags",
-    title: "Tags",
-    icon: HvTag,
   },
   {
     id: "prayer-time-fallback",

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
 import {
   HvArrowLeft,
   HvEdit,
   HvMerge,
   HvTrash2,
-  HvTag,
+  HvHash,
   HvX,
 } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
@@ -112,7 +112,7 @@ export default function TagManagementPage() {
 
       {!loading && tags.length === 0 && (
         <div className="text-center py-12 px-4">
-          <HvTag size={48} className="mx-auto text-gray-400 mb-4" />
+          <HvHash size={48} className="mx-auto text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             {t("no_tags_yet")}
           </h3>
@@ -127,8 +127,11 @@ export default function TagManagementPage() {
               key={tag.name}
               className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <HvTag size={16} className="text-gray-400 flex-shrink-0" />
+              <Link
+                to={`/tags/${encodeURIComponent(tag.name)}`}
+                className="flex items-center gap-3 min-w-0 flex-1"
+              >
+                <HvHash size={16} className="text-gray-400 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                     {tag.name}
@@ -137,7 +140,7 @@ export default function TagManagementPage() {
                     {t("tag_count_tasks", { count: tag.count })}
                   </p>
                 </div>
-              </div>
+              </Link>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button
                   onClick={() => openModal(tag, "rename")}

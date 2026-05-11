@@ -34,6 +34,7 @@ import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import Browse from "./modules/task/browse";
 import TagManagementPage from "./modules/task/tag-management-page";
+import TagDetailPage from "./modules/task/tag-detail-page";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -43,10 +44,6 @@ const desktopSettingsSections: SettingsSection[] = [
   {
     ...defaultSettingsSections.find((s) => s.id === "general")!,
     path: "/settings/general",
-  },
-  {
-    ...defaultSettingsSections.find((s) => s.id === "tags")!,
-    path: "/tags",
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "prayer-time-fallback")!,
@@ -100,9 +97,8 @@ export const AppRoutes = () => {
             <Route path="upcoming" element={<Tasks />} />
             <Route path="inbox" element={<Inbox />} />
             <Route path="browse" element={<Browse />} />
-            {!isDesktop && (
-              <Route path="tags" element={<TagManagementPage />} />
-            )}
+            <Route path="tags" element={<TagManagementPage />} />
+            <Route path="tags/:tagName" element={<TagDetailPage />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}
           <Route path="about" element={<About />} />
@@ -137,7 +133,6 @@ export const AppRoutes = () => {
               path="settings/prayer-time-fallback"
               element={<PrayerTimeFallback />}
             />
-            <Route path="tags" element={<TagManagementPage />} />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />

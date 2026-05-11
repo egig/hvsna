@@ -3,8 +3,10 @@ import {
   HvList,
   HvSettings,
   HvSearch,
-  HvTag,
   HvOutlineInbox,
+  HvTag,
+  HvTags,
+  HvHash,
 } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
@@ -42,12 +44,7 @@ export default function Browse() {
     >
       {/* Navigation Menu Items */}
       <div className="mb-6 space-y-1">
-        <MenuItem
-          icon={HvSearch}
-          title={t("search") || "Search"}
-          to="/search"
-        />
-        <MenuItem icon={HvTag} title={t("tags") || "Tags"} to="/tags" />
+        <MenuItem icon={HvHash} title={t("tags") || "Tags"} to="/tags" />
       </div>
     </Page>
   );

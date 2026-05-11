@@ -11,10 +11,15 @@ export interface TagInfo {
   count: number;
 }
 
-export function useTags() {
+export interface UseTagsOptions {
+  limit?: number;
+}
+
+export function useTags(options?: UseTagsOptions) {
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
   const queryClient = useQueryClient();
+  const limit = options?.limit;
 
   const allTasksQuery = useAllTasks();
   const tasks = allTasksQuery.data || [];
@@ -34,10 +39,16 @@ export function useTags() {
       }
     }
 
-    return Array.from(tagCounts.entries())
+    let result = Array.from(tagCounts.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [tasks]);
+
+    if (limit && result.length > limit) {
+      result = result.slice(0, limit);
+    }
+
+    return result;
+  }, [tasks, limit]);
 
   const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
 

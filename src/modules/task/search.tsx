@@ -60,6 +60,7 @@ export default function Search() {
           searchValue={searchTextFilter}
           onSearchChange={setSearchTextFilter}
           searchPlaceholder={t("search_tasks")}
+          showBackButton={false}
           rightAction={
             <Button
               onClick={() => setFilterModalOpened(true)}

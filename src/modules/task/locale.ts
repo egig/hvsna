@@ -172,6 +172,10 @@ export const taskTranslations = {
     en: "Later",
     id: "Nanti",
   },
+  scheduled: {
+    en: "Scheduled",
+    id: "Terjadwal",
+  },
   unscheduled: {
     en: "Unscheduled",
     id: "Tidak Terjadwal",

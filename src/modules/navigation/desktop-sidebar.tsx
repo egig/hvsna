@@ -1,32 +1,22 @@
 import {
-  HvPlus,
   HvPanelLeftClose,
   HvUserRound,
-  HvMoreVertical,
-  HvEdit,
-  HvTrash2,
   HvPanelLeft,
   HvCalendar,
   HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
-  HvOutlineInbox,
-  HvHiInbox,
-  HvLayoutList,
-  HvLayoutListFilled,
   HvSettings,
   HvSettingsFilled,
-  HvTag,
-  HvWallet,
-  HvLandmark,
+  HvSearch,
   HvSquareRoundedPlusFilled,
 } from "@/modules/icons";
 import { Link, useLocation } from "react-router";
+import { SidebarTagsSection } from "../task/sidebar-tags-section";
 import { Button } from "./button";
 import { Menu } from "@base-ui/react/menu";
 import { Modal } from "./modal";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useTasks } from "../task/use-tasks";
 import { useTaskContext } from "../task/task-context";
 import { useState } from "react";
 import { useAuth } from "../auth/use-auth";
@@ -41,25 +31,11 @@ export function DesktopSidebar({
   collapsed = false,
   onToggleCollapse,
 }: DesktopSidebarProps) {
-  const { projects, loading, deleteProject } = useProjects();
-  const { tasks } = useTasks();
   const { t } = useLanguageContext();
   const location = useLocation();
-  const { openProjectForm } = useProjectContext();
   const { openCreateTaskForm } = useTaskContext();
   const { user, isAuthenticated, logout } = useAuth();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
-  const handleEditProject = (project: any) => {
-    openProjectForm(project.id!);
-  };
-
-  const handleDeleteProject = (project: any) => {
-    setSelectedProject(project);
-    setShowDeleteModal(true);
-  };
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
@@ -72,19 +48,6 @@ export function DesktopSidebar({
 
   const cancelLogout = () => {
     setShowLogoutConfirm(false);
-  };
-
-  const confirmDeleteProject = async (deleteTasks: boolean) => {
-    if (!selectedProject) {
-      return;
-    }
-
-    const success = await deleteProject(selectedProject.id!, deleteTasks);
-    if (success) {
-      setShowDeleteModal(false);
-      setSelectedProject(null);
-      // List will be automatically refreshed by the hook
-    }
   };
 
   const tabs = [
@@ -101,6 +64,13 @@ export function DesktopSidebar({
       icon: <HvCalendarMonth />,
       activeIcon: <HvCalendarMonthFilled />,
       context: "upcoming",
+    },
+    {
+      path: "/search",
+      label: t("search") || "Search",
+      icon: <HvSearch />,
+      activeIcon: <HvSearch />,
+      context: "search",
     },
   ];
 
@@ -227,8 +197,8 @@ export function DesktopSidebar({
             </Button>
           );
         })}
+        <SidebarTagsSection collapsed={collapsed} />
       </div>
-
       <div className="border-t border-gray-100 p-2 space-y-2">
         {bottomTabs.map((tab) => {
           const isActive = getIsActive(tab.path);
@@ -255,20 +225,6 @@ export function DesktopSidebar({
           );
         })}
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {selectedProject && (
-        <DeleteProjectModal
-          isOpen={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false);
-            setSelectedProject(null);
-          }}
-          onConfirm={confirmDeleteProject}
-          projectName={selectedProject.name || ""}
-          tasks={getProjectTasks(selectedProject.id)}
-        />
-      )}
 
       {/* Logout Confirmation Modal */}
       <Modal

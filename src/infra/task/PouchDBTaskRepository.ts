@@ -125,40 +125,6 @@ class PouchDBTaskDocument {
   }
 }
 
-class PouchDBProjectDocument {
-  _id?: string;
-  _rev?: string | undefined;
-  type: "project" = "project";
-  name?: string;
-  description?: string;
-  color?: string;
-  createdAt: number = new Date().valueOf();
-  updatedAt: number = new Date().valueOf();
-
-  constructor(o: any) {
-    Object.assign(this, o);
-  }
-
-  toProjectItem(): Project {
-    return new Project({
-      id: this._id || "",
-      rev: this._rev,
-      name: this.name || "",
-      description: this.description || "",
-      color: this.color,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-    });
-  }
-
-  static fromProjectItem(l: Project) {
-    let a = new PouchDBProjectDocument(l);
-    a._id = l.id;
-    a._rev = l.rev;
-    return a;
-  }
-}
-
 export class PouchDBTaskRepository implements ITaskRepository {
   private readonly db: PouchDB.Database;
 

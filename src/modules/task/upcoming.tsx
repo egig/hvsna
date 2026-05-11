@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
 import {
   DndContext,
   DragOverlay,
@@ -14,8 +13,6 @@ import {
   HvOutlineInbox,
   HvHiInbox,
   HvGripVertical,
-  HvSearch,
-  HvSquareRoundedPlusFilled,
 } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -24,7 +21,6 @@ import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { useUpcoming } from "./use-upcoming";
 import { useInbox } from "./use-inbox";
-import { useToday } from "./use-today";
 import { WeekView } from "./week-view";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
@@ -34,7 +30,6 @@ import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { createPortal } from "react-dom";
 
 type ViewMode = "list" | "week";
-type MobileTab = "today" | "upcoming" | "inbox";
 
 function UpcomingContent({
   upcomingTasks,
@@ -228,56 +223,9 @@ function DroppableInboxSidebar({
   );
 }
 
-function TodayColumn({
-  todayTasks,
-  todayCompletedTasks,
-  todayInitiated,
-  todayError,
-  handleEditTask,
-  t,
-}: {
-  todayTasks: Task[];
-  todayCompletedTasks: Task[];
-  todayInitiated: boolean;
-  todayError: string | null;
-  handleEditTask: (task: Task) => void;
-  t: (key: string) => string;
-}) {
-  const allTasks = [...todayTasks, ...todayCompletedTasks];
-
-  return (
-    <div className="flex-1 overflow-y-auto">
-      {todayInitiated && todayError && (
-        <div className="text-center py-4 px-2">
-          <div className="text-red-600 text-sm">{`Error: ${todayError}`}</div>
-        </div>
-      )}
-      {todayInitiated && allTasks.length === 0 ? (
-        <EmptyState
-          icon={<HvCalendar className="w-full h-full" />}
-          title={t("no_tasks_scheduled_for_today")}
-          description={t("tasks_scheduled_for_today_will_appear_here")}
-        />
-      ) : (
-        <div className="space-y-2 p-2">
-          {allTasks.map((task) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              onEdit={handleEditTask}
-              showGoalInfo={false}
-              showDateTime={true}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function Tasks() {
   const { t } = useLanguageContext();
-  const { openEditTaskForm, updateTask, openCreateTaskForm } = useTaskContext();
+  const { openEditTaskForm, updateTask } = useTaskContext();
   const { isDesktop } = useScreenSize();
   const { toHijriDate } = useHijriDate();
 
@@ -304,6 +252,10 @@ export default function Tasks() {
     }
   };
 
+  const [mobileTab, setMobileTab] = useState<"scheduled" | "inbox">(
+    "scheduled"
+  );
+
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const stored = localStorage.getItem("upcoming-view-mode");
     return stored === "week" ? "week" : "list";
@@ -327,13 +279,6 @@ export default function Tasks() {
 
   const { inboxTasks, initiated: inboxInitiated } = useInbox();
 
-  const {
-    todayTasks,
-    todayCompletedTasks,
-    initiated: todayInitiated,
-    error: todayError,
-  } = useToday();
-
   const taskGroupsWithLabels = {
     ...taskGroups,
     today: { ...taskGroups.today, label: t("today") },
@@ -349,17 +294,9 @@ export default function Tasks() {
   };
 
   const isReady = initiated && !loading && !error;
-  const navigate = useNavigate();
 
   const navbarActions = (
     <div className="flex items-center gap-1">
-      <button
-        onClick={() => navigate("/search")}
-        title={t("search")}
-        className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-      >
-        <HvSearch className="size-4" />
-      </button>
       {isDesktop && (
         <div className="flex gap-0.5">
           <button
@@ -411,76 +348,75 @@ export default function Tasks() {
               rightAction={navbarActions}
             />
 
-            {/* Content area */}
+            {/* Content area: always two columns on desktop */}
             <div className="flex-1 flex overflow-hidden">
-              {effectiveMode === "list" ? (
-                <div className="flex-1 overflow-y-auto">
-                  <div className="max-w-4xl mx-auto">
-                    {initiated && error && (
-                      <div className="text-center py-8">
-                        <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-                      </div>
-                    )}
-                    <UpcomingContent
-                      upcomingTasks={upcomingTasks}
-                      taskGroupsWithLabels={taskGroupsWithLabels}
-                      isReady={isReady}
-                      effectiveMode="list"
-                      formatScheduledDate={formatScheduledDate}
-                      handleEditTask={handleEditTask}
-                      t={t}
-                      droppable={false}
-                    />
-                  </div>
+              {/* Main scheduled content */}
+              <div className="flex-1 overflow-y-auto">
+                <div
+                  className={
+                    effectiveMode === "week" ? "" : "max-w-2xl mx-auto w-full"
+                  }
+                >
+                  {initiated && error && (
+                    <div className="text-center py-8">
+                      <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
+                    </div>
+                  )}
+                  <UpcomingContent
+                    upcomingTasks={upcomingTasks}
+                    taskGroupsWithLabels={taskGroupsWithLabels}
+                    isReady={isReady}
+                    effectiveMode={effectiveMode}
+                    formatScheduledDate={formatScheduledDate}
+                    handleEditTask={handleEditTask}
+                    t={t}
+                    droppable={effectiveMode === "week"}
+                  />
                 </div>
-              ) : (
-                <>
-                  {/* Week View: Main content + Inbox sidebar */}
-                  <div className="flex flex-col flex-1 overflow-hidden">
-                    <div className="flex-1 overflow-y-auto">
-                      <div
-                        className={
-                          effectiveMode === "week"
-                            ? ""
-                            : "max-w-2xl mx-auto w-full"
-                        }
-                      >
-                        {initiated && error && (
-                          <div className="text-center py-8">
-                            <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-                          </div>
-                        )}
-                        <UpcomingContent
-                          upcomingTasks={upcomingTasks}
-                          taskGroupsWithLabels={taskGroupsWithLabels}
-                          isReady={isReady}
-                          effectiveMode={effectiveMode}
-                          formatScheduledDate={formatScheduledDate}
-                          handleEditTask={handleEditTask}
-                          t={t}
-                          droppable
-                        />
-                      </div>
-                    </div>
-                  </div>
+              </div>
 
-                  {/* Inbox sidebar */}
-                  <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-                      <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
-                      <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {t("inbox") || "Inbox"}
-                      </h2>
-                    </div>
-                    <DroppableInboxSidebar
-                      inboxTasks={inboxTasks}
-                      inboxInitiated={inboxInitiated}
-                      handleEditTask={handleEditTask}
-                      t={t}
-                    />
+              {/* Inbox sidebar - always visible */}
+              <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+                  <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
+                  <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    {t("inbox") || "Inbox"}
+                  </h2>
+                </div>
+                {effectiveMode === "week" ? (
+                  <DroppableInboxSidebar
+                    inboxTasks={inboxTasks}
+                    inboxInitiated={inboxInitiated}
+                    handleEditTask={handleEditTask}
+                    t={t}
+                  />
+                ) : (
+                  <div className="flex-1 overflow-y-auto">
+                    {inboxInitiated &&
+                      (inboxTasks.length === 0 ? (
+                        <EmptyState
+                          icon={<HvOutlineInbox className="w-full h-full" />}
+                          title={t("no_tasks_in_inbox")}
+                          description={t(
+                            "tasks_without_schedule_or_list_will_appear_here"
+                          )}
+                        />
+                      ) : (
+                        <div className="space-y-2 p-2">
+                          {inboxTasks.map((task) => (
+                            <TaskListItem
+                              key={task.id}
+                              task={task}
+                              onEdit={handleEditTask}
+                              showGoalInfo={false}
+                              showDateTime={false}
+                            />
+                          ))}
+                        </div>
+                      ))}
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
@@ -514,20 +450,55 @@ export default function Tasks() {
         />
       }
     >
-      {initiated && error && (
-        <div className="text-center py-8">
-          <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-        </div>
+      {/* Mobile tab bar */}
+      <div className="flex border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white dark:bg-gray-950 z-10">
+        <button
+          onClick={() => setMobileTab("scheduled")}
+          className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+            mobileTab === "scheduled"
+              ? "text-primary-600 border-b-2 border-primary-500"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          {t("scheduled") || "Scheduled"}
+        </button>
+        <button
+          onClick={() => setMobileTab("inbox")}
+          className={`flex-1 py-2.5 text-sm font-medium transition-colors ${
+            mobileTab === "inbox"
+              ? "text-primary-600 border-b-2 border-primary-500"
+              : "text-gray-500 dark:text-gray-400"
+          }`}
+        >
+          {t("unscheduled") || "Unscheduled"}
+        </button>
+      </div>
+
+      {mobileTab === "scheduled" ? (
+        <>
+          {initiated && error && (
+            <div className="text-center py-8">
+              <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
+            </div>
+          )}
+          <UpcomingContent
+            upcomingTasks={upcomingTasks}
+            taskGroupsWithLabels={taskGroupsWithLabels}
+            isReady={isReady}
+            effectiveMode="list"
+            formatScheduledDate={formatScheduledDate}
+            handleEditTask={handleEditTask}
+            t={t}
+          />
+        </>
+      ) : (
+        <InboxContent
+          inboxTasks={inboxTasks}
+          inboxInitiated={inboxInitiated}
+          handleEditTask={handleEditTask}
+          t={t}
+        />
       )}
-      <UpcomingContent
-        upcomingTasks={upcomingTasks}
-        taskGroupsWithLabels={taskGroupsWithLabels}
-        isReady={isReady}
-        effectiveMode="list"
-        formatScheduledDate={formatScheduledDate}
-        handleEditTask={handleEditTask}
-        t={t}
-      />
     </Page>
   );
 }

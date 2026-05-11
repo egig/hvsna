@@ -45,7 +45,6 @@ export interface UseTaskFormReturn {
   showRecurringEditScope: boolean;
   removeTime: boolean;
   formData: EditFormData;
-  projects: any[];
   handleSubmit: (f: FormData) => void;
   handleDelete: () => void;
   handleDeleteSingle: () => Promise<void>;
@@ -463,6 +462,5 @@ export const useTaskFormEdit = (
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-    projects,
   };
 };

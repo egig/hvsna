@@ -44,6 +44,7 @@ export {
   Settings as HvSettings,
   Tag as HvTag,
   Tags as HvTags,
+  Hash as HvHash,
   Smartphone as HvSmartphone,
   Square as HvSquare,
   Trash as HvTrash,
