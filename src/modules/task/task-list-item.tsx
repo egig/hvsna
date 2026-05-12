@@ -12,7 +12,7 @@ import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "./types";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
-import { useHijriDate } from "../calendar/hijri";
+import { HijriDate, isSameHijriDate, useHijriDate } from "../calendar/hijri";
 import { TagList } from "./tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 
@@ -88,36 +88,37 @@ export function TaskListItem({
       return formatDate(task);
     }
 
-    if (!task.atDateHijri) return null;
+    if (!task.atEpochMillis) return null;
 
     const today = getToday();
-    const yesterday = today.previous().format("YYYYMMDD");
-    const tomorrow = today.next();
-    const todayString = today.format("YYYYMMDD");
-    const tomorrowString = tomorrow.format("YYYYMMDD");
     const time = task.atTime || task.prayerTime;
+    const taskDate = createHijriDate(
+      ...(() => {
+        const h = HijriDate.fromDate(new Date(task.atEpochMillis!), {
+          latitude: task.lat,
+          longitude: task.long,
+          offset: task.hijriDateOffset,
+        });
+        return [h.year, h.month, h.day] as [number, number, number];
+      })()
+    );
 
-    if (task.atDateHijri === yesterday) {
+    if (isSameHijriDate(taskDate, today.previous())) {
       return t("yesterday") + (time ? `, ${time}` : "");
     }
 
-    if (task.atDateHijri === todayString) {
+    if (isSameHijriDate(taskDate, today)) {
       if (timeContext === "today") {
         return time ? time : "";
       }
       return t("today") + (time ? `, ${time}` : "");
     }
 
-    if (task.atDateHijri === tomorrowString) {
+    if (isSameHijriDate(taskDate, today.next())) {
       return t("tomorrow") + (time ? `, ${time}` : "");
     }
 
     try {
-      const taskDate = createHijriDate(
-        parseInt(task.atDateHijri.slice(0, 4)),
-        parseInt(task.atDateHijri.slice(4, 6)),
-        parseInt(task.atDateHijri.slice(6, 8))
-      );
       const todayGregorian = today.toDate();
       const taskGregorian = taskDate.toDate();
       const daysDiff = Math.floor(
@@ -236,8 +237,19 @@ export function TaskListItem({
     repeat: "none" | "daily" | "weekly" | "monthly" | "yearly",
     repeatInterval: number
   ) => {
+    let atEpochMillis: number | null = null;
+    if (date) {
+      const { year, month, day } = date as HijriDate;
+      const opts = { latitude: task.lat, longitude: task.long, offset: task.hijriDateOffset };
+      if (time) {
+        const [h, m] = time.split(":").map(Number);
+        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, opts).toDate().valueOf();
+      } else {
+        atEpochMillis = new HijriDate(year, month, day, undefined, undefined, 0, 0, opts).endOfDay().toDate().valueOf();
+      }
+    }
     updateTask(task.id as string, {
-      atDateHijri: date ? date.format("YYYYMMDD") : undefined,
+      atEpochMillis,
       atTime: time ?? undefined,
       prayerTime: (prayerTime as any) ?? undefined,
       repeat: repeat ?? "none",

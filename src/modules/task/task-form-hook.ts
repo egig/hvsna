@@ -6,7 +6,7 @@ import { Task, type PrayerTime, type TaskCreateInput } from "./types";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";
-import { formatHijriDateString } from "./task-form-helpers";
+import { parseHijriDateString } from "./task-form-helpers";
 import logger from "../logger";
 import type {
   RepeatConfig,
@@ -91,17 +91,17 @@ export const useTaskForm = (
       taskDescription: string;
     } & Partial<Task>;
 
-    if (!!formData.scheduleAt.dateHijri) {
-      taskData.atDateHijri = formatHijriDateString(
-        formData.scheduleAt.dateHijri.year,
-        formData.scheduleAt.dateHijri.month,
-        formData.scheduleAt.dateHijri.day
-      );
-
-      if (!!formData.scheduleAt.time) {
+    if (formData.scheduleAt.dateHijri) {
+      const { year, month, day } = formData.scheduleAt.dateHijri;
+      const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
+      if (formData.scheduleAt.time) {
         taskData.atTime = formData.scheduleAt.time;
+        const [h, m] = formData.scheduleAt.time.split(":").map(Number);
+        taskData.atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, hijriOpts).toDate().valueOf();
+      } else {
+        taskData.atEpochMillis = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
       }
-      if (!!formData.scheduleAt.prayerTime) {
+      if (formData.scheduleAt.prayerTime) {
         taskData.prayerTime = formData.scheduleAt.prayerTime as PrayerTime;
       }
     }
@@ -112,12 +112,21 @@ export const useTaskForm = (
       const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
 
-      if (isRecurring && taskData.atDateHijri) {
+      if (isRecurring && formData.scheduleAt.dateHijri) {
+        const { year, month, day } = formData.scheduleAt.dateHijri;
+        const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
+        const baseDateEpoch = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+        const repeatEndEpoch = formData.repeat.end === "on_date" && formData.repeat.endDate
+          ? (() => {
+              const { year: ey, month: em, day: ed } = parseHijriDateString(formData.repeat.endDate as string);
+              return new HijriDate(ey, em, ed, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+            })()
+          : undefined;
         const template = await createRecurringTask({
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
           attributes: attr,
-          baseDateHijri: taskData.atDateHijri as string,
+          baseDateEpoch,
           repeat: formData.repeat.repeat,
           repeatInterval: formData.repeat.interval,
           atTime: formData.scheduleAt.time,
@@ -128,7 +137,7 @@ export const useTaskForm = (
           hijriDateOffset: offset,
           tags: formData.tags,
           repeatEnd: formData.repeat.end,
-          repeatEndDate: formData.repeat.endDate as string,
+          repeatEndEpoch,
           repeatEndOccurrences: formData.repeat.endOccurrences,
         });
 
@@ -142,7 +151,7 @@ export const useTaskForm = (
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
           attributes: attr,
-          atDateHijri: taskData.atDateHijri as string,
+          atEpochMillis: taskData.atEpochMillis ?? null,
           atTime: taskData.atTime,
           prayerTime: taskData.prayerTime as PrayerTime,
           lat: latitude,

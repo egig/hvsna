@@ -4,6 +4,7 @@ import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import { HijriDate } from "../calendar/hijri";
 import {
   parseHijriDateString,
+  formatHijriDateString,
   getNextOccurrenceDate,
 } from "./task-form-helpers";
 
@@ -42,32 +43,27 @@ export async function generateOccurrencesForTemplate(
   const horizon = horizonDays(template.repeat, interval);
   const horizonEpoch = todayEpoch + horizon * 24 * 60 * 60 * 1000;
 
+  const opts = {
+    latitude: template.lat ?? 0,
+    longitude: template.long ?? 0,
+    offset: template.hijriDateOffset ?? 0,
+  };
+
   // Collect existing instance dates to avoid duplicates
   const existing = await taskRepository.findByRecurringTaskId(template.id);
-  const existingDates = new Set(existing.map((t) => t.atDateHijri));
+  const existingDates = new Set(
+    existing
+      .filter((t) => t.atEpochMillis != null)
+      .map((t) => {
+        const h = HijriDate.fromDate(new Date(t.atEpochMillis!), opts);
+        return formatHijriDateString(h.year, h.month, h.day);
+      })
+  );
 
-  // "on_date" end epoch
-  let endEpoch: number | null = null;
-  if (template.repeatEnd === "on_date" && template.repeatEndDate) {
-    const { year, month, day } = parseHijriDateString(template.repeatEndDate);
-    endEpoch = new HijriDate(
-      year,
-      month,
-      day,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      {
-        latitude: template.lat ?? 0,
-        longitude: template.long ?? 0,
-        offset: template.hijriDateOffset ?? 0,
-      }
-    )
-      .endOfDay()
-      .toDate()
-      .getTime();
-  }
+  const endEpoch =
+    template.repeatEnd === "on_date" && template.repeatEndEpoch
+      ? template.repeatEndEpoch
+      : null;
 
   const maxToCreate =
     template.repeatEnd === "after_occurrences" && template.repeatEndOccurrences
@@ -78,7 +74,13 @@ export async function generateOccurrencesForTemplate(
   const effectiveHorizon =
     endEpoch !== null ? Math.min(horizonEpoch, endEpoch) : horizonEpoch;
 
-  let currentDateStr = template.baseDateHijri;
+  // Seed iteration from the stored base epoch
+  const baseHijri = HijriDate.fromDate(new Date(template.baseDateEpoch), opts);
+  let currentDateStr = formatHijriDateString(
+    baseHijri.year,
+    baseHijri.month,
+    baseHijri.day
+  );
   let iterations = 0;
   const maxIterations = 400;
 
@@ -102,12 +104,7 @@ export async function generateOccurrencesForTemplate(
       minutes,
       undefined,
       undefined,
-      {
-        // TODO use use hook instead ? lat long is required
-        latitude: template.lat ?? 0,
-        longitude: template.long ?? 0,
-        offset: template.hijriDateOffset ?? 0,
-      }
+      opts
     );
 
     // of no time set, we use end of day as task date
@@ -124,7 +121,7 @@ export async function generateOccurrencesForTemplate(
       await taskRepository.create({
         name: template.name,
         description: template.description,
-        atDateHijri: currentDateStr,
+        atEpochMillis: dateEpoch,
         atTime: template.atTime,
         prayerTime: template.prayerTime,
         lat: template.lat,
@@ -172,7 +169,7 @@ export async function generateAllRecurringTaskOccurrences(
   });
 
   const templates = response.rows
-    .filter((row: any) => row.doc && row.doc.baseDateHijri)
+    .filter((row: any) => row.doc && row.doc.baseDateEpoch)
     .map((row: any) => row.doc as RecurringTask);
 
   await Promise.all(

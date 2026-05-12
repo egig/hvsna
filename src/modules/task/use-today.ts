@@ -29,6 +29,7 @@ export function useToday() {
   const todayTasks = (pendingTasksQuery.data ?? []).filter(
     (t) => t.noDate === 0 && t.atEpochMillis != null && t.atEpochMillis <= endOfToday
   );
+  console.log("todaytasks", pendingTasksQuery.data )
 
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
     hijriMonthNames[today.month - 1]

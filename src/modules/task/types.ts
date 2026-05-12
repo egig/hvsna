@@ -16,7 +16,6 @@ export class Task {
   description?: string;
   status?: TaskStatus;
   noDate?: number;
-  atDateHijri?: string;
   atTime?: string;
   atEpochMillis: number | null = null;
   lat?: number;
@@ -56,7 +55,7 @@ export interface TaskCreateInput {
   name: string;
   description?: string;
   status?: TaskStatus;
-  atDateHijri: string;
+  atEpochMillis?: number | null;
   atTime?: string;
   lat?: number;
   long?: number;
@@ -74,7 +73,7 @@ export interface TaskUpdateInput {
   name?: string;
   description?: string;
   status?: TaskStatus;
-  atDateHijri?: string;
+  atEpochMillis?: number | null;
   atTime?: string;
   lat?: number;
   long?: number;
@@ -102,7 +101,6 @@ export type TaskTypeFilter = "all" | "recurring";
 
 export type TaskQuery = {
   status?: TaskStatus;
-  atDateHijri?: string;
   noDate?: number;
   atTime?: string;
   atEpochMillis?: number | { $gte?: number; $lte?: number };

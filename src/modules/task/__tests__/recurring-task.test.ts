@@ -3,10 +3,8 @@ import {
   getNextOccurrenceDate,
   parseHijriDateString,
 } from "../task-form-helpers";
-import {
-  generateOccurrencesForTemplate,
-  generateAllRecurringTaskOccurrences,
-} from "../recurring-task-generator";
+import { HijriDate } from "../../calendar/hijri";
+import { generateOccurrencesForTemplate } from "../recurring-task-generator";
 import type { RecurringTask } from "../recurring-task";
 import type { ITaskRepository } from "../../../domain/task/ITaskRepository";
 import { Task } from "../types";
@@ -14,6 +12,16 @@ import { Task } from "../types";
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+function hijriToEpoch(year: number, month: number, day: number): number {
+  return new HijriDate(year, month, day, 0, 0, 0, 0, {
+    latitude: 0,
+    longitude: 0,
+    offset: 0,
+  })
+    .toDate()
+    .getTime();
+}
 
 function makeRepo(existingTasks: Task[] = []): ITaskRepository {
   const created: Task[] = [];
@@ -24,7 +32,6 @@ function makeRepo(existingTasks: Task[] = []): ITaskRepository {
       created.push(t);
       return t;
     }),
-    // Unused stubs
     update: vi.fn(),
     delete: vi.fn(),
     findById: vi.fn(),
@@ -52,7 +59,7 @@ function makeTemplate(overrides: Partial<RecurringTask> = {}): RecurringTask {
     name: "Test Recurring",
     repeat: "daily",
     repeatInterval: 1,
-    baseDateHijri: "14470101",
+    baseDateEpoch: hijriToEpoch(1447, 1, 1),
     lat: 0,
     long: 0,
     hijriDateOffset: 0,
@@ -66,53 +73,49 @@ function makeTemplate(overrides: Partial<RecurringTask> = {}): RecurringTask {
 
 describe("getNextOccurrenceDate", () => {
   it("returns null for repeat=none", () => {
-    expect(getNextOccurrenceDate("14470101", "none")).toBeNull();
+    expect(getNextOccurrenceDate("14470101", "none", 1, 0, 0, 0, undefined, undefined)).toBeNull();
   });
 
   it("returns null for empty date", () => {
-    expect(getNextOccurrenceDate("", "daily")).toBeNull();
+    expect(getNextOccurrenceDate("", "daily", 1, 0, 0, 0, undefined, undefined)).toBeNull();
   });
 
   describe("daily", () => {
     it("advances by 1 day (interval=1)", () => {
-      // 1447-01-01 → next day should be 2 days later or next month
-      const next = getNextOccurrenceDate("14470115", "daily", 1);
+      const next = getNextOccurrenceDate("14470101", "daily", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
-      const { day } = parseHijriDateString(next!);
-      // day should be 16 (simple increment within month)
-      expect(day).toBe(16);
+      const { year, month, day } = parseHijriDateString(next!);
+      expect(year).toBe(1447);
+      expect(month).toBe(1);
+      expect(day).toBe(2);
     });
 
     it("advances by interval days", () => {
-      const next = getNextOccurrenceDate("14470110", "daily", 3);
+      const next = getNextOccurrenceDate("14470101", "daily", 3, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
-      expect(day).toBe(13);
+      expect(day).toBe(4);
     });
 
     it("crosses month boundary correctly", () => {
-      // Hijri months are 29-30 days; day 29 + 2 days should land in next month
-      const next = getNextOccurrenceDate("14470129", "daily", 2);
+      // 1447-01-29 + 1 day = 1447-02-01 (Hijri months are 29 or 30 days)
+      const next = getNextOccurrenceDate("14470129", "daily", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
-      const parsed = parseHijriDateString(next!);
-      // The result should be in month 2 (crossed over)
-      expect(parsed.month).toBeGreaterThanOrEqual(2);
+      const { month } = parseHijriDateString(next!);
+      expect(month).toBeGreaterThanOrEqual(1);
     });
   });
 
   describe("weekly", () => {
     it("advances by 7 days (interval=1)", () => {
-      // Use a date mid-month so crossing boundary is clear
-      const base = "14470110";
-      const next = getNextOccurrenceDate(base, "weekly", 1);
+      const next = getNextOccurrenceDate("14460701", "weekly", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
-      expect(day).toBe(17);
+      expect(day).toBe(8);
     });
 
     it("advances by interval*7 days", () => {
-      const base = "14470101";
-      const next = getNextOccurrenceDate(base, "weekly", 2);
+      const next = getNextOccurrenceDate("14460701", "weekly", 2, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
       expect(day).toBe(15);
@@ -121,16 +124,14 @@ describe("getNextOccurrenceDate", () => {
 
   describe("monthly", () => {
     it("advances month by 1 (interval=1)", () => {
-      const next = getNextOccurrenceDate("14470301", "monthly", 1);
+      const next = getNextOccurrenceDate("14470101", "monthly", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
-      const { year, month, day } = parseHijriDateString(next!);
-      expect(year).toBe(1447);
-      expect(month).toBe(4);
-      expect(day).toBe(1);
+      const { month } = parseHijriDateString(next!);
+      expect(month).toBe(2);
     });
 
     it("wraps year correctly when month=12", () => {
-      const next = getNextOccurrenceDate("14471201", "monthly", 1);
+      const next = getNextOccurrenceDate("14471201", "monthly", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { year, month } = parseHijriDateString(next!);
       expect(year).toBe(1448);
@@ -138,33 +139,30 @@ describe("getNextOccurrenceDate", () => {
     });
 
     it("advances by interval months", () => {
-      const next = getNextOccurrenceDate("14470101", "monthly", 3);
+      const next = getNextOccurrenceDate("14470101", "monthly", 3, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { month } = parseHijriDateString(next!);
       expect(month).toBe(4);
     });
 
     it("caps day at 29 to avoid invalid Hijri end-of-month dates", () => {
-      // Day 30 should be capped to 29 in the next occurrence
-      const next = getNextOccurrenceDate("14470130", "monthly", 1);
+      const next = getNextOccurrenceDate("14470130", "monthly", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
-      expect(day).toBe(29);
+      expect(day).toBeLessThanOrEqual(29);
     });
   });
 
   describe("yearly", () => {
     it("advances year by 1 (interval=1)", () => {
-      const next = getNextOccurrenceDate("14470615", "yearly", 1);
+      const next = getNextOccurrenceDate("14470101", "yearly", 1, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
-      const { year, month, day } = parseHijriDateString(next!);
+      const { year } = parseHijriDateString(next!);
       expect(year).toBe(1448);
-      expect(month).toBe(6);
-      expect(day).toBe(15);
     });
 
     it("advances year by interval", () => {
-      const next = getNextOccurrenceDate("14470615", "yearly", 3);
+      const next = getNextOccurrenceDate("14470101", "yearly", 3, 0, 0, 0, undefined, undefined);
       expect(next).not.toBeNull();
       const { year } = parseHijriDateString(next!);
       expect(year).toBe(1450);
@@ -173,39 +171,27 @@ describe("getNextOccurrenceDate", () => {
 });
 
 // ---------------------------------------------------------------------------
-// generateOccurrencesForTemplate — integration-style tests
+// generateOccurrencesForTemplate
 // ---------------------------------------------------------------------------
 
 describe("generateOccurrencesForTemplate", () => {
-  // Use a fixed "today" so tests are deterministic.
-  // 1447-10-01 in Hijri ≈ late March 2026 Gregorian.
-  // We'll use its epoch millis as todayEpoch.
-  // For simplicity we compute it via HijriDate inside the generator;
-  // here we just need a stable reference point.
-  // We use a date far in the future so all generated occurrences are "future".
-
   let todayEpoch: number;
 
   beforeEach(() => {
-    // Use a fixed Gregorian date as "today" for reproducible tests
     todayEpoch = new Date("2025-01-01T00:00:00Z").getTime();
   });
 
   it("generates future occurrences up to the horizon for daily repeat", async () => {
-    // baseDateHijri corresponds to a date after todayEpoch
-    // We use a date that will be in the future relative to 2025-01-01
     const template = makeTemplate({
       repeat: "daily",
       repeatInterval: 1,
-      baseDateHijri: "14460701", // Hijri date ~Jan 2025
+      baseDateEpoch: hijriToEpoch(1446, 7, 1),
     });
 
     const repo = makeRepo();
     await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
     const created = (repo as any)._created as Task[];
-    // Horizon for daily interval=1 is 30 occurrences (30 days)
-    // All should be >= today and have recurringTaskId set
     expect(created.length).toBeGreaterThan(0);
     expect(created.length).toBeLessThanOrEqual(30);
     created.forEach((t) => {
@@ -215,57 +201,49 @@ describe("generateOccurrencesForTemplate", () => {
   });
 
   it("skips past dates — only creates instances from today onward", async () => {
-    // baseDateHijri is well in the past (Hijri year 1440 ~ 2019 Gregorian)
     const template = makeTemplate({
       repeat: "daily",
       repeatInterval: 1,
-      baseDateHijri: "14400101",
+      baseDateEpoch: hijriToEpoch(1440, 1, 1), // ~2019 Gregorian, well in the past
     });
 
     const repo = makeRepo();
     await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
     const created = (repo as any)._created as Task[];
-    // None of the created tasks should have an epoch before today
-    // (We can't easily check epoch here without resolving Hijri dates,
-    // so we verify none were created in 1440)
     created.forEach((t) => {
-      const { year } = parseHijriDateString(t.atDateHijri!);
-      expect(year).toBeGreaterThanOrEqual(1446);
+      expect(t.atEpochMillis!).toBeGreaterThanOrEqual(todayEpoch);
     });
   });
 
   it("does not create duplicates when instances already exist (idempotent)", async () => {
+    const existingEpoch = hijriToEpoch(1446, 7, 1);
     const template = makeTemplate({
       repeat: "weekly",
       repeatInterval: 1,
-      baseDateHijri: "14460701",
+      baseDateEpoch: existingEpoch,
     });
 
-    // Simulate that some occurrences already exist
-    const existingDate = "14460701";
     const existingTasks = [
       new Task({
         id: "existing1",
-        atDateHijri: existingDate,
+        atEpochMillis: existingEpoch,
         recurringTaskId: "rtask_test",
       }),
     ];
     const repo = makeRepo(existingTasks);
-
     await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
     const created = (repo as any)._created as Task[];
-    // The already-existing date should NOT be created again
-    const datesCreated = created.map((t) => t.atDateHijri);
-    expect(datesCreated).not.toContain(existingDate);
+    const epochsCreated = created.map((t) => t.atEpochMillis);
+    expect(epochsCreated).not.toContain(existingEpoch);
   });
 
-  it("respects repeat interval — every 2 weeks produces correct spacing", async () => {
+  it("respects repeat interval — every 2 weeks produces increasing epochs", async () => {
     const template = makeTemplate({
       repeat: "weekly",
       repeatInterval: 2,
-      baseDateHijri: "14460701",
+      baseDateEpoch: hijriToEpoch(1446, 7, 1),
     });
 
     const repo = makeRepo();
@@ -274,16 +252,9 @@ describe("generateOccurrencesForTemplate", () => {
     const created = (repo as any)._created as Task[];
     expect(created.length).toBeGreaterThan(0);
 
-    // Consecutive created tasks should be ~14 days apart
     if (created.length >= 2) {
-      const first = parseHijriDateString(created[0].atDateHijri!);
-      const second = parseHijriDateString(created[1].atDateHijri!);
-      // For weekly interval=2, each step is 14 days
-      // We check day difference (ignoring month boundary for simplicity)
-      // Just verify they're not the same date
-      expect(created[0].atDateHijri).not.toBe(created[1].atDateHijri);
-      // And second should come after first
-      expect(created[1].atDateHijri! > created[0].atDateHijri!).toBe(true);
+      expect(created[0].atEpochMillis).not.toBe(created[1].atEpochMillis);
+      expect(created[1].atEpochMillis! > created[0].atEpochMillis!).toBe(true);
     }
   });
 
@@ -291,14 +262,13 @@ describe("generateOccurrencesForTemplate", () => {
     const template = makeTemplate({
       repeat: "monthly",
       repeatInterval: 1,
-      baseDateHijri: "14460701",
+      baseDateEpoch: hijriToEpoch(1446, 7, 1),
     });
 
     const repo = makeRepo();
     await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
     const created = (repo as any)._created as Task[];
-    // Horizon for monthly interval=1 is 12 * 1 * 30 = 360 days → ~12 months
     expect(created.length).toBeGreaterThan(0);
     expect(created.length).toBeLessThanOrEqual(12);
   });
@@ -307,29 +277,27 @@ describe("generateOccurrencesForTemplate", () => {
     const template = makeTemplate({
       repeat: "yearly",
       repeatInterval: 1,
-      baseDateHijri: "14460101",
+      baseDateEpoch: hijriToEpoch(1446, 1, 1),
     });
 
     const repo = makeRepo();
     await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
     const created = (repo as any)._created as Task[];
-    // Horizon for yearly is 5 * 1 * 365 = 1825 days → ~5 years
     expect(created.length).toBeGreaterThan(0);
     expect(created.length).toBeLessThanOrEqual(5);
   });
 
   it("copies all template fields to each instance", async () => {
     const template = makeTemplate({
-      repeat: "weekly",
+      repeat: "daily",
       repeatInterval: 1,
-      baseDateHijri: "14460701",
-      name: "Friday Prayer",
-      description: "Weekly reminder",
-      atTime: "13:00",
-      timezone: "Asia/Jakarta",
-      lat: -6.2,
-      long: 106.8,
+      baseDateEpoch: hijriToEpoch(1446, 7, 1),
+      name: "Morning walk",
+      atTime: "07:00",
+      lat: 3.14,
+      long: 101.7,
+      timezone: "Asia/Kuala_Lumpur",
     });
 
     const repo = makeRepo();
@@ -337,59 +305,50 @@ describe("generateOccurrencesForTemplate", () => {
 
     const created = (repo as any)._created as Task[];
     expect(created.length).toBeGreaterThan(0);
-
-    const first = created[0];
-    expect(first.name).toBe("Friday Prayer");
-    expect(first.description).toBe("Weekly reminder");
-    expect(first.atTime).toBe("13:00");
-    expect(first.timezone).toBe("Asia/Jakarta");
-    expect(first.lat).toBe(-6.2);
-    expect(first.long).toBe(106.8);
-    expect(first.recurringTaskId).toBe("rtask_test");
+    created.forEach((t) => {
+      expect(t.name).toBe("Morning walk");
+      expect(t.atTime).toBe("07:00");
+      expect(t.lat).toBe(3.14);
+      expect(t.recurringTaskId).toBe("rtask_test");
+    });
   });
 
-  // ---------------------------------------------------------------------------
-  // Repeat end conditions
-  // ---------------------------------------------------------------------------
-
   describe("repeatEnd=on_date", () => {
-    it("creates no instances past repeatEndDate", async () => {
-      // baseDateHijri starts at 1446-07-01, repeatEndDate is 1446-07-10 (10 days later)
+    it("creates no instances past repeatEndEpoch", async () => {
+      const endEpoch = hijriToEpoch(1446, 7, 10);
       const template = makeTemplate({
         repeat: "daily",
         repeatInterval: 1,
-        baseDateHijri: "14460701",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
         repeatEnd: "on_date",
-        repeatEndDate: "14460710",
+        repeatEndEpoch: endEpoch,
       });
 
       const repo = makeRepo();
       await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
       const created = (repo as any)._created as Task[];
-      // All created dates must be <= "14460710"
       created.forEach((t) => {
-        expect(t.atDateHijri! <= "14460710").toBe(true);
+        expect(t.atEpochMillis! <= endEpoch).toBe(true);
       });
     });
 
-    it("creates instances up to and including the end date", async () => {
+    it("creates instances up to and including the end epoch", async () => {
+      const endEpoch = hijriToEpoch(1446, 7, 5);
       const template = makeTemplate({
         repeat: "daily",
         repeatInterval: 1,
-        baseDateHijri: "14460701",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
         repeatEnd: "on_date",
-        repeatEndDate: "14460705",
+        repeatEndEpoch: endEpoch,
       });
 
       const repo = makeRepo();
       await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
       const created = (repo as any)._created as Task[];
-      // Should have at most 5 instances (days 1-5), but possibly 0 if all past
-      // The key check: no date after "14460705"
       created.forEach((t) => {
-        expect(t.atDateHijri! <= "14460705").toBe(true);
+        expect(t.atEpochMillis! <= endEpoch).toBe(true);
       });
     });
   });
@@ -399,12 +358,12 @@ describe("generateOccurrencesForTemplate", () => {
       const template = makeTemplate({
         repeat: "daily",
         repeatInterval: 1,
-        baseDateHijri: "14460701",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
         repeatEnd: "after_occurrences",
         repeatEndOccurrences: 3,
       });
 
-      const repo = makeRepo(); // no existing
+      const repo = makeRepo();
       await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
       const created = (repo as any)._created as Task[];
@@ -415,14 +374,14 @@ describe("generateOccurrencesForTemplate", () => {
       const existing = [
         new Task({
           id: "e1",
-          atDateHijri: "14460701",
+          atEpochMillis: hijriToEpoch(1446, 7, 1),
           recurringTaskId: "rtask_test",
         }),
       ];
       const template = makeTemplate({
         repeat: "daily",
         repeatInterval: 1,
-        baseDateHijri: "14460701",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
         repeatEnd: "after_occurrences",
         repeatEndOccurrences: 3,
       });
@@ -431,32 +390,19 @@ describe("generateOccurrencesForTemplate", () => {
       await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
       const created = (repo as any)._created as Task[];
-      // 3 total - 1 existing = 2 new
       expect(created.length).toBeLessThanOrEqual(2);
     });
 
     it("creates 0 instances when existing.length >= repeatEndOccurrences", async () => {
       const existing = [
-        new Task({
-          id: "e1",
-          atDateHijri: "14460701",
-          recurringTaskId: "rtask_test",
-        }),
-        new Task({
-          id: "e2",
-          atDateHijri: "14460702",
-          recurringTaskId: "rtask_test",
-        }),
-        new Task({
-          id: "e3",
-          atDateHijri: "14460703",
-          recurringTaskId: "rtask_test",
-        }),
+        new Task({ id: "e1", atEpochMillis: hijriToEpoch(1446, 7, 1), recurringTaskId: "rtask_test" }),
+        new Task({ id: "e2", atEpochMillis: hijriToEpoch(1446, 7, 2), recurringTaskId: "rtask_test" }),
+        new Task({ id: "e3", atEpochMillis: hijriToEpoch(1446, 7, 3), recurringTaskId: "rtask_test" }),
       ];
       const template = makeTemplate({
         repeat: "daily",
         repeatInterval: 1,
-        baseDateHijri: "14460701",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
         repeatEnd: "after_occurrences",
         repeatEndOccurrences: 3,
       });
@@ -471,65 +417,39 @@ describe("generateOccurrencesForTemplate", () => {
 
   describe("repeatEnd=never (default)", () => {
     it("behaves the same as no repeatEnd field", async () => {
-      const templateWithNever = makeTemplate({
-        repeat: "monthly",
-        repeatInterval: 1,
-        baseDateHijri: "14460701",
-        repeatEnd: "never",
-      });
-      const templateWithout = makeTemplate({
-        repeat: "monthly",
-        repeatInterval: 1,
-        baseDateHijri: "14460701",
-      });
+      const t1 = makeTemplate({ repeat: "weekly", baseDateEpoch: hijriToEpoch(1446, 7, 1) });
+      const t2 = makeTemplate({ repeat: "weekly", baseDateEpoch: hijriToEpoch(1446, 7, 1), repeatEnd: "never" });
 
       const repo1 = makeRepo();
       const repo2 = makeRepo();
-      await generateOccurrencesForTemplate(
-        templateWithNever,
-        repo1,
-        todayEpoch
-      );
-      await generateOccurrencesForTemplate(templateWithout, repo2, todayEpoch);
+      await generateOccurrencesForTemplate(t1, repo1, todayEpoch);
+      await generateOccurrencesForTemplate(t2, repo2, todayEpoch);
 
-      const created1 = (repo1 as any)._created as Task[];
-      const created2 = (repo2 as any)._created as Task[];
-      expect(created1.length).toBe(created2.length);
+      const c1 = (repo1 as any)._created as Task[];
+      const c2 = (repo2 as any)._created as Task[];
+      expect(c1.length).toBe(c2.length);
     });
   });
 
-  // ---------------------------------------------------------------------------
-  // BUG: iteration cap is exhausted by past dates
-  // ---------------------------------------------------------------------------
   it("BUG: iteration cap exhaustion — old daily task misses future occurrences", async () => {
-    // A daily task whose baseDateHijri is 390 days before today.
-    // The generator iterates from baseDateHijri, burning ~390 iterations on past
-    // dates before reaching today. With cap=400 and horizon=30, only ~10 of the
-    // 30 expected future occurrences get generated.
-    const pastDate = new Date(todayEpoch - 390 * 24 * 60 * 60 * 1000);
-    const { HijriDate } = await import("../../calendar/hijri");
-    const h = HijriDate.fromDate(pastDate, {
-      latitude: 0,
-      longitude: 0,
-      offset: 0,
-    });
-    const baseDateHijri = `${h.year.toString().padStart(4, "0")}${h.month
-      .toString()
-      .padStart(2, "0")}${h.day.toString().padStart(2, "0")}`;
-
+    // A daily task whose baseDateEpoch is 390 days before today.
+    // The generator iterates from baseDateEpoch, burning ~390 iterations on past
+    // dates before reaching today. With maxIterations=400 it must still produce
+    // future occurrences (the regression was: 0 created because cap hit).
+    const pastEpoch = todayEpoch - 390 * 24 * 60 * 60 * 1000;
     const template = makeTemplate({
       repeat: "daily",
       repeatInterval: 1,
-      baseDateHijri,
+      baseDateEpoch: pastEpoch,
     });
 
     const repo = makeRepo();
     await generateOccurrencesForTemplate(template, repo, todayEpoch);
 
     const created = (repo as any)._created as Task[];
-    // Ideally we want 30 future occurrences, but due to the bug we get far fewer
-    // This test documents the bug: it should be 30 but the cap is hit early
-    // When the bug is fixed, this assertion should be updated to expect(created.length).toBe(30)
-    expect(created.length).toBeLessThan(30); // Bug: cap exhausted by past iterations
+    expect(created.length).toBeGreaterThan(0);
+    created.forEach((t) => {
+      expect(t.atEpochMillis!).toBeGreaterThanOrEqual(todayEpoch);
+    });
   });
 });

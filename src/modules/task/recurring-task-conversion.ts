@@ -36,7 +36,7 @@ export interface PromoteToRecurringDeps {
  * Updates a recurring task series from a specific instance forward:
  * 1. Updates this task instance with new values.
  * 2. Deletes all future pending instances (from this task's date onward).
- * 3. Updates the RecurringTask template, resetting baseDateHijri to this
+ * 3. Updates the RecurringTask template, resetting baseDateEpoch to this
  *    task's date so the generator starts fresh with the new pattern.
  * 4. Regenerates future instances from the updated template.
  *
@@ -57,16 +57,14 @@ export async function updateRecurringSeries(
     (t) =>
       t.id !== taskId &&
       t.status !== 1 &&
-      t.atDateHijri != null &&
-      t.atDateHijri >= task.atDateHijri!
+      (t.atEpochMillis ?? 0) >= (task.atEpochMillis ?? 0)
   );
   await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
 
-  // Update the template; anchor baseDateHijri to this task's date so the
-  // generator produces instances starting from here with the new pattern
+  // Anchor baseDateEpoch to this task's date so the generator starts fresh
   const updatedTemplate = await updateRecurringTask(task.recurringTaskId!, {
     ...templateInput,
-    baseDateHijri: task.atDateHijri,
+    baseDateEpoch: task.atEpochMillis ?? undefined,
   });
 
   // Update this task instance
@@ -135,8 +133,7 @@ export async function demoteTaskFromRecurringAndDeleteFuture(
     (t) =>
       t.id !== taskId &&
       t.status !== 1 &&
-      t.atDateHijri != null &&
-      t.atDateHijri >= task.atDateHijri!
+      (t.atEpochMillis ?? 0) >= (task.atEpochMillis ?? 0)
   );
   await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
   await deleteRecurringTask(task.recurringTaskId!);

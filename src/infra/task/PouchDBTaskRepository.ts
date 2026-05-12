@@ -11,10 +11,6 @@ import type {
 } from "../../modules/task/types";
 import { Task } from "../../modules/task/types";
 import { generatePrefixedUUID } from "../../modules/uuid";
-import {
-  parseHijriDateString,
-  parseTimeString,
-} from "../../modules/task/task-form-helpers";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 
 class PouchDBTaskDocument {
@@ -24,7 +20,6 @@ class PouchDBTaskDocument {
   name?: string;
   description?: string;
   status?: TaskStatus = 0;
-  atDateHijri?: string = "";
   noDate?: number = 1;
   atEpochMillis?: number | null = null;
   atTime?: string = "";
@@ -60,7 +55,6 @@ class PouchDBTaskDocument {
       updatedAt: this.updatedAt,
       completedAt: this.completedAt,
       attributes: this.attributes || {},
-      atDateHijri: this.atDateHijri || "",
       noDate: this.noDate !== undefined ? this.noDate : 1,
       atTime: this.atTime || "",
       prayerTime: this.prayerTime,
@@ -80,46 +74,12 @@ class PouchDBTaskDocument {
     let a = new PouchDBTaskDocument(t);
     a._id = t.id;
     a._rev = t.rev;
-    a.noDate = !!t.atDateHijri ? 0 : 1;
+    a.noDate = t.atEpochMillis != null ? 0 : 1;
+    a.atEpochMillis = t.atEpochMillis ?? null;
     a.lat = t.lat;
     a.long = t.long;
     a.hijriDateOffset = t.hijriDateOffset;
     a.tags = t.tags || [];
-
-    if (!!t.atDateHijri) {
-      const { year, month, day } = parseHijriDateString(t.atDateHijri);
-      let hour = undefined;
-      let minute = undefined;
-      // if no time defined set the epoch to the end of day
-      let d = new HijriDate(year, month, day, hour, minute, 0, 0, {
-        latitude: t.lat,
-        longitude: t.long,
-        offset: t.hijriDateOffset || 0,
-      });
-
-      a.atEpochMillis = d.endOfDay().toDate().valueOf();
-      if (!!t.prayerTime) {
-        a.prayerTime = t.prayerTime;
-        a.usePrayerTime = true;
-        a.atTime = "";
-      }
-
-      if (!!t.atTime) {
-        const timeParts = parseTimeString(t.atTime);
-        hour = timeParts.hour;
-        minute = timeParts.minute;
-        let d = new HijriDate(year, month, day, hour, minute, 0, 0, {
-          latitude: t.lat,
-          longitude: t.long,
-          offset: t.hijriDateOffset || 0,
-        }).toDate();
-
-        a.atEpochMillis = d.valueOf();
-        a.atTime = t.atTime;
-        a.prayerTime = undefined;
-        a.usePrayerTime = false;
-      }
-    }
 
     return a;
   }
@@ -175,7 +135,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
       name: input.name,
       description: input.description,
       status: input.status || 0,
-      atDateHijri: input.atDateHijri || "",
+      atEpochMillis: input.atEpochMillis ?? null,
       atTime: input.atTime || "",
       createdAt: now,
       updatedAt: now,
@@ -264,7 +224,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async find(query?: TaskQuery): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atDateHijri", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis"],
       },
     });
 
@@ -281,7 +241,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
         { type: "asc" },
         { status: "asc" },
         { noDate: "asc" },
-        { atDateHijri: "asc" },
         { atEpochMillis: "asc" },
       ],
     };
@@ -377,14 +336,13 @@ export class PouchDBTaskRepository implements ITaskRepository {
       atEpochMillis: doc.atEpochMillis,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
-      atDateHijri: doc.atDateHijri,
     }));
   }
 
   async findTasksBefore(beforeHijri: HijriDate): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atDateHijri", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis"],
       },
     });
 
@@ -393,10 +351,8 @@ export class PouchDBTaskRepository implements ITaskRepository {
         type: "task",
         status: 0,
         noDate: 0,
-        atDateHijri: {
-          $gt: null,
-        },
         atEpochMillis: {
+          $gt: null,
           $lte: beforeHijri.toDate().valueOf(),
         },
       },
@@ -404,7 +360,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
         { type: "asc" },
         { status: "asc" },
         { noDate: "asc" },
-        { atDateHijri: "asc" },
         { atEpochMillis: "asc" },
       ] as any,
     };

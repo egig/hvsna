@@ -1,4 +1,4 @@
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
+import { HijriDate, useHijriDate } from "../calendar/hijri";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { Task } from "./types";
 
@@ -100,12 +100,18 @@ export default function TaskPreview({ task }: TaskPreviewProps) {
               </div>
             </>
           )}
-          {task.atDateHijri && (
+          {task.atEpochMillis && (
             <div>
               <span className="font-medium text-gray-600">
                 {t("scheduled_hijri_date")}:
               </span>
-              <p className="text-gray-900">{task.atDateHijri}</p>
+              <p className="text-gray-900">
+                {HijriDate.fromDate(new Date(task.atEpochMillis), {
+                  latitude: task.lat,
+                  longitude: task.long,
+                  offset: task.hijriDateOffset,
+                }).format("D MMMM YYYY")}
+              </p>
             </div>
           )}
           {task.atTime && (

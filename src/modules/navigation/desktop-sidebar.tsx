@@ -13,6 +13,8 @@ import {
   HvSquareCheck,
   HvSquareCheckFilled,
   HvSearchAlt,
+  HvCalendarEvent,
+  HvCalendarEventFilled,
 } from "@/modules/icons";
 import { Link, useLocation } from "react-router";
 import { SidebarTagsSection } from "../task/sidebar-tags-section";
@@ -57,8 +59,8 @@ export function DesktopSidebar({
     {
       path: "/today",
       label: t("today"),
-      icon: <HvCalendar />,
-      activeIcon: <HvCalendarFilled />,
+      icon: <HvCalendarEvent />,
+      activeIcon: <HvCalendarEventFilled />,
       context: "today",
     },
     {

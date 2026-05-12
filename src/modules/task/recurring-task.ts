@@ -8,7 +8,7 @@ export interface RecurringTask {
   attributes?: Record<string, string>;
   repeat: TaskRepeat;
   repeatInterval: number;
-  baseDateHijri: string;
+  baseDateEpoch: number;
   atTime?: string;
   prayerTime?: PrayerTime;
   lat?: number;
@@ -17,7 +17,7 @@ export interface RecurringTask {
   hijriDateOffset?: number;
   tags?: string[];
   repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndDate?: string;
+  repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
   created_at?: number;
   updated_at?: number;
@@ -30,7 +30,7 @@ export interface RecurringTaskCreateInput {
   attributes?: Record<string, string>;
   repeat: TaskRepeat;
   repeatInterval?: number;
-  baseDateHijri: string;
+  baseDateEpoch: number;
   atTime?: string;
   prayerTime?: PrayerTime;
   lat?: number;
@@ -39,7 +39,7 @@ export interface RecurringTaskCreateInput {
   hijriDateOffset?: number;
   tags?: string[];
   repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndDate?: string;
+  repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
 }
 
@@ -49,7 +49,7 @@ export interface RecurringTaskUpdateInput {
   attributes?: Record<string, string>;
   repeat?: TaskRepeat;
   repeatInterval?: number;
-  baseDateHijri?: string;
+  baseDateEpoch?: number;
   atTime?: string;
   prayerTime?: PrayerTime;
   lat?: number;
@@ -58,7 +58,7 @@ export interface RecurringTaskUpdateInput {
   hijriDateOffset?: number;
   tags?: string[] | null;
   repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndDate?: string;
+  repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
 }
 

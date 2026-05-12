@@ -3,15 +3,14 @@ import { Button } from "./button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import {
-  HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
-  HvCalendar,
   HvSearch,
-  HvCheckCircle,
   HvOutlineEllipsisHorizontalCircle,
   HvEllipsisHorizontalCircle,
   HvSearchAlt,
+  HvCalendarEvent,
+  HvCalendarEventFilled,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -23,8 +22,8 @@ export function TabBar() {
     {
       path: "/today",
       label: t("today"),
-      icon: <HvCalendar />,
-      activeIcon: <HvCalendarFilled />,
+      icon: <HvCalendarEvent />,
+      activeIcon: <HvCalendarEventFilled />,
       context: "today",
     },
     {

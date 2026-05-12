@@ -17,7 +17,7 @@ class PouchDBRecurringTaskDocument {
   attributes?: Record<string, string>;
   repeat?: string;
   repeatInterval?: number;
-  baseDateHijri?: string;
+  baseDateEpoch?: number;
   atTime?: string;
   prayerTime?: any;
   lat?: number;
@@ -26,7 +26,7 @@ class PouchDBRecurringTaskDocument {
   hijriDateOffset?: number;
   tags?: string[] | null = null;
   repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndDate?: string;
+  repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
   created_at?: number;
   updated_at?: number;
@@ -44,7 +44,7 @@ class PouchDBRecurringTaskDocument {
       attributes: this.attributes,
       repeat: this.repeat as any,
       repeatInterval: this.repeatInterval || 1,
-      baseDateHijri: this.baseDateHijri || "",
+      baseDateEpoch: this.baseDateEpoch ?? 0,
       atTime: this.atTime,
       prayerTime: this.prayerTime,
       lat: this.lat,
@@ -53,7 +53,7 @@ class PouchDBRecurringTaskDocument {
       hijriDateOffset: this.hijriDateOffset,
       tags: this.tags || undefined,
       repeatEnd: this.repeatEnd,
-      repeatEndDate: this.repeatEndDate,
+      repeatEndEpoch: this.repeatEndEpoch,
       repeatEndOccurrences: this.repeatEndOccurrences,
       created_at: this.created_at,
       updated_at: this.updated_at,
@@ -71,7 +71,7 @@ class PouchDBRecurringTaskDocument {
     doc.attributes = t.attributes;
     doc.repeat = t.repeat;
     doc.repeatInterval = t.repeatInterval;
-    doc.baseDateHijri = t.baseDateHijri;
+    doc.baseDateEpoch = t.baseDateEpoch;
     doc.atTime = t.atTime;
     doc.prayerTime = t.prayerTime;
     doc.lat = t.lat;
@@ -80,7 +80,7 @@ class PouchDBRecurringTaskDocument {
     doc.hijriDateOffset = t.hijriDateOffset;
     doc.tags = t.tags;
     doc.repeatEnd = t.repeatEnd;
-    doc.repeatEndDate = t.repeatEndDate;
+    doc.repeatEndEpoch = t.repeatEndEpoch;
     doc.repeatEndOccurrences = t.repeatEndOccurrences;
     doc.created_at = t.created_at;
     doc.updated_at = t.updated_at;
@@ -104,7 +104,7 @@ export class PouchDBRecurringTaskRepository
       attributes: input.attributes,
       repeat: input.repeat,
       repeatInterval: input.repeatInterval ?? 1,
-      baseDateHijri: input.baseDateHijri,
+      baseDateEpoch: input.baseDateEpoch,
       atTime: input.atTime,
       prayerTime: input.prayerTime,
       lat: input.lat,
@@ -114,7 +114,7 @@ export class PouchDBRecurringTaskRepository
       created_at: now,
       updated_at: now,
       repeatEnd: input.repeatEnd,
-      repeatEndDate: input.repeatEndDate,
+      repeatEndEpoch: input.repeatEndEpoch,
       repeatEndOccurrences: input.repeatEndOccurrences,
       tags: input.tags,
     };

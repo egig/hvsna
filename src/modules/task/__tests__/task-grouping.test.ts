@@ -101,7 +101,6 @@ describe("Task Grouping Logic", () => {
       name: "Overdue Task",
       status: 0,
       atEpochMillis: new Date("2026-02-23T10:00:00.000Z").getTime(), // Yesterday
-      atDateHijri: "1447-08-25",
       usePrayerTime: false,
     },
     {
@@ -109,7 +108,6 @@ describe("Task Grouping Logic", () => {
       name: "Today Task",
       status: 0,
       atEpochMillis: new Date("2026-02-24T10:00:00.000Z").getTime(), // Today
-      atDateHijri: "1447-08-26",
       usePrayerTime: false,
     },
     {
@@ -117,7 +115,6 @@ describe("Task Grouping Logic", () => {
       name: "Prayer Task",
       status: 0,
       atEpochMillis: new Date("2026-02-24T13:00:00.000Z").getTime(), // Today
-      atDateHijri: "1447-08-26",
       usePrayerTime: true,
       prayerTime: "Dhuhr",
     },
@@ -168,7 +165,6 @@ describe("Task Grouping Logic", () => {
         name: "Overdue Task 1",
         status: 0,
         atEpochMillis: new Date("2026-02-23T15:00:00.000Z").getTime(),
-        atDateHijri: "1447-08-25",
         usePrayerTime: false,
       },
       {
@@ -176,7 +172,6 @@ describe("Task Grouping Logic", () => {
         name: "Overdue Task 2",
         status: 0,
         atEpochMillis: new Date("2026-02-23T10:00:00.000Z").getTime(),
-        atDateHijri: "1447-08-25",
         usePrayerTime: false,
       },
     ] as Task[];

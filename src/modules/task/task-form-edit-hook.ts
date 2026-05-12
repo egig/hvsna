@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { formatHijriDateString } from "./task-form-helpers";
+import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
+import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskUpdateInput } from "./types";
 import { useSettings } from "../settings/useSettings";
-import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
@@ -129,13 +129,16 @@ export const useTaskFormEdit = (
       taskDescription: string;
     } & Partial<Task>;
 
-    let atDateHijri: string | undefined;
+    const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
+    let atEpochMillis: number | null = null;
     if (formData.scheduleAt.dateHijri) {
-      atDateHijri = formatHijriDateString(
-        formData.scheduleAt.dateHijri.year,
-        formData.scheduleAt.dateHijri.month,
-        formData.scheduleAt.dateHijri.day
-      );
+      const { year, month, day } = formData.scheduleAt.dateHijri;
+      if (formData.scheduleAt.time) {
+        const [h, m] = formData.scheduleAt.time.split(":").map(Number);
+        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, hijriOpts).toDate().valueOf();
+      } else {
+        atEpochMillis = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+      }
     }
 
     try {
@@ -145,7 +148,7 @@ export const useTaskFormEdit = (
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
         attributes: {},
-        atDateHijri,
+        atEpochMillis,
         atTime: formData.scheduleAt.time || undefined,
         lat: latitude,
         long: longitude,
@@ -160,8 +163,17 @@ export const useTaskFormEdit = (
       const isNowRecurring = formData.repeat.repeat !== "none";
       let result: Task;
 
-      if (wasRegular && isNowRecurring && atDateHijri) {
+      if (wasRegular && isNowRecurring && formData.scheduleAt.dateHijri) {
         // Promote: regular → recurring
+        const { year, month, day } = formData.scheduleAt.dateHijri;
+        const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
+        const baseDateEpoch = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+        const repeatEndEpoch = formData.repeat.end === "on_date" && formData.repeat.endDate
+          ? (() => {
+              const { year: ey, month: em, day: ed } = parseHijriDateString(formData.repeat.endDate as string);
+              return new HijriDate(ey, em, ed, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+            })()
+          : undefined;
         result = await promoteTaskToRecurring(
           taskId,
           taskInput,
@@ -170,7 +182,7 @@ export const useTaskFormEdit = (
           {
             name: taskData.taskName.trim(),
             description: taskData.taskDescription?.trim() || undefined,
-            baseDateHijri: atDateHijri,
+            baseDateEpoch,
             repeat: formData.repeat.repeat,
             repeatInterval: formData.repeat.interval,
             atTime: formData.scheduleAt.time,
@@ -181,10 +193,7 @@ export const useTaskFormEdit = (
             hijriDateOffset: offset,
             repeatEnd:
               formData.repeat.end === "never" ? undefined : formData.repeat.end,
-            repeatEndDate:
-              formData.repeat.end === "on_date"
-                ? formData.repeat.endDate ?? undefined
-                : undefined,
+            repeatEndEpoch,
             repeatEndOccurrences:
               formData.repeat.end === "after_occurrences"
                 ? formData.repeat.endOccurrences
@@ -387,8 +396,12 @@ export const useTaskFormEdit = (
       prayerTime: "",
     };
 
-    if (task.atDateHijri) {
-      const { year, month, day } = parseHijriDateString(task.atDateHijri);
+    if (task.atEpochMillis) {
+      const hijri = HijriDate.fromDate(new Date(task.atEpochMillis), {
+        latitude,
+        longitude,
+        offset,
+      });
 
       let hour: number | undefined;
       let minute: number | undefined;
@@ -398,7 +411,7 @@ export const useTaskFormEdit = (
         minute = timeParts.minute;
       }
 
-      scheduleAt.dateHijri = createHijriDate(year, month, day, hour, minute);
+      scheduleAt.dateHijri = createHijriDate(hijri.year, hijri.month, hijri.day, hour, minute);
       scheduleAt.time = task.atTime || "";
       scheduleAt.prayerTime = task.prayerTime || "";
     }

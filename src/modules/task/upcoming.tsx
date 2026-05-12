@@ -235,15 +235,12 @@ export default function Tasks() {
       upcomingTasks.find((t) => t.id === active.id);
     if (!task) return;
     if (over.id === "inbox") {
-      updateTask(task.id!, { atDateHijri: "" });
+      updateTask(task.id!, { atEpochMillis: null });
     } else {
       const [y, m, d] = (over.id as string).split("-").map(Number);
       const hijri = toHijriDate(new Date(y, m - 1, d));
-      const atDateHijri =
-        String(hijri.year).padStart(4, "0") +
-        String(hijri.month).padStart(2, "0") +
-        String(hijri.day).padStart(2, "0");
-      updateTask(task.id!, { atDateHijri });
+      const atEpochMillis = hijri.endOfDay().toDate().valueOf();
+      updateTask(task.id!, { atEpochMillis });
     }
   };
 

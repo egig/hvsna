@@ -60,6 +60,8 @@ export {
 export {
   TbSquareRoundedPlusFilled as HvSquareRoundedPlusFilled,
   TbCalendar as HvCalendar,
+  TbCalendarEvent  as HvCalendarEvent,
+  TbCalendarEventFilled  as HvCalendarEventFilled,
   TbCalendarFilled as HvCalendarFilled,
   TbCalendarMonth as HvCalendarMonth,
   TbCalendarMonthFilled as HvCalendarMonthFilled,
