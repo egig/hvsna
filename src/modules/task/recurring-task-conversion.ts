@@ -5,8 +5,6 @@ import type {
   RecurringTaskCreateInput,
   RecurringTaskUpdateInput,
 } from "./recurring-task";
-import { generateOccurrencesForTemplate } from "./recurring-task-generator";
-
 export interface UpdateRecurringSeriesDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   updateRecurringTask: (
@@ -14,7 +12,6 @@ export interface UpdateRecurringSeriesDeps {
     input: RecurringTaskUpdateInput
   ) => Promise<RecurringTask>;
   taskRepository: ITaskRepository;
-  todayEpoch: number;
 }
 
 export interface DemoteAndDeleteFutureDeps {
@@ -29,7 +26,6 @@ export interface PromoteToRecurringDeps {
   ) => Promise<RecurringTask>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   taskRepository: ITaskRepository;
-  todayEpoch: number;
 }
 
 /**
@@ -49,9 +45,10 @@ export async function updateRecurringSeries(
   templateInput: RecurringTaskUpdateInput,
   deps: UpdateRecurringSeriesDeps
 ): Promise<Task> {
-  const { updateTask, updateRecurringTask, taskRepository, todayEpoch } = deps;
+  const { updateTask, updateRecurringTask, taskRepository } = deps;
 
-  // Delete all future pending instances except this one
+  // Delete all future pending instances except this one (virtuals need no cleanup,
+  // but materialized real tasks must be removed so they don't appear as stale exceptions)
   const all = await taskRepository.findByRecurringTaskId(task.recurringTaskId!);
   const futurePending = all.filter(
     (t) =>
@@ -61,23 +58,13 @@ export async function updateRecurringSeries(
   );
   await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
 
-  // Anchor baseDateEpoch to this task's date so the generator starts fresh
-  const updatedTemplate = await updateRecurringTask(task.recurringTaskId!, {
+  // Anchor baseDateEpoch to this task's date so future virtuals start fresh
+  await updateRecurringTask(task.recurringTaskId!, {
     ...templateInput,
     baseDateEpoch: task.atEpochMillis ?? undefined,
   });
 
-  // Update this task instance
-  const result = await updateTask(taskId, taskInput);
-
-  // Regenerate future instances with the new pattern
-  await generateOccurrencesForTemplate(
-    updatedTemplate,
-    taskRepository,
-    todayEpoch
-  );
-
-  return result;
+  return updateTask(taskId, taskInput);
 }
 
 /**
@@ -97,21 +84,16 @@ export async function promoteTaskToRecurring(
   templateInput: RecurringTaskCreateInput,
   deps: PromoteToRecurringDeps
 ): Promise<Task> {
-  const { createRecurringTask, updateTask, taskRepository, todayEpoch } = deps;
+  const { createRecurringTask, updateTask } = deps;
 
   const template = await createRecurringTask(templateInput);
 
-  const linkedInput: TaskUpdateInput = {
+  return updateTask(taskId, {
     ...taskInput,
     repeat,
     repeatInterval,
     recurringTaskId: template.id,
-  };
-  const result = await updateTask(taskId, linkedInput);
-
-  await generateOccurrencesForTemplate(template, taskRepository, todayEpoch);
-
-  return result;
+  });
 }
 
 /**

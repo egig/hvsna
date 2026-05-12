@@ -5,27 +5,22 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
-import { queryKeys } from "../query-keys";
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings/useSettings";
-import {
-  generateAllRecurringTaskOccurrences,
-  generateOccurrencesForTemplate,
-} from "./recurring-task-generator";
+import { scheduleRecurringTaskReminders } from "./recurring-reminder-scheduler";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import type { RecurringTask } from "./recurring-task";
+import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
 
 interface TaskContextType {
   // Task data
   task: Task | null;
 
-  // CRUD operations
   createTask: (input: TaskCreateInput) => Promise<Task>;
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
@@ -33,14 +28,15 @@ interface TaskContextType {
   getTask: (id: string) => Promise<Task | null>;
   completeTask: (id: string) => Promise<Task>;
   reopenTask: (id: string) => Promise<Task>;
+  materializeVirtualTask: (task: Task) => Promise<Task>;
   reset: () => void;
-  generateOccurrencesForTemplate: (template: RecurringTask) => Promise<void>;
 
   // Form state management
   editingTaskId: string | null;
+  editingTask: Task | null;
   formOpen: boolean;
   openCreateTaskForm: () => void;
-  openEditTaskForm: (taskId: string) => void;
+  openEditTaskForm: (taskId: string, initialTask?: Task) => void;
   closeTaskForm: () => void;
   setEditingTaskId: (taskId: string | null) => void;
   preselectedListId: string | null;
@@ -55,8 +51,7 @@ export const TaskProvider: React.FC<{
   children: ReactNode;
   taskId?: string;
 }> = ({ children, taskId }) => {
-  const queryClient = useQueryClient();
-  const { getToday } = useHijriDate();
+  const invalidateTaskQueries = useInvalidateTaskQueries();
   const { settings } = useSettings();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
@@ -64,6 +59,7 @@ export const TaskProvider: React.FC<{
 
   // Local form state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const [preselectedListId, setPreselectedListId] = useState<string | null>(
     null
@@ -79,26 +75,20 @@ export const TaskProvider: React.FC<{
     }
   }, [taskId, taskUseCases]);
 
-  // Generate missing recurring task occurrences on startup
+  // Schedule reminders for virtual recurring task occurrences on startup
   useEffect(() => {
     const taskRepository = new PouchDBTaskRepository(db);
-    generateAllRecurringTaskOccurrences(db, taskRepository, Date.now()).catch(
-      (err) =>
-        logger.error("Failed to generate recurring task occurrences:", err)
-    );
+    db.allDocs({ include_docs: true, startkey: "rtask_", endkey: "rtask_￿" })
+      .then((response) => {
+        const templates = response.rows
+          .filter((row: any) => row.doc && row.doc.baseDateEpoch)
+          .map((row: any) => row.doc as RecurringTask);
+        return scheduleRecurringTaskReminders(db, templates, taskRepository);
+      })
+      .catch((err) =>
+        logger.error("Failed to schedule recurring task reminders:", err)
+      );
   }, [db]);
-
-  const invalidateTaskQueries = () => {
-    const today = getToday();
-    const todayString = today.toString();
-
-    queryClient.invalidateQueries({ queryKey: queryKeys.pendingTasks() });
-    queryClient.invalidateQueries({ queryKey: queryKeys.completedTasks() });
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.todayCompletedTasks(todayString),
-    });
-    queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
-  };
 
   // Local form functions
   const openCreateTaskForm = () => {
@@ -106,13 +96,15 @@ export const TaskProvider: React.FC<{
     setFormOpen(true);
   };
 
-  const openEditTaskForm = (taskId: string) => {
+  const openEditTaskForm = (taskId: string, initialTask?: Task) => {
     setEditingTaskId(taskId);
+    setEditingTask(initialTask ?? null);
     setFormOpen(true);
   };
 
   const closeTaskForm = () => {
     setEditingTaskId(null);
+    setEditingTask(null);
     setPreselectedListId(null);
     setFormOpen(false);
   };
@@ -145,14 +137,6 @@ export const TaskProvider: React.FC<{
       }
 
       invalidateTaskQueries();
-      try {
-        const currentTask = await taskUseCases.getTaskById(id);
-        if (currentTask?.status === 1) {
-          return; // Already completed
-        }
-      } catch (logError) {
-        console.warn("Failed to create log for task completion:", logError);
-      }
     },
     onError: (error) => {
       logger.error("Failed to complete task:", error);
@@ -164,7 +148,6 @@ export const TaskProvider: React.FC<{
   const reopenTaskMutation = useMutation({
     mutationFn: (id: string) => taskUseCases.uncompleteTask(id),
     onSuccess: async (updatedTask: Task, id) => {
-      // Reschedule reminders when task is reopened
       if (settings.notifications && updatedTask.atEpochMillis) {
         try {
           await ReminderService.updateTaskReminders(updatedTask);
@@ -174,15 +157,6 @@ export const TaskProvider: React.FC<{
       }
 
       invalidateTaskQueries();
-
-      try {
-        const currentTask = await taskUseCases.getTaskById(id);
-        if (currentTask?.status === 0) {
-          return; // Already pending
-        }
-      } catch (logError) {
-        console.warn("Failed to create log for task reopening:", logError);
-      }
     },
     onError: (error) => {
       console.error("Failed to reopen task:", error);
@@ -261,24 +235,25 @@ export const TaskProvider: React.FC<{
     },
   });
 
-  // React Query mutation for generating recurring task occurrences
-  const generateOccurrencesMutation = useMutation({
-    mutationFn: async (template: RecurringTask) => {
-      const taskRepository = new PouchDBTaskRepository(db);
-      await generateOccurrencesForTemplate(
-        template,
-        taskRepository,
-        Date.now()
-      );
-    },
-    onSuccess: () => {
-      invalidateTaskQueries();
-    },
-    onError: (error) => {
-      logger.error("Failed to generate recurring task occurrences:", error);
-      throw error;
-    },
-  });
+  const materializeVirtualTask = async (task: Task): Promise<Task> => {
+    if (!task.isVirtual) return task;
+    return createTaskMutation.mutateAsync({
+      name: task.name || "",
+      description: task.description,
+      atEpochMillis: task.atEpochMillis,
+      atTime: task.atTime,
+      prayerTime: task.prayerTime,
+      lat: task.lat,
+      long: task.long,
+      timezone: task.timezone,
+      hijriDateOffset: task.hijriDateOffset,
+      repeat: task.repeat,
+      repeatInterval: task.repeatInterval,
+      recurringTaskId: task.recurringTaskId ?? undefined,
+      tags: task.tags ?? [],
+      attributes: task.attributes,
+    });
+  };
 
   const deleteRecurringTaskSeries = async (recurringTaskId: string) => {
     await taskUseCases.deletePendingByRecurringTaskId(recurringTaskId);
@@ -303,10 +278,10 @@ export const TaskProvider: React.FC<{
     getTask: (id: string) => taskUseCases.getTaskById(id),
     completeTask: (id: string) => completeTaskMutation.mutateAsync(id),
     reopenTask: (id: string) => reopenTaskMutation.mutateAsync(id),
+    materializeVirtualTask,
     reset: () => setTask(null),
-    generateOccurrencesForTemplate: (template: RecurringTask) =>
-      generateOccurrencesMutation.mutateAsync(template),
     editingTaskId,
+    editingTask,
     formOpen,
     openCreateTaskForm,
     openEditTaskForm,

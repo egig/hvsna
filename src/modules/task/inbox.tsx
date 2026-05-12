@@ -2,7 +2,7 @@ import { Page } from "../navigation";
 import TaskListItem from "./task-list-item";
 import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
-import { useInbox } from "./use-inbox";
+import { useUnscheduled } from "./use-unscheduled";
 import { LargeNavbar } from "../navigation/navbar";
 import type { Task } from "./types";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -13,7 +13,7 @@ import { HvOutlineInbox } from "@/modules/icons";
 export function Inbox() {
   const { t } = useLanguageContext();
   const { inboxTasks, error, pageTitle, subTitle, initiated, refetch } =
-    useInbox();
+    useUnscheduled();
 
   const { openEditTaskForm } = useTaskContext();
 
@@ -48,7 +48,6 @@ export function Inbox() {
                 onEdit={handleEditTask}
                 showGoalInfo={false}
                 className="transition-all hover:shadow-sm"
-                showDateTime={false}
               />
             ))}
           </div>

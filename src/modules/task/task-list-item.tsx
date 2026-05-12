@@ -36,7 +36,7 @@ export function TaskListItem({
   disableSwipe = false,
 }: TaskListItemProps) {
   const { completeTask, reopenTask } = useTaskListItem();
-  const { updateTask } = useTaskContext();
+  const { updateTask, materializeVirtualTask } = useTaskContext();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
@@ -145,11 +145,15 @@ export function TaskListItem({
     let updatePromise: Promise<Task>;
     let nextStatus: TaskStatus;
 
-    if (task.status === 0) {
-      updatePromise = completeTask(task.id as string);
+    const activeTask = task.isVirtual
+      ? await materializeVirtualTask(task)
+      : task;
+
+    if (activeTask.status === 0) {
+      updatePromise = completeTask(activeTask.id as string);
       nextStatus = 1;
     } else {
-      updatePromise = reopenTask(task.id as string);
+      updatePromise = reopenTask(activeTask.id as string);
       nextStatus = 0;
     }
 
@@ -166,12 +170,12 @@ export function TaskListItem({
         <span>{`${t("status_changed_to")} ${statusText}`}</span>
         <button
           onClick={() => {
-            if (task.status === 0) {
-              reopenTask(task.id as string).then(() => {
+            if (activeTask.status === 0) {
+              reopenTask(activeTask.id as string).then(() => {
                 hideSnackbar(snackbarId);
               });
             } else {
-              completeTask(task.id as string).then(() => {
+              completeTask(activeTask.id as string).then(() => {
                 hideSnackbar(snackbarId);
               });
             }
@@ -240,12 +244,30 @@ export function TaskListItem({
     let atEpochMillis: number | null = null;
     if (date) {
       const { year, month, day } = date as HijriDate;
-      const opts = { latitude: task.lat, longitude: task.long, offset: task.hijriDateOffset };
+      const opts = {
+        latitude: task.lat,
+        longitude: task.long,
+        offset: task.hijriDateOffset,
+      };
       if (time) {
         const [h, m] = time.split(":").map(Number);
-        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, opts).toDate().valueOf();
+        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, opts)
+          .toDate()
+          .valueOf();
       } else {
-        atEpochMillis = new HijriDate(year, month, day, undefined, undefined, 0, 0, opts).endOfDay().toDate().valueOf();
+        atEpochMillis = new HijriDate(
+          year,
+          month,
+          day,
+          undefined,
+          undefined,
+          0,
+          0,
+          opts
+        )
+          .endOfDay()
+          .toDate()
+          .valueOf();
       }
     }
     updateTask(task.id as string, {

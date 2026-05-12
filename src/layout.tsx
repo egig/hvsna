@@ -14,6 +14,7 @@ import { useTaskContext } from "./modules/task/task-context";
 interface MobileLayoutProps {
   formOpen: boolean;
   editingTaskId: string | null;
+  editingTask: import("./modules/task/types").Task | null;
   handleTaskSuccess: () => void;
   handleTaskCancel: () => void;
   openCreateTaskForm: () => void;
@@ -24,6 +25,7 @@ interface MobileLayoutProps {
 function MobileLayout({
   formOpen,
   editingTaskId,
+  editingTask,
   handleTaskSuccess,
   handleTaskCancel,
   openCreateTaskForm,
@@ -55,7 +57,12 @@ function MobileLayout({
       {/* Task Form Modal */}
       <Modal isOpen={formOpen} onClose={handleTaskCancel}>
         {editingTaskId && (
-          <TaskFormEdit taskId={editingTaskId} onSuccess={handleTaskSuccess} />
+          <TaskFormEdit
+            taskId={editingTaskId}
+            initialTask={editingTask ?? undefined}
+            onSuccess={handleTaskSuccess}
+            onDelete={handleTaskCancel}
+          />
         )}
         {!editingTaskId && (
           <TaskForm onSuccess={handleTaskSuccess} onCancel={handleTaskCancel} />
@@ -66,8 +73,13 @@ function MobileLayout({
 }
 
 export default function TabLayout() {
-  const { formOpen, editingTaskId, openCreateTaskForm, closeTaskForm } =
-    useTaskContext();
+  const {
+    formOpen,
+    editingTaskId,
+    editingTask,
+    openCreateTaskForm,
+    closeTaskForm,
+  } = useTaskContext();
   const location = useLocation();
   const params = useParams();
   const { isDesktop } = useScreenSize();
@@ -117,7 +129,9 @@ export default function TabLayout() {
               {editingTaskId && (
                 <TaskFormEdit
                   taskId={editingTaskId}
+                  initialTask={editingTask ?? undefined}
                   onSuccess={handleTaskSuccess}
+                  onDelete={handleTaskCancel}
                 />
               )}
               {!editingTaskId && (
@@ -138,6 +152,7 @@ export default function TabLayout() {
     <MobileLayout
       formOpen={formOpen}
       editingTaskId={editingTaskId}
+      editingTask={editingTask}
       handleTaskSuccess={handleTaskSuccess}
       handleTaskCancel={handleTaskCancel}
       openCreateTaskForm={openCreateTaskForm}

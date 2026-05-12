@@ -102,10 +102,7 @@ describe("useTags", () => {
   });
 
   it("handles tasks with no tags", async () => {
-    const noTagTasks = [
-      { id: "task_1", tags: undefined },
-      { id: "task_2" },
-    ];
+    const noTagTasks = [{ id: "task_1", tags: undefined }, { id: "task_2" }];
     mockGetTasks.mockResolvedValue(noTagTasks);
     mockGetAllPendingTasks.mockResolvedValue(noTagTasks);
 
@@ -120,7 +117,9 @@ describe("useTags", () => {
   });
 
   it("normalizes tags during extraction", async () => {
-    const normalizedTasks = [{ id: "task_1", tags: ["Work", "WORK", " work "] }];
+    const normalizedTasks = [
+      { id: "task_1", tags: ["Work", "WORK", " work "] },
+    ];
     mockGetTasks.mockResolvedValue(normalizedTasks);
     mockGetAllPendingTasks.mockResolvedValue(normalizedTasks);
 

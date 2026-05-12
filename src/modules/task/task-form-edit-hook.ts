@@ -63,10 +63,16 @@ export const useTaskFormEdit = (
   taskId: string,
   onSuccess?: (task: Task) => void,
   onError?: (error: string) => void,
-  onDelete?: (taskId: string) => void
+  onDelete?: (taskId: string) => void,
+  initialTask?: Task
 ): UseTaskFormReturn => {
-  const { updateTask, deleteTask, deleteRecurringTaskSeries, getTask } =
-    useTaskContext();
+  const {
+    updateTask,
+    deleteTask,
+    deleteRecurringTaskSeries,
+    getTask,
+    materializeVirtualTask,
+  } = useTaskContext();
   const {
     createRecurringTask,
     deleteRecurringTask,
@@ -75,10 +81,7 @@ export const useTaskFormEdit = (
   } = useRecurringTasks();
   const { db } = usePouchDB();
 
-  const [task, setTask] = useState<Task | null>(null);
-  const [parentTemplate, setParentTemplate] = useState<RecurringTask | null>(
-    null
-  );
+  const [task, setTask] = useState<Task | null>(initialTask ?? null);
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createHijriDate } = useHijriDate();
@@ -135,9 +138,23 @@ export const useTaskFormEdit = (
       const { year, month, day } = formData.scheduleAt.dateHijri;
       if (formData.scheduleAt.time) {
         const [h, m] = formData.scheduleAt.time.split(":").map(Number);
-        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, hijriOpts).toDate().valueOf();
+        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, hijriOpts)
+          .toDate()
+          .valueOf();
       } else {
-        atEpochMillis = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+        atEpochMillis = new HijriDate(
+          year,
+          month,
+          day,
+          undefined,
+          undefined,
+          0,
+          0,
+          hijriOpts
+        )
+          .endOfDay()
+          .toDate()
+          .valueOf();
       }
     }
 
@@ -167,13 +184,42 @@ export const useTaskFormEdit = (
         // Promote: regular → recurring
         const { year, month, day } = formData.scheduleAt.dateHijri;
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
-        const repeatEndEpoch = formData.repeat.end === "on_date" && formData.repeat.endDate
-          ? (() => {
-              const { year: ey, month: em, day: ed } = parseHijriDateString(formData.repeat.endDate as string);
-              return new HijriDate(ey, em, ed, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
-            })()
-          : undefined;
+        const baseDateEpoch = new HijriDate(
+          year,
+          month,
+          day,
+          undefined,
+          undefined,
+          0,
+          0,
+          hijriOpts
+        )
+          .endOfDay()
+          .toDate()
+          .valueOf();
+        const repeatEndEpoch =
+          formData.repeat.end === "on_date" && formData.repeat.endDate
+            ? (() => {
+                const {
+                  year: ey,
+                  month: em,
+                  day: ed,
+                } = parseHijriDateString(formData.repeat.endDate as string);
+                return new HijriDate(
+                  ey,
+                  em,
+                  ed,
+                  undefined,
+                  undefined,
+                  0,
+                  0,
+                  hijriOpts
+                )
+                  .endOfDay()
+                  .toDate()
+                  .valueOf();
+              })()
+            : undefined;
         result = await promoteTaskToRecurring(
           taskId,
           taskInput,
@@ -203,7 +249,6 @@ export const useTaskFormEdit = (
             createRecurringTask,
             updateTask,
             taskRepository: new PouchDBTaskRepository(db),
-            todayEpoch: Date.now(),
           }
         );
       } else if (!wasRegular && !isNowRecurring) {
@@ -273,7 +318,10 @@ export const useTaskFormEdit = (
   const handleDeleteSingle = async () => {
     setShowDeleteOptions(false);
     try {
-      await deleteTask(taskId);
+      const idToDelete = task?.isVirtual
+        ? ((await materializeVirtualTask(task)).id as string)
+        : taskId;
+      await deleteTask(idToDelete);
       setTask(null);
       onDelete?.(taskId);
     } catch (error) {
@@ -313,11 +361,11 @@ export const useTaskFormEdit = (
           updateTask
         );
       } else {
-        // Update only this task instance
-        result = await updateTask(
-          pendingOperation.taskId,
-          pendingOperation.taskInput
-        );
+        // Update only this task instance — materialize first if virtual
+        const targetId = pendingOperation.task.isVirtual
+          ? ((await materializeVirtualTask(pendingOperation.task)).id as string)
+          : pendingOperation.taskId;
+        result = await updateTask(targetId, pendingOperation.taskInput);
       }
       setPendingOperation(null);
       setTask(null);
@@ -351,8 +399,11 @@ export const useTaskFormEdit = (
       } else {
         // Update this instance, delete future instances, update the template,
         // and regenerate occurrences with the new repeat pattern
+        const seriesTargetId = pendingOperation.task.isVirtual
+          ? ((await materializeVirtualTask(pendingOperation.task)).id as string)
+          : pendingOperation.taskId;
         result = await updateRecurringSeries(
-          pendingOperation.taskId,
+          seriesTargetId,
           {
             ...pendingOperation.taskInput,
             repeat: pendingOperation.repeatConfig.repeat,
@@ -371,7 +422,6 @@ export const useTaskFormEdit = (
             updateTask,
             updateRecurringTask,
             taskRepository: new PouchDBTaskRepository(db),
-            todayEpoch: Date.now(),
           }
         );
       }
@@ -411,7 +461,13 @@ export const useTaskFormEdit = (
         minute = timeParts.minute;
       }
 
-      scheduleAt.dateHijri = createHijriDate(hijri.year, hijri.month, hijri.day, hour, minute);
+      scheduleAt.dateHijri = createHijriDate(
+        hijri.year,
+        hijri.month,
+        hijri.day,
+        hour,
+        minute
+      );
       scheduleAt.time = task.atTime || "";
       scheduleAt.prayerTime = task.prayerTime || "";
     }
@@ -428,9 +484,10 @@ export const useTaskFormEdit = (
         endOccurrences: 1,
       },
     });
-  }, [task, createHijriDate, parentTemplate]);
+  }, [task, createHijriDate]);
 
   useEffect(() => {
+    if (initialTask?.isVirtual) return;
     if (taskId) {
       getTask(taskId).then((fetchedTask) => {
         if (fetchedTask) {
@@ -439,21 +496,6 @@ export const useTaskFormEdit = (
       });
     }
   }, [taskId, getTask]);
-
-  // Load parent RecurringTask template when task has recurringTaskId
-  useEffect(() => {
-    if (task?.recurringTaskId) {
-      getRecurringTask(task.recurringTaskId)
-        .then((template) => {
-          setParentTemplate(template);
-        })
-        .catch((err) => {
-          logger.error("Failed to load parent template:", err);
-        });
-    } else {
-      setParentTemplate(null);
-    }
-  }, [task?.recurringTaskId, getRecurringTask]);
 
   return {
     task,

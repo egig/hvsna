@@ -1,8 +1,12 @@
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePendingTasks } from "./use-pending-tasks";
 
-export function useInbox() {
-  const { getToday, formatDate, initiated: hijriCalInititated } = useHijriDate();
+export function useUnscheduled() {
+  const {
+    getToday,
+    formatDate,
+    initiated: hijriCalInititated,
+  } = useHijriDate();
 
   const today = getToday();
   const gregorianDate = today.toDate();
@@ -13,7 +17,7 @@ export function useInbox() {
     (t) => t.noDate === 1
   );
 
-  const pageTitle = "Inbox";
+  const pageTitle = "Unscheduled";
   const subTitle = formatDate(today, "full");
 
   return {

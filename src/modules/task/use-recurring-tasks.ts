@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import type {
   RecurringTask,
   RecurringTaskCreateInput,
@@ -10,139 +11,89 @@ import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCas
 
 export function useRecurringTasks() {
   const { db } = usePouchDB();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const invalidateTaskQueries = useInvalidateTaskQueries();
 
   const recurringTaskUseCases = createRecurringTaskUseCases(db);
 
-  const createRecurringTask = useCallback(
-    async (input: RecurringTaskCreateInput): Promise<RecurringTask> => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const recurringTask = await recurringTaskUseCases.createRecurringTask(
-          input
-        );
-        return recurringTask;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Failed to create recurring task";
-        setError(errorMessage);
-        throw new Error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
+  const createRecurringTaskMutation = useMutation({
+    mutationFn: (input: RecurringTaskCreateInput) =>
+      recurringTaskUseCases.createRecurringTask(input),
+    onSuccess: () => {
+      invalidateTaskQueries();
     },
-    [recurringTaskUseCases]
-  );
-
-  const getRecurringTask = useCallback(
-    async (id: string): Promise<RecurringTask> => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const recurringTask = await recurringTaskUseCases.getRecurringTask(id);
-        if (!recurringTask) {
-          throw new Error("Recurring task not found");
-        }
-        return recurringTask;
-      } catch (err: any) {
-        if (err.status === 404) {
-          throw new Error("Recurring task not found");
-        }
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to get recurring task";
-        setError(errorMessage);
-        throw new Error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
+    onError: (error) => {
+      console.error("Failed to create recurring task:", error);
+      throw error;
     },
-    [recurringTaskUseCases]
-  );
+  });
 
-  const getRecurringTasks = useCallback(
-    async (query?: RecurringTaskQuery): Promise<RecurringTask[]> => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const recurringTasks = await recurringTaskUseCases.getRecurringTasks(
-          query
-        );
-        return recurringTasks;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to get recurring tasks";
-        setError(errorMessage);
-        throw new Error(errorMessage);
-      } finally {
-        setLoading(false);
+  const getRecurringTaskMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const recurringTask = await recurringTaskUseCases.getRecurringTask(id);
+      if (!recurringTask) {
+        throw new Error("Recurring task not found");
       }
+      return recurringTask;
     },
-    [recurringTaskUseCases]
-  );
-
-  const updateRecurringTask = useCallback(
-    async (
-      id: string,
-      input: RecurringTaskUpdateInput
-    ): Promise<RecurringTask> => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const recurringTask = await recurringTaskUseCases.updateRecurringTask(
-          id,
-          input
-        );
-        return recurringTask;
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Failed to update recurring task";
-        setError(errorMessage);
-        throw new Error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
+    onError: (error) => {
+      console.error("Failed to get recurring task:", error);
+      throw error;
     },
-    [recurringTaskUseCases]
-  );
+  });
 
-  const deleteRecurringTask = useCallback(
-    async (id: string): Promise<void> => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        await recurringTaskUseCases.deleteRecurringTask(id);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : "Failed to delete recurring task";
-        setError(errorMessage);
-        throw new Error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
+  const getRecurringTasksMutation = useMutation({
+    mutationFn: (query?: RecurringTaskQuery) =>
+      recurringTaskUseCases.getRecurringTasks(query),
+    onError: (error) => {
+      console.error("Failed to get recurring tasks:", error);
+      throw error;
     },
-    [recurringTaskUseCases]
-  );
+  });
+
+  const updateRecurringTaskMutation = useMutation({
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: RecurringTaskUpdateInput;
+    }) => recurringTaskUseCases.updateRecurringTask(id, input),
+    onError: (error) => {
+      console.error("Failed to update recurring task:", error);
+      throw error;
+    },
+  });
+
+  const deleteRecurringTaskMutation = useMutation({
+    mutationFn: (id: string) => recurringTaskUseCases.deleteRecurringTask(id),
+    onError: (error) => {
+      console.error("Failed to delete recurring task:", error);
+      throw error;
+    },
+  });
 
   return {
-    createRecurringTask,
-    getRecurringTask,
-    getRecurringTasks,
-    updateRecurringTask,
-    deleteRecurringTask,
-    loading,
-    error,
+    createRecurringTask: (input: RecurringTaskCreateInput) =>
+      createRecurringTaskMutation.mutateAsync(input),
+    getRecurringTask: (id: string) => getRecurringTaskMutation.mutateAsync(id),
+    getRecurringTasks: (query?: RecurringTaskQuery) =>
+      getRecurringTasksMutation.mutateAsync(query),
+    updateRecurringTask: (id: string, input: RecurringTaskUpdateInput) =>
+      updateRecurringTaskMutation.mutateAsync({ id, input }),
+    deleteRecurringTask: (id: string) =>
+      deleteRecurringTaskMutation.mutateAsync(id),
+    loading:
+      createRecurringTaskMutation.isPending ||
+      getRecurringTaskMutation.isPending ||
+      getRecurringTasksMutation.isPending ||
+      updateRecurringTaskMutation.isPending ||
+      deleteRecurringTaskMutation.isPending,
+    error:
+      createRecurringTaskMutation.error?.message ??
+      getRecurringTaskMutation.error?.message ??
+      getRecurringTasksMutation.error?.message ??
+      updateRecurringTaskMutation.error?.message ??
+      deleteRecurringTaskMutation.error?.message ??
+      null,
   };
 }

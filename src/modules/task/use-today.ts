@@ -4,6 +4,7 @@ import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
+import { useVirtualTasks } from "./use-virtual-tasks";
 import { usePendingTasks } from "./use-pending-tasks";
 
 export function useToday() {
@@ -18,6 +19,14 @@ export function useToday() {
   const todayString = today.toString();
 
   const pendingTasksQuery = usePendingTasks();
+  const startOfToday = today.startOfDay().toDate().valueOf();
+  const endOfToday = today.endOfDay().toDate().valueOf();
+  const virtualTaskQuery = useVirtualTasks(startOfToday, endOfToday);
+
+  const allTasks = [
+    ...(pendingTasksQuery.data ?? []),
+    ...(virtualTaskQuery.data ?? []),
+  ];
 
   const todayCompletedTasksQuery = useQuery({
     queryKey: queryKeys.todayCompletedTasks(todayString),
@@ -25,11 +34,10 @@ export function useToday() {
     enabled: hijriCalInititated,
   });
 
-  const endOfToday = today.endOfDay().toDate().valueOf();
-  const todayTasks = (pendingTasksQuery.data ?? []).filter(
-    (t) => t.noDate === 0 && t.atEpochMillis != null && t.atEpochMillis <= endOfToday
+  const todayTasks = (allTasks ?? []).filter(
+    (t) =>
+      t.noDate === 0 && t.atEpochMillis != null && t.atEpochMillis <= endOfToday
   );
-  console.log("todaytasks", pendingTasksQuery.data )
 
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
     hijriMonthNames[today.month - 1]

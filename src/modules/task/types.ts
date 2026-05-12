@@ -32,6 +32,8 @@ export class Task {
   usePrayerTime?: boolean;
   hijriDateOffset?: number;
   tags?: string[] | null = null;
+  deletedAt?: number;
+  isVirtual?: boolean;
 
   constructor(a: Partial<Task>) {
     Object.assign(this, a);

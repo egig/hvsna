@@ -20,7 +20,7 @@ import { PageTransition } from "../navigation/page-transition";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { useUpcoming } from "./use-upcoming";
-import { useInbox } from "./use-inbox";
+import { useUnscheduled } from "./use-unscheduled";
 import { WeekView } from "./week-view";
 import type { Task } from "src/modules/task/types";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
@@ -94,7 +94,7 @@ function UpcomingContent({
   );
 }
 
-function InboxContent({
+function UnscheduledContent({
   inboxTasks,
   inboxInitiated,
   handleEditTask,
@@ -121,7 +121,6 @@ function InboxContent({
               task={task}
               onEdit={handleEditTask}
               showGoalInfo={false}
-              showDateTime={false}
             />
           ))}
         </div>
@@ -231,7 +230,7 @@ export default function Tasks() {
     const { active, over } = event;
     if (!over) return;
     const task =
-      inboxTasks.find((t) => t.id === active.id) ??
+      unscheduledTasks.find((t) => t.id === active.id) ??
       upcomingTasks.find((t) => t.id === active.id);
     if (!task) return;
     if (over.id === "inbox") {
@@ -263,7 +262,8 @@ export default function Tasks() {
   const { upcomingTasks, taskGroups, loading, initiated, error } =
     useUpcoming();
 
-  const { inboxTasks, initiated: inboxInitiated } = useInbox();
+  const { inboxTasks: unscheduledTasks, initiated: inboxInitiated } =
+    useUnscheduled();
 
   const taskGroupsWithLabels = {
     ...taskGroups,
@@ -276,7 +276,7 @@ export default function Tasks() {
   };
 
   const handleEditTask = (task: Task) => {
-    openEditTaskForm(task.id as string);
+    openEditTaskForm(task.id as string, task.isVirtual ? task : undefined);
   };
 
   const isReady = initiated && !loading && !error;
@@ -320,7 +320,7 @@ export default function Tasks() {
         <DndContext
           onDragStart={(e) => {
             const task =
-              inboxTasks.find((t) => t.id === e.active.id) ??
+              unscheduledTasks.find((t) => t.id === e.active.id) ??
               upcomingTasks.find((t) => t.id === e.active.id);
             setActiveTask(task ?? null);
           }}
@@ -381,7 +381,7 @@ export default function Tasks() {
               <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
                 {effectiveMode === "week" ? (
                   <DroppableInboxSidebar
-                    inboxTasks={inboxTasks}
+                    inboxTasks={unscheduledTasks}
                     inboxInitiated={inboxInitiated}
                     handleEditTask={handleEditTask}
                     t={t}
@@ -389,7 +389,7 @@ export default function Tasks() {
                 ) : (
                   <div className="flex-1 overflow-y-auto">
                     {inboxInitiated &&
-                      (inboxTasks.length === 0 ? (
+                      (unscheduledTasks.length === 0 ? (
                         <EmptyState
                           icon={<HvOutlineInbox className="w-full h-full" />}
                           title={t("no_tasks_in_inbox")}
@@ -399,13 +399,12 @@ export default function Tasks() {
                         />
                       ) : (
                         <div className="space-y-2 p-2">
-                          {inboxTasks.map((task) => (
+                          {unscheduledTasks.map((task) => (
                             <TaskListItem
                               key={task.id}
                               task={task}
                               onEdit={handleEditTask}
                               showGoalInfo={false}
-                              showDateTime={false}
                             />
                           ))}
                         </div>
@@ -486,8 +485,8 @@ export default function Tasks() {
           />
         </>
       ) : (
-        <InboxContent
-          inboxTasks={inboxTasks}
+        <UnscheduledContent
+          inboxTasks={unscheduledTasks}
           inboxInitiated={inboxInitiated}
           handleEditTask={handleEditTask}
           t={t}

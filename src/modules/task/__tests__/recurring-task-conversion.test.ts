@@ -118,7 +118,7 @@ describe("promoteTaskToRecurring", () => {
         repeatInterval: 1,
         timezone: "Asia/Jakarta",
       },
-      { createRecurringTask, updateTask, taskRepository: repo, todayEpoch: TODAY_EPOCH }
+      { createRecurringTask, updateTask, taskRepository: repo }
     );
 
     expect(createRecurringTask).toHaveBeenCalledOnce();
@@ -137,8 +137,13 @@ describe("promoteTaskToRecurring", () => {
       BASE_TASK_INPUT,
       "weekly",
       2,
-      { name: "Daily standup", baseDateEpoch: EPOCH_07_01, repeat: "weekly", repeatInterval: 2 },
-      { createRecurringTask, updateTask, taskRepository: repo, todayEpoch: TODAY_EPOCH }
+      {
+        name: "Daily standup",
+        baseDateEpoch: EPOCH_07_01,
+        repeat: "weekly",
+        repeatInterval: 2,
+      },
+      { createRecurringTask, updateTask, taskRepository: repo }
     );
 
     expect(updateTask).toHaveBeenCalledOnce();
@@ -152,34 +157,58 @@ describe("promoteTaskToRecurring", () => {
   it("links the task BEFORE generating occurrences so its epoch is skipped (no duplicate)", async () => {
     const callOrder: string[] = [];
 
-    const createRecurringTask = vi.fn(async (input: any): Promise<RecurringTask> => {
-      callOrder.push("createTemplate");
-      return { id: "rtask_abc", user_id: "u", name: input.name, repeat: input.repeat, repeatInterval: 1, baseDateEpoch: input.baseDateEpoch };
-    });
+    const createRecurringTask = vi.fn(
+      async (input: any): Promise<RecurringTask> => {
+        callOrder.push("createTemplate");
+        return {
+          id: "rtask_abc",
+          user_id: "u",
+          name: input.name,
+          repeat: input.repeat,
+          repeatInterval: 1,
+          baseDateEpoch: input.baseDateEpoch,
+        };
+      }
+    );
 
     let linkedEpoch: number | null | undefined;
     const updateTask = vi.fn(async (_id: string, input: TaskUpdateInput) => {
       callOrder.push("linkTask");
       linkedEpoch = input.atEpochMillis;
-      return new Task({ id: _id, atEpochMillis: input.atEpochMillis, recurringTaskId: input.recurringTaskId });
+      return new Task({
+        id: _id,
+        atEpochMillis: input.atEpochMillis,
+        recurringTaskId: input.recurringTaskId,
+      });
     });
 
     const existingAfterLink = [
-      new Task({ id: "task_1", atEpochMillis: EPOCH_07_01, recurringTaskId: "rtask_abc" }),
+      new Task({
+        id: "task_1",
+        atEpochMillis: EPOCH_07_01,
+        recurringTaskId: "rtask_abc",
+      }),
     ];
     const repo = makeRepo(existingAfterLink);
-    (repo.create as ReturnType<typeof vi.fn>).mockImplementation(async (input: any) => {
-      callOrder.push("createInstance");
-      return new Task({ id: `task_new`, ...input });
-    });
+    (repo.create as ReturnType<typeof vi.fn>).mockImplementation(
+      async (input: any) => {
+        callOrder.push("createInstance");
+        return new Task({ id: `task_new`, ...input });
+      }
+    );
 
     await promoteTaskToRecurring(
       "task_1",
       BASE_TASK_INPUT,
       "weekly",
       1,
-      { name: "Daily standup", baseDateEpoch: EPOCH_07_01, repeat: "weekly", repeatInterval: 1 },
-      { createRecurringTask, updateTask, taskRepository: repo, todayEpoch: TODAY_EPOCH }
+      {
+        name: "Daily standup",
+        baseDateEpoch: EPOCH_07_01,
+        repeat: "weekly",
+        repeatInterval: 1,
+      },
+      { createRecurringTask, updateTask, taskRepository: repo }
     );
 
     expect(callOrder[0]).toBe("createTemplate");
@@ -189,7 +218,7 @@ describe("promoteTaskToRecurring", () => {
     expect(created.map((t) => t.atEpochMillis)).not.toContain(EPOCH_07_01);
   });
 
-  it("generates future instances for the series", async () => {
+  it("links the task to the template without generating DB instances (virtual-task architecture)", async () => {
     const createRecurringTask = makeCreateRecurringTask("rtask_abc");
     const updateTask = makeUpdateTask();
     const repo = makeRepo();
@@ -199,17 +228,26 @@ describe("promoteTaskToRecurring", () => {
       BASE_TASK_INPUT,
       "weekly",
       1,
-      { name: "Daily standup", baseDateEpoch: EPOCH_07_01, repeat: "weekly", repeatInterval: 1 },
-      { createRecurringTask, updateTask, taskRepository: repo, todayEpoch: TODAY_EPOCH }
+      {
+        name: "Daily standup",
+        baseDateEpoch: EPOCH_07_01,
+        repeat: "weekly",
+        repeatInterval: 1,
+      },
+      { createRecurringTask, updateTask, taskRepository: repo }
     );
 
+    // No DB instances are created — future occurrences are virtual (computed on-read)
     const created = (repo as any)._created as Task[];
-    expect(created.length).toBeGreaterThan(0);
-    created.forEach((t) => expect(t.recurringTaskId).toBe("rtask_abc"));
+    expect(created.length).toBe(0);
   });
 
   it("returns the result of updateTask", async () => {
-    const expectedTask = new Task({ id: "task_1", name: "Daily standup", recurringTaskId: "rtask_abc" });
+    const expectedTask = new Task({
+      id: "task_1",
+      name: "Daily standup",
+      recurringTaskId: "rtask_abc",
+    });
     const updateTask = vi.fn(async () => expectedTask);
     const repo = makeRepo();
 
@@ -218,8 +256,17 @@ describe("promoteTaskToRecurring", () => {
       BASE_TASK_INPUT,
       "daily",
       1,
-      { name: "Daily standup", baseDateEpoch: EPOCH_07_01, repeat: "daily", repeatInterval: 1 },
-      { createRecurringTask: makeCreateRecurringTask(), updateTask, taskRepository: repo, todayEpoch: TODAY_EPOCH }
+      {
+        name: "Daily standup",
+        baseDateEpoch: EPOCH_07_01,
+        repeat: "daily",
+        repeatInterval: 1,
+      },
+      {
+        createRecurringTask: makeCreateRecurringTask(),
+        updateTask,
+        taskRepository: repo,
+      }
     );
 
     expect(result).toBe(expectedTask);
@@ -244,7 +291,11 @@ describe("demoteTaskFromRecurring", () => {
 
   it("clears repeatInterval", async () => {
     const updateTask = makeUpdateTask();
-    await demoteTaskFromRecurring("task_1", { ...BASE_TASK_INPUT, repeatInterval: 3 }, updateTask);
+    await demoteTaskFromRecurring(
+      "task_1",
+      { ...BASE_TASK_INPUT, repeatInterval: 3 },
+      updateTask
+    );
 
     const [, input] = updateTask.mock.calls[0];
     expect(input.repeatInterval).toBeUndefined();
@@ -252,7 +303,12 @@ describe("demoteTaskFromRecurring", () => {
 
   it("preserves all other task fields from taskInput", async () => {
     const updateTask = makeUpdateTask();
-    const richInput: TaskUpdateInput = { ...BASE_TASK_INPUT, atTime: "09:00", description: "standup notes", timezone: "Asia/Jakarta" };
+    const richInput: TaskUpdateInput = {
+      ...BASE_TASK_INPUT,
+      atTime: "09:00",
+      description: "standup notes",
+      timezone: "Asia/Jakarta",
+    };
 
     await demoteTaskFromRecurring("task_1", richInput, updateTask);
 
@@ -268,7 +324,11 @@ describe("demoteTaskFromRecurring", () => {
     const expectedTask = new Task({ id: "task_1", name: "Daily standup" });
     const updateTask = vi.fn(async () => expectedTask);
 
-    const result = await demoteTaskFromRecurring("task_1", BASE_TASK_INPUT, updateTask);
+    const result = await demoteTaskFromRecurring(
+      "task_1",
+      BASE_TASK_INPUT,
+      updateTask
+    );
     expect(result).toBe(expectedTask);
   });
 
@@ -300,46 +360,105 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
   });
 
   it("deletes future pending instances (epoch >= task epoch, id !== taskId, status !== 1)", async () => {
-    const future1 = new Task({ id: "task_2", atEpochMillis: EPOCH_07_16, recurringTaskId: "rtask_abc", status: 0 });
-    const future2 = new Task({ id: "task_3", atEpochMillis: EPOCH_07_20, recurringTaskId: "rtask_abc", status: 0 });
-    const { updateTask, deleteRecurringTask, repo } = makeDeps([BASE_RECURRING_TASK, future1, future2]);
+    const future1 = new Task({
+      id: "task_2",
+      atEpochMillis: EPOCH_07_16,
+      recurringTaskId: "rtask_abc",
+      status: 0,
+    });
+    const future2 = new Task({
+      id: "task_3",
+      atEpochMillis: EPOCH_07_20,
+      recurringTaskId: "rtask_abc",
+      status: 0,
+    });
+    const { updateTask, deleteRecurringTask, repo } = makeDeps([
+      BASE_RECURRING_TASK,
+      future1,
+      future2,
+    ]);
 
-    await demoteTaskFromRecurringAndDeleteFuture("task_1", BASE_TASK_INPUT, BASE_RECURRING_TASK, { updateTask, deleteRecurringTask, taskRepository: repo });
+    await demoteTaskFromRecurringAndDeleteFuture(
+      "task_1",
+      BASE_TASK_INPUT,
+      BASE_RECURRING_TASK,
+      { updateTask, deleteRecurringTask, taskRepository: repo }
+    );
 
     expect(repo.delete).toHaveBeenCalledWith("task_2");
     expect(repo.delete).toHaveBeenCalledWith("task_3");
   });
 
   it("does NOT delete completed future instances (status === 1)", async () => {
-    const completed = new Task({ id: "task_2", atEpochMillis: EPOCH_07_20, recurringTaskId: "rtask_abc", status: 1 });
-    const { updateTask, deleteRecurringTask, repo } = makeDeps([BASE_RECURRING_TASK, completed]);
+    const completed = new Task({
+      id: "task_2",
+      atEpochMillis: EPOCH_07_20,
+      recurringTaskId: "rtask_abc",
+      status: 1,
+    });
+    const { updateTask, deleteRecurringTask, repo } = makeDeps([
+      BASE_RECURRING_TASK,
+      completed,
+    ]);
 
-    await demoteTaskFromRecurringAndDeleteFuture("task_1", BASE_TASK_INPUT, BASE_RECURRING_TASK, { updateTask, deleteRecurringTask, taskRepository: repo });
+    await demoteTaskFromRecurringAndDeleteFuture(
+      "task_1",
+      BASE_TASK_INPUT,
+      BASE_RECURRING_TASK,
+      { updateTask, deleteRecurringTask, taskRepository: repo }
+    );
 
     expect(repo.delete).not.toHaveBeenCalledWith("task_2");
   });
 
   it("does NOT delete past pending instances (epoch < task epoch)", async () => {
-    const past = new Task({ id: "task_0", atEpochMillis: EPOCH_07_10, recurringTaskId: "rtask_abc", status: 0 });
-    const { updateTask, deleteRecurringTask, repo } = makeDeps([past, BASE_RECURRING_TASK]);
+    const past = new Task({
+      id: "task_0",
+      atEpochMillis: EPOCH_07_10,
+      recurringTaskId: "rtask_abc",
+      status: 0,
+    });
+    const { updateTask, deleteRecurringTask, repo } = makeDeps([
+      past,
+      BASE_RECURRING_TASK,
+    ]);
 
-    await demoteTaskFromRecurringAndDeleteFuture("task_1", BASE_TASK_INPUT, BASE_RECURRING_TASK, { updateTask, deleteRecurringTask, taskRepository: repo });
+    await demoteTaskFromRecurringAndDeleteFuture(
+      "task_1",
+      BASE_TASK_INPUT,
+      BASE_RECURRING_TASK,
+      { updateTask, deleteRecurringTask, taskRepository: repo }
+    );
 
     expect(repo.delete).not.toHaveBeenCalledWith("task_0");
   });
 
   it("deletes the rtask_ template", async () => {
-    const { updateTask, deleteRecurringTask, repo } = makeDeps([BASE_RECURRING_TASK]);
+    const { updateTask, deleteRecurringTask, repo } = makeDeps([
+      BASE_RECURRING_TASK,
+    ]);
 
-    await demoteTaskFromRecurringAndDeleteFuture("task_1", BASE_TASK_INPUT, BASE_RECURRING_TASK, { updateTask, deleteRecurringTask, taskRepository: repo });
+    await demoteTaskFromRecurringAndDeleteFuture(
+      "task_1",
+      BASE_TASK_INPUT,
+      BASE_RECURRING_TASK,
+      { updateTask, deleteRecurringTask, taskRepository: repo }
+    );
 
     expect(deleteRecurringTask).toHaveBeenCalledWith("rtask_abc");
   });
 
   it("demotes the current task (recurringTaskId=null, repeat=none)", async () => {
-    const { updateTask, deleteRecurringTask, repo } = makeDeps([BASE_RECURRING_TASK]);
+    const { updateTask, deleteRecurringTask, repo } = makeDeps([
+      BASE_RECURRING_TASK,
+    ]);
 
-    await demoteTaskFromRecurringAndDeleteFuture("task_1", BASE_TASK_INPUT, BASE_RECURRING_TASK, { updateTask, deleteRecurringTask, taskRepository: repo });
+    await demoteTaskFromRecurringAndDeleteFuture(
+      "task_1",
+      BASE_TASK_INPUT,
+      BASE_RECURRING_TASK,
+      { updateTask, deleteRecurringTask, taskRepository: repo }
+    );
 
     const [id, input] = updateTask.mock.calls[0];
     expect(id).toBe("task_1");
@@ -353,7 +472,12 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
     const updateTask = vi.fn(async () => expected);
     const { deleteRecurringTask, repo } = makeDeps([BASE_RECURRING_TASK]);
 
-    const result = await demoteTaskFromRecurringAndDeleteFuture("task_1", BASE_TASK_INPUT, BASE_RECURRING_TASK, { updateTask, deleteRecurringTask, taskRepository: repo });
+    const result = await demoteTaskFromRecurringAndDeleteFuture(
+      "task_1",
+      BASE_TASK_INPUT,
+      BASE_RECURRING_TASK,
+      { updateTask, deleteRecurringTask, taskRepository: repo }
+    );
 
     expect(result).toBe(expected);
   });

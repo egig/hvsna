@@ -1,5 +1,6 @@
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePendingTasks } from "./use-pending-tasks";
+import { useVirtualTasks } from "./use-virtual-tasks";
 import type { Task } from "src/modules/task/types";
 
 export function useUpcoming() {
@@ -10,6 +11,9 @@ export function useUpcoming() {
   const endOfWeek = today.endOfWeek();
 
   const pendingTasksQuery = usePendingTasks();
+  const startOfToday = today.startOfDay().toDate().valueOf();
+  const aYearOut = startOfToday + 90 * 24 * 60 * 60 * 1000;
+  const virtualTaskQuery = useVirtualTasks(startOfToday, aYearOut);
 
   const groupTasksByTimePeriod = (
     tasks: Task[]
@@ -57,7 +61,10 @@ export function useUpcoming() {
           return;
         }
 
-        if (taskDate > tomorrowStartOfDay && taskDate <= endOfWeekDate.toDate()) {
+        if (
+          taskDate > tomorrowStartOfDay &&
+          taskDate <= endOfWeekDate.toDate()
+        ) {
           groups.thisWeek.tasks.push(task);
           return;
         }
@@ -80,10 +87,11 @@ export function useUpcoming() {
     return groups;
   };
 
-  // Upcoming = all pending tasks (scheduled from today onwards + unscheduled)
-  const upcomingTasks = pendingTasksQuery.data ?? [];
+  const upcomingTasks = [
+    ...(pendingTasksQuery.data ?? []),
+    ...(virtualTaskQuery.data ?? []),
+  ];
   const groupedTasks = groupTasksByTimePeriod(upcomingTasks);
-
   return {
     upcomingTasks,
     taskGroups: groupedTasks,

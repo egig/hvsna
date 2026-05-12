@@ -60,8 +60,8 @@ export {
 export {
   TbSquareRoundedPlusFilled as HvSquareRoundedPlusFilled,
   TbCalendar as HvCalendar,
-  TbCalendarEvent  as HvCalendarEvent,
-  TbCalendarEventFilled  as HvCalendarEventFilled,
+  TbCalendarEvent as HvCalendarEvent,
+  TbCalendarEventFilled as HvCalendarEventFilled,
   TbCalendarFilled as HvCalendarFilled,
   TbCalendarMonth as HvCalendarMonth,
   TbCalendarMonthFilled as HvCalendarMonthFilled,
@@ -91,5 +91,7 @@ export {
   AiFillProject as HvProjectFilled,
 } from "react-icons/ai";
 
-
-export { BiSearch as HvSearch, BiSearchAlt as HvSearchAlt } from "react-icons/bi";
+export {
+  BiSearch as HvSearch,
+  BiSearchAlt as HvSearchAlt,
+} from "react-icons/bi";

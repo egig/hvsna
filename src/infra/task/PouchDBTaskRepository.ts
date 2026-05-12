@@ -23,7 +23,7 @@ class PouchDBTaskDocument {
   noDate?: number = 1;
   atEpochMillis?: number | null = null;
   atTime?: string = "";
-  createdAt: number = new Date().valueOf();
+  createdAt: number | undefined;
   updatedAt: number = new Date().valueOf();
   completedAt?: number;
   attributes?: Record<string, any> = {};
@@ -37,6 +37,7 @@ class PouchDBTaskDocument {
   repeatInterval?: number;
   recurringTaskId?: string;
   tags?: string[] | null = null;
+  deletedAt?: number;
 
   constructor(o: any) {
     // o must be data from pouchdb
@@ -67,6 +68,7 @@ class PouchDBTaskDocument {
       repeatInterval: this.repeatInterval,
       recurringTaskId: this.recurringTaskId,
       tags: this.tags,
+      deletedAt: this.deletedAt,
     });
   }
 
@@ -80,6 +82,7 @@ class PouchDBTaskDocument {
     a.long = t.long;
     a.hijriDateOffset = t.hijriDateOffset;
     a.tags = t.tags || [];
+    a.deletedAt = t.deletedAt;
 
     return a;
   }
@@ -206,12 +209,20 @@ export class PouchDBTaskRepository implements ITaskRepository {
       throw new Error("Document revision is required for deletion");
     }
 
-    await this.db.remove(doc as any);
+    // Soft delete: set deletedAt timestamp instead of removing the document
+    doc.deletedAt = Date.now();
+    doc.updatedAt = Date.now();
+
+    await this.db.put(doc as any);
   }
 
   async findById(id: string): Promise<Task | null> {
     try {
       const doc: PouchDBTaskDocument = await this.db.get(id);
+      // Return null if the document is soft-deleted
+      if (doc.deletedAt) {
+        return null;
+      }
       return new PouchDBTaskDocument(doc).toTaskItem();
     } catch (err) {
       if ((err as any).status === 404) {
@@ -224,7 +235,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async find(query?: TaskQuery): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -236,6 +247,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         atEpochMillis: {
           $gte: null,
         },
+        deletedAt: null,
       },
       sort: [
         { type: "asc" },
@@ -274,6 +286,12 @@ export class PouchDBTaskRepository implements ITaskRepository {
     const endDate = new Date(date);
     endDate.setHours(23, 59, 59, 999);
 
+    await this.db.createIndex({
+      index: {
+        fields: ["type", "atEpochMillis", "deletedAt"],
+      },
+    });
+
     const mangoQuery = {
       selector: {
         type: "task",
@@ -281,6 +299,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
           $gte: startDate.getTime(),
           $lte: endDate.getTime(),
         },
+        deletedAt: null,
       },
       sort: [{ atEpochMillis: "asc" as const }],
     };
@@ -295,7 +314,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findByHijriDate(hijriDate: string): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "hijriDate"],
+        fields: ["type", "hijriDate", "deletedAt"],
       },
     });
 
@@ -303,6 +322,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         hijriDate: hijriDate,
+        deletedAt: null,
       },
       sort: [{ type: "asc" }, { hijriDate: "desc" }] as any,
     };
@@ -318,9 +338,16 @@ export class PouchDBTaskRepository implements ITaskRepository {
     offset: number,
     limit: number = 20
   ): Promise<Task[]> {
+    await this.db.createIndex({
+      index: {
+        fields: ["type", "deletedAt"],
+      },
+    });
+
     const mangoQuery = {
       selector: {
         type: "task",
+        deletedAt: null,
       },
       sort: [{ _id: "asc" as const }],
       limit,
@@ -342,7 +369,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findTasksBefore(beforeHijri: HijriDate): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -355,6 +382,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
           $gt: null,
           $lte: beforeHijri.toDate().valueOf(),
         },
+        deletedAt: null,
       },
       sort: [
         { type: "asc" },
@@ -373,7 +401,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findTodayCompletedTasks(todayHijri: HijriDate): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "completedAt"],
+        fields: ["type", "status", "completedAt", "deletedAt"],
       },
     });
 
@@ -387,6 +415,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
           $gte: todayStart.getTime(),
           $lte: todayEnd.getTime(),
         },
+        deletedAt: null,
       },
       sort: [
         { type: "asc" },
@@ -442,7 +471,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findTasksAfter(todayHijri: HijriDate): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -454,6 +483,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         atEpochMillis: {
           $gte: todayHijri.toDate().valueOf(),
         },
+        deletedAt: null,
       },
       sort: [
         { type: "asc" },
@@ -472,7 +502,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findAllPending(limit: number): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis"],
+        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -482,12 +512,14 @@ export class PouchDBTaskRepository implements ITaskRepository {
         status: 0,
         noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
+        deletedAt: { $exists: false },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
         { noDate: "asc" },
         { atEpochMillis: "asc" },
+        { deletedAt: "asc" },
       ] as any,
       limit,
     };
@@ -505,7 +537,14 @@ export class PouchDBTaskRepository implements ITaskRepository {
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis", "tags"],
+        fields: [
+          "type",
+          "status",
+          "noDate",
+          "atEpochMillis",
+          "tags",
+          "deletedAt",
+        ],
       },
     });
 
@@ -516,6 +555,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
         tags: { $gte: null },
+        deletedAt: { $exists: false },
       },
       sort: [
         { type: "asc" },
@@ -559,7 +599,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findUnscheduledTasks(): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "noDate", "status", "createdAt"],
+        fields: ["type", "noDate", "status", "createdAt", "deletedAt"],
       },
     });
 
@@ -569,6 +609,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         noDate: 1, // No schedule
         status: 0, // Not completed
         createdAt: { $gte: null },
+        deletedAt: null,
       },
       sort: [
         { type: "asc" },
@@ -586,13 +627,37 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
   async findByRecurringTaskId(recurringTaskId: string): Promise<Task[]> {
     await this.db.createIndex({
-      index: { fields: ["type", "recurringTaskId"] },
+      index: { fields: ["type", "recurringTaskId", "deletedAt"] },
     });
 
     const result = await this.db.find({
       selector: {
         type: "task",
         recurringTaskId,
+        deletedAt: null,
+      },
+      limit: 2147483647,
+    });
+
+    return (result as any).docs.map((doc: PouchDBTaskDocument) =>
+      new PouchDBTaskDocument(doc).toTaskItem()
+    );
+  }
+
+  async findByRecurringTaskIdInRange(
+    recurringTaskId: string,
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]> {
+    await this.db.createIndex({
+      index: { fields: ["type", "recurringTaskId", "atEpochMillis"] },
+    });
+
+    const result = await this.db.find({
+      selector: {
+        type: "task",
+        recurringTaskId,
+        atEpochMillis: { $gte: startEpoch, $lte: endEpoch },
       },
       limit: 2147483647,
     });

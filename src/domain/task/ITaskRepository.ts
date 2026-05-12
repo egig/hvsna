@@ -32,6 +32,11 @@ export interface ITaskRepository {
 
   // Recurring task operations
   findByRecurringTaskId(recurringTaskId: string): Promise<Task[]>;
+  findByRecurringTaskIdInRange(
+    recurringTaskId: string,
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]>;
   deletePendingByRecurringTaskId(recurringTaskId: string): Promise<void>;
 
   // Task status operations

@@ -1,4 +1,10 @@
-import { HvSettings, HvHash, HvOutlineEllipsisHorizontalCircle, HvCheckCircle, HvCheckSquare2 } from "@/modules/icons";
+import {
+  HvSettings,
+  HvHash,
+  HvOutlineEllipsisHorizontalCircle,
+  HvCheckCircle,
+  HvCheckSquare2,
+} from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";

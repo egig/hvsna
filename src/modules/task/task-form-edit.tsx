@@ -23,6 +23,7 @@ import { TagInput } from "./tag-input";
 
 interface TaskFormEditProps {
   taskId: string;
+  initialTask?: Task;
   onSuccess?: (task: Task) => void;
   onError?: (error: string) => void;
   onDelete?: (taskId: string) => void;
@@ -30,6 +31,7 @@ interface TaskFormEditProps {
 
 export default function TaskFormEdit({
   taskId,
+  initialTask,
   onSuccess,
   onError,
   onDelete,
@@ -60,7 +62,7 @@ export default function TaskFormEdit({
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-  } = useTaskFormEdit(taskId, onSuccess, onError, onDelete);
+  } = useTaskFormEdit(taskId, onSuccess, onError, onDelete, initialTask);
 
   const nameInputRef = useRef<HTMLInputElement>(null);
 

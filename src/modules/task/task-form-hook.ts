@@ -32,10 +32,9 @@ export interface UseTaskFormReturn {
 
 export const useTaskForm = (
   onSuccess?: (task: Task) => void,
-  onError?: (error: string) => void,
-  onCancel?: () => void
+  onError?: (error: string) => void
 ): UseTaskFormReturn => {
-  const { createTask, generateOccurrencesForTemplate } = useTaskContext();
+  const { createTask } = useTaskContext();
   const location = useLocation();
   const params = useParams();
   const { showSnackbar } = useSnackbar();
@@ -43,7 +42,6 @@ export const useTaskForm = (
   const { createRecurringTask } = useRecurringTasks();
 
   const {
-    timezone,
     latitude,
     longitude,
     manualOffset: offset,
@@ -97,9 +95,32 @@ export const useTaskForm = (
       if (formData.scheduleAt.time) {
         taskData.atTime = formData.scheduleAt.time;
         const [h, m] = formData.scheduleAt.time.split(":").map(Number);
-        taskData.atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, hijriOpts).toDate().valueOf();
+        taskData.atEpochMillis = new HijriDate(
+          year,
+          month,
+          day,
+          h,
+          m,
+          0,
+          0,
+          hijriOpts
+        )
+          .toDate()
+          .valueOf();
       } else {
-        taskData.atEpochMillis = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
+        taskData.atEpochMillis = new HijriDate(
+          year,
+          month,
+          day,
+          undefined,
+          undefined,
+          0,
+          0,
+          hijriOpts
+        )
+          .endOfDay()
+          .toDate()
+          .valueOf();
       }
       if (formData.scheduleAt.prayerTime) {
         taskData.prayerTime = formData.scheduleAt.prayerTime as PrayerTime;
@@ -115,13 +136,42 @@ export const useTaskForm = (
       if (isRecurring && formData.scheduleAt.dateHijri) {
         const { year, month, day } = formData.scheduleAt.dateHijri;
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
-        const repeatEndEpoch = formData.repeat.end === "on_date" && formData.repeat.endDate
-          ? (() => {
-              const { year: ey, month: em, day: ed } = parseHijriDateString(formData.repeat.endDate as string);
-              return new HijriDate(ey, em, ed, undefined, undefined, 0, 0, hijriOpts).endOfDay().toDate().valueOf();
-            })()
-          : undefined;
+        const baseDateEpoch = new HijriDate(
+          year,
+          month,
+          day,
+          undefined,
+          undefined,
+          0,
+          0,
+          hijriOpts
+        )
+          .endOfDay()
+          .toDate()
+          .valueOf();
+        const repeatEndEpoch =
+          formData.repeat.end === "on_date" && formData.repeat.endDate
+            ? (() => {
+                const {
+                  year: ey,
+                  month: em,
+                  day: ed,
+                } = parseHijriDateString(formData.repeat.endDate as string);
+                return new HijriDate(
+                  ey,
+                  em,
+                  ed,
+                  undefined,
+                  undefined,
+                  0,
+                  0,
+                  hijriOpts
+                )
+                  .endOfDay()
+                  .toDate()
+                  .valueOf();
+              })()
+            : undefined;
         const template = await createRecurringTask({
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
@@ -140,8 +190,6 @@ export const useTaskForm = (
           repeatEndEpoch,
           repeatEndOccurrences: formData.repeat.endOccurrences,
         });
-
-        await generateOccurrencesForTemplate(template);
 
         if (onSuccess) {
           onSuccess(new Task({ name: template.name }));

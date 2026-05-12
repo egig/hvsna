@@ -73,16 +73,38 @@ function makeTemplate(overrides: Partial<RecurringTask> = {}): RecurringTask {
 
 describe("getNextOccurrenceDate", () => {
   it("returns null for repeat=none", () => {
-    expect(getNextOccurrenceDate("14470101", "none", 1, 0, 0, 0, undefined, undefined)).toBeNull();
+    expect(
+      getNextOccurrenceDate(
+        "14470101",
+        "none",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      )
+    ).toBeNull();
   });
 
   it("returns null for empty date", () => {
-    expect(getNextOccurrenceDate("", "daily", 1, 0, 0, 0, undefined, undefined)).toBeNull();
+    expect(
+      getNextOccurrenceDate("", "daily", 1, 0, 0, 0, undefined, undefined)
+    ).toBeNull();
   });
 
   describe("daily", () => {
     it("advances by 1 day (interval=1)", () => {
-      const next = getNextOccurrenceDate("14470101", "daily", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470101",
+        "daily",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { year, month, day } = parseHijriDateString(next!);
       expect(year).toBe(1447);
@@ -91,7 +113,16 @@ describe("getNextOccurrenceDate", () => {
     });
 
     it("advances by interval days", () => {
-      const next = getNextOccurrenceDate("14470101", "daily", 3, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470101",
+        "daily",
+        3,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
       expect(day).toBe(4);
@@ -99,7 +130,16 @@ describe("getNextOccurrenceDate", () => {
 
     it("crosses month boundary correctly", () => {
       // 1447-01-29 + 1 day = 1447-02-01 (Hijri months are 29 or 30 days)
-      const next = getNextOccurrenceDate("14470129", "daily", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470129",
+        "daily",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { month } = parseHijriDateString(next!);
       expect(month).toBeGreaterThanOrEqual(1);
@@ -108,14 +148,32 @@ describe("getNextOccurrenceDate", () => {
 
   describe("weekly", () => {
     it("advances by 7 days (interval=1)", () => {
-      const next = getNextOccurrenceDate("14460701", "weekly", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14460701",
+        "weekly",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
       expect(day).toBe(8);
     });
 
     it("advances by interval*7 days", () => {
-      const next = getNextOccurrenceDate("14460701", "weekly", 2, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14460701",
+        "weekly",
+        2,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
       expect(day).toBe(15);
@@ -124,14 +182,32 @@ describe("getNextOccurrenceDate", () => {
 
   describe("monthly", () => {
     it("advances month by 1 (interval=1)", () => {
-      const next = getNextOccurrenceDate("14470101", "monthly", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470101",
+        "monthly",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { month } = parseHijriDateString(next!);
       expect(month).toBe(2);
     });
 
     it("wraps year correctly when month=12", () => {
-      const next = getNextOccurrenceDate("14471201", "monthly", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14471201",
+        "monthly",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { year, month } = parseHijriDateString(next!);
       expect(year).toBe(1448);
@@ -139,14 +215,32 @@ describe("getNextOccurrenceDate", () => {
     });
 
     it("advances by interval months", () => {
-      const next = getNextOccurrenceDate("14470101", "monthly", 3, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470101",
+        "monthly",
+        3,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { month } = parseHijriDateString(next!);
       expect(month).toBe(4);
     });
 
     it("caps day at 29 to avoid invalid Hijri end-of-month dates", () => {
-      const next = getNextOccurrenceDate("14470130", "monthly", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470130",
+        "monthly",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { day } = parseHijriDateString(next!);
       expect(day).toBeLessThanOrEqual(29);
@@ -155,14 +249,32 @@ describe("getNextOccurrenceDate", () => {
 
   describe("yearly", () => {
     it("advances year by 1 (interval=1)", () => {
-      const next = getNextOccurrenceDate("14470101", "yearly", 1, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470101",
+        "yearly",
+        1,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { year } = parseHijriDateString(next!);
       expect(year).toBe(1448);
     });
 
     it("advances year by interval", () => {
-      const next = getNextOccurrenceDate("14470101", "yearly", 3, 0, 0, 0, undefined, undefined);
+      const next = getNextOccurrenceDate(
+        "14470101",
+        "yearly",
+        3,
+        0,
+        0,
+        0,
+        undefined,
+        undefined
+      );
       expect(next).not.toBeNull();
       const { year } = parseHijriDateString(next!);
       expect(year).toBe(1450);
@@ -395,9 +507,21 @@ describe("generateOccurrencesForTemplate", () => {
 
     it("creates 0 instances when existing.length >= repeatEndOccurrences", async () => {
       const existing = [
-        new Task({ id: "e1", atEpochMillis: hijriToEpoch(1446, 7, 1), recurringTaskId: "rtask_test" }),
-        new Task({ id: "e2", atEpochMillis: hijriToEpoch(1446, 7, 2), recurringTaskId: "rtask_test" }),
-        new Task({ id: "e3", atEpochMillis: hijriToEpoch(1446, 7, 3), recurringTaskId: "rtask_test" }),
+        new Task({
+          id: "e1",
+          atEpochMillis: hijriToEpoch(1446, 7, 1),
+          recurringTaskId: "rtask_test",
+        }),
+        new Task({
+          id: "e2",
+          atEpochMillis: hijriToEpoch(1446, 7, 2),
+          recurringTaskId: "rtask_test",
+        }),
+        new Task({
+          id: "e3",
+          atEpochMillis: hijriToEpoch(1446, 7, 3),
+          recurringTaskId: "rtask_test",
+        }),
       ];
       const template = makeTemplate({
         repeat: "daily",
@@ -417,8 +541,15 @@ describe("generateOccurrencesForTemplate", () => {
 
   describe("repeatEnd=never (default)", () => {
     it("behaves the same as no repeatEnd field", async () => {
-      const t1 = makeTemplate({ repeat: "weekly", baseDateEpoch: hijriToEpoch(1446, 7, 1) });
-      const t2 = makeTemplate({ repeat: "weekly", baseDateEpoch: hijriToEpoch(1446, 7, 1), repeatEnd: "never" });
+      const t1 = makeTemplate({
+        repeat: "weekly",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
+      });
+      const t2 = makeTemplate({
+        repeat: "weekly",
+        baseDateEpoch: hijriToEpoch(1446, 7, 1),
+        repeatEnd: "never",
+      });
 
       const repo1 = makeRepo();
       const repo2 = makeRepo();

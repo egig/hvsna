@@ -26,8 +26,7 @@ export function useCompletedTasks() {
   const handleInfiniteScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       const el = e.currentTarget;
-      const nearBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight < 200;
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
       if (nearBottom && !query.isFetching) {
         loadMore();
       }

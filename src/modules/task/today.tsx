@@ -72,7 +72,6 @@ export function TodayContent() {
 }
 
 export function Today() {
-  const { t } = useLanguageContext();
   const { pageTitle, subTitle } = useToday();
 
   return (
@@ -243,11 +242,15 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     loadPrayerTimes();
   }, [settings]);
 
+  const { materializeVirtualTask } = useTaskContext();
   const handleEditTask = useCallback(
-    (task: Task) => {
-      openEditTaskForm(task.id as string);
+    async (task: Task) => {
+      const realTask = task.isVirtual
+        ? await materializeVirtualTask(task)
+        : task;
+      openEditTaskForm(realTask.id as string);
     },
-    [openEditTaskForm]
+    [openEditTaskForm, materializeVirtualTask]
   );
 
   // Use new prayer time grouping logic
