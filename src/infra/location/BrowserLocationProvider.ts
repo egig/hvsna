@@ -1,11 +1,11 @@
+import type { Coordinate } from "@/domain/location/coordinate";
 import type {
-  ILocationProvider,
+  ILocationManager,
   LocationPermissionResult,
   GeolocationOptions,
-} from "../../domain/settings/ILocationProvider";
-import type { Coordinate } from "../../modules/settings/settings";
+} from "@/domain/location/ILocationManager";
 
-export class BrowserLocationProvider implements ILocationProvider {
+export class BrowserLocationProvider implements ILocationManager {
   async checkPermission(): Promise<LocationPermissionResult> {
     if (!("permissions" in navigator)) {
       return { state: "unknown" };

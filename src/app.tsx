@@ -1,4 +1,4 @@
-import { BrowserRouter, MemoryRouter} from "react-router";
+import { BrowserRouter, MemoryRouter } from "react-router";
 import { AppRoutes } from "src/routes";
 import "@/app.css";
 import { PouchDBProvider } from "@/pouchdb";
@@ -53,7 +53,7 @@ export default function App({
   config,
   db,
   platform,
-  Router
+  Router,
 }: {
   platform: "web" | "capacitor";
   config: AppConfig;

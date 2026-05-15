@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-  HvClock,
-  HvRefreshCw,
-  HvAlertTriangle,
-} from "@/modules/icons";
+import { HvClock, HvRefreshCw, HvAlertTriangle } from "@/modules/icons";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { SimpleTimePicker } from "../../components/simple-time-picker";

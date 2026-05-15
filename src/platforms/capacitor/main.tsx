@@ -25,7 +25,9 @@ const db = getPouchDBInstance();
 configureLogger();
 
 (async () => {
-  root.render(<App config={config} db={db} platform="capacitor" Router={MemoryRouter} />);
+  root.render(
+    <App config={config} db={db} platform="capacitor" Router={MemoryRouter} />
+  );
   // @ts-ignore
   window.__dtMounted = true;
 })();

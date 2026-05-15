@@ -11,6 +11,7 @@ interface ModalProps {
   className?: string;
   noPadding?: boolean;
   "data-testid"?: string;
+  dismissable?: boolean;
 }
 
 export function Modal({
@@ -21,6 +22,7 @@ export function Modal({
   className = "",
   noPadding = false,
   "data-testid": testId,
+  dismissable = true,
 }: ModalProps) {
   const { isDesktop } = useScreenSize();
 
@@ -30,6 +32,7 @@ export function Modal({
       <Dialog.Root
         open={isOpen}
         onOpenChange={(open: boolean) => !open && onClose()}
+        disablePointerDismissal={!dismissable}
       >
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
@@ -81,6 +84,7 @@ export function Modal({
     <Drawer.Root
       open={isOpen}
       onOpenChange={(open: boolean) => !open && onClose()}
+      dismissible={!!dismissable}
     >
       <Drawer.Portal>
         <Drawer.Overlay className="fixed z-[1000] inset-0 bg-black/40" />

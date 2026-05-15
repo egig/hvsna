@@ -12,6 +12,7 @@ import {
   HvChevronDown,
   HvCheck,
   HvWallet,
+  HvMapPin,
 } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings/useSettings";
@@ -22,6 +23,7 @@ import {
 import logger from "src/modules/logger";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
+import { useLocationContext } from "../location/context";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -55,6 +57,7 @@ export function TodayContent() {
 
 export function Today() {
   const { pageTitle, subTitle } = useToday();
+  const {name} = useLocationContext();
 
   return (
     <Page
@@ -63,6 +66,11 @@ export function Today() {
           showBackButton={false}
           title={pageTitle}
           subtitle={subTitle}
+          leftAction={
+            <button className="flex gap-1 w-max px-2">
+              <HvMapPin /> {name}
+            </button>
+          }
         />
       }
     >

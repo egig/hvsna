@@ -9,22 +9,8 @@ import { ListInputSelect } from "../../components/list-input-select";
 import { usePlatform } from "../../platform";
 
 export default function GeneralSettings() {
-  const {
-    settings,
-    setLanguage,
-    loading,
-    error,
-    updateSettings,
-    requestLocationPermission,
-    getCurrentLocation,
-    updateLocation,
-    setManualLocation,
-    clearLocation,
-    hasLocationPermission,
-    updateTimezoneFromLocation,
-  } = useSettings();
+  const { settings, loading, updateSettings } = useSettings();
   const { t } = useLanguageContext();
-  const { isNative: isNativePlatform } = usePlatform();
 
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
 
@@ -41,22 +27,6 @@ export default function GeneralSettings() {
   const handleDateOffsetChange = async (newOffset: number) => {
     await updateSettings({ manualDateOffset: newOffset });
   };
-
-  const handleGetLocation = async () => {
-    const coordinate = await getCurrentLocation();
-    if (coordinate) {
-      const resolveType = isNativePlatform ? "capacitor_native" : "auto";
-      await updateLocation(coordinate, resolveType);
-      await updateTimezoneFromLocation();
-    }
-  };
-
-  // Check if timezone is based on location coordinates
-  const isTimezoneFromLocation =
-    settings.coordinate &&
-    settings.locationResolvedAt &&
-    (settings.locationResolveType === "auto" ||
-      settings.locationResolveType === "capacitor_native");
 
   return (
     <Page>
@@ -82,20 +52,15 @@ export default function GeneralSettings() {
             <button
               type="button"
               onClick={() => setIsTimezoneModalOpen(true)}
-              disabled={loading || !!isTimezoneFromLocation}
+              disabled={loading}
               className="flex items-center space-x-1 px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed min-w-0 max-w-[50%]"
             >
               <span className="truncate">
-                {settings.timezone.replace(/_/g, " ")}
+                {settings.timezone?.replace(/_/g, " ")}
               </span>
               <HvChevronsUpDown className="w-3.5 h-3.5 text-gray-400 shrink-0" />
             </button>
           </div>
-          {isTimezoneFromLocation && (
-            <div className="mt-2 text-sm text-gray-500">
-              {t("timezone_from_location")}
-            </div>
-          )}
         </div>
 
         <TimezonePickerModal
@@ -104,6 +69,7 @@ export default function GeneralSettings() {
           value={settings.timezone}
           onSelect={handleTimezoneChange}
           title={t("timezone")}
+          dismissable={true}
         />
 
         <div className="space-y-4">

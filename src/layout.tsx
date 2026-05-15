@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Outlet, useLocation, useParams } from "react-router";
 import { Allotment, type AllotmentHandle } from "allotment";
-import { HvPlus} from "@/modules/icons";
+import { HvPlus } from "@/modules/icons";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";
 import { Modal } from "./modules/navigation/modal";
@@ -10,7 +10,6 @@ import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
 import { Task } from "./domain/task";
-
 
 import "allotment/dist/style.css";
 

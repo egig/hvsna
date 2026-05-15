@@ -1,4 +1,4 @@
-import type { ITimezoneProvider } from "../../domain/settings/ITimezoneProvider";
+import type { ITimezoneProvider } from "../../domain/location/ITimezoneProvider";
 
 const LONGITUDE_TO_TIMEZONE: Record<string, string> = {
   "GMT+0": "Europe/London",

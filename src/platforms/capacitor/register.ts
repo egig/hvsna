@@ -2,12 +2,12 @@ import { CapacitorSessionRepository } from "@/infra/auth/CapacitorSessionReposit
 import { CapacitorNotificationsProvider } from "@/infra/notifications/CapacitorNotificationsProvider";
 import { CapacitorPermissionsProvider } from "@/infra/permissions/CapacitorPermissionsProvider";
 import { CapacitorNetworkProvider } from "@/infra/network/CapacitorNetworkProvider";
-import { NativeLocationProvider } from "@/infra/settings/NativeLocationProvider";
+import { NativeLocationProvider } from "@/infra/location/NativeLocationProvider";
 import { initAuthUseCases } from "@/infra/auth/AuthServiceFactory";
 import { initNotificationsProvider } from "@/infra/notifications";
 import { initPermissionsProvider } from "@/infra/permissions";
 import { initNetworkProvider } from "@/infra/network";
-import { initLocationProvider } from "@/infra/settings/CapacitorLocationProvider";
+import { initLocationProvider } from "@/infra/location/CapacitorLocationProvider";
 
 export function registerCapacitorImplementations(): void {
   initAuthUseCases(new CapacitorSessionRepository());

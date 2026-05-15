@@ -27,7 +27,9 @@ const db = getPouchDBInstance();
 configureLogger();
 
 (async () => {
-  root.render(<App config={config} db={db} platform="web" Router={BrowserRouter} />);
+  root.render(
+    <App config={config} db={db} platform="web" Router={BrowserRouter} />
+  );
   // @ts-ignore
   window.__dtMounted = true;
 })();
@@ -40,5 +42,3 @@ registerSW({
     log.info("New content available, please refresh");
   },
 });
-
-

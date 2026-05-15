@@ -1,7 +1,5 @@
 import type { Language } from "../i18n/language";
 
-
-
 export interface PrayerTimesFallback {
   fajr: string;
   sunrise: string;
@@ -17,7 +15,6 @@ export interface GeneralSettings {
   manualDateOffset?: number;
   theme?: "light" | "dark" | "system";
   notifications?: boolean;
-  locationResolvedAt?: string;
   onboardedAt?: number;
   prayerTimesFallback?: PrayerTimesFallback;
 }

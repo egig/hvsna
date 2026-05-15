@@ -20,11 +20,11 @@ export interface PouchDBProviderProps {
 
 export const PouchDBProvider: React.FC<PouchDBProviderProps> = ({
   dbInstance,
-  children
+  children,
 }) => {
   return React.createElement(
     PouchDBContext.Provider,
-    { value: { db: dbInstance} },
+    { value: { db: dbInstance } },
     children
   );
 };

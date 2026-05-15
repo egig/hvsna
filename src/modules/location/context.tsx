@@ -1,22 +1,29 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { LocationUseCases } from "./usecase";
 import { createLocationProvider } from "@/infra";
-import { TimeAPITimezoneProvider } from "@/infra/settings/TimeAPITimezoneProvider";
+import { TimeAPITimezoneProvider } from "@/infra/location/TimeAPITimezoneProvider";
+import { TimezonePickerModal } from "../components/timezone-picker-modal";
 import { useSettings } from "../settings";
 
 interface LocationContextType {
-    name: string;
-    lat: number,
-    lng: number,
-    timezone: string
-    error: string,
-    requestLocationPermission: Function
+  name: string;
+  lat: number;
+  lng: number;
+  timezone: string;
+  error: string;
+  requestLocationPermission: Function;
 }
 
 const LacationContext = createContext<LocationContextType | undefined>(
   undefined
 );
-
 
 export const useLocationContext = () => {
   const context = useContext(LacationContext);
@@ -28,7 +35,6 @@ export const useLocationContext = () => {
   return context;
 };
 
-
 interface LocationProviderProps {
   children: ReactNode;
 }
@@ -36,17 +42,17 @@ interface LocationProviderProps {
 export const LocationProvider: React.FC<LocationProviderProps> = ({
   children,
 }) => {
-
-  const [name, setName] = useState("")
-  const [lat, setLat] = useState<number>(0)
-  const [lng, setLng] = useState<number>(0)
-  const [timezone, setTimezone] = useState("")
-  const [error, setError] = useState("")
+  const [name, setName] = useState("");
+  const [lat, setLat] = useState<number>(0);
+  const [lng, setLng] = useState<number>(0);
+  const [error, setError] = useState("");
+  const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
+  const { updateSettings, settings, initiated } = useSettings();
 
   const useCases = new LocationUseCases(
     createLocationProvider(),
     new TimeAPITimezoneProvider()
-  )
+  );
 
   const requestLocationPermission = useCallback(async (): Promise<boolean> => {
     try {
@@ -59,29 +65,35 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
       setLat(coordinate.latitude);
       setLng(coordinate.longitude);
 
-      // TODO get place name, set timedzone as fallback
+      // TODO get place name, set timezone as fallback
       const t = await useCases.getTimezoneFromCoordinates(
         coordinate.latitude,
-        coordinate.longitude,
+        coordinate.longitude
       );
       setName(t as string);
-      setTimezone(t as string);
 
       return true;
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to get location permission",
+        err instanceof Error ? err.message : "Failed to get location permission"
       );
       return false;
     } finally {
     }
   }, []);
 
+  const handleSelectTimezone = (timezone: string) => {
+    updateSettings({
+      timezone,
+    });
+  };
+
   useEffect(() => {
     (async () => {
-      await requestLocationPermission()
+      let granted = await requestLocationPermission();
+      if (!granted) {
+        setIsTimezoneModalOpen(true);
+      }
     })();
   }, []);
 
@@ -91,12 +103,22 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         name,
         lat,
         lng,
-        timezone,
+        timezone: settings.timezone,
         error,
-        requestLocationPermission
+        requestLocationPermission,
       }}
     >
       {children}
+
+      <TimezonePickerModal
+        isOpen={isTimezoneModalOpen}
+        onClose={() => setIsTimezoneModalOpen(false)}
+        value={settings.timezone}
+        onSelect={handleSelectTimezone}
+        title={"Select Timezone"}
+        data-testid="timezone-modal"
+        dismissable={false}
+      />
     </LacationContext.Provider>
   );
 };

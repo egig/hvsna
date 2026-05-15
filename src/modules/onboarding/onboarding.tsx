@@ -11,10 +11,8 @@ import { useLocationContext } from "../location/context";
 
 export default function Onboarding() {
   const { t, language, setLanguage } = useLanguageContext();
-  const {
-    updateSettings,
-  } = useSettings();
-  const {requestLocationPermission, error} = useLocationContext();
+  const { updateSettings } = useSettings();
+  const { requestLocationPermission, error } = useLocationContext();
   const [loading, setLoading] = useState(false);
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -38,10 +36,10 @@ export default function Onboarding() {
 
   const handleLocationPermission = async () => {
     setLoading(true);
-    console.log("handleLocationPermission")
+    console.log("handleLocationPermission");
     try {
       const success = await requestLocationPermission();
-      console.log(success, "handleLocationPermission")
+      console.log(success, "handleLocationPermission");
       if (success) {
         // await updateTimezoneFromLocation();
         setCurrentStep(3);

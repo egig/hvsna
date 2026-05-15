@@ -3,6 +3,7 @@ import { useSettings } from "../../settings/useSettings";
 import { HijriDate } from "./hijri-date";
 import { HijriMonth } from "./hijri-month";
 import { getCoordinateFromTimezone } from "@/config";
+import { useLocationContext } from "@/modules/location/context";
 
 export * from "./hijri-date";
 
@@ -67,11 +68,12 @@ export interface UseHijriCalendarReturn {
 
 export function useHijriDate(): UseHijriCalendarReturn {
   const { settings, loading, error, initiated } = useSettings();
+  const { lat, lng } = useLocationContext();
 
   // Extract coordinates and offset from settings
   const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
-  const latitude = settings.coordinate?.latitude ?? _fallback.latitude;
-  const longitude = settings.coordinate?.longitude ?? _fallback.longitude;
+  const latitude = lat ?? _fallback.latitude;
+  const longitude = lng ?? _fallback.longitude;
   const hasLocation = !!(latitude && longitude);
   const manualOffset = settings.manualDateOffset;
   const timezone = settings.timezone;

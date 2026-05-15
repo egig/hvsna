@@ -9,6 +9,7 @@ interface TimezonePickerModalProps {
   value: string;
   onSelect: (tz: string) => void;
   title?: string;
+  dismissable?: boolean;
 }
 
 export function TimezonePickerModal({
@@ -17,6 +18,7 @@ export function TimezonePickerModal({
   value,
   onSelect,
   title = "Select Timezone",
+  dismissable,
 }: TimezonePickerModalProps) {
   const [search, setSearch] = useState("");
 
@@ -46,6 +48,7 @@ export function TimezonePickerModal({
       title={title}
       noPadding
       data-testid="timezone-modal"
+      dismissable={dismissable}
     >
       <div className="flex flex-col h-full">
         <div className="px-4 py-3 border-b border-gray-100">

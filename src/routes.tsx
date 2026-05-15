@@ -84,13 +84,7 @@ export const AppRoutes = () => {
           }
         >
           <Route path="onboarding" element={<Onboarding />} />
-          <Route
-            element={
-              <OnboardingGuard>
-                <Layout />
-              </OnboardingGuard>
-            }
-          >
+          <Route element={<Layout />}>
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="search" element={<Search />} />
             <Route path="today" element={<Today />} />

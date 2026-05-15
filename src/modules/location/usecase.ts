@@ -1,14 +1,15 @@
 import type { Coordinate } from "@/domain/location/coordinate";
-import type { ITimezoneProvider } from "../../domain/settings/ITimezoneProvider";
-import type { ILocationManager, GeolocationOptions } from "@/domain/location/ILocationManager";
-
+import type { ITimezoneProvider } from "../../domain/location/ITimezoneProvider";
+import type {
+  ILocationManager,
+  GeolocationOptions,
+} from "@/domain/location/ILocationManager";
 
 export class LocationUseCases {
   constructor(
     private readonly locationManager: ILocationManager,
     private readonly timezoneProvider: ITimezoneProvider
   ) {}
-
 
   /** Request permission and get current location. Returns coordinate on success. */
   async requestLocation(options?: GeolocationOptions): Promise<Coordinate> {
@@ -42,5 +43,4 @@ export class LocationUseCases {
   ): Promise<string | null> {
     return this.timezoneProvider.getTimezone(latitude, longitude);
   }
-
 }

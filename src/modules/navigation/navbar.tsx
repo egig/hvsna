@@ -196,7 +196,7 @@ export function LargeNavbar({
   return (
     <>
       <header
-        className={`sticky top-0 z-10 px-2 py-2 bg-white/80 backdrop-blur-sm ${
+        className={`sticky top-0 z-100 px-2 py-2 bg-white/80 backdrop-blur-sm ${
           !modal ? "safe-top" : ""
         } ${className}`}
         style={{
@@ -226,7 +226,7 @@ export function LargeNavbar({
                 {modal ? <HvX /> : <HvChevronLeft />}
               </button>
             ) : (
-              leftAction
+              !isScrolled && leftAction
             )}
           </div>
 
