@@ -1,9 +1,10 @@
 import { createRoot, type Container } from "react-dom/client";
-import type { AppConfig } from "./app";
-import App from "./app";
+import type { AppConfig } from "@/app";
+import App from "@/app";
 import { getPouchDBInstance } from "@/modules/pouchdb-singleton";
 import { configureLogger } from "@/modules/logger";
 import { registerCapacitorImplementations } from "./register";
+import { MemoryRouter } from "react-router";
 
 registerCapacitorImplementations();
 
@@ -24,7 +25,7 @@ const db = getPouchDBInstance();
 configureLogger();
 
 (async () => {
-  root.render(<App config={config} db={db} />);
+  root.render(<App config={config} db={db} platform="capacitor" Router={MemoryRouter} />);
   // @ts-ignore
   window.__dtMounted = true;
 })();

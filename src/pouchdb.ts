@@ -4,7 +4,6 @@ import React, {
   type ReactNode,
   type Context,
 } from "react";
-import { db } from "./modules/pouchdb-singleton";
 
 export interface PouchDBContextType {
   db: PouchDB.Database;
@@ -16,16 +15,16 @@ const PouchDBContext: Context<PouchDBContextType | undefined> = createContext<
 
 export interface PouchDBProviderProps {
   children: ReactNode;
-  dbName?: string;
-  dbInstance?: PouchDB.Database;
+  dbInstance: PouchDB.Database;
 }
 
 export const PouchDBProvider: React.FC<PouchDBProviderProps> = ({
-  children,
+  dbInstance,
+  children
 }) => {
   return React.createElement(
     PouchDBContext.Provider,
-    { value: { db } },
+    { value: { db: dbInstance} },
     children
   );
 };

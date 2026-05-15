@@ -1,11 +1,12 @@
 import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
-import type { AppConfig } from "@/platforms/web/app";
-import App from "./app";
+import type { AppConfig } from "@/app";
+import App from "@/app";
 import { getPouchDBInstance } from "@/modules/pouchdb-singleton";
 import { configureLogger } from "@/modules/logger";
 import { registerWebImplementations } from "./register";
 import log from "@/modules/logger";
+import { BrowserRouter } from "react-router";
 
 registerWebImplementations();
 
@@ -26,7 +27,7 @@ const db = getPouchDBInstance();
 configureLogger();
 
 (async () => {
-  root.render(<App config={config} db={db} />);
+  root.render(<App config={config} db={db} platform="web" Router={BrowserRouter} />);
   // @ts-ignore
   window.__dtMounted = true;
 })();
@@ -39,3 +40,5 @@ registerSW({
     log.info("New content available, please refresh");
   },
 });
+
+
