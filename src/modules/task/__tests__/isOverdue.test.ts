@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Task } from "../types";
+import { Task } from "@/domain/task";
 
 describe("Task.isOverdue", () => {
   it("should return false for completed tasks", () => {

@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Navigate } from "react-router";
 import { useSettings } from "../settings/useSettings";
 

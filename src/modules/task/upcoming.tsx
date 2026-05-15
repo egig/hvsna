@@ -22,7 +22,7 @@ import TaskListItem from "./task-list-item";
 import { useUpcoming } from "./use-upcoming";
 import { useUnscheduled } from "./use-unscheduled";
 import { WeekView } from "./week-view";
-import type { Task } from "src/modules/task/types";
+import type { Task } from "@/domain/task";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "./task-context";
 import { useScreenSize } from "../components/screen-size-wrapper";

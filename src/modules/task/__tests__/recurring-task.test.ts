@@ -7,7 +7,7 @@ import { HijriDate } from "../../calendar/hijri";
 import { generateOccurrencesForTemplate } from "../recurring-task-generator";
 import type { RecurringTask } from "../recurring-task";
 import type { ITaskRepository } from "../../../domain/task/ITaskRepository";
-import { Task } from "../types";
+import { Task } from "@/domain/task";
 
 // ---------------------------------------------------------------------------
 // Helpers

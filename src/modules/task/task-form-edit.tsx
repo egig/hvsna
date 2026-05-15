@@ -14,7 +14,7 @@ import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Navbar } from "../navigation";
 import { useAppNavigation } from "../navigation/use-app-navigation";
-import type { Task } from "./types";
+import type { Task } from "@/domain/task";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import TaskPreview from "./task-preview";

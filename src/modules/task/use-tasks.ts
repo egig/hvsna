@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
-import type { Task, TaskQuery, TaskTypeFilter } from "./types";
+import type { Task, TaskQuery, TaskTypeFilter } from "@/domain/task";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import log from "../logger";

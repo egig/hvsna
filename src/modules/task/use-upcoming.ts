@@ -1,7 +1,7 @@
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePendingTasks } from "./use-pending-tasks";
 import { useVirtualTasks } from "./use-virtual-tasks";
-import type { Task } from "src/modules/task/types";
+import type { Task } from "@/domain/task";
 
 export function useUpcoming() {
   const { getToday, toHijriDate, formatDate } = useHijriDate();

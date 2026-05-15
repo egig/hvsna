@@ -1,7 +1,7 @@
 import type { ISettingsRepository } from "../../domain/settings/ISettingsRepository";
 import type { GeneralSettings } from "../../modules/settings/settings";
 
-const SETTINGS_DOC_ID = "general_settings";
+const SETTINGS_DOC_ID = "settings";
 
 export class PouchDBSettingsRepository implements ISettingsRepository {
   constructor(private readonly db: PouchDB.Database) {}

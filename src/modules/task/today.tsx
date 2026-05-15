@@ -3,7 +3,7 @@ import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import type { Task, PrayerTime } from "src/modules/task/types";
+import type { Task, PrayerTime } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
@@ -31,10 +31,6 @@ interface TodayTasksProps {
 export function TodayContent() {
   const { t } = useLanguageContext();
   const { todayTasks, todayCompletedTasks, error, initiated } = useToday();
-  const { settings } = useSettings();
-  const hasLocation = !!(
-    settings.coordinate?.latitude && settings.coordinate?.longitude
-  );
 
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
@@ -44,20 +40,6 @@ export function TodayContent() {
 
   return (
     <div className={initiated ? "visible" : "invisible"}>
-      {!hasLocation && (
-        <a
-          href="/settings/general"
-          className="flex items-center gap-2 m-4 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm"
-        >
-          <span className="flex-1">
-            {t("location_not_set_using_default") ||
-              "Location not set — prayer times may be inaccurate."}
-          </span>
-          <span className="shrink-0 font-medium">
-            {t("set_location") || "Set location →"}
-          </span>
-        </a>
-      )}
       {isEmpty ? (
         <EmptyState
           icon={<HvCheck className="w-full h-full" />}

@@ -6,7 +6,7 @@ import { EmptyState } from "../components/empty-state";
 import { useCompletedTasks } from "./use-completed-tasks";
 import { LargeNavbar } from "../navigation/navbar";
 import { HvCheckCircle } from "@/modules/icons";
-import type { Task } from "./types";
+import type { Task } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTaskContext } from "./task-context";
 

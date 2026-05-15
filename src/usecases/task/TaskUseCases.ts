@@ -4,7 +4,7 @@ import type {
   TaskQuery,
   TaskStatus,
 } from "../../modules/task/types";
-import { Task } from "../../modules/task/types";
+import { Task } from "@/domain/task";
 import type {
   INotificationsProvider,
   TaskReminderOptions,

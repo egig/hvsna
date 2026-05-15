@@ -15,7 +15,6 @@ import { Page } from "../../navigation";
 import { MenuItem } from "../../components/menu-item";
 import { Navbar } from "../../navigation";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useAuth } from "../../auth/use-auth";
 
 export default function Settings() {

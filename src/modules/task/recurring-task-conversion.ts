@@ -1,5 +1,5 @@
-import type { ITaskRepository } from "../../domain/task/ITaskRepository";
-import type { Task, TaskRepeat, TaskUpdateInput } from "./types";
+import type { ITaskRepository } from "@/domain/task/ITaskRepository";
+import type { Task, TaskRepeat, TaskUpdateInput } from "@/domain/task";
 import type {
   RecurringTask,
   RecurringTaskCreateInput,

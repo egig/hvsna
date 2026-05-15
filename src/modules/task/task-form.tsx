@@ -5,7 +5,7 @@ import { useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
-import type { Task } from "./types";
+import type { Task } from "@/domain/task";
 import { useSettings } from "src/modules/settings/useSettings";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";

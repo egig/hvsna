@@ -4,7 +4,6 @@ import {
   Routes,
   useLocation,
   useNavigate,
-  useNavigationType,
 } from "react-router";
 import { useMobileNavigation } from "./modules/navigation/use-mobile-navigation";
 import Layout from "./layout";

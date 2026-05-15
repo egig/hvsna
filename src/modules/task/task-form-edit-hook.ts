@@ -3,7 +3,7 @@ import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
-import type { PrayerTime, Task, TaskUpdateInput } from "./types";
+import type { PrayerTime, Task, TaskUpdateInput } from "@/domain/task";
 import { useSettings } from "../settings/useSettings";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";

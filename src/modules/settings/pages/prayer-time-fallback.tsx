@@ -1,14 +1,11 @@
 import { useState } from "react";
 import {
   HvClock,
-  HvWifi,
-  HvWifiOff,
   HvRefreshCw,
   HvAlertTriangle,
 } from "@/modules/icons";
 import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
-import { FormInput } from "../../components/form-input";
 import { SimpleTimePicker } from "../../components/simple-time-picker";
 import Block from "../../components/block";
 import BlockTitle from "../../components/block-title";

@@ -54,27 +54,6 @@ export class SettingsUseCases {
     return this.updateSettings(current, { language });
   }
 
-  /** Request permission and get current location. Returns coordinate on success. */
-  async requestLocation(options?: GeolocationOptions): Promise<Coordinate> {
-    const permission = await this.locationProvider.checkPermission();
-
-    if (permission.state === "denied") {
-      throw new Error(permission.message ?? "Location permission denied");
-    }
-
-    if (permission.state === "prompt" || permission.state === "unknown") {
-      const result = await this.locationProvider.requestPermission();
-      if (result.state === "prompt") {
-        return this.locationProvider.getCurrentPosition(options);
-      }
-
-      if (result.state !== "granted" && result.state !== "unknown") {
-        throw new Error(result.message ?? "Location permission denied");
-      }
-    }
-
-    return this.locationProvider.getCurrentPosition(options);
-  }
 
   /** Get current position without going through the permission flow (permission already granted). */
   async getCurrentPosition(options?: GeolocationOptions): Promise<Coordinate> {

@@ -7,14 +7,14 @@ import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { createNotificationsProvider } from "../../infra";
 import type { Language } from "src/modules/i18n/language";
 import logger from "src/modules/logger";
+import { useLocationContext } from "../location/context";
 
 export default function Onboarding() {
   const { t, language, setLanguage } = useLanguageContext();
   const {
     updateSettings,
-    requestLocationPermission,
-    updateTimezoneFromLocation,
   } = useSettings();
+  const {requestLocationPermission, error} = useLocationContext();
   const [loading, setLoading] = useState(false);
   const [isTimezoneModalOpen, setIsTimezoneModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -38,10 +38,12 @@ export default function Onboarding() {
 
   const handleLocationPermission = async () => {
     setLoading(true);
+    console.log("handleLocationPermission")
     try {
       const success = await requestLocationPermission();
+      console.log(success, "handleLocationPermission")
       if (success) {
-        await updateTimezoneFromLocation();
+        // await updateTimezoneFromLocation();
         setCurrentStep(3);
       }
     } catch (error) {
@@ -56,7 +58,6 @@ export default function Onboarding() {
     try {
       await updateSettings({
         timezone: selectedTimezone,
-        locationResolveType: "manual",
         locationResolvedAt: new Date().toISOString(),
       });
       setCurrentStep(3);
@@ -133,60 +134,22 @@ export default function Onboarding() {
           className="text-xl font-bold text-gray-900"
           data-testid="location-title"
         >
-          {t("setup_location") || "Setup Location"}
+          {t("location_permission_access") || "Location Permission"}
         </h1>
         <p className="text-sm text-gray-500">
           {t("location_setup_description") ||
             "How would you like to set your timezone?"}
         </p>
       </div>
-
+      {error && <div className="text-danger-500 py-2">{error}</div>}
       <button
         onClick={handleLocationPermission}
         disabled={loading}
         data-testid="use-current-location"
-        className="w-full p-4 rounded-xl border-2 border-gray-200 bg-white text-left font-medium text-gray-900 hover:border-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color)]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-[var(--hvsna-primary-color)] text-white py-3 rounded-xl font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {t("use_current_location") || "Use Current Location"}
+        {t("grant_access") || "Grant Access"}
       </button>
-
-      <div className="space-y-2" data-testid="manual-timezone-section">
-        <button
-          type="button"
-          onClick={() => setIsTimezoneModalOpen(true)}
-          disabled={loading}
-          data-testid="timezone-picker-button"
-          className="w-full flex items-center justify-between p-4 rounded-xl border-2 border-gray-200 bg-white hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span
-            className="font-medium text-gray-900"
-            data-testid="selected-timezone"
-          >
-            {selectedTimezone.replace(/_/g, " ")}
-          </span>
-          <HvChevronsUpDown className="w-4 h-4 text-gray-400 shrink-0" />
-        </button>
-
-        <TimezonePickerModal
-          isOpen={isTimezoneModalOpen}
-          onClose={() => setIsTimezoneModalOpen(false)}
-          value={selectedTimezone}
-          onSelect={setSelectedTimezone}
-          title={t("select_timezone_manually") || "Select Timezone"}
-          data-testid="timezone-modal"
-        />
-
-        <button
-          onClick={handleManualTimezone}
-          disabled={loading}
-          data-testid="continue-timezone"
-          className="w-full bg-[var(--hvsna-primary-color)] text-white py-3 rounded-xl font-medium hover:bg-[var(--hvsna-primary-color-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading
-            ? t("setting_up") || "Setting up..."
-            : t("continue") || "Continue"}
-        </button>
-      </div>
 
       <button
         onClick={() => setCurrentStep(1)}

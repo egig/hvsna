@@ -1,8 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Outlet, useLocation, useParams } from "react-router";
 import { Allotment, type AllotmentHandle } from "allotment";
-import "allotment/dist/style.css";
-import { HvPlus, HvWallet } from "@/modules/icons";
+import { HvPlus} from "@/modules/icons";
 import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
 import { TabBar } from "./modules/navigation/tab-bar";
 import { Modal } from "./modules/navigation/modal";
@@ -10,11 +9,15 @@ import TaskForm from "./modules/task/task-form";
 import TaskFormEdit from "./modules/task/task-form-edit";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import { useTaskContext } from "./modules/task/task-context";
+import { Task } from "./domain/task";
+
+
+import "allotment/dist/style.css";
 
 interface MobileLayoutProps {
   formOpen: boolean;
   editingTaskId: string | null;
-  editingTask: import("./modules/task/types").Task | null;
+  editingTask: Task | null;
   handleTaskSuccess: () => void;
   handleTaskCancel: () => void;
   openCreateTaskForm: () => void;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import { Task, type PrayerTime, type TaskCreateInput } from "./types";
+import { Task, type PrayerTime, type TaskCreateInput } from "@/domain/task";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings/useSettings";

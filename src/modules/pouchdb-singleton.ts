@@ -1,10 +1,8 @@
 import PouchDB from "pouchdb";
 import PouchDBFind from "pouchdb-find";
-
 PouchDB.plugin(PouchDBFind);
 
 let dbInstance: PouchDB.Database | null = null;
-let indexesCreated = false;
 
 /**
  * Get the singleton PouchDB instance
@@ -29,7 +27,6 @@ export const resetPouchDBInstance = (): void => {
       // Ignore errors during cleanup
     });
     dbInstance = null;
-    indexesCreated = false;
   }
 };
 

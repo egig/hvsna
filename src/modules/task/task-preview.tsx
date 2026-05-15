@@ -1,6 +1,6 @@
 import { HijriDate, useHijriDate } from "../calendar/hijri";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { Task } from "./types";
+import type { Task } from "@/domain/task";
 
 interface TaskPreviewProps {
   task: Task;

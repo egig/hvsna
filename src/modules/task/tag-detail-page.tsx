@@ -8,7 +8,7 @@ import TaskListItem from "./task-list-item";
 import { useAllTasks } from "./use-all-tasks";
 import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { Task } from "./types";
+import type { Task } from "@/domain/task";
 
 export default function TagDetailPage() {
   const { tagName } = useParams<{ tagName: string }>();

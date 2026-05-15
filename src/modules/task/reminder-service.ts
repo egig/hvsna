@@ -1,6 +1,6 @@
 import { createNotificationsProvider } from "../../infra";
 import type { TaskReminderOptions } from "../../domain/notifications/INotificationsProvider";
-import { Task, type Task as TaskType } from "./types";
+import { Task, type Task as TaskType } from "@/domain/task";
 import logger from "../logger";
 
 export class ReminderService {

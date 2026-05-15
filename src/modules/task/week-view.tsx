@@ -17,7 +17,7 @@ import {
   groupTasksByPrayerTimes,
 } from "../prayer-time-utils";
 import TaskListItem from "./task-list-item";
-import type { Task, PrayerTime } from "./types";
+import type { Task, PrayerTime } from "@/domain/task";
 import logger from "../logger";
 
 function toLocalDateStr(d: Date) {

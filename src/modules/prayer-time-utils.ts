@@ -1,6 +1,6 @@
 import type { PrayerTimesResponse } from "./prayer-times";
 import type { PrayerTimesFallback, GeneralSettings } from "./settings/settings";
-import type { PrayerTime, Task } from "./task/types";
+import type { PrayerTime, Task } from "@/domain/task";
 import { getPrayerTimes } from "./prayer-times";
 
 export async function getPrayerTimesWithFallback(

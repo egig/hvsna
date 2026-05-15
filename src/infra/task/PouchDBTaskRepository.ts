@@ -9,7 +9,7 @@ import type {
   TaskUpdateInput,
   PrayerTime,
 } from "../../modules/task/types";
-import { Task } from "../../modules/task/types";
+import { Task } from "@/domain/task";
 import { generatePrefixedUUID } from "../../modules/uuid";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 

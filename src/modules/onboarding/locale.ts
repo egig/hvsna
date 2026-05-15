@@ -12,13 +12,21 @@ export const onboardingTranslations = {
     en: "Choose your preferred language for the app",
     id: "Pilih bahasa yang Anda inginkan untuk aplikasi",
   },
+  location_permission_access: {
+    en: "Location Permission",
+    id: "Izin Akses Lokasi",
+  },
   setup_location: {
     en: "Setup Location",
     id: "Atur Lokasi",
   },
   location_setup_description: {
-    en: "Choose how you want to set your timezone for accurate scheduling",
-    id: "Pilih cara Anda ingin mengatur zona waktu untuk penjadwalan yang akurat",
+    en: "Hvsna need access to device location to calculate accurate prayer time and dates",
+    id: "Hvsna membutuhankan akses lokasi untuk perhitungan tanggal dan waktu solat yang akurat",
+  },
+  grant_access: {
+    en: "Grant Location Access",
+    id: "Izinkan Akses Lokasi",
   },
   use_current_location: {
     en: "Use Current Location",

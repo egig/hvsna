@@ -22,6 +22,7 @@ import { SettingsProvider } from "@/modules/settings";
 import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker";
 import { PlatformProvider } from "@/modules/platform";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
+import { LocationProvider } from "./modules/location/context";
 
 export interface AppConfig {
   basePath?: string;
@@ -88,24 +89,28 @@ export default function App({
             <PlatformProvider>
               <SnackbarProvider>
                 <ScreenSizeProvider>
-                  <AuthProvider>
-                    <SettingsProvider>
-                      <DroppableContext>
-                        <PouchDBProvider dbInstance={db}>
-                          <SyncProvider>
-                            <LanguageProviderWrapper>
-                              <TaskProvider>
-                                <Router>
-                                  <PostHogSessionTracker platform={platform} />
-                                  <AppRoutes />
-                                </Router>
-                              </TaskProvider>
-                            </LanguageProviderWrapper>
-                          </SyncProvider>
-                        </PouchDBProvider>
-                      </DroppableContext>
-                    </SettingsProvider>
-                  </AuthProvider>
+                  <PouchDBProvider dbInstance={db}>
+                    <AuthProvider>
+                      <SettingsProvider>
+                        <LocationProvider>
+                          <DroppableContext>
+                            <SyncProvider>
+                              <LanguageProviderWrapper>
+                                <TaskProvider>
+                                  <Router>
+                                    <PostHogSessionTracker
+                                      platform={platform}
+                                    />
+                                    <AppRoutes />
+                                  </Router>
+                                </TaskProvider>
+                              </LanguageProviderWrapper>
+                            </SyncProvider>
+                          </DroppableContext>
+                        </LocationProvider>
+                      </SettingsProvider>
+                    </AuthProvider>
+                  </PouchDBProvider>
                 </ScreenSizeProvider>
               </SnackbarProvider>
             </PlatformProvider>

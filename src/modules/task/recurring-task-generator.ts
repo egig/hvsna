@@ -7,7 +7,7 @@ import {
   formatHijriDateString,
   getNextOccurrenceDate,
 } from "./task-form-helpers";
-import { Task } from "./types";
+import { Task } from "@/domain/task";
 
 // Target occurrences × days-per-unit gives the horizon in days.
 // Multiplied by repeatInterval so "every 3 months" still yields ~12 occurrences.

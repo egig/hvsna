@@ -4,7 +4,7 @@ import type {
   TaskUpdateInput,
   TaskQuery,
   TaskStatus,
-} from "../../modules/task/types";
+} from "@/domain/task";
 import { HijriDate } from "../../modules/calendar/hijri";
 
 export interface ITaskRepository {

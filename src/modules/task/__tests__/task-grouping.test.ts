@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import type { Task, PrayerTime } from "../../task/types";
+import type { Task, PrayerTime } from "@/domain/task";
 
 // Extract the grouping logic without React hooks
 export function groupTasks(tasks: Task[], getToday: () => any) {

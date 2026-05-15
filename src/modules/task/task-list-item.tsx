@@ -9,7 +9,7 @@ import { HvSquare, HvCheckSquare2, HvCalendar, HvCheck } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
-import type { Task, TaskStatus } from "./types";
+import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
 import { HijriDate, isSameHijriDate, useHijriDate } from "../calendar/hijri";

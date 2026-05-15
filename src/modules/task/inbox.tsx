@@ -4,7 +4,7 @@ import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useUnscheduled } from "./use-unscheduled";
 import { LargeNavbar } from "../navigation/navbar";
-import type { Task } from "./types";
+import type { Task } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useCallback } from "react";
 import { useTaskContext } from "./task-context";

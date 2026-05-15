@@ -1,16 +1,6 @@
 import type { Language } from "../i18n/language";
 
-export interface Coordinate {
-  latitude: number;
-  longitude: number;
-  accuracy?: number;
-  altitude?: number;
-  altitudeAccuracy?: number;
-  heading?: number;
-  speed?: number;
-}
 
-export type LocationResolveType = "manual" | "auto" | "capacitor_native";
 
 export interface PrayerTimesFallback {
   fajr: string;
@@ -28,8 +18,6 @@ export interface GeneralSettings {
   theme?: "light" | "dark" | "system";
   notifications?: boolean;
   locationResolvedAt?: string;
-  locationResolveType?: LocationResolveType;
-  coordinate?: Coordinate | null;
   onboardedAt?: number;
   prayerTimesFallback?: PrayerTimesFallback;
 }

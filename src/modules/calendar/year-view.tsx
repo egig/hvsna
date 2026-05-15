@@ -1,11 +1,8 @@
-import React from "react";
-import { HijriDate } from "src/modules/calendar/hijri";
 import { Link } from "react-router";
 import {
-  HIJRI_MONTH_NAMES_EN,
   HIJRI_MONTH_NAMES_EN_SHORT,
 } from "src/modules/calendar/hijri-months";
-import MonthViewSmall from "../calendar/month-view-small";
+import MonthViewSmall from "./month-view-small";
 
 export default function YearView({ year }: { year: number }) {
   return (

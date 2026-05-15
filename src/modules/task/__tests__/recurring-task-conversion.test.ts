@@ -4,8 +4,8 @@ import {
   demoteTaskFromRecurring,
   demoteTaskFromRecurringAndDeleteFuture,
 } from "../recurring-task-conversion";
-import { Task } from "../types";
-import type { TaskUpdateInput } from "../types";
+import { Task } from "@/domain/task";
+import type { TaskUpdateInput } from "@/domain/task";
 import type { RecurringTask } from "../recurring-task";
 import type { ITaskRepository } from "../../../domain/task/ITaskRepository";
 import { HijriDate } from "../../calendar/hijri";

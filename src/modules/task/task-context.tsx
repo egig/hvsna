@@ -6,7 +6,7 @@ import React, {
   type ReactNode,
 } from "react";
 import { useMutation } from "@tanstack/react-query";
-import type { Task, TaskCreateInput, TaskUpdateInput } from "./types";
+import type { Task, TaskCreateInput, TaskUpdateInput } from "@/domain/task";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { ReminderService } from "./reminder-service";

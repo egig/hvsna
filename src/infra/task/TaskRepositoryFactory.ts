@@ -6,7 +6,7 @@ import type {
   TaskUpdateInput,
   TaskQuery,
   TaskStatus,
-} from "../../modules/task/types";
+} from "@/domain/task";
 
 /**
  * Combined interface that includes both task and list operations with renamed methods to avoid conflicts
