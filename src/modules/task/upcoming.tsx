@@ -31,10 +31,9 @@ import { createPortal } from "react-dom";
 
 type ViewMode = "list" | "week";
 
-function UpcomingContent({
+function ScheduledContent({
   upcomingTasks,
   taskGroupsWithLabels,
-  isReady,
   effectiveMode,
   handleEditTask,
   t,
@@ -217,7 +216,7 @@ function DroppableInboxSidebar({
   );
 }
 
-export default function Tasks() {
+export default function Upcoming() {
   const { t } = useLanguageContext();
   const { openEditTaskForm, updateTask } = useTaskContext();
   const { isDesktop } = useScreenSize();
@@ -365,7 +364,7 @@ export default function Tasks() {
                       <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
                     </div>
                   )}
-                  <UpcomingContent
+                  <ScheduledContent
                     upcomingTasks={upcomingTasks}
                     taskGroupsWithLabels={taskGroupsWithLabels}
                     isReady={isReady}
@@ -475,7 +474,7 @@ export default function Tasks() {
               <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
             </div>
           )}
-          <UpcomingContent
+          <ScheduledContent
             upcomingTasks={upcomingTasks}
             taskGroupsWithLabels={taskGroupsWithLabels}
             isReady={isReady}

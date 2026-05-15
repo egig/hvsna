@@ -18,7 +18,6 @@ import { queryClient } from "@/modules/query-client";
 import { TaskProvider } from "@/modules/task/task-context";
 import { AuthProvider } from "@/modules/auth";
 import { SettingsProvider } from "@/modules/settings";
-import { SystemProvider } from "@/modules/system";
 import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker";
 import { PlatformProvider } from "@/modules/platform";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
@@ -88,26 +87,24 @@ export default function App({
           <ErrorBoundary>
             <PlatformProvider>
               <SnackbarProvider>
-                <SystemProvider>
-                  <ScreenSizeProvider onClose={handleBreakpointClose}>
-                    <AuthProvider>
-                      <SettingsProvider>
-                        <PouchDBProvider dbInstance={db}>
-                          <SyncProvider>
-                            <LanguageProviderWrapper>
-                              <TaskProvider>
-                                <MemoryRouter>
-                                  <PostHogSessionTracker platform="capacitor" />
-                                  <AppRoutes />
-                                </MemoryRouter>
-                              </TaskProvider>
-                            </LanguageProviderWrapper>
-                          </SyncProvider>
-                        </PouchDBProvider>
-                      </SettingsProvider>
-                    </AuthProvider>
-                  </ScreenSizeProvider>
-                </SystemProvider>
+                <ScreenSizeProvider>
+                  <AuthProvider>
+                    <SettingsProvider>
+                      <PouchDBProvider dbInstance={db}>
+                        <SyncProvider>
+                          <LanguageProviderWrapper>
+                            <TaskProvider>
+                              <MemoryRouter>
+                                <PostHogSessionTracker platform="capacitor" />
+                                <AppRoutes />
+                              </MemoryRouter>
+                            </TaskProvider>
+                          </LanguageProviderWrapper>
+                        </SyncProvider>
+                      </PouchDBProvider>
+                    </SettingsProvider>
+                  </AuthProvider>
+                </ScreenSizeProvider>
               </SnackbarProvider>
             </PlatformProvider>
           </ErrorBoundary>

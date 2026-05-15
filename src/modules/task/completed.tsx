@@ -33,7 +33,7 @@ export function Completed() {
       navbarLarge={<LargeNavbar title={t("completed")} showBackButton={true} />}
     >
       <div
-        className="tasks-scroll-container h-[100%] overflow-y-auto"
+        className="tasks-scroll-container overflow-y-auto"
         onScroll={handleInfiniteScroll}
       >
         <div className={initiated ? "visible" : "invisible"}>

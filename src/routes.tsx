@@ -22,7 +22,7 @@ import Search from "./modules/task/search";
 import { NotFound } from "./modules/components/not-found";
 import { Today } from "./modules/task/today";
 import WipeData from "./modules/settings/wipe-data";
-import Tasks from "./modules/task/upcoming";
+import Upcoming from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
 import { Inbox } from "./modules/task/inbox";
 import { Completed } from "./modules/task/completed";
@@ -95,7 +95,7 @@ export const AppRoutes = () => {
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="search" element={<Search />} />
             <Route path="today" element={<Today />} />
-            <Route path="upcoming" element={<Tasks />} />
+            <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
             <Route path="completed" element={<Completed />} />
             <Route path="browse" element={<Browse />} />

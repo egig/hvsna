@@ -1,9 +1,20 @@
-import React, { useEffect } from "react";
-import { useSystemStore } from "../system/systemStore";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-export const useScreenSize = () => {
-  const { isDesktop } = useSystemStore();
-  return { isDesktop };
+interface ScreenSizeState {
+  isDesktop: boolean;
+}
+
+type ScreenSizeContextType = ScreenSizeState;
+const ScreenSizeContext = createContext<ScreenSizeContextType | undefined>(
+  undefined
+);
+
+export const useScreenSize = (): ScreenSizeContextType => {
+  const context = useContext(ScreenSizeContext);
+  if (context === undefined) {
+    throw new Error("useSystemContext must be used within a SystemProvider");
+  }
+  return context;
 };
 
 interface ScreenSizeProviderProps {
@@ -14,10 +25,8 @@ interface ScreenSizeProviderProps {
 
 export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
   children,
-  onClose,
-  className = "",
 }) => {
-  const { setDesktop } = useSystemStore();
+  const [isDesktop, setDesktop] = useState<boolean>(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -32,5 +41,9 @@ export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [setDesktop]);
 
-  return <>{children}</>;
+  return (
+    <ScreenSizeContext.Provider value={{ isDesktop }}>
+      {children}
+    </ScreenSizeContext.Provider>
+  );
 };

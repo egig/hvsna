@@ -88,6 +88,14 @@ export const commonTranslations = {
     en: "Completed",
     id: "Selesai",
   },
+  no_completed_tasks: {
+    en: "No completed tasks",
+    id: "Tidak ada tugas selesai",
+  },
+  completed_tasks_will_appear_here: {
+    en: "Completed tasks will appear here",
+    id: "Tugas selesai akan muncul disini",
+  },
   overdue: {
     en: "Overdue",
     id: "Lewat jadwal",

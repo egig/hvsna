@@ -19,11 +19,9 @@ import { queryClient } from "../../modules/query-client";
 import { TaskProvider } from "../../modules/task/task-context";
 import { AuthProvider } from "../../modules/auth";
 import { SettingsProvider } from "../../modules/settings";
-import { SystemProvider } from "../../modules/system";
 import { PostHogSessionTracker } from "../../modules/posthog/posthog-session-tracker";
 import { PlatformProvider } from "../../modules/platform";
 import { EnsureRequiredParams } from "../../modules/components/ensure-required-params";
-import log from "../../modules/logger";
 
 export interface AppConfig {
   basePath?: string;
@@ -57,11 +55,6 @@ export default function App({
   config: AppConfig;
   db: PouchDB.Database;
 }) {
-  const handleBreakpointClose = () => {
-    log.info("Breakpoint wrapper closed by user");
-    // You can add analytics tracking or other logic here
-  };
-
   return (
     <EnsureRequiredParams
       component={PostHogProvider}
@@ -90,30 +83,28 @@ export default function App({
           <ErrorBoundary>
             <PlatformProvider>
               <SnackbarProvider>
-                <SystemProvider>
-                  <ScreenSizeProvider onClose={handleBreakpointClose}>
-                    <AuthProvider>
-                      <SettingsProvider>
-                        <DroppableContext>
-                          <PouchDBProvider dbInstance={db}>
-                            <SyncProvider>
-                              <LanguageProviderWrapper>
-                                <TaskProvider>
-                                  <BrowserRouter
-                                    basename={config.appBaseName || ""}
-                                  >
-                                    <PostHogSessionTracker platform="web" />
-                                    <AppRoutes />
-                                  </BrowserRouter>
-                                </TaskProvider>
-                              </LanguageProviderWrapper>
-                            </SyncProvider>
-                          </PouchDBProvider>
-                        </DroppableContext>
-                      </SettingsProvider>
-                    </AuthProvider>
-                  </ScreenSizeProvider>
-                </SystemProvider>
+                <ScreenSizeProvider>
+                  <AuthProvider>
+                    <SettingsProvider>
+                      <DroppableContext>
+                        <PouchDBProvider dbInstance={db}>
+                          <SyncProvider>
+                            <LanguageProviderWrapper>
+                              <TaskProvider>
+                                <BrowserRouter
+                                  basename={config.appBaseName || ""}
+                                >
+                                  <PostHogSessionTracker platform="web" />
+                                  <AppRoutes />
+                                </BrowserRouter>
+                              </TaskProvider>
+                            </LanguageProviderWrapper>
+                          </SyncProvider>
+                        </PouchDBProvider>
+                      </DroppableContext>
+                    </SettingsProvider>
+                  </AuthProvider>
+                </ScreenSizeProvider>
               </SnackbarProvider>
             </PlatformProvider>
           </ErrorBoundary>

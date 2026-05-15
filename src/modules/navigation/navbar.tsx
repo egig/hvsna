@@ -2,7 +2,7 @@ import { HvChevronLeft, HvX, HvSearch } from "@/modules/icons";
 import { useAppNavigation } from "./use-app-navigation";
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";
-import { useScreenSize } from "../system";
+import { useScreenSize } from "@/modules/components/screen-size-wrapper";
 
 interface NavbarProps {
   title?: string | React.ReactNode;
