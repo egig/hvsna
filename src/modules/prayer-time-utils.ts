@@ -8,15 +8,15 @@ export async function getPrayerTimesWithFallback(
   date: string
 ): Promise<PrayerTimesResponse["data"]["timings"]> {
   // If no location coordinates, use fallback immediately
-  if (!settings.coordinate) {
+  if (!settings.location) {
     return convertFallbackToTimings(settings.prayerTimesFallback);
   }
 
   try {
     const response = await getPrayerTimes({
       date,
-      latitude: settings.coordinate.latitude,
-      longitude: settings.coordinate.longitude,
+      latitude: settings.location?.lat as number,
+      longitude: settings.location?.lng as number,
       timezonestring: settings.timezone,
     });
     return response.data.timings;
@@ -82,16 +82,23 @@ export function groupTasksByPrayerTimes(
     atTime?: string;
   }[] = [];
 
+  tasks = tasks.map((t) => {
+    if (!!t.prayerTime) {
+      t.atEpochMillis = prayerTimeToEpochToday(
+        prayerTimings[t.prayerTime],
+        prayerTimings.Maghrib
+      );
+    }
+    return t;
+  });
+
   // Separate tasks by type and status
   const overdueTasks = tasks.filter(
     (task) => task.isOverdue() && !task.completedAt
   );
+
   const prayerBasedTasks = tasks.filter(
-    (task) =>
-      task.usePrayerTime &&
-      task.prayerTime &&
-      !task.isOverdue() &&
-      !task.completedAt
+    (task) => task.prayerTime && !task.isOverdue() && !task.completedAt
   );
   const timeBasedTasks = tasks.filter(
     (task) =>
@@ -223,4 +230,26 @@ export function groupTasksByPrayerTimes(
 function timeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
+}
+
+function prayerTimeToEpochToday(time: string, maghrib: string): number {
+  console.log("time", time, maghrib);
+  let now = new Date();
+  const maghribMinutes = timeToMinutes(maghrib);
+  const m = timeToMinutes(time);
+  let d = now.getDate();
+  if (m >= maghribMinutes) {
+    d = d - 1;
+  }
+
+  let t = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    d,
+    0,
+    timeToMinutes(time),
+    0,
+    0
+  );
+  return t.valueOf();
 }

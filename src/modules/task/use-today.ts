@@ -19,9 +19,12 @@ export function useToday() {
   const todayString = today.toString();
 
   const pendingTasksQuery = usePendingTasks();
-  const startOfToday = today.startOfDay().toDate().valueOf();
-  const endOfToday = today.endOfDay().toDate().valueOf();
-  const virtualTaskQuery = useVirtualTasks(startOfToday, endOfToday);
+  const startOfToday = today.startOfDay().toDate();
+  const endOfToday = today.endOfDay().toDate();
+  const virtualTaskQuery = useVirtualTasks(
+    startOfToday.valueOf(),
+    endOfToday.valueOf()
+  );
 
   const allTasks = [
     ...(pendingTasksQuery.data ?? []),
@@ -36,7 +39,9 @@ export function useToday() {
 
   const todayTasks = (allTasks ?? []).filter(
     (t) =>
-      t.noDate === 0 && t.atEpochMillis != null && t.atEpochMillis <= endOfToday
+      t.noDate === 0 &&
+      t.atEpochMillis != null &&
+      t.atEpochMillis <= endOfToday.valueOf()
   );
 
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
@@ -44,7 +49,7 @@ export function useToday() {
   } ${today.year}`;
   const subTitle = `${gregorianDate.getDate()} ${
     gregorianMonthNames[gregorianDate.getMonth()]
-  } ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}`;
+  } ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}, Sunset ${startOfToday.getHours()}:${startOfToday.getMinutes()}`;
 
   const isLoading =
     pendingTasksQuery.isPending || todayCompletedTasksQuery.isPending;

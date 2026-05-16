@@ -231,55 +231,57 @@ export function LargeNavbar({
           </div>
 
           {/* Center: Title or Search */}
-          <div
-            className={`flex-1 text-center transition-opacity duration-800 ${
-              isScrolled ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            {showSearch ? (
-              <div className="relative max-w-md mx-auto">
-                <HvSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => onSearchChange?.(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      onSearchSubmit?.(searchValue);
-                    }
-                  }}
-                  placeholder={searchPlaceholder}
-                  className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-                {searchValue && (
-                  <button
-                    onClick={() => onSearchChange?.("")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label="Clear search"
-                  >
-                    <HvX className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                {title && (
-                  <h1
-                    className={`text-lg font-semibold text-gray-900 truncate`}
-                  >
-                    {title}
-                  </h1>
-                )}
-                {/* Subtitle */}
-                {subtitle && (
-                  <div className={`text-xs text-gray-500`}>{subtitle}</div>
-                )}
-              </>
-            )}
-          </div>
+          {(title || showSearch) && (
+            <div
+              className={`flex-1 text-center transition-opacity duration-800 ${
+                isScrolled ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              {showSearch ? (
+                <div className="relative max-w-md mx-auto">
+                  <HvSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => onSearchChange?.(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        onSearchSubmit?.(searchValue);
+                      }
+                    }}
+                    placeholder={searchPlaceholder}
+                    className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {searchValue && (
+                    <button
+                      onClick={() => onSearchChange?.("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <HvX className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <>
+                  {title && (
+                    <h1
+                      className={`text-lg font-semibold text-gray-900 truncate`}
+                    >
+                      {title}
+                    </h1>
+                  )}
+                  {/* Subtitle */}
+                  {subtitle && (
+                    <div className={`text-xs text-gray-500`}>{subtitle}</div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Right: Action */}
-          <div className="flex justify-end">{rightAction}</div>
+          {rightAction && <div className="flex justify-end">{rightAction}</div>}
         </div>
       </header>
 
