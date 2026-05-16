@@ -444,7 +444,7 @@ export default function Upcoming() {
       }
     >
       {/* Mobile tab bar */}
-      <div className="flex border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white dark:bg-gray-950 z-10">
+      <div className="flex border-b border-gray-100 dark:border-gray-800 sticky top-0 bg-white dark:bg-gray-950 z-20">
         <button
           onClick={() => setMobileTab("scheduled")}
           className={`flex-1 py-2.5 text-sm font-medium transition-colors ${

@@ -9,6 +9,13 @@ export interface PrayerTimesFallback {
   isha: string;
 }
 
+export interface LocationSetting {
+  resolvedAt: number;
+  lat: number;
+  lng: number;
+  name: string;
+}
+
 export interface GeneralSettings {
   language: Language;
   timezone: string;
@@ -17,6 +24,7 @@ export interface GeneralSettings {
   notifications?: boolean;
   onboardedAt?: number;
   prayerTimesFallback?: PrayerTimesFallback;
+  location?: LocationSetting;
 }
 
 export interface SettingsState {

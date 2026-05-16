@@ -57,7 +57,7 @@ export function TodayContent() {
 
 export function Today() {
   const { pageTitle, subTitle } = useToday();
-  const {name} = useLocationContext();
+  const { location, ensureLocation, loading } = useLocationContext();
 
   return (
     <Page
@@ -67,8 +67,13 @@ export function Today() {
           title={pageTitle}
           subtitle={subTitle}
           leftAction={
-            <button className="flex gap-1 w-max px-2">
-              <HvMapPin /> {name}
+            <button
+              onClick={async () => {
+                await ensureLocation();
+              }}
+              className="flex gap-1 w-max px-2 text-sm cursor-pointer hover:bg-gray-100 py-2 text-gray-600 rounded-lg"
+            >
+              <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
             </button>
           }
         />

@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from "react";
-import { useSettingsStore } from "./settingsStore";
 import type { GeneralSettings } from "./settings";
 import { usePouchDB } from "../../pouchdb";
 import type { Language } from "../i18n/language";
 import { createSettingsUseCases } from "../../infra/settings/SettingsUseCasesFactory";
+import { useSettingsContext } from "./settings-context";
 
 export function useSettings() {
   const { db } = usePouchDB();
@@ -18,7 +18,7 @@ export function useSettings() {
     clearError,
     initiated,
     setInitiated,
-  } = useSettingsStore();
+  } = useSettingsContext();
 
   const useCases = createSettingsUseCases(db);
 
