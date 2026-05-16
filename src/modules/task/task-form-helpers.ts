@@ -2,7 +2,7 @@
  * Reusable helper functions for task form operations
  */
 import { HijriDate } from "../calendar/hijri";
-import type { TaskRepeat } from "./types";
+import type { TaskRepeat } from "@/domain/task";
 
 /**
  * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.

@@ -2,8 +2,6 @@ import {
   HvPanelLeftClose,
   HvUserRound,
   HvPanelLeft,
-  HvCalendar,
-  HvCalendarFilled,
   HvCalendarMonth,
   HvCalendarMonthFilled,
   HvSettings,

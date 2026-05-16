@@ -68,12 +68,12 @@ export interface UseHijriCalendarReturn {
 
 export function useHijriDate(): UseHijriCalendarReturn {
   const { settings, loading, error, initiated } = useSettings();
-  const { lat, lng } = useLocationContext();
+  const { location } = useLocationContext();
 
   // Extract coordinates and offset from settings
   const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
-  const latitude = lat ?? _fallback.latitude;
-  const longitude = lng ?? _fallback.longitude;
+  const latitude = location.lat ?? _fallback.latitude;
+  const longitude = location.lng ?? _fallback.longitude;
   const hasLocation = !!(latitude && longitude);
   const manualOffset = settings.manualDateOffset;
   const timezone = settings.timezone;
