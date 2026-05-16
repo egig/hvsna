@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HvCheck, HvChevronLeft, HvChevronRight } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
-import { Modal, Navbar } from "src/modules/navigation";
+import { Modal, ModalNavbar } from "src/modules/navigation";
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { Tabs } from "@base-ui/react/tabs";
 import {
@@ -334,8 +334,7 @@ export function HijriDateRangeModal({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
-      <Navbar
-        modal
+      <ModalNavbar
         title={t("select_date_range")}
         onModalClose={onClose}
         rightAction={

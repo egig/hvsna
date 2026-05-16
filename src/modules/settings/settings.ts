@@ -10,7 +10,7 @@ export interface PrayerTimesFallback {
 }
 
 export interface LocationSetting {
-  source: "auto" | "manual",
+  source: "auto" | "manual";
   resolvedAt: number;
   lat: number;
   lng: number;

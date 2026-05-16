@@ -1,10 +1,10 @@
-import { Navbar } from "../navigation/navbar";
+import { ModalNavbar } from "../navigation";
 import { HvCheck, HvX } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { TaskTypeFilter } from "./types";
+import type { TaskTypeFilter } from "@/domain/task";
 import { useTags } from "./use-tags";
 
 interface TaskFilterModalProps {
@@ -52,8 +52,7 @@ export default function TaskFilterModal({
 
   return (
     <div className="h-full flex flex-col mb-[env(safe-area-inset-bottom)]">
-      <Navbar
-        modal
+      <ModalNavbar
         title={t("filter_tasks")}
         onModalClose={onClose}
         rightAction={

@@ -7,7 +7,7 @@ import {
   HvClock,
   HvRepeat,
 } from "@/modules/icons";
-import { Modal, Navbar } from "src/modules/navigation";
+import { Modal, ModalNavbar } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
 import { Tabs } from "@base-ui/react/tabs";
 import { HijriMonth } from "../hijri/hijri-month";
@@ -16,7 +16,7 @@ import { ListInput } from "src/modules/components/list-input";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
-import type { PrayerTime, TaskRepeat } from "src/modules/task/types";
+import type { PrayerTime, TaskRepeat } from "@/domain/task";
 import { TimeSelectionModal } from "./time-selection-modal";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { RepeatEndDateView } from "./repeat-end-date-view";
@@ -362,8 +362,7 @@ export function CalendarModal({
       {/* ── Date view ─────────────────────────────────────────────────────── */}
       <Activity mode={view === "date" ? "visible" : "hidden"}>
         <>
-          <Navbar
-            modal
+          <ModalNavbar
             title={t("select_date")}
             onModalClose={onClose}
             rightAction={

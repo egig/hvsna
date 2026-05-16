@@ -76,7 +76,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
           lat: coordinate.latitude,
           lng: coordinate.longitude,
           resolvedAt: new Date().valueOf(),
-          source: "auto"
+          source: "auto",
         },
       });
 
@@ -98,7 +98,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         lat: location.lat,
         lng: location.lng,
         resolvedAt: new Date().valueOf(),
-        source: "manual"
+        source: "manual",
       },
     });
   };
@@ -108,11 +108,12 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
       return false;
     }
 
-    const { resolvedAt, lat, lng, source } = settings?.location as LocationSetting;
+    const { resolvedAt, lat, lng, source } =
+      settings?.location as LocationSetting;
     let hasLocation = resolvedAt > 0 && !!lat && !!lng;
     // We do not re-prompt location picker if user was manually select location
-    if (hasLocation && (source === "manual")) {
-      return true
+    if (hasLocation && source === "manual") {
+      return true;
     }
 
     let resolvedAnHourAgo = new Date().valueOf() - resolvedAt < 60 * 60 * 1000;

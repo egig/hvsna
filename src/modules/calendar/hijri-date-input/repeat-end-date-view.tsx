@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HvChevronLeft, HvChevronRight } from "@/modules/icons";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import { Navbar } from "src/modules/navigation";
+import { ModalNavbar } from "src/modules/navigation";
 import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
 import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
 import { HijriMonth } from "../hijri/hijri-month";
@@ -74,12 +74,7 @@ export function RepeatEndDateView({
 
   return (
     <>
-      <Navbar
-        modal
-        title={t("repeat_ends_on_date")}
-        showBackButton={true}
-        customBackAction={onBack}
-      />
+      <ModalNavbar title={t("repeat_ends_on_date")} />
       <div className="pb-[env(safe-area-inset-bottom)]">
         {/* Month navigation */}
         <div className="flex items-center justify-between p-2">

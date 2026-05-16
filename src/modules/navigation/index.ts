@@ -6,6 +6,7 @@ export { FeatureCard } from "../components/feature-card";
 export { Navbar } from "./navbar";
 export { TabBar } from "./tab-bar";
 export { Modal } from "./modal";
+export { ModalNavbar } from "./modal-navbar";
 export { PageTransition } from "./page-transition";
 export { Page } from "./page";
 export { MenuItem } from "../components/menu-item";

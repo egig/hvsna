@@ -233,7 +233,6 @@ function timeToMinutes(time: string): number {
 }
 
 function prayerTimeToEpochToday(time: string, maghrib: string): number {
-  console.log("time", time, maghrib);
   let now = new Date();
   const maghribMinutes = timeToMinutes(maghrib);
   const m = timeToMinutes(time);

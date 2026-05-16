@@ -12,7 +12,7 @@ import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
 import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { Navbar } from "../navigation";
+import { ModalNavbar } from "../navigation";
 import { useAppNavigation } from "../navigation/use-app-navigation";
 import type { Task } from "@/domain/task";
 import type { HijriDate } from "../calendar/hijri";
@@ -311,10 +311,8 @@ export default function TaskFormEdit({
         await handleSubmit(formData);
       }}
     >
-      <Navbar
+      <ModalNavbar
         title="Edit Task"
-        modal
-        showBackButton={false}
         rightAction={
           <div className="flex items-center gap-2">
             {(isFormFocused || isFormDirty) && (

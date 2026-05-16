@@ -3,10 +3,10 @@ import { NavActionButton } from "../../components/nav-action-button";
 import { getCoordinateFromTimezone } from "@/config";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import { Navbar } from "src/modules/navigation";
+import { ModalNavbar } from "src/modules/navigation";
 import { useSettings } from "src/modules/settings/useSettings";
 import * as SunCalc from "suncalc";
-import type { PrayerTime } from "src/modules/task/types";
+import type { PrayerTime } from "@/domain/task";
 import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { Toggle } from "@base-ui/react/toggle";
 
@@ -89,10 +89,10 @@ export function TimeSelectionModal({
 
   useEffect(() => {
     const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
-    const lat = settings.coordinate?.latitude ?? _fallback.latitude;
-    const lng = settings.coordinate?.longitude ?? _fallback.longitude;
+    const lat = settings.location?.lat ?? _fallback.latitude;
+    const lng = settings.location?.lng ?? _fallback.longitude;
     setSortedHours(getSunsetBasedSortedHours(lat, lng));
-  }, [settings.coordinate, settings.timezone]);
+  }, [settings.location, settings.timezone]);
 
   const handleCustomTimeConfirm = () => {
     const time = `${hour.toString().padStart(2, "0")}:${minute
@@ -117,8 +117,7 @@ export function TimeSelectionModal({
 
   return (
     <div className="min-h-[50dvh]">
-      <Navbar
-        modal
+      <ModalNavbar
         title={t("select_time")}
         onModalClose={onBack}
         rightAction={

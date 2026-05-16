@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { Navbar } from "../navigation";
-import type { TaskRepeat } from "./types";
+import { ModalNavbar } from "../navigation";
+import type { TaskRepeat } from "@/domain/task";
 
 type RepeatOption =
   | "none"
@@ -143,9 +143,8 @@ export function RepeatSelectorModal({
 
   return (
     <div className="min-h-[50dvh]">
-      <Navbar
+      <ModalNavbar
         title={t("repeat")}
-        modal
         onModalClose={onBack}
         rightAction={
           <NavActionButton variant="primary" onClick={handleConfirm}>

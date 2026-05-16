@@ -1,7 +1,5 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { HvCheck } from "@/modules/icons";
-import Block from "../ui/block";
-import { FormInput } from "../ui/form-input";
 import { NavActionButton } from "./nav-action-button";
 import { Navbar } from "../navigation";
 
