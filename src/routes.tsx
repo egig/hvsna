@@ -35,6 +35,7 @@ import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import Browse from "./modules/task/browse";
 import TagManagementPage from "./modules/task/tag-management-page";
 import TagDetailPage from "./modules/task/tag-detail-page";
+import LayoutMobile from "./layout-mobile";
 
 const desktopSettingsSections: SettingsSection[] = [
   {
@@ -84,7 +85,7 @@ export const AppRoutes = () => {
           }
         >
           <Route path="onboarding" element={<Onboarding />} />
-          <Route element={<Layout />}>
+          <Route element={isDesktop ? <Layout /> : <LayoutMobile />}>
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="search" element={<Search />} />
             <Route path="today" element={<Today />} />

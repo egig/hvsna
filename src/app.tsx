@@ -4,10 +4,6 @@ import "@/app.css";
 import { PouchDBProvider } from "@/pouchdb";
 import DroppableContext from "@/modules/components/droppable-context";
 import { ScreenSizeProvider } from "@/modules/components/screen-size-wrapper";
-import type {
-  Coordinate,
-  LocationResolveType,
-} from "@/modules/settings/settings";
 import { Provider } from "@rollbar/react";
 import { PostHogProvider } from "@posthog/react";
 import { SyncProvider } from "@/modules/sync/context";
@@ -39,9 +35,6 @@ export interface AppConfig {
   appBaseName?: string;
   supabaseURL?: string;
   supabasePublishableKey?: string;
-  locationResolvedAt?: string;
-  locationResolveType?: LocationResolveType;
-  coordinate?: Coordinate | null;
 }
 
 const posthogOptions = {
@@ -96,14 +89,14 @@ export default function App({
                           <DroppableContext>
                             <SyncProvider>
                               <LanguageProviderWrapper>
-                                <TaskProvider>
-                                  <Router>
+                                <Router>
+                                  <TaskProvider>
                                     <PostHogSessionTracker
                                       platform={platform}
                                     />
                                     <AppRoutes />
-                                  </Router>
-                                </TaskProvider>
+                                  </TaskProvider>
+                                </Router>
                               </LanguageProviderWrapper>
                             </SyncProvider>
                           </DroppableContext>

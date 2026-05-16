@@ -16,6 +16,9 @@ import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
+import TaskFormEdit from "./task-form-edit";
+import { Modal } from "../navigation";
+import TaskForm from "./task-form";
 
 interface TaskContextType {
   // Task data
@@ -292,7 +295,23 @@ export const TaskProvider: React.FC<{
   };
 
   return (
-    <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>
+    <TaskContext.Provider value={contextValue}>
+      {children}
+
+      <Modal isOpen={formOpen} onClose={closeTaskForm}>
+        {editingTaskId && (
+          <TaskFormEdit
+            taskId={editingTaskId}
+            initialTask={editingTask ?? undefined}
+            onSuccess={closeTaskForm}
+            onDelete={closeTaskForm}
+          />
+        )}
+        {!editingTaskId && (
+          <TaskForm onSuccess={closeTaskForm} onCancel={closeTaskForm} />
+        )}
+      </Modal>
+    </TaskContext.Provider>
   );
 };
 
