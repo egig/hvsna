@@ -231,7 +231,7 @@ export function LargeNavbar({
           </div>
 
           {/* Center: Title or Search */}
-          {(title || showSearch) && (
+          {(title || showSearch) && isScrolled && (
             <div
               className={`flex-1 text-center transition-opacity duration-800 ${
                 isScrolled ? "opacity-100" : "opacity-0"
