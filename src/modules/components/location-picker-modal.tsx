@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { HvSearch } from "@/modules/icons";
 import { Modal } from "../navigation";
 
@@ -8,13 +8,34 @@ export type Location = {
   lng: number;
 };
 
-const offlineLocations: Location[] = [
-  {
-    name: "Jakarta Area, Indonesia",
-    lat: 6.2001514,
-    lng: 106.829547,
-  },
+const FALLBACK_LOCATIONS: Location[] = [
+  { name: "Jakarta Area, Indonesia", lat: 6.2001514, lng: 106.829547 },
 ];
+
+interface NominatimResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
+async function searchNominatim(query: string): Promise<Location[]> {
+  const params = new URLSearchParams({
+    q: query,
+    format: "jsonv2",
+    limit: "8",
+    addressdetails: "0",
+  });
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?${params}`
+  );
+  if (!res.ok) throw new Error("Nominatim error");
+  const data: NominatimResult[] = await res.json();
+  return data.map((r) => ({
+    name: r.display_name,
+    lat: parseFloat(r.lat),
+    lng: parseFloat(r.lon),
+  }));
+}
 
 interface LocationPickerModalProps {
   isOpen: boolean;
@@ -34,23 +55,47 @@ export function LocationPickerModal({
   dismissable,
 }: LocationPickerModalProps) {
   const [search, setSearch] = useState("");
+  const [results, setResults] = useState<Location[]>(FALLBACK_LOCATIONS);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return offlineLocations;
-    return offlineLocations.filter((l) =>
-      l.name.replace(/_/g, " ").toLowerCase().includes(q)
-    );
+  useEffect(() => {
+    const q = search.trim();
+    if (!q) {
+      setResults(FALLBACK_LOCATIONS);
+      setError(false);
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      setError(false);
+      try {
+        const locations = await searchNominatim(q);
+        setResults(locations);
+      } catch {
+        setError(true);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [search]);
 
   const handleClose = () => {
     setSearch("");
+    setResults(FALLBACK_LOCATIONS);
     onClose();
   };
 
   const handleSelect = (l: Location) => {
     onSelect(l);
     setSearch("");
+    setResults(FALLBACK_LOCATIONS);
     onClose();
   };
 
@@ -78,13 +123,21 @@ export function LocationPickerModal({
           </div>
         </div>
         <ul className="overflow-y-auto h-72">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <li className="p-4 text-sm text-gray-400 text-center">
+              Searching…
+            </li>
+          ) : error ? (
+            <li className="p-4 text-sm text-red-400 text-center">
+              Search failed. Check your connection.
+            </li>
+          ) : results.length === 0 ? (
             <li className="p-4 text-sm text-gray-500 text-center">
               No locations found
             </li>
           ) : (
-            filtered.map((l) => (
-              <li key={l.name}>
+            results.map((l) => (
+              <li key={`${l.lat},${l.lng}`}>
                 <button
                   type="button"
                   onClick={() => handleSelect(l)}
@@ -98,7 +151,7 @@ export function LocationPickerModal({
                       : "text-gray-800"
                   }`}
                 >
-                  {l.name.replace(/_/g, " ")}
+                  {l.name}
                 </button>
               </li>
             ))

@@ -16,6 +16,32 @@ import {
 } from "../components/location-picker-modal";
 import type { LocationSetting } from "../settings/settings";
 
+async function reverseGeocode(
+  lat: number,
+  lon: number
+): Promise<string | null> {
+  try {
+    const params = new URLSearchParams({
+      lat: String(lat),
+      lon: String(lon),
+      format: "jsonv2",
+      zoom: "10",
+    });
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?${params}`,
+      { headers: { "User-Agent": "hvsna/1.0 (egigundari@gmail.com)" } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    console.log(data);
+    let displayName = `${data.address.municipality}, ${data.address.county}`;
+
+    return displayName;
+  } catch {
+    return null;
+  }
+}
+
 interface LocationContextType {
   loading: boolean;
   location: Location;
@@ -60,19 +86,26 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
     try {
       setError("");
       setLoading(true);
+      console.log("req");
       const coordinate = await useCases.requestLocation({
         timeout: 5000,
         maximumAge: 0,
       });
-      // TODO get place name, set timezone as fallback
-      const t = await useCases.getTimezoneFromCoordinates(
-        coordinate.latitude,
-        coordinate.longitude
-      );
+
+      console.log(coordinate);
+      const [placeName, t] = await Promise.all([
+        reverseGeocode(coordinate.latitude, coordinate.longitude),
+        useCases.getTimezoneFromCoordinates(
+          coordinate.latitude,
+          coordinate.longitude
+        ),
+      ]);
+
+      console.log("o", placeName, t);
 
       await updateSettings({
         location: {
-          name: t as string,
+          name: placeName ?? (t as string),
           lat: coordinate.latitude,
           lng: coordinate.longitude,
           resolvedAt: new Date().valueOf(),
@@ -82,6 +115,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
 
       return true;
     } catch (err) {
+      console.error(err);
       setError(
         err instanceof Error ? err.message : "Failed to get location permission"
       );
