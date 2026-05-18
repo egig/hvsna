@@ -5,10 +5,11 @@ import { useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
-import type { Task } from "@/domain/task";
+import type { PrayerTime, Task } from "@/domain/task";
 import { useSettings } from "src/modules/settings";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
+import { TimeInput } from "../calendar/time-input";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -33,7 +34,7 @@ export default function TaskForm({
     updateFormData,
     updateScheduleAt,
     updateRepeatConfig,
-  } = useTaskForm(onSuccess, onError, onCancel);
+  } = useTaskForm(onSuccess, onError);
   const location = useLocation();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset || 0;
@@ -105,8 +106,6 @@ export default function TaskForm({
       <div className="flex flex-wrap gap-3 px-4 py-2">
         <DatePrayerInput
           hijriDate={formData.scheduleAt.dateHijri}
-          atTime={formData.scheduleAt.time}
-          prayerTime={formData.scheduleAt.prayerTime}
           isSubmitting={isSubmitting}
           repeat={formData.repeat.repeat}
           repeatInterval={formData.repeat.interval}
@@ -128,14 +127,29 @@ export default function TaskForm({
               endOccurrences: repeatEndOccurrences,
             });
           }}
-          onChange={(hijriDate, time, prayerTime) => {
+          onChange={(hijriDate) => {
             updateScheduleAt({
               dateHijri: hijriDate,
-              time: time ?? undefined,
-              prayerTime: prayerTime ?? undefined,
             });
           }}
         />
+        {formData.scheduleAt.dateHijri && (
+          <TimeInput
+            label=""
+            name={"atTime"}
+            customTime={formData.scheduleAt.time}
+            prayerTime={formData.scheduleAt.prayerTime}
+            onChange={function (
+              time: string | null,
+              prayerTime?: PrayerTime
+            ): void {
+              updateScheduleAt({
+                time: time ?? undefined,
+                prayerTime: prayerTime ?? undefined,
+              });
+            }}
+          />
+        )}
       </div>
 
       <div className="flex justify-end p-4">

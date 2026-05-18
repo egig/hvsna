@@ -10,8 +10,6 @@ type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
 interface DatePrayerInputProps {
   hijriDate: HijriDate | null;
-  atTime: string | null;
-  prayerTime: PrayerTime | string;
   isSubmitting: boolean;
   repeat?: TaskRepeat;
   repeatInterval?: number;
@@ -26,17 +24,11 @@ interface DatePrayerInputProps {
     repeatEndDate: string | null,
     repeatEndOccurrences: number
   ) => void;
-  onChange: (
-    hijriDate: HijriDate | null,
-    time: string | null,
-    prayerTime?: PrayerTime | string
-  ) => void;
+  onChange: (hijriDate: HijriDate | null) => void;
 }
 
 export function DatePrayerInput({
   hijriDate,
-  atTime,
-  prayerTime,
   isSubmitting,
   repeat = "none",
   repeatInterval = 1,
@@ -58,13 +50,6 @@ export function DatePrayerInput({
     return formatDate(hijriDate, "DD MMMM");
   };
 
-  const buildLabel = () => {
-    const parts: string[] = [formatDateLabel()];
-    if (prayerTime) parts.push(String(prayerTime));
-    else if (atTime) parts.push(atTime);
-    return parts.join(" · ");
-  };
-
   return (
     <>
       <button
@@ -72,10 +57,10 @@ export function DatePrayerInput({
         onClick={() => !isSubmitting && setIsOpen(true)}
         disabled={isSubmitting}
         data-testid="date-prayer-input-button"
-        className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors ${
+        className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors  border-gray-300 dark:border-gray-600 ${
           hijriDate
-            ? "text-gray-900 dark:text-white border-[var(--hvsna-primary-color)]"
-            : "text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-600"
+            ? "text-gray-900 dark:text-white"
+            : "text-gray-500 dark:text-gray-400"
         } ${
           isSubmitting
             ? "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600"
@@ -87,15 +72,13 @@ export function DatePrayerInput({
         ) : (
           <HvCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
         )}
-        <span>{buildLabel()}</span>
+        <span>{formatDateLabel()}</span>
       </button>
 
       <CalendarModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         selectedDate={hijriDate}
-        selectedTime={atTime}
-        selectedPrayerTime={prayerTime}
         selectedRepeat={repeat}
         selectedRepeatInterval={repeatInterval}
         selectedRepeatEnd={repeatEnd}
@@ -104,15 +87,13 @@ export function DatePrayerInput({
         forceRepeat={forceRepeat}
         onConfirm={(
           date,
-          time,
-          confirmedPrayerTime,
           confirmedRepeat,
           interval,
           confirmedRepeatEnd,
           confirmedRepeatEndDate,
           confirmedRepeatEndOccurrences
         ) => {
-          onChange(date, time, confirmedPrayerTime ?? undefined);
+          onChange(date);
           if (onRepeatChange)
             onRepeatChange(
               confirmedRepeat,

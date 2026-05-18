@@ -4,7 +4,6 @@ import {
   HvCheck,
   HvChevronLeft,
   HvChevronRight,
-  HvClock,
   HvRepeat,
 } from "@/modules/icons";
 import { Modal, ModalNavbar } from "src/modules/navigation";
@@ -13,7 +12,6 @@ import { Tabs } from "@base-ui/react/tabs";
 import { HijriMonth } from "../hijri/hijri-month";
 import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
 import { ListInput } from "src/modules/components/list-input";
-import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
 import type { PrayerTime, TaskRepeat } from "@/domain/task";
@@ -27,8 +25,6 @@ interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: HijriDate | null;
-  selectedTime?: string | null;
-  selectedPrayerTime?: PrayerTime | string;
   selectedRepeat?: TaskRepeat;
   selectedRepeatInterval?: number;
   selectedRepeatEnd?: RepeatEnd;
@@ -37,8 +33,6 @@ interface CalendarModalProps {
   forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onConfirm: (
     date: HijriDate | null,
-    time: string | null,
-    prayerTime: PrayerTime | string | null,
     repeat: TaskRepeat,
     repeatInterval: number,
     repeatEnd: RepeatEnd,
@@ -68,8 +62,6 @@ export function CalendarModal({
   isOpen,
   onClose,
   selectedDate,
-  selectedTime = null,
-  selectedPrayerTime = "",
   selectedRepeat = "none",
   selectedRepeatInterval = 1,
   selectedRepeatEnd = "never",
@@ -109,10 +101,6 @@ export function CalendarModal({
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
     selectedDate
   );
-  const [tempTime, setTempTime] = useState<string | null>(selectedTime ?? null);
-  const [tempPrayerTime, setTempPrayerTime] = useState<PrayerTime | string>(
-    selectedPrayerTime ?? ""
-  );
   const [tempRepeat, setTempRepeat] = useState<TaskRepeat>(
     selectedRepeat ?? "none"
   );
@@ -134,8 +122,6 @@ export function CalendarModal({
     if (!isOpen) return;
     setView("date");
     setTempSelectedDate(selectedDate);
-    setTempTime(selectedTime ?? null);
-    setTempPrayerTime(selectedPrayerTime ?? "");
     setTempRepeat(selectedRepeat ?? "none");
     setTempRepeatInterval(selectedRepeatInterval ?? 1);
     setTempRepeatEnd(selectedRepeatEnd ?? "never");
@@ -237,8 +223,6 @@ export function CalendarModal({
       );
       onConfirm(
         finalDate,
-        tempTime,
-        tempPrayerTime,
         tempRepeat,
         tempRepeatInterval,
         tempRepeatEnd,
@@ -296,8 +280,6 @@ export function CalendarModal({
     const today = getToday().startOfDay();
     onConfirm(
       today,
-      tempTime,
-      tempPrayerTime,
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,
@@ -310,8 +292,6 @@ export function CalendarModal({
     const tomorrow = getToday().next().startOfDay();
     onConfirm(
       tomorrow,
-      tempTime,
-      tempPrayerTime,
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,
@@ -328,8 +308,6 @@ export function CalendarModal({
     for (let i = 0; i < daysUntilFriday; i++) date = date.next();
     onConfirm(
       date.startOfDay(),
-      tempTime,
-      tempPrayerTime,
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,
@@ -339,16 +317,8 @@ export function CalendarModal({
   };
 
   const handleNoDate = () => {
-    onConfirm(null, null, null, "none", 1, "never", null, 1);
+    onConfirm(null, "none", 1, "never", null, 1);
   };
-
-  // ── Labels for the time / repeat summary rows ──────────────────────────────
-
-  const timeLabel = tempPrayerTime
-    ? String(tempPrayerTime)
-    : tempTime
-    ? tempTime
-    : t("time");
 
   const repeatLabel =
     tempRepeat !== "none"
@@ -528,14 +498,7 @@ export function CalendarModal({
               </div>
             </div>
 
-            {/* Time and Repeat */}
             <div className="flex flex-col">
-              <ListInput
-                onClick={() => setView("time")}
-                label={timeLabel}
-                icon={<HvClock className="w-4 h-4" />}
-                disabled={!tempSelectedDate}
-              />
               <ListInput
                 onClick={() => setView("repeat")}
                 label={repeatLabel}
@@ -546,25 +509,6 @@ export function CalendarModal({
             </div>
           </div>
         </>
-      </Activity>
-
-      {/* ── Time sub-view ─────────────────────────────────────────────────── */}
-      <Activity mode={view === "time" ? "visible" : "hidden"}>
-        <TimeSelectionModal
-          selectedTime={tempTime}
-          selectedPrayerTime={tempPrayerTime as PrayerTime}
-          onBack={() => setView("date")}
-          onConfirm={(time, prayerTime) => {
-            setTempTime(time || null);
-            setTempPrayerTime(prayerTime || "");
-            setView("date");
-          }}
-          onRemoveTime={() => {
-            setTempTime(null);
-            setTempPrayerTime("");
-            setView("date");
-          }}
-        />
       </Activity>
 
       {/* ── Repeat sub-view ───────────────────────────────────────────────── */}

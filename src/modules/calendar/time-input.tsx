@@ -67,23 +67,25 @@ export function TimeInput({
         type="button"
         onClick={handleButtonClick}
         disabled={disabled}
-        className={`h-[100%] px-2 w-full text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
+        className={`h-[100%] text-sm px-2 w-full text-left border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
           disabled
             ? "bg-gray-100 dark:bg-gray-600 cursor-not-allowed opacity-50"
             : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
         }`}
       >
         <div className="flex items-center justify-between gap-1">
-          <span
-            className={
-              customTime || prayerTime
-                ? "text-gray-900 dark:text-white"
-                : "text-gray-500 dark:text-gray-400"
-            }
-          >
-            {formatTimeDisplay(customTime, prayerTime)}
-          </span>
-          <HvClock className="w-5 h-5 text-gray-400" />
+          <HvClock className="w-4 h-4 text-gray-400" />
+          {(customTime || prayerTime) && (
+            <span
+              className={
+                customTime || prayerTime
+                  ? "text-gray-900 dark:text-white"
+                  : "text-gray-500 dark:text-gray-400"
+              }
+            >
+              {formatTimeDisplay(customTime, prayerTime)}
+            </span>
+          )}
         </div>
       </button>
 

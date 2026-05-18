@@ -116,7 +116,7 @@ export function TimeSelectionModal({
   };
 
   return (
-    <div className="min-h-[50dvh]">
+    <div className="min-h-[25dvh]">
       <ModalNavbar
         title={t("select_time")}
         onModalClose={onBack}

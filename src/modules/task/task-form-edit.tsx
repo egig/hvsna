@@ -14,12 +14,13 @@ import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { ModalNavbar } from "../navigation";
 import { useAppNavigation } from "../navigation/use-app-navigation";
-import type { Task } from "@/domain/task";
+import type { PrayerTime, Task } from "@/domain/task";
 import type { HijriDate } from "../calendar/hijri";
 import { Modal } from "../navigation/modal";
 import TaskPreview from "./task-preview";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
+import { TimeInput } from "../calendar/time-input";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -227,8 +228,6 @@ export default function TaskFormEdit({
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput
           hijriDate={formData.scheduleAt.dateHijri as HijriDate}
-          atTime={formData.scheduleAt.time || ""}
-          prayerTime={formData.scheduleAt.prayerTime || ""}
           isSubmitting={isSubmitting}
           repeat={formData.repeat.repeat}
           repeatInterval={formData.repeat.interval}
@@ -251,18 +250,34 @@ export default function TaskFormEdit({
             });
             setIsFormDirty(true);
           }}
-          onChange={(hijriDate, time, prayerTime) => {
+          onChange={(hijriDate) => {
             updateScheduleAt({
               dateHijri: hijriDate,
-              time: time ?? "",
-              prayerTime: prayerTime ?? "",
             });
             setIsFormDirty(true);
-            if (!time && !prayerTime) {
-              setRemoveTime(true);
-            }
           }}
         />
+
+        {formData.scheduleAt.dateHijri && (
+          <TimeInput
+            label=""
+            name={"atTime"}
+            customTime={formData.scheduleAt.time}
+            prayerTime={formData.scheduleAt.prayerTime}
+            onChange={function (
+              time: string | null,
+              prayerTime?: PrayerTime
+            ): void {
+              updateScheduleAt({
+                time: time ?? undefined,
+                prayerTime: prayerTime ?? undefined,
+              });
+              if (!time && !prayerTime) {
+                setRemoveTime(true);
+              }
+            }}
+          />
+        )}
       </div>
     </>
   );
