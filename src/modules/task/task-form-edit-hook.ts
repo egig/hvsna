@@ -4,11 +4,10 @@ import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskUpdateInput } from "@/domain/task";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
-import type { RecurringTask } from "./recurring-task";
 import {
   promoteTaskToRecurring,
   demoteTaskFromRecurring,
@@ -123,8 +122,8 @@ export const useTaskFormEdit = (
 
   const offset = settings.manualDateOffset || 0;
   const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
-  const latitude = settings.coordinate?.latitude || _fallback.latitude;
-  const longitude = settings.coordinate?.longitude || _fallback.longitude;
+  const latitude = settings.location?.lat || _fallback.latitude;
+  const longitude = settings.location?.lng || _fallback.longitude;
 
   const handleSubmit = async (submittedFormData: FormData) => {
     const taskData = Object.fromEntries(submittedFormData) as unknown as {

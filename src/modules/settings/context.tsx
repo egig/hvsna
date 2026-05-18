@@ -3,9 +3,13 @@ import React, {
   useContext,
   useReducer,
   useCallback,
+  useEffect,
 } from "react";
 import type { ReactNode } from "react";
 import type { GeneralSettings, PrayerTimesFallback } from "./settings";
+import { usePouchDB } from "@/pouchdb";
+import { createSettingsUseCases } from "@/infra/settings/SettingsUseCasesFactory";
+import type { Language } from "../i18n/language";
 
 const DEFAULT_PRAYER_TIMES: PrayerTimesFallback = {
   fajr: "05:00",
@@ -39,6 +43,8 @@ interface SettingsActions {
   setSettings: (settings: GeneralSettings) => void;
   updateSettings: (updates: Partial<GeneralSettings>) => void;
   clearError: () => void;
+  setLanguage: (l: Language) => Promise<void>;
+  resetSettings: () => Promise<void>;
 }
 
 type SettingsContextType = SettingsState & SettingsActions;
@@ -92,6 +98,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(settingsReducer, initialState);
+  const { db } = usePouchDB();
+  const useCases = createSettingsUseCases(db);
 
   const setLoading = useCallback((loading: boolean) => {
     dispatch({ type: "SET_LOADING", payload: loading });
@@ -109,13 +117,70 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     dispatch({ type: "SET_SETTINGS", payload: settings });
   }, []);
 
-  const updateSettings = useCallback((updates: Partial<GeneralSettings>) => {
-    dispatch({ type: "UPDATE_SETTINGS", payload: updates });
-  }, []);
+  const updateSettingsStore = useCallback(
+    (updates: Partial<GeneralSettings>) => {
+      dispatch({ type: "UPDATE_SETTINGS", payload: updates });
+    },
+    []
+  );
 
   const clearError = useCallback(() => {
     dispatch({ type: "CLEAR_ERROR" });
   }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = useCallback(async (): Promise<void> => {
+    setLoading(true);
+    clearError();
+    try {
+      const loaded = await useCases.loadSettings();
+      setSettings(loaded);
+    } catch (err: any) {
+      setError(err.message || "Failed to load settings");
+    } finally {
+      setLoading(false);
+      setInitiated(true);
+    }
+  }, [db]);
+
+  const updateSettings = useCallback(
+    async (updates: Partial<GeneralSettings>): Promise<void> => {
+      setLoading(true);
+      clearError();
+      try {
+        await useCases.updateSettings(state.settings, updates);
+        updateSettingsStore(updates);
+      } catch (err: any) {
+        setError(err.message || "Failed to update settings");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [db, state.settings]
+  );
+
+  const setLanguage = useCallback(
+    async (language: Language): Promise<void> => {
+      await updateSettings({ language });
+    },
+    [updateSettings]
+  );
+
+  const resetSettings = useCallback(async (): Promise<void> => {
+    setLoading(true);
+    clearError();
+    try {
+      const defaults = await useCases.resetSettings();
+      setSettings(defaults);
+    } catch (err: any) {
+      setError(err.message || "Failed to reset settings");
+    } finally {
+      setLoading(false);
+    }
+  }, [db]);
 
   const contextValue: SettingsContextType = {
     ...state,
@@ -125,16 +190,18 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     setSettings,
     updateSettings,
     clearError,
+    setLanguage,
+    resetSettings,
   };
 
   return (
     <SettingsContext.Provider value={contextValue}>
-      {children}
+      {state.initiated && children}
     </SettingsContext.Provider>
   );
 };
 
-export const useSettingsContext = (): SettingsContextType => {
+export const useSettings = (): SettingsContextType => {
   const context = useContext(SettingsContext);
   if (context === undefined) {
     throw new Error(

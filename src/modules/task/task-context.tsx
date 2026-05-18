@@ -10,7 +10,7 @@ import type { Task, TaskCreateInput, TaskUpdateInput } from "@/domain/task";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { ReminderService } from "./reminder-service";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import { scheduleRecurringTaskReminders } from "./recurring-reminder-scheduler";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import type { RecurringTask } from "./recurring-task";

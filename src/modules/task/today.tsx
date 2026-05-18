@@ -15,7 +15,7 @@ import {
   HvMapPin,
 } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import {
   groupTasksByPrayerTimes,
   getPrayerTimesWithFallback,
@@ -71,7 +71,7 @@ export function Today() {
               onClick={async () => {
                 await ensureLocation();
               }}
-              className="flex gap-1 w-max px-2 text-sm cursor-pointer hover:bg-gray-100 py-2 text-gray-600 rounded-lg"
+              className="flex gap-1 w-max px-4 text-sm cursor-pointer hover:bg-gray-100 py-2 text-gray-600 rounded-lg"
             >
               <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
             </button>
@@ -278,7 +278,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       {taskGroups.map((group: any, groupIndex: number) => {
         const hasLabel = group.isOverdue || group.isCompleted || !!group.prayer;
 

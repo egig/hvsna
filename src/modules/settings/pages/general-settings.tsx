@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { HvChevronsUpDown } from "@/modules/icons";
 import { Page, Navbar } from "../../navigation";
 import { TimezonePickerModal } from "../../components/timezone-picker-modal";
-import { useSettings } from "../useSettings";
+import { useSettings } from "..";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { ALL_TIMEZONES, COMMON_TIMEZONES } from "../../timezones";
 import { ListInputSelect } from "../../components/list-input-select";
-import { usePlatform } from "../../platform";
 
 export default function GeneralSettings() {
   const { settings, loading, updateSettings } = useSettings();

@@ -52,6 +52,7 @@
     "npm": "^11.7.0",
     "pouchdb": "^9.0.0",
     "pouchdb-adapter-cordova-sqlite": "^2.0.8",
+    "pouchdb-adapter-memory": "^9.0.0",
     "pouchdb-find": "^9.0.0",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-dropcursor": "^1.8.2",

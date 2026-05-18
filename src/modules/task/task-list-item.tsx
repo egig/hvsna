@@ -313,7 +313,7 @@ export function TaskListItem({
       )}
 
       <motion.div
-        className={`relative z-10 w-full p-4 transition-colors cursor-pointer ${contentBg}`}
+        className={`relative z-10 w-full px-6 py-4 transition-colors cursor-pointer ${contentBg}`}
         drag={disableSwipe ? false : "x"}
         dragConstraints={{ left: -120, right: 120 }}
         dragElastic={0.5}

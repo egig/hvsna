@@ -5,10 +5,10 @@ import { Navbar } from "../../navigation";
 import { SimpleTimePicker } from "../../components/simple-time-picker";
 import Block from "../../components/block";
 import BlockTitle from "../../components/block-title";
-import { useSettings } from "../useSettings";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { getPrayerTimes } from "../../prayer-times";
 import type { PrayerTimesFallback } from "../settings";
+import { useSettings } from "../context";
 
 const prayerTimeKeys: (keyof PrayerTimesFallback)[] = [
   "fajr",
@@ -46,7 +46,7 @@ export default function PrayerTimeFallback() {
   };
 
   const fetchUpdatedPrayerTimes = async () => {
-    if (!settings.coordinate) {
+    if (!settings.location) {
       setFetchError(
         t("location_required") ||
           "Location coordinates are required to fetch prayer times"
@@ -62,8 +62,8 @@ export default function PrayerTimeFallback() {
       const today = new Date().toISOString().split("T")[0];
       const response = await getPrayerTimes({
         date: today,
-        latitude: settings.coordinate.latitude,
-        longitude: settings.coordinate.longitude,
+        latitude: settings.location.lat,
+        longitude: settings.location.lng,
         timezonestring: settings.timezone,
       });
 
@@ -119,13 +119,12 @@ export default function PrayerTimeFallback() {
       />
 
       <Block>
-        <BlockTitle>
-          <div className="flex items-center gap-2">
-            <HvClock className="w-4 h-4" />
-            {t("prayer_times") || "Prayer Times"}
-          </div>
-        </BlockTitle>
         <div className="text-sm text-gray-500 mb-4">
+          {t("prayer_fallback_explanation") ||
+            "When your device is offline, the app will automatically use these saved prayer times to manage today's timeline instead of trying to fetch them from the internet."}
+
+          <br />
+          <br />
           {t("set_fallback_times") || "Set fallback times for each prayer"}
         </div>
 
@@ -148,7 +147,7 @@ export default function PrayerTimeFallback() {
         <div className="mt-6 flex flex-col gap-3">
           <button
             onClick={fetchUpdatedPrayerTimes}
-            disabled={isFetching || !settings.coordinate}
+            disabled={isFetching || !settings.location}
             className="flex items-center justify-center gap-2 text-sm w-full md:w-fit px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors duration-200 shadow-sm"
           >
             <HvRefreshCw
@@ -159,7 +158,7 @@ export default function PrayerTimeFallback() {
               : t("fetch_updated_prayer_times") || "Fetch Updated Prayer Times"}
           </button>
 
-          {!settings.coordinate && (
+          {!settings.location && (
             <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
               <HvAlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <div>
@@ -185,23 +184,6 @@ export default function PrayerTimeFallback() {
               </div>
             </div>
           )}
-        </div>
-      </Block>
-
-      <Block>
-        <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <HvClock className="w-5 h-5 text-primary-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <h4 className="text-sm font-medium text-primary-900 dark:text-primary-100 mb-1">
-                {t("how_it_works") || "How it works"}
-              </h4>
-              <p className="text-sm text-primary-700 dark:text-primary-300 leading-relaxed">
-                {t("prayer_fallback_explanation") ||
-                  "When your device is offline, the app will automatically use these saved prayer times to manage today's timeline instead of trying to fetch them from the internet."}
-              </p>
-            </div>
-          </div>
         </div>
       </Block>
     </Page>

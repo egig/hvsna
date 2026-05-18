@@ -1,5 +1,5 @@
 import { Navigate } from "react-router";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 
 interface OnboardingGuardProps {
   children: React.ReactNode;

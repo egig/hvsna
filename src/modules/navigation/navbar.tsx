@@ -285,7 +285,7 @@ export function LargeNavbar({
         </div>
       </header>
 
-      <div className={`bg-white/80 backdrop-blur-sm px-4 h-20`}>
+      <div className={`bg-white/80 backdrop-blur-sm px-6 h-20`}>
         <div
           className={`h-full flex flex-col justify-end pb-4 transition-all duration-1000 ${
             isScrolled ? "opacity-0" : "opacity-100"

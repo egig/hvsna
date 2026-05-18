@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useSettings } from "../../settings/useSettings";
+import { useSettings } from "../../settings";
 import { HijriDate } from "./hijri-date";
 import { HijriMonth } from "./hijri-month";
 import { getCoordinateFromTimezone } from "@/config";

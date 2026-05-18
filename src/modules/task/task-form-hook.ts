@@ -5,7 +5,7 @@ import { HijriDate, useHijriDate } from "../calendar/hijri";
 import { Task, type PrayerTime, type TaskCreateInput } from "@/domain/task";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import { parseHijriDateString } from "./task-form-helpers";
 import logger from "../logger";
 import type {

@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { HvChevronLeft, HvChevronsUpDown } from "@/modules/icons";
 import { Page } from "../navigation";
-import { TimezonePickerModal } from "../components/timezone-picker-modal";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { createNotificationsProvider } from "../../infra";
 import type { Language } from "src/modules/i18n/language";

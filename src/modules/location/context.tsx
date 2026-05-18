@@ -33,7 +33,6 @@ async function reverseGeocode(
     );
     if (!res.ok) return null;
     const data = await res.json();
-    console.log(data);
     let displayName = `${data.address.municipality}, ${data.address.county}`;
 
     return displayName;
@@ -86,13 +85,11 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
     try {
       setError("");
       setLoading(true);
-      console.log("req");
       const coordinate = await useCases.requestLocation({
         timeout: 5000,
         maximumAge: 0,
       });
 
-      console.log(coordinate);
       const [placeName, t] = await Promise.all([
         reverseGeocode(coordinate.latitude, coordinate.longitude),
         useCases.getTimezoneFromCoordinates(
@@ -100,8 +97,6 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
           coordinate.longitude
         ),
       ]);
-
-      console.log("o", placeName, t);
 
       await updateSettings({
         location: {

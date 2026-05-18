@@ -4,7 +4,7 @@ import { CalendarModal } from "src/modules/calendar/hijri-date-input/calendar-mo
 import { useHijriDate } from "src/modules/calendar/hijri";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import type { HijriDate } from "src/modules/calendar/hijri/hijri-date";
-import type { PrayerTime, TaskRepeat } from "src/modules/task/types";
+import type { PrayerTime, TaskRepeat } from "@/domain/task";
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 

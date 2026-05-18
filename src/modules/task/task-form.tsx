@@ -6,7 +6,7 @@ import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
 import type { Task } from "@/domain/task";
-import { useSettings } from "src/modules/settings/useSettings";
+import { useSettings } from "src/modules/settings";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
 

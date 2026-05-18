@@ -38,7 +38,7 @@ export default function WipeData() {
     <Page>
       <Navbar title={t("reset_device_data")} showBackButton />
 
-      <main className="max-w-[520px] mx-auto px-4 py-6">
+      <main className="max-w-[520px] mx-auto p-6">
         {/* Warning Section */}
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
           <div className="flex items-start space-x-3">
@@ -50,7 +50,7 @@ export default function WipeData() {
               <p className="text-sm text-orange-800 dark:text-orange-200 mb-2">
                 {t("data_deletion_permanent")}
               </p>
-              <p className="text-xs text-orange-700 dark:text-orange-300">
+              <p className="text-sm font-bold text-orange-700 dark:text-orange-300">
                 {t("actions_cannot_be_undone")}
               </p>
             </div>
@@ -58,7 +58,7 @@ export default function WipeData() {
         </div>
 
         {/* Action Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-800">
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
             {t("reset_device_data_subtitle")}
           </p>

@@ -4,7 +4,7 @@ import React, {
   type ReactNode,
   useEffect,
 } from "react";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import type { Language } from "./language";
 import { translations } from "./locales";
 

@@ -4,7 +4,7 @@ import { getCoordinateFromTimezone } from "@/config";
 import { useEffect, useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { ModalNavbar } from "src/modules/navigation";
-import { useSettings } from "src/modules/settings/useSettings";
+import { useSettings } from "src/modules/settings";
 import * as SunCalc from "suncalc";
 import type { PrayerTime } from "@/domain/task";
 import { ToggleGroup } from "@base-ui/react/toggle-group";

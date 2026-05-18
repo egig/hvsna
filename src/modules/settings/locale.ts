@@ -37,7 +37,7 @@ export const settingsTranslations = {
     id: "Reset Data",
   },
   reset_device_data_subtitle: {
-    en: "Delete all device data (synced data will not be deleted.",
+    en: "Delete all device data (synced data will not be deleted).",
     id: "Hapus semua data perangkat (data yang disinkronkan tidak akan dihapus).",
   },
 
@@ -184,8 +184,8 @@ export const settingsTranslations = {
     id: "Penghapusan data bersifat permanen untuk data perangkat. Pastikan untuk menyinkronkan data Anda sesuai kebutuhan.",
   },
   actions_cannot_be_undone: {
-    en: "These actions cannot be undone.",
-    id: "Tindakan ini tidak dapat dibatalkan.",
+    en: "These actions cannot be undone !",
+    id: "Tindakan ini tidak dapat dibatalkan !",
   },
   delete_all_data: {
     en: "This will delete all data stored on this device.",

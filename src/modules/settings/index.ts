@@ -1,5 +1,4 @@
-export { SettingsProvider, useSettingsContext } from "./settings-context";
-export { useSettings } from "./useSettings";
+export { SettingsProvider, useSettings } from "./context";
 export type {
   GeneralSettings,
   SettingsState,

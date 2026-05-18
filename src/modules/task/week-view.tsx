@@ -8,7 +8,7 @@ import {
   HvArrowRight,
   HvGripVertical,
 } from "@/modules/icons";
-import { useSettings } from "../settings/useSettings";
+import { useSettings } from "../settings";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";

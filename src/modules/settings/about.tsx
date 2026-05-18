@@ -23,7 +23,7 @@ export default function About() {
   return (
     <Page>
       <LargeNavbar title={t("about")} showBackButton={true} />
-      <div className="prose prose-sm p-4">
+      <div className="prose prose-sm p-6">
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-lg font-semibold mb-2">Hvsna</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
