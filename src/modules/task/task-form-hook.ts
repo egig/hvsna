@@ -13,6 +13,8 @@ import type {
   TaskFormData,
   TaskScheduleAt,
 } from "./task-form-types";
+import { getPrayerTimeForDate } from "../prayer";
+import type { PrayerTimes } from "adhan";
 export type {
   TaskScheduleAt,
   RepeatConfig,
@@ -38,6 +40,10 @@ export const useTaskForm = (
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
+
+  function calculateDueTime(h: HijriDate, ) {
+    
+  }
 
   const {
     latitude,
@@ -121,6 +127,7 @@ export const useTaskForm = (
           .valueOf();
       }
       if (formData.scheduleAt.prayerTime) {
+        const prayerTimes = getPrayerTimeForDate(settings.location?.lat as number, settings.location?.lng as number, formData.scheduleAt.dateHijri.toDate())
         taskData.prayerTime = formData.scheduleAt.prayerTime as PrayerTime;
       }
     }

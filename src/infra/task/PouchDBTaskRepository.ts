@@ -8,7 +8,7 @@ import type {
   TaskStatus,
   TaskUpdateInput,
   PrayerTime,
-} from "../../modules/task/types";
+} from "@/domain/task";
 import { Task } from "@/domain/task";
 import { generatePrefixedUUID } from "../../modules/uuid";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
@@ -28,7 +28,6 @@ class PouchDBTaskDocument {
   completedAt?: number;
   attributes?: Record<string, any> = {};
   prayerTime?: PrayerTime;
-  usePrayerTime?: boolean = false;
   lat?: number;
   long?: number;
   hijriDateOffset?: number;
@@ -59,7 +58,6 @@ class PouchDBTaskDocument {
       noDate: this.noDate !== undefined ? this.noDate : 1,
       atTime: this.atTime || "",
       prayerTime: this.prayerTime,
-      usePrayerTime: this.usePrayerTime || false,
       lat: this.lat,
       long: this.long,
       timezone: this.timezone,
@@ -179,15 +177,12 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     if (!!input.atTime) {
       updateData.atTime = input.atTime;
-      updateData.usePrayerTime = false;
       updateData.prayerTime = undefined;
     } else if (!!input.prayerTime) {
       updateData.prayerTime = input.prayerTime;
-      updateData.usePrayerTime = true;
       updateData.atTime = "";
     } else if (input.removeTime) {
       updateData.prayerTime = undefined;
-      updateData.usePrayerTime = false;
       updateData.atTime = "";
     }
 

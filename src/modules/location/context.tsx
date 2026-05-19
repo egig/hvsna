@@ -96,6 +96,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
       );
 
       await updateSettings({
+        timezone: t as string,
         location: {
           name: placeName ?? (t as string),
           lat: coordinate.latitude,
@@ -107,7 +108,6 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
 
       return true;
     } catch (err) {
-      console.error("ERROR HERE", err);
       setError(
         err instanceof Error ? err.message : "Failed to get location permission"
       );

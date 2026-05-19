@@ -19,6 +19,8 @@ import {
 import TaskListItem from "./task-list-item";
 import type { Task, PrayerTime } from "@/domain/task";
 import logger from "../logger";
+import { getPrayerTimeForDate } from "../prayer";
+import type { PrayerTimes } from "adhan";
 
 function toLocalDateStr(d: Date) {
   return [
@@ -36,7 +38,7 @@ interface WeekViewProps {
 interface WeekViewColumnProps {
   day: Date;
   tasks: Task[];
-  prayerTimings: Record<string, string> | null;
+  prayerTimings: PrayerTimes
   isToday: boolean;
   droppable?: boolean;
 }
@@ -86,7 +88,6 @@ function DraggableTaskCard({
           task={task}
           onEdit={onEdit}
           showGoalInfo={false}
-          showDateTime={false}
           className="!border-b-0"
         />
       </div>
@@ -126,7 +127,7 @@ function WeekViewColumn({
 
   const taskGroups = useMemo(() => {
     if (!prayerTimings) return [];
-    return groupTasksByPrayerTimes(tasks, prayerTimings as any);
+    return groupTasksByPrayerTimes(tasks, prayerTimings);
   }, [tasks, prayerTimings]);
 
   const getPrayerLabel = useCallback(
@@ -262,17 +263,7 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   const { toHijriDate, formatDate, getStartOfWeek, currentHijriDate } =
     useHijriDate();
   const [weekOffset, setWeekOffset] = useState(0);
-  const [prayerTimings, setPrayerTimings] = useState<Record<
-    string,
-    string
-  > | null>(null);
-
-  useEffect(() => {
-    const today = toLocalDateStr(new Date());
-    getPrayerTimesWithFallback(settings, today)
-      .then((timings) => setPrayerTimings(timings as any))
-      .catch((err) => logger.error("Failed to load prayer times:", err));
-  }, [settings]);
+  const prayerTimings = getPrayerTimeForDate(settings.location?.lat as number, settings.location?.lng as number, new Date())
 
   const days = useMemo(() => {
     const weekStart = currentHijriDate.startOfWeek().toDate();

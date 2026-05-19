@@ -11,20 +11,17 @@ import {
   HvChevronRight,
   HvChevronDown,
   HvCheck,
-  HvWallet,
   HvMapPin,
 } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { useSettings } from "../settings";
-import {
-  groupTasksByPrayerTimes,
-  getPrayerTimesWithFallback,
-} from "../prayer-time-utils";
-import logger from "src/modules/logger";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
 import { useLocationContext } from "../location/context";
 import { useNetworkContext } from "../network/context";
+import getTodayPrayerTimes from "../prayer";
+import type { PrayerTimes } from "adhan";
+import { groupTasksByPrayerTimes } from "../prayer-time-utils";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -95,157 +92,16 @@ export function Today() {
 }
 
 // Fallback function for original grouping logic (used while prayer times are loading)
-const getOriginalTaskGroups = (
-  tasks: Task[],
-  completedTasks: Task[],
-  getToday: any
-) => {
-  const groups: {
-    prayer: PrayerTime | null;
-    tasks: Task[];
-    isOverdue?: boolean;
-    isCompleted?: boolean;
-    isTimeBased?: boolean;
-    atTime?: string;
-  }[] = [];
-
-  const today = getToday();
-  const todayStart = today.startOfDay().toDate().valueOf();
-
-  const overdueTasks = tasks.filter(
-    (task) => task.isOverdue() && !task.completedAt
-  );
-  const prayerTasks = tasks.filter(
-    (task) =>
-      task.usePrayerTime &&
-      task.prayerTime &&
-      (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
-      !task.completedAt
-  );
-  const timeBasedTasks = tasks.filter(
-    (task) =>
-      !task.usePrayerTime &&
-      task.atTime &&
-      (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
-      !task.completedAt
-  );
-  const regularTasks = tasks.filter(
-    (task) =>
-      !task.usePrayerTime &&
-      !task.atTime &&
-      (!task.atEpochMillis || task.atEpochMillis >= todayStart) &&
-      !task.completedAt
-  );
-
-  if (overdueTasks.length > 0) {
-    groups.push({
-      prayer: null,
-      tasks: overdueTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
-      ),
-      isOverdue: true,
-    });
-  }
-
-  // Group prayer tasks by prayer time
-  const prayerGroups: Record<PrayerTime, Task[]> = {
-    Fajr: [],
-    Sunrise: [],
-    Dhuhr: [],
-    Asr: [],
-    Maghrib: [],
-    Isha: [],
-  };
-
-  prayerTasks.forEach((task) => {
-    if (task.prayerTime && prayerGroups[task.prayerTime]) {
-      prayerGroups[task.prayerTime].push(task);
-    }
-  });
-
-  const prayerOrder: PrayerTime[] = [
-    "Maghrib",
-    "Isha",
-    "Fajr",
-    "Sunrise",
-    "Dhuhr",
-    "Asr",
-  ];
-  prayerOrder.forEach((prayer) => {
-    if (prayerGroups[prayer].length > 0) {
-      groups.push({
-        prayer,
-        tasks: prayerGroups[prayer].sort(
-          (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
-        ),
-      });
-    }
-  });
-
-  // Add each time-based task as its own entry, sorted by atTime
-  timeBasedTasks
-    .filter((task) => task.atTime)
-    .sort((a, b) => {
-      const [ah, am] = a.atTime!.split(":").map(Number);
-      const [bh, bm] = b.atTime!.split(":").map(Number);
-      return ah * 60 + am - (bh * 60 + bm);
-    })
-    .forEach((task) => {
-      groups.push({
-        prayer: null,
-        tasks: [task],
-        isTimeBased: true,
-        atTime: task.atTime,
-      });
-    });
-
-  if (regularTasks.length > 0) {
-    groups.push({
-      prayer: null,
-      tasks: regularTasks.sort(
-        (a, b) => (a.atEpochMillis || 0) - (b.atEpochMillis || 0)
-      ),
-    });
-  }
-
-  if (completedTasks.length > 0) {
-    groups.push({
-      prayer: null,
-      tasks: completedTasks.sort(
-        (a, b) => (b.completedAt || 0) - (a.completedAt || 0)
-      ),
-      isCompleted: true,
-    });
-  }
-
-  return groups;
-};
 
 function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { openEditTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
   const { getToday } = useHijriDate();
   const { settings } = useSettings();
-  const [prayerTimings, setPrayerTimings] = useState<any>(null);
-  const [, setLoadingPrayerTimes] = useState(true);
-
-  // Load prayer times
-  useEffect(() => {
-    const loadPrayerTimes = async () => {
-      try {
-        setLoadingPrayerTimes(true);
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
-        const timings = await getPrayerTimesWithFallback(settings, today);
-        setPrayerTimings(timings);
-      } catch (error) {
-        logger.error("Failed to load prayer times:", error);
-      } finally {
-        setLoadingPrayerTimes(false);
-      }
-    };
-
-    loadPrayerTimes();
-  }, [settings]);
+  const prayerTimings = getTodayPrayerTimes(
+    settings.location?.lat as number,
+    settings.location?.lng as number
+  );
 
   const { materializeVirtualTask } = useTaskContext();
   const handleEditTask = useCallback(
@@ -260,16 +116,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
 
   // Use new prayer time grouping logic
   const taskGroups = useMemo(() => {
-    if (!prayerTimings) {
-      // Fallback to original logic if prayer times not loaded
-      return getOriginalTaskGroups(tasks, completedTasks, getToday);
-    }
-
-    // Pass all tasks (active + completed) to the new grouping function
-    return groupTasksByPrayerTimes(
-      [...tasks, ...completedTasks],
-      prayerTimings
-    );
+    return groupTasksByPrayerTimes(tasks, prayerTimings);
   }, [tasks, completedTasks, prayerTimings, getToday]);
 
   const getPrayerTimeDisplay = useCallback(
@@ -277,8 +124,12 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
       const prayerName = t(prayer.toLowerCase());
 
       // Add actual prayer time if available and not using fallback
-      if (prayerTimings && prayerTimings[prayer]) {
-        const prayerTime = prayerTimings[prayer];
+      if (
+        prayerTimings &&
+        prayerTimings[prayer.toLocaleLowerCase() as keyof PrayerTimes]
+      ) {
+        const prayerTime =
+          prayerTimings[prayer.toLocaleLowerCase() as keyof PrayerTimes];
         return `${prayerName} (${prayerTime})`;
       }
 

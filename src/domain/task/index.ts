@@ -29,7 +29,6 @@ export class Task {
   updatedAt?: number;
   completedAt?: number;
   prayerTime?: PrayerTime;
-  usePrayerTime?: boolean;
   hijriDateOffset?: number;
   tags?: string[] | null = null;
   deletedAt?: number;

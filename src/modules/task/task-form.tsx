@@ -31,8 +31,6 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
     updateRepeatConfig,
   } = useTaskForm(onSuccess, onError);
   const location = useLocation();
-  const { settings } = useSettings();
-  const offset = settings.manualDateOffset || 0;
   const { getToday } = useHijriDate();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
