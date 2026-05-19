@@ -275,6 +275,7 @@ export default function TaskFormEdit({
               if (!time && !prayerTime) {
                 setRemoveTime(true);
               }
+              setIsFormDirty(true);
             }}
           />
         )}

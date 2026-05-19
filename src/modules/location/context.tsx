@@ -20,25 +20,21 @@ async function reverseGeocode(
   lat: number,
   lon: number
 ): Promise<string | null> {
-  try {
-    const params = new URLSearchParams({
-      lat: String(lat),
-      lon: String(lon),
-      format: "jsonv2",
-      zoom: "10",
-    });
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?${params}`,
-      { headers: { "User-Agent": "hvsna/1.0 (egigundari@gmail.com)" } }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    let displayName = `${data.address.municipality}, ${data.address.county}`;
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lon: String(lon),
+    format: "jsonv2",
+    zoom: "10",
+  });
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?${params}`,
+    { headers: { "User-Agent": "hvsna/1.0 (egigundari@gmail.com)" } }
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  let displayName = `${data.address.municipality}, ${data.address.county}`;
 
-    return displayName;
-  } catch {
-    return null;
-  }
+  return displayName;
 }
 
 interface LocationContextType {
@@ -74,7 +70,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const { updateSettings, settings, initiated } = useSettings();
+  const { updateSettings, settings } = useSettings();
 
   const useCases = new LocationUseCases(
     createLocationProvider(),
@@ -90,13 +86,14 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         maximumAge: 0,
       });
 
-      const [placeName, t] = await Promise.all([
-        reverseGeocode(coordinate.latitude, coordinate.longitude),
-        useCases.getTimezoneFromCoordinates(
-          coordinate.latitude,
-          coordinate.longitude
-        ),
-      ]);
+      let placeName = await reverseGeocode(
+        coordinate.latitude,
+        coordinate.longitude
+      );
+      let t = await useCases.getTimezoneFromCoordinates(
+        coordinate.latitude,
+        coordinate.longitude
+      );
 
       await updateSettings({
         location: {
@@ -110,7 +107,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
 
       return true;
     } catch (err) {
-      console.error(err);
+      console.error("ERROR HERE", err);
       setError(
         err instanceof Error ? err.message : "Failed to get location permission"
       );
@@ -137,9 +134,9 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
       return false;
     }
 
-    const { resolvedAt, lat, lng, source } =
+    const { resolvedAt, lat, lng, source, name } =
       settings?.location as LocationSetting;
-    let hasLocation = resolvedAt > 0 && !!lat && !!lng;
+    let hasLocation = resolvedAt > 0 && !!lat && !!lng && !!name;
     // We do not re-prompt location picker if user was manually select location
     if (hasLocation && source === "manual") {
       return true;
@@ -160,10 +157,6 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
 
   useEffect(() => {
     (async () => {
-      if (!initiated) {
-        return;
-      }
-
       if (islLocationUptodate()) {
         return;
       }
@@ -173,7 +166,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         setIsLocationModalOpen(true);
       }
     })();
-  }, [initiated, settings]);
+  }, [settings]);
 
   return (
     <LacationContext.Provider

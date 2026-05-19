@@ -24,6 +24,7 @@ import logger from "src/modules/logger";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
 import { useLocationContext } from "../location/context";
+import { useNetworkContext } from "../network/context";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -58,6 +59,7 @@ export function TodayContent() {
 export function Today() {
   const { pageTitle, subTitle } = useToday();
   const { location, ensureLocation, loading } = useLocationContext();
+  const { isOnline, initiated: networkInit } = useNetworkContext();
 
   return (
     <Page
@@ -75,6 +77,14 @@ export function Today() {
             >
               <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
             </button>
+          }
+          rightAction={
+            !isOnline &&
+            networkInit && (
+              <div className="text-sm text-gray-500 px-1 mr-3 rounded-sm border-1 border-gray-300">
+                Offline
+              </div>
+            )
           }
         />
       }

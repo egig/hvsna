@@ -1,7 +1,7 @@
 // Network providers
 export { createNetworkProvider } from "./network";
-export { BrowserNetworkProvider } from "./network/BrowserNetworkProvider";
-export { CapacitorNetworkProvider } from "./network/CapacitorNetworkProvider";
+export { BrowserNetworkDriver as BrowserNetworkProvider } from "./network/BrowserNetworkDriver";
+export { CapacitorNetworkDriver as CapacitorNetworkProvider } from "./network/CapacitorNetworkDriver";
 
 // Notifications providers
 export { createNotificationsProvider } from "./notifications";
@@ -17,6 +17,6 @@ export { CapacitorPermissionsProvider } from "./permissions/CapacitorPermissions
 export { PouchDBTaskRepository } from "./task";
 
 // Location providers (existing)
-export { createLocationProvider } from "./location/CapacitorLocationProvider";
-export { BrowserLocationProvider } from "./location/BrowserLocationProvider";
-export { NativeLocationProvider } from "./location/NativeLocationProvider";
+export { createLocationProvider } from "./location/CapacitorLocationDriver";
+export { BrowserLocationDriver as BrowserLocationProvider } from "./location/BrowserLocationDriver";
+export { NativeLocationDriver as NativeLocationProvider } from "./location/NativeLocationProvider";

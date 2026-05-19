@@ -1,4 +1,4 @@
-import type { Coordinate } from "../../modules/settings/settings";
+import type { Coordinate } from "./coordinate";
 
 export interface LocationPermissionResult {
   state: "granted" | "denied" | "prompt" | "unknown";
@@ -11,7 +11,7 @@ export interface GeolocationOptions {
   maximumAge?: number;
 }
 
-export interface ILocationManager {
+export interface ILocationDriver {
   checkPermission(): Promise<LocationPermissionResult>;
   requestPermission(): Promise<LocationPermissionResult>;
   getCurrentPosition(options?: GeolocationOptions): Promise<Coordinate>;

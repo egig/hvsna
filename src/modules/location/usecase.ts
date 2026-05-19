@@ -1,13 +1,13 @@
 import type { Coordinate } from "@/domain/location/coordinate";
 import type { ITimezoneProvider } from "../../domain/location/ITimezoneProvider";
 import type {
-  ILocationManager,
+  ILocationDriver,
   GeolocationOptions,
 } from "@/domain/location/ILocationManager";
 
 export class LocationUseCases {
   constructor(
-    private readonly locationManager: ILocationManager,
+    private readonly locationManager: ILocationDriver,
     private readonly timezoneProvider: ITimezoneProvider
   ) {}
 

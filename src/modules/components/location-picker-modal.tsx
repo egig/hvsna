@@ -8,10 +8,6 @@ export type Location = {
   lng: number;
 };
 
-const FALLBACK_LOCATIONS: Location[] = [
-  { name: "Jakarta Area, Indonesia", lat: -6.2001514, lng: 106.829547 },
-];
-
 interface NominatimResult {
   display_name: string;
   lat: string;
@@ -55,7 +51,7 @@ export function LocationPickerModal({
   dismissable,
 }: LocationPickerModalProps) {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState<Location[]>(FALLBACK_LOCATIONS);
+  const [results, setResults] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -63,7 +59,7 @@ export function LocationPickerModal({
   useEffect(() => {
     const q = search.trim();
     if (!q) {
-      setResults(FALLBACK_LOCATIONS);
+      setResults([]);
       setError(false);
       return;
     }
@@ -88,14 +84,14 @@ export function LocationPickerModal({
 
   const handleClose = () => {
     setSearch("");
-    setResults(FALLBACK_LOCATIONS);
+    setResults([]);
     onClose();
   };
 
   const handleSelect = (l: Location) => {
     onSelect(l);
     setSearch("");
-    setResults(FALLBACK_LOCATIONS);
+    setResults([]);
     onClose();
   };
 

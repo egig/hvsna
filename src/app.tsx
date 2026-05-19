@@ -19,6 +19,7 @@ import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker
 import { PlatformProvider } from "@/modules/platform";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
 import { LocationProvider } from "./modules/location/context";
+import { NetworkProvider } from "./modules/network/context";
 
 export interface AppConfig {
   basePath?: string;
@@ -79,34 +80,36 @@ export default function App({
       >
         <QueryClientProvider client={queryClient}>
           <ErrorBoundary>
-            <PlatformProvider>
-              <SnackbarProvider>
-                <ScreenSizeProvider>
-                  <PouchDBProvider dbInstance={db}>
-                    <AuthProvider>
-                      <SettingsProvider>
-                        <LocationProvider>
-                          <DroppableContext>
-                            <SyncProvider>
-                              <LanguageProviderWrapper>
-                                <Router>
-                                  <TaskProvider>
-                                    <PostHogSessionTracker
-                                      platform={platform}
-                                    />
-                                    <AppRoutes />
-                                  </TaskProvider>
-                                </Router>
-                              </LanguageProviderWrapper>
-                            </SyncProvider>
-                          </DroppableContext>
-                        </LocationProvider>
-                      </SettingsProvider>
-                    </AuthProvider>
-                  </PouchDBProvider>
-                </ScreenSizeProvider>
-              </SnackbarProvider>
-            </PlatformProvider>
+            <NetworkProvider>
+              <PlatformProvider>
+                <SnackbarProvider>
+                  <ScreenSizeProvider>
+                    <PouchDBProvider dbInstance={db}>
+                      <AuthProvider>
+                        <SettingsProvider>
+                          <LocationProvider>
+                            <DroppableContext>
+                              <SyncProvider>
+                                <LanguageProviderWrapper>
+                                  <Router>
+                                    <TaskProvider>
+                                      <PostHogSessionTracker
+                                        platform={platform}
+                                      />
+                                      <AppRoutes />
+                                    </TaskProvider>
+                                  </Router>
+                                </LanguageProviderWrapper>
+                              </SyncProvider>
+                            </DroppableContext>
+                          </LocationProvider>
+                        </SettingsProvider>
+                      </AuthProvider>
+                    </PouchDBProvider>
+                  </ScreenSizeProvider>
+                </SnackbarProvider>
+              </PlatformProvider>
+            </NetworkProvider>
           </ErrorBoundary>
         </QueryClientProvider>
       </EnsureRequiredParams>

@@ -8,7 +8,7 @@ export interface NetworkListener {
   remove: () => Promise<void>;
 }
 
-export interface INetworkProvider {
+export interface INetworkDriver {
   getStatus(): Promise<NetworkStatus>;
   addListener(
     callback: (status: NetworkStatus) => void

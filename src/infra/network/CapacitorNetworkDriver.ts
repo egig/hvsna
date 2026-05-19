@@ -1,11 +1,11 @@
 import { Network } from "@capacitor/network";
 import type {
-  INetworkProvider,
+  INetworkDriver,
   NetworkStatus,
   NetworkListener,
 } from "../../domain/network/INetworkProvider";
 
-export class CapacitorNetworkProvider implements INetworkProvider {
+export class CapacitorNetworkDriver implements INetworkDriver {
   async getStatus(): Promise<NetworkStatus> {
     try {
       const status = await Network.getStatus();

@@ -1,12 +1,12 @@
 import { Geolocation, type Position } from "@capacitor/geolocation";
 import type {
-  ILocationManager,
+  ILocationDriver,
   LocationPermissionResult,
   GeolocationOptions,
 } from "@/domain/location/ILocationManager";
 import type { Coordinate } from "@/domain/location/coordinate";
 
-export class NativeLocationProvider implements ILocationManager {
+export class NativeLocationDriver implements ILocationDriver {
   async checkPermission(): Promise<LocationPermissionResult> {
     try {
       const status = await Geolocation.checkPermissions();

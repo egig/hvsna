@@ -10,7 +10,6 @@ import { useAuth } from "src/modules/auth/use-auth";
 import PouchDB from "pouchdb";
 import { usePouchDB } from "src/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
-import { createNetworkProvider } from "../../infra";
 import { SyncInitDialog } from "./components/sync-init-dialog";
 import {
   hasSyncedBefore,
@@ -21,6 +20,7 @@ import {
 } from "./utils/sync-state";
 import { getTokenStore } from "../../infra/auth/AuthServiceFactory";
 import log from "../logger";
+import { useNetworkContext } from "../network/context";
 
 // Helper functions for syncTime persistence
 interface SyncTimeDocument {
@@ -74,7 +74,6 @@ type SyncContextType = {
   lastSyncTime: Date | null;
   isSyncing: boolean;
   isManualSyncing: boolean;
-  isOnline: boolean;
   initialSyncPerformed: boolean;
   showSyncDialog: boolean;
   localDocCount: number;
@@ -94,14 +93,12 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [initialSyncPerformed, setInitialSyncPerformed] = useState(false);
   const [showSyncDialog, setShowSyncDialog] = useState(false);
   const [localDocCount, setLocalDocCount] = useState(0);
   const [hasCheckedSyncState, setHasCheckedSyncState] = useState(false);
   const queryClient = useQueryClient();
-
-  const networkProvider = createNetworkProvider();
+  const { isOnline } = useNetworkContext();
 
   // Reusable function to check if sync conditions are met
   const canSync = useCallback((): boolean => {
@@ -256,62 +253,6 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
     checkSyncState();
   }, [db, hasCheckedSyncState, isAuthenticated, user]);
-
-  // Network status monitoring
-  useEffect(() => {
-    let networkListener: any = null;
-
-    const initializeNetworkMonitoring = async () => {
-      try {
-        // Get initial network status
-        const status = await networkProvider.getStatus();
-        setIsOnline(status.connected);
-
-        // Add network status listener
-        networkListener = await networkProvider.addListener((networkStatus) => {
-          log.info(
-            `[sync] Network ${
-              networkStatus.connected ? "online" : "offline"
-            } - ${networkStatus.connectionType}`
-          );
-          setIsOnline(networkStatus.connected);
-        });
-      } catch (error) {
-        console.error("[sync] Failed to initialize network monitoring:", error);
-        // Fallback to browser API
-        setIsOnline(navigator.onLine);
-
-        const handleOnline = () => {
-          log.info("[sync] Network online - resuming sync");
-          setIsOnline(true);
-        };
-
-        const handleOffline = () => {
-          log.info("[sync] Network offline - pausing sync");
-          setIsOnline(false);
-        };
-
-        window.addEventListener("online", handleOnline);
-        window.addEventListener("offline", handleOffline);
-
-        // Store fallback listeners for cleanup
-        networkListener = {
-          remove: async () => {
-            window.removeEventListener("online", handleOnline);
-            window.removeEventListener("offline", handleOffline);
-          },
-        };
-      }
-    };
-
-    initializeNetworkMonitoring();
-
-    return () => {
-      if (networkListener) {
-        networkListener.remove();
-      }
-    };
-  }, []);
 
   // Pause/resume sync based on network status
   useEffect(() => {
@@ -504,7 +445,6 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
         lastSyncTime,
         isSyncing,
         isManualSyncing,
-        isOnline,
         initialSyncPerformed,
         showSyncDialog,
         localDocCount,

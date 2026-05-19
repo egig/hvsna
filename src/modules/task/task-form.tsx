@@ -18,10 +18,7 @@ interface TaskFormProps {
   onDelete?: (taskId: string) => void;
 }
 
-export default function TaskForm({
-  onSuccess,
-  onError,
-}: TaskFormProps) {
+export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
   const { t } = useLanguageContext();
   const { isDesktop } = useScreenSize();
   const {

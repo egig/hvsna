@@ -1,10 +1,10 @@
 import type {
-  INetworkProvider,
+  INetworkDriver,
   NetworkStatus,
   NetworkListener,
 } from "../../domain/network/INetworkProvider";
 
-export class BrowserNetworkProvider implements INetworkProvider {
+export class BrowserNetworkDriver implements INetworkDriver {
   async getStatus(): Promise<NetworkStatus> {
     return {
       connected: navigator.onLine,

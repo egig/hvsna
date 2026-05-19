@@ -1,17 +1,17 @@
 import { Capacitor } from "@capacitor/core";
-import type { INetworkProvider } from "../../domain/network/INetworkProvider";
-import { CapacitorNetworkProvider } from "./CapacitorNetworkProvider";
-import { BrowserNetworkProvider } from "./BrowserNetworkProvider";
+import type { INetworkDriver } from "../../domain/network/INetworkProvider";
+import { CapacitorNetworkDriver } from "./CapacitorNetworkDriver";
+import { BrowserNetworkDriver } from "./BrowserNetworkDriver";
 
-let networkInstance: INetworkProvider | null = null;
+let networkInstance: INetworkDriver | null = null;
 
-export function initNetworkProvider(p: INetworkProvider): void {
+export function initNetworkProvider(p: INetworkDriver): void {
   networkInstance = p;
 }
 
-export function createNetworkProvider(): INetworkProvider {
+export function createNetworkProvider(): INetworkDriver {
   if (networkInstance) return networkInstance;
   return Capacitor.isNativePlatform()
-    ? new CapacitorNetworkProvider()
-    : new BrowserNetworkProvider();
+    ? new CapacitorNetworkDriver()
+    : new BrowserNetworkDriver();
 }
