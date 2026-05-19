@@ -12,8 +12,8 @@ export function useUpcoming() {
 
   const pendingTasksQuery = usePendingTasks();
   const startOfToday = today.startOfDay().toDate().valueOf();
-  const aYearOut = startOfToday + 90 * 24 * 60 * 60 * 1000;
-  const virtualTaskQuery = useVirtualTasks(startOfToday, aYearOut);
+  const threeMonths = startOfToday + 90 * 24 * 60 * 60 * 1000;
+  const virtualTaskQuery = useVirtualTasks(startOfToday, threeMonths);
 
   const groupTasksByTimePeriod = (
     tasks: Task[]
@@ -87,8 +87,9 @@ export function useUpcoming() {
     return groups;
   };
 
+  // TODO paginate by date range
   const upcomingTasks = [
-    ...(pendingTasksQuery.data ?? []),
+    ...(pendingTasksQuery.data ?? []).filter(t => (!!t.atEpochMillis && t.atEpochMillis > (new Date().valueOf()) )),
     ...(virtualTaskQuery.data ?? []),
   ];
   const groupedTasks = groupTasksByTimePeriod(upcomingTasks);
