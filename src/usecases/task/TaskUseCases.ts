@@ -1,10 +1,10 @@
 import type {
+  Task,
   TaskCreateInput,
   TaskUpdateInput,
   TaskQuery,
   TaskStatus,
-} from "../../modules/task/types";
-import { Task } from "@/domain/task";
+} from "@/domain/task";
 import type {
   INotificationsProvider,
   TaskReminderOptions,

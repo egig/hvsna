@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { HvArrowUp } from "@/modules/icons";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useHijriDate } from "src/modules/calendar/hijri";
@@ -21,8 +21,6 @@ interface TaskFormProps {
 export default function TaskForm({
   onSuccess,
   onError,
-  onCancel,
-  onDelete,
 }: TaskFormProps) {
   const { t } = useLanguageContext();
   const { isDesktop } = useScreenSize();

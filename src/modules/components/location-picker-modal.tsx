@@ -9,7 +9,7 @@ export type Location = {
 };
 
 const FALLBACK_LOCATIONS: Location[] = [
-  { name: "Jakarta Area, Indonesia", lat: 6.2001514, lng: 106.829547 },
+  { name: "Jakarta Area, Indonesia", lat: -6.2001514, lng: 106.829547 },
 ];
 
 interface NominatimResult {

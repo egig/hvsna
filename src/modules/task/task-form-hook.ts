@@ -27,7 +27,6 @@ export interface UseTaskFormReturn {
   updateFormData: (updates: Partial<TaskFormData>) => void;
   updateScheduleAt: (updates: Partial<TaskScheduleAt>) => void;
   updateRepeatConfig: (updates: Partial<RepeatConfig>) => void;
-  projects: any[];
 }
 
 export const useTaskForm = (
@@ -36,7 +35,6 @@ export const useTaskForm = (
 ): UseTaskFormReturn => {
   const { createTask } = useTaskContext();
   const location = useLocation();
-  const params = useParams();
   const { showSnackbar } = useSnackbar();
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
