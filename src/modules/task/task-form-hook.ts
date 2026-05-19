@@ -6,7 +6,7 @@ import { Task, type PrayerTime, type TaskCreateInput } from "@/domain/task";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings";
-import { parseHijriDateString } from "./task-form-helpers";
+import { getTaskEpoch, parseHijriDateString } from "./task-form-helpers";
 import logger from "../logger";
 import type {
   RepeatConfig,
@@ -41,9 +41,7 @@ export const useTaskForm = (
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
 
-  function calculateDueTime(h: HijriDate, ) {
-    
-  }
+  function calculateDueTime(h: HijriDate) {}
 
   const {
     latitude,
@@ -57,7 +55,6 @@ export const useTaskForm = (
     scheduleAt: {
       dateHijri: null,
       time: "",
-      prayerTime: "",
     },
     repeat: {
       repeat: "none",
@@ -93,67 +90,27 @@ export const useTaskForm = (
       taskDescription: string;
     } & Partial<Task>;
 
-    if (formData.scheduleAt.dateHijri) {
-      const { year, month, day } = formData.scheduleAt.dateHijri;
-      const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-      if (formData.scheduleAt.time) {
-        taskData.atTime = formData.scheduleAt.time;
-        const [h, m] = formData.scheduleAt.time.split(":").map(Number);
-        taskData.atEpochMillis = new HijriDate(
-          year,
-          month,
-          day,
-          h,
-          m,
-          0,
-          0,
-          hijriOpts
-        )
-          .toDate()
-          .valueOf();
-      } else {
-        taskData.atEpochMillis = new HijriDate(
-          year,
-          month,
-          day,
-          undefined,
-          undefined,
-          0,
-          0,
-          hijriOpts
-        )
-          .endOfDay()
-          .toDate()
-          .valueOf();
-      }
-      if (formData.scheduleAt.prayerTime) {
-        const prayerTimes = getPrayerTimeForDate(settings.location?.lat as number, settings.location?.lng as number, formData.scheduleAt.dateHijri.toDate())
-        taskData.prayerTime = formData.scheduleAt.prayerTime as PrayerTime;
-      }
-    }
+    taskData.atTime = formData.scheduleAt.time;
+    taskData.atEpochMillis = getTaskEpoch(
+      formData.scheduleAt,
+      latitude as number,
+      longitude as number,
+      offset as number
+    ) as number;
 
     try {
       setIsSubmitting(true);
 
-      const attr: Record<string, any> = {};
       const isRecurring = formData.repeat.repeat !== "none";
 
       if (isRecurring && formData.scheduleAt.dateHijri) {
-        const { year, month, day } = formData.scheduleAt.dateHijri;
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = new HijriDate(
-          year,
-          month,
-          day,
-          undefined,
-          undefined,
-          0,
-          0,
-          hijriOpts
-        )
-          .endOfDay()
-          .toDate()
-          .valueOf();
+        const baseDateEpoch = getTaskEpoch(
+          formData.scheduleAt,
+          latitude as number,
+          longitude as number,
+          offset as number
+        ) as number;
         const repeatEndEpoch =
           formData.repeat.end === "on_date" && formData.repeat.endDate
             ? (() => {
@@ -180,12 +137,10 @@ export const useTaskForm = (
         const template = await createRecurringTask({
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
-          attributes: attr,
           baseDateEpoch,
           repeat: formData.repeat.repeat,
           repeatInterval: formData.repeat.interval,
           atTime: formData.scheduleAt.time,
-          prayerTime: formData.scheduleAt.prayerTime as PrayerTime,
           lat: latitude,
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
@@ -203,10 +158,8 @@ export const useTaskForm = (
         const taskInput: TaskCreateInput = {
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
-          attributes: attr,
           atEpochMillis: taskData.atEpochMillis ?? null,
           atTime: taskData.atTime,
-          prayerTime: taskData.prayerTime as PrayerTime,
           lat: latitude,
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",

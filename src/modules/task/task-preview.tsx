@@ -122,14 +122,6 @@ export default function TaskPreview({ task }: TaskPreviewProps) {
               <p className="text-gray-900">{task.atTime}</p>
             </div>
           )}
-          {task.prayerTime && (
-            <div>
-              <span className="font-medium text-gray-600">
-                {t("prayer_time")}:
-              </span>
-              <p className="text-gray-900">{task.prayerTime}</p>
-            </div>
-          )}
         </div>
       </div>
 

@@ -27,7 +27,6 @@ class PouchDBTaskDocument {
   updatedAt: number = new Date().valueOf();
   completedAt?: number;
   attributes?: Record<string, any> = {};
-  prayerTime?: PrayerTime;
   lat?: number;
   long?: number;
   hijriDateOffset?: number;
@@ -54,10 +53,8 @@ class PouchDBTaskDocument {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       completedAt: this.completedAt,
-      attributes: this.attributes || {},
       noDate: this.noDate !== undefined ? this.noDate : 1,
       atTime: this.atTime || "",
-      prayerTime: this.prayerTime,
       lat: this.lat,
       long: this.long,
       timezone: this.timezone,
@@ -140,8 +137,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       atTime: input.atTime || "",
       createdAt: now,
       updatedAt: now,
-      attributes: input.attributes || {},
-      prayerTime: input.prayerTime,
       lat: input.lat,
       long: input.long,
       timezone: input.timezone,
@@ -177,12 +172,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
 
     if (!!input.atTime) {
       updateData.atTime = input.atTime;
-      updateData.prayerTime = undefined;
-    } else if (!!input.prayerTime) {
-      updateData.prayerTime = input.prayerTime;
-      updateData.atTime = "";
     } else if (input.removeTime) {
-      updateData.prayerTime = undefined;
       updateData.atTime = "";
     }
 

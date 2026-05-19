@@ -1,10 +1,9 @@
 import type { HijriDate } from "../calendar/hijri";
-import type { TaskRepeat } from "./types";
+import type { TaskRepeat } from "@/domain/task";
 
 export interface TaskScheduleAt {
   dateHijri: HijriDate | null;
   time: string;
-  prayerTime: string;
 }
 
 export type RepeatEnd = "never" | "on_date" | "after_occurrences";

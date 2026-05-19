@@ -245,7 +245,6 @@ export const TaskProvider: React.FC<{
       description: task.description,
       atEpochMillis: task.atEpochMillis,
       atTime: task.atTime,
-      prayerTime: task.prayerTime,
       lat: task.lat,
       long: task.long,
       timezone: task.timezone,
@@ -254,7 +253,6 @@ export const TaskProvider: React.FC<{
       repeatInterval: task.repeatInterval,
       recurringTaskId: task.recurringTaskId ?? undefined,
       tags: task.tags ?? [],
-      attributes: task.attributes,
     });
   };
 

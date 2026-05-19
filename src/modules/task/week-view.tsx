@@ -38,7 +38,7 @@ interface WeekViewProps {
 interface WeekViewColumnProps {
   day: Date;
   tasks: Task[];
-  prayerTimings: PrayerTimes
+  prayerTimings: PrayerTimes;
   isToday: boolean;
   droppable?: boolean;
 }
@@ -263,7 +263,11 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   const { toHijriDate, formatDate, getStartOfWeek, currentHijriDate } =
     useHijriDate();
   const [weekOffset, setWeekOffset] = useState(0);
-  const prayerTimings = getPrayerTimeForDate(settings.location?.lat as number, settings.location?.lng as number, new Date())
+  const prayerTimings = getPrayerTimeForDate(
+    settings.location?.lat as number,
+    settings.location?.lng as number,
+    new Date()
+  );
 
   const days = useMemo(() => {
     const weekStart = currentHijriDate.startOfWeek().toDate();

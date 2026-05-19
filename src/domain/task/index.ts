@@ -11,7 +11,6 @@ export type PrayerTime =
 export class Task {
   id?: string;
   rev?: string;
-  userId?: string;
   name?: string;
   description?: string;
   status?: TaskStatus;
@@ -24,11 +23,9 @@ export class Task {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string | null;
-  attributes?: Record<string, string>;
   createdAt?: number;
   updatedAt?: number;
   completedAt?: number;
-  prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   tags?: string[] | null = null;
   deletedAt?: number;
@@ -64,8 +61,6 @@ export interface TaskCreateInput {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string;
-  attributes?: Record<string, string>;
-  prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   tags: string[];
 }
@@ -82,8 +77,6 @@ export interface TaskUpdateInput {
   repeat?: TaskRepeat;
   repeatInterval?: number;
   recurringTaskId?: string | null;
-  attributes?: Record<string, string>;
-  prayerTime?: PrayerTime;
   hijriDateOffset?: number;
   removeTime?: boolean;
   tags?: string[] | null;

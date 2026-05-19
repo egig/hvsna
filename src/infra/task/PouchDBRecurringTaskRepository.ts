@@ -14,12 +14,10 @@ class PouchDBRecurringTaskDocument {
   user_id?: string;
   name?: string;
   description?: string;
-  attributes?: Record<string, string>;
   repeat?: string;
   repeatInterval?: number;
   baseDateEpoch?: number;
   atTime?: string;
-  prayerTime?: any;
   lat?: number;
   long?: number;
   timezone?: string;
@@ -41,12 +39,10 @@ class PouchDBRecurringTaskDocument {
       user_id: this.user_id,
       name: this.name || "",
       description: this.description,
-      attributes: this.attributes,
       repeat: this.repeat as any,
       repeatInterval: this.repeatInterval || 1,
       baseDateEpoch: this.baseDateEpoch ?? 0,
       atTime: this.atTime,
-      prayerTime: this.prayerTime,
       lat: this.lat,
       long: this.long,
       timezone: this.timezone,
@@ -68,12 +64,10 @@ class PouchDBRecurringTaskDocument {
     doc.user_id = t.user_id;
     doc.name = t.name;
     doc.description = t.description;
-    doc.attributes = t.attributes;
     doc.repeat = t.repeat;
     doc.repeatInterval = t.repeatInterval;
     doc.baseDateEpoch = t.baseDateEpoch;
     doc.atTime = t.atTime;
-    doc.prayerTime = t.prayerTime;
     doc.lat = t.lat;
     doc.long = t.long;
     doc.timezone = t.timezone;
@@ -101,7 +95,6 @@ export class PouchDBRecurringTaskRepository
       id,
       name: input.name,
       description: input.description,
-      attributes: input.attributes,
       repeat: input.repeat,
       repeatInterval: input.repeatInterval ?? 1,
       baseDateEpoch: input.baseDateEpoch,

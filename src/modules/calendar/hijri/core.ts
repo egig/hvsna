@@ -137,7 +137,7 @@ export function fromDate(
 /**
  * Gets sunset time for a specific date and location
  */
-function getSunsetTime(
+export function getSunsetTime(
   date: Date,
   latitude: number,
   longitude: number
@@ -165,7 +165,7 @@ function getSunsetTime(
 /**
  * Checks if a given time is after sunset time
  */
-function isTimeAfter(
+export function isTimeAfter(
   time: TimeComponents,
   sunsetTime: TimeComponents | null
 ): boolean {

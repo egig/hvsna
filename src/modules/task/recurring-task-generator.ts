@@ -165,7 +165,6 @@ function createVirtualTask(template: RecurringTask, epoch: number): Task {
     description: template.description,
     atEpochMillis: epoch,
     atTime: template.atTime,
-    prayerTime: template.prayerTime,
     repeat: template.repeat,
     repeatInterval: template.repeatInterval ?? 1,
     lat: template.lat,
@@ -173,7 +172,6 @@ function createVirtualTask(template: RecurringTask, epoch: number): Task {
     timezone: template.timezone,
     hijriDateOffset: template.hijriDateOffset,
     tags: template.tags ?? [],
-    attributes: template.attributes,
     status: 0,
     noDate: 0,
   });

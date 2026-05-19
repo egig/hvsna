@@ -14,14 +14,14 @@ import {
   HvMapPin,
 } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
-import { useSettings } from "../settings";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
 import { useLocationContext } from "../location/context";
 import { useNetworkContext } from "../network/context";
-import getTodayPrayerTimes from "../prayer";
+import { usePrayerTimes } from "../prayer";
 import type { PrayerTimes } from "adhan";
 import { groupTasksByPrayerTimes } from "../prayer-time-utils";
+import dayjs from "dayjs";
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -97,11 +97,9 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { openEditTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
   const { getToday } = useHijriDate();
-  const { settings } = useSettings();
-  const prayerTimings = getTodayPrayerTimes(
-    settings.location?.lat as number,
-    settings.location?.lng as number
-  );
+  const { getTodayPrayerTimes } = usePrayerTimes();
+
+  const prayerTimings = getTodayPrayerTimes();
 
   const { materializeVirtualTask } = useTaskContext();
   const handleEditTask = useCallback(
@@ -126,11 +124,11 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
       // Add actual prayer time if available and not using fallback
       if (
         prayerTimings &&
-        prayerTimings[prayer.toLocaleLowerCase() as keyof PrayerTimes]
+        prayerTimings[prayer.toLowerCase() as keyof PrayerTimes]
       ) {
         const prayerTime =
           prayerTimings[prayer.toLocaleLowerCase() as keyof PrayerTimes];
-        return `${prayerName} (${prayerTime})`;
+        return `${prayerName} (${dayjs(prayerTime as Date).format("hh:mm a")})`;
       }
 
       return prayerName;

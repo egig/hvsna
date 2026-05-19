@@ -5,8 +5,7 @@ import { useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
-import type { PrayerTime, Task } from "@/domain/task";
-import { useSettings } from "src/modules/settings";
+import type { Task } from "@/domain/task";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
 import { TimeInput } from "../calendar/time-input";
@@ -46,7 +45,6 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
       updateScheduleAt({
         dateHijri: getToday(),
         time: "",
-        prayerTime: "",
       });
     }
   }, [location.state]);
@@ -56,8 +54,6 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
       onError(error);
     }
   }, [error, onError]);
-
-  // Helper function to render attribute input using CustomAttributeInput
 
   return (
     <form
@@ -130,15 +126,10 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
           <TimeInput
             label=""
             name={"atTime"}
-            customTime={formData.scheduleAt.time}
-            prayerTime={formData.scheduleAt.prayerTime}
-            onChange={function (
-              time: string | null,
-              prayerTime?: PrayerTime
-            ): void {
+            time={formData.scheduleAt.time}
+            onChange={function (time: string | null): void {
               updateScheduleAt({
                 time: time ?? undefined,
-                prayerTime: prayerTime ?? undefined,
               });
             }}
           />

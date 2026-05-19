@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { parseHijriDateString, parseTimeString } from "./task-form-helpers";
+import {
+  getTaskEpoch,
+  parseHijriDateString,
+  parseTimeString,
+} from "./task-form-helpers";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
@@ -91,7 +95,7 @@ export const useTaskFormEdit = (
     useState<PendingOperationData | null>(null);
 
   const [formData, setFormData] = useState<EditFormData>({
-    scheduleAt: { dateHijri: null, time: "", prayerTime: "" },
+    scheduleAt: { dateHijri: null, time: "" },
     repeat: {
       repeat: "none",
       interval: 1,
@@ -132,30 +136,12 @@ export const useTaskFormEdit = (
     } & Partial<Task>;
 
     const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-    let atEpochMillis: number | null = null;
-    if (formData.scheduleAt.dateHijri) {
-      const { year, month, day } = formData.scheduleAt.dateHijri;
-      if (formData.scheduleAt.time) {
-        const [h, m] = formData.scheduleAt.time.split(":").map(Number);
-        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, hijriOpts)
-          .toDate()
-          .valueOf();
-      } else {
-        atEpochMillis = new HijriDate(
-          year,
-          month,
-          day,
-          undefined,
-          undefined,
-          0,
-          0,
-          hijriOpts
-        )
-          .endOfDay()
-          .toDate()
-          .valueOf();
-      }
-    }
+    let atEpochMillis = getTaskEpoch(
+      formData.scheduleAt,
+      latitude as number,
+      longitude as number,
+      offset as number
+    ) as number;
 
     try {
       setIsSubmitting(true);
@@ -163,14 +149,12 @@ export const useTaskFormEdit = (
       const taskInput: TaskUpdateInput = {
         name: taskData.taskName.trim(),
         description: taskData.taskDescription?.trim() || undefined,
-        attributes: {},
         atEpochMillis,
         atTime: formData.scheduleAt.time || undefined,
         lat: latitude,
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
         hijriDateOffset: offset,
-        prayerTime: (formData.scheduleAt.prayerTime as PrayerTime) || undefined,
         removeTime: removeTime,
         tags: formData.tags.length > 0 ? formData.tags : null,
       };
@@ -231,7 +215,6 @@ export const useTaskFormEdit = (
             repeat: formData.repeat.repeat,
             repeatInterval: formData.repeat.interval,
             atTime: formData.scheduleAt.time,
-            prayerTime: formData.scheduleAt.prayerTime as PrayerTime,
             lat: latitude,
             long: longitude,
             timezone: settings.timezone || "Asia/Jakarta",
@@ -413,7 +396,6 @@ export const useTaskFormEdit = (
             name: pendingOperation.taskInput.name,
             description: pendingOperation.taskInput.description,
             atTime: pendingOperation.taskInput.atTime,
-            prayerTime: pendingOperation.taskInput.prayerTime,
             repeat: pendingOperation.repeatConfig.repeat,
             repeatInterval: pendingOperation.repeatConfig.interval,
           },
@@ -442,7 +424,6 @@ export const useTaskFormEdit = (
     const scheduleAt: TaskScheduleAt = {
       dateHijri: null,
       time: "",
-      prayerTime: "",
     };
 
     if (task.atEpochMillis) {
@@ -468,7 +449,6 @@ export const useTaskFormEdit = (
         minute
       );
       scheduleAt.time = task.atTime || "";
-      scheduleAt.prayerTime = task.prayerTime || "";
     }
 
     setFormData({

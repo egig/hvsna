@@ -91,7 +91,7 @@ export function TaskListItem({
     if (!task.atEpochMillis) return null;
 
     const today = getToday();
-    const time = task.atTime || task.prayerTime;
+    const time = task.atTime;
     const taskDate = createHijriDate(
       ...(() => {
         const h = HijriDate.fromDate(new Date(task.atEpochMillis!), {

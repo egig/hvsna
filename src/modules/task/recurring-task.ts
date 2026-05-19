@@ -1,16 +1,14 @@
-import type { PrayerTime, TaskRepeat } from "./types";
+import type { PrayerTime, TaskRepeat } from "@/domain/task";
 
 export interface RecurringTask {
   id: string;
   user_id?: string;
   name: string;
   description?: string;
-  attributes?: Record<string, string>;
   repeat: TaskRepeat;
   repeatInterval: number;
   baseDateEpoch: number;
   atTime?: string;
-  prayerTime?: PrayerTime;
   lat?: number;
   long?: number;
   timezone?: string;
@@ -27,12 +25,10 @@ export interface RecurringTaskCreateInput {
   id?: string;
   name: string;
   description?: string;
-  attributes?: Record<string, string>;
   repeat: TaskRepeat;
   repeatInterval?: number;
   baseDateEpoch: number;
   atTime?: string;
-  prayerTime?: PrayerTime;
   lat?: number;
   long?: number;
   timezone?: string;
@@ -51,7 +47,6 @@ export interface RecurringTaskUpdateInput {
   repeatInterval?: number;
   baseDateEpoch?: number;
   atTime?: string;
-  prayerTime?: PrayerTime;
   lat?: number;
   long?: number;
   timezone?: string;

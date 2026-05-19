@@ -63,13 +63,35 @@ function convertFallbackToTimings(
   };
 }
 
+export function isPrayerBased(t: Task) {
+  return !!t.atTime && !t.atTime.includes(":");
+}
 
-export function groupTasksByPrayerTimes(tasks: Task[], prayerTimings: PrayerTimes) {
+function isInSamePrayerGroup(current: Task, prev: Task) {
+  if (isPrayerBased(current) && isPrayerBased(prev)) {
+    return current.atTime === prev.atTime;
+  }
+
+  if (isPrayerBased(current) && !isPrayerBased(prev)) {
+    return false;
+  }
+
+  if (!isPrayerBased(current) && isPrayerBased(prev)) {
+    return false;
+  }
+
+  return true;
+}
+
+export function groupTasksByPrayerTimes(
+  tasks: Task[],
+  prayerTimings: PrayerTimes
+) {
   let tmpTasks = tasks
     .map((t) => {
-      if (!!t.prayerTime) {
+      if (isPrayerBased(t)) {
         let tpTime =
-          prayerTimings[t.prayerTime.toLowerCase() as keyof PrayerTimes];
+          prayerTimings[t.atTime?.toLowerCase() as keyof PrayerTimes];
         return {
           n: (tpTime as Date).valueOf(),
           item: t,
@@ -95,10 +117,12 @@ export function groupTasksByPrayerTimes(tasks: Task[], prayerTimings: PrayerTime
 
     if (i > 0) {
       let prev = tmpTasks[i - 1];
-      if (current.item.prayerTime !== prev.item.prayerTime) {
+      if (!isInSamePrayerGroup(current.item, prev.item)) {
         if (!!currentGroup.length) {
+          let a = currentGroup[currentGroup.length - 1];
           groups.push({
-            label: current.item.prayerTime ?? "",
+            label: isPrayerBased(a) ? a.atTime : "",
+            prayer: isPrayerBased(a) ? a.atTime : "",
             tasks: [...currentGroup],
           });
           currentGroup = [];
@@ -110,17 +134,23 @@ export function groupTasksByPrayerTimes(tasks: Task[], prayerTimings: PrayerTime
   }
   if (!!currentGroup.length) {
     groups.push({
-      label: currentGroup[currentGroup.length - 1].prayerTime ?? "",
+      label: isPrayerBased(currentGroup[currentGroup.length - 1])
+        ? currentGroup[currentGroup.length - 1].atTime
+        : "",
+      prayer: isPrayerBased(currentGroup[currentGroup.length - 1])
+        ? currentGroup[currentGroup.length - 1].atTime
+        : "",
       tasks: [...currentGroup],
     });
   }
 
-  groups.unshift({
-    label: "overdue",
-    isOverdue: true,
-    tasks: overdueTasks,
-  });
+  if (overdueTasks.length) {
+    groups.unshift({
+      label: "overdue",
+      isOverdue: true,
+      tasks: overdueTasks,
+    });
+  }
 
   return groups;
 }
-

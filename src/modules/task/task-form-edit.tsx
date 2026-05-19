@@ -262,7 +262,7 @@ export default function TaskFormEdit({
           <TimeInput
             label=""
             name={"atTime"}
-            customTime={formData.scheduleAt.time}
+            time={formData.scheduleAt.time}
             prayerTime={formData.scheduleAt.prayerTime}
             onChange={function (
               time: string | null,

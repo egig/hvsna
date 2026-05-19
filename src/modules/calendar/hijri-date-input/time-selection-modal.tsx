@@ -46,15 +46,13 @@ function getSunsetBasedSortedHours(lat: number, lng: number): number[] {
 
 interface TimeSelectionModalProps {
   selectedTime: string | null;
-  selectedPrayerTime?: PrayerTime;
   onBack: () => void;
-  onConfirm: (time: string, prayerTime?: PrayerTime | string) => void;
+  onConfirm: (time: string) => void;
   onRemoveTime: () => void;
 }
 
 export function TimeSelectionModal({
   selectedTime,
-  selectedPrayerTime,
   onBack,
   onConfirm,
   onRemoveTime,
@@ -64,11 +62,13 @@ export function TimeSelectionModal({
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
   const [sortedHours, setSortedHours] = useState<number[]>([]);
-  const [selectedPrayer, setSelectedPrayer] = useState<PrayerTime | "">(
-    selectedPrayerTime || ""
+  const [selectedPrayer, setSelectedPrayer] = useState<string>(
+    selectedTime || ""
   );
+
+  let isCustom = !!selectedTime && selectedTime.includes(":");
   const [inputMode, setInputMode] = useState<"prayer" | "custom">(
-    selectedTime ? "custom" : "prayer"
+    isCustom ? "custom" : "prayer"
   );
 
   const prayerTimes: PrayerTime[] = [
@@ -80,10 +80,10 @@ export function TimeSelectionModal({
     "Asr",
   ];
   useEffect(() => {
-    if (selectedTime) {
+    if (isCustom) {
       const [h, m] = selectedTime?.split(":") || [0, 0];
-      setHour(parseInt(h));
-      setMinute(parseInt(m));
+      setHour(parseInt(h as string));
+      setMinute(parseInt(m as string));
     }
   }, [selectedTime]);
 
@@ -98,12 +98,12 @@ export function TimeSelectionModal({
     const time = `${hour.toString().padStart(2, "0")}:${minute
       .toString()
       .padStart(2, "0")}`;
-    onConfirm(time, "");
+    onConfirm(time);
   };
 
   const handlePrayerTimeConfirm = () => {
     if (selectedPrayer) {
-      onConfirm("", selectedPrayer);
+      onConfirm(selectedPrayer);
     }
   };
 
@@ -164,7 +164,7 @@ export function TimeSelectionModal({
               const selected = values[0] as PrayerTime | "";
               setSelectedPrayer(selected);
               if (selected) {
-                onConfirm("", selected);
+                onConfirm(selected);
               }
             }}
             multiple={false}

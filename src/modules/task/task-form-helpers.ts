@@ -3,6 +3,9 @@
  */
 import { HijriDate } from "../calendar/hijri";
 import type { TaskRepeat } from "@/domain/task";
+import type { TaskScheduleAt } from "./task-form-types";
+import { getPrayerTimeForDate } from "../prayer";
+import type { PrayerTimes } from "adhan";
 
 /**
  * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.
@@ -152,4 +155,46 @@ export function parseTimeString(timeString: string): {
   }
 
   return { hour, minute };
+}
+
+export function getTaskEpoch(
+  scheduleAt: TaskScheduleAt,
+  lat: number,
+  lng: number,
+  offset: number
+): number | null {
+  if (!scheduleAt.dateHijri) {
+    return null;
+  }
+
+  const { year, month, day } = scheduleAt.dateHijri;
+  const hijriOpts = { latitude: lat, longitude: lng, offset: offset ?? 0 };
+  if (!!scheduleAt.time && !scheduleAt.time.includes(":")) {
+    let d = new HijriDate(
+      year,
+      month,
+      day,
+      undefined,
+      undefined,
+      0,
+      0,
+      hijriOpts
+    ).toDate();
+    let prayerTimes = getPrayerTimeForDate(lat, lng, d);
+    return (
+      prayerTimes[scheduleAt.time.toLowerCase() as keyof PrayerTimes] as Date
+    ).valueOf();
+  }
+
+  if (!!scheduleAt.time && scheduleAt.time.includes(":")) {
+    const [h, m] = scheduleAt.time.split(":").map(Number);
+    return new HijriDate(year, month, day, h, m, 0, 0, hijriOpts)
+      .toDate()
+      .valueOf();
+  }
+
+  return new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts)
+    .endOfDay()
+    .toDate()
+    .valueOf();
 }

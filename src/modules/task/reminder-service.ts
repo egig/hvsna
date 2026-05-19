@@ -1,6 +1,6 @@
 import { createNotificationsProvider } from "../../infra";
 import type { TaskReminderOptions } from "../../domain/notifications/INotificationsProvider";
-import { Task, type Task as TaskType } from "@/domain/task";
+import { type Task as TaskType } from "@/domain/task";
 import logger from "../logger";
 
 export class ReminderService {
@@ -119,29 +119,5 @@ export class ReminderService {
       task.status !== 1 && // not completed
       task.atEpochMillis > Date.now() // future task
     );
-  }
-
-  /**
-   * Get reminder settings from task attributes
-   */
-  static getReminderMinutesFromTask(task: TaskType): number {
-    if (task.attributes?.reminderMinutes) {
-      const minutes = parseInt(task.attributes.reminderMinutes, 10);
-      return isNaN(minutes) ? this.DEFAULT_REMINDER_MINUTES : minutes;
-    }
-    return this.DEFAULT_REMINDER_MINUTES;
-  }
-
-  /**
-   * Set reminder minutes in task attributes
-   */
-  static setReminderMinutesInTask(task: TaskType, minutes: number): TaskType {
-    const updatedTask = Object.assign(new Task({}), task, {
-      attributes: {
-        ...task.attributes,
-        reminderMinutes: minutes.toString(),
-      },
-    });
-    return updatedTask;
   }
 }

@@ -14,8 +14,7 @@ import { useDateTranslationHelper } from "src/modules/calendar/use-date-translat
 import { ListInput } from "src/modules/components/list-input";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
-import type { PrayerTime, TaskRepeat } from "@/domain/task";
-import { TimeSelectionModal } from "./time-selection-modal";
+import type { TaskRepeat } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { RepeatEndDateView } from "./repeat-end-date-view";
 

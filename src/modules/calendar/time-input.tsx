@@ -2,13 +2,12 @@ import { useState } from "react";
 import { HvClock } from "@/modules/icons";
 import { Modal } from "src/modules/navigation";
 import { TimeSelectionModal } from "./hijri-date-input/time-selection-modal";
-import type { PrayerTime } from "src/modules/task/types";
+import type { PrayerTime } from "@/domain/task";
 
 interface TimeInputProps {
   name: string;
   label?: string;
-  customTime: string;
-  prayerTime: PrayerTime;
+  time: string;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -19,21 +18,16 @@ interface TimeInputProps {
 export function TimeInput({
   name,
   label,
-  customTime,
-  prayerTime,
+  time,
   placeholder = "",
   disabled = false,
-  required = false,
   className = "",
   onChange,
 }: TimeInputProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleTimeConfirm = (
-    time: string,
-    selectedPrayerTime?: PrayerTime | string
-  ) => {
-    onChange(time, selectedPrayerTime as PrayerTime);
+  const handleTimeConfirm = (time: string) => {
+    onChange(time);
     setIsModalOpen(false);
   };
 
@@ -46,14 +40,6 @@ export function TimeInput({
     if (!disabled) {
       setIsModalOpen(true);
     }
-  };
-
-  const formatTimeDisplay = (time: string | null, prayer?: PrayerTime) => {
-    if (prayer) {
-      return `${prayer}`;
-    }
-    if (!time) return placeholder;
-    return time;
   };
 
   return (
@@ -75,15 +61,15 @@ export function TimeInput({
       >
         <div className="flex items-center justify-between gap-1">
           <HvClock className="w-4 h-4 text-gray-400" />
-          {(customTime || prayerTime) && (
+          {time && (
             <span
               className={
-                customTime || prayerTime
+                time
                   ? "text-gray-900 dark:text-white"
                   : "text-gray-500 dark:text-gray-400"
               }
             >
-              {formatTimeDisplay(customTime, prayerTime)}
+              {time}
             </span>
           )}
         </div>
@@ -95,8 +81,7 @@ export function TimeInput({
         title=""
       >
         <TimeSelectionModal
-          selectedTime={customTime}
-          selectedPrayerTime={prayerTime}
+          selectedTime={time}
           onBack={() => setIsModalOpen(false)}
           onConfirm={handleTimeConfirm}
           onRemoveTime={handleRemoveTime}
