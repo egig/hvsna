@@ -1,7 +1,15 @@
-import { HvCheck } from "@/modules/icons";
+import {
+  HvAsr,
+  HvCheck,
+  HvDhuhr,
+  HvFajr,
+  HvIsha,
+  HvMaghrib,
+  HvSunrise,
+} from "@/modules/icons";
 import { NavActionButton } from "../../components/nav-action-button";
 import { getCoordinateFromTimezone } from "@/config";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { ModalNavbar } from "src/modules/navigation";
 import { useSettings } from "src/modules/settings";
@@ -79,6 +87,16 @@ export function TimeSelectionModal({
     "Dhuhr",
     "Asr",
   ];
+
+  const prayerIcons: Record<string, ReactNode> = {
+    Maghrib: <HvMaghrib size={20} />,
+    Isha: <HvIsha size={20} />,
+    Fajr: <HvFajr size={20} />,
+    Sunrise: <HvSunrise size={20} />,
+    Dhuhr: <HvDhuhr size={20} />,
+    Asr: <HvAsr size={20} />,
+  };
+
   useEffect(() => {
     if (isCustom) {
       const [h, m] = selectedTime?.split(":") || [0, 0];
@@ -175,14 +193,14 @@ export function TimeSelectionModal({
                 key={prayer}
                 value={prayer}
                 className={({ pressed }) =>
-                  `px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
+                  `flex gap-1 items-center px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
                     pressed
                       ? "bg-[var(--hvsna-primary-color)] text-white border-[var(--hvsna-primary-color)]"
                       : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
                   }`
                 }
               >
-                {t(prayer.toLowerCase())}
+                {prayerIcons[prayer as string]} {t(prayer.toLowerCase())}
               </Toggle>
             ))}
           </ToggleGroup>

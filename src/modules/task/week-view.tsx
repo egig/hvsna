@@ -19,8 +19,8 @@ import {
 import TaskListItem from "./task-list-item";
 import type { Task, PrayerTime } from "@/domain/task";
 import logger from "../logger";
-import { getPrayerTimeForDate } from "../prayer";
 import type { PrayerTimes } from "adhan";
+import { usePrayerTimes } from "../prayer";
 
 function toLocalDateStr(d: Date) {
   return [
@@ -259,15 +259,10 @@ function WeekViewColumn({
 }
 
 export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
-  const { settings } = useSettings();
-  const { toHijriDate, formatDate, getStartOfWeek, currentHijriDate } =
-    useHijriDate();
+  const { toHijriDate, formatDate, currentHijriDate } = useHijriDate();
   const [weekOffset, setWeekOffset] = useState(0);
-  const prayerTimings = getPrayerTimeForDate(
-    settings.location?.lat as number,
-    settings.location?.lng as number,
-    new Date()
-  );
+  const { getTodayPrayerTimes } = usePrayerTimes();
+  const prayerTimings = getTodayPrayerTimes();
 
   const days = useMemo(() => {
     const weekStart = currentHijriDate.startOfWeek().toDate();

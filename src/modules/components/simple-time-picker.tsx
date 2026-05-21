@@ -85,7 +85,6 @@ export function SimpleTimePicker({
 
       <Modal isOpen={isOpen} onClose={handleCancel} title="Select Time">
         <div className="flex flex-col">
-          {/* Current Time Display */}
           <div className="text-center py-4 border-b border-gray-200 dark:border-gray-700">
             <div className="text-3xl font-bold text-gray-900 dark:text-white">
               {hour.toString().padStart(2, "0")}:
@@ -139,7 +138,6 @@ export function SimpleTimePicker({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex gap-3">
             <button
               onClick={handleCancel}

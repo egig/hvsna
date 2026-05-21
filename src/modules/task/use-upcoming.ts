@@ -89,7 +89,9 @@ export function useUpcoming() {
 
   // TODO paginate by date range
   const upcomingTasks = [
-    ...(pendingTasksQuery.data ?? []).filter(t => (!!t.atEpochMillis && t.atEpochMillis > (new Date().valueOf()) )),
+    ...(pendingTasksQuery.data ?? []).filter(
+      (t) => !!t.atEpochMillis && t.atEpochMillis > new Date().valueOf()
+    ),
     ...(virtualTaskQuery.data ?? []),
   ];
   const groupedTasks = groupTasksByTimePeriod(upcomingTasks);

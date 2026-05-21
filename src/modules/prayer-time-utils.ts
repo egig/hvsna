@@ -83,41 +83,31 @@ function isInSamePrayerGroup(current: Task, prev: Task) {
   return true;
 }
 
-export function groupTasksByPrayerTimes(
-  tasks: Task[],
-  prayerTimings: PrayerTimes
-) {
-  let tmpTasks = tasks
-    .map((t) => {
-      if (isPrayerBased(t)) {
-        let tpTime =
-          prayerTimings[t.atTime?.toLowerCase() as keyof PrayerTimes];
-        return {
-          n: (tpTime as Date).valueOf(),
-          item: t,
-        };
-      }
-
-      return {
-        n: t.atEpochMillis || 0,
-        item: t,
-      };
-    })
-    .sort((a, b) => a.n - b.n);
+export function groupTasksByPrayerTimes(tasks: Task[]) {
+  // Sort task by atEpochMillis
+  // atEpochMillis for prayerBased task is the next prayer time
+  // for non-time tasks, its the next day
+  tasks.sort(
+    (a, b) => (a.atEpochMillis as number) - (b.atEpochMillis as number)
+  );
 
   const overdueTasks: Task[] = [];
   let groups = [];
   let currentGroup: Task[] = [];
-  for (let i = 0; i < tmpTasks.length; i++) {
-    let current = tmpTasks[i];
-    if (current.n < new Date().valueOf()) {
-      overdueTasks.push(current.item);
+  for (let i = 0; i < tasks.length; i++) {
+    let current = tasks[i];
+    if (!current.atEpochMillis) {
+      continue;
+    }
+
+    if (current.atEpochMillis < new Date().valueOf()) {
+      overdueTasks.push(current);
       continue;
     }
 
     if (i > 0) {
-      let prev = tmpTasks[i - 1];
-      if (!isInSamePrayerGroup(current.item, prev.item)) {
+      let prev = tasks[i - 1];
+      if (!isInSamePrayerGroup(current, prev)) {
         if (!!currentGroup.length) {
           let a = currentGroup[currentGroup.length - 1];
           groups.push({
@@ -130,7 +120,7 @@ export function groupTasksByPrayerTimes(
       }
     }
 
-    currentGroup.push(current.item);
+    currentGroup.push(current);
   }
   if (!!currentGroup.length) {
     groups.push({

@@ -1,11 +1,11 @@
 /**
  * Reusable helper functions for task form operations
  */
-import { HijriDate } from "../calendar/hijri";
+import { HijriDate, useHijriDate } from "../calendar/hijri";
 import type { TaskRepeat } from "@/domain/task";
 import type { TaskScheduleAt } from "./task-form-types";
-import { getPrayerTimeForDate } from "../prayer";
-import type { PrayerTimes } from "adhan";
+import { usePrayerTimes } from "../prayer";
+import { useSettings } from "../settings";
 
 /**
  * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.
@@ -157,44 +157,28 @@ export function parseTimeString(timeString: string): {
   return { hour, minute };
 }
 
-export function getTaskEpoch(
-  scheduleAt: TaskScheduleAt,
-  lat: number,
-  lng: number,
-  offset: number
-): number | null {
-  if (!scheduleAt.dateHijri) {
-    return null;
-  }
+export function useTaskEpoch() {
+  const { getPrayerEndTime } = usePrayerTimes();
+  const { createHijriDate } = useHijriDate();
+  return function getTaskEpoch(scheduleAt: TaskScheduleAt): number | null {
+    if (!scheduleAt.dateHijri) {
+      return null;
+    }
 
-  const { year, month, day } = scheduleAt.dateHijri;
-  const hijriOpts = { latitude: lat, longitude: lng, offset: offset ?? 0 };
-  if (!!scheduleAt.time && !scheduleAt.time.includes(":")) {
-    let d = new HijriDate(
-      year,
-      month,
-      day,
-      undefined,
-      undefined,
-      0,
-      0,
-      hijriOpts
-    ).toDate();
-    let prayerTimes = getPrayerTimeForDate(lat, lng, d);
-    return (
-      prayerTimes[scheduleAt.time.toLowerCase() as keyof PrayerTimes] as Date
-    ).valueOf();
-  }
+    const { year, month, day } = scheduleAt.dateHijri;
+    if (!!scheduleAt.time && !scheduleAt.time.includes(":")) {
+      let d = createHijriDate(year, month, day, undefined, undefined);
+      return getPrayerEndTime(scheduleAt.time.toLowerCase(), d).valueOf();
+    }
 
-  if (!!scheduleAt.time && scheduleAt.time.includes(":")) {
-    const [h, m] = scheduleAt.time.split(":").map(Number);
-    return new HijriDate(year, month, day, h, m, 0, 0, hijriOpts)
+    if (!!scheduleAt.time && scheduleAt.time.includes(":")) {
+      const [h, m] = scheduleAt.time.split(":").map(Number);
+      return createHijriDate(year, month, day, h, m).toDate().valueOf();
+    }
+
+    return createHijriDate(year, month, day, undefined, undefined)
+      .endOfDay()
       .toDate()
       .valueOf();
-  }
-
-  return new HijriDate(year, month, day, undefined, undefined, 0, 0, hijriOpts)
-    .endOfDay()
-    .toDate()
-    .valueOf();
+  };
 }

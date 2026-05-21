@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  getTaskEpoch,
+  useTaskEpoch,
   parseHijriDateString,
   parseTimeString,
 } from "./task-form-helpers";
@@ -94,6 +94,8 @@ export const useTaskFormEdit = (
   const [pendingOperation, setPendingOperation] =
     useState<PendingOperationData | null>(null);
 
+  const getTaskEpoch = useTaskEpoch();
+
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { dateHijri: null, time: "" },
     repeat: {
@@ -135,13 +137,7 @@ export const useTaskFormEdit = (
       taskDescription: string;
     } & Partial<Task>;
 
-    const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-    let atEpochMillis = getTaskEpoch(
-      formData.scheduleAt,
-      latitude as number,
-      longitude as number,
-      offset as number
-    ) as number;
+    let atEpochMillis = getTaskEpoch(formData.scheduleAt) as number;
 
     try {
       setIsSubmitting(true);

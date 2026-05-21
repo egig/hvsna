@@ -73,6 +73,8 @@ export {
   TbChartAreaFilled as HvChartAreaFilled,
   TbSquareCheck as HvSquareCheck,
   TbSquareCheckFilled as HvSquareCheckFilled,
+  TbSunset2 as HvMaghrib,
+  TbMoon as HvIsha,
 } from "react-icons/tb";
 
 export {
@@ -95,3 +97,11 @@ export {
   BiSearch as HvSearch,
   BiSearchAlt as HvSearchAlt,
 } from "react-icons/bi";
+
+export { SiSunrise as HvFajr } from "react-icons/si";
+
+export {
+  PiSunHorizon as HvSunrise,
+  PiSun as HvDhuhr,
+  PiCloudSun as HvAsr,
+} from "react-icons/pi";

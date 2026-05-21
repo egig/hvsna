@@ -2,19 +2,17 @@ import { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { useTaskContext } from "./task-context";
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import { Task, type PrayerTime, type TaskCreateInput } from "@/domain/task";
+import { Task, type TaskCreateInput } from "@/domain/task";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings";
-import { getTaskEpoch, parseHijriDateString } from "./task-form-helpers";
+import { parseHijriDateString, useTaskEpoch } from "./task-form-helpers";
 import logger from "../logger";
 import type {
   RepeatConfig,
   TaskFormData,
   TaskScheduleAt,
 } from "./task-form-types";
-import { getPrayerTimeForDate } from "../prayer";
-import type { PrayerTimes } from "adhan";
 export type {
   TaskScheduleAt,
   RepeatConfig,
@@ -49,6 +47,7 @@ export const useTaskForm = (
     manualOffset: offset,
     getToday,
   } = useHijriDate();
+  const getTaskEpoch = useTaskEpoch();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
@@ -91,12 +90,7 @@ export const useTaskForm = (
     } & Partial<Task>;
 
     taskData.atTime = formData.scheduleAt.time;
-    taskData.atEpochMillis = getTaskEpoch(
-      formData.scheduleAt,
-      latitude as number,
-      longitude as number,
-      offset as number
-    ) as number;
+    taskData.atEpochMillis = getTaskEpoch(formData.scheduleAt) as number;
 
     try {
       setIsSubmitting(true);
@@ -105,12 +99,7 @@ export const useTaskForm = (
 
       if (isRecurring && formData.scheduleAt.dateHijri) {
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = getTaskEpoch(
-          formData.scheduleAt,
-          latitude as number,
-          longitude as number,
-          offset as number
-        ) as number;
+        const baseDateEpoch = getTaskEpoch(formData.scheduleAt) as number;
         const repeatEndEpoch =
           formData.repeat.end === "on_date" && formData.repeat.endDate
             ? (() => {
