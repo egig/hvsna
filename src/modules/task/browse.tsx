@@ -4,6 +4,7 @@ import {
   HvOutlineEllipsisHorizontalCircle,
   HvCheckCircle,
   HvCheckSquare2,
+  HvReplayCircle,
 } from "@/modules/icons";
 import { useNavigate } from "react-router";
 import { Navbar } from "../navigation/navbar";
@@ -23,6 +24,11 @@ export default function Browse() {
     <Page navbar={<Navbar title={t("browse")} showBackButton={false} />}>
       {/* Navigation Menu Items */}
       <div className="mb-6 space-y-1">
+        <MenuItem
+          icon={HvReplayCircle}
+          title={t("recurring") || "Recurring"}
+          to="/recurring"
+        />
         <MenuItem
           icon={HvCheckSquare2}
           title={t("completed") || "Completed"}

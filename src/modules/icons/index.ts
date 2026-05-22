@@ -105,3 +105,8 @@ export {
   PiSun as HvDhuhr,
   PiCloudSun as HvAsr,
 } from "react-icons/pi";
+
+export {
+  MdReplayCircleFilled as HvReplayCircleFilled,
+  MdOutlineReplay as HvReplayCircle,
+ } from "react-icons/md";

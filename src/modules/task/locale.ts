@@ -24,6 +24,14 @@ export const taskTranslations = {
     en: "Recurring",
     id: "Berulang",
   },
+  no_recurring_tasks: {
+    en: "No recurring tasks",
+    id: "Tidak ada tugas berulang",
+  },
+  recurring_tasks_will_appear_here: {
+    en: "Your active recurring tasks will appear here",
+    id: "Tugas berulang aktif Anda akan muncul di sini",
+  },
   to_do: {
     en: "To Do",
     id: "To Do",

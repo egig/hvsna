@@ -13,6 +13,8 @@ import {
   HvSearchAlt,
   HvCalendarEvent,
   HvCalendarEventFilled,
+  HvReplayCircle,
+  HvReplayCircleFilled,
 } from "@/modules/icons";
 import { Link, useLocation } from "react-router";
 import { SidebarTagsSection } from "../task/sidebar-tags-section";
@@ -74,6 +76,13 @@ export function DesktopSidebar({
       icon: <HvSearch />,
       activeIcon: <HvSearchAlt />,
       context: "search",
+    },
+    {
+      path: "/recurring",
+      label: t("recurring") || "Recurring",
+      icon: <HvReplayCircle />,
+      activeIcon: <HvReplayCircleFilled />,
+      context: "recurring",
     },
     {
       path: "/completed",

@@ -25,6 +25,7 @@ import Upcoming from "./modules/task/upcoming";
 import SyncPage from "./modules/sync/sync";
 import { Inbox } from "./modules/task/inbox";
 import { Completed } from "./modules/task/completed";
+import { Recurring } from "./modules/task/recurring";
 import Onboarding from "./modules/onboarding/onboarding";
 import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
 import SignInPage from "./modules/auth/pages/signin";
@@ -91,6 +92,7 @@ export const AppRoutes = () => {
             <Route path="today" element={<Today />} />
             <Route path="upcoming" element={<Upcoming />} />
             <Route path="inbox" element={<Inbox />} />
+            <Route path="recurring" element={<Recurring />} />
             <Route path="completed" element={<Completed />} />
             <Route path="browse" element={<Browse />} />
             <Route path="tags" element={<TagManagementPage />} />
