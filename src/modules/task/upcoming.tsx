@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -57,17 +57,21 @@ function ScheduledContent({
   isLoadingMore: boolean;
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const isLoadingMoreRef = useRef(isLoadingMore);
+  useEffect(() => { isLoadingMoreRef.current = isLoadingMore; }, [isLoadingMore]);
+
+  const hasItems = upcomingTasks.length > 0;
   useEffect(() => {
     if (!canLoadMore || !sentinelRef.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) onLoadMore();
+        if (entry.isIntersecting && !isLoadingMoreRef.current) onLoadMore();
       },
       { rootMargin: "200px" }
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [canLoadMore, onLoadMore]);
+  }, [canLoadMore, onLoadMore, hasItems]);
 
   return (
     <>
@@ -273,10 +277,9 @@ export default function Upcoming() {
 
   const [horizonDays, setHorizonDays] = useState(HORIZON_INITIAL);
   const canLoadMore = horizonDays < HORIZON_MAX;
-  const handleLoadMore = () => {
-    if (!canLoadMore) return;
+  const handleLoadMore = useCallback(() => {
     setHorizonDays((prev) => Math.min(prev + HORIZON_INCREMENT, HORIZON_MAX));
-  };
+  }, []);
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 

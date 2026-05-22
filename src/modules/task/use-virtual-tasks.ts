@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import { buildVirtualTasksForRange } from "./recurring-task-generator";
@@ -30,5 +30,6 @@ export function useVirtualTasks(startEpoch: number, endEpoch: number) {
       );
     },
     staleTime: 1000 * 60 * 2,
+    placeholderData: keepPreviousData,
   });
 }
