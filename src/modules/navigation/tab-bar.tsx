@@ -6,11 +6,11 @@ import {
   HvCalendarMonth,
   HvCalendarMonthFilled,
   HvSearch,
-  HvOutlineEllipsisHorizontalCircle,
-  HvEllipsisHorizontalCircle,
   HvSearchAlt,
   HvCalendarEvent,
   HvCalendarEventFilled,
+  HvDotsThreeOutlineLight,
+  HvDotsThreeOutlineFill,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -42,10 +42,10 @@ export function TabBar() {
     },
     {
       path: "/browse",
-      label: t("browse") || "Browse",
-      icon: <HvOutlineEllipsisHorizontalCircle />,
-      activeIcon: <HvEllipsisHorizontalCircle />,
-      context: "browse",
+      label: t("more") || "More",
+      icon: <HvDotsThreeOutlineLight />,
+      activeIcon: <HvDotsThreeOutlineFill />,
+      context: "more",
     },
   ];
 

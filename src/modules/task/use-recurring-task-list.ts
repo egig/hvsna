@@ -8,7 +8,10 @@ import type { RecurringTask } from "./recurring-task";
 
 const HORIZON_MS = 365 * 24 * 60 * 60 * 1000;
 
-function toVirtualTask(template: RecurringTask, nextEpoch: number | null): Task {
+function toVirtualTask(
+  template: RecurringTask,
+  nextEpoch: number | null
+): Task {
   return new Task({
     id: `vtask_${template.id}_${nextEpoch ?? 0}`,
     isVirtual: true,
@@ -32,7 +35,11 @@ function toVirtualTask(template: RecurringTask, nextEpoch: number | null): Task 
 export function useRecurringTaskList() {
   const { db } = usePouchDB();
 
-  const { data: tasks = [], isLoading: loading, error } = useQuery({
+  const {
+    data: tasks = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
     queryKey: queryKeys.recurringTaskList(),
     queryFn: async () => {
       const useCases = createRecurringTaskUseCases(db);
@@ -42,7 +49,11 @@ export function useRecurringTaskList() {
 
       return templates
         .map((template) => {
-          const occurrences = computeOccurrencesInRange(template, now, now + HORIZON_MS);
+          const occurrences = computeOccurrencesInRange(
+            template,
+            now,
+            now + HORIZON_MS
+          );
           const nextEpoch = occurrences.length > 0 ? occurrences[0] : null;
           return { template, nextEpoch };
         })

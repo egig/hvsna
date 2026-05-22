@@ -171,23 +171,4 @@ describe("useTags", () => {
       tags: ["critical"],
     });
   });
-
-  it("can merge tags", async () => {
-    const updateTask = vi.fn().mockResolvedValue({});
-    mockGetTasks.mockResolvedValue(mockTasks);
-    mockUpdateTask.mockImplementation(updateTask);
-
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    await result.current.mergeTags("urgent", "work");
-
-    expect(updateTask).toHaveBeenCalledTimes(2);
-    const calls = updateTask.mock.calls;
-    expect(calls).toContainEqual(["task_1", { tags: ["work"] }]);
-    expect(calls).toContainEqual(["task_3", { tags: ["work"] }]);
-  });
 });

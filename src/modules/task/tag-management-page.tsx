@@ -17,28 +17,23 @@ import { Modal } from "../navigation/modal";
 export default function TagManagementPage() {
   const { t } = useLanguageContext();
   const navigate = useNavigate();
-  const { tags, loading, error, renameTag, deleteTag, mergeTags } = useTags();
+  const { tags, loading, error, renameTag, deleteTag } = useTags();
 
   const [selectedTag, setSelectedTag] = useState<TagInfo | null>(null);
-  const [modalMode, setModalMode] = useState<
-    null | "rename" | "merge" | "delete"
-  >(null);
+  const [modalMode, setModalMode] = useState<null | "rename" | "delete">(null);
   const [newTagName, setNewTagName] = useState("");
-  const [mergeTarget, setMergeTarget] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const openModal = (tag: TagInfo, mode: "rename" | "merge" | "delete") => {
+  const openModal = (tag: TagInfo, mode: "rename" | "delete") => {
     setSelectedTag(tag);
     setModalMode(mode);
     setNewTagName(tag.name);
-    setMergeTarget("");
   };
 
   const closeModal = () => {
     setSelectedTag(null);
     setModalMode(null);
     setNewTagName("");
-    setMergeTarget("");
     setIsSubmitting(false);
   };
 
@@ -51,19 +46,6 @@ export default function TagManagementPage() {
       closeModal();
     } catch (err) {
       console.error("Rename failed:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleMerge = async () => {
-    if (!selectedTag || !mergeTarget) return;
-    setIsSubmitting(true);
-    try {
-      await mergeTags(selectedTag.name, mergeTarget);
-      closeModal();
-    } catch (err) {
-      console.error("Merge failed:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -149,15 +131,6 @@ export default function TagManagementPage() {
                 >
                   <HvEdit size={16} />
                 </button>
-                {tags.length > 1 && (
-                  <button
-                    onClick={() => openModal(tag, "merge")}
-                    className="p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
-                    aria-label={t("merge_tags")}
-                  >
-                    <HvMerge size={16} />
-                  </button>
-                )}
                 <button
                   onClick={() => openModal(tag, "delete")}
                   className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
@@ -197,54 +170,6 @@ export default function TagManagementPage() {
             <button
               onClick={handleRename}
               disabled={isSubmitting || !newTagName.trim()}
-              className="px-4 py-2 text-sm text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] rounded-md transition-colors disabled:opacity-50"
-            >
-              {t("submit")}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Merge Modal */}
-      <Modal
-        isOpen={modalMode === "merge"}
-        onClose={closeModal}
-        title={t("merge_tags")}
-      >
-        <div className="p-4 space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {selectedTag &&
-              t("tag_merge_confirm", {
-                source: selectedTag.name,
-                target: mergeTarget,
-              })}
-          </p>
-          <select
-            value={mergeTarget}
-            onChange={(e) => setMergeTarget(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
-          >
-            <option value="" disabled>
-              {t("select_tag_to_merge")}
-            </option>
-            {tags
-              .filter((t) => t.name !== selectedTag?.name)
-              .map((tag) => (
-                <option key={tag.name} value={tag.name}>
-                  {tag.name} ({t("tag_count_tasks", { count: tag.count })})
-                </option>
-              ))}
-          </select>
-          <div className="flex justify-end gap-2">
-            <button
-              onClick={closeModal}
-              className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
-            >
-              {t("cancel")}
-            </button>
-            <button
-              onClick={handleMerge}
-              disabled={isSubmitting || !mergeTarget}
               className="px-4 py-2 text-sm text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] rounded-md transition-colors disabled:opacity-50"
             >
               {t("submit")}

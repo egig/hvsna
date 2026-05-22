@@ -58,7 +58,9 @@ function ScheduledContent({
 }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isLoadingMoreRef = useRef(isLoadingMore);
-  useEffect(() => { isLoadingMoreRef.current = isLoadingMore; }, [isLoadingMore]);
+  useEffect(() => {
+    isLoadingMoreRef.current = isLoadingMore;
+  }, [isLoadingMore]);
 
   const hasItems = upcomingTasks.length > 0;
   useEffect(() => {
@@ -317,8 +319,22 @@ export default function Upcoming() {
     localStorage.setItem("upcoming-view-mode", mode);
   };
 
-  const { upcomingTasks, taskGroups, loading, isLoadingMore, initiated, error } =
-    useUpcoming(horizonDays);
+  const {
+    upcomingTasks,
+    taskGroups,
+    loading,
+    isLoadingMore,
+    initiated,
+    error,
+  } = useUpcoming(horizonDays);
+
+  useEffect(() => {
+    if (!initiated || isLoadingMore || !canLoadMore) return;
+    const scheduledCount = upcomingTasks.filter(
+      (t) => !!t.atEpochMillis
+    ).length;
+    if (scheduledCount < 10) handleLoadMore();
+  }, [initiated, isLoadingMore, canLoadMore, upcomingTasks, handleLoadMore]);
 
   const { inboxTasks: unscheduledTasks, initiated: inboxInitiated } =
     useUnscheduled();

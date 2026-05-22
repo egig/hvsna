@@ -1,5 +1,5 @@
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { usePendingTasks } from "./use-pending-tasks";
+import { usePendingTasksInRange } from "./use-pending-tasks-in-range";
 import { useVirtualTasks } from "./use-virtual-tasks";
 import type { Task } from "@/domain/task";
 
@@ -12,9 +12,9 @@ export function useUpcoming(horizonDays = 30) {
   const tomorrow = today.next();
   const endOfWeek = today.endOfWeek();
 
-  const pendingTasksQuery = usePendingTasks();
   const startOfToday = today.startOfDay().toDate().valueOf();
   const endEpoch = startOfToday + horizonDays * 24 * 60 * 60 * 1000;
+  const pendingTasksQuery = usePendingTasksInRange(startOfToday, endEpoch);
   const virtualTaskQuery = useVirtualTasks(startOfToday, endEpoch);
 
   const groupTasksByTimePeriod = (tasks: Task[]) => {
@@ -55,7 +55,10 @@ export function useUpcoming(horizonDays = 30) {
           return;
         }
 
-        if (taskDate > tomorrowStartOfDay && taskDate <= endOfWeekDate.toDate()) {
+        if (
+          taskDate > tomorrowStartOfDay &&
+          taskDate <= endOfWeekDate.toDate()
+        ) {
           fixed.thisWeek.tasks.push(task);
           return;
         }
@@ -70,7 +73,10 @@ export function useUpcoming(horizonDays = 30) {
         let key: string;
         let label: string;
         if (taskHijri.year === today.year) {
-          key = `month_${taskHijri.year}_${String(taskHijri.month).padStart(2, "0")}`;
+          key = `month_${taskHijri.year}_${String(taskHijri.month).padStart(
+            2,
+            "0"
+          )}`;
           label = taskHijri.format("MMMM YYYY");
         } else {
           key = `year_${taskHijri.year}`;
@@ -94,17 +100,20 @@ export function useUpcoming(horizonDays = 30) {
   };
 
   const upcomingTasks = [
-    ...(pendingTasksQuery.data ?? []).filter(
-      (t) => !!t.atEpochMillis && t.atEpochMillis > new Date().valueOf()
-    ),
+    ...(pendingTasksQuery.data ?? []),
     ...(virtualTaskQuery.data ?? []),
-  ];
+  ].sort((a, b) => {
+    if (a.atEpochMillis == null && b.atEpochMillis == null) return 0;
+    if (a.atEpochMillis == null) return 1;
+    if (b.atEpochMillis == null) return -1;
+    return a.atEpochMillis - b.atEpochMillis;
+  });
   const groupedTasks = groupTasksByTimePeriod(upcomingTasks);
   return {
     upcomingTasks,
     taskGroups: groupedTasks,
     loading: pendingTasksQuery.isPending,
-    isLoadingMore: virtualTaskQuery.isFetching,
+    isLoadingMore: pendingTasksQuery.isFetching || virtualTaskQuery.isFetching,
     initiated: !pendingTasksQuery.isPending,
     error: pendingTasksQuery.error
       ? pendingTasksQuery.error instanceof Error

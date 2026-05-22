@@ -112,47 +112,6 @@ export function useTags(options?: UseTagsOptions) {
     [tasks, taskUseCases, refreshTags]
   );
 
-  // Merge two tags (source into target)
-  const mergeTags = useCallback(
-    async (sourceTag: string, targetTag: string): Promise<void> => {
-      if (sourceTag === targetTag) return;
-
-      const tasksToUpdate = tasks.filter(
-        (task) =>
-          task.tags?.includes(sourceTag) && !task.tags?.includes(targetTag)
-      );
-
-      for (const task of tasksToUpdate) {
-        const updatedTags = task.tags!.map((tag) =>
-          tag === sourceTag ? targetTag : tag
-        );
-        try {
-          await taskUseCases.updateTask(task.id!, { tags: updatedTags });
-        } catch (err) {
-          log.error(`Failed to merge tag on task ${task.id}:`, err);
-        }
-      }
-
-      // Delete the source tag from any remaining tasks that also have the target
-      const tasksWithBoth = tasks.filter(
-        (task) =>
-          task.tags?.includes(sourceTag) && task.tags?.includes(targetTag)
-      );
-
-      for (const task of tasksWithBoth) {
-        const updatedTags = task.tags!.filter((tag) => tag !== sourceTag);
-        try {
-          await taskUseCases.updateTask(task.id!, { tags: updatedTags });
-        } catch (err) {
-          log.error(`Failed to remove merged tag on task ${task.id}:`, err);
-        }
-      }
-
-      refreshTags();
-    },
-    [tasks, taskUseCases, refreshTags]
-  );
-
   return {
     tags,
     tagNames,
@@ -165,7 +124,6 @@ export function useTags(options?: UseTagsOptions) {
     refreshTags,
     renameTag,
     deleteTag,
-    mergeTags,
   };
 }
 

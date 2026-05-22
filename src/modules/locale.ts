@@ -70,6 +70,10 @@ export const commonTranslations = {
     en: "Browse",
     id: "Telusur",
   },
+  more: {
+    en: "More",
+    id: "Lainnya",
+  },
 
   // Status states
   pending: {

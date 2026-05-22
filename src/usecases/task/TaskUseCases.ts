@@ -153,6 +153,13 @@ export class TaskUseCases {
     return await this.taskRepository.findAllPending(1000);
   }
 
+  async getPendingTasksInRange(
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]> {
+    return await this.taskRepository.findPendingInRange(startEpoch, endEpoch);
+  }
+
   async getTasks(query: TaskQuery = {}): Promise<Task[]> {
     return await this.taskRepository.findBrowsedTasks(query);
   }
