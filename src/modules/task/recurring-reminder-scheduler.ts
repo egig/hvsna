@@ -1,7 +1,6 @@
-import type PouchDB from "pouchdb";
 import type { RecurringTask } from "./recurring-task";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
-import { buildVirtualTasksForRange } from "./recurring-task-generator";
+import { useRecurringOccurance } from "./recurring-task-generator";
 import { ReminderService } from "./reminder-service";
 import logger from "../logger";
 
@@ -44,43 +43,47 @@ async function saveRegistry(
  * reminders for all virtual recurring task occurrences in the next 7 days.
  * Should be called once on app startup.
  */
-export async function scheduleRecurringTaskReminders(
-  db: PouchDB.Database,
-  templates: RecurringTask[],
-  taskRepository: ITaskRepository
-): Promise<void> {
-  if (templates.length === 0) return;
 
-  const now = Date.now();
-  const horizon = now + HORIZON_DAYS * 24 * 60 * 60 * 1000;
+export function useTaskReminder() {
+  const { buildVirtualTasksForRange } = useRecurringOccurance();
+  return async function scheduleRecurringTaskReminders(
+    db: PouchDB.Database,
+    templates: RecurringTask[],
+    taskRepository: ITaskRepository
+  ): Promise<void> {
+    if (templates.length === 0) return;
 
-  const registry = await loadRegistry(db);
+    const now = Date.now();
+    const horizon = now + HORIZON_DAYS * 24 * 60 * 60 * 1000;
 
-  // Cancel all previously scheduled virtual reminders to avoid stale ones
-  await Promise.allSettled(
-    registry.scheduledIds.map((id) => ReminderService.cancelTaskReminders(id))
-  );
+    const registry = await loadRegistry(db);
 
-  // Build virtual tasks for the coming week
-  const virtualTasks = await buildVirtualTasksForRange(
-    templates,
-    taskRepository,
-    now,
-    horizon
-  );
+    // Cancel all previously scheduled virtual reminders to avoid stale ones
+    await Promise.allSettled(
+      registry.scheduledIds.map((id) => ReminderService.cancelTaskReminders(id))
+    );
 
-  // Only schedule future occurrences (overdue virtuals don't need new reminders)
-  const schedulable = virtualTasks.filter(
-    (t) => t.atEpochMillis != null && t.atEpochMillis > now
-  );
+    // Build virtual tasks for the coming week
+    const virtualTasks = await buildVirtualTasksForRange(
+      templates,
+      taskRepository,
+      now,
+      horizon
+    );
 
-  await ReminderService.scheduleMultipleTaskReminders(schedulable);
+    // Only schedule future occurrences (overdue virtuals don't need new reminders)
+    const schedulable = virtualTasks.filter(
+      (t) => t.atEpochMillis != null && t.atEpochMillis > now
+    );
 
-  await saveRegistry(
-    db,
-    registry,
-    schedulable.map((t) => t.id as string)
-  );
+    await ReminderService.scheduleMultipleTaskReminders(schedulable);
+
+    await saveRegistry(
+      db,
+      registry,
+      schedulable.map((t) => t.id as string)
+    );
+  };
 }
 
 /**

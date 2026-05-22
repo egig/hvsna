@@ -6,7 +6,7 @@ import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCas
 import { Task, type TaskQuery, type TaskTypeFilter } from "@/domain/task";
 import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
-import { computeOccurrencesInRange } from "./recurring-task-generator";
+import { useRecurringOccurance } from "./recurring-task-generator";
 import type { RecurringTask } from "./recurring-task";
 
 const HORIZON_MS = 365 * 24 * 60 * 60 * 1000;
@@ -50,6 +50,7 @@ export function useSearch() {
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
   const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const { computeOccurrencesInRange } = useRecurringOccurance();
 
   const clearFilters = useCallback(() => {
     setDateRangeFilter(null);
@@ -87,7 +88,6 @@ export function useSearch() {
       query.unscheduled = 1;
     }
 
-
     if (tagFilter.length > 0) {
       query.tags = tagFilter;
     }
@@ -98,9 +98,11 @@ export function useSearch() {
   const searchQuery = useQuery({
     queryKey: ["search-tasks", filterKey],
     queryFn: async () => {
-      const regularTasksPromise = taskUseCases.getTasks(buildRegularTaskQuery());
+      const regularTasksPromise = taskUseCases.getTasks(
+        buildRegularTaskQuery()
+      );
 
-      const recurringTasksPromise = recurringTaskUseCases.getRecurringTasks()
+      const recurringTasksPromise = recurringTaskUseCases.getRecurringTasks();
 
       const [regularTasks, recurringTemplates] = await Promise.all([
         regularTasksPromise,

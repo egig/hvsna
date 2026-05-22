@@ -160,19 +160,19 @@ export function parseTimeString(timeString: string): {
 export function useTaskEpoch() {
   const { getPrayerEndTime } = usePrayerTimes();
   const { createHijriDate } = useHijriDate();
-  return function getTaskEpoch(scheduleAt: TaskScheduleAt): number | null {
-    if (!scheduleAt.dateHijri) {
-      return null;
-    }
-
-    const { year, month, day } = scheduleAt.dateHijri;
-    if (!!scheduleAt.time && !scheduleAt.time.includes(":")) {
+  return function getTaskEpoch(
+    year: number,
+    month: number,
+    day: number,
+    atTime: string
+  ): number | null {
+    if (!!atTime && !atTime.includes(":")) {
       let d = createHijriDate(year, month, day, undefined, undefined);
-      return getPrayerEndTime(scheduleAt.time.toLowerCase(), d).valueOf();
+      return getPrayerEndTime(atTime.toLowerCase(), d).valueOf();
     }
 
-    if (!!scheduleAt.time && scheduleAt.time.includes(":")) {
-      const [h, m] = scheduleAt.time.split(":").map(Number);
+    if (!!atTime && atTime.includes(":")) {
+      const [h, m] = atTime.split(":").map(Number);
       return createHijriDate(year, month, day, h, m).toDate().valueOf();
     }
 

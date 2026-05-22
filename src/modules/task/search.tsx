@@ -68,9 +68,7 @@ export default function Search() {
         />
       }
     >
-      <div
-        className="tasks-scroll-container h-[100%] overflow-y-auto min-h-[400px]"
-      >
+      <div className="tasks-scroll-container h-[100%] overflow-y-auto min-h-[400px]">
         {initiated && error && (
           <div className="text-center py-8">
             <div className="text-red-600 mb-4">

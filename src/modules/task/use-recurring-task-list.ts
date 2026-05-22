@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
 import { queryKeys } from "../query-keys";
-import { computeOccurrencesInRange } from "./recurring-task-generator";
+import { useRecurringOccurance } from "./recurring-task-generator";
 import { Task } from "@/domain/task";
 import type { RecurringTask } from "./recurring-task";
 
@@ -34,6 +34,7 @@ function toVirtualTask(
 
 export function useRecurringTaskList() {
   const { db } = usePouchDB();
+  const { computeOccurrencesInRange } = useRecurringOccurance();
 
   const {
     data: tasks = [],

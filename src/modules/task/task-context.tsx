@@ -11,7 +11,7 @@ import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings";
-import { scheduleRecurringTaskReminders } from "./recurring-reminder-scheduler";
+import { useTaskReminder } from "./recurring-reminder-scheduler";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
@@ -59,6 +59,7 @@ export const TaskProvider: React.FC<{
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
   const [task, setTask] = useState<Task | null>(null);
+  const scheduleRecurringTaskReminders = useTaskReminder();
 
   // Local form state
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);

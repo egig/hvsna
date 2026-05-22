@@ -137,7 +137,16 @@ export const useTaskFormEdit = (
       taskDescription: string;
     } & Partial<Task>;
 
-    let atEpochMillis = getTaskEpoch(formData.scheduleAt) as number;
+    let atEpochMillis = null;
+    if (formData.scheduleAt.dateHijri) {
+      const { year, month, day } = formData.scheduleAt.dateHijri;
+      atEpochMillis = getTaskEpoch(
+        year,
+        month,
+        day,
+        formData.scheduleAt.time
+      ) as number;
+    }
 
     try {
       setIsSubmitting(true);

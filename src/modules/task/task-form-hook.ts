@@ -90,7 +90,15 @@ export const useTaskForm = (
     } & Partial<Task>;
 
     taskData.atTime = formData.scheduleAt.time;
-    taskData.atEpochMillis = getTaskEpoch(formData.scheduleAt) as number;
+    if (!!formData.scheduleAt.dateHijri) {
+      const { year, month, day } = formData.scheduleAt.dateHijri;
+      taskData.atEpochMillis = getTaskEpoch(
+        year,
+        month,
+        day,
+        formData.scheduleAt.time
+      ) as number;
+    }
 
     try {
       setIsSubmitting(true);
@@ -99,7 +107,13 @@ export const useTaskForm = (
 
       if (isRecurring && formData.scheduleAt.dateHijri) {
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = getTaskEpoch(formData.scheduleAt) as number;
+        const { year, month, day } = formData.scheduleAt.dateHijri;
+        const baseDateEpoch = getTaskEpoch(
+          year,
+          month,
+          day,
+          formData.scheduleAt.time
+        ) as number;
         const repeatEndEpoch =
           formData.repeat.end === "on_date" && formData.repeat.endDate
             ? (() => {
