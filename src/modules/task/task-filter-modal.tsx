@@ -4,7 +4,6 @@ import { NavActionButton } from "../components/nav-action-button";
 import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { TaskTypeFilter } from "@/domain/task";
 import { useTags } from "./use-tags";
 
 interface TaskFilterModalProps {
@@ -13,14 +12,12 @@ interface TaskFilterModalProps {
   dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
   searchTextFilter: string;
   unscheduledFilter: boolean;
-  taskTypeFilter: TaskTypeFilter;
   tagFilter: string[];
   onDateRangeFilterChange: (
     dateRange: { startDate: HijriDate; endDate: HijriDate } | null
   ) => void;
   onSearchTextFilterChange: (value: string) => void;
   onUnscheduledFilterChange: (value: boolean) => void;
-  onTaskTypeFilterChange: (value: TaskTypeFilter) => void;
   onTagFilterChange: (tags: string[]) => void;
   onClear: () => void;
 }

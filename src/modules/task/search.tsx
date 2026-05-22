@@ -6,7 +6,7 @@ import { EmptyState } from "../components/empty-state";
 import TaskFilterModal from "./task-filter-modal";
 import { Button, Page } from "../navigation";
 import TaskListItem from "src/modules/task/task-list-item";
-import { useTasks } from "./use-tasks";
+import { useSearch } from "./use-search";
 import { useLanguageContext } from "../i18n/LanguageContext";
 
 export default function Search() {
@@ -20,19 +20,16 @@ export default function Search() {
     error,
     refreshTasks,
     openEditPopup,
-    handleInfiniteScroll,
     dateRangeFilter,
     searchTextFilter,
     unscheduledFilter,
-    taskTypeFilter,
     tagFilter,
     setDateRangeFilter,
     setSearchTextFilter,
     setUnscheduledFilter,
-    setTaskTypeFilter,
     setTagFilter,
     clearFilters,
-  } = useTasks();
+  } = useSearch();
 
   const handleFilterModalClose = () => {
     setFilterModalOpened(false);
@@ -43,7 +40,6 @@ export default function Search() {
       searchTextFilter !== "" ||
       !!dateRangeFilter ||
       unscheduledFilter ||
-      taskTypeFilter !== "all" ||
       tagFilter.length > 0
     );
   };
@@ -74,7 +70,6 @@ export default function Search() {
     >
       <div
         className="tasks-scroll-container h-[100%] overflow-y-auto min-h-[400px]"
-        onScroll={handleInfiniteScroll}
       >
         {initiated && error && (
           <div className="text-center py-8">
@@ -126,12 +121,10 @@ export default function Search() {
           dateRangeFilter={dateRangeFilter}
           searchTextFilter={searchTextFilter}
           unscheduledFilter={unscheduledFilter}
-          taskTypeFilter={taskTypeFilter}
           tagFilter={tagFilter}
           onDateRangeFilterChange={setDateRangeFilter}
           onSearchTextFilterChange={setSearchTextFilter}
           onUnscheduledFilterChange={setUnscheduledFilter}
-          onTaskTypeFilterChange={setTaskTypeFilter}
           onTagFilterChange={setTagFilter}
           onClear={clearFilters}
         />
