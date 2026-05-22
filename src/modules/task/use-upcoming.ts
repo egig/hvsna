@@ -3,7 +3,9 @@ import { usePendingTasks } from "./use-pending-tasks";
 import { useVirtualTasks } from "./use-virtual-tasks";
 import type { Task } from "@/domain/task";
 
-export function useUpcoming() {
+export type LaterGroup = { key: string; label: string; tasks: Task[] };
+
+export function useUpcoming(horizonDays = 30) {
   const { getToday, toHijriDate, formatDate } = useHijriDate();
 
   const today = getToday();
@@ -12,27 +14,19 @@ export function useUpcoming() {
 
   const pendingTasksQuery = usePendingTasks();
   const startOfToday = today.startOfDay().toDate().valueOf();
-  const threeMonths = startOfToday + 90 * 24 * 60 * 60 * 1000;
-  const virtualTaskQuery = useVirtualTasks(startOfToday, threeMonths);
+  const endEpoch = startOfToday + horizonDays * 24 * 60 * 60 * 1000;
+  const virtualTaskQuery = useVirtualTasks(startOfToday, endEpoch);
 
-  const groupTasksByTimePeriod = (
-    tasks: Task[]
-  ): {
-    today: { tasks: Task[]; label: string };
-    tomorrow: { tasks: Task[]; label: string };
-    thisWeek: { tasks: Task[]; label: string };
-    thisMonth: { tasks: Task[]; label: string };
-    later: { tasks: Task[]; label: string };
-    unscheduled: { tasks: Task[]; label: string };
-  } => {
-    const groups = {
+  const groupTasksByTimePeriod = (tasks: Task[]) => {
+    const fixed = {
       today: { tasks: [] as Task[], label: "" },
       tomorrow: { tasks: [] as Task[], label: "" },
       thisWeek: { tasks: [] as Task[], label: "" },
       thisMonth: { tasks: [] as Task[], label: "" },
-      later: { tasks: [] as Task[], label: "" },
       unscheduled: { tasks: [] as Task[], label: "" },
     };
+
+    const laterMap = new Map<string, LaterGroup>();
 
     const todayStartOfDay = today.startOfDay().toDate();
     const tomorrowStartOfDay = today.next().startOfDay().toDate();
@@ -40,7 +34,7 @@ export function useUpcoming() {
 
     tasks.forEach((task) => {
       if (!task.atEpochMillis) {
-        groups.unscheduled.tasks.push(task);
+        fixed.unscheduled.tasks.push(task);
         return;
       }
 
@@ -48,7 +42,7 @@ export function useUpcoming() {
         const taskDate = new Date(task.atEpochMillis);
 
         if (taskDate >= todayStartOfDay && taskDate < tomorrowStartOfDay) {
-          groups.today.tasks.push(task);
+          fixed.today.tasks.push(task);
           return;
         }
 
@@ -57,37 +51,48 @@ export function useUpcoming() {
           taskDate <
             new Date(tomorrowStartOfDay.getTime() + 24 * 60 * 60 * 1000)
         ) {
-          groups.tomorrow.tasks.push(task);
+          fixed.tomorrow.tasks.push(task);
           return;
         }
 
-        if (
-          taskDate > tomorrowStartOfDay &&
-          taskDate <= endOfWeekDate.toDate()
-        ) {
-          groups.thisWeek.tasks.push(task);
+        if (taskDate > tomorrowStartOfDay && taskDate <= endOfWeekDate.toDate()) {
+          fixed.thisWeek.tasks.push(task);
           return;
         }
 
-        const taskHijriDate = toHijriDate(taskDate);
-        if (
-          taskHijriDate.year === today.year &&
-          taskHijriDate.month === today.month
-        ) {
-          groups.thisMonth.tasks.push(task);
+        const taskHijri = toHijriDate(taskDate);
+        if (taskHijri.year === today.year && taskHijri.month === today.month) {
+          fixed.thisMonth.tasks.push(task);
           return;
         }
 
-        groups.later.tasks.push(task);
+        // Beyond thisMonth — group by Hijri month (same year) or Hijri year (future years)
+        let key: string;
+        let label: string;
+        if (taskHijri.year === today.year) {
+          key = `month_${taskHijri.year}_${String(taskHijri.month).padStart(2, "0")}`;
+          label = taskHijri.format("MMMM YYYY");
+        } else {
+          key = `year_${taskHijri.year}`;
+          label = taskHijri.year.toString();
+        }
+
+        if (!laterMap.has(key)) {
+          laterMap.set(key, { key, label, tasks: [] });
+        }
+        laterMap.get(key)!.tasks.push(task);
       } catch {
-        groups.unscheduled.tasks.push(task);
+        fixed.unscheduled.tasks.push(task);
       }
     });
 
-    return groups;
+    const laterGroups = Array.from(laterMap.values()).sort((a, b) =>
+      a.key.localeCompare(b.key)
+    );
+
+    return { ...fixed, laterGroups };
   };
 
-  // TODO paginate by date range
   const upcomingTasks = [
     ...(pendingTasksQuery.data ?? []).filter(
       (t) => !!t.atEpochMillis && t.atEpochMillis > new Date().valueOf()
@@ -99,6 +104,7 @@ export function useUpcoming() {
     upcomingTasks,
     taskGroups: groupedTasks,
     loading: pendingTasksQuery.isPending,
+    isLoadingMore: virtualTaskQuery.isFetching,
     initiated: !pendingTasksQuery.isPending,
     error: pendingTasksQuery.error
       ? pendingTasksQuery.error instanceof Error

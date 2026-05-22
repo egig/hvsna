@@ -3,13 +3,12 @@ import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import { buildVirtualTasksForRange } from "./recurring-task-generator";
 import type { RecurringTask } from "./recurring-task";
-import { queryKeys } from "../query-keys";
 
 export function useVirtualTasks(startEpoch: number, endEpoch: number) {
   const { db } = usePouchDB();
 
   return useQuery({
-    queryKey: queryKeys.virtualTasks(),
+    queryKey: ["virtual-tasks", startEpoch, endEpoch],
     queryFn: async () => {
       // All recurring task templates
       const response = await db.allDocs({

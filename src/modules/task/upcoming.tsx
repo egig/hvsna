@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -23,6 +23,7 @@ import { useUpcoming } from "./use-upcoming";
 import { useUnscheduled } from "./use-unscheduled";
 import { WeekView } from "./week-view";
 import type { Task } from "@/domain/task";
+import type { LaterGroup } from "./use-upcoming";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "./task-context";
 import { useScreenSize } from "../components/screen-size-wrapper";
@@ -34,19 +35,40 @@ type ViewMode = "list" | "week";
 function ScheduledContent({
   upcomingTasks,
   taskGroupsWithLabels,
+  laterGroups,
   effectiveMode,
   handleEditTask,
   t,
   droppable,
+  onLoadMore,
+  canLoadMore,
+  isLoadingMore,
 }: {
   upcomingTasks: Task[];
   taskGroupsWithLabels: Record<string, { label: string; tasks: Task[] }>;
+  laterGroups: LaterGroup[];
   isReady: boolean;
   effectiveMode: ViewMode;
   handleEditTask: (task: Task) => void;
   t: (key: string) => string;
   droppable?: boolean;
+  onLoadMore: () => void;
+  canLoadMore: boolean;
+  isLoadingMore: boolean;
 }) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!canLoadMore || !sentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) onLoadMore();
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [canLoadMore, onLoadMore]);
+
   return (
     <>
       {effectiveMode === "week" ? (
@@ -64,7 +86,6 @@ function ScheduledContent({
             { key: "tomorrow", label: t("tomorrow") },
             { key: "thisWeek", label: t("this_week") },
             { key: "thisMonth", label: t("this_month") },
-            { key: "later", label: t("later") },
           ]
             .filter(
               ({ key }) =>
@@ -87,6 +108,30 @@ function ScheduledContent({
                 </>
               </div>
             ))}
+          {laterGroups
+            .filter((g) => g.tasks.length > 0)
+            .map((group) => (
+              <div key={group.key}>
+                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
+                  {group.label}
+                </h3>
+                <>
+                  {group.tasks.map((task: Task) => (
+                    <TaskListItem
+                      key={task.id}
+                      task={task}
+                      onEdit={handleEditTask}
+                    />
+                  ))}
+                </>
+              </div>
+            ))}
+          <div ref={sentinelRef} className="h-1" aria-hidden />
+          {isLoadingMore && (
+            <div className="flex justify-center py-4 text-sm text-gray-400">
+              {"Loading…"}
+            </div>
+          )}
         </div>
       )}
     </>
@@ -216,11 +261,22 @@ function DroppableInboxSidebar({
   );
 }
 
+const HORIZON_INITIAL = 30;
+const HORIZON_INCREMENT = 30;
+const HORIZON_MAX = 365;
+
 export default function Upcoming() {
   const { t } = useLanguageContext();
   const { openEditTaskForm, updateTask } = useTaskContext();
   const { isDesktop } = useScreenSize();
   const { toHijriDate } = useHijriDate();
+
+  const [horizonDays, setHorizonDays] = useState(HORIZON_INITIAL);
+  const canLoadMore = horizonDays < HORIZON_MAX;
+  const handleLoadMore = () => {
+    if (!canLoadMore) return;
+    setHorizonDays((prev) => Math.min(prev + HORIZON_INCREMENT, HORIZON_MAX));
+  };
 
   const [activeTask, setActiveTask] = useState<Task | null>(null);
 
@@ -258,19 +314,17 @@ export default function Upcoming() {
     localStorage.setItem("upcoming-view-mode", mode);
   };
 
-  const { upcomingTasks, taskGroups, loading, initiated, error } =
-    useUpcoming();
+  const { upcomingTasks, taskGroups, loading, isLoadingMore, initiated, error } =
+    useUpcoming(horizonDays);
 
   const { inboxTasks: unscheduledTasks, initiated: inboxInitiated } =
     useUnscheduled();
 
   const taskGroupsWithLabels = {
-    ...taskGroups,
     today: { ...taskGroups.today, label: t("today") },
     tomorrow: { ...taskGroups.tomorrow, label: t("tomorrow") },
     thisWeek: { ...taskGroups.thisWeek, label: t("this_week") },
     thisMonth: { ...taskGroups.thisMonth, label: t("this_month") },
-    later: { ...taskGroups.later, label: t("later") },
     unscheduled: { ...taskGroups.unscheduled, label: t("unscheduled") },
   };
 
@@ -367,11 +421,15 @@ export default function Upcoming() {
                   <ScheduledContent
                     upcomingTasks={upcomingTasks}
                     taskGroupsWithLabels={taskGroupsWithLabels}
+                    laterGroups={taskGroups.laterGroups}
                     isReady={isReady}
                     effectiveMode={effectiveMode}
                     handleEditTask={handleEditTask}
                     t={t}
                     droppable={effectiveMode === "week"}
+                    onLoadMore={handleLoadMore}
+                    canLoadMore={canLoadMore}
+                    isLoadingMore={isLoadingMore}
                   />
                 </div>
               </div>
@@ -477,10 +535,14 @@ export default function Upcoming() {
           <ScheduledContent
             upcomingTasks={upcomingTasks}
             taskGroupsWithLabels={taskGroupsWithLabels}
+            laterGroups={taskGroups.laterGroups}
             isReady={isReady}
             effectiveMode="list"
             handleEditTask={handleEditTask}
             t={t}
+            onLoadMore={handleLoadMore}
+            canLoadMore={canLoadMore}
+            isLoadingMore={isLoadingMore}
           />
         </>
       ) : (
