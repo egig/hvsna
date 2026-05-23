@@ -172,7 +172,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         setIsLocationModalOpen(true);
       }
     })();
-  }, [settings]);
+  }, [settings, networkInit, isOnline]);
 
   return (
     <LacationContext.Provider
