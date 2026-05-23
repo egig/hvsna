@@ -15,6 +15,7 @@ import {
   type Location,
 } from "../components/location-picker-modal";
 import type { LocationSetting } from "../settings/settings";
+import { useNetworkContext } from "../network/context";
 
 async function reverseGeocode(
   lat: number,
@@ -71,6 +72,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
   const [loading, setLoading] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const { updateSettings, settings } = useSettings();
+  const { initiated: networkInit, isOnline } = useNetworkContext();
 
   const useCases = new LocationUseCases(
     createLocationProvider(),
@@ -129,7 +131,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
     });
   };
 
-  const islLocationUptodate = () => {
+  const isLocationUptodate = () => {
     if (!settings?.location) {
       return false;
     }
@@ -157,7 +159,11 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
 
   useEffect(() => {
     (async () => {
-      if (islLocationUptodate()) {
+      if (networkInit && !isOnline) {
+        return;
+      }
+
+      if (isLocationUptodate()) {
         return;
       }
 
