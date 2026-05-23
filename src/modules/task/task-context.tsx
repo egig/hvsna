@@ -250,8 +250,8 @@ export const TaskProvider: React.FC<{
       long: task.long,
       timezone: task.timezone,
       hijriDateOffset: task.hijriDateOffset,
-      repeat: task.repeat,
-      repeatInterval: task.repeatInterval,
+      recurringType: task.recurringType,
+      recurringInterval: task.recurringInterval,
       recurringTaskId: task.recurringTaskId ?? undefined,
       tags: task.tags ?? [],
     });

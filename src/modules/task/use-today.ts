@@ -38,10 +38,7 @@ export function useToday() {
   });
 
   const todayTasks = (allTasks ?? []).filter(
-    (t) =>
-      t.noDate === 0 &&
-      t.atEpochMillis != null &&
-      t.atEpochMillis <= endOfToday.valueOf()
+    (t) => t.atEpochMillis != null && t.atEpochMillis <= endOfToday.valueOf()
   );
 
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${

@@ -14,7 +14,7 @@ import { useDateTranslationHelper } from "src/modules/calendar/use-date-translat
 import { ListInput } from "src/modules/components/list-input";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
-import type { TaskRepeat } from "@/domain/task";
+import type { TaskRecurringType } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { RepeatEndDateView } from "./repeat-end-date-view";
 
@@ -24,26 +24,26 @@ interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedDate: HijriDate | null;
-  selectedRepeat?: TaskRepeat;
-  selectedRepeatInterval?: number;
-  selectedRepeatEnd?: RepeatEnd;
-  selectedRepeatEndDate?: string | null;
-  selectedRepeatEndOccurrences?: number;
+  selectedRecurringType?: TaskRecurringType;
+  selectedRecurringInterval?: number;
+  selectedRecurringEnd?: RepeatEnd;
+  selectedRecurringEndDate?: string | null;
+  selectedRecurringEndOccurrences?: number;
   selectedUseGregorian?: boolean;
-  forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
+  forceRecurring?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onConfirm: (
     date: HijriDate | null,
-    repeat: TaskRepeat,
-    repeatInterval: number,
-    repeatEnd: RepeatEnd,
-    repeatEndDate: string | null,
-    repeatEndOccurrences: number,
+    recurring: TaskRecurringType,
+    recurringInterval: number,
+    recurringEnd: RepeatEnd,
+    recurringEndDate: string | null,
+    recurringEndOccurrences: number,
     useGregorian: boolean
   ) => void;
 }
 
 function formatRepeatLabel(
-  repeat: TaskRepeat,
+  recurringType: TaskRecurringType,
   interval: number,
   t: (key: string) => string
 ): string {
@@ -53,9 +53,9 @@ function formatRepeatLabel(
     monthly: t("repeat_monthly"),
     yearly: t("repeat_yearly"),
   };
-  if (interval <= 1) return unitLabels[repeat] ?? repeat;
+  if (interval <= 1) return unitLabels[recurringType] ?? recurringType;
   return `${t("every") || "Every"} ${interval} ${(
-    unitLabels[repeat] ?? repeat
+    unitLabels[recurringType] ?? recurringType
   ).toLowerCase()}`;
 }
 
@@ -63,13 +63,13 @@ export function CalendarModal({
   isOpen,
   onClose,
   selectedDate,
-  selectedRepeat = "none",
-  selectedRepeatInterval = 1,
-  selectedRepeatEnd = "never",
-  selectedRepeatEndDate = null,
-  selectedRepeatEndOccurrences = 1,
+  selectedRecurringType: selectedRecurringType = "none",
+  selectedRecurringInterval: selectedRecurringInterval = 1,
+  selectedRecurringEnd: selectedRecurringEnd = "never",
+  selectedRecurringEndDate: selectedRecurringEndDate = null,
+  selectedRecurringEndOccurrences: selectedRecurringEndOccurrences = 1,
   selectedUseGregorian = false,
-  forceRepeat = false,
+  forceRecurring: forceRecurring = false,
   onConfirm,
 }: CalendarModalProps) {
   const { t, language } = useLanguageContext();
@@ -103,20 +103,20 @@ export function CalendarModal({
   const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
     selectedDate
   );
-  const [tempRepeat, setTempRepeat] = useState<TaskRepeat>(
-    selectedRepeat ?? "none"
+  const [tempRepeat, setTempRepeat] = useState<TaskRecurringType>(
+    selectedRecurringType ?? "none"
   );
   const [tempRepeatInterval, setTempRepeatInterval] = useState(
-    selectedRepeatInterval ?? 1
+    selectedRecurringInterval ?? 1
   );
   const [tempRepeatEnd, setTempRepeatEnd] = useState<RepeatEnd>(
-    selectedRepeatEnd ?? "never"
+    selectedRecurringEnd ?? "never"
   );
   const [tempRepeatEndDate, setTempRepeatEndDate] = useState<string | null>(
-    selectedRepeatEndDate ?? null
+    selectedRecurringEndDate ?? null
   );
   const [tempRepeatEndOccurrences, setTempRepeatEndOccurrences] = useState(
-    selectedRepeatEndOccurrences ?? 1
+    selectedRecurringEndOccurrences ?? 1
   );
   const [tempUseGregorian, setTempUseGregorian] = useState(
     selectedUseGregorian ?? false
@@ -127,11 +127,11 @@ export function CalendarModal({
     if (!isOpen) return;
     setView("date");
     setTempSelectedDate(selectedDate);
-    setTempRepeat(selectedRepeat ?? "none");
-    setTempRepeatInterval(selectedRepeatInterval ?? 1);
-    setTempRepeatEnd(selectedRepeatEnd ?? "never");
-    setTempRepeatEndDate(selectedRepeatEndDate ?? null);
-    setTempRepeatEndOccurrences(selectedRepeatEndOccurrences ?? 1);
+    setTempRepeat(selectedRecurringType ?? "none");
+    setTempRepeatInterval(selectedRecurringInterval ?? 1);
+    setTempRepeatEnd(selectedRecurringEnd ?? "never");
+    setTempRepeatEndDate(selectedRecurringEndDate ?? null);
+    setTempRepeatEndOccurrences(selectedRecurringEndOccurrences ?? 1);
     setTempUseGregorian(selectedUseGregorian ?? false);
     setCurrentMonth(
       selectedDate
@@ -524,12 +524,12 @@ export function CalendarModal({
       {/* ── Repeat sub-view ───────────────────────────────────────────────── */}
       <Activity mode={view === "repeat" ? "visible" : "hidden"}>
         <RepeatSelectorModal
-          repeat={tempRepeat}
+          recurringType={tempRepeat}
           interval={tempRepeatInterval}
-          repeatEnd={tempRepeatEnd}
-          repeatEndDate={tempRepeatEndDate}
-          repeatEndOccurrences={tempRepeatEndOccurrences}
-          forceRepeat={forceRepeat}
+          recurringEnd={tempRepeatEnd}
+          recurringEndDate={tempRepeatEndDate}
+          recurringEndOccurrences={tempRepeatEndOccurrences}
+          forceRecurring={forceRecurring}
           onBack={() => setView("date")}
           onSelectEndDate={() => setView("repeat_end_date")}
           onConfirm={(

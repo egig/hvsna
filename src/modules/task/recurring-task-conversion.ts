@@ -1,5 +1,5 @@
 import type { ITaskRepository } from "@/domain/task/ITaskRepository";
-import type { Task, TaskRepeat, TaskUpdateInput } from "@/domain/task";
+import type { Task, TaskRecurringType, TaskUpdateInput } from "@/domain/task";
 import type {
   RecurringTask,
   RecurringTaskCreateInput,
@@ -79,8 +79,8 @@ export async function updateRecurringSeries(
 export async function promoteTaskToRecurring(
   taskId: string,
   taskInput: TaskUpdateInput,
-  repeat: TaskRepeat,
-  repeatInterval: number,
+  recurringType: TaskRecurringType,
+  recurringInterval: number,
   templateInput: RecurringTaskCreateInput,
   deps: PromoteToRecurringDeps
 ): Promise<Task> {
@@ -90,8 +90,8 @@ export async function promoteTaskToRecurring(
 
   return updateTask(taskId, {
     ...taskInput,
-    repeat,
-    repeatInterval,
+    recurringType: recurringType,
+    recurringInterval: recurringInterval,
     recurringTaskId: template.id,
   });
 }
@@ -123,8 +123,8 @@ export async function demoteTaskFromRecurringAndDeleteFuture(
   return updateTask(taskId, {
     ...taskInput,
     recurringTaskId: null,
-    repeat: "none",
-    repeatInterval: undefined,
+    recurringType: "none",
+    recurringInterval: undefined,
   });
 }
 
@@ -141,7 +141,7 @@ export async function demoteTaskFromRecurring(
   return updateTask(taskId, {
     ...taskInput,
     recurringTaskId: null,
-    repeat: "none",
-    repeatInterval: undefined,
+    recurringType: "none",
+    recurringInterval: undefined,
   });
 }

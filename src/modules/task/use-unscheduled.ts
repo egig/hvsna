@@ -14,7 +14,7 @@ export function useUnscheduled() {
   const pendingTasksQuery = usePendingTasks();
 
   const inboxTasks = (pendingTasksQuery.data ?? []).filter(
-    (t) => t.noDate === 1
+    (t) => !t.atEpochMillis
   );
 
   const pageTitle = "Unscheduled";

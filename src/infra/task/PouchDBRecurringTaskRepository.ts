@@ -14,8 +14,8 @@ class PouchDBRecurringTaskDocument {
   user_id?: string;
   name?: string;
   description?: string;
-  repeat?: string;
-  repeatInterval?: number;
+  recurringType?: string;
+  recurringInterval?: number;
   baseDateEpoch?: number;
   atTime?: string;
   lat?: number;
@@ -23,9 +23,9 @@ class PouchDBRecurringTaskDocument {
   timezone?: string;
   hijriDateOffset?: number;
   tags?: string[] | null = null;
-  repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndEpoch?: number;
-  repeatEndOccurrences?: number;
+  recurringEnd?: "never" | "on_date" | "after_occurrences";
+  recurringEndEpoch?: number;
+  recurringEndOccurrences?: number;
   useGregorian?: boolean;
   created_at?: number;
   updated_at?: number;
@@ -40,8 +40,8 @@ class PouchDBRecurringTaskDocument {
       user_id: this.user_id,
       name: this.name || "",
       description: this.description,
-      repeat: this.repeat as any,
-      repeatInterval: this.repeatInterval || 1,
+      recurringType: this.recurringType as any,
+      recurringInterval: this.recurringInterval || 1,
       baseDateEpoch: this.baseDateEpoch ?? 0,
       atTime: this.atTime,
       lat: this.lat,
@@ -49,9 +49,9 @@ class PouchDBRecurringTaskDocument {
       timezone: this.timezone,
       hijriDateOffset: this.hijriDateOffset,
       tags: this.tags || undefined,
-      repeatEnd: this.repeatEnd,
-      repeatEndEpoch: this.repeatEndEpoch,
-      repeatEndOccurrences: this.repeatEndOccurrences,
+      recurringEnd: this.recurringEnd,
+      recurringEndEpoch: this.recurringEndEpoch,
+      recurringEndOccurrences: this.recurringEndOccurrences,
       useGregorian: this.useGregorian,
       created_at: this.created_at,
       updated_at: this.updated_at,
@@ -66,8 +66,8 @@ class PouchDBRecurringTaskDocument {
     doc.user_id = t.user_id;
     doc.name = t.name;
     doc.description = t.description;
-    doc.repeat = t.repeat;
-    doc.repeatInterval = t.repeatInterval;
+    doc.recurringType = t.recurringType;
+    doc.recurringInterval = t.recurringInterval;
     doc.baseDateEpoch = t.baseDateEpoch;
     doc.atTime = t.atTime;
     doc.lat = t.lat;
@@ -75,9 +75,9 @@ class PouchDBRecurringTaskDocument {
     doc.timezone = t.timezone;
     doc.hijriDateOffset = t.hijriDateOffset;
     doc.tags = t.tags;
-    doc.repeatEnd = t.repeatEnd;
-    doc.repeatEndEpoch = t.repeatEndEpoch;
-    doc.repeatEndOccurrences = t.repeatEndOccurrences;
+    doc.recurringEnd = t.recurringEnd;
+    doc.recurringEndEpoch = t.recurringEndEpoch;
+    doc.recurringEndOccurrences = t.recurringEndOccurrences;
     doc.useGregorian = t.useGregorian;
     doc.created_at = t.created_at;
     doc.updated_at = t.updated_at;
@@ -98,8 +98,8 @@ export class PouchDBRecurringTaskRepository
       id,
       name: input.name,
       description: input.description,
-      repeat: input.repeat,
-      repeatInterval: input.repeatInterval ?? 1,
+      recurringType: input.recurringType,
+      recurringInterval: input.recurringInterval ?? 1,
       baseDateEpoch: input.baseDateEpoch,
       atTime: input.atTime,
       lat: input.lat,
@@ -108,9 +108,9 @@ export class PouchDBRecurringTaskRepository
       hijriDateOffset: input.hijriDateOffset,
       created_at: now,
       updated_at: now,
-      repeatEnd: input.repeatEnd,
-      repeatEndEpoch: input.repeatEndEpoch,
-      repeatEndOccurrences: input.repeatEndOccurrences,
+      recurringEnd: input.recurringEnd,
+      recurringEndEpoch: input.recurringEndEpoch,
+      recurringEndOccurrences: input.recurringEndOccurrences,
       useGregorian: input.useGregorian,
       tags: input.tags,
     };
@@ -170,7 +170,7 @@ export class PouchDBRecurringTaskRepository
   async find(query?: RecurringTaskQuery): Promise<RecurringTask[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "repeat"],
+        fields: ["type", "recurringType"],
       },
     });
 
@@ -181,13 +181,13 @@ export class PouchDBRecurringTaskRepository
       sort: [
         {
           type: "asc",
-          repeat: "asc",
+          recurringType: "asc",
         },
       ],
     };
 
-    if (query?.repeat) {
-      mangoQuery.selector.repeat = query.repeat;
+    if (query?.recurringType) {
+      mangoQuery.selector.recurringType = query.recurringType;
     }
 
     const result = await this.db.find(mangoQuery);

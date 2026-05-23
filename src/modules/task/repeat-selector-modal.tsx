@@ -3,7 +3,7 @@ import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { ModalNavbar } from "../navigation";
-import type { TaskRepeat } from "@/domain/task";
+import type { TaskRecurringType } from "@/domain/task";
 
 type RepeatOption =
   | "none"
@@ -16,11 +16,11 @@ type RepeatOption =
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
 interface RepeatSelectorModalProps {
-  repeat: TaskRepeat;
+  recurringType: TaskRecurringType;
   interval: number;
   onBack: () => void;
   onConfirm: (
-    repeat: TaskRepeat,
+    repeat: TaskRecurringType,
     interval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
@@ -28,32 +28,35 @@ interface RepeatSelectorModalProps {
     useGregorian: boolean
   ) => void;
   useGregorian?: boolean;
-  repeatEnd?: RepeatEnd;
-  repeatEndDate?: string | null;
-  repeatEndOccurrences?: number;
+  recurringEnd?: RepeatEnd;
+  recurringEndDate?: string | null;
+  recurringEndOccurrences?: number;
   onSelectEndDate: () => void;
-  forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
+  forceRecurring?: boolean; // If true, repeat is forced to be selected (no "none" option)
 }
 
-const REPEAT_UNITS: { value: TaskRepeat; labelKey: string }[] = [
+const REPEAT_UNITS: { value: TaskRecurringType; labelKey: string }[] = [
   { value: "daily", labelKey: "repeat_daily" },
   { value: "weekly", labelKey: "repeat_weekly" },
   { value: "monthly", labelKey: "repeat_monthly" },
   { value: "yearly", labelKey: "repeat_yearly" },
 ];
 
-const INTERVAL_UNITS: { value: TaskRepeat; labelKey: string }[] = [
+const INTERVAL_UNITS: { value: TaskRecurringType; labelKey: string }[] = [
   { value: "daily", labelKey: "Days" },
   { value: "weekly", labelKey: "Weeks" },
   { value: "monthly", labelKey: "Months" },
   { value: "yearly", labelKey: "Years" },
 ];
 
-function isPreset(repeat: TaskRepeat, interval: number): boolean {
+function isPreset(repeat: TaskRecurringType, interval: number): boolean {
   return repeat !== "none" && interval === 1;
 }
 
-function getInitialOption(repeat: TaskRepeat, interval: number): RepeatOption {
+function getInitialOption(
+  repeat: TaskRecurringType,
+  interval: number
+): RepeatOption {
   if (repeat === "none") return "none";
   if (interval === 1) return repeat;
   return "custom";
@@ -69,30 +72,30 @@ function formatRepeatEndDate(dateStr: string | null): string {
 }
 
 export function RepeatSelectorModal({
-  repeat,
+  recurringType,
   interval,
   onBack,
   onConfirm,
-  repeatEnd: repeatEndProp = "never",
-  repeatEndDate = null,
-  repeatEndOccurrences: repeatEndOccurrencesProp = 1,
+  recurringEnd: recurringEndProp = "never",
+  recurringEndDate: recurringEndDate = null,
+  recurringEndOccurrences: repeatEndOccurrencesProp = 1,
   onSelectEndDate,
-  forceRepeat = false,
+  forceRecurring: forceRecurring = false,
   useGregorian: useGregorianProp = false,
 }: RepeatSelectorModalProps) {
   const { t } = useLanguageContext();
 
   const [selectedOption, setSelectedOption] = useState<RepeatOption>(
-    getInitialOption(repeat, interval)
+    getInitialOption(recurringType, interval)
   );
   const [customInterval, setCustomInterval] = useState(
     interval > 1 ? interval : 2
   );
-  const [customUnit, setCustomUnit] = useState<TaskRepeat>(
-    repeat !== "none" ? repeat : "daily"
+  const [customUnit, setCustomUnit] = useState<TaskRecurringType>(
+    recurringType !== "none" ? recurringType : "daily"
   );
   const [selectedRepeatEnd, setSelectedRepeatEnd] =
-    useState<RepeatEnd>(repeatEndProp);
+    useState<RepeatEnd>(recurringEndProp);
   const [endOccurrences, setEndOccurrences] = useState(
     repeatEndOccurrencesProp
   );
@@ -100,8 +103,8 @@ export function RepeatSelectorModal({
 
   // Sync internal state when props change
   useEffect(() => {
-    setSelectedRepeatEnd(repeatEndProp);
-  }, [repeatEndProp]);
+    setSelectedRepeatEnd(recurringEndProp);
+  }, [recurringEndProp]);
 
   useEffect(() => {
     setEndOccurrences(repeatEndOccurrencesProp);
@@ -115,16 +118,16 @@ export function RepeatSelectorModal({
         customUnit,
         Math.max(1, customInterval),
         selectedRepeatEnd,
-        repeatEndDate ?? null,
+        recurringEndDate ?? null,
         endOccurrences,
         useGregorian
       );
     } else {
       onConfirm(
-        selectedOption as TaskRepeat,
+        selectedOption as TaskRecurringType,
         1,
         selectedRepeatEnd,
-        repeatEndDate ?? null,
+        recurringEndDate ?? null,
         endOccurrences,
         useGregorian
       );
@@ -202,7 +205,9 @@ export function RepeatSelectorModal({
             />
             <select
               value={customUnit}
-              onChange={(e) => setCustomUnit(e.target.value as TaskRepeat)}
+              onChange={(e) =>
+                setCustomUnit(e.target.value as TaskRecurringType)
+              }
               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
               {INTERVAL_UNITS.map(({ value, labelKey }) => (
@@ -277,8 +282,8 @@ export function RepeatSelectorModal({
                 selectedRepeatEnd === "on_date" ? activeClass : inactiveClass
               } ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
             >
-              {repeatEndDate
-                ? formatRepeatEndDate(repeatEndDate)
+              {recurringEndDate
+                ? formatRepeatEndDate(recurringEndDate)
                 : t("repeat_ends_on_date")}
             </button>
             <button
@@ -339,7 +344,7 @@ export function RepeatSelectorModal({
       </div>
 
       {/* Remove repeat */}
-      {!forceRepeat && (
+      {!forceRecurring && (
         <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
           <button
             type="button"

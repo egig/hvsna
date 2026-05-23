@@ -23,15 +23,14 @@ function recurringTemplateToVirtualTask(
     description: template.description,
     atEpochMillis: nextEpoch ?? undefined,
     atTime: template.atTime,
-    repeat: template.repeat,
-    repeatInterval: template.repeatInterval ?? 1,
+    recurringType: template.recurringType,
+    recurringInterval: template.recurringInterval ?? 1,
     lat: template.lat,
     long: template.long,
     timezone: template.timezone,
     hijriDateOffset: template.hijriDateOffset,
     tags: template.tags ?? [],
     status: 0,
-    noDate: nextEpoch ? 0 : 1,
   });
 }
 
@@ -167,8 +166,22 @@ export function useSearch() {
     searchQuery.refetch();
   }, [searchQuery]);
 
+  // Sort no-date task on bottom
+  const tasks = (searchQuery.data || []).sort((a, b) => {
+    let at = Number.MAX_SAFE_INTEGER;
+    let bt = Number.MAX_SAFE_INTEGER;
+    if (!!a.atEpochMillis) {
+      at = a.atEpochMillis;
+    }
+
+    if (!!b.atEpochMillis) {
+      bt = b.atEpochMillis;
+    }
+    return at - bt;
+  });
+
   return {
-    tasks: searchQuery.data || [],
+    tasks,
     loading: searchQuery.isPending,
     initiated,
     error: searchQuery.error

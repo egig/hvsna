@@ -20,15 +20,14 @@ function toVirtualTask(
     description: template.description,
     atEpochMillis: nextEpoch ?? undefined,
     atTime: template.atTime,
-    repeat: template.repeat,
-    repeatInterval: template.repeatInterval ?? 1,
+    recurringType: template.recurringType,
+    recurringInterval: template.recurringInterval ?? 1,
     lat: template.lat,
     long: template.long,
     timezone: template.timezone,
     hijriDateOffset: template.hijriDateOffset,
     tags: template.tags ?? [],
     status: 0,
-    noDate: nextEpoch ? 0 : 1,
   });
 }
 

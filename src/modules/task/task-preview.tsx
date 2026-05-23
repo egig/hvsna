@@ -201,7 +201,7 @@ export default function TaskPreview({ task }: TaskPreviewProps) {
       </div>
 
       {/* Additional Information */}
-      {task.repeat && task.repeat !== "none" && (
+      {task.recurringType && task.recurringType !== "none" && (
         <div className="space-y-2">
           <h3 className="font-semibold text-gray-900">
             {t("repeat_information")}
@@ -209,7 +209,7 @@ export default function TaskPreview({ task }: TaskPreviewProps) {
           <div className="bg-gray-50 p-3 rounded-lg">
             <div>
               <span className="font-medium text-gray-600">{t("repeat")}:</span>
-              <p className="text-gray-900">{task.repeat}</p>
+              <p className="text-gray-900">{task.recurringType}</p>
             </div>
           </div>
         </div>

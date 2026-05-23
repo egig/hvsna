@@ -2,7 +2,7 @@
  * Reusable helper functions for task form operations
  */
 import { HijriDate, useHijriDate } from "../calendar/hijri";
-import type { TaskRepeat } from "@/domain/task";
+import type { TaskRecurringType } from "@/domain/task";
 import { usePrayerTimes } from "../prayer";
 
 /**
@@ -11,7 +11,7 @@ import { usePrayerTimes } from "../prayer";
  */
 export function getNextOccurrenceDate(
   atDateHijri: string,
-  repeat: TaskRepeat,
+  recurringType: TaskRecurringType,
   interval = 1,
   lat = 0,
   long = 0,
@@ -20,14 +20,14 @@ export function getNextOccurrenceDate(
   minutes: number | undefined,
   useGregorian = false
 ): string | null {
-  if (!repeat || repeat === "none" || !atDateHijri) return null;
+  if (!recurringType || recurringType === "none" || !atDateHijri) return null;
 
   const n = Math.max(1, interval);
   const { year, month, day } = parseHijriDateString(atDateHijri);
   const coords = { latitude: lat, longitude: long, offset };
 
-  if (repeat === "daily" || repeat === "weekly") {
-    const days = repeat === "weekly" ? n * 7 : n;
+  if (recurringType === "daily" || recurringType === "weekly") {
+    const days = recurringType === "weekly" ? n * 7 : n;
     const hijriDate = new HijriDate(
       year,
       month,
@@ -44,7 +44,7 @@ export function getNextOccurrenceDate(
     return formatHijriDateString(next.year, next.month, next.day);
   }
 
-  if (repeat === "monthly") {
+  if (recurringType === "monthly") {
     if (useGregorian) {
       const greg = new HijriDate(
         year,
@@ -67,7 +67,7 @@ export function getNextOccurrenceDate(
     return formatHijriDateString(nextYear, nextMonth, Math.min(day, 29));
   }
 
-  if (repeat === "yearly") {
+  if (recurringType === "yearly") {
     if (useGregorian) {
       const greg = new HijriDate(
         year,

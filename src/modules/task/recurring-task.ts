@@ -1,12 +1,12 @@
-import type { PrayerTime, TaskRepeat } from "@/domain/task";
+import type { TaskRecurringType } from "@/domain/task";
 
 export interface RecurringTask {
   id: string;
   user_id?: string;
   name: string;
   description?: string;
-  repeat: TaskRepeat;
-  repeatInterval: number;
+  recurringType: TaskRecurringType;
+  recurringInterval: number;
   baseDateEpoch: number;
   atTime?: string;
   lat?: number;
@@ -14,9 +14,9 @@ export interface RecurringTask {
   timezone?: string;
   hijriDateOffset?: number;
   tags?: string[];
-  repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndEpoch?: number;
-  repeatEndOccurrences?: number;
+  recurringEnd?: "never" | "on_date" | "after_occurrences";
+  recurringEndEpoch?: number;
+  recurringEndOccurrences?: number;
   useGregorian?: boolean;
   created_at?: number;
   updated_at?: number;
@@ -26,8 +26,8 @@ export interface RecurringTaskCreateInput {
   id?: string;
   name: string;
   description?: string;
-  repeat: TaskRepeat;
-  repeatInterval?: number;
+  recurringType: TaskRecurringType;
+  recurringInterval?: number;
   baseDateEpoch: number;
   atTime?: string;
   lat?: number;
@@ -35,18 +35,17 @@ export interface RecurringTaskCreateInput {
   timezone?: string;
   hijriDateOffset?: number;
   tags?: string[];
-  repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndEpoch?: number;
-  repeatEndOccurrences?: number;
+  recurringEnd?: "never" | "on_date" | "after_occurrences";
+  recurringEndEpoch?: number;
+  recurringEndOccurrences?: number;
   useGregorian?: boolean;
 }
 
 export interface RecurringTaskUpdateInput {
   name?: string;
   description?: string;
-  attributes?: Record<string, string>;
-  repeat?: TaskRepeat;
-  repeatInterval?: number;
+  recurringType?: TaskRecurringType;
+  recurringInterval?: number;
   baseDateEpoch?: number;
   atTime?: string;
   lat?: number;
@@ -54,9 +53,9 @@ export interface RecurringTaskUpdateInput {
   timezone?: string;
   hijriDateOffset?: number;
   tags?: string[] | null;
-  repeatEnd?: "never" | "on_date" | "after_occurrences";
-  repeatEndEpoch?: number;
-  repeatEndOccurrences?: number;
+  recurringEnd?: "never" | "on_date" | "after_occurrences";
+  recurringEndEpoch?: number;
+  recurringEndOccurrences?: number;
   useGregorian?: boolean;
 }
 
@@ -70,5 +69,5 @@ export interface RecurringTaskChange {
 
 export type RecurringTaskQuery = {
   id?: string;
-  repeat?: TaskRepeat;
+  recurringType?: TaskRecurringType;
 };

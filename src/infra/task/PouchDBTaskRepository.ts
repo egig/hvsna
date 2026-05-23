@@ -4,7 +4,7 @@ import { HijriDate } from "../../modules/calendar/hijri";
 import type {
   TaskCreateInput,
   TaskQuery,
-  TaskRepeat,
+  TaskRecurringType,
   TaskStatus,
   TaskUpdateInput,
   PrayerTime,
@@ -20,7 +20,6 @@ class PouchDBTaskDocument {
   name?: string;
   description?: string;
   status?: TaskStatus = 0;
-  noDate?: number = 1;
   atEpochMillis?: number | null = null;
   atTime?: string = "";
   createdAt: number | undefined;
@@ -31,8 +30,8 @@ class PouchDBTaskDocument {
   long?: number;
   hijriDateOffset?: number;
   timezone?: string;
-  repeat?: TaskRepeat;
-  repeatInterval?: number;
+  recurringType?: TaskRecurringType;
+  recurringInterval?: number;
   recurringTaskId?: string;
   tags?: string[] | null = null;
   deletedAt?: number;
@@ -53,14 +52,13 @@ class PouchDBTaskDocument {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       completedAt: this.completedAt,
-      noDate: this.noDate !== undefined ? this.noDate : 1,
       atTime: this.atTime || "",
       lat: this.lat,
       long: this.long,
       timezone: this.timezone,
       hijriDateOffset: this.hijriDateOffset,
-      repeat: this.repeat,
-      repeatInterval: this.repeatInterval,
+      recurringType: this.recurringType,
+      recurringInterval: this.recurringInterval,
       recurringTaskId: this.recurringTaskId,
       tags: this.tags,
       deletedAt: this.deletedAt,
@@ -71,7 +69,6 @@ class PouchDBTaskDocument {
     let a = new PouchDBTaskDocument(t);
     a._id = t.id;
     a._rev = t.rev;
-    a.noDate = t.atEpochMillis != null ? 0 : 1;
     a.atEpochMillis = t.atEpochMillis ?? null;
     a.lat = t.lat;
     a.long = t.long;
@@ -141,8 +138,8 @@ export class PouchDBTaskRepository implements ITaskRepository {
       long: input.long,
       timezone: input.timezone,
       hijriDateOffset: input.hijriDateOffset || 0,
-      repeat: input.repeat,
-      repeatInterval: input.repeatInterval,
+      recurringType: input.recurringType,
+      recurringInterval: input.recurringInterval,
       recurringTaskId: input.recurringTaskId,
       tags: input.tags,
     });
@@ -220,7 +217,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async find(query?: TaskQuery): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
+        fields: ["type", "status", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -228,18 +225,12 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: 0,
-        noDate: { $gte: 0 },
         atEpochMillis: {
           $gte: null,
         },
         deletedAt: null,
       },
-      sort: [
-        { type: "asc" },
-        { status: "asc" },
-        { noDate: "asc" },
-        { atEpochMillis: "asc" },
-      ],
+      sort: [{ type: "asc" }, { status: "asc" }, { atEpochMillis: "asc" }],
     };
 
     if (query?.status) {
@@ -354,7 +345,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findTasksBefore(beforeHijri: HijriDate): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
+        fields: ["type", "status", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -362,7 +353,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: 0,
-        noDate: 0,
         atEpochMillis: {
           $gt: null,
           $lte: beforeHijri.toDate().valueOf(),
@@ -372,7 +362,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { noDate: "asc" },
         { atEpochMillis: "asc" },
       ] as any,
     };
@@ -459,7 +448,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findTasksAfter(todayHijri: HijriDate): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
+        fields: ["type", "status", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -467,7 +456,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: 0,
-        noDate: 0,
         atEpochMillis: {
           $gte: todayHijri.toDate().valueOf(),
         },
@@ -476,7 +464,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { noDate: "asc" },
         { atEpochMillis: "asc" },
       ] as any,
     };
@@ -490,7 +477,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findAllPending(limit: number): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
+        fields: ["type", "status", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -498,14 +485,12 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: 0,
-        noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
         deletedAt: { $exists: false },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { noDate: "asc" },
         { atEpochMillis: "asc" },
         { deletedAt: "asc" },
       ] as any,
@@ -524,7 +509,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "status", "noDate", "atEpochMillis", "deletedAt"],
+        fields: ["type", "status", "atEpochMillis", "deletedAt"],
       },
     });
 
@@ -532,14 +517,12 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: 0,
-        noDate: 0,
         atEpochMillis: { $gte: startEpoch, $lte: endEpoch },
         deletedAt: { $exists: false },
       },
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { noDate: "asc" },
         { atEpochMillis: "asc" },
       ] as any,
     };
@@ -557,14 +540,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: [
-          "type",
-          "status",
-          "noDate",
-          "atEpochMillis",
-          "tags",
-          "deletedAt",
-        ],
+        fields: ["type", "status", "atEpochMillis", "tags", "deletedAt"],
       },
     });
 
@@ -572,7 +548,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       selector: {
         type: "task",
         status: { $gte: 0 },
-        noDate: { $gte: 0 },
         atEpochMillis: { $gte: null },
         tags: { $gte: null },
         deletedAt: { $exists: false },
@@ -580,7 +555,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
       sort: [
         { type: "asc" },
         { status: "asc" },
-        { noDate: "asc" },
         { atEpochMillis: "asc" },
         { tags: "asc" },
       ] as any,
@@ -604,7 +578,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         ];
       }
       if (query.unscheduled !== undefined) {
-        mangoQuery.selector.noDate = query.unscheduled;
+        mangoQuery.selector.atEpochMillis = { $eq: null };
       }
       if (query.tags && query.tags.length > 0) {
         mangoQuery.selector.tags = { $in: query.tags };
@@ -619,22 +593,21 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async findUnscheduledTasks(): Promise<Task[]> {
     await this.db.createIndex({
       index: {
-        fields: ["type", "noDate", "status", "createdAt", "deletedAt"],
+        fields: ["type", "atEpochMillis", "status", "createdAt", "deletedAt"],
       },
     });
 
     const mangoQuery = {
       selector: {
         type: "task",
-        noDate: 1, // No schedule
+        atEpochMillis: { $eq: null }, // No schedule
         status: 0, // Not completed
         createdAt: { $gte: null },
         deletedAt: null,
       },
       sort: [
         { type: "asc" },
-        { noDate: "asc" },
-        { status: "asc" },
+        { atEpochMillis: "asc" },
         { createdAt: "asc" },
       ] as any,
     };

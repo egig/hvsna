@@ -52,8 +52,8 @@ function makeCreateRecurringTask(templateId = "rtask_test") {
       id: templateId,
       user_id: "user1",
       name: input.name,
-      repeat: input.repeat,
-      repeatInterval: input.repeatInterval ?? 1,
+      recurringType: input.recurringType,
+      recurringInterval: input.recurringInterval ?? 1,
       baseDateEpoch: input.baseDateEpoch,
     })
   );
@@ -114,8 +114,8 @@ describe("promoteTaskToRecurring", () => {
       {
         name: "Daily standup",
         baseDateEpoch: EPOCH_07_01,
-        repeat: "weekly",
-        repeatInterval: 1,
+        recurringType: "weekly",
+        recurringInterval: 1,
         timezone: "Asia/Jakarta",
       },
       { createRecurringTask, updateTask, taskRepository: repo }
@@ -123,7 +123,7 @@ describe("promoteTaskToRecurring", () => {
 
     expect(createRecurringTask).toHaveBeenCalledOnce();
     const templateArg = createRecurringTask.mock.calls[0][0];
-    expect(templateArg.repeat).toBe("weekly");
+    expect(templateArg.recurringType).toBe("weekly");
     expect(templateArg.baseDateEpoch).toBe(EPOCH_07_01);
   });
 
@@ -140,8 +140,8 @@ describe("promoteTaskToRecurring", () => {
       {
         name: "Daily standup",
         baseDateEpoch: EPOCH_07_01,
-        repeat: "weekly",
-        repeatInterval: 2,
+        recurringType: "weekly",
+        recurringInterval: 2,
       },
       { createRecurringTask, updateTask, taskRepository: repo }
     );
@@ -150,8 +150,8 @@ describe("promoteTaskToRecurring", () => {
     const [id, input] = updateTask.mock.calls[0];
     expect(id).toBe("task_1");
     expect(input.recurringTaskId).toBe("rtask_abc");
-    expect(input.repeat).toBe("weekly");
-    expect(input.repeatInterval).toBe(2);
+    expect(input.recurringType).toBe("weekly");
+    expect(input.recurringInterval).toBe(2);
   });
 
   it("links the task BEFORE generating occurrences so its epoch is skipped (no duplicate)", async () => {
@@ -164,8 +164,8 @@ describe("promoteTaskToRecurring", () => {
           id: "rtask_abc",
           user_id: "u",
           name: input.name,
-          repeat: input.repeat,
-          repeatInterval: 1,
+          recurringType: input.recurringType,
+          recurringInterval: 1,
           baseDateEpoch: input.baseDateEpoch,
         };
       }
@@ -205,8 +205,8 @@ describe("promoteTaskToRecurring", () => {
       {
         name: "Daily standup",
         baseDateEpoch: EPOCH_07_01,
-        repeat: "weekly",
-        repeatInterval: 1,
+        recurringType: "weekly",
+        recurringInterval: 1,
       },
       { createRecurringTask, updateTask, taskRepository: repo }
     );
@@ -231,8 +231,8 @@ describe("promoteTaskToRecurring", () => {
       {
         name: "Daily standup",
         baseDateEpoch: EPOCH_07_01,
-        repeat: "weekly",
-        repeatInterval: 1,
+        recurringType: "weekly",
+        recurringInterval: 1,
       },
       { createRecurringTask, updateTask, taskRepository: repo }
     );
@@ -259,8 +259,8 @@ describe("promoteTaskToRecurring", () => {
       {
         name: "Daily standup",
         baseDateEpoch: EPOCH_07_01,
-        repeat: "daily",
-        repeatInterval: 1,
+        recurringType: "daily",
+        recurringInterval: 1,
       },
       {
         createRecurringTask: makeCreateRecurringTask(),
@@ -286,19 +286,19 @@ describe("demoteTaskFromRecurring", () => {
     const [id, input] = updateTask.mock.calls[0];
     expect(id).toBe("task_1");
     expect(input.recurringTaskId).toBeNull();
-    expect(input.repeat).toBe("none");
+    expect(input.recurringType).toBe("none");
   });
 
   it("clears repeatInterval", async () => {
     const updateTask = makeUpdateTask();
     await demoteTaskFromRecurring(
       "task_1",
-      { ...BASE_TASK_INPUT, repeatInterval: 3 },
+      { ...BASE_TASK_INPUT, recurringInterval: 3 },
       updateTask
     );
 
     const [, input] = updateTask.mock.calls[0];
-    expect(input.repeatInterval).toBeUndefined();
+    expect(input.recurringInterval).toBeUndefined();
   });
 
   it("preserves all other task fields from taskInput", async () => {
@@ -317,7 +317,7 @@ describe("demoteTaskFromRecurring", () => {
     expect(input.description).toBe("standup notes");
     expect(input.timezone).toBe("Asia/Jakarta");
     expect(input.recurringTaskId).toBeNull();
-    expect(input.repeat).toBe("none");
+    expect(input.recurringType).toBe("none");
   });
 
   it("returns the result of updateTask", async () => {
@@ -463,8 +463,8 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
     const [id, input] = updateTask.mock.calls[0];
     expect(id).toBe("task_1");
     expect(input.recurringTaskId).toBeNull();
-    expect(input.repeat).toBe("none");
-    expect(input.repeatInterval).toBeUndefined();
+    expect(input.recurringType).toBe("none");
+    expect(input.recurringInterval).toBeUndefined();
   });
 
   it("returns the result of updateTask", async () => {

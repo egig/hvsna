@@ -238,8 +238,8 @@ export function TaskListItem({
     date: { format: (fmt: string) => string } | null,
     time: string | null,
     prayerTime: string | null,
-    repeat: "none" | "daily" | "weekly" | "monthly" | "yearly",
-    repeatInterval: number
+    recurringType: "none" | "daily" | "weekly" | "monthly" | "yearly",
+    recurringInterval: number
   ) => {
     let atEpochMillis: number | null = null;
     if (date) {
@@ -274,8 +274,8 @@ export function TaskListItem({
       atEpochMillis,
       atTime: time ?? undefined,
       prayerTime: (prayerTime as any) ?? undefined,
-      repeat: repeat ?? "none",
-      repeatInterval: repeatInterval ?? 1,
+      recurringType: recurringType ?? "none",
+      recurringInterval: recurringInterval ?? 1,
     });
     setIsScheduleModalOpen(false);
   };

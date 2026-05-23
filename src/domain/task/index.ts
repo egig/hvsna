@@ -1,5 +1,10 @@
 export type TaskStatus = 0 | 1;
-export type TaskRepeat = "none" | "daily" | "weekly" | "monthly" | "yearly";
+export type TaskRecurringType =
+  | "none"
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly";
 export type PrayerTime =
   | "Fajr"
   | "Sunrise"
@@ -14,20 +19,19 @@ export class Task {
   name?: string;
   description?: string;
   status?: TaskStatus;
-  noDate?: number;
   atTime?: string;
   atEpochMillis: number | null = null;
   lat?: number;
   long?: number;
   timezone?: string;
-  repeat?: TaskRepeat;
-  repeatInterval?: number;
+  recurringType?: TaskRecurringType;
+  recurringInterval?: number;
   recurringTaskId?: string | null;
+  hijriDateOffset?: number;
+  tags?: string[] | null = null;
   createdAt?: number;
   updatedAt?: number;
   completedAt?: number;
-  hijriDateOffset?: number;
-  tags?: string[] | null = null;
   deletedAt?: number;
   isVirtual?: boolean;
 
@@ -58,8 +62,8 @@ export interface TaskCreateInput {
   lat?: number;
   long?: number;
   timezone?: string;
-  repeat?: TaskRepeat;
-  repeatInterval?: number;
+  recurringType?: TaskRecurringType;
+  recurringInterval?: number;
   recurringTaskId?: string;
   hijriDateOffset?: number;
   tags: string[];
@@ -74,8 +78,8 @@ export interface TaskUpdateInput {
   lat?: number;
   long?: number;
   timezone?: string;
-  repeat?: TaskRepeat;
-  repeatInterval?: number;
+  recurringType?: TaskRecurringType;
+  recurringInterval?: number;
   recurringTaskId?: string | null;
   hijriDateOffset?: number;
   removeTime?: boolean;
@@ -95,7 +99,6 @@ export type TaskTypeFilter = "all" | "recurring";
 
 export type TaskQuery = {
   status?: TaskStatus;
-  noDate?: number;
   atTime?: string;
   atEpochMillis?: number | { $gte?: number; $lte?: number };
   unscheduled?: number;

@@ -50,7 +50,7 @@ export function useRecurringOccurance() {
     startEpoch: number,
     endEpoch: number
   ): number[] => {
-    const interval = template.repeatInterval ?? 1;
+    const interval = template.recurringInterval ?? 1;
     const opts = templateHijriOpts(template);
 
     let hour: number | undefined;
@@ -62,8 +62,8 @@ export function useRecurringOccurance() {
     }
 
     const effectiveEnd =
-      template.repeatEnd === "on_date" && template.repeatEndEpoch
-        ? Math.min(endEpoch, template.repeatEndEpoch)
+      template.recurringEnd === "on_date" && template.recurringEndEpoch
+        ? Math.min(endEpoch, template.recurringEndEpoch)
         : endEpoch;
 
     if (template.baseDateEpoch > effectiveEnd) return [];
@@ -79,9 +79,9 @@ export function useRecurringOccurance() {
     );
 
     const maxOccurrences =
-      template.repeatEnd === "after_occurrences" &&
-      template.repeatEndOccurrences
-        ? template.repeatEndOccurrences
+      template.recurringEnd === "after_occurrences" &&
+      template.recurringEndOccurrences
+        ? template.recurringEndOccurrences
         : Infinity;
 
     const results: number[] = [];
@@ -108,7 +108,7 @@ export function useRecurringOccurance() {
 
       const nextStr = getNextOccurrenceDate(
         currentDateStr,
-        template.repeat,
+        template.recurringType,
         interval,
         template.lat,
         template.long,
@@ -203,14 +203,13 @@ function createVirtualTask(template: RecurringTask, epoch: number): Task {
     description: template.description,
     atEpochMillis: epoch,
     atTime: template.atTime,
-    repeat: template.repeat,
-    repeatInterval: template.repeatInterval ?? 1,
+    recurringType: template.recurringType,
+    recurringInterval: template.recurringInterval ?? 1,
     lat: template.lat,
     long: template.long,
     timezone: template.timezone,
     hijriDateOffset: template.hijriDateOffset,
     tags: template.tags ?? [],
     status: 0,
-    noDate: 0,
   });
 }

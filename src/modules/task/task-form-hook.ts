@@ -56,7 +56,7 @@ export const useTaskForm = (
       time: "",
     },
     repeat: {
-      repeat: "none",
+      recurringType: "none",
       interval: 1,
       end: "never",
       endDate: null,
@@ -104,7 +104,7 @@ export const useTaskForm = (
     try {
       setIsSubmitting(true);
 
-      const isRecurring = formData.repeat.repeat !== "none";
+      const isRecurring = formData.repeat.recurringType !== "none";
 
       if (isRecurring && formData.scheduleAt.dateHijri) {
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
@@ -142,17 +142,17 @@ export const useTaskForm = (
           name: taskData.taskName.trim(),
           description: taskData.taskDescription?.trim() || undefined,
           baseDateEpoch,
-          repeat: formData.repeat.repeat,
-          repeatInterval: formData.repeat.interval,
+          recurringType: formData.repeat.recurringType,
+          recurringInterval: formData.repeat.interval,
           atTime: formData.scheduleAt.time,
           lat: latitude,
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
           hijriDateOffset: offset,
           tags: formData.tags,
-          repeatEnd: formData.repeat.end,
-          repeatEndEpoch,
-          repeatEndOccurrences: formData.repeat.endOccurrences,
+          recurringEnd: formData.repeat.end,
+          recurringEndEpoch: repeatEndEpoch,
+          recurringEndOccurrences: formData.repeat.endOccurrences,
           useGregorian: formData.repeat.useGregorian,
         });
 

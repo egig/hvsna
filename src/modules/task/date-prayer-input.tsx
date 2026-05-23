@@ -4,23 +4,23 @@ import { CalendarModal } from "src/modules/calendar/hijri-date-input/calendar-mo
 import { useHijriDate } from "src/modules/calendar/hijri";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import type { HijriDate } from "src/modules/calendar/hijri/hijri-date";
-import type { PrayerTime, TaskRepeat } from "@/domain/task";
+import type { PrayerTime, TaskRecurringType } from "@/domain/task";
 
-type RepeatEnd = "never" | "on_date" | "after_occurrences";
+type RecurringEnd = "never" | "on_date" | "after_occurrences";
 
 interface DatePrayerInputProps {
   hijriDate: HijriDate | null;
   isSubmitting: boolean;
-  repeat?: TaskRepeat;
-  repeatInterval?: number;
-  repeatEnd?: RepeatEnd;
-  repeatEndDate?: string | null;
-  repeatEndOccurrences?: number;
-  forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
+  recurringType?: TaskRecurringType;
+  recurringInterval?: number;
+  recurringEnd?: RecurringEnd;
+  recurringEndDate?: string | null;
+  recurringEndOccurrences?: number;
+  forceRecurring?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onRepeatChange?: (
-    repeat: TaskRepeat,
+    recurringType: TaskRecurringType,
     interval: number,
-    repeatEnd: RepeatEnd,
+    recurringEnd: RecurringEnd,
     repeatEndDate: string | null,
     repeatEndOccurrences: number,
     useGregorian: boolean
@@ -32,12 +32,12 @@ interface DatePrayerInputProps {
 export function DatePrayerInput({
   hijriDate,
   isSubmitting,
-  repeat = "none",
-  repeatInterval = 1,
-  repeatEnd = "never",
-  repeatEndDate = null,
-  repeatEndOccurrences = 1,
-  forceRepeat = false,
+  recurringType: recurringType = "none",
+  recurringInterval: recurringInterval = 1,
+  recurringEnd: recurringEnd = "never",
+  recurringEndDate: recurringEndDate = null,
+  recurringEndOccurrences: recurringEndOccurrences = 1,
+  forceRecurring: forceRepeat = false,
   useGregorian = false,
   onRepeatChange,
   onChange,
@@ -70,7 +70,7 @@ export function DatePrayerInput({
             : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
         }`}
       >
-        {repeat !== "none" ? (
+        {recurringType !== "none" ? (
           <HvRepeat className="w-4 h-4 text-[var(--hvsna-primary-color)] flex-shrink-0" />
         ) : (
           <HvCalendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -82,13 +82,13 @@ export function DatePrayerInput({
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         selectedDate={hijriDate}
-        selectedRepeat={repeat}
-        selectedRepeatInterval={repeatInterval}
-        selectedRepeatEnd={repeatEnd}
-        selectedRepeatEndDate={repeatEndDate}
-        selectedRepeatEndOccurrences={repeatEndOccurrences}
+        selectedRecurringType={recurringType}
+        selectedRecurringInterval={recurringInterval}
+        selectedRecurringEnd={recurringEnd}
+        selectedRecurringEndDate={recurringEndDate}
+        selectedRecurringEndOccurrences={recurringEndOccurrences}
         selectedUseGregorian={useGregorian}
-        forceRepeat={forceRepeat}
+        forceRecurring={forceRepeat}
         onConfirm={(
           date,
           confirmedRepeat,

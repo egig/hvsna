@@ -96,11 +96,11 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
         <DatePrayerInput
           hijriDate={formData.scheduleAt.dateHijri}
           isSubmitting={isSubmitting}
-          repeat={formData.repeat.repeat}
-          repeatInterval={formData.repeat.interval}
-          repeatEnd={formData.repeat.end}
-          repeatEndDate={formData.repeat.endDate}
-          repeatEndOccurrences={formData.repeat.endOccurrences}
+          recurringType={formData.repeat.recurringType}
+          recurringInterval={formData.repeat.interval}
+          recurringEnd={formData.repeat.end}
+          recurringEndDate={formData.repeat.endDate}
+          recurringEndOccurrences={formData.repeat.endOccurrences}
           useGregorian={formData.repeat.useGregorian}
           onRepeatChange={(
             repeat,
@@ -111,7 +111,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
             useGregorian
           ) => {
             updateRepeatConfig({
-              repeat,
+              recurringType: repeat,
               interval,
               end: repeatEnd,
               endDate: repeatEndDate,

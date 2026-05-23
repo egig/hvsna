@@ -99,7 +99,7 @@ export const useTaskFormEdit = (
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { dateHijri: null, time: "" },
     repeat: {
-      repeat: "none",
+      recurringType: "none",
       interval: 1,
       end: "never",
       endDate: null,
@@ -166,7 +166,7 @@ export const useTaskFormEdit = (
       };
 
       const wasRegular = !task?.recurringTaskId;
-      const isNowRecurring = formData.repeat.repeat !== "none";
+      const isNowRecurring = formData.repeat.recurringType !== "none";
       let result: Task;
 
       if (wasRegular && isNowRecurring && formData.scheduleAt.dateHijri) {
@@ -212,23 +212,23 @@ export const useTaskFormEdit = (
         result = await promoteTaskToRecurring(
           taskId,
           taskInput,
-          formData.repeat.repeat,
+          formData.repeat.recurringType,
           formData.repeat.interval,
           {
             name: taskData.taskName.trim(),
             description: taskData.taskDescription?.trim() || undefined,
             baseDateEpoch,
-            repeat: formData.repeat.repeat,
-            repeatInterval: formData.repeat.interval,
+            recurringType: formData.repeat.recurringType,
+            recurringInterval: formData.repeat.interval,
             atTime: formData.scheduleAt.time,
             lat: latitude,
             long: longitude,
             timezone: settings.timezone || "Asia/Jakarta",
             hijriDateOffset: offset,
-            repeatEnd:
+            recurringEnd:
               formData.repeat.end === "never" ? undefined : formData.repeat.end,
-            repeatEndEpoch,
-            repeatEndOccurrences:
+            recurringEndEpoch: repeatEndEpoch,
+            recurringEndOccurrences:
               formData.repeat.end === "after_occurrences"
                 ? formData.repeat.endOccurrences
                 : undefined,
@@ -395,16 +395,16 @@ export const useTaskFormEdit = (
           seriesTargetId,
           {
             ...pendingOperation.taskInput,
-            repeat: pendingOperation.repeatConfig.repeat,
-            repeatInterval: pendingOperation.repeatConfig.interval,
+            recurringType: pendingOperation.repeatConfig.recurringType,
+            recurringInterval: pendingOperation.repeatConfig.interval,
           },
           pendingOperation.task,
           {
             name: pendingOperation.taskInput.name,
             description: pendingOperation.taskInput.description,
             atTime: pendingOperation.taskInput.atTime,
-            repeat: pendingOperation.repeatConfig.repeat,
-            repeatInterval: pendingOperation.repeatConfig.interval,
+            recurringType: pendingOperation.repeatConfig.recurringType,
+            recurringInterval: pendingOperation.repeatConfig.interval,
           },
           {
             updateTask,
@@ -462,8 +462,8 @@ export const useTaskFormEdit = (
       scheduleAt,
       tags: task.tags || [],
       repeat: {
-        repeat: task.repeat ?? "none",
-        interval: task.repeatInterval ?? 1,
+        recurringType: task.recurringType ?? "none",
+        interval: task.recurringInterval ?? 1,
         // repeatEnd lives on the RecurringTask template, not task instances — defaults used
         end: "never",
         endDate: null,

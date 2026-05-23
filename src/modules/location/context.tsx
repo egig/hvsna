@@ -33,9 +33,10 @@ async function reverseGeocode(
   );
   if (!res.ok) return null;
   const data = await res.json();
-  let displayName = data.address.county ?? data.address.city ?? data.address.display_name;
+  let displayName =
+    data.address.county ?? data.address.city ?? data.address.display_name;
   if (!data.address.municipality) {
-    displayName = `${data.address.municipality}, ${displayName}`
+    displayName = `${data.address.municipality}, ${displayName}`;
   }
 
   return displayName;

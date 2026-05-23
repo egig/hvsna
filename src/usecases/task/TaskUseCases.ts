@@ -180,10 +180,6 @@ export class TaskUseCases {
     return await this.taskRepository.findByHijriDate(hijriDate);
   }
 
-  async getUnscheduledTasks(): Promise<Task[]> {
-    return await this.taskRepository.findUnscheduledTasks();
-  }
-
   async getOverdueTasks(): Promise<Task[]> {
     const now = Date.now();
     return await this.taskRepository.find({

@@ -68,7 +68,7 @@ export function RepeatSelector({
 
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="">
         <RepeatSelectorModal
-          repeat={value}
+          recurringType={value}
           interval={interval}
           onBack={() => setIsOpen(false)}
           onSelectEndDate={() => {
