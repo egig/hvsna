@@ -400,7 +400,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
           $gte: todayStart.getTime(),
           $lte: todayEnd.getTime(),
         },
-        deletedAt: null,
+        deletedAt: { $exists: false },
       },
       sort: [
         { type: "asc" },
@@ -409,7 +409,10 @@ export class PouchDBTaskRepository implements ITaskRepository {
       ] as any,
     };
 
+    console.log(mangoQuery);
     const result = await this.db.find(mangoQuery);
+    console.log(result.docs);
+    console.log(await this.db.allDocs({ include_docs: true }));
     return (result as any).docs.map((doc: PouchDBTaskDocument) =>
       new PouchDBTaskDocument(doc).toTaskItem()
     );

@@ -32,6 +32,8 @@ export function TodayContent() {
   const { t } = useLanguageContext();
   const { todayTasks, todayCompletedTasks, error, initiated } = useToday();
 
+  console.log("completedTasks", todayCompletedTasks);
+
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
   }
@@ -114,8 +116,17 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
 
   // Use new prayer time grouping logic
   const taskGroups = useMemo(() => {
-    return groupTasksByPrayerTimes(tasks, prayerTimings);
-  }, [tasks, completedTasks, prayerTimings, getToday]);
+    let g = groupTasksByPrayerTimes(tasks);
+    if (completedTasks.length) {
+      g.push({
+        label: "completed",
+        // @ts-ignore
+        isCompleted: true,
+        tasks: completedTasks,
+      });
+    }
+    return g;
+  }, [tasks, completedTasks]);
 
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
