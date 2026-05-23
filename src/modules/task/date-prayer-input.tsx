@@ -22,8 +22,10 @@ interface DatePrayerInputProps {
     interval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
-    repeatEndOccurrences: number
+    repeatEndOccurrences: number,
+    useGregorian: boolean
   ) => void;
+  useGregorian?: boolean;
   onChange: (hijriDate: HijriDate | null) => void;
 }
 
@@ -36,6 +38,7 @@ export function DatePrayerInput({
   repeatEndDate = null,
   repeatEndOccurrences = 1,
   forceRepeat = false,
+  useGregorian = false,
   onRepeatChange,
   onChange,
 }: DatePrayerInputProps) {
@@ -84,6 +87,7 @@ export function DatePrayerInput({
         selectedRepeatEnd={repeatEnd}
         selectedRepeatEndDate={repeatEndDate}
         selectedRepeatEndOccurrences={repeatEndOccurrences}
+        selectedUseGregorian={useGregorian}
         forceRepeat={forceRepeat}
         onConfirm={(
           date,
@@ -91,7 +95,8 @@ export function DatePrayerInput({
           interval,
           confirmedRepeatEnd,
           confirmedRepeatEndDate,
-          confirmedRepeatEndOccurrences
+          confirmedRepeatEndOccurrences,
+          confirmedUseGregorian
         ) => {
           onChange(date);
           if (onRepeatChange)
@@ -100,7 +105,8 @@ export function DatePrayerInput({
               interval,
               confirmedRepeatEnd,
               confirmedRepeatEndDate,
-              confirmedRepeatEndOccurrences
+              confirmedRepeatEndOccurrences,
+              confirmedUseGregorian
             );
           setIsOpen(false);
         }}

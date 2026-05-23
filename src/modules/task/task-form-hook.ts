@@ -61,6 +61,7 @@ export const useTaskForm = (
       end: "never",
       endDate: null,
       endOccurrences: 1,
+      useGregorian: false,
     },
     tags: [],
   });
@@ -152,6 +153,7 @@ export const useTaskForm = (
           repeatEnd: formData.repeat.end,
           repeatEndEpoch,
           repeatEndOccurrences: formData.repeat.endOccurrences,
+          useGregorian: formData.repeat.useGregorian,
         });
 
         if (onSuccess) {

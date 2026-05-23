@@ -234,12 +234,14 @@ export default function TaskFormEdit({
           repeatEnd={formData.repeat.end}
           repeatEndDate={formData.repeat.endDate}
           repeatEndOccurrences={formData.repeat.endOccurrences}
+          useGregorian={formData.repeat.useGregorian}
           onRepeatChange={(
             repeat,
             interval,
             repeatEnd,
             repeatEndDate,
-            repeatEndOccurrences
+            repeatEndOccurrences,
+            useGregorian
           ) => {
             updateRepeatConfig({
               repeat,
@@ -247,6 +249,7 @@ export default function TaskFormEdit({
               end: repeatEnd,
               endDate: repeatEndDate,
               endOccurrences: repeatEndOccurrences,
+              useGregorian,
             });
             setIsFormDirty(true);
           }}

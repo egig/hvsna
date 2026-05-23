@@ -1,4 +1,3 @@
-import type PouchDB from "pouchdb";
 import type { RecurringTask } from "./recurring-task";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import { HijriDate } from "../calendar/hijri";
@@ -115,7 +114,8 @@ export function useRecurringOccurance() {
         template.long,
         template.hijriDateOffset,
         hour,
-        minutes
+        minutes,
+        template.useGregorian
       );
       if (!nextStr) break;
       currentDateStr = nextStr;

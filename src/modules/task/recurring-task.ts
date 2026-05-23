@@ -17,6 +17,7 @@ export interface RecurringTask {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
+  useGregorian?: boolean;
   created_at?: number;
   updated_at?: number;
 }
@@ -37,6 +38,7 @@ export interface RecurringTaskCreateInput {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
+  useGregorian?: boolean;
 }
 
 export interface RecurringTaskUpdateInput {
@@ -55,6 +57,7 @@ export interface RecurringTaskUpdateInput {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
+  useGregorian?: boolean;
 }
 
 export interface RecurringTaskChange {

@@ -3,9 +3,7 @@
  */
 import { HijriDate, useHijriDate } from "../calendar/hijri";
 import type { TaskRepeat } from "@/domain/task";
-import type { TaskScheduleAt } from "./task-form-types";
 import { usePrayerTimes } from "../prayer";
-import { useSettings } from "../settings";
 
 /**
  * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.
@@ -19,31 +17,49 @@ export function getNextOccurrenceDate(
   long = 0,
   offset = 0,
   hour: number | undefined,
-  minutes: number | undefined
+  minutes: number | undefined,
+  useGregorian = false
 ): string | null {
   if (!repeat || repeat === "none" || !atDateHijri) return null;
 
   const n = Math.max(1, interval);
   const { year, month, day } = parseHijriDateString(atDateHijri);
+  const coords = { latitude: lat, longitude: long, offset };
 
   if (repeat === "daily" || repeat === "weekly") {
     const days = repeat === "weekly" ? n * 7 : n;
-    const hijriDate = new HijriDate(year, month, day, hour, minutes, 0, 0, {
-      latitude: lat,
-      longitude: long,
-      offset,
-    });
+    const hijriDate = new HijriDate(
+      year,
+      month,
+      day,
+      hour,
+      minutes,
+      0,
+      0,
+      coords
+    );
     const greg = hijriDate.toDate();
     greg.setDate(greg.getDate() + days);
-    const next = HijriDate.fromDate(greg, {
-      latitude: lat,
-      longitude: long,
-      offset,
-    });
+    const next = HijriDate.fromDate(greg, coords);
     return formatHijriDateString(next.year, next.month, next.day);
   }
 
   if (repeat === "monthly") {
+    if (useGregorian) {
+      const greg = new HijriDate(
+        year,
+        month,
+        day,
+        hour,
+        minutes,
+        0,
+        0,
+        coords
+      ).toDate();
+      greg.setMonth(greg.getMonth() + n);
+      const next = HijriDate.fromDate(greg, coords);
+      return formatHijriDateString(next.year, next.month, next.day);
+    }
     const totalMonths = year * 12 + (month - 1) + n;
     const nextYear = Math.floor(totalMonths / 12);
     const nextMonth = (totalMonths % 12) + 1;
@@ -52,6 +68,21 @@ export function getNextOccurrenceDate(
   }
 
   if (repeat === "yearly") {
+    if (useGregorian) {
+      const greg = new HijriDate(
+        year,
+        month,
+        day,
+        hour,
+        minutes,
+        0,
+        0,
+        coords
+      ).toDate();
+      greg.setFullYear(greg.getFullYear() + n);
+      const next = HijriDate.fromDate(greg, coords);
+      return formatHijriDateString(next.year, next.month, next.day);
+    }
     return formatHijriDateString(year + n, month, day);
   }
 

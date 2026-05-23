@@ -24,8 +24,10 @@ interface RepeatSelectorModalProps {
     interval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
-    repeatEndOccurrences: number
+    repeatEndOccurrences: number,
+    useGregorian: boolean
   ) => void;
+  useGregorian?: boolean;
   repeatEnd?: RepeatEnd;
   repeatEndDate?: string | null;
   repeatEndOccurrences?: number;
@@ -76,6 +78,7 @@ export function RepeatSelectorModal({
   repeatEndOccurrences: repeatEndOccurrencesProp = 1,
   onSelectEndDate,
   forceRepeat = false,
+  useGregorian: useGregorianProp = false,
 }: RepeatSelectorModalProps) {
   const { t } = useLanguageContext();
 
@@ -93,6 +96,7 @@ export function RepeatSelectorModal({
   const [endOccurrences, setEndOccurrences] = useState(
     repeatEndOccurrencesProp
   );
+  const [useGregorian, setUseGregorian] = useState(useGregorianProp);
 
   // Sync internal state when props change
   useEffect(() => {
@@ -105,14 +109,15 @@ export function RepeatSelectorModal({
 
   const handleConfirm = () => {
     if (selectedOption === "none") {
-      onConfirm("none", 1, "never", null, 1);
+      onConfirm("none", 1, "never", null, 1, false);
     } else if (selectedOption === "custom") {
       onConfirm(
         customUnit,
         Math.max(1, customInterval),
         selectedRepeatEnd,
         repeatEndDate ?? null,
-        endOccurrences
+        endOccurrences,
+        useGregorian
       );
     } else {
       onConfirm(
@@ -120,7 +125,8 @@ export function RepeatSelectorModal({
         1,
         selectedRepeatEnd,
         repeatEndDate ?? null,
-        endOccurrences
+        endOccurrences,
+        useGregorian
       );
     }
   };
@@ -205,6 +211,32 @@ export function RepeatSelectorModal({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {/* Gregorian toggle */}
+        {selectedOption !== "none" && (
+          <div className="flex items-center justify-between px-1 py-2">
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              {t("repeat_use_gregorian") || "Use Gregorian calendar"}
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={useGregorian}
+              onClick={() => setUseGregorian((v) => !v)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                useGregorian
+                  ? "bg-[var(--hvsna-primary-color)]"
+                  : "bg-gray-300 dark:bg-gray-600"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  useGregorian ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
           </div>
         )}
 

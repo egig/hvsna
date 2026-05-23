@@ -26,6 +26,7 @@ class PouchDBRecurringTaskDocument {
   repeatEnd?: "never" | "on_date" | "after_occurrences";
   repeatEndEpoch?: number;
   repeatEndOccurrences?: number;
+  useGregorian?: boolean;
   created_at?: number;
   updated_at?: number;
 
@@ -51,6 +52,7 @@ class PouchDBRecurringTaskDocument {
       repeatEnd: this.repeatEnd,
       repeatEndEpoch: this.repeatEndEpoch,
       repeatEndOccurrences: this.repeatEndOccurrences,
+      useGregorian: this.useGregorian,
       created_at: this.created_at,
       updated_at: this.updated_at,
     };
@@ -76,6 +78,7 @@ class PouchDBRecurringTaskDocument {
     doc.repeatEnd = t.repeatEnd;
     doc.repeatEndEpoch = t.repeatEndEpoch;
     doc.repeatEndOccurrences = t.repeatEndOccurrences;
+    doc.useGregorian = t.useGregorian;
     doc.created_at = t.created_at;
     doc.updated_at = t.updated_at;
     return doc;
@@ -99,7 +102,6 @@ export class PouchDBRecurringTaskRepository
       repeatInterval: input.repeatInterval ?? 1,
       baseDateEpoch: input.baseDateEpoch,
       atTime: input.atTime,
-      prayerTime: input.prayerTime,
       lat: input.lat,
       long: input.long,
       timezone: input.timezone,
@@ -109,6 +111,7 @@ export class PouchDBRecurringTaskRepository
       repeatEnd: input.repeatEnd,
       repeatEndEpoch: input.repeatEndEpoch,
       repeatEndOccurrences: input.repeatEndOccurrences,
+      useGregorian: input.useGregorian,
       tags: input.tags,
     };
 

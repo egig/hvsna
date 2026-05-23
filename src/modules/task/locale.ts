@@ -505,6 +505,10 @@ export const taskTranslations = {
   repeat_ends_never: { en: "Never", id: "Tidak Pernah" },
   repeat_ends_on_date: { en: "On Date", id: "Pada Tanggal" },
   repeat_ends_after: { en: "After", id: "Setelah" },
+  repeat_use_gregorian: {
+    en: "Use Gregorian calendar",
+    id: "Gunakan kalender Masehi",
+  },
   occurrences: { en: "occurrences", id: "kejadian" },
 
   // Location-based prayer time warnings

@@ -104,6 +104,7 @@ export const useTaskFormEdit = (
       end: "never",
       endDate: null,
       endOccurrences: 1,
+      useGregorian: false,
     },
     tags: [],
   });
@@ -231,6 +232,7 @@ export const useTaskFormEdit = (
               formData.repeat.end === "after_occurrences"
                 ? formData.repeat.endOccurrences
                 : undefined,
+            useGregorian: formData.repeat.useGregorian,
           },
           {
             createRecurringTask,
@@ -466,6 +468,7 @@ export const useTaskFormEdit = (
         end: "never",
         endDate: null,
         endOccurrences: 1,
+        useGregorian: false,
       },
     });
   }, [task, createHijriDate]);

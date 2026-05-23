@@ -29,6 +29,7 @@ interface CalendarModalProps {
   selectedRepeatEnd?: RepeatEnd;
   selectedRepeatEndDate?: string | null;
   selectedRepeatEndOccurrences?: number;
+  selectedUseGregorian?: boolean;
   forceRepeat?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onConfirm: (
     date: HijriDate | null,
@@ -36,7 +37,8 @@ interface CalendarModalProps {
     repeatInterval: number,
     repeatEnd: RepeatEnd,
     repeatEndDate: string | null,
-    repeatEndOccurrences: number
+    repeatEndOccurrences: number,
+    useGregorian: boolean
   ) => void;
 }
 
@@ -66,6 +68,7 @@ export function CalendarModal({
   selectedRepeatEnd = "never",
   selectedRepeatEndDate = null,
   selectedRepeatEndOccurrences = 1,
+  selectedUseGregorian = false,
   forceRepeat = false,
   onConfirm,
 }: CalendarModalProps) {
@@ -115,6 +118,9 @@ export function CalendarModal({
   const [tempRepeatEndOccurrences, setTempRepeatEndOccurrences] = useState(
     selectedRepeatEndOccurrences ?? 1
   );
+  const [tempUseGregorian, setTempUseGregorian] = useState(
+    selectedUseGregorian ?? false
+  );
 
   // Re-sync pending state whenever the modal opens (props may have changed)
   useEffect(() => {
@@ -126,6 +132,7 @@ export function CalendarModal({
     setTempRepeatEnd(selectedRepeatEnd ?? "never");
     setTempRepeatEndDate(selectedRepeatEndDate ?? null);
     setTempRepeatEndOccurrences(selectedRepeatEndOccurrences ?? 1);
+    setTempUseGregorian(selectedUseGregorian ?? false);
     setCurrentMonth(
       selectedDate
         ? createHijriMonth(selectedDate.year, selectedDate.month)
@@ -226,7 +233,8 @@ export function CalendarModal({
         tempRepeatInterval,
         tempRepeatEnd,
         tempRepeatEndDate,
-        tempRepeatEndOccurrences
+        tempRepeatEndOccurrences,
+        tempUseGregorian
       );
     }
   };
@@ -283,7 +291,8 @@ export function CalendarModal({
       tempRepeatInterval,
       tempRepeatEnd,
       tempRepeatEndDate,
-      tempRepeatEndOccurrences
+      tempRepeatEndOccurrences,
+      tempUseGregorian
     );
   };
 
@@ -295,7 +304,8 @@ export function CalendarModal({
       tempRepeatInterval,
       tempRepeatEnd,
       tempRepeatEndDate,
-      tempRepeatEndOccurrences
+      tempRepeatEndOccurrences,
+      tempUseGregorian
     );
   };
 
@@ -311,12 +321,13 @@ export function CalendarModal({
       tempRepeatInterval,
       tempRepeatEnd,
       tempRepeatEndDate,
-      tempRepeatEndOccurrences
+      tempRepeatEndOccurrences,
+      tempUseGregorian
     );
   };
 
   const handleNoDate = () => {
-    onConfirm(null, "none", 1, "never", null, 1);
+    onConfirm(null, "none", 1, "never", null, 1, false);
   };
 
   const repeatLabel =
@@ -521,14 +532,23 @@ export function CalendarModal({
           forceRepeat={forceRepeat}
           onBack={() => setView("date")}
           onSelectEndDate={() => setView("repeat_end_date")}
-          onConfirm={(repeat, interval, repeatEnd, endDate, endOccurrences) => {
+          onConfirm={(
+            repeat,
+            interval,
+            repeatEnd,
+            endDate,
+            endOccurrences,
+            gregorian
+          ) => {
             setTempRepeat(repeat);
             setTempRepeatInterval(interval);
             setTempRepeatEnd(repeatEnd);
             setTempRepeatEndDate(endDate);
             setTempRepeatEndOccurrences(endOccurrences);
+            setTempUseGregorian(gregorian);
             setView("date");
           }}
+          useGregorian={tempUseGregorian}
         />
       </Activity>
 

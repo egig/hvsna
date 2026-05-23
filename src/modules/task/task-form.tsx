@@ -101,12 +101,14 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
           repeatEnd={formData.repeat.end}
           repeatEndDate={formData.repeat.endDate}
           repeatEndOccurrences={formData.repeat.endOccurrences}
+          useGregorian={formData.repeat.useGregorian}
           onRepeatChange={(
             repeat,
             interval,
             repeatEnd,
             repeatEndDate,
-            repeatEndOccurrences
+            repeatEndOccurrences,
+            useGregorian
           ) => {
             updateRepeatConfig({
               repeat,
@@ -114,6 +116,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
               end: repeatEnd,
               endDate: repeatEndDate,
               endOccurrences: repeatEndOccurrences,
+              useGregorian,
             });
           }}
           onChange={(hijriDate) => {

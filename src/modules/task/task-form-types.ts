@@ -14,6 +14,7 @@ export interface RepeatConfig {
   end: RepeatEnd;
   endDate: string | null;
   endOccurrences: number;
+  useGregorian: boolean;
 }
 
 export interface TaskFormData {
