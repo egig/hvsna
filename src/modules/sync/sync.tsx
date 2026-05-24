@@ -155,7 +155,7 @@ export default function Sync() {
           <button
             onClick={handleManualSync}
             disabled={isManualSyncing}
-            className={`text-sm w-full md:w-fit px-4 py-2 rounded-lgtransition-colors duration-200 flex items-center justify-center gap-2 border ${
+            className={`text-sm w-full md:w-fit px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 border ${
               isManualSyncing
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
                 : "text-white hover:opacity-90"
