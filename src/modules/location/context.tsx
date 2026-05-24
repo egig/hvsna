@@ -16,6 +16,7 @@ import {
 } from "../components/location-picker-modal";
 import type { LocationSetting } from "../settings/settings";
 import { useNetworkContext } from "../network/context";
+import { useSnackbar } from "../components/snackbar-provider";
 
 async function reverseGeocode(
   lat: number,
@@ -77,6 +78,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const { updateSettings, settings } = useSettings();
   const { initiated: networkInit, isOnline } = useNetworkContext();
+  const { showSnackbar } = useSnackbar();
 
   const useCases = new LocationUseCases(
     createLocationProvider(),
@@ -137,7 +139,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
 
   const isLocationUptodate = () => {
     if (!settings?.location) {
-      return false;
+      return [false, false];
     }
 
     const { resolvedAt, lat, lng, source, name } =
@@ -145,11 +147,11 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
     let hasLocation = resolvedAt > 0 && !!lat && !!lng && !!name;
     // We do not re-prompt location picker if user was manually select location
     if (hasLocation && source === "manual") {
-      return true;
+      return [true, true];
     }
 
     let resolvedAnHourAgo = new Date().valueOf() - resolvedAt < 60 * 60 * 1000;
-    return hasLocation && resolvedAnHourAgo;
+    return [hasLocation, resolvedAnHourAgo];
   };
 
   const ensureLocation = async () => {
@@ -167,13 +169,26 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         return;
       }
 
-      if (isLocationUptodate()) {
+      const [hasLocation, resolvedAnHourAgo] = isLocationUptodate();
+      if (hasLocation && resolvedAnHourAgo) {
         return;
       }
 
       let granted = await requestLocationPermission();
       if (!granted) {
-        setIsLocationModalOpen(true);
+        // For display location picker it its no location before
+        if (!hasLocation) {
+          setIsLocationModalOpen(true);
+          return;
+        }
+
+        console.log("test");
+        showSnackbar(
+          <div className="flex items-center justify-between w-full">
+            <span>Can not get updated location</span>
+          </div>,
+          { autoHideDuration: 5000, showCloseButton: true }
+        );
       }
     })();
   }, [settings, networkInit, isOnline]);

@@ -1,17 +1,17 @@
 import { Capacitor } from "@capacitor/core";
-import type { INotificationsProvider } from "../../domain/notifications/INotificationsProvider";
-import { CapacitorNotificationsProvider } from "./CapacitorNotificationsProvider";
-import { BrowserNotificationsProvider } from "./BrowserNotificationsProvider";
+import type { INotificationsDriver } from "../../domain/notifications/INotificationsProvider";
+import { CapacitorNotificationsDriver } from "./CapacitorNotificationsDriver";
+import { BrowserNotificationsDriver } from "./BrowserNotificationsDriver";
 
-let notificationsInstance: INotificationsProvider | null = null;
+let notificationsInstance: INotificationsDriver | null = null;
 
-export function initNotificationsProvider(p: INotificationsProvider): void {
+export function initNotificationsProvider(p: INotificationsDriver): void {
   notificationsInstance = p;
 }
 
-export function createNotificationsProvider(): INotificationsProvider {
+export function createNotificationsDriver(): INotificationsDriver {
   if (notificationsInstance) return notificationsInstance;
   return Capacitor.isNativePlatform()
-    ? new CapacitorNotificationsProvider()
-    : new BrowserNotificationsProvider();
+    ? new CapacitorNotificationsDriver()
+    : new BrowserNotificationsDriver();
 }

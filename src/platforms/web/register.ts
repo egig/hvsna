@@ -1,5 +1,5 @@
 import { WebSessionRepository } from "@/infra/auth/WebSessionRepository";
-import { BrowserNotificationsProvider } from "@/infra/notifications/BrowserNotificationsProvider";
+import { BrowserNotificationsDriver } from "@/infra/notifications/BrowserNotificationsDriver";
 import { BrowserPermissionsProvider } from "@/infra/permissions/BrowserPermissionsProvider";
 import { BrowserNetworkDriver } from "@/infra/network/BrowserNetworkDriver";
 import { BrowserLocationDriver } from "@/infra/location/BrowserLocationDriver";
@@ -11,7 +11,7 @@ import { initLocationProvider } from "@/infra/location/CapacitorLocationDriver";
 
 export function registerWebImplementations(): void {
   initAuthUseCases(new WebSessionRepository());
-  initNotificationsProvider(new BrowserNotificationsProvider());
+  initNotificationsProvider(new BrowserNotificationsDriver());
   initPermissionsProvider(new BrowserPermissionsProvider());
   initNetworkProvider(new BrowserNetworkDriver());
   initLocationProvider(new BrowserLocationDriver());

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Page } from "../navigation";
 import { useSettings } from "../settings";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import { createNotificationsProvider } from "../../infra";
+import { createNotificationsDriver } from "../../infra";
 import type { Language } from "src/modules/i18n/language";
 import logger from "src/modules/logger";
 import { useLocationContext } from "../location/context";
@@ -14,7 +14,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
-  const notificationsProvider = createNotificationsProvider();
+  const notificationsDriver = createNotificationsDriver();
 
   const handleLanguageSelection = async (selectedLanguage: Language) => {
     setLoading(true);
@@ -45,7 +45,7 @@ export default function Onboarding() {
     try {
       let notificationEnabled = false;
       if (enable) {
-        const permission = await notificationsProvider.requestPermissions();
+        const permission = await notificationsDriver.requestPermissions();
         notificationEnabled = permission.state === "granted";
       }
       await updateSettings({

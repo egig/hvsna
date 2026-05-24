@@ -1,107 +1,111 @@
+import {
+  LocalNotifications,
+  type PermissionStatus,
+} from "@capacitor/local-notifications";
 import type {
-  INotificationsProvider,
+  INotificationsDriver,
   TaskReminderOptions,
   ReminderResult,
   NotificationPermissionResult,
 } from "../../domain/notifications/INotificationsProvider";
 import type { PermissionState } from "../../domain/permissions/IPermissionsProvider";
 
-export class BrowserNotificationsProvider implements INotificationsProvider {
+export class CapacitorNotificationsDriver implements INotificationsDriver {
   async checkPermissions(): Promise<NotificationPermissionResult> {
-    if ("Notification" in window) {
-      try {
-        const permission = Notification.permission;
-        return {
-          state: this.mapBrowserPermissionState(permission),
-          canRequest: permission !== "denied",
-        };
-      } catch (error) {
-        return {
-          state: "unknown",
-          canRequest: true,
-          message: "Notification API not available",
-        };
-      }
+    try {
+      const permissionStatus: PermissionStatus =
+        await LocalNotifications.checkPermissions();
+      return {
+        state: this.mapCapacitorPermissionState(permissionStatus.display),
+        canRequest: permissionStatus.display !== "denied",
+      };
+    } catch (error) {
+      return {
+        state: "unknown",
+        canRequest: true,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unknown error checking permissions",
+      };
     }
-    return {
-      state: "unknown",
-      canRequest: false,
-      message: "Notifications not supported on this platform",
-    };
   }
 
   async requestPermissions(): Promise<NotificationPermissionResult> {
-    if ("Notification" in window) {
-      try {
-        const permission = await Notification.requestPermission();
-        const state = this.mapBrowserPermissionState(permission);
-        return {
-          state,
-          canRequest: state !== "denied",
-          message: this.getPermissionMessage(state),
-        };
-      } catch (error) {
-        return {
-          state: "denied",
-          canRequest: false,
-          message:
-            error instanceof Error
-              ? error.message
-              : "Failed to request notification permission",
-        };
-      }
+    try {
+      const permissionStatus: PermissionStatus =
+        await LocalNotifications.requestPermissions();
+      const state = this.mapCapacitorPermissionState(permissionStatus.display);
+
+      return {
+        state,
+        canRequest: state !== "denied",
+        message: this.getPermissionMessage(state),
+      };
+    } catch (error) {
+      return {
+        state: "denied",
+        canRequest: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to request notification permission",
+      };
     }
-    return {
-      state: "unknown",
-      canRequest: false,
-      message: "Notifications not supported on this platform",
-    };
   }
 
   async scheduleTaskReminder(
     options: TaskReminderOptions
   ): Promise<ReminderResult> {
-    if (!("Notification" in window) || Notification.permission !== "granted") {
+    try {
+      const scheduledTime = this.calculateReminderTime(options);
+      const notificationId = this.generateNotificationId(options);
+
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: parseInt(notificationId),
+            title: this.getNotificationTitle(options),
+            body: this.getNotificationBody(options),
+            schedule: { at: new Date(scheduledTime) },
+            sound: "default",
+            smallIcon: "ic_stat_icon_config_sample",
+            iconColor: "#488AFF",
+            extra: {
+              taskId: options.taskId,
+              type: options.type,
+            },
+          },
+        ],
+      });
+
+      return { notifications: [notificationId] };
+    } catch (error) {
       return {
         notifications: [],
-        error: "Notifications not supported or permission not granted",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to schedule notification",
       };
     }
-
-    // PWA limitations: can't schedule exact future notifications
-    // Store in localStorage for service worker to handle
-    const scheduledTime = this.calculateReminderTime(options);
-    const notificationId = this.generateNotificationId(options);
-
-    const reminderData = {
-      id: notificationId,
-      taskId: options.taskId,
-      taskName: options.taskName,
-      scheduledTime,
-      type: options.type,
-      title: this.getNotificationTitle(options),
-      body: this.getNotificationBody(options),
-    };
-
-    // Store for service worker processing
-    const reminders = JSON.parse(localStorage.getItem("taskReminders") || "[]");
-    reminders.push(reminderData);
-    localStorage.setItem("taskReminders", JSON.stringify(reminders));
-
-    return { notifications: [notificationId] };
   }
 
   async cancelTaskReminder(taskId: string): Promise<void> {
     try {
-      const reminders = JSON.parse(
-        localStorage.getItem("taskReminders") || "[]"
+      // Find and cancel all notifications for this task
+      const pending = await LocalNotifications.getPending();
+      const taskNotifications = pending.notifications.filter(
+        (notification) => notification.extra?.taskId === taskId
       );
-      const filteredReminders = reminders.filter(
-        (reminder: any) => reminder.taskId !== taskId
-      );
-      localStorage.setItem("taskReminders", JSON.stringify(filteredReminders));
+
+      if (taskNotifications.length > 0) {
+        await LocalNotifications.cancel({
+          notifications: taskNotifications.map((n) => ({ id: n.id })),
+        });
+      }
     } catch (error) {
-      console.error("Failed to cancel PWA reminder:", error);
+      console.error("Failed to cancel task reminder:", error);
     }
   }
 
@@ -160,13 +164,13 @@ export class BrowserNotificationsProvider implements INotificationsProvider {
     }
   }
 
-  private mapBrowserPermissionState(state: string): PermissionState {
+  private mapCapacitorPermissionState(state: string): PermissionState {
     switch (state) {
       case "granted":
         return "granted";
       case "denied":
         return "denied";
-      case "default":
+      case "prompt":
         return "prompt";
       default:
         return "unknown";

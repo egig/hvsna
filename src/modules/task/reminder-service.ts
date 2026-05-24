@@ -1,4 +1,4 @@
-import { createNotificationsProvider } from "../../infra";
+import { createNotificationsDriver } from "../../infra";
 import type { TaskReminderOptions } from "../../domain/notifications/INotificationsProvider";
 import { type Task as TaskType } from "@/domain/task";
 import logger from "../logger";
@@ -9,8 +9,8 @@ export class ReminderService {
    */
   private static readonly DEFAULT_REMINDER_MINUTES = 15;
 
-  private static get notificationsProvider() {
-    return createNotificationsProvider();
+  private static get notificationsDriver() {
+    return createNotificationsDriver();
   }
 
   /**
@@ -20,8 +20,11 @@ export class ReminderService {
     task: TaskType,
     reminderMinutes: number = this.DEFAULT_REMINDER_MINUTES
   ): Promise<void> {
-    // Only schedule if task has a scheduled time and is not completed
-    if (!task.atEpochMillis || task.status === 1) {
+    if (task.status === 1) {
+      return;
+    }
+
+    if (!task.atEpochMillis) {
       return;
     }
 
@@ -36,7 +39,7 @@ export class ReminderService {
           type: "pre-due",
         };
 
-        await this.notificationsProvider.scheduleTaskReminder(preDueOptions);
+        await this.notificationsDriver.scheduleTaskReminder(preDueOptions);
       }
 
       // Schedule due time reminder
@@ -48,7 +51,7 @@ export class ReminderService {
         type: "due",
       };
 
-      await this.notificationsProvider.scheduleTaskReminder(dueOptions);
+      await this.notificationsDriver.scheduleTaskReminder(dueOptions);
 
       // Schedule overdue reminder (30 minutes after due)
       const overdueOptions: TaskReminderOptions = {
@@ -59,7 +62,7 @@ export class ReminderService {
         type: "overdue",
       };
 
-      await this.notificationsProvider.scheduleTaskReminder(overdueOptions);
+      await this.notificationsDriver.scheduleTaskReminder(overdueOptions);
     } catch (error) {
       logger.error("Failed to schedule task reminders:", error);
     }
@@ -70,7 +73,7 @@ export class ReminderService {
    */
   static async cancelTaskReminders(taskId: string): Promise<void> {
     try {
-      await this.notificationsProvider.cancelTaskReminder(taskId);
+      await this.notificationsDriver.cancelTaskReminder(taskId);
     } catch (error) {
       logger.error("Failed to cancel task reminders:", error);
     }

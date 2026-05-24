@@ -6,7 +6,7 @@ import type {
   TaskStatus,
 } from "@/domain/task";
 import type {
-  INotificationsProvider,
+  INotificationsDriver,
   TaskReminderOptions,
 } from "../../domain/notifications/INotificationsProvider";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
@@ -14,7 +14,7 @@ import type { HijriDate } from "src/modules/calendar/hijri";
 
 export class TaskUseCases {
   constructor(
-    private readonly notificationsProvider: INotificationsProvider,
+    private readonly notificationsProvider: INotificationsDriver,
     private readonly taskRepository: ITaskRepository
   ) {}
 

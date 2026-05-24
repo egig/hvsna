@@ -18,7 +18,7 @@ export interface NotificationPermissionResult {
   canScheduleExact?: boolean;
 }
 
-export interface INotificationsProvider {
+export interface INotificationsDriver {
   checkPermissions(): Promise<NotificationPermissionResult>;
   requestPermissions(): Promise<NotificationPermissionResult>;
   scheduleTaskReminder(options: TaskReminderOptions): Promise<ReminderResult>;

@@ -4,9 +4,9 @@ export { BrowserNetworkDriver as BrowserNetworkProvider } from "./network/Browse
 export { CapacitorNetworkDriver as CapacitorNetworkProvider } from "./network/CapacitorNetworkDriver";
 
 // Notifications providers
-export { createNotificationsProvider } from "./notifications";
-export { BrowserNotificationsProvider } from "./notifications/BrowserNotificationsProvider";
-export { CapacitorNotificationsProvider } from "./notifications/CapacitorNotificationsProvider";
+export { createNotificationsDriver } from "./notifications";
+export { BrowserNotificationsDriver } from "./notifications/BrowserNotificationsDriver";
+export { CapacitorNotificationsDriver } from "./notifications/CapacitorNotificationsDriver";
 
 // Permissions providers
 export { createPermissionsProvider } from "./permissions";
