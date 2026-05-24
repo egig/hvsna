@@ -199,11 +199,6 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
     icon: HvSettings,
   },
   {
-    id: "prayer-time-fallback",
-    title: "Prayer Times",
-    icon: HvClock,
-  },
-  {
     id: "sync",
     title: "Sync",
     icon: HvRefreshCw,

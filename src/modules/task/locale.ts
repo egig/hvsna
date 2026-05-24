@@ -486,7 +486,7 @@ export const taskTranslations = {
     en: "Change Recurring Task",
     id: "Ubah Tugas Berulang",
   },
-  change_this_event_only: { en: "This event only", id: "Hanya acara ini" },
+  change_this_event_only: { en: "This task only", id: "Hanya tugas ini" },
   change_this_event_only_desc: {
     en: "Remove repeat from this occurrence only",
     id: "Hapus pengulangan hanya dari kejadian ini",

@@ -38,13 +38,10 @@ export default function Settings() {
       )}
       <MenuItem title={t("general")} icon={HvSettings} to="/settings/general" />
       <MenuItem
-        title={t("prayer_time_fallback") || "Prayer Time Fallback"}
-        icon={HvClock}
-        to="/settings/prayer-time-fallback"
+        title={t("sync")}
+        icon={HvRefreshCw}
+        to={isAuthenticated ? "/sync" : "/signin"}
       />
-      {isAuthenticated && (
-        <MenuItem title={t("sync")} icon={HvRefreshCw} to="/sync" />
-      )}
       <MenuItem
         title={t("reset_device_data")}
         icon={HvTrash}

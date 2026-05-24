@@ -14,7 +14,7 @@ export default function LayoutMobile() {
       </div>
 
       {/* Task FAB */}
-      {["today", "upcoming"].indexOf(location?.state?.context) != -1 && (
+      {["/today", "/upcoming"].indexOf(location?.pathname) != -1 && (
         <button
           onClick={() => openCreateTaskForm()}
           className="absolute bottom-[calc(var(--tab-bar-height)+1rem+env(safe-area-inset-bottom))] right-[1rem] w-14 h-14 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"

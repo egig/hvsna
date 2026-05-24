@@ -27,12 +27,10 @@ import { Inbox } from "./modules/task/inbox";
 import { Completed } from "./modules/task/completed";
 import { Recurring } from "./modules/task/recurring";
 import Onboarding from "./modules/onboarding/onboarding";
-import { OnboardingGuard } from "./modules/onboarding/onboarding-guard";
 import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
-import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import Browse from "./modules/task/browse";
 import TagDetailPage from "./modules/task/tag-detail-page";
 import LayoutMobile from "./layout-mobile";
@@ -45,10 +43,6 @@ const desktopSettingsSections: SettingsSection[] = [
   {
     ...defaultSettingsSections.find((s) => s.id === "general")!,
     path: "/settings/general",
-  },
-  {
-    ...defaultSettingsSections.find((s) => s.id === "prayer-time-fallback")!,
-    path: "/settings/prayer-time-fallback",
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "sync")!,
@@ -105,10 +99,6 @@ export const AppRoutes = () => {
           <Route path="signup/:action" element={<SignUpPage />} />
           <Route path="sync" element={<SyncPage />} />
           <Route path="settings/general" element={<GeneralSettings />} />
-          <Route
-            path="settings/prayer-time-fallback"
-            element={<PrayerTimeFallback />}
-          />
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />
@@ -125,10 +115,6 @@ export const AppRoutes = () => {
         >
           <Routes>
             <Route path="settings/general" element={<GeneralSettings />} />
-            <Route
-              path="settings/prayer-time-fallback"
-              element={<PrayerTimeFallback />}
-            />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />

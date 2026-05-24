@@ -56,24 +56,10 @@ function ScheduledContent({
   canLoadMore: boolean;
   isLoadingMore: boolean;
 }) {
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const isLoadingMoreRef = useRef(isLoadingMore);
   useEffect(() => {
     isLoadingMoreRef.current = isLoadingMore;
   }, [isLoadingMore]);
-
-  const hasItems = upcomingTasks.length > 0;
-  useEffect(() => {
-    if (!canLoadMore || !sentinelRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !isLoadingMoreRef.current) onLoadMore();
-      },
-      { rootMargin: "200px" }
-    );
-    observer.observe(sentinelRef.current);
-    return () => observer.disconnect();
-  }, [canLoadMore, onLoadMore, hasItems]);
 
   return (
     <>
@@ -132,10 +118,19 @@ function ScheduledContent({
                 </>
               </div>
             ))}
-          <div ref={sentinelRef} className="h-1" aria-hidden />
           {isLoadingMore && (
             <div className="flex justify-center py-4 text-sm text-gray-400">
               {"Loading…"}
+            </div>
+          )}
+          {canLoadMore && (
+            <div className="flex justify-center mb-8">
+              <button
+                className="p-2 font-bold text-gray-500"
+                onClick={onLoadMore}
+              >
+                Load more
+              </button>
             </div>
           )}
         </div>
