@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useParams, useNavigate } from "react-router";
-import { HvArrowLeft, HvTag } from "@/modules/icons";
+import { HvArrowLeft, HvHash, HvTag } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Button, Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
@@ -38,21 +38,7 @@ export default function TagDetailPage() {
   };
 
   return (
-    <Page
-      navbar={
-        <Navbar
-          title={`#${decodedTag}`}
-          leftAction={
-            <Button
-              onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-            >
-              <HvArrowLeft size={20} />
-            </Button>
-          }
-        />
-      }
-    >
+    <Page navbar={<Navbar title={`#${decodedTag}`} />}>
       {allTasksQuery.isPending && (
         <div className="flex justify-center items-center h-32 text-gray-500 text-sm">
           {t("loading") || "Loading..."}
@@ -63,7 +49,7 @@ export default function TagDetailPage() {
         tasks.length === 0 &&
         completedTasks.length === 0 && (
           <EmptyState
-            icon={<HvTag className="w-full h-full" />}
+            icon={<HvHash className="w-full h-full" />}
             title={t("no_tasks_in_tag") || `No tasks tagged #${decodedTag}`}
             description={
               t("add_tags_to_tasks") ||
@@ -75,12 +61,7 @@ export default function TagDetailPage() {
       {tasks.length > 0 && (
         <div>
           {tasks.map((task) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              onEdit={handleEditTask}
-              showDateTime
-            />
+            <TaskListItem key={task.id} task={task} onEdit={handleEditTask} />
           ))}
         </div>
       )}
@@ -91,12 +72,7 @@ export default function TagDetailPage() {
             {t("completed") || "Completed"}
           </h3>
           {completedTasks.map((task) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              onEdit={handleEditTask}
-              showDateTime
-            />
+            <TaskListItem key={task.id} task={task} onEdit={handleEditTask} />
           ))}
         </div>
       )}

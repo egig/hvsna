@@ -586,6 +586,14 @@ export const taskTranslations = {
     en: "{count} tasks",
     id: "{count} tugas",
   },
+  no_tasks_in_tag: {
+    en: "No tasks",
+    id: "Tidak ada task",
+  },
+  add_tags_to_tasks: {
+    en: "Add tags to task to create",
+    id: "Tambahkan tag ke task untuk membuat tag",
+  },
 
   // Project health card
   no_tasks: {

@@ -4,7 +4,6 @@ import { Page } from "../../navigation";
 import { Navbar } from "../../navigation";
 import { SimpleTimePicker } from "../../components/simple-time-picker";
 import Block from "../../components/block";
-import BlockTitle from "../../components/block-title";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { getPrayerTimes } from "../../prayer-times";
 import type { PrayerTimesFallback } from "../settings";

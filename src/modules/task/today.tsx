@@ -95,7 +95,6 @@ export function Today() {
 function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
   const { openEditTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
-  const { getToday } = useHijriDate();
   const { getTodayPrayerTimes } = usePrayerTimes();
 
   const prayerTimings = getTodayPrayerTimes();

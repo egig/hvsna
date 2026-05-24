@@ -37,9 +37,13 @@ export function useToday() {
     enabled: hijriCalInititated,
   });
 
-  const todayTasks = (allTasks ?? []).filter(
-    (t) => t.atEpochMillis != null && t.atEpochMillis <= endOfToday.valueOf()
-  );
+  const todayTasks = (allTasks ?? []).filter((t) => {
+    return (
+      t.atEpochMillis != null &&
+      Math.ceil(t.atEpochMillis / 1000) <=
+        Math.ceil(endOfToday.valueOf() / 1000)
+    );
+  });
 
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
     hijriMonthNames[today.month - 1]

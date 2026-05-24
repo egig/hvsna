@@ -34,7 +34,6 @@ import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 import PrayerTimeFallback from "./modules/settings/pages/prayer-time-fallback";
 import Browse from "./modules/task/browse";
-import TagManagementPage from "./modules/task/tag-management-page";
 import TagDetailPage from "./modules/task/tag-detail-page";
 import LayoutMobile from "./layout-mobile";
 
@@ -95,7 +94,6 @@ export const AppRoutes = () => {
             <Route path="recurring" element={<Recurring />} />
             <Route path="completed" element={<Completed />} />
             <Route path="browse" element={<Browse />} />
-            <Route path="tags" element={<TagManagementPage />} />
             <Route path="tags/:tagName" element={<TagDetailPage />} />
           </Route>
           {!isDesktop && <Route path="settings" element={<Settings />} />}
