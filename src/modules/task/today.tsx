@@ -31,9 +31,6 @@ interface TodayTasksProps {
 export function TodayContent() {
   const { t } = useLanguageContext();
   const { todayTasks, todayCompletedTasks, error, initiated } = useToday();
-
-  console.log("completedTasks", todayCompletedTasks);
-
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
   }

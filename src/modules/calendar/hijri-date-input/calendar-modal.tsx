@@ -410,20 +410,19 @@ export function CalendarModal({
               </Tabs.List>
             </Tabs.Root>
 
-            {/* Month navigation */}
-            <div className="flex items-center justify-between p-2">
+            <div className="flex items-center justify-between p-2 gap-2">
               <button
                 onClick={
                   calendarMode === "hijri"
                     ? handlePreviousMonth
                     : handleGregPrev
                 }
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="p-2 bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 <HvChevronLeft className="w-5 h-5" />
               </button>
 
-              <h3 className="text-m text-gray-900 dark:text-white">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">
                 {calendarMode === "hijri"
                   ? `${hijriMonthNames[currentMonth.month - 1]} ${
                       currentMonth.year
@@ -435,7 +434,7 @@ export function CalendarModal({
                 onClick={
                   calendarMode === "hijri" ? handleNextMonth : handleGregNext
                 }
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                className="p-2  bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 <HvChevronRight className="w-5 h-5" />
               </button>

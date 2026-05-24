@@ -35,7 +35,7 @@ async function reverseGeocode(
   const data = await res.json();
   let displayName =
     data.address.county ?? data.address.city ?? data.address.display_name;
-  if (!data.address.municipality) {
+  if (!!data.address.municipality) {
     displayName = `${data.address.municipality}, ${displayName}`;
   }
 

@@ -332,6 +332,7 @@ export default function TaskFormEdit({
     >
       <ModalNavbar
         title="Edit Task"
+        onModalClose={() => {}}
         rightAction={
           <div className="flex items-center gap-2">
             {(isFormFocused || isFormDirty) && (
