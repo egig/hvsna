@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import {
+  HvBell,
   HvLogIn,
   HvTrash,
   HvSettings,
@@ -37,6 +38,11 @@ export default function Settings() {
         <MenuItem title={t("sign_in")} icon={HvLogIn} to="/signin" />
       )}
       <MenuItem title={t("general")} icon={HvSettings} to="/settings/general" />
+      <MenuItem
+        title={t("notifications")}
+        icon={HvBell}
+        to="/settings/notifications"
+      />
       <MenuItem
         title={t("sync")}
         icon={HvRefreshCw}

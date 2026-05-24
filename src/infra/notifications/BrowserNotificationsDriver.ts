@@ -7,6 +7,8 @@ import type {
 import type { PermissionState } from "../../domain/permissions/IPermissionsProvider";
 
 export class BrowserNotificationsDriver implements INotificationsDriver {
+  private pendingTimers = new Map<string, ReturnType<typeof setTimeout>[]>();
+
   async checkPermissions(): Promise<NotificationPermissionResult> {
     if ("Notification" in window) {
       try {
@@ -68,40 +70,33 @@ export class BrowserNotificationsDriver implements INotificationsDriver {
       };
     }
 
-    // PWA limitations: can't schedule exact future notifications
-    // Store in localStorage for service worker to handle
     const scheduledTime = this.calculateReminderTime(options);
     const notificationId = this.generateNotificationId(options);
+    const delay = Math.max(0, scheduledTime - Date.now());
+    const title = this.getNotificationTitle(options);
+    const body = this.getNotificationBody(options);
 
-    const reminderData = {
-      id: notificationId,
-      taskId: options.taskId,
-      taskName: options.taskName,
-      scheduledTime,
-      type: options.type,
-      title: this.getNotificationTitle(options),
-      body: this.getNotificationBody(options),
-    };
+    const timer = setTimeout(() => {
+      new Notification(title, { body, icon: "/icon-192.png" });
+      // Clean up timer reference after it fires
+      const timers = this.pendingTimers.get(options.taskId) ?? [];
+      this.pendingTimers.set(
+        options.taskId,
+        timers.filter((t) => t !== timer)
+      );
+    }, delay);
 
-    // Store for service worker processing
-    const reminders = JSON.parse(localStorage.getItem("taskReminders") || "[]");
-    reminders.push(reminderData);
-    localStorage.setItem("taskReminders", JSON.stringify(reminders));
+    const existing = this.pendingTimers.get(options.taskId) ?? [];
+    this.pendingTimers.set(options.taskId, [...existing, timer]);
 
     return { notifications: [notificationId] };
   }
 
   async cancelTaskReminder(taskId: string): Promise<void> {
-    try {
-      const reminders = JSON.parse(
-        localStorage.getItem("taskReminders") || "[]"
-      );
-      const filteredReminders = reminders.filter(
-        (reminder: any) => reminder.taskId !== taskId
-      );
-      localStorage.setItem("taskReminders", JSON.stringify(filteredReminders));
-    } catch (error) {
-      console.error("Failed to cancel PWA reminder:", error);
+    const timers = this.pendingTimers.get(taskId);
+    if (timers) {
+      timers.forEach(clearTimeout);
+      this.pendingTimers.delete(taskId);
     }
   }
 

@@ -60,11 +60,12 @@ export class CapacitorNotificationsDriver implements INotificationsDriver {
     try {
       const scheduledTime = this.calculateReminderTime(options);
       const notificationId = this.generateNotificationId(options);
+      const numericId = this.generateNumericId(options);
 
       await LocalNotifications.schedule({
         notifications: [
           {
-            id: parseInt(notificationId),
+            id: numericId,
             title: this.getNotificationTitle(options),
             body: this.getNotificationBody(options),
             schedule: { at: new Date(scheduledTime) },
@@ -136,6 +137,17 @@ export class CapacitorNotificationsDriver implements INotificationsDriver {
 
   private generateNotificationId(options: TaskReminderOptions): string {
     return `${options.type}_${options.taskId}_${Date.now()}`;
+  }
+
+  private generateNumericId(options: TaskReminderOptions): number {
+    // Capacitor requires a positive 32-bit integer notification ID.
+    // Derive one by hashing type + taskId so cancel/update can find it.
+    const str = `${options.type}_${options.taskId}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (Math.imul(31, hash) + str.charCodeAt(i)) | 0;
+    }
+    return Math.abs(hash) || 1;
   }
 
   private getNotificationTitle(options: TaskReminderOptions): string {

@@ -16,6 +16,7 @@ import {
 } from "./modules/components/settings-layout";
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import GeneralSettings from "./modules/settings/pages/general-settings";
+import NotificationSettings from "./modules/settings/pages/notifications";
 import { AnimatePresence } from "framer-motion";
 import Search from "./modules/task/search";
 import { NotFound } from "./modules/components/not-found";
@@ -26,7 +27,6 @@ import SyncPage from "./modules/sync/sync";
 import { Inbox } from "./modules/task/inbox";
 import { Completed } from "./modules/task/completed";
 import { Recurring } from "./modules/task/recurring";
-import Onboarding from "./modules/onboarding/onboarding";
 import SignInPage from "./modules/auth/pages/signin";
 import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
@@ -43,6 +43,10 @@ const desktopSettingsSections: SettingsSection[] = [
   {
     ...defaultSettingsSections.find((s) => s.id === "general")!,
     path: "/settings/general",
+  },
+  {
+    ...defaultSettingsSections.find((s) => s.id === "notifications")!,
+    path: "/settings/notifications",
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "sync")!,
@@ -78,7 +82,6 @@ export const AppRoutes = () => {
               : location.pathname
           }
         >
-          <Route path="onboarding" element={<Onboarding />} />
           <Route element={isDesktop ? <Layout /> : <LayoutMobile />}>
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="search" element={<Search />} />
@@ -99,6 +102,10 @@ export const AppRoutes = () => {
           <Route path="signup/:action" element={<SignUpPage />} />
           <Route path="sync" element={<SyncPage />} />
           <Route path="settings/general" element={<GeneralSettings />} />
+          <Route
+            path="settings/notifications"
+            element={<NotificationSettings />}
+          />
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />
@@ -115,6 +122,10 @@ export const AppRoutes = () => {
         >
           <Routes>
             <Route path="settings/general" element={<GeneralSettings />} />
+            <Route
+              path="settings/notifications"
+              element={<NotificationSettings />}
+            />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<SyncPage />} />

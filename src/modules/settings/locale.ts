@@ -321,4 +321,24 @@ export const settingsTranslations = {
     en: "Prayer times updated successfully",
     id: "Waktu sholat berhasil diperbarui",
   },
+  notifications: { en: "Notifications", id: "Notifikasi" },
+  notification_settings_subtitle: {
+    en: "Manage notification permissions",
+    id: "Kelola izin notifikasi",
+  },
+  notification_permission_granted: { en: "Granted", id: "Diberikan" },
+  notification_permission_denied: { en: "Denied", id: "Ditolak" },
+  notification_permission_prompt: { en: "Not set", id: "Belum diatur" },
+  enable_notifications: {
+    en: "Enable Notifications",
+    id: "Aktifkan Notifikasi",
+  },
+  send_test_notification: {
+    en: "Send Test Notification",
+    id: "Kirim Notifikasi Uji",
+  },
+  notification_test_sent: {
+    en: "Test notification sent!",
+    id: "Notifikasi uji terkirim!",
+  },
 };

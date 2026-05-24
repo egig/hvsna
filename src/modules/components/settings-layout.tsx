@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import {
+  HvBell,
   HvLogIn,
   HvTrash,
   HvSettings,
@@ -197,6 +198,11 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
     id: "general",
     title: "General",
     icon: HvSettings,
+  },
+  {
+    id: "notifications",
+    title: "Notifications",
+    icon: HvBell,
   },
   {
     id: "sync",
