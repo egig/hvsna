@@ -107,19 +107,19 @@ export const taskTranslations = {
     id: "Tidak ada pengulangan",
   },
   repeat_daily: {
-    en: "Daily",
+    en: "Every Day",
     id: "Harian",
   },
   repeat_weekly: {
-    en: "Weekly",
+    en: "Every Week",
     id: "Mingguan",
   },
   repeat_monthly: {
-    en: "Monthly",
+    en: "Every Month",
     id: "Bulanan",
   },
   repeat_yearly: {
-    en: "Yearly",
+    en: "Every Year",
     id: "Tahunan",
   },
   repeat_custom: {
