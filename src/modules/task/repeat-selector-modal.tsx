@@ -89,7 +89,7 @@ export function RepeatSelectorModal({
     getInitialOption(recurringType, interval)
   );
   const [customInterval, setCustomInterval] = useState(
-    interval > 1 ? interval : 2
+    interval > 1 ? interval : 1
   );
   const [customUnit, setCustomUnit] = useState<TaskRecurringType>(
     recurringType !== "none" ? recurringType : "daily"
@@ -193,16 +193,19 @@ export function RepeatSelectorModal({
         {/* Custom interval inputs */}
         {selectedOption === "custom" && (
           <div className="flex gap-2 mt-1 px-1">
-            <input
-              type="number"
-              min={1}
-              max={999}
+            <select
               value={customInterval}
               onChange={(e) =>
                 setCustomInterval(Math.max(2, parseInt(e.target.value) || 2))
               }
               className="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-center focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            />
+            >
+              {Array.from<number, number>({length: 999}, (_,k) => k).map(i => {
+                return <option key={i} value={i+1}>
+                  {i+1}
+                </option>
+              })}
+            </select>
             <select
               value={customUnit}
               onChange={(e) =>
