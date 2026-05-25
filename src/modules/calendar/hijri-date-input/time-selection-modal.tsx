@@ -32,20 +32,13 @@ export function TimeSelectionModal({
   const [selectedTimeTemp, setSelectedTimeTemp] = useState<string>(
     selectedTime || ""
   );
-  
 
   let isCustom = !!selectedTime && selectedTime.includes(":");
   const [inputMode, setInputMode] = useState<"prayer" | "custom">(
     isCustom ? "custom" : "prayer"
   );
 
-  const prayerTimes: PrayerTime[] = [
-    "Maghrib",
-    "Isha",
-    "Fajr",
-    "Dhuhr",
-    "Asr",
-  ];
+  const prayerTimes: PrayerTime[] = ["Maghrib", "Isha", "Fajr", "Dhuhr", "Asr"];
 
   const prayerIcons: Record<string, ReactNode> = {
     Maghrib: <HvMaghrib size={20} />,
@@ -90,45 +83,60 @@ export function TimeSelectionModal({
         }
       />
 
-        <div className="p-4">
-          <ToggleGroup
-            value={selectedTimeTemp ? [selectedTimeTemp] : []}
-            onValueChange={(values) => {
-              const selected = values[0] as PrayerTime | "";
-              setSelectedTimeTemp(selected);
-              if (selected) {
-                onConfirm(selected);
+      <div className="p-4">
+        <ToggleGroup
+          value={selectedTimeTemp ? [selectedTimeTemp] : []}
+          onValueChange={(values) => {
+            const selected = values[0] as PrayerTime | "";
+            setSelectedTimeTemp(selected);
+            if (selected) {
+              onConfirm(selected);
+            }
+          }}
+          multiple={false}
+          className="grid grid-cols-2 gap-2"
+        >
+          {prayerTimes.map((prayer) => (
+            <Toggle
+              key={prayer}
+              value={prayer}
+              className={({ pressed }) =>
+                `flex gap-1 items-center px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
+                  pressed
+                    ? "bg-[var(--hvsna-primary-color)] text-white border-[var(--hvsna-primary-color)]"
+                    : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+                }`
               }
-            }}
-            multiple={false}
-            className="grid grid-cols-2 gap-2"
+            >
+              {prayerIcons[prayer as string]} {t(prayer.toLowerCase())}
+            </Toggle>
+          ))}
+          <div
+            className={`relative flex items-center px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
+              inputMode === "custom"
+                ? "bg-[var(--hvsna-primary-color)] text-white border-[var(--hvsna-primary-color)]"
+                : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
+            } ${
+              (!selectedTimeTemp && inputMode === "custom") ||
+              inputMode === "prayer"
+                ? "before:content-['Custom_Time'] before:text-gray-500 before:dark:text-gray-400 before:absolute before:left-3 before:pointer-events-none focus-within:before:hidden"
+                : ""
+            }`}
           >
-            {prayerTimes.map((prayer) => (
-              <Toggle
-                key={prayer}
-                value={prayer}
-                className={({ pressed }) =>
-                  `flex gap-1 items-center px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
-                    pressed
-                      ? "bg-[var(--hvsna-primary-color)] text-white border-[var(--hvsna-primary-color)]"
-                      : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                  }`
-                }
-              >
-                {prayerIcons[prayer as string]} {t(prayer.toLowerCase())}
-              </Toggle>
-            ))}
             <input
-              className="outline-none"
+              className={`outline-none bg-transparent w-full relative z-10 focus:text-inherit ${
+                inputMode === "prayer" ? "text-transparent" : ""
+              }`}
               type="time"
-              value={isCustom ? (selectedTimeTemp as string) : undefined}
+              value={inputMode === "custom" ? (selectedTimeTemp as string) : ""}
               onChange={(e) => {
                 setSelectedTimeTemp(e.target.value);
-                setInputMode("custom")
+                setInputMode("custom");
               }}
             />
-          </ToggleGroup>
-        </div>
+          </div>
+        </ToggleGroup>
+      </div>
 
       <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button
