@@ -369,7 +369,7 @@ export class HijriDate {
 
   endOfDay(): HijriDate {
     try {
-      const nextDay = this.next();
+      const nextDay = this.next().startOfDay();
       const times = SunCalc.getTimes(
         nextDay._jsDate,
         nextDay._latitude as number,

@@ -40,8 +40,8 @@ export function useToday() {
   const todayTasks = (allTasks ?? []).filter((t) => {
     return (
       t.atEpochMillis != null &&
-      Math.ceil(t.atEpochMillis / 1000) <=
-        Math.ceil(endOfToday.valueOf() / 1000)
+      Math.ceil(t.atEpochMillis /60000) <=
+        Math.ceil(endOfToday.valueOf() / 60000)
     );
   });
 

@@ -58,12 +58,8 @@ export function toDate(
   );
 
   const sunsetTime = getSunsetTime(gregorianDate, latitude, longitude);
-  if (
-    hijriTime.hour == undefined &&
-    hijriTime.minute == undefined &&
-    hijriTime.second == undefined &&
-    hijriTime.millisecond == undefined
-  ) {
+  // enough to check only hour and minutes
+  if (hijriTime.hour == undefined && hijriTime.minute == undefined) {
     hijriTime.hour = sunsetTime?.hour as number;
     hijriTime.minute = sunsetTime?.minute as number;
     hijriTime.second = sunsetTime?.second as number;

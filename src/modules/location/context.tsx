@@ -182,7 +182,6 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
           return;
         }
 
-        console.log("test");
         showSnackbar(
           <div className="flex items-center justify-between w-full">
             <span>Can not get updated location</span>
