@@ -1,82 +1,11 @@
-import { useState, useEffect } from "react";
 import { Page } from "../navigation/page";
 import { useHijriDate } from "./hijri/use-hijri-date";
-import { getSunsetTime } from "./hijri/hijri-date";
 
 export function HijriCalendar() {
-  const {
-    currentHijriDate,
-    timezone,
-    latitude,
-    longitude,
-    manualOffset,
-    getToday,
-    toGregorianDate,
-    formatDate,
-    loading,
-    error,
-  } = useHijriDate();
-
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [sunsetTime, setSunsetTime] = useState<string | null>(null);
-  const [sunsetLoading, setSunsetLoading] = useState(false);
-  const [sunsetError, setSunsetError] = useState<string | null>(null);
-
-  // Update current time every second
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
+  const { currentHijriDate, getToday, formatDate, loading, error } =
+    useHijriDate();
 
   // Fetch sunset time
-  useEffect(() => {
-    const fetchSunsetTime = () => {
-      if (!latitude || !longitude) {
-        setSunsetError("Location coordinates not available");
-        return;
-      }
-
-      setSunsetLoading(true);
-      setSunsetError(null);
-
-      try {
-        const today = getToday();
-        const gregorianDate = toGregorianDate(today);
-        const sunset = getSunsetTime(gregorianDate, latitude, longitude);
-
-        if (sunset) {
-          // Format sunset time as HH:MM
-          const sunsetTimeStr = sunset.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-            timeZone: timezone,
-          });
-          setSunsetTime(sunsetTimeStr);
-        } else {
-          setSunsetError("Could not calculate sunset time");
-        }
-      } catch (err) {
-        setSunsetError(
-          err instanceof Error ? err.message : "Failed to calculate sunset time"
-        );
-      } finally {
-        setSunsetLoading(false);
-      }
-    };
-
-    // Initial fetch
-    fetchSunsetTime();
-
-    // Refresh sunset time every minute (in case date changes)
-    const refreshInterval = setInterval(fetchSunsetTime, 60000);
-
-    return () => clearInterval(refreshInterval);
-  }, [latitude, longitude, timezone, getToday, toGregorianDate]);
-
   // Define calendar data structure
   const calendarData = [
     {
@@ -92,72 +21,36 @@ export function HijriCalendar() {
     {
       id: "start-of-current-day",
       label: "Start of Current Day",
-      value: sunsetLoading
-        ? {
-            primary: "Loading day start...",
-          }
-        : sunsetError
-        ? {
-            primary: "Cannot determine day start",
-            color: "text-[var(--hvsna-danger-color)]",
-          }
-        : {
-            primary: getToday().startOfDay().toDate().toString(),
-            secondary: "",
-            tertiary: `Hijri: ${formatDate(
-              getToday(),
-              "DD MMMM YYYY HH:mm:ss.SSS"
-            )}`,
-          },
+      value: {
+        primary: getToday().startOfDay().toDate().toString(),
+        secondary: "",
+        tertiary: `Hijri: ${formatDate(
+          getToday(),
+          "DD MMMM YYYY HH:mm:ss.SSS"
+        )}`,
+      },
       color: "text-[var(--hvsna-info-color)]",
       striped: true,
     },
     {
       id: "end-of-current-day",
       label: "End of Current Day",
-      value: sunsetLoading
-        ? {
-            primary: "Loading sunset time...",
-          }
-        : sunsetError
-        ? {
-            primary: "Cannot determine day end",
-            color: "text-[var(--hvsna-danger-color)]",
-          }
-        : sunsetTime
-        ? {
-            primary: sunsetTime,
-            secondary:
-              "Gregorian: " + getToday().endOfDay().toDate().toString(),
-          }
-        : {
-            primary: "Day end time not available",
-          },
+      value: {
+        primary: getToday().endOfDay().toDate().toString(),
+        secondary: "Gregorian: " + getToday().endOfDay().toDate().toString(),
+      },
       color: "text-[var(--hvsna-warning-color)]",
     },
     {
       id: "start-of-next-day",
       label: "Start of Next Day",
-      value: sunsetLoading
-        ? {
-            primary: "Loading next day start...",
-          }
-        : sunsetError
-        ? {
-            primary: "Cannot determine next day start",
-            color: "text-[var(--hvsna-danger-color)]",
-          }
-        : sunsetTime
-        ? {
-            primary: getToday().next().startOfDay().toDate().toString(),
-            secondary: `Hijri: ${formatDate(
-              getToday().next(),
-              "DD MMMM YYYY HH:mm:ss.SSS"
-            )}`,
-          }
-        : {
-            primary: "Next day start not available",
-          },
+      value: {
+        primary: getToday().next().startOfDay().toDate().toString(),
+        secondary: `Hijri: ${formatDate(
+          getToday().next(),
+          "DD MMMM YYYY HH:mm:ss.SSS"
+        )}`,
+      },
     },
   ];
 

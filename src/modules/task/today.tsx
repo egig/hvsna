@@ -2,7 +2,6 @@ import TaskListItem from "./task-list-item";
 import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import type { Task, PrayerTime } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback, useState, useEffect } from "react";

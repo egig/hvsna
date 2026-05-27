@@ -52,7 +52,9 @@ export interface UseHijriCalendarReturn {
     month: number,
     day: number,
     hour?: number,
-    minute?: number
+    minute?: number,
+    seconds?: number,
+    milliseconds?: number
   ) => HijriDate;
   createHijriMonth: (year: number, month: number) => HijriMonth;
   currentHijriMonth: () => HijriMonth;
@@ -80,9 +82,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
 
   // Create current hijri date based on options or current time
   const currentHijriDate = useMemo(() => {
-    return HijriDate.fromDate(new Date(), {
-      latitude,
-      longitude,
+    return HijriDate.fromDate(latitude, longitude, new Date(), {
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -90,9 +90,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
   // Convert Gregorian date to Hijri date
   const toHijriDate = useCallback(
     (date: Date): HijriDate => {
-      return HijriDate.fromDate(date, {
-        latitude,
-        longitude,
+      return HijriDate.fromDate(latitude, longitude, date, {
         offset: manualOffset,
       });
     },
@@ -109,9 +107,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
 
   // Get today's hijri date
   const getToday = useCallback((): HijriDate => {
-    return HijriDate.fromDate(new Date(), {
-      latitude,
-      longitude,
+    return HijriDate.fromDate(latitude, longitude, new Date(), {
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -120,9 +116,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
   const getTomorrow = useCallback((): HijriDate => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return HijriDate.fromDate(tomorrow, {
-      latitude,
-      longitude,
+    return HijriDate.fromDate(latitude, longitude, tomorrow, {
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -131,9 +125,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
   const getYesterday = useCallback((): HijriDate => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    return HijriDate.fromDate(yesterday, {
-      latitude,
-      longitude,
+    return HijriDate.fromDate(latitude, longitude, yesterday, {
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);
@@ -185,13 +177,24 @@ export function useHijriDate(): UseHijriCalendarReturn {
       month: number,
       day: number,
       hour: number | undefined = undefined,
-      minute: number | undefined = undefined
+      minute: number | undefined = undefined,
+      seconds: number | undefined = undefined,
+      milliseconds: number | undefined = undefined
     ): HijriDate => {
-      return new HijriDate(year, month, day, hour, minute, 0, 0, {
+      return new HijriDate(
         latitude,
         longitude,
-        offset: manualOffset,
-      });
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        seconds,
+        milliseconds,
+        {
+          offset: manualOffset,
+        }
+      );
     },
     [latitude, longitude, manualOffset]
   );
@@ -199,9 +202,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
   // Create hijri month with specific year and month
   const createHijriMonth = useCallback(
     (year: number, month: number): HijriMonth => {
-      return new HijriMonth(year, month, {
-        latitude,
-        longitude,
+      return new HijriMonth(latitude, longitude, year, month, {
         offset: manualOffset,
       });
     },
@@ -210,9 +211,7 @@ export function useHijriDate(): UseHijriCalendarReturn {
 
   // Get current hijri month
   const currentHijriMonth = useCallback((): HijriMonth => {
-    return HijriMonth.getCurrent({
-      latitude,
-      longitude,
+    return HijriMonth.getCurrent(latitude, longitude, {
       offset: manualOffset,
     });
   }, [latitude, longitude, manualOffset]);

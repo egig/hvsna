@@ -46,6 +46,7 @@ export const useTaskForm = (
     longitude,
     manualOffset: offset,
     getToday,
+    createHijriDate,
   } = useHijriDate();
   const getTaskEpoch = useTaskEpoch();
 
@@ -123,16 +124,7 @@ export const useTaskForm = (
                   month: em,
                   day: ed,
                 } = parseHijriDateString(formData.repeat.endDate as string);
-                return new HijriDate(
-                  ey,
-                  em,
-                  ed,
-                  undefined,
-                  undefined,
-                  0,
-                  0,
-                  hijriOpts
-                )
+                return createHijriDate(ey, em, ed)
                   .endOfDay()
                   .toDate()
                   .valueOf();

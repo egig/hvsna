@@ -37,18 +37,18 @@ export function usePrayerTimes() {
       let prayerTimes = getPrayerTimesForHijriDate(d);
       switch (prayerName.toLowerCase()) {
         case "maghrib":
-          return prayerTimes.isha;
+          return new Date(prayerTimes.isha.valueOf() - 1000);
         case "isha":
-          return prayerTimes.fajr;
+          return new Date(prayerTimes.fajr.valueOf() - 1000);
         // Sunrise / Dhuha is sunnah so we set fajr end time to dhuhr
         case "fajr":
         case "sunrise":
-          return prayerTimes.dhuhr;
+          return new Date(prayerTimes.dhuhr.valueOf() - 1000);
         case "dhuhr":
-          return prayerTimes.asr;
+          return new Date(prayerTimes.asr.valueOf() - 1000);
         case "asr":
           let tom = getPrayerTimesForHijriDate(d.next());
-          return tom.maghrib;
+          return new Date(tom.maghrib.valueOf() - 1000);
       }
 
       throw new Error(`unknown prayer ${prayerName}`);

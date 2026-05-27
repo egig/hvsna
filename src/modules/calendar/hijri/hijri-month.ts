@@ -1,32 +1,32 @@
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
-import * as SunCalc from "suncalc";
 import { HijriDate } from "./hijri-date";
 import type { HijriDateOptions } from "./hijri-date";
 import { getDaysInMonth } from "./get-days-in-month";
-import { DEFAULT_LOCATION } from "@/config";
 
 export class HijriMonth {
   year: number;
   month: number;
   _jsDate: Date;
-  _latitude?: number;
-  _longitude?: number;
+  _latitude: number;
+  _longitude: number;
   _offset?: number;
 
-  constructor(year: number, month: number, options?: HijriDateOptions) {
+  constructor(
+    lat: number,
+    lng: number,
+    year: number,
+    month: number,
+    options: HijriDateOptions
+  ) {
     this.year = year;
     this.month = month;
-    // Only set defaults if options is undefined, not if it's an empty object
-    if (options === undefined) {
-      this._latitude = DEFAULT_LOCATION.latitude;
-      this._longitude = DEFAULT_LOCATION.longitude;
-      this._offset = 0;
-    } else {
-      this._latitude = options.latitude;
-      this._longitude = options.longitude;
-      this._offset = options.offset;
-    }
+
+    this._latitude = lat;
+    this._longitude = lng;
+    this._offset = options.offset;
+
     let d = new HijriDate(
+      lat,
+      lng,
       year,
       month,
       1,
@@ -48,11 +48,15 @@ export class HijriMonth {
       prevYear -= 1;
     }
 
-    return new HijriMonth(prevYear, prevMonth, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset,
-    });
+    return new HijriMonth(
+      this._latitude,
+      this._longitude,
+      prevYear,
+      prevMonth,
+      {
+        offset: this._offset,
+      }
+    );
   }
 
   next(): HijriMonth {
@@ -64,11 +68,15 @@ export class HijriMonth {
       nextYear += 1;
     }
 
-    return new HijriMonth(nextYear, nextMonth, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset,
-    });
+    return new HijriMonth(
+      this._latitude,
+      this._longitude,
+      nextYear,
+      nextMonth,
+      {
+        offset: this._offset,
+      }
+    );
   }
 
   getDaysInMonth(): number {
@@ -76,20 +84,38 @@ export class HijriMonth {
   }
 
   getFirstDay(): HijriDate {
-    return new HijriDate(this.year, this.month, 1, 0, 0, 0, 0, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset || 0,
-    });
+    return new HijriDate(
+      this._latitude,
+      this._longitude,
+      this.year,
+      this.month,
+      1,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        offset: this._offset || 0,
+      }
+    );
   }
 
   getLastDay(): HijriDate {
     const daysInMonth = this.getDaysInMonth();
-    return new HijriDate(this.year, this.month, daysInMonth, 0, 0, 0, 0, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset || 0,
-    });
+    return new HijriDate(
+      this._latitude,
+      this._longitude,
+      this.year,
+      this.month,
+      daysInMonth,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      {
+        offset: this._offset || 0,
+      }
+    );
   }
 
   toString(): string {
@@ -106,9 +132,14 @@ export class HijriMonth {
    * @param options Optional configuration including latitude, longitude, and offset
    * @returns HijriMonth instance
    */
-  static fromDate(date: Date, options?: HijriDateOptions): HijriMonth {
-    const hijriDate = HijriDate.fromDate(date, options);
-    return new HijriMonth(hijriDate.year, hijriDate.month, options);
+  static fromDate(
+    lat: number,
+    lng: number,
+    date: Date,
+    options: HijriDateOptions
+  ): HijriMonth {
+    const hijriDate = HijriDate.fromDate(lat, lng, date, options);
+    return new HijriMonth(lat, lng, hijriDate.year, hijriDate.month, options);
   }
 
   /**
@@ -116,7 +147,11 @@ export class HijriMonth {
    * @param options Optional configuration including latitude, longitude, and offset
    * @returns Current HijriMonth instance
    */
-  static getCurrent(options?: HijriDateOptions): HijriMonth {
-    return HijriMonth.fromDate(new Date(), options);
+  static getCurrent(
+    lat: number,
+    lng: number,
+    options: HijriDateOptions
+  ): HijriMonth {
+    return HijriMonth.fromDate(lat, lng, new Date(), options);
   }
 }

@@ -15,6 +15,7 @@ import { useTaskContext } from "./task-context";
 import { HijriDate, isSameHijriDate, useHijriDate } from "../calendar/hijri";
 import { TagList } from "./tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
+import { useTaskEpoch } from "./task-form-helpers";
 
 interface TaskListItemProps {
   task: Task;
@@ -40,7 +41,8 @@ export function TaskListItem({
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
-  const { getToday, createHijriDate } = useHijriDate();
+  const { getToday, toHijriDate } = useHijriDate();
+  const getTaskEpoch = useTaskEpoch();
 
   const x = useMotionValue(0);
   const controls = useAnimation();
@@ -92,17 +94,7 @@ export function TaskListItem({
 
     const today = getToday();
     const time = task.atTime;
-    const taskDate = createHijriDate(
-      ...(() => {
-        const h = HijriDate.fromDate(new Date(task.atEpochMillis!), {
-          latitude: task.lat,
-          longitude: task.long,
-          offset: task.hijriDateOffset,
-        });
-        return [h.year, h.month, h.day] as [number, number, number];
-      })()
-    );
-
+    const taskDate = toHijriDate(new Date(task.atEpochMillis));
     if (isSameHijriDate(taskDate, today.previous())) {
       return t("yesterday") + (time ? `, ${time}` : "");
     }
@@ -244,36 +236,11 @@ export function TaskListItem({
     let atEpochMillis: number | null = null;
     if (date) {
       const { year, month, day } = date as HijriDate;
-      const opts = {
-        latitude: task.lat,
-        longitude: task.long,
-        offset: task.hijriDateOffset,
-      };
-      if (time) {
-        const [h, m] = time.split(":").map(Number);
-        atEpochMillis = new HijriDate(year, month, day, h, m, 0, 0, opts)
-          .toDate()
-          .valueOf();
-      } else {
-        atEpochMillis = new HijriDate(
-          year,
-          month,
-          day,
-          undefined,
-          undefined,
-          0,
-          0,
-          opts
-        )
-          .endOfDay()
-          .toDate()
-          .valueOf();
-      }
+      atEpochMillis = getTaskEpoch(year, month, day, time);
     }
     updateTask(task.id as string, {
       atEpochMillis,
       atTime: time ?? undefined,
-      prayerTime: (prayerTime as any) ?? undefined,
       recurringType: recurringType ?? "none",
       recurringInterval: recurringInterval ?? 1,
     });

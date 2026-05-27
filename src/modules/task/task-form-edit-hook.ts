@@ -76,18 +76,14 @@ export const useTaskFormEdit = (
     getTask,
     materializeVirtualTask,
   } = useTaskContext();
-  const {
-    createRecurringTask,
-    deleteRecurringTask,
-    updateRecurringTask,
-    getRecurringTask,
-  } = useRecurringTasks();
+  const { createRecurringTask, deleteRecurringTask, updateRecurringTask } =
+    useRecurringTasks();
   const { db } = usePouchDB();
 
   const [task, setTask] = useState<Task | null>(initialTask ?? null);
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createHijriDate } = useHijriDate();
+  const { createHijriDate, toHijriDate } = useHijriDate();
   const [removeTime, setRemoveTime] = useState(false);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
   const [showRecurringEditScope, setShowRecurringEditScope] = useState(false);
@@ -173,16 +169,7 @@ export const useTaskFormEdit = (
         // Promote: regular → recurring
         const { year, month, day } = formData.scheduleAt.dateHijri;
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = new HijriDate(
-          year,
-          month,
-          day,
-          undefined,
-          undefined,
-          0,
-          0,
-          hijriOpts
-        )
+        const baseDateEpoch = createHijriDate(year, month, day)
           .endOfDay()
           .toDate()
           .valueOf();
@@ -434,26 +421,11 @@ export const useTaskFormEdit = (
     };
 
     if (task.atEpochMillis) {
-      const hijri = HijriDate.fromDate(new Date(task.atEpochMillis), {
-        latitude,
-        longitude,
-        offset,
-      });
-
-      let hour: number | undefined;
-      let minute: number | undefined;
-      if (task.atTime) {
-        const timeParts = parseTimeString(task.atTime);
-        hour = timeParts.hour;
-        minute = timeParts.minute;
-      }
-
+      const hijri = toHijriDate(new Date(task.atEpochMillis));
       scheduleAt.dateHijri = createHijriDate(
         hijri.year,
         hijri.month,
-        hijri.day,
-        hour,
-        minute
+        hijri.day
       );
       scheduleAt.time = task.atTime || "";
     }

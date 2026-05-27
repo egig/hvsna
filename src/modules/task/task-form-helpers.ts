@@ -6,90 +6,6 @@ import type { TaskRecurringType } from "@/domain/task";
 import { usePrayerTimes } from "../prayer";
 
 /**
- * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.
- * Returns null if repeat is "none" or inputs are invalid.
- */
-export function getNextOccurrenceDate(
-  atDateHijri: string,
-  recurringType: TaskRecurringType,
-  interval = 1,
-  lat = 0,
-  long = 0,
-  offset = 0,
-  hour: number | undefined,
-  minutes: number | undefined,
-  useGregorian = false
-): string | null {
-  if (!recurringType || recurringType === "none" || !atDateHijri) return null;
-
-  const n = Math.max(1, interval);
-  const { year, month, day } = parseHijriDateString(atDateHijri);
-  const coords = { latitude: lat, longitude: long, offset };
-
-  if (recurringType === "daily" || recurringType === "weekly") {
-    const days = recurringType === "weekly" ? n * 7 : n;
-    const hijriDate = new HijriDate(
-      year,
-      month,
-      day,
-      hour,
-      minutes,
-      0,
-      0,
-      coords
-    );
-    const greg = hijriDate.toDate();
-    greg.setDate(greg.getDate() + days);
-    const next = HijriDate.fromDate(greg, coords);
-    return formatHijriDateString(next.year, next.month, next.day);
-  }
-
-  if (recurringType === "monthly") {
-    if (useGregorian) {
-      const greg = new HijriDate(
-        year,
-        month,
-        day,
-        hour,
-        minutes,
-        0,
-        0,
-        coords
-      ).toDate();
-      greg.setMonth(greg.getMonth() + n);
-      const next = HijriDate.fromDate(greg, coords);
-      return formatHijriDateString(next.year, next.month, next.day);
-    }
-    const totalMonths = year * 12 + (month - 1) + n;
-    const nextYear = Math.floor(totalMonths / 12);
-    const nextMonth = (totalMonths % 12) + 1;
-    // Cap day at 29 to avoid invalid end-of-month dates (Hijri months are 29–30 days)
-    return formatHijriDateString(nextYear, nextMonth, Math.min(day, 29));
-  }
-
-  if (recurringType === "yearly") {
-    if (useGregorian) {
-      const greg = new HijriDate(
-        year,
-        month,
-        day,
-        hour,
-        minutes,
-        0,
-        0,
-        coords
-      ).toDate();
-      greg.setFullYear(greg.getFullYear() + n);
-      const next = HijriDate.fromDate(greg, coords);
-      return formatHijriDateString(next.year, next.month, next.day);
-    }
-    return formatHijriDateString(year + n, month, day);
-  }
-
-  return null;
-}
-
-/**
  * Parses a Hijri date string in YYYYMMDD format into year, month, and day components
  * @param hijriDateString - The Hijri date string in YYYYMMDD format
  * @returns Object containing year, month, and day as numbers
@@ -198,7 +114,7 @@ export function useTaskEpoch() {
     atTime: string
   ): number | null {
     if (!!atTime && !atTime.includes(":")) {
-      let d = createHijriDate(year, month, day, undefined, undefined);
+      let d = createHijriDate(year, month, day);
       return getPrayerEndTime(atTime.toLowerCase(), d).valueOf();
     }
 
@@ -207,9 +123,8 @@ export function useTaskEpoch() {
       return createHijriDate(year, month, day, h, m).toDate().valueOf();
     }
 
-    return createHijriDate(year, month, day, undefined, undefined)
-      .endOfDay()
-      .toDate()
-      .valueOf();
+    let r = createHijriDate(year, month, day);
+    let e = r.endOfDay().toDate();
+    return e.valueOf();
   };
 }

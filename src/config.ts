@@ -4,18 +4,8 @@
  */
 
 /**
- * Default location fallback (Jakarta, Indonesia)
- * Used when IP-based location detection fails
- */
-export const DEFAULT_LOCATION = {
-  latitude: -6.2088,
-  longitude: 106.8456,
-} as const;
-
-/**
  * Representative coordinates for major IANA timezones.
  * Used as fallback when user has not set a GPS/manual location.
- * Falls back to DEFAULT_LOCATION for unknown timezones.
  */
 export const TIMEZONE_COORDINATES: Record<
   string,
@@ -137,20 +127,13 @@ export const TIMEZONE_COORDINATES: Record<
 
 /**
  * Returns the best-known coordinate for a given IANA timezone string.
- * Falls back to DEFAULT_LOCATION (Jakarta) for unknown timezones.
  */
 export function getCoordinateFromTimezone(timezone: string): {
   latitude: number;
   longitude: number;
 } {
-  return TIMEZONE_COORDINATES[timezone] ?? DEFAULT_LOCATION;
+  return TIMEZONE_COORDINATES[timezone];
 }
-
-/**
- * Default timezone for prayer times
- * TODO: Should be dynamically determined from location data
- */
-export const DEFAULT_TIMEZONE = "Asia/Jakarta" as const;
 
 /**
  * Prayer times API configuration

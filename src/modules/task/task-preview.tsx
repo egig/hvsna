@@ -106,11 +106,9 @@ export default function TaskPreview({ task }: TaskPreviewProps) {
                 {t("scheduled_hijri_date")}:
               </span>
               <p className="text-gray-900">
-                {HijriDate.fromDate(new Date(task.atEpochMillis), {
-                  latitude: task.lat,
-                  longitude: task.long,
-                  offset: task.hijriDateOffset,
-                }).format("D MMMM YYYY")}
+                {toHijriDate(new Date(task.atEpochMillis)).format(
+                  "D MMMM YYYY"
+                )}
               </p>
             </div>
           )}

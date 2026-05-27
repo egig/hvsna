@@ -1,13 +1,12 @@
 import type { RecurringTask } from "./recurring-task";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
-import { HijriDate } from "../calendar/hijri";
+import { HijriDate, useHijriDate } from "../calendar/hijri";
 import {
   parseHijriDateString,
   formatHijriDateString,
-  getNextOccurrenceDate,
   useTaskEpoch,
 } from "./task-form-helpers";
-import { Task } from "@/domain/task";
+import { Task, type TaskRecurringType } from "@/domain/task";
 
 function templateHijriOpts(template: RecurringTask) {
   return {
@@ -24,6 +23,7 @@ function templateHijriOpts(template: RecurringTask) {
  */
 export function useRecurringOccurance() {
   const getTaskEpoch = useTaskEpoch();
+  const { createHijriDate, toHijriDate } = useHijriDate();
 
   /**
    * Pure. Returns the epoch of the latest occurrence strictly before
@@ -68,10 +68,7 @@ export function useRecurringOccurance() {
 
     if (template.baseDateEpoch > effectiveEnd) return [];
 
-    const baseHijri = HijriDate.fromDate(
-      new Date(template.baseDateEpoch),
-      opts
-    );
+    const baseHijri = toHijriDate(new Date(template.baseDateEpoch));
     let currentDateStr = formatHijriDateString(
       baseHijri.year,
       baseHijri.month,
@@ -187,10 +184,76 @@ export function useRecurringOccurance() {
     return all;
   }
 
+  /**
+   * Computes the next occurrence Hijri date string (YYYYMMDD) given a current date and repeat type.
+   * Returns null if repeat is "none" or inputs are invalid.
+   */
+  function getNextOccurrenceDate(
+    atDateHijri: string,
+    recurringType: TaskRecurringType,
+    interval = 1,
+    lat = 0,
+    long = 0,
+    offset = 0,
+    hour: number | undefined,
+    minutes: number | undefined,
+    useGregorian = false
+  ): string | null {
+    if (!recurringType || recurringType === "none" || !atDateHijri) return null;
+
+    const n = Math.max(1, interval);
+    const { year, month, day } = parseHijriDateString(atDateHijri);
+    const coords = { offset };
+
+    if (recurringType === "daily" || recurringType === "weekly") {
+      const days = recurringType === "weekly" ? n * 7 : n;
+      const hijriDate = createHijriDate(year, month, day, hour, minutes);
+      const greg = hijriDate.toDate();
+      greg.setDate(greg.getDate() + days);
+      const next = toHijriDate(greg);
+      return formatHijriDateString(next.year, next.month, next.day);
+    }
+
+    if (recurringType === "monthly") {
+      if (useGregorian) {
+        const greg = createHijriDate(year, month, day, hour, minutes).toDate();
+        greg.setMonth(greg.getMonth() + n);
+        const next = toHijriDate(greg);
+        return formatHijriDateString(next.year, next.month, next.day);
+      }
+      const totalMonths = year * 12 + (month - 1) + n;
+      const nextYear = Math.floor(totalMonths / 12);
+      const nextMonth = (totalMonths % 12) + 1;
+      // Cap day at 29 to avoid invalid end-of-month dates (Hijri months are 29–30 days)
+      return formatHijriDateString(nextYear, nextMonth, Math.min(day, 29));
+    }
+
+    if (recurringType === "yearly") {
+      if (useGregorian) {
+        const greg = createHijriDate(
+          year,
+          month,
+          day,
+          hour,
+          minutes,
+          0,
+          0
+        ).toDate();
+        greg.setFullYear(greg.getFullYear() + n);
+        const next = toHijriDate(greg);
+        return formatHijriDateString(next.year, next.month, next.day);
+      }
+      return formatHijriDateString(year + n, month, day);
+    }
+
+    return null;
+  }
+
   return {
     computeOccurrencesInRange,
     findLatestOccurrenceBefore,
     buildVirtualTasksForRange,
+    getNextOccurrenceDate,
   };
 }
 

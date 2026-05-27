@@ -1,6 +1,6 @@
 import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
-import * as SunCalc from "suncalc";
-import { DEFAULT_LOCATION } from "@/config";
+import { CalculationMethod, Coordinates, PrayerTimes } from "adhan";
+import dayjs from "dayjs";
 
 /**
  * Interface for Hijri date components
@@ -16,19 +16,17 @@ export interface HijriDateComponents {
  * Interface for time components
  */
 export interface TimeComponents {
-  hour: number | undefined;
-  minute: number | undefined;
-  second: number | undefined;
-  millisecond: number | undefined;
+  hour: number;
+  minute: number;
+  second: number;
+  millisecond: number;
 }
 
 /**
  * Options for date conversion
  */
 export interface ConversionOptions {
-  latitude?: number;
-  longitude?: number;
-  offset?: number;
+  offset: number;
 }
 
 /**
@@ -40,15 +38,27 @@ export interface ConversionOptions {
  * @returns Gregorian Date object
  */
 export function toDate(
-  hijriDate: HijriDateComponents,
-  hijriTime: TimeComponents,
-  options?: ConversionOptions
-): Date {
-  const latitude = options?.latitude ?? DEFAULT_LOCATION.latitude;
-  const longitude = options?.longitude ?? DEFAULT_LOCATION.longitude;
+  latitude: number,
+  longitude: number,
+  year: number,
+  month: number,
+  day: number,
+  hour: number | undefined,
+  minutes: number = 0,
+  seconds: number = 0,
+  milliseconds: number = 0,
+  options: ConversionOptions
+): { epoch: number; startOfDay: number } {
   const offset = options?.offset ?? 0;
 
-  const adjustedHijri = _applyOffset(hijriDate, -1 * offset);
+  const adjustedHijri = _applyOffset(
+    {
+      year,
+      month,
+      day,
+    },
+    -1 * offset
+  );
 
   const gregorian = hijriToGregorian(adjustedHijri);
   let gregorianDate = new Date(
@@ -57,26 +67,49 @@ export function toDate(
     gregorian.day
   );
 
-  const sunsetTime = getSunsetTime(gregorianDate, latitude, longitude);
-  // enough to check only hour and minutes
-  if (hijriTime.hour == undefined && hijriTime.minute == undefined) {
-    hijriTime.hour = sunsetTime?.hour as number;
-    hijriTime.minute = sunsetTime?.minute as number;
-    hijriTime.second = sunsetTime?.second as number;
-    hijriTime.millisecond = sunsetTime?.millisecond as number;
-  }
-
-  if (isTimeAfter(hijriTime, sunsetTime)) {
-    gregorianDate.setDate(gregorianDate.getDate() - 1);
-  }
-
-  const result = new Date(gregorianDate);
-  result.setHours(
-    hijriTime.hour || 0,
-    hijriTime.minute || 0,
-    hijriTime.second || 0,
-    hijriTime.millisecond || 0
+  let result = { epoch: -1, startOfDay: -1 };
+  let yesterdayGreg = dayjs(new Date(gregorianDate))
+    .subtract(1, "day")
+    .toDate();
+  const y = getSunset(latitude, longitude, yesterdayGreg);
+  let startOfDayDate = new Date(yesterdayGreg);
+  startOfDayDate.setHours(
+    y.getHours(),
+    y.getMinutes(),
+    y.getSeconds(),
+    y.getMilliseconds()
   );
+  result.startOfDay = startOfDayDate.valueOf();
+
+  // use start of day if no hijri time supplied
+  // start of day = yesterday sunset time
+  if (!hour) {
+    result.epoch = result.startOfDay;
+    return result;
+  }
+
+  const s = getSunset(latitude, longitude, yesterdayGreg);
+  console.log("CALLING TO DATE");
+  console.log("CALLING TO DATE sunset", s);
+  let useStartOfDay = isTimeSameOrAfter(
+    { hour, minutes, seconds, milliseconds },
+    {
+      hour: s.getHours(),
+      minute: s.getMinutes(),
+      second: s.getSeconds(),
+      millisecond: s.getMilliseconds(),
+    }
+  );
+
+  console.log("CALLING TO DATE useStartOfDay: ", useStartOfDay);
+  if (useStartOfDay) {
+    yesterdayGreg.setHours(hour, minutes, seconds, milliseconds);
+    result.epoch = yesterdayGreg.valueOf();
+    return result;
+  }
+
+  gregorianDate.setHours(hour, minutes, seconds, milliseconds);
+  result.epoch = gregorianDate.valueOf();
   return result;
 }
 
@@ -89,33 +122,29 @@ export function toDate(
  * @returns Hijri date components
  */
 export function fromDate(
+  latitude: number,
+  longitude: number,
   gregorianDate: Date,
-  options?: ConversionOptions
+  options: ConversionOptions
 ): HijriDateComponents & TimeComponents {
-  const latitude = options?.latitude ?? DEFAULT_LOCATION.latitude;
-  const longitude = options?.longitude ?? DEFAULT_LOCATION.longitude;
   const offset = options?.offset ?? 0;
 
-  const workingDate = new Date(gregorianDate);
   let hijriDate = gregorianToHijri({
-    year: workingDate.getFullYear(),
-    month: workingDate.getMonth() + 1, // JavaScript months are 0-based
-    day: workingDate.getDate(),
+    year: gregorianDate.getFullYear(),
+    month: gregorianDate.getMonth() + 1, // JavaScript months are 0-based
+    day: gregorianDate.getDate(),
   });
 
-  const sunsetTime = getSunsetTime(workingDate, latitude, longitude);
-  const isAfterSunset = isTimeAfter(
-    {
-      hour: gregorianDate.getHours(),
-      minute: gregorianDate.getMinutes(),
-      second: gregorianDate.getSeconds(),
-      millisecond: gregorianDate.getMilliseconds(),
-    },
-    sunsetTime
-  );
+  const sunset = getSunset(latitude, longitude, gregorianDate);
+
+  // NOTE - the milliseconds of the sunset seems not stable
+  // so we only check until the seconds level
+  const isOrAfterSunset =
+    Math.ceil(gregorianDate.valueOf() / 1000) >=
+    Math.ceil(sunset.valueOf() / 1000);
 
   let sunsetShift = 0;
-  if (isAfterSunset) {
+  if (isOrAfterSunset) {
     hijriDate = _applyOffset(hijriDate, 1);
     sunsetShift = 1;
   }
@@ -131,39 +160,16 @@ export function fromDate(
 }
 
 /**
- * Gets sunset time for a specific date and location
- */
-export function getSunsetTime(
-  date: Date,
-  latitude: number,
-  longitude: number
-): TimeComponents | null {
-  try {
-    const times = SunCalc.getTimes(date, latitude, longitude);
-    const sunset = times.sunset;
-
-    if (!sunset || isNaN(sunset.getTime())) {
-      return null;
-    }
-
-    return {
-      hour: sunset.getHours(),
-      minute: sunset.getMinutes(),
-      second: sunset.getSeconds(),
-      millisecond: sunset.getMilliseconds(),
-    };
-  } catch (error) {
-    console.warn("SunCalc calculation failed:", error);
-    return null;
-  }
-}
-
-/**
  * Checks if a given time is after sunset time
  */
-export function isTimeAfter(
-  time: TimeComponents,
-  sunsetTime: TimeComponents | null
+export function isTimeSameOrAfter(
+  time: {
+    hour: number;
+    minutes: number;
+    seconds: number;
+    milliseconds: number;
+  },
+  sunsetTime: TimeComponents
 ): boolean {
   if (!sunsetTime) {
     return false;
@@ -171,13 +177,9 @@ export function isTimeAfter(
 
   if (
     time.hour === undefined ||
-    time.minute === undefined ||
-    time.second === undefined ||
-    time.millisecond === undefined ||
-    sunsetTime.hour === undefined ||
-    sunsetTime.minute === undefined ||
-    sunsetTime.second === undefined ||
-    sunsetTime.millisecond === undefined
+    time.minutes === undefined ||
+    time.seconds === undefined ||
+    time.milliseconds === undefined
   ) {
     return false;
   }
@@ -186,23 +188,23 @@ export function isTimeAfter(
     return true;
   }
 
-  if (time.hour === sunsetTime.hour && time.minute > sunsetTime.minute) {
+  if (time.hour === sunsetTime.hour && time.minutes > sunsetTime.minute) {
     return true;
   }
 
   if (
     time.hour === sunsetTime.hour &&
-    time.minute === sunsetTime.minute &&
-    time.second > sunsetTime.second
+    time.minutes === sunsetTime.minute &&
+    time.seconds > sunsetTime.second
   ) {
     return true;
   }
 
   if (
     time.hour === sunsetTime.hour &&
-    time.minute === sunsetTime.minute &&
-    time.second === sunsetTime.second &&
-    time.millisecond >= sunsetTime.millisecond
+    time.minutes === sunsetTime.minute &&
+    time.seconds === sunsetTime.second &&
+    time.milliseconds >= sunsetTime.millisecond
   ) {
     return true;
   }
@@ -257,4 +259,11 @@ export function _daysInMonth(year: number, month: number): number {
     }
   }
   return maxDay;
+}
+
+export function getSunset(lat: number, long: number, d: Date): Date {
+  const coordinates = new Coordinates(lat, long);
+  const params = CalculationMethod.UmmAlQura();
+  const prayerTimes = new PrayerTimes(coordinates, d, params);
+  return prayerTimes.maghrib;
 }

@@ -15,9 +15,7 @@ import { HijriDate } from "../../calendar/hijri";
 // ---------------------------------------------------------------------------
 
 function hijriToEpoch(year: number, month: number, day: number): number {
-  return new HijriDate(year, month, day, 0, 0, 0, 0, {
-    latitude: 0,
-    longitude: 0,
+  return new HijriDate(-6.2088, 106.8456, year, month, day, 0, 0, 0, 0, {
     offset: 0,
   })
     .toDate()

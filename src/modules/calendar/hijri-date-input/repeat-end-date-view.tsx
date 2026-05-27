@@ -48,7 +48,7 @@ export function RepeatEndDateView({
   // Rebuild the current month object when settings change
   useEffect(() => {
     setCurrentMonth(createHijriMonth(currentMonth.year, currentMonth.month));
-  }, [createHijriDate]);
+  }, [createHijriMonth]);
 
   // Calendar grid
   const getCalendarDays = () => {

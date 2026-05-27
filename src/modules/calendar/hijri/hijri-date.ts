@@ -1,15 +1,11 @@
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
-import { getDaysInMonth } from "./get-days-in-month";
-import * as SunCalc from "suncalc";
-import { fromDate, toDate } from "./core";
-import { DEFAULT_LOCATION } from "@/config";
+import { hijriToGregorian } from "@tabby_ai/hijri-converter";
+import { fromDate, getSunset, toDate } from "./core";
+import dayjs from "dayjs";
 
 /**
  * Options for HijriDate calculations
  */
 export interface HijriDateOptions {
-  latitude?: number;
-  longitude?: number;
   offset?: number;
   startOfWeek?: number; // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
   sunsetShift?: number;
@@ -24,19 +20,18 @@ export class HijriDate {
   minute!: number;
   second!: number;
   millisecond!: number;
-  _input!: {
-    year: number;
-    month: number;
-    day: number;
-  };
   _jsDate!: Date;
   _latitude: number;
   _longitude: number;
   _offset?: number;
-  _startOfWeek?: number;
-  _sunsetShift?: number;
+  _startOfWeek: number;
+  _sunsetShift: number;
+  _startOfDayEpoch: number;
+  // _endOfDayEpoch: number;
 
   constructor(
+    lat: number,
+    lng: number,
     year: number,
     month: number,
     day: number,
@@ -46,10 +41,11 @@ export class HijriDate {
     millisecond?: number,
     options?: HijriDateOptions
   ) {
-    this._latitude = options?.latitude || DEFAULT_LOCATION.latitude;
-    this._longitude = options?.longitude || DEFAULT_LOCATION.longitude;
+    this._latitude = lat;
+    this._longitude = lng;
     this._offset = options?.offset || 0;
     this._startOfWeek = options?.startOfWeek ?? 5; // Default to Friday (5) for Islamic calendar
+    this._sunsetShift = options?.sunsetShift || 0;
 
     this.year = year;
     this.month = month;
@@ -58,19 +54,23 @@ export class HijriDate {
     this.minute = minute as number;
     this.second = second as number;
     this.millisecond = millisecond as number;
-    this._jsDate = toDate(
+    const { epoch, startOfDay } = toDate(
+      this._latitude,
+      this._longitude,
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
+      millisecond,
       {
-        year,
-        month,
-        day,
-      },
-      { hour, minute, second, millisecond },
-      {
-        latitude: this._latitude,
-        longitude: this._longitude,
         offset: this._offset,
       }
     );
+
+    this._jsDate = new Date(epoch);
+    this._startOfDayEpoch = startOfDay;
 
     this.dayOfWeek = this._jsDate.getDay();
     // Adjust dayOfWeek based on startOfWeek setting
@@ -82,9 +82,21 @@ export class HijriDate {
       (this.dayOfWeek - startOfWeekDay + 7 + (options?.sunsetShift || 0)) % 7;
   }
 
-  static fromDate(date: Date, options?: HijriDateOptions): HijriDate {
-    let h = fromDate(date, options);
+  static fromDate(
+    lat: number,
+    long: number,
+    date: Date,
+    options?: HijriDateOptions
+  ): HijriDate {
+    let h = fromDate(lat, long, date, {
+      offset: options?.offset || 0,
+    });
+
+    console.log("fromDate RESULTS: ", h);
+
     const hijriDateObj = new HijriDate(
+      lat,
+      long,
       h.year,
       h.month,
       h.day,
@@ -93,14 +105,11 @@ export class HijriDate {
       h.second,
       h.millisecond,
       {
-        latitude: options?.latitude,
-        longitude: options?.longitude,
         offset: options?.offset,
         startOfWeek: options?.startOfWeek,
-        sunsetShift: h.sunsetShift,
       }
     );
-
+    console.log("constructor RESULTS: ", hijriDateObj);
     return hijriDateObj;
   }
 
@@ -130,24 +139,17 @@ export class HijriDate {
   }
 
   previous(): HijriDate {
-    const prevGregorian = new Date(this._jsDate);
+    const prevGregorian = dayjs(this._jsDate).subtract(1, "day").toDate();
     prevGregorian.setDate(prevGregorian.getDate() - 1);
-
-    return HijriDate.fromDate(prevGregorian, {
-      latitude: this._latitude,
-      longitude: this._longitude,
+    return HijriDate.fromDate(this._latitude, this._longitude, prevGregorian, {
       offset: this._offset,
       startOfWeek: this._startOfWeek,
     });
   }
 
   next(): HijriDate {
-    const nextGregorian = new Date(this._jsDate);
-    nextGregorian.setDate(nextGregorian.getDate() + 1);
-
-    return HijriDate.fromDate(nextGregorian, {
-      latitude: this._latitude,
-      longitude: this._longitude,
+    const nextGregorian = dayjs(this._jsDate).add(1, "day").toDate();
+    return HijriDate.fromDate(this._latitude, this._longitude, nextGregorian, {
       offset: this._offset,
       startOfWeek: this._startOfWeek,
     });
@@ -173,12 +175,15 @@ export class HijriDate {
       startOfWeekGregorian.getDate() - daysToSubtract
     );
 
-    return HijriDate.fromDate(startOfWeekGregorian, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset,
-      startOfWeek: this._startOfWeek,
-    });
+    return HijriDate.fromDate(
+      this._latitude,
+      this._longitude,
+      startOfWeekGregorian,
+      {
+        offset: this._offset,
+        startOfWeek: this._startOfWeek,
+      }
+    );
   }
 
   endOfWeek(): HijriDate {
@@ -189,12 +194,15 @@ export class HijriDate {
     const endOfWeekGregorian = new Date(startOfWeek._jsDate);
     endOfWeekGregorian.setDate(endOfWeekGregorian.getDate() + 6);
 
-    return HijriDate.fromDate(endOfWeekGregorian, {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset,
-      startOfWeek: this._startOfWeek,
-    });
+    return HijriDate.fromDate(
+      this._latitude,
+      this._longitude,
+      endOfWeekGregorian,
+      {
+        offset: this._offset,
+        startOfWeek: this._startOfWeek,
+      }
+    );
   }
 
   format(formatString: string): string {
@@ -300,12 +308,15 @@ export class HijriDate {
   }
 
   isToday(): boolean {
-    const today = HijriDate.fromDate(new Date(), {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset,
-      startOfWeek: this._startOfWeek,
-    });
+    const today = HijriDate.fromDate(
+      this._latitude,
+      this._latitude,
+      new Date(),
+      {
+        offset: this._offset,
+        startOfWeek: this._startOfWeek,
+      }
+    );
     return (
       this.year === today.year &&
       this.month === today.month &&
@@ -314,12 +325,15 @@ export class HijriDate {
   }
 
   isTomorrow(): boolean {
-    const tomorrow = HijriDate.fromDate(new Date(Date.now() + 86400000), {
-      latitude: this._latitude,
-      longitude: this._longitude,
-      offset: this._offset,
-      startOfWeek: this._startOfWeek,
-    });
+    const tomorrow = HijriDate.fromDate(
+      this._latitude,
+      this._longitude,
+      new Date(Date.now() + 86400000),
+      {
+        offset: this._offset,
+        startOfWeek: this._startOfWeek,
+      }
+    );
     return (
       this.year === tomorrow.year &&
       this.month === tomorrow.month &&
@@ -337,68 +351,26 @@ export class HijriDate {
   }
 
   startOfDay(): HijriDate {
-    try {
-      const times = SunCalc.getTimes(
-        this._jsDate,
-        this._latitude as number,
-        this._longitude as number
-      );
-      const sunset = times.sunset;
-
-      if (sunset && !isNaN(sunset.getTime())) {
-        return new HijriDate(
-          this.year,
-          this.month,
-          this.day,
-          sunset.getHours(),
-          sunset.getMinutes(),
-          sunset.getSeconds(),
-          sunset.getMilliseconds(),
-          {
-            latitude: this._latitude,
-            longitude: this._longitude,
-            offset: this._offset,
-          }
-        );
+    return HijriDate.fromDate(
+      this._latitude,
+      this._longitude,
+      new Date(this._startOfDayEpoch),
+      {
+        offset: this._offset,
       }
-    } catch (error) {
-      console.warn("SunCalc calculation failed in startOfDay:", error);
-    }
-    return this;
+    );
   }
 
   endOfDay(): HijriDate {
-    try {
-      const nextDay = this.next().startOfDay();
-      const times = SunCalc.getTimes(
-        nextDay._jsDate,
-        nextDay._latitude as number,
-        nextDay._longitude as number
-      );
-      const sunset = times.sunset;
-
-      if (sunset && !isNaN(sunset.getTime())) {
-        // Subtract one second from the next day's sunset for precise end of day
-        const endTime = new Date(sunset.getTime() - 1000);
-        return new HijriDate(
-          this.year,
-          this.month,
-          this.day,
-          endTime.getHours(),
-          endTime.getMinutes(),
-          endTime.getSeconds(),
-          endTime.getMilliseconds(),
-          {
-            latitude: this._latitude,
-            longitude: this._longitude,
-            offset: this._offset,
-          }
-        );
+    let nextStartEpoch = this.next().startOfDay().toDate().valueOf();
+    return HijriDate.fromDate(
+      this._latitude,
+      this._longitude,
+      new Date(nextStartEpoch - 1000),
+      {
+        offset: this._offset,
       }
-    } catch (error) {
-      console.warn("SunCalc calculation failed in endOfDay:", error);
-    }
-    return this;
+    );
   }
 }
 
@@ -411,30 +383,6 @@ export function isSameHijriDate(date1: HijriDate, date2: HijriDate): boolean {
 }
 
 /**
- * Get sunset time for a specific date and location
- */
-export function getSunsetTime(
-  date: Date,
-  latitude: number,
-  longitude: number
-): Date | null {
-  try {
-    const times = SunCalc.getTimes(date, latitude, longitude);
-    const sunset = times.sunset;
-
-    // Check if sunset is a valid date
-    if (!sunset || isNaN(sunset.getTime())) {
-      return null;
-    }
-
-    return sunset;
-  } catch (error) {
-    console.warn("SunCalc calculation failed:", error);
-    return null;
-  }
-}
-
-/**
  * Check if current time is after sunset for given location
  */
 export function isAfterSunset(
@@ -442,6 +390,21 @@ export function isAfterSunset(
   latitude: number,
   longitude: number
 ): boolean {
-  const sunset = getSunsetTime(date, latitude, longitude);
+  const sunset = getSunset(latitude, longitude, date);
   return sunset ? date >= sunset : false;
+}
+
+export function _daysInMonth(year: number, month: number): number {
+  // Check different days to find the maximum valid day in this month
+  let maxDay = 30;
+  for (let day = 30; day >= 1; day--) {
+    try {
+      hijriToGregorian({ year, month, day });
+      maxDay = day;
+      break;
+    } catch (error) {
+      // Day is invalid, continue checking
+    }
+  }
+  return maxDay;
 }
