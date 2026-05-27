@@ -146,20 +146,20 @@ export function CalendarModal({
   }, [createHijriDate]);
 
   // ── Hijri calendar grid ────────────────────────────────────────────────────
-
   const getCalendarDays = () => {
-    const firstDay = currentMonth.getFirstDay();
+    const firstDay = currentMonth.getFirstDay().endOfDay();
     const daysInMonth = currentMonth.getDaysInMonth();
     const startDayOfWeek = firstDay.dayOfWeek;
     const days = [];
     for (let i = 0; i < startDayOfWeek; i++) days.push(null);
     for (let day = 1; day <= daysInMonth; day++)
-      days.push(createHijriDate(currentMonth.year, currentMonth.month, day));
+      days.push(
+        createHijriDate(currentMonth.year, currentMonth.month, day).endOfDay()
+      );
     return days;
   };
 
   // ── Gregorian calendar grid ────────────────────────────────────────────────
-
   const getGregCalendarDays = (): (Date | null)[] => {
     const firstDayJs = new Date(gregYear, gregMonth, 1).getDay();
     const offset = (firstDayJs - 5 + 7) % 7; // week starts Friday
@@ -226,7 +226,7 @@ export function CalendarModal({
         tempSelectedDate.year,
         tempSelectedDate.month,
         tempSelectedDate.day
-      );
+      ).endOfDay();
       onConfirm(
         finalDate,
         tempRepeat,
@@ -241,7 +241,7 @@ export function CalendarModal({
 
   const isSelectedToday = () => {
     if (!selectedDate) return false;
-    const today = getToday().startOfDay();
+    const today = getToday().endOfDay();
     return (
       selectedDate.year === today.year &&
       selectedDate.month === today.month &&
@@ -251,7 +251,7 @@ export function CalendarModal({
 
   const isSelectedTomorrow = () => {
     if (!selectedDate) return false;
-    const tomorrow = getToday().next().startOfDay();
+    const tomorrow = getToday().next().endOfDay();
     return (
       selectedDate.year === tomorrow.year &&
       selectedDate.month === tomorrow.month &&
@@ -261,16 +261,16 @@ export function CalendarModal({
 
   const isSelectedNextWeek = () => {
     if (!selectedDate) return false;
-    const today = getToday();
+    const today = getToday().endOfDay();
     const dayOfWeek = today.toDate().getDay(); // 0=Sun ... 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
 
     // Create next Friday by adding days using next() method
     let nextFriday = today;
     for (let i = 0; i < daysUntilFriday; i++) {
-      nextFriday = nextFriday.next();
+      nextFriday = nextFriday.next().endOfDay();
     }
-    nextFriday = nextFriday.startOfDay();
+    nextFriday = nextFriday.endOfDay();
 
     return (
       selectedDate.year === nextFriday.year &&
@@ -284,7 +284,7 @@ export function CalendarModal({
   };
 
   const handleToday = () => {
-    const today = getToday().startOfDay();
+    const today = getToday().endOfDay();
     onConfirm(
       today,
       tempRepeat,
@@ -297,7 +297,7 @@ export function CalendarModal({
   };
 
   const handleTomorrow = () => {
-    const tomorrow = getToday().next().startOfDay();
+    const tomorrow = getToday().next().endOfDay();
     onConfirm(
       tomorrow,
       tempRepeat,
@@ -310,7 +310,7 @@ export function CalendarModal({
   };
 
   const handleNextWeek = () => {
-    const today = getToday();
+    const today = getToday().endOfDay();
     const dayOfWeek = today.toDate().getDay(); // 0=Sun … 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
     let date = today;
