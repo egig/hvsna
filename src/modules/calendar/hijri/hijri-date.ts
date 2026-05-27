@@ -92,8 +92,6 @@ export class HijriDate {
       offset: options?.offset || 0,
     });
 
-    console.log("fromDate RESULTS: ", h);
-
     const hijriDateObj = new HijriDate(
       lat,
       long,
@@ -109,7 +107,6 @@ export class HijriDate {
         startOfWeek: options?.startOfWeek,
       }
     );
-    console.log("constructor RESULTS: ", hijriDateObj);
     return hijriDateObj;
   }
 

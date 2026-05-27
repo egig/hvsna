@@ -89,8 +89,6 @@ export function toDate(
   }
 
   const s = getSunset(latitude, longitude, yesterdayGreg);
-  console.log("CALLING TO DATE");
-  console.log("CALLING TO DATE sunset", s);
   let useStartOfDay = isTimeSameOrAfter(
     { hour, minutes, seconds, milliseconds },
     {
@@ -101,7 +99,6 @@ export function toDate(
     }
   );
 
-  console.log("CALLING TO DATE useStartOfDay: ", useStartOfDay);
   if (useStartOfDay) {
     yesterdayGreg.setHours(hour, minutes, seconds, milliseconds);
     result.epoch = yesterdayGreg.valueOf();
