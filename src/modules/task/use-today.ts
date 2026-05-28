@@ -6,6 +6,7 @@ import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
 import { useVirtualTasks } from "./use-virtual-tasks";
 import { usePendingTasks } from "./use-pending-tasks";
+import dayjs from "dayjs";
 
 export function useToday() {
   const { dayNames, hijriMonthNames, gregorianMonthNames } =
@@ -15,14 +16,14 @@ export function useToday() {
   const taskUseCases = createTaskUseCases(db);
 
   const today = getToday();
-  const gregorianDate = today.toDate();
+  const gregDate = dayjs(today.toDate());
   const todayString = today.toString();
 
   const pendingTasksQuery = usePendingTasks();
-  const startOfToday = today.startOfDay().toDate();
+  const startOfToday = today.startOfDay();
   const endOfToday = today.endOfDay().toDate();
   const virtualTaskQuery = useVirtualTasks(
-    startOfToday.valueOf(),
+    startOfToday.toDate().valueOf(),
     endOfToday.valueOf()
   );
 
@@ -48,9 +49,9 @@ export function useToday() {
   const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
     hijriMonthNames[today.month - 1]
   } ${today.year}`;
-  const subTitle = `${gregorianDate.getDate()} ${
-    gregorianMonthNames[gregorianDate.getMonth()]
-  } ${gregorianDate.getFullYear()}, ${gregorianDate.getHours()}:${gregorianDate.getMinutes()}, Sunset ${startOfToday.getHours()}:${startOfToday.getMinutes()}`;
+  const subTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
+    gregorianMonthNames[gregDate.month()]
+  } ${gregDate.year()} ${gregDate.format("HH:mm")}`;
 
   const isLoading =
     pendingTasksQuery.isPending || todayCompletedTasksQuery.isPending;
@@ -67,6 +68,6 @@ export function useToday() {
       : null,
     pageTitle,
     subTitle,
-    gregorianDate,
+    gregorianDate: gregDate,
   };
 }

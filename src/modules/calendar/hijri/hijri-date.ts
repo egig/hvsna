@@ -105,6 +105,7 @@ export class HijriDate {
       {
         offset: options?.offset,
         startOfWeek: options?.startOfWeek,
+        sunsetShift: h.sunsetShift,
       }
     );
     return hijriDateObj;
@@ -307,11 +308,11 @@ export class HijriDate {
   isToday(): boolean {
     const today = HijriDate.fromDate(
       this._latitude,
-      this._latitude,
+      this._longitude,
       new Date(),
       {
         offset: this._offset,
-        startOfWeek: this._startOfWeek,
+        // startOfWeek: this._startOfWeek,
       }
     );
     return (

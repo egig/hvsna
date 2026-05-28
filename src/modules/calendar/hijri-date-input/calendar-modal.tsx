@@ -459,18 +459,18 @@ export function CalendarModal({
                         {date ? (
                           <button
                             onClick={() => setTempSelectedDate(date)}
-                            data-testid={
-                              date.isToday()
-                                ? "calendar-today-button"
-                                : undefined
-                            }
+                            // data-testid={
+                            //   date.isToday()
+                            //     ? "calendar-today-button"
+                            //     : undefined
+                            // }
                             className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
                               tempSelectedDate &&
                               date.year === tempSelectedDate.year &&
                               date.month === tempSelectedDate.month &&
                               date.day === tempSelectedDate.day
                                 ? "bg-[var(--hvsna-primary-color)] text-white"
-                                : date.isToday()
+                                : false
                                 ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
                                 : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
                             }`}
