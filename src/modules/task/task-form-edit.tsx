@@ -254,7 +254,6 @@ export default function TaskFormEdit({
             setIsFormDirty(true);
           }}
           onChange={(date) => {
-            console.log("change to", date);
             updateScheduleAt({
               date,
             });

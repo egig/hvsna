@@ -233,7 +233,7 @@ export function TaskListItem({
   ) => {
     let atEpochMillis: number | null = null;
     if (date) {
-      atEpochMillis = getTaskEpoch(date, (task.atTime as string) || "");
+      atEpochMillis = getTaskEpoch(date, task.atTime || "");
     }
     updateTask(task.id as string, {
       atEpochMillis,

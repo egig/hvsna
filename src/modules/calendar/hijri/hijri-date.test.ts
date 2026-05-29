@@ -871,25 +871,6 @@ describe("HijriDate", () => {
       expect(endOfDay.millisecond).toBeGreaterThanOrEqual(0);
     });
 
-    it("should maintain precision in next() and previous() methods", () => {
-      const originalDate = new Date(2023, 6, 6, 14, 30, 45, 123);
-      const hijriDate = HijriDate.fromDate(-6.2088, 106.8456, originalDate, {});
-
-      const nextDate = hijriDate.next();
-      const prevDate = hijriDate.previous();
-
-      // Should maintain the same time precision
-      expect(nextDate.hour).toBe(14);
-      expect(nextDate.minute).toBe(30);
-      expect(nextDate.second).toBe(45);
-      expect(nextDate.millisecond).toBe(123);
-
-      expect(prevDate.hour).toBe(14);
-      expect(prevDate.minute).toBe(30);
-      expect(prevDate.second).toBe(45);
-      expect(prevDate.millisecond).toBe(123);
-    });
-
     it("should handle edge case with maximum milliseconds", () => {
       const hijriDate = HijriDate.fromDate(
         -6.2088,

@@ -5,10 +5,15 @@ import { useDateTranslationHelper } from "../use-date-translation-helper";
 import { getDaysInMonth } from "../hijri/get-days-in-month";
 import { _applyOffset } from "../hijri/core";
 import { useSettings } from "@/modules/settings/context";
+import { useHijriDate } from "../hijri/use-hijri-date";
+import {
+  formatHijriDateString,
+  parseHijriDateString,
+} from "@/modules/task/task-form-helpers";
 
 interface CalendarMonthGridProps {
-  selectedDate: Date | null;
-  onChange: (date: Date) => void;
+  selectedDate: string | null;
+  onChange: (date: string) => void;
 }
 
 function toHijri(date: Date, offset: number) {
@@ -28,20 +33,26 @@ export function CalendarMonthGrid({
   selectedDate,
   onChange,
 }: CalendarMonthGridProps) {
-  const { weekDays, hijriMonthNames } = useDateTranslationHelper();
+  const { weekDays, hijriMonthNames, gregorianMonthNames } =
+    useDateTranslationHelper();
   const { settings } = useSettings();
   const offset = settings.manualDateOffset ?? 0;
+  const { currentHijriDate } = useHijriDate();
 
   const todayHijri = toHijri(new Date(), offset);
   const initialHijri = selectedDate
-    ? toHijri(selectedDate, offset)
+    ? parseHijriDateString(selectedDate as string)
     : todayHijri;
 
   const [year, setYear] = useState(initialHijri.year);
   const [month, setMonth] = useState(initialHijri.month);
 
-  const selectedHijri = selectedDate ? toHijri(selectedDate, offset) : null;
+  const selectedHijri = selectedDate
+    ? parseHijriDateString(selectedDate)
+    : null;
   const daysInMonth = getDaysInMonth(year, month);
+
+  const lastDayGreg = toGregorian(year, month, daysInMonth, offset);
 
   const firstDayGreg = toGregorian(year, month, 1, offset);
   const firstDayDate = new Date(
@@ -79,9 +90,15 @@ export function CalendarMonthGrid({
         >
           <HvChevronLeft className="w-5 h-5" />
         </button>
-        <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-          {hijriMonthNames[month - 1]} {year}
-        </h3>
+        <div className="flex flex-col items-center">
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+            {hijriMonthNames[month - 1]} {year}
+          </h3>
+          <p className="text-xs">
+            {firstDayGreg.day} {gregorianMonthNames[firstDayGreg.month - 1]} -{" "}
+            {lastDayGreg.day} {gregorianMonthNames[lastDayGreg.month - 1]}
+          </p>
+        </div>
         <button
           onClick={handleNext}
           className="p-2 bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
@@ -109,25 +126,20 @@ export function CalendarMonthGrid({
 
             const gregDate = hijriToGregorian({ year, month, day });
             const isToday =
-              year === todayHijri.year &&
-              month === todayHijri.month &&
-              day === todayHijri.day;
+              year === currentHijriDate.year &&
+              month === currentHijriDate.month &&
+              day === currentHijriDate.day;
             const isSelected =
               selectedHijri != null &&
               year === selectedHijri.year &&
               month === selectedHijri.month &&
               day === selectedHijri.day;
-            const jsDate = new Date(
-              gregDate.year,
-              gregDate.month - 1,
-              gregDate.day
-            );
 
             return (
               <div key={index} className="aspect-3/2">
                 <button
                   onClick={() => {
-                    onChange(jsDate);
+                    onChange(formatHijriDateString(year, month, day));
                   }}
                   data-testid={isToday ? "calendar-today-button" : undefined}
                   className={`w-full flex flex-col p-1 items-center justify-center rounded-md text-sm transition-colors ${

@@ -10,6 +10,7 @@ import { useHijriDate } from "../hijri/use-hijri-date";
 import type { TaskRecurringType } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { CalendarMonthGrid } from "./calendar-month-grid";
+import { parseHijriDateString } from "@/modules/task/task-form-helpers";
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
@@ -66,7 +67,7 @@ export function CalendarModal({
   onConfirm,
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
-  const { getToday, toHijriDate } = useHijriDate();
+  const { getToday, toHijriDate, createHijriDate } = useHijriDate();
 
   // Which sub-view is active inside the modal
   const [view, setView] = useState<
@@ -264,8 +265,16 @@ export function CalendarModal({
 
           <div className="pb-[env(safe-area-inset-bottom)]">
             <CalendarMonthGrid
-              selectedDate={tempSelectedDate}
-              onChange={setTempSelectedDate}
+              selectedDate={
+                tempSelectedDate
+                  ? toHijriDate(tempSelectedDate).format("YYYYMMDD")
+                  : ""
+              }
+              onChange={(dateStr) => {
+                const { year, month, day } = parseHijriDateString(dateStr);
+                const h = createHijriDate(year, month, day);
+                setTempSelectedDate(h.toDate());
+              }}
             />
 
             <div className="flex flex-col">
@@ -323,24 +332,8 @@ export function CalendarModal({
           }
         />
         <CalendarMonthGrid
-          selectedDate={(() => {
-            if (!tempRepeatEndDate) return null;
-            const y = parseInt(tempRepeatEndDate.substring(0, 4));
-            const m = parseInt(tempRepeatEndDate.substring(4, 6));
-            const d = parseInt(tempRepeatEndDate.substring(6, 8));
-            const greg = hijriToGregorian({ year: y, month: m, day: d });
-            return new Date(greg.year, greg.month - 1, greg.day);
-          })()}
-          onChange={(date) => {
-            const hijri = gregorianToHijri({
-              year: date.getFullYear(),
-              month: date.getMonth() + 1,
-              day: date.getDate(),
-            });
-            const dateStr = `${hijri.year}${String(hijri.month).padStart(
-              2,
-              "0"
-            )}${String(hijri.day).padStart(2, "0")}`;
+          selectedDate={tempRepeatEndDate}
+          onChange={(dateStr) => {
             setTempRepeatEnd("on_date");
             setTempRepeatEndDate(dateStr);
             setView("repeat");

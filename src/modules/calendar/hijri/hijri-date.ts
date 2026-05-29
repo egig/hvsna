@@ -345,7 +345,6 @@ export class HijriDate {
       }
     );
     const tomorrow = today.next();
-    console.log("isTomorrow", this, tomorrow);
     return (
       this.year === tomorrow.year &&
       this.month === tomorrow.month &&

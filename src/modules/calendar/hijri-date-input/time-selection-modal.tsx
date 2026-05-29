@@ -33,7 +33,7 @@ export function TimeSelectionModal({
     selectedTime || ""
   );
 
-  let isCustom = !!selectedTime && selectedTime.includes(":");
+  let isCustom = !!selectedTime && selectedTime?.includes(":");
   const [inputMode, setInputMode] = useState<"prayer" | "custom">(
     isCustom ? "custom" : "prayer"
   );
