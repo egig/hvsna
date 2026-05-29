@@ -1,21 +1,15 @@
 import { useState, useEffect } from "react";
 import { Activity } from "react";
-import {
-  HvCheck,
-  HvChevronLeft,
-  HvChevronRight,
-  HvRepeat,
-} from "@/modules/icons";
+import { HvCheck, HvChevronLeft, HvRepeat } from "@/modules/icons";
+import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { Modal, ModalNavbar } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
-import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
 import { ListInput } from "src/modules/components/list-input";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { useHijriDate } from "../hijri/use-hijri-date";
 import type { TaskRecurringType } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
-import { RepeatEndDateView } from "./repeat-end-date-view";
-import dayjs from "dayjs";
+import { CalendarMonthGrid } from "./calendar-month-grid";
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
@@ -71,19 +65,13 @@ export function CalendarModal({
   forceRecurring: forceRecurring = false,
   onConfirm,
 }: CalendarModalProps) {
-  const { t, language } = useLanguageContext();
-  const { weekDays } = useDateTranslationHelper();
-  const { toHijriDate } = useHijriDate();
+  const { t } = useLanguageContext();
+  const { getToday, toHijriDate } = useHijriDate();
 
   // Which sub-view is active inside the modal
   const [view, setView] = useState<
     "date" | "time" | "repeat" | "repeat_end_date"
   >("date");
-
-  const [gregYear, setGregYear] = useState(() => new Date().getFullYear());
-  const [gregMonth, setGregMonth] = useState(() =>
-    (selectedDate || new Date()).getMonth()
-  );
 
   // Pending selections — committed only when the user taps the confirm button
   const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(
@@ -119,67 +107,7 @@ export function CalendarModal({
     setTempRepeatEndDate(selectedRecurringEndDate ?? null);
     setTempRepeatEndOccurrences(selectedRecurringEndOccurrences ?? 1);
     setTempUseGregorian(selectedUseGregorian ?? false);
-    setGregYear(
-      selectedDate ? selectedDate.getFullYear() : new Date().getFullYear()
-    );
-    setGregMonth(
-      selectedDate ? selectedDate.getMonth() : new Date().getMonth()
-    );
   }, [isOpen]);
-
-  // ── Gregorian calendar grid ────────────────────────────────────────────────
-  const getGregCalendarDays = (): (Date | null)[] => {
-    const firstDayJs = new Date(gregYear, gregMonth, 1).getDay();
-    const offset = (firstDayJs - 5 + 7) % 7; // week starts Friday
-    const daysInMonth = new Date(gregYear, gregMonth + 1, 0).getDate();
-    const days: (Date | null)[] = [];
-    for (let i = 0; i < offset; i++) days.push(null);
-    for (let d = 1; d <= daysInMonth; d++)
-      days.push(new Date(gregYear, gregMonth, d));
-    return days;
-  };
-
-  const isGregToday = (date: Date) => {
-    const now = new Date();
-    return (
-      date.getFullYear() === now.getFullYear() &&
-      date.getMonth() === now.getMonth() &&
-      date.getDate() === now.getDate()
-    );
-  };
-
-  const isGregSelected = (date: Date) => {
-    if (!tempSelectedDate) return false;
-    const js = tempSelectedDate;
-    return (
-      date.getFullYear() === js.getFullYear() &&
-      date.getMonth() === js.getMonth() &&
-      date.getDate() === js.getDate()
-    );
-  };
-
-  const gregMonthLabel = new Intl.DateTimeFormat(
-    language === "id" ? "id-ID" : "en-US",
-    { month: "long", year: "numeric" }
-  ).format(new Date(gregYear, gregMonth));
-
-  const handleGregPrev = () => {
-    if (gregMonth === 0) {
-      setGregYear((y) => y - 1);
-      setGregMonth(11);
-    } else {
-      setGregMonth((m) => m - 1);
-    }
-  };
-
-  const handleGregNext = () => {
-    if (gregMonth === 11) {
-      setGregYear((y) => y + 1);
-      setGregMonth(0);
-    } else {
-      setGregMonth((m) => m + 1);
-    }
-  };
 
   // ── Confirm / quick-select handlers ───────────────────────────────────────
 
@@ -199,40 +127,44 @@ export function CalendarModal({
 
   const isSelectedToday = () => {
     if (!selectedDate) return false;
-    const today = new Date();
+    const today = getToday().endOfDay();
+    const selectedHijri = toHijriDate(selectedDate);
     return (
-      selectedDate.getFullYear() === today.getFullYear() &&
-      selectedDate.getMonth() === today.getMonth() &&
-      selectedDate.getDate() === today.getDate()
+      selectedHijri.year === today.year &&
+      selectedHijri.month === today.month &&
+      selectedHijri.day === today.day
     );
   };
 
   const isSelectedTomorrow = () => {
     if (!selectedDate) return false;
-    const tomorrow = dayjs().add(1, "day").toDate();
+    const tomorrow = getToday().next().endOfDay();
+    const selectedHijri = toHijriDate(selectedDate);
     return (
-      selectedDate.getFullYear() === tomorrow.getFullYear() &&
-      selectedDate.getMonth() === tomorrow.getMonth() &&
-      selectedDate.getDate() === tomorrow.getDate()
+      selectedHijri.year === tomorrow.year &&
+      selectedHijri.month === tomorrow.month &&
+      selectedHijri.day === tomorrow.day
     );
   };
 
   const isSelectedNextWeek = () => {
     if (!selectedDate) return false;
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Sun ... 5=Fri
+    const today = getToday().endOfDay();
+    const dayOfWeek = today.toDate().getDay(); // 0=Sun ... 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
 
     // Create next Friday by adding days using next() method
     let nextFriday = today;
     for (let i = 0; i < daysUntilFriday; i++) {
-      nextFriday = dayjs(nextFriday).add(1, "day").toDate();
+      nextFriday = nextFriday.next().endOfDay();
     }
+    nextFriday = nextFriday.endOfDay();
 
+    const selectedHijri = toHijriDate(selectedDate);
     return (
-      selectedDate.getFullYear() === nextFriday.getFullYear() &&
-      selectedDate.getMonth() === nextFriday.getMonth() &&
-      selectedDate.getDate() === nextFriday.getDate()
+      selectedHijri.year === nextFriday.year &&
+      selectedHijri.month === nextFriday.month &&
+      selectedHijri.day === nextFriday.day
     );
   };
 
@@ -241,7 +173,7 @@ export function CalendarModal({
   };
 
   const handleToday = () => {
-    const today = new Date();
+    const today = getToday().endOfDay().toDate();
     onConfirm(
       today,
       tempRepeat,
@@ -254,7 +186,7 @@ export function CalendarModal({
   };
 
   const handleTomorrow = () => {
-    const tomorrow = dayjs().add(1, "day").toDate();
+    const tomorrow = getToday().next().endOfDay().toDate();
     onConfirm(
       tomorrow,
       tempRepeat,
@@ -267,14 +199,13 @@ export function CalendarModal({
   };
 
   const handleNextWeek = () => {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Sun … 5=Fri
+    const today = getToday().endOfDay();
+    const dayOfWeek = today.toDate().getDay(); // 0=Sun … 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
     let date = today;
-    for (let i = 0; i < daysUntilFriday; i++)
-      date = dayjs(date).add(1, "day").toDate();
+    for (let i = 0; i < daysUntilFriday; i++) date = date.next();
     onConfirm(
-      date,
+      date.endOfDay().toDate(),
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,
@@ -292,6 +223,8 @@ export function CalendarModal({
     tempRepeat !== "none"
       ? formatRepeatLabel(tempRepeat, tempRepeatInterval, t)
       : t("repeat");
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
@@ -330,64 +263,10 @@ export function CalendarModal({
           </div>
 
           <div className="pb-[env(safe-area-inset-bottom)]">
-            <div className="flex items-center justify-between p-2 gap-2">
-              <button
-                onClick={handleGregPrev}
-                className="p-2 bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
-              >
-                <HvChevronLeft className="w-5 h-5" />
-              </button>
-
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                {gregMonthLabel}
-              </h3>
-
-              <button
-                onClick={handleGregNext}
-                className="p-2  bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
-              >
-                <HvChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Calendar grid */}
-            <div className="p-2 border-y border-gray-200">
-              <div className="grid grid-cols-7 gap-1 text-center">
-                {weekDays.map((day: string) => (
-                  <div
-                    key={day}
-                    className="text-xs font-medium text-gray-500 dark:text-gray-400"
-                  >
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {getGregCalendarDays().map((date, index) => (
-                  <div key={index} className="aspect-3/2">
-                    {date ? (
-                      <button
-                        onClick={() => setTempSelectedDate(date)}
-                        className={`w-full flex flex-col py-1 px-2 items-center justify-center rounded-md text-sm transition-colors ${
-                          isGregSelected(date)
-                            ? "bg-[var(--hvsna-primary-color)] text-white"
-                            : isGregToday(date)
-                            ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                        }`}
-                      >
-                        <div className="text-base">{date.getDate()}</div>
-                        <div className="text-[0.625rem]">
-                          {toHijriDate(date).day}
-                        </div>
-                      </button>
-                    ) : (
-                      <div className="w-full h-full" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CalendarMonthGrid
+              selectedDate={tempSelectedDate}
+              onChange={setTempSelectedDate}
+            />
 
             <div className="flex flex-col">
               <ListInput
@@ -435,14 +314,37 @@ export function CalendarModal({
 
       {/* ── Repeat end date sub-view ──────────────────────────────────────── */}
       <Activity mode={view === "repeat_end_date" ? "visible" : "hidden"}>
-        <RepeatEndDateView
-          selectedDate={tempRepeatEndDate}
-          onDateSelect={(dateStr) => {
+        <ModalNavbar
+          title={t("repeat_ends_on_date")}
+          leftAction={
+            <button onClick={() => setView("repeat")} className="p-2">
+              <HvChevronLeft className="w-5 h-5" />
+            </button>
+          }
+        />
+        <CalendarMonthGrid
+          selectedDate={(() => {
+            if (!tempRepeatEndDate) return null;
+            const y = parseInt(tempRepeatEndDate.substring(0, 4));
+            const m = parseInt(tempRepeatEndDate.substring(4, 6));
+            const d = parseInt(tempRepeatEndDate.substring(6, 8));
+            const greg = hijriToGregorian({ year: y, month: m, day: d });
+            return new Date(greg.year, greg.month - 1, greg.day);
+          })()}
+          onChange={(date) => {
+            const hijri = gregorianToHijri({
+              year: date.getFullYear(),
+              month: date.getMonth() + 1,
+              day: date.getDate(),
+            });
+            const dateStr = `${hijri.year}${String(hijri.month).padStart(
+              2,
+              "0"
+            )}${String(hijri.day).padStart(2, "0")}`;
             setTempRepeatEnd("on_date");
             setTempRepeatEndDate(dateStr);
             setView("repeat");
           }}
-          onBack={() => setView("repeat")}
         />
       </Activity>
     </Modal>

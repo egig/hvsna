@@ -1,6 +1,5 @@
 import { hijriToGregorian } from "@tabby_ai/hijri-converter";
-import { fromDate, getSunset, toDate } from "./core";
-import dayjs from "dayjs";
+import { _applyOffset, fromDate, getSunset, toDate } from "./core";
 
 /**
  * Options for HijriDate calculations
@@ -72,14 +71,15 @@ export class HijriDate {
     this._jsDate = new Date(epoch);
     this._startOfDayEpoch = startOfDay;
 
-    this.dayOfWeek = this._jsDate.getDay();
-    // Adjust dayOfWeek based on startOfWeek setting
-    // If startOfWeek is Sunday (0), dayOfWeek remains 0-6 (Sun-Sat)
-    // If startOfWeek is Monday (1), dayOfWeek becomes 0-6 (Mon-Sun)
-    // If startOfWeek is Friday (5), dayOfWeek becomes 0-6 (Fri-Thu)
-    const startOfWeekDay = this._startOfWeek ?? 5; // Default to Friday (5) for Islamic calendar
+    // When no time is given, epoch === startOfDay (the preceding sunset — a Monday evening).
+    // The Hijri day's display Gregorian day is the day after that sunset (Tuesday).
+    // Applying a +1 shift here corrects the weekday column without changing core.ts.
+    const isAtStartOfDay = epoch === startOfDay;
+    const startOfWeekDay = this._startOfWeek ?? 5;
+    const effectiveSunsetShift =
+      options?.sunsetShift ?? (isAtStartOfDay ? 1 : 0);
     this.dayOfWeek =
-      (this.dayOfWeek - startOfWeekDay + 7 + (options?.sunsetShift || 0)) % 7;
+      (this._jsDate.getDay() - startOfWeekDay + 7 + effectiveSunsetShift) % 7;
   }
 
   static fromDate(
@@ -137,51 +137,63 @@ export class HijriDate {
   }
 
   previous(): HijriDate {
-    const prevGregorian = dayjs(this._jsDate).subtract(1, "day").toDate();
-    prevGregorian.setDate(prevGregorian.getDate() - 1);
-    return HijriDate.fromDate(this._latitude, this._longitude, prevGregorian, {
-      offset: this._offset,
-      startOfWeek: this._startOfWeek,
-    });
+    const prev = _applyOffset(
+      { year: this.year, month: this.month, day: this.day },
+      -1
+    );
+    return new HijriDate(
+      this._latitude,
+      this._longitude,
+      prev.year,
+      prev.month,
+      prev.day,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { offset: this._offset, startOfWeek: this._startOfWeek }
+    );
   }
 
   next(): HijriDate {
-    const nextGregorian = dayjs(this._jsDate).add(1, "day").toDate();
-    return HijriDate.fromDate(this._latitude, this._longitude, nextGregorian, {
-      offset: this._offset,
-      startOfWeek: this._startOfWeek,
-    });
+    const next = _applyOffset(
+      { year: this.year, month: this.month, day: this.day },
+      1
+    );
+    return new HijriDate(
+      this._latitude,
+      this._longitude,
+      next.year,
+      next.month,
+      next.day,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { offset: this._offset, startOfWeek: this._startOfWeek }
+    );
   }
 
   startOfWeek(): HijriDate {
-    // Get the raw JavaScript day of week (0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday)
-    const rawDayOfWeek = this._jsDate.getDay();
-    const startOfWeekDay = this._startOfWeek ?? 5; // Default to Friday (5) for Islamic calendar
+    // Use noon of the display day (startOfDayEpoch + 18h) as anchor to avoid
+    // _jsDate landing on the sunset boundary and computing the wrong weekday.
+    const displayDayNoon = new Date(this._startOfDayEpoch + 18 * 3600 * 1000);
+    const rawDayOfWeek = displayDayNoon.getDay();
+    const startOfWeekDay = this._startOfWeek ?? 5;
 
-    // Calculate days to subtract to get to the start of week
-    let daysToSubtract;
-    if (rawDayOfWeek >= startOfWeekDay) {
-      // Current day is on or after start of week
-      daysToSubtract = rawDayOfWeek - startOfWeekDay;
-    } else {
-      // Current day is before start of week, go back to previous week
-      daysToSubtract = rawDayOfWeek + (7 - startOfWeekDay);
-    }
+    const daysToSubtract =
+      rawDayOfWeek >= startOfWeekDay
+        ? rawDayOfWeek - startOfWeekDay
+        : rawDayOfWeek + (7 - startOfWeekDay);
 
-    const startOfWeekGregorian = new Date(this._jsDate);
-    startOfWeekGregorian.setDate(
-      startOfWeekGregorian.getDate() - daysToSubtract
-    );
+    const ref = new Date(displayDayNoon);
+    ref.setDate(ref.getDate() - daysToSubtract);
+    ref.setHours(12, 0, 0, 0);
 
-    return HijriDate.fromDate(
-      this._latitude,
-      this._longitude,
-      startOfWeekGregorian,
-      {
-        offset: this._offset,
-        startOfWeek: this._startOfWeek,
-      }
-    );
+    return HijriDate.fromDate(this._latitude, this._longitude, ref, {
+      offset: this._offset,
+      startOfWeek: this._startOfWeek,
+    });
   }
 
   endOfWeek(): HijriDate {
@@ -312,7 +324,7 @@ export class HijriDate {
       new Date(),
       {
         offset: this._offset,
-        // startOfWeek: this._startOfWeek,
+        startOfWeek: this._startOfWeek,
       }
     );
     return (
@@ -323,15 +335,17 @@ export class HijriDate {
   }
 
   isTomorrow(): boolean {
-    const tomorrow = HijriDate.fromDate(
+    const today = HijriDate.fromDate(
       this._latitude,
       this._longitude,
-      new Date(Date.now() + 86400000),
+      new Date(),
       {
         offset: this._offset,
         startOfWeek: this._startOfWeek,
       }
     );
+    const tomorrow = today.next();
+    console.log("isTomorrow", this, tomorrow);
     return (
       this.year === tomorrow.year &&
       this.month === tomorrow.month &&
@@ -355,6 +369,8 @@ export class HijriDate {
       new Date(this._startOfDayEpoch),
       {
         offset: this._offset,
+        startOfWeek: this._startOfWeek,
+        sunsetShift: this._sunsetShift,
       }
     );
   }
@@ -367,6 +383,8 @@ export class HijriDate {
       new Date(nextStartEpoch - 1000),
       {
         offset: this._offset,
+        startOfWeek: this._startOfWeek,
+        sunsetShift: this._sunsetShift,
       }
     );
   }

@@ -209,7 +209,7 @@ export function isTimeSameOrAfter(
   return false;
 }
 
-function _applyOffset(
+export function _applyOffset(
   d: HijriDateComponents,
   offset: number
 ): { year: number; month: number; day: number } {

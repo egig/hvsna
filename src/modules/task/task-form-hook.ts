@@ -39,13 +39,10 @@ export const useTaskForm = (
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
 
-  function calculateDueTime(h: HijriDate) {}
-
   const {
     latitude,
     longitude,
     manualOffset: offset,
-    getToday,
     createHijriDate,
   } = useHijriDate();
   const getTaskEpoch = useTaskEpoch();

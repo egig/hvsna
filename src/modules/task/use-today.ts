@@ -45,10 +45,10 @@ export function useToday() {
     );
   });
 
-  const subTitle = `${today.day} ${hijriMonthNames[today.month - 1]} ${
+  const pageTitle = `${today.day} ${hijriMonthNames[today.month - 1]} ${
     today.year
   }`;
-  const pageTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
+  const subTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
     gregorianMonthNames[gregDate.month()]
   } ${gregDate.year()}`;
 

@@ -45,12 +45,14 @@ export function DatePrayerInput({
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
   const [isOpen, setIsOpen] = useState(false);
+  const { toHijriDate } = useHijriDate();
 
   const formatDateLabel = () => {
     if (!selectedDate) return t("date");
-    if (isToday(selectedDate)) return t("today");
-    if (isTomorrow(selectedDate)) return t("tomorrow");
-    return dayjs(selectedDate).format("DD MMMM");
+    let d = toHijriDate(selectedDate);
+    if (d.isToday()) return t("today");
+    if (d.isTomorrow()) return t("tomorrow");
+    return d.format("DD MMMM");
   };
 
   return (
@@ -114,21 +116,3 @@ export function DatePrayerInput({
     </>
   );
 }
-
-const isToday = (date: Date) => {
-  const now = new Date();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-};
-
-const isTomorrow = (date: Date) => {
-  const now = dayjs().add(1, "day").toDate();
-  return (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  );
-};

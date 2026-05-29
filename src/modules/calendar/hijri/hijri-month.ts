@@ -5,7 +5,6 @@ import { getDaysInMonth } from "./get-days-in-month";
 export class HijriMonth {
   year: number;
   month: number;
-  _jsDate: Date;
   _latitude: number;
   _longitude: number;
   _offset?: number;
@@ -23,20 +22,6 @@ export class HijriMonth {
     this._latitude = lat;
     this._longitude = lng;
     this._offset = options.offset;
-
-    let d = new HijriDate(
-      lat,
-      lng,
-      year,
-      month,
-      1,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options
-    );
-    this._jsDate = d.toDate();
   }
 
   previous(): HijriMonth {
