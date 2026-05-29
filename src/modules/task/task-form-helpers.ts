@@ -106,24 +106,21 @@ export function parseTimeString(timeString: string): {
 
 export function useTaskEpoch() {
   const { getPrayerEndTime } = usePrayerTimes();
-  const { createHijriDate } = useHijriDate();
-  return function getTaskEpoch(
-    year: number,
-    month: number,
-    day: number,
-    atTime: string
-  ): number | null {
+  const { toHijriDate } = useHijriDate();
+  return function getTaskEpoch(date: Date, atTime: string): number | null {
     if (!!atTime && !atTime.includes(":")) {
-      let d = createHijriDate(year, month, day);
+      const d = toHijriDate(date);
       return getPrayerEndTime(atTime.toLowerCase(), d).valueOf();
     }
 
     if (!!atTime && atTime.includes(":")) {
       const [h, m] = atTime.split(":").map(Number);
-      return createHijriDate(year, month, day, h, m).toDate().valueOf();
+      let da = new Date();
+      da.setHours(h, m);
+      return da.valueOf();
     }
 
-    let r = createHijriDate(year, month, day);
+    let r = toHijriDate(date);
     let e = r.endOfDay().toDate();
     return e.valueOf();
   };

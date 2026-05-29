@@ -9,8 +9,7 @@ import { usePendingTasks } from "./use-pending-tasks";
 import dayjs from "dayjs";
 
 export function useToday() {
-  const { dayNames, hijriMonthNames, gregorianMonthNames } =
-    useDateTranslationHelper();
+  const { hijriMonthNames, gregorianMonthNames } = useDateTranslationHelper();
   const { getToday, initiated: hijriCalInititated } = useHijriDate();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
@@ -46,12 +45,12 @@ export function useToday() {
     );
   });
 
-  const pageTitle = `${dayNames[today.dayOfWeek]}, ${today.day} ${
-    hijriMonthNames[today.month - 1]
-  } ${today.year}`;
-  const subTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
+  const subTitle = `${today.day} ${hijriMonthNames[today.month - 1]} ${
+    today.year
+  }`;
+  const pageTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
     gregorianMonthNames[gregDate.month()]
-  } ${gregDate.year()} ${gregDate.format("HH:mm")}`;
+  } ${gregDate.year()}`;
 
   const isLoading =
     pendingTasksQuery.isPending || todayCompletedTasksQuery.isPending;

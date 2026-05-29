@@ -2,7 +2,7 @@ import type { HijriDate } from "../calendar/hijri";
 import type { TaskRecurringType } from "@/domain/task";
 
 export interface TaskScheduleAt {
-  dateHijri: HijriDate | null;
+  date: Date | null;
   time: string;
 }
 

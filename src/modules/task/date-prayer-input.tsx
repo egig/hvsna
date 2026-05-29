@@ -5,11 +5,12 @@ import { useHijriDate } from "src/modules/calendar/hijri";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import type { HijriDate } from "src/modules/calendar/hijri/hijri-date";
 import type { PrayerTime, TaskRecurringType } from "@/domain/task";
+import dayjs from "dayjs";
 
 type RecurringEnd = "never" | "on_date" | "after_occurrences";
 
 interface DatePrayerInputProps {
-  hijriDate: HijriDate | null;
+  selectedDate: Date | null;
   isSubmitting: boolean;
   recurringType?: TaskRecurringType;
   recurringInterval?: number;
@@ -26,11 +27,11 @@ interface DatePrayerInputProps {
     useGregorian: boolean
   ) => void;
   useGregorian?: boolean;
-  onChange: (hijriDate: HijriDate | null) => void;
+  onChange: (d: Date | null) => void;
 }
 
 export function DatePrayerInput({
-  hijriDate,
+  selectedDate,
   isSubmitting,
   recurringType: recurringType = "none",
   recurringInterval: recurringInterval = 1,
@@ -43,14 +44,13 @@ export function DatePrayerInput({
   onChange,
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
-  const { isToday, isTomorrow, formatDate } = useHijriDate();
   const [isOpen, setIsOpen] = useState(false);
 
   const formatDateLabel = () => {
-    if (!hijriDate) return t("date");
-    if (isToday(hijriDate)) return t("today");
-    if (isTomorrow(hijriDate)) return t("tomorrow");
-    return formatDate(hijriDate, "DD MMMM");
+    if (!selectedDate) return t("date");
+    if (isToday(selectedDate)) return t("today");
+    if (isTomorrow(selectedDate)) return t("tomorrow");
+    return dayjs(selectedDate).format("DD MMMM");
   };
 
   return (
@@ -61,7 +61,7 @@ export function DatePrayerInput({
         disabled={isSubmitting}
         data-testid="date-prayer-input-button"
         className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors  border-gray-300 dark:border-gray-600 ${
-          hijriDate
+          selectedDate
             ? "text-gray-900 dark:text-white"
             : "text-gray-500 dark:text-gray-400"
         } ${
@@ -81,7 +81,7 @@ export function DatePrayerInput({
       <CalendarModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        selectedDate={hijriDate}
+        selectedDate={selectedDate as Date}
         selectedRecurringType={recurringType}
         selectedRecurringInterval={recurringInterval}
         selectedRecurringEnd={recurringEnd}
@@ -114,3 +114,21 @@ export function DatePrayerInput({
     </>
   );
 }
+
+const isToday = (date: Date) => {
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+};
+
+const isTomorrow = (date: Date) => {
+  const now = dayjs().add(1, "day").toDate();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+};

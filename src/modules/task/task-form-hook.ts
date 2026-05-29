@@ -53,7 +53,7 @@ export const useTaskForm = (
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
     scheduleAt: {
-      dateHijri: null,
+      date: null,
       time: "",
     },
     repeat: {
@@ -92,12 +92,9 @@ export const useTaskForm = (
     } & Partial<Task>;
 
     taskData.atTime = formData.scheduleAt.time;
-    if (!!formData.scheduleAt.dateHijri) {
-      const { year, month, day } = formData.scheduleAt.dateHijri;
+    if (!!formData.scheduleAt.date) {
       taskData.atEpochMillis = getTaskEpoch(
-        year,
-        month,
-        day,
+        formData.scheduleAt.date,
         formData.scheduleAt.time
       ) as number;
     }
@@ -107,13 +104,9 @@ export const useTaskForm = (
 
       const isRecurring = formData.repeat.recurringType !== "none";
 
-      if (isRecurring && formData.scheduleAt.dateHijri) {
-        const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const { year, month, day } = formData.scheduleAt.dateHijri;
+      if (isRecurring && formData.scheduleAt.date) {
         const baseDateEpoch = getTaskEpoch(
-          year,
-          month,
-          day,
+          formData.scheduleAt.date,
           formData.scheduleAt.time
         ) as number;
         const repeatEndEpoch =
@@ -173,8 +166,8 @@ export const useTaskForm = (
         if (
           !isMatchLocationContext(
             location,
-            formData.scheduleAt.dateHijri,
-            getToday()
+            formData.scheduleAt.date as Date,
+            new Date()
           )
         ) {
           showSnackbar("Task created but not listed in this page");
@@ -203,19 +196,19 @@ export const useTaskForm = (
 
 function isMatchLocationContext(
   location: any,
-  selectedHijriDate: any,
-  today: HijriDate
+  selectedDate: Date,
+  today: Date
 ) {
   if (location?.state?.context === "all") {
     return true;
   }
 
-  if (!selectedHijriDate) {
+  if (!selectedDate) {
     return ["today", "upcoming"].indexOf(location.state?.context) == -1;
   }
 
-  const todayTimestamp = today.startOfDay().toDate().valueOf();
-  const selectedTimestamp = selectedHijriDate.startOfDay().toDate().valueOf();
+  const todayTimestamp = today.valueOf();
+  const selectedTimestamp = selectedDate.valueOf();
 
   if (selectedTimestamp <= todayTimestamp) {
     return ["today", "upcoming"].indexOf(location.state?.context) !== -1;

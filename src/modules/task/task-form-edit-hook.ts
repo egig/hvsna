@@ -93,7 +93,7 @@ export const useTaskFormEdit = (
   const getTaskEpoch = useTaskEpoch();
 
   const [formData, setFormData] = useState<EditFormData>({
-    scheduleAt: { dateHijri: null, time: "" },
+    scheduleAt: { date: null, time: "" },
     repeat: {
       recurringType: "none",
       interval: 1,
@@ -135,12 +135,9 @@ export const useTaskFormEdit = (
     } & Partial<Task>;
 
     let atEpochMillis = null;
-    if (formData.scheduleAt.dateHijri) {
-      const { year, month, day } = formData.scheduleAt.dateHijri;
+    if (formData.scheduleAt.date) {
       atEpochMillis = getTaskEpoch(
-        year,
-        month,
-        day,
+        formData.scheduleAt.date,
         formData.scheduleAt.time
       ) as number;
     }
@@ -165,11 +162,10 @@ export const useTaskFormEdit = (
       const isNowRecurring = formData.repeat.recurringType !== "none";
       let result: Task;
 
-      if (wasRegular && isNowRecurring && formData.scheduleAt.dateHijri) {
+      if (wasRegular && isNowRecurring && formData.scheduleAt.date) {
         // Promote: regular → recurring
-        const { year, month, day } = formData.scheduleAt.dateHijri;
         const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
-        const baseDateEpoch = createHijriDate(year, month, day)
+        const baseDateEpoch = toHijriDate(formData.scheduleAt.date)
           .endOfDay()
           .toDate()
           .valueOf();
@@ -181,21 +177,13 @@ export const useTaskFormEdit = (
                   month: em,
                   day: ed,
                 } = parseHijriDateString(formData.repeat.endDate as string);
-                return new HijriDate(
-                  ey,
-                  em,
-                  ed,
-                  undefined,
-                  undefined,
-                  0,
-                  0,
-                  hijriOpts
-                )
+                return createHijriDate(ey, em, ed)
                   .endOfDay()
                   .toDate()
                   .valueOf();
               })()
             : undefined;
+
         result = await promoteTaskToRecurring(
           taskId,
           taskInput,
@@ -416,17 +404,12 @@ export const useTaskFormEdit = (
     if (!task) return;
 
     const scheduleAt: TaskScheduleAt = {
-      dateHijri: null,
+      date: null,
       time: "",
     };
 
     if (task.atEpochMillis) {
-      const hijri = toHijriDate(new Date(task.atEpochMillis));
-      scheduleAt.dateHijri = createHijriDate(
-        hijri.year,
-        hijri.month,
-        hijri.day
-      );
+      scheduleAt.date = new Date(task.atEpochMillis);
       scheduleAt.time = task.atTime || "";
     }
 

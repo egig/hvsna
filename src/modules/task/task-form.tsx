@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { HvArrowUp } from "@/modules/icons";
 import { DatePrayerInput } from "./date-prayer-input";
-import { useHijriDate } from "src/modules/calendar/hijri";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useLocation } from "react-router";
@@ -30,7 +29,6 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
     updateRepeatConfig,
   } = useTaskForm(onSuccess, onError);
   const location = useLocation();
-  const { getToday } = useHijriDate();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -41,9 +39,9 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
   }, []);
 
   useEffect(() => {
-    if (["today", "upcoming"].includes(location.state?.context)) {
+    if (["/today", "/upcoming"].includes(location.pathname)) {
       updateScheduleAt({
-        dateHijri: getToday(),
+        date: new Date(),
         time: "",
       });
     }
@@ -94,7 +92,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
 
       <div className="flex flex-wrap gap-3 px-4 py-2">
         <DatePrayerInput
-          hijriDate={formData.scheduleAt.dateHijri}
+          selectedDate={formData.scheduleAt.date}
           isSubmitting={isSubmitting}
           recurringType={formData.repeat.recurringType}
           recurringInterval={formData.repeat.interval}
@@ -119,13 +117,13 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
               useGregorian,
             });
           }}
-          onChange={(hijriDate) => {
+          onChange={(d) => {
             updateScheduleAt({
-              dateHijri: hijriDate,
+              date: d,
             });
           }}
         />
-        {formData.scheduleAt.dateHijri && (
+        {formData.scheduleAt.date && (
           <TimeInput
             label=""
             name={"atTime"}

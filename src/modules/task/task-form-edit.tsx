@@ -227,7 +227,7 @@ export default function TaskFormEdit({
 
       <div className="flex flex-wrap gap-3 px-4">
         <DatePrayerInput
-          hijriDate={formData.scheduleAt.dateHijri as HijriDate}
+          selectedDate={formData.scheduleAt.date as Date}
           isSubmitting={isSubmitting}
           recurringType={formData.repeat.recurringType}
           recurringInterval={formData.repeat.interval}
@@ -253,29 +253,24 @@ export default function TaskFormEdit({
             });
             setIsFormDirty(true);
           }}
-          onChange={(hijriDate) => {
+          onChange={(date) => {
             updateScheduleAt({
-              dateHijri: hijriDate,
+              date,
             });
             setIsFormDirty(true);
           }}
         />
 
-        {formData.scheduleAt.dateHijri && (
+        {formData.scheduleAt.date && (
           <TimeInput
             label=""
             name={"atTime"}
             time={formData.scheduleAt.time}
-            prayerTime={formData.scheduleAt.prayerTime}
-            onChange={function (
-              time: string | null,
-              prayerTime?: PrayerTime
-            ): void {
+            onChange={function (time: string | null): void {
               updateScheduleAt({
                 time: time ?? undefined,
-                prayerTime: prayerTime ?? undefined,
               });
-              if (!time && !prayerTime) {
+              if (!time) {
                 setRemoveTime(true);
               }
               setIsFormDirty(true);

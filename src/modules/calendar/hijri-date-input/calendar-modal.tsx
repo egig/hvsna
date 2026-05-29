@@ -8,22 +8,21 @@ import {
 } from "@/modules/icons";
 import { Modal, ModalNavbar } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
-import { Tabs } from "@base-ui/react/tabs";
-import { HijriMonth } from "../hijri/hijri-month";
 import { useDateTranslationHelper } from "src/modules/calendar/use-date-translation-helper";
 import { ListInput } from "src/modules/components/list-input";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { useHijriDate, HijriDate } from "../hijri/use-hijri-date";
+import { useHijriDate } from "../hijri/use-hijri-date";
 import type { TaskRecurringType } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { RepeatEndDateView } from "./repeat-end-date-view";
+import dayjs from "dayjs";
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
 interface CalendarModalProps {
   isOpen: boolean;
   onClose: () => void;
-  selectedDate: HijriDate | null;
+  selectedDate: Date | null;
   selectedRecurringType?: TaskRecurringType;
   selectedRecurringInterval?: number;
   selectedRecurringEnd?: RepeatEnd;
@@ -32,7 +31,7 @@ interface CalendarModalProps {
   selectedUseGregorian?: boolean;
   forceRecurring?: boolean; // If true, repeat is forced to be selected (no "none" option)
   onConfirm: (
-    date: HijriDate | null,
+    date: Date | null,
     recurring: TaskRecurringType,
     recurringInterval: number,
     recurringEnd: RepeatEnd,
@@ -73,34 +72,21 @@ export function CalendarModal({
   onConfirm,
 }: CalendarModalProps) {
   const { t, language } = useLanguageContext();
-  const { hijriMonthNames, weekDays } = useDateTranslationHelper();
-  const {
-    getToday,
-    createHijriDate,
-    createHijriMonth,
-    currentHijriMonth,
-    toHijriDate,
-  } = useHijriDate();
+  const { weekDays } = useDateTranslationHelper();
+  const { toHijriDate } = useHijriDate();
 
   // Which sub-view is active inside the modal
   const [view, setView] = useState<
     "date" | "time" | "repeat" | "repeat_end_date"
   >("date");
 
-  // Calendar navigation state
-  const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
-    selectedDate
-      ? createHijriMonth(selectedDate.year, selectedDate.month)
-      : currentHijriMonth()
-  );
-  const [calendarMode, setCalendarMode] = useState<"hijri" | "gregorian">(
-    "hijri"
-  );
   const [gregYear, setGregYear] = useState(() => new Date().getFullYear());
-  const [gregMonth, setGregMonth] = useState(() => new Date().getMonth());
+  const [gregMonth, setGregMonth] = useState(() =>
+    (selectedDate || new Date()).getMonth()
+  );
 
   // Pending selections — committed only when the user taps the confirm button
-  const [tempSelectedDate, setTempSelectedDate] = useState<HijriDate | null>(
+  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(
     selectedDate
   );
   const [tempRepeat, setTempRepeat] = useState<TaskRecurringType>(
@@ -133,31 +119,13 @@ export function CalendarModal({
     setTempRepeatEndDate(selectedRecurringEndDate ?? null);
     setTempRepeatEndOccurrences(selectedRecurringEndOccurrences ?? 1);
     setTempUseGregorian(selectedUseGregorian ?? false);
-    setCurrentMonth(
-      selectedDate
-        ? createHijriMonth(selectedDate.year, selectedDate.month)
-        : currentHijriMonth()
+    setGregYear(
+      selectedDate ? selectedDate.getFullYear() : new Date().getFullYear()
+    );
+    setGregMonth(
+      selectedDate ? selectedDate.getMonth() : new Date().getMonth()
     );
   }, [isOpen]);
-
-  // Rebuild the current month object when settings (e.g. manual date offset) change
-  useEffect(() => {
-    setCurrentMonth(createHijriMonth(currentMonth.year, currentMonth.month));
-  }, [createHijriDate]);
-
-  // ── Hijri calendar grid ────────────────────────────────────────────────────
-  const getCalendarDays = () => {
-    const firstDay = currentMonth.getFirstDay().endOfDay();
-    const daysInMonth = currentMonth.getDaysInMonth();
-    const startDayOfWeek = firstDay.dayOfWeek;
-    const days = [];
-    for (let i = 0; i < startDayOfWeek; i++) days.push(null);
-    for (let day = 1; day <= daysInMonth; day++)
-      days.push(
-        createHijriDate(currentMonth.year, currentMonth.month, day).endOfDay()
-      );
-    return days;
-  };
 
   // ── Gregorian calendar grid ────────────────────────────────────────────────
   const getGregCalendarDays = (): (Date | null)[] => {
@@ -182,7 +150,7 @@ export function CalendarModal({
 
   const isGregSelected = (date: Date) => {
     if (!tempSelectedDate) return false;
-    const js = tempSelectedDate.toDate();
+    const js = tempSelectedDate;
     return (
       date.getFullYear() === js.getFullYear() &&
       date.getMonth() === js.getMonth() &&
@@ -194,11 +162,6 @@ export function CalendarModal({
     language === "id" ? "id-ID" : "en-US",
     { month: "long", year: "numeric" }
   ).format(new Date(gregYear, gregMonth));
-
-  // ── Navigation ─────────────────────────────────────────────────────────────
-
-  const handlePreviousMonth = () => setCurrentMonth(currentMonth.previous());
-  const handleNextMonth = () => setCurrentMonth(currentMonth.next());
 
   const handleGregPrev = () => {
     if (gregMonth === 0) {
@@ -222,13 +185,8 @@ export function CalendarModal({
 
   const handleConfirm = () => {
     if (tempSelectedDate) {
-      const finalDate = createHijriDate(
-        tempSelectedDate.year,
-        tempSelectedDate.month,
-        tempSelectedDate.day
-      ).endOfDay();
       onConfirm(
-        finalDate,
+        tempSelectedDate,
         tempRepeat,
         tempRepeatInterval,
         tempRepeatEnd,
@@ -241,41 +199,40 @@ export function CalendarModal({
 
   const isSelectedToday = () => {
     if (!selectedDate) return false;
-    const today = getToday().endOfDay();
+    const today = new Date();
     return (
-      selectedDate.year === today.year &&
-      selectedDate.month === today.month &&
-      selectedDate.day === today.day
+      selectedDate.getFullYear() === today.getFullYear() &&
+      selectedDate.getMonth() === today.getMonth() &&
+      selectedDate.getDate() === today.getDate()
     );
   };
 
   const isSelectedTomorrow = () => {
     if (!selectedDate) return false;
-    const tomorrow = getToday().next().endOfDay();
+    const tomorrow = dayjs().add(1, "day").toDate();
     return (
-      selectedDate.year === tomorrow.year &&
-      selectedDate.month === tomorrow.month &&
-      selectedDate.day === tomorrow.day
+      selectedDate.getFullYear() === tomorrow.getFullYear() &&
+      selectedDate.getMonth() === tomorrow.getMonth() &&
+      selectedDate.getDate() === tomorrow.getDate()
     );
   };
 
   const isSelectedNextWeek = () => {
     if (!selectedDate) return false;
-    const today = getToday().endOfDay();
-    const dayOfWeek = today.toDate().getDay(); // 0=Sun ... 5=Fri
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Sun ... 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
 
     // Create next Friday by adding days using next() method
     let nextFriday = today;
     for (let i = 0; i < daysUntilFriday; i++) {
-      nextFriday = nextFriday.next().endOfDay();
+      nextFriday = dayjs(nextFriday).add(1, "day").toDate();
     }
-    nextFriday = nextFriday.endOfDay();
 
     return (
-      selectedDate.year === nextFriday.year &&
-      selectedDate.month === nextFriday.month &&
-      selectedDate.day === nextFriday.day
+      selectedDate.getFullYear() === nextFriday.getFullYear() &&
+      selectedDate.getMonth() === nextFriday.getMonth() &&
+      selectedDate.getDate() === nextFriday.getDate()
     );
   };
 
@@ -284,7 +241,7 @@ export function CalendarModal({
   };
 
   const handleToday = () => {
-    const today = getToday().endOfDay();
+    const today = new Date();
     onConfirm(
       today,
       tempRepeat,
@@ -297,7 +254,7 @@ export function CalendarModal({
   };
 
   const handleTomorrow = () => {
-    const tomorrow = getToday().next().endOfDay();
+    const tomorrow = dayjs().add(1, "day").toDate();
     onConfirm(
       tomorrow,
       tempRepeat,
@@ -310,13 +267,14 @@ export function CalendarModal({
   };
 
   const handleNextWeek = () => {
-    const today = getToday().endOfDay();
-    const dayOfWeek = today.toDate().getDay(); // 0=Sun … 5=Fri
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Sun … 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
     let date = today;
-    for (let i = 0; i < daysUntilFriday; i++) date = date.next();
+    for (let i = 0; i < daysUntilFriday; i++)
+      date = dayjs(date).add(1, "day").toDate();
     onConfirm(
-      date.startOfDay(),
+      date,
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,
@@ -334,8 +292,6 @@ export function CalendarModal({
     tempRepeat !== "none"
       ? formatRepeatLabel(tempRepeat, tempRepeatInterval, t)
       : t("repeat");
-
-  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="">
@@ -374,66 +330,20 @@ export function CalendarModal({
           </div>
 
           <div className="pb-[env(safe-area-inset-bottom)]">
-            {/* Calendar mode tabs */}
-            <Tabs.Root
-              value={calendarMode}
-              onValueChange={(value) =>
-                setCalendarMode(value as "hijri" | "gregorian")
-              }
-              defaultValue="hijri"
-            >
-              <Tabs.List className="flex border-b border-gray-200 dark:border-gray-700">
-                <Tabs.Tab
-                  value="hijri"
-                  className={({ active }) =>
-                    `flex-1 py-2 text-sm font-medium transition-colors ${
-                      active
-                        ? "text-[var(--hvsna-primary-color)] border-b-2 border-[var(--hvsna-primary-color)]"
-                        : "text-gray-500 dark:text-gray-400"
-                    }`
-                  }
-                >
-                  {t("hijri")}
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="gregorian"
-                  className={({ active }) =>
-                    `flex-1 py-2 text-sm font-medium transition-colors ${
-                      active
-                        ? "text-[var(--hvsna-primary-color)] border-b-2 border-[var(--hvsna-primary-color)]"
-                        : "text-gray-500 dark:text-gray-400"
-                    }`
-                  }
-                >
-                  {t("gregorian")}
-                </Tabs.Tab>
-              </Tabs.List>
-            </Tabs.Root>
-
             <div className="flex items-center justify-between p-2 gap-2">
               <button
-                onClick={
-                  calendarMode === "hijri"
-                    ? handlePreviousMonth
-                    : handleGregPrev
-                }
+                onClick={handleGregPrev}
                 className="p-2 bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 <HvChevronLeft className="w-5 h-5" />
               </button>
 
               <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-                {calendarMode === "hijri"
-                  ? `${hijriMonthNames[currentMonth.month - 1]} ${
-                      currentMonth.year
-                    }`
-                  : gregMonthLabel}
+                {gregMonthLabel}
               </h3>
 
               <button
-                onClick={
-                  calendarMode === "hijri" ? handleNextMonth : handleGregNext
-                }
+                onClick={handleGregNext}
                 className="p-2  bg-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
               >
                 <HvChevronRight className="w-5 h-5" />
@@ -453,57 +363,29 @@ export function CalendarModal({
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
-                {calendarMode === "hijri"
-                  ? getCalendarDays().map((date, index) => (
-                      <div key={index} className="aspect-3/2">
-                        {date ? (
-                          <button
-                            onClick={() => setTempSelectedDate(date)}
-                            // data-testid={
-                            //   date.isToday()
-                            //     ? "calendar-today-button"
-                            //     : undefined
-                            // }
-                            className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
-                              tempSelectedDate &&
-                              date.year === tempSelectedDate.year &&
-                              date.month === tempSelectedDate.month &&
-                              date.day === tempSelectedDate.day
-                                ? "bg-[var(--hvsna-primary-color)] text-white"
-                                : false
-                                ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                                : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                            }`}
-                          >
-                            {date.day}
-                          </button>
-                        ) : (
-                          <div className="w-full h-full" />
-                        )}
-                      </div>
-                    ))
-                  : getGregCalendarDays().map((date, index) => (
-                      <div key={index} className="aspect-3/2">
-                        {date ? (
-                          <button
-                            onClick={() =>
-                              setTempSelectedDate(toHijriDate(date))
-                            }
-                            className={`w-full h-full flex items-center justify-center rounded-md text-sm transition-colors ${
-                              isGregSelected(date)
-                                ? "bg-[var(--hvsna-primary-color)] text-white"
-                                : isGregToday(date)
-                                ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
-                                : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
-                            }`}
-                          >
-                            {date.getDate()}
-                          </button>
-                        ) : (
-                          <div className="w-full h-full" />
-                        )}
-                      </div>
-                    ))}
+                {getGregCalendarDays().map((date, index) => (
+                  <div key={index} className="aspect-3/2">
+                    {date ? (
+                      <button
+                        onClick={() => setTempSelectedDate(date)}
+                        className={`w-full flex flex-col py-1 px-2 items-center justify-center rounded-md text-sm transition-colors ${
+                          isGregSelected(date)
+                            ? "bg-[var(--hvsna-primary-color)] text-white"
+                            : isGregToday(date)
+                            ? "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
+                            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                        }`}
+                      >
+                        <div className="text-base">{date.getDate()}</div>
+                        <div className="text-[0.625rem]">
+                          {toHijriDate(date).day}
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="w-full h-full" />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 

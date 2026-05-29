@@ -12,7 +12,7 @@ import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
-import { HijriDate, isSameHijriDate, useHijriDate } from "../calendar/hijri";
+import { isSameHijriDate, useHijriDate } from "../calendar/hijri";
 import { TagList } from "./tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 import { useTaskEpoch } from "./task-form-helpers";
@@ -227,20 +227,16 @@ export function TaskListItem({
   };
 
   const handleScheduleConfirm = (
-    date: { format: (fmt: string) => string } | null,
-    time: string | null,
-    prayerTime: string | null,
+    date: Date | null,
     recurringType: "none" | "daily" | "weekly" | "monthly" | "yearly",
     recurringInterval: number
   ) => {
     let atEpochMillis: number | null = null;
     if (date) {
-      const { year, month, day } = date as HijriDate;
-      atEpochMillis = getTaskEpoch(year, month, day, time);
+      atEpochMillis = getTaskEpoch(date, task.atTime as string);
     }
     updateTask(task.id as string, {
       atEpochMillis,
-      atTime: time ?? undefined,
       recurringType: recurringType ?? "none",
       recurringInterval: recurringInterval ?? 1,
     });
