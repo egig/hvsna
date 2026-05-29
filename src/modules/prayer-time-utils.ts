@@ -64,7 +64,7 @@ function convertFallbackToTimings(
 }
 
 export function isPrayerBased(t: Task) {
-  return !!t.atTime && !t.atTime.includes(":");
+  return typeof t.atTime === "string" && !(t.atTime.includes(":"));
 }
 
 function isInSamePrayerGroup(current: Task, prev: Task) {
