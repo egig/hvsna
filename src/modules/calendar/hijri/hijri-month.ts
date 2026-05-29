@@ -21,7 +21,7 @@ export class HijriMonth {
 
     this._latitude = lat;
     this._longitude = lng;
-    this._offset = options.offset;
+    this._offset = options?.offset || 0;
   }
 
   previous(): HijriMonth {

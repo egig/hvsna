@@ -151,7 +151,7 @@ export class HijriDate {
       undefined,
       undefined,
       undefined,
-      { offset: this._offset, startOfWeek: this._startOfWeek }
+      { offset: this._offset ?? 0, startOfWeek: this._startOfWeek }
     );
   }
 
