@@ -108,12 +108,12 @@ export function useTaskEpoch() {
   const { getPrayerEndTime } = usePrayerTimes();
   const { toHijriDate } = useHijriDate();
   return function getTaskEpoch(date: Date, atTime: string): number | null {
-    if (typeof atTime === "string" && !atTime.includes(":")) {
+    if (!!atTime && !atTime.includes(":")) {
       const d = toHijriDate(date);
       return getPrayerEndTime(atTime.toLowerCase(), d).valueOf();
     }
 
-    if (typeof atTime === "string" && atTime.includes(":")) {
+    if (!!atTime && atTime.includes(":")) {
       const [h, m] = atTime.split(":").map(Number);
       let da = new Date();
       da.setHours(h, m);

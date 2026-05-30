@@ -89,9 +89,7 @@ export function useRecurringOccurance() {
     while (iterations < maxIterations && totalCount < maxOccurrences) {
       const { year, month, day } = parseHijriDateString(currentDateStr);
       const epoch = getTaskEpoch(
-        year,
-        month,
-        day,
+        new Date(template.baseDateEpoch),
         template.atTime as string
       ) as number;
 

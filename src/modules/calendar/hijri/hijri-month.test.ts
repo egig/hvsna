@@ -313,7 +313,7 @@ describe("HijriMonth", () => {
       const hijriMonth = new HijriMonth(-6.2088, 106.8456, 1445, 6, {});
       expect(hijriMonth._latitude).toBe(-6.2088);
       expect(hijriMonth._longitude).toBe(106.8456);
-      expect(hijriMonth._offset).toBeUndefined();
+      expect(hijriMonth._offset).toBe(0);
     });
 
     it("should preserve location and offset in previous() method", () => {
