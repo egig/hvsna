@@ -87,10 +87,10 @@ export default function App({
                     <PouchDBProvider dbInstance={db}>
                       <AuthProvider>
                         <SettingsProvider>
-                          <LocationProvider>
-                            <DroppableContext>
-                              <SyncProvider>
-                                <LanguageProviderWrapper>
+                          <LanguageProviderWrapper>
+                            <LocationProvider>
+                              <DroppableContext>
+                                <SyncProvider>
                                   <Router>
                                     <TaskProvider>
                                       <PostHogSessionTracker
@@ -99,10 +99,10 @@ export default function App({
                                       <AppRoutes />
                                     </TaskProvider>
                                   </Router>
-                                </LanguageProviderWrapper>
-                              </SyncProvider>
-                            </DroppableContext>
-                          </LocationProvider>
+                                </SyncProvider>
+                              </DroppableContext>
+                            </LocationProvider>
+                          </LanguageProviderWrapper>
                         </SettingsProvider>
                       </AuthProvider>
                     </PouchDBProvider>

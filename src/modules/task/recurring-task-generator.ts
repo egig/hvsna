@@ -76,7 +76,6 @@ export function useRecurringOccurance() {
       baseHijri.day
     );
 
-
     const maxOccurrences =
       template.recurringEnd === "after_occurrences" &&
       template.recurringEndOccurrences
@@ -90,10 +89,10 @@ export function useRecurringOccurance() {
 
     while (iterations < maxIterations && totalCount < maxOccurrences) {
       const { year, month, day } = parseHijriDateString(currentDateStr);
-      const greg = hijriToGregorian({year, month, day})
-      
+      const greg = hijriToGregorian({ year, month, day });
+
       const epoch = getTaskEpoch(
-        new Date(greg.year, greg.month-1, greg.day),
+        new Date(greg.year, greg.month - 1, greg.day),
         template.atTime as string
       ) as number;
 

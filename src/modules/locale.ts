@@ -471,4 +471,9 @@ export const commonTranslations = {
     en: "Add new task",
     id: "Tambah tugas baru",
   },
+
+  location_not_detected: {
+    en: "Your location couldn't be detected automatically. Search and select one to continue.",
+    id: "Lokasi tidak dapat dideteksi otomatis. Cari dan pilih lokasi untuk melanjutkan.",
+  },
 };

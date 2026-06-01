@@ -1,11 +1,11 @@
-import { HvChevronRight, type HvIcon } from "@/modules/icons";
-import { type ReactNode } from "react";
+import { HvChevronRight } from "@/modules/icons";
+import { type ReactNode, type ElementType } from "react";
 import { Button } from "../navigation";
 
 interface MenuItemProps {
   title: string;
   subtitle?: string;
-  icon?: HvIcon;
+  icon?: ElementType;
   onClick?: () => void;
   to?: string;
   navType?: "forward" | "back" | "tab" | "modal";

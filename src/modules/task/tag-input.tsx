@@ -1,39 +1,36 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useTags, normalizeTag } from "./use-tags";
-import { HvSearch, HvX } from "../icons";
-import { Modal } from "../navigation";
-
-interface TagInputProps {
-  selectedTags: string[];
-  onTagsChange: (tags: string[]) => void;
-  disabled?: boolean;
-  placeholder?: string;
-}
+import { HvCheck, HvSearch, HvX } from "../icons";
+import { Modal, ModalNavbar } from "../navigation";
+import { NavActionButton } from "../components/nav-action-button";
 
 interface TagPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedTags: string[];
-  onToggleTag: (tag: string) => void;
-  onCreateTag: (tag: string) => void;
+  onConfirm: (tags: string[]) => void;
 }
 
 function TagPickerModal({
   isOpen,
   onClose,
   selectedTags,
-  onToggleTag,
-  onCreateTag,
+  onConfirm,
 }: TagPickerModalProps) {
   const { tagNames, loading } = useTags();
   const [search, setSearch] = useState("");
+  const [pendingTags, setPendingTags] = useState<string[]>(selectedTags);
+
+  useEffect(() => {
+    if (isOpen) setPendingTags(selectedTags);
+  }, [isOpen]);
 
   const normalizedSearch = normalizeTag(search);
 
   const allItems = useMemo(() => {
-    const items = new Set([...tagNames, ...selectedTags]);
+    const items = new Set([...tagNames, ...pendingTags]);
     return Array.from(items).sort();
-  }, [tagNames, selectedTags]);
+  }, [tagNames, pendingTags]);
 
   const filtered = useMemo(() => {
     if (!normalizedSearch) return allItems;
@@ -41,26 +38,48 @@ function TagPickerModal({
   }, [allItems, normalizedSearch]);
 
   const showCreate = Boolean(
-    normalizedSearch &&
-      !allItems.includes(normalizedSearch) &&
-      !selectedTags.includes(normalizedSearch)
+    normalizedSearch && !allItems.includes(normalizedSearch)
   );
 
-  const handleClose = () => {
+  const handleCancel = () => {
     setSearch("");
     onClose();
   };
 
+  const handleConfirm = () => {
+    onConfirm(pendingTags);
+    setSearch("");
+    onClose();
+  };
+
+  const handleToggleTag = (tag: string) => {
+    setPendingTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
   const handleCreate = () => {
     if (normalizedSearch) {
-      onCreateTag(normalizedSearch);
+      if (!pendingTags.includes(normalizedSearch)) {
+        setPendingTags((prev) => [...prev, normalizedSearch]);
+      }
       setSearch("");
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Tags" noPadding>
+    <Modal isOpen={isOpen} onClose={handleCancel} noPadding>
       <div className="flex flex-col h-full">
+        <ModalNavbar
+          title="Tags"
+          onModalClose={handleCancel}
+          rightAction={
+            <NavActionButton variant="primary" onClick={handleConfirm}>
+              <HvCheck />
+            </NavActionButton>
+          }
+        />
+
         <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
           <div className="relative">
             <HvSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -77,7 +96,7 @@ function TagPickerModal({
                   handleCreate();
                 } else if (e.key === "Enter" && filtered.length > 0) {
                   e.preventDefault();
-                  onToggleTag(filtered[0]);
+                  handleToggleTag(filtered[0]);
                 }
               }}
             />
@@ -113,12 +132,12 @@ function TagPickerModal({
           )}
 
           {filtered.map((tag) => {
-            const isSelected = selectedTags.includes(tag);
+            const isSelected = pendingTags.includes(tag);
             return (
               <li key={tag}>
                 <button
                   type="button"
-                  onClick={() => onToggleTag(tag)}
+                  onClick={() => handleToggleTag(tag)}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between ${
                     isSelected
                       ? "font-semibold text-[var(--hvsna-primary-color)] bg-[var(--hvsna-primary-color)]/5"
@@ -162,19 +181,8 @@ export function TagInput({
 }: TagInputProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleToggleTag = (tag: string) => {
-    if (selectedTags.includes(tag)) {
-      onTagsChange(selectedTags.filter((t) => t !== tag));
-    } else {
-      onTagsChange([...selectedTags, tag]);
-    }
-  };
-
-  const handleCreateTag = (tag: string) => {
-    const normalized = normalizeTag(tag);
-    if (normalized && !selectedTags.includes(normalized)) {
-      onTagsChange([...selectedTags, normalized]);
-    }
+  const handleConfirm = (tags: string[]) => {
+    onTagsChange(tags);
   };
 
   const handleRemoveTag = (e: React.MouseEvent, tag: string) => {
@@ -223,11 +231,17 @@ export function TagInput({
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         selectedTags={selectedTags}
-        onToggleTag={handleToggleTag}
-        onCreateTag={handleCreateTag}
+        onConfirm={handleConfirm}
       />
     </>
   );
+}
+
+interface TagInputProps {
+  selectedTags: string[];
+  onTagsChange: (tags: string[]) => void;
+  disabled?: boolean;
+  placeholder?: string;
 }
 
 interface TagListProps {

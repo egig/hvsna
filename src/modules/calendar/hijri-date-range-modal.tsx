@@ -81,7 +81,10 @@ export function HijriDateRangeModal({
   useEffect(() => {
     if (selectedRange) {
       setCurrentMonth(
-        createHijriMonth(selectedRange.startDate.year, selectedRange.startDate.month)
+        createHijriMonth(
+          selectedRange.startDate.year,
+          selectedRange.startDate.month
+        )
       );
       setTempStartDate(selectedRange.startDate);
       setTempEndDate(selectedRange.endDate);
