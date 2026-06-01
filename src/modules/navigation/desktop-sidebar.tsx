@@ -16,16 +16,14 @@ import {
   HvReplayCircle,
   HvReplayCircleFilled,
 } from "@/modules/icons";
-import { Link, useLocation } from "react-router";
+import { useLocation } from "react-router";
 import { SidebarTagsSection } from "../task/sidebar-tags-section";
 import { Button } from "./button";
-import { Menu } from "@base-ui/react/menu";
 import { Modal } from "./modal";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTaskContext } from "../task/task-context";
 import { useState } from "react";
 import { useAuth } from "../auth/use-auth";
-import { UserRound } from "lucide-react";
 
 interface DesktopSidebarProps {
   collapsed?: boolean;
@@ -123,58 +121,22 @@ export function DesktopSidebar({
       className={`${"w-full h-full"} bg-white border-gray-200 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
-        {!collapsed && (
-          <>
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <Menu.Root>
-                  <Menu.Trigger className="flex items-center justify-center size-8 rounded-full bg-primary-100 text-primary-600 hover:bg-primary-200 transition-colors cursor-pointer">
-                    <UserRound size={16} />
-                  </Menu.Trigger>
-                  <Menu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup className="bg-white border border-gray-200 rounded-md shadow-lg min-w-[140px] py-1 z-50">
-                        <Menu.Item
-                          onClick={handleLogoutClick}
-                          className="flex items-center space-x-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
-                        >
-                          <HvUserRound size={16} />
-                          <span>{t("sign_out")}</span>
-                        </Menu.Item>
-                      </Menu.Popup>
-                    </Menu.Positioner>
-                  </Menu.Portal>
-                </Menu.Root>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900">
-                    {user?.firstName || user?.email?.split("@")[0]}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <Link
-                to="/signin"
-                className="flex items-center justify-center size-8 rounded-full bg-primary-100 hover:bg-primary-200 text-gray-400 hover:text-primary-600 transition-colors"
-                title={t("sign_in")}
-              >
-                <UserRound size={16} />
-              </Link>
-            )}
-          </>
-        )}
-        <button
-          onClick={onToggleCollapse}
-          className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
+        <Button
+          to={"/settings/general"}
+          navType="sidebar"
+          className={`p-1 rounded-lg text-gray-500 transition-colors hover:bg-gray-100 ${
             collapsed ? "mx-auto" : "ml-auto"
           }`}
-          aria-label={collapsed ? t("expand_sidebar") : t("collapse_sidebar")}
+          aria-label="Settings"
+          state={{
+            context: "settings",
+            settingsBackgroundLocation: location,
+          }}
         >
-          {collapsed ? (
-            <HvPanelLeft size={18} />
-          ) : (
-            <HvPanelLeftClose size={18} />
-          )}
-        </button>
+          <span className="text-xl">
+            <HvSettings size={20} />
+          </span>
+        </Button>
       </div>
 
       <div className="flex-1 p-2 space-y-2">
@@ -217,32 +179,6 @@ export function DesktopSidebar({
           );
         })}
         <SidebarTagsSection collapsed={collapsed} />
-      </div>
-      <div className="border-t border-gray-100 p-2 space-y-2">
-        {bottomTabs.map((tab) => {
-          const isActive = getIsActive(tab.path);
-          return (
-            <Button
-              key={tab.path}
-              to={tab.path}
-              navType="sidebar"
-              className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
-                collapsed ? "justify-center" : "space-x-1"
-              } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
-              aria-label={tab.label}
-              aria-current={isActive ? "page" : undefined}
-              state={{
-                context: tab.context,
-                settingsBackgroundLocation: location,
-              }}
-            >
-              <span className="text-xl">
-                {isActive ? tab.activeIcon : tab.icon}
-              </span>
-              {!collapsed && <span className="text-sm">{tab.label}</span>}
-            </Button>
-          );
-        })}
       </div>
 
       {/* Logout Confirmation Modal */}

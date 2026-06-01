@@ -19,7 +19,7 @@ export default function Browse() {
     <Page
       navbar={
         <Navbar
-          title={t("browse")}
+          title={""}
           showBackButton={false}
           rightAction={
             <Button to={"/settings"}>

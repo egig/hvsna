@@ -189,6 +189,12 @@ interface SettingsLayoutProps {
 
 export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
   {
+    id: "signin",
+    title: "Sign In",
+    icon: HvLogIn,
+    hideWhenSignedIn: true,
+  },
+  {
     id: "account",
     title: "Account",
     icon: HvUser,
@@ -208,7 +214,6 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
     id: "sync",
     title: "Sync",
     icon: HvRefreshCw,
-    requiresAuth: true,
   },
   {
     id: "calendar",

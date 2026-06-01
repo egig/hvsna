@@ -28,14 +28,20 @@ import { Inbox } from "./modules/task/inbox";
 import { Completed } from "./modules/task/completed";
 import { Recurring } from "./modules/task/recurring";
 import SignInPage from "./modules/auth/pages/signin";
+import { SignInView } from "./modules/auth/pages/signin-view";
 import SignUpPage from "./modules/auth/pages/signup";
 import { HijriCalendar } from "./modules/calendar/hijri-calendar";
 import Profile from "./modules/settings/pages/profile";
 import Browse from "./modules/task/browse";
 import TagDetailPage from "./modules/task/tag-detail-page";
 import LayoutMobile from "./layout-mobile";
+import Sync from "./modules/sync/sync";
 
 const desktopSettingsSections: SettingsSection[] = [
+  {
+    ...defaultSettingsSections.find((s) => s.id === "signin")!,
+    path: "/signin",
+  },
   {
     ...defaultSettingsSections.find((s) => s.id === "account")!,
     path: "/profile",
@@ -128,10 +134,11 @@ export const AppRoutes = () => {
             />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
-            <Route path="sync" element={<SyncPage />} />
+            <Route path="sync" element={<Sync />} />
             <Route path="hijri-calendar" element={<HijriCalendar />} />
             <Route path="wipe-local" element={<WipeData />} />
             <Route path="about" element={<About />} />
+            <Route path="signin" element={<SignInView />} />
           </Routes>
         </SettingsModal>
       )}
