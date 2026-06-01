@@ -7,6 +7,7 @@ import {
   useTaskEpoch,
 } from "./task-form-helpers";
 import { Task, type TaskRecurringType } from "@/domain/task";
+import { hijriToGregorian } from "@tabby_ai/hijri-converter";
 
 function templateHijriOpts(template: RecurringTask) {
   return {
@@ -75,6 +76,7 @@ export function useRecurringOccurance() {
       baseHijri.day
     );
 
+
     const maxOccurrences =
       template.recurringEnd === "after_occurrences" &&
       template.recurringEndOccurrences
@@ -88,8 +90,10 @@ export function useRecurringOccurance() {
 
     while (iterations < maxIterations && totalCount < maxOccurrences) {
       const { year, month, day } = parseHijriDateString(currentDateStr);
+      const greg = hijriToGregorian({year, month, day})
+      
       const epoch = getTaskEpoch(
-        new Date(template.baseDateEpoch),
+        new Date(greg.year, greg.month-1, greg.day),
         template.atTime as string
       ) as number;
 
