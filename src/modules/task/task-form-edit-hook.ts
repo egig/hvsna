@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import {
   useTaskEpoch,
   parseHijriDateString,
-  parseTimeString,
 } from "./task-form-helpers";
-import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskUpdateInput } from "@/domain/task";
@@ -432,7 +430,7 @@ export const useTaskFormEdit = (
         useGregorian: false,
       },
     });
-  }, [task, createHijriDate]);
+  }, [task]);
 
   useEffect(() => {
     if (initialTask?.isVirtual) return;

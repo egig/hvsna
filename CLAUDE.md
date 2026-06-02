@@ -52,18 +52,20 @@ npm run android
 src/
   domain/          # Interfaces/contracts (no dependencies on other layers)
     auth/          # ISessionRepository, ITokenStore, AuthErrors
+    location/      # ILocationManager, ITimezoneProvider, coordinate types
     network/       # INetworkProvider
     notifications/ # INotificationsProvider
     permissions/   # IPermissionsProvider
-    settings/      # ILocationProvider, ISettingsRepository, ITimezoneProvider
+    settings/      # ISettingsRepository
     task/          # ITaskRepository
 
   infra/           # Concrete implementations of domain interfaces
     auth/          # Web + Capacitor session/token storage
+    location/      # Browser/Capacitor location drivers, timezone API
     network/       # Browser + Capacitor network detection
     notifications/ # Browser + Capacitor push notifications
     permissions/   # Browser + Capacitor permission handling
-    settings/      # PouchDB settings, IP/native geolocation, timezone API
+    settings/      # PouchDB settings, SettingsUseCasesFactory
     task/          # PouchDBTaskRepository, TaskRepositoryFactory
     index.ts       # Exports all infra providers
 
@@ -81,14 +83,18 @@ src/
     feature-flags/ # Feature flag system
     i18n/          # Internationalization
     icons/         # Icon exports
+    location/      # Location context + usecase
     navigation/    # Navbar, tab bar, desktop sidebar, page transitions
-    onboarding/    # Onboarding flow + guard
+    network/       # Network context
     platform/      # Platform detection context
     posthog/       # PostHog analytics
     settings/      # Settings context, pages
     sync/          # Data sync
-    system/        # System context/state
-    task/          # Task management module (41 files, see below)
+    task/          # Task management module (46 files, see below)
+
+  platforms/       # Platform-specific entry points
+    capacitor/     # Capacitor (iOS/Android) main + service worker registration
+    web/           # Web (PWA) main + service worker registration
 
   app.tsx          # Root component with all providers
   routes.tsx       # React Router route definitions
@@ -165,20 +171,22 @@ Located in `src/modules/task/` (41 files). Key files:
 
 - Persisted via `PouchDBSettingsRepository` in `src/infra/settings/`
 - Context in `src/modules/settings/settings-context.tsx`
-- Includes location (IP geolocation or native GPS), timezone, prayer method
+- Includes prayer method and general app preferences
+- Location/timezone logic lives in `src/infra/location/` and `src/modules/location/`
 
 ### Routing
 
 Client-side React Router 7 routes defined in `src/routes.tsx`:
 
-- `/` — Today view (prayer times + calendar)
-- `/y/:year/m/:month` — Month view
-- `/y/:year/m/:month/d/:date` — Day view
-- `/y/:year` — Year view
-- `/tasks`, `/today`, `/upcoming`, `/inbox`, `/browse` — Task views
-- `/settings`, `/settings/general`, `/settings/profile`, etc. — Settings
-- `/signin`, `/signup` — Auth pages
-- `/sync`, `/onboarding` — Setup pages
+- `/today`, `/upcoming`, `/inbox`, `/recurring`, `/completed`, `/browse` — Task views
+- `/search` — Search
+- `/tags/:tagName` — Tag detail
+- `/hijri-calendar` — Hijri calendar view
+- `/settings/general`, `/settings/notifications`, `/settings/hijri-date` — Settings pages
+- `/profile`, `/profile/:action` — Profile
+- `/signin`, `/signin/:action`, `/signup`, `/signup/:action` — Auth pages
+- `/sync` — Sync setup
+- `/about`, `/wipe-local` — Utility pages
 
 ### Testing
 

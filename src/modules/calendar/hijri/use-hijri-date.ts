@@ -76,7 +76,11 @@ export function useHijriDate(): UseHijriCalendarReturn {
   const latitude = location.lat ?? _fallback.latitude;
   const longitude = location.lng ?? _fallback.longitude;
   const hasLocation = !!(latitude && longitude);
-  const monthOffsets = settings.hijriMonthOffsets ?? {};
+  const monthOffsets = useMemo(
+    () => settings.hijriMonthOffsets ?? {},
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settings.hijriMonthOffsets]
+  );
   const timezone = settings.timezone;
 
   // Create current hijri date based on options or current time
