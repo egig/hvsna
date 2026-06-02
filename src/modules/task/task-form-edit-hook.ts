@@ -123,7 +123,7 @@ export const useTaskFormEdit = (
     }));
   };
 
-  const offset = settings.manualDateOffset || 0;
+  const monthOffsets = settings.hijriMonthOffsets ?? {};
   const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
   const latitude = settings.location?.lat || _fallback.latitude;
   const longitude = settings.location?.lng || _fallback.longitude;
@@ -142,6 +142,13 @@ export const useTaskFormEdit = (
       ) as number;
     }
 
+    // Calculate the offset for the task's scheduled month
+    let hijriDateOffset = 0;
+    if (formData.scheduleAt.date) {
+      const hijriDate = toHijriDate(formData.scheduleAt.date);
+      hijriDateOffset = monthOffsets?.[hijriDate.month] ?? 0;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -153,7 +160,7 @@ export const useTaskFormEdit = (
         lat: latitude,
         long: longitude,
         timezone: settings.timezone || "Asia/Jakarta",
-        hijriDateOffset: offset,
+        hijriDateOffset,
         removeTime: removeTime,
         tags: formData.tags.length > 0 ? formData.tags : null,
       };
@@ -164,7 +171,6 @@ export const useTaskFormEdit = (
 
       if (wasRegular && isNowRecurring && formData.scheduleAt.date) {
         // Promote: regular → recurring
-        const hijriOpts = { latitude, longitude, offset: offset ?? 0 };
         const baseDateEpoch = toHijriDate(formData.scheduleAt.date)
           .endOfDay()
           .toDate()
@@ -199,7 +205,7 @@ export const useTaskFormEdit = (
             lat: latitude,
             long: longitude,
             timezone: settings.timezone || "Asia/Jakarta",
-            hijriDateOffset: offset,
+            hijriDateOffset,
             recurringEnd:
               formData.repeat.end === "never" ? undefined : formData.repeat.end,
             recurringEndEpoch: repeatEndEpoch,

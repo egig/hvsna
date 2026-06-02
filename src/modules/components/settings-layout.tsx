@@ -216,8 +216,8 @@ export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
     icon: HvRefreshCw,
   },
   {
-    id: "calendar",
-    title: "Calendar",
+    id: "hijri_date",
+    title: "Hijri Date",
     icon: HvCalendar,
   },
   {

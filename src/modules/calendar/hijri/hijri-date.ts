@@ -6,6 +6,7 @@ import { _applyOffset, fromDate, getSunset, toDate } from "./core";
  */
 export interface HijriDateOptions {
   offset?: number;
+  monthOffsets?: Partial<Record<number, number>>;
   startOfWeek?: number; // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
   sunsetShift?: number;
 }
@@ -23,6 +24,7 @@ export class HijriDate {
   _latitude: number;
   _longitude: number;
   _offset?: number;
+  _monthOffsets?: Partial<Record<number, number>>;
   _startOfWeek: number;
   _sunsetShift: number;
   _startOfDayEpoch: number;
@@ -43,6 +45,7 @@ export class HijriDate {
     this._latitude = lat;
     this._longitude = lng;
     this._offset = options?.offset || 0;
+    this._monthOffsets = options?.monthOffsets;
     this._startOfWeek = options?.startOfWeek ?? 5; // Default to Friday (5) for Islamic calendar
     this._sunsetShift = options?.sunsetShift || 0;
 
@@ -65,6 +68,7 @@ export class HijriDate {
       millisecond,
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
       }
     );
 
@@ -90,6 +94,7 @@ export class HijriDate {
   ): HijriDate {
     let h = fromDate(lat, long, date, {
       offset: options?.offset || 0,
+      monthOffsets: options?.monthOffsets,
     });
 
     const hijriDateObj = new HijriDate(
@@ -104,6 +109,7 @@ export class HijriDate {
       h.millisecond,
       {
         offset: options?.offset,
+        monthOffsets: options?.monthOffsets,
         startOfWeek: options?.startOfWeek,
         sunsetShift: h.sunsetShift,
       }
@@ -151,7 +157,11 @@ export class HijriDate {
       undefined,
       undefined,
       undefined,
-      { offset: this._offset ?? 0, startOfWeek: this._startOfWeek }
+      {
+        offset: this._offset ?? 0,
+        monthOffsets: this._monthOffsets,
+        startOfWeek: this._startOfWeek,
+      }
     );
   }
 
@@ -170,7 +180,11 @@ export class HijriDate {
       undefined,
       undefined,
       undefined,
-      { offset: this._offset, startOfWeek: this._startOfWeek }
+      {
+        offset: this._offset,
+        monthOffsets: this._monthOffsets,
+        startOfWeek: this._startOfWeek,
+      }
     );
   }
 
@@ -192,6 +206,7 @@ export class HijriDate {
 
     return HijriDate.fromDate(this._latitude, this._longitude, ref, {
       offset: this._offset,
+      monthOffsets: this._monthOffsets,
       startOfWeek: this._startOfWeek,
     });
   }
@@ -210,6 +225,7 @@ export class HijriDate {
       endOfWeekGregorian,
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
         startOfWeek: this._startOfWeek,
       }
     );
@@ -324,6 +340,7 @@ export class HijriDate {
       new Date(),
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
         startOfWeek: this._startOfWeek,
       }
     );
@@ -341,6 +358,7 @@ export class HijriDate {
       new Date(),
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
         startOfWeek: this._startOfWeek,
       }
     );
@@ -368,6 +386,7 @@ export class HijriDate {
       new Date(this._startOfDayEpoch),
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
         startOfWeek: this._startOfWeek,
         sunsetShift: this._sunsetShift,
       }
@@ -382,6 +401,7 @@ export class HijriDate {
       new Date(nextStartEpoch - 1000),
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
         startOfWeek: this._startOfWeek,
         sunsetShift: this._sunsetShift,
       }

@@ -16,16 +16,23 @@ interface CalendarMonthGridProps {
   onChange: (date: string) => void;
 }
 
-function toHijri(date: Date, offset: number) {
+function toHijri(date: Date, monthOffsets: Partial<Record<number, number>>) {
   const raw = gregorianToHijri({
     year: date.getFullYear(),
     month: date.getMonth() + 1,
     day: date.getDate(),
   });
+  const offset = monthOffsets?.[raw.month] ?? 0;
   return _applyOffset(raw, offset);
 }
 
-function toGregorian(year: number, month: number, day: number, offset: number) {
+function toGregorian(
+  year: number,
+  month: number,
+  day: number,
+  monthOffsets: Partial<Record<number, number>>
+) {
+  const offset = monthOffsets?.[month] ?? 0;
   return hijriToGregorian(_applyOffset({ year, month, day }, -offset));
 }
 
@@ -36,10 +43,10 @@ export function CalendarMonthGrid({
   const { weekDays, hijriMonthNames, gregorianMonthNames } =
     useDateTranslationHelper();
   const { settings } = useSettings();
-  const offset = settings.manualDateOffset ?? 0;
+  const monthOffsets = settings.hijriMonthOffsets ?? {};
   const { currentHijriDate } = useHijriDate();
 
-  const todayHijri = toHijri(new Date(), offset);
+  const todayHijri = toHijri(new Date(), monthOffsets);
   const initialHijri = selectedDate
     ? parseHijriDateString(selectedDate as string)
     : todayHijri;
@@ -52,9 +59,9 @@ export function CalendarMonthGrid({
     : null;
   const daysInMonth = getDaysInMonth(year, month);
 
-  const lastDayGreg = toGregorian(year, month, daysInMonth, offset);
+  const lastDayGreg = toGregorian(year, month, daysInMonth, monthOffsets);
 
-  const firstDayGreg = toGregorian(year, month, 1, offset);
+  const firstDayGreg = toGregorian(year, month, 1, monthOffsets);
   const firstDayDate = new Date(
     firstDayGreg.year,
     firstDayGreg.month - 1,
@@ -124,7 +131,7 @@ export function CalendarMonthGrid({
               return <div key={index} className="aspect-3/2 w-full h-full" />;
             }
 
-            const gregDate = hijriToGregorian({ year, month, day });
+            const gregDate = toGregorian(year, month, day, monthOffsets);
             const isToday =
               year === currentHijriDate.year &&
               month === currentHijriDate.month &&

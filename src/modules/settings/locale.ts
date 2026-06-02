@@ -125,9 +125,13 @@ export const settingsTranslations = {
     en: "Timezone automatically set from location",
     id: "Zona waktu secara otomatis diatur dari lokasi",
   },
-  hijri_calendar_offset: {
-    en: "Hijri calendar manual offset",
-    id: "Offset manual kalender Hijri",
+  hijri_date_settings: {
+    en: "Hijri Date Settings",
+    id: "Pengaturan Tanggal Hijri",
+  },
+  hijri_offset_gap_warning: {
+    en: "Large offset gap between months may cause date inconsistencies",
+    id: "Gap offset yang besar antar bulan dapat menyebabkan ketidakkonsistenan tanggal",
   },
   source: {
     en: "Source",
@@ -206,10 +210,6 @@ export const settingsTranslations = {
   timezone: {
     en: "Timezone",
     id: "Zona Waktu",
-  },
-  manual_date_offset: {
-    en: "Manual Date Offset",
-    id: "Offset Tanggal Manual",
   },
   days_offset_negative: {
     en: "-{{count}} days",

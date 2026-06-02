@@ -20,7 +20,7 @@ export interface LocationSetting {
 export interface GeneralSettings {
   language: Language;
   timezone: string;
-  manualDateOffset?: number;
+  hijriMonthOffsets?: Partial<Record<number, number>>;
   theme?: "light" | "dark" | "system";
   notifications?: boolean;
   onboardedAt?: number;

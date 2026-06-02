@@ -23,7 +23,6 @@ const DEFAULT_PRAYER_TIMES: PrayerTimesFallback = {
 const DEFAULT_SETTINGS: GeneralSettings = {
   language: "en",
   timezone: "",
-  manualDateOffset: 0,
   theme: "system",
   notifications: true,
   prayerTimesFallback: DEFAULT_PRAYER_TIMES,

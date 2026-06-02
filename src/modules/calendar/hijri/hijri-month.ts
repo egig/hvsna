@@ -8,6 +8,7 @@ export class HijriMonth {
   _latitude: number;
   _longitude: number;
   _offset?: number;
+  _monthOffsets?: Partial<Record<number, number>>;
 
   constructor(
     lat: number,
@@ -22,6 +23,7 @@ export class HijriMonth {
     this._latitude = lat;
     this._longitude = lng;
     this._offset = options?.offset || 0;
+    this._monthOffsets = options?.monthOffsets;
   }
 
   previous(): HijriMonth {
@@ -40,6 +42,7 @@ export class HijriMonth {
       prevMonth,
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
       }
     );
   }
@@ -60,6 +63,7 @@ export class HijriMonth {
       nextMonth,
       {
         offset: this._offset,
+        monthOffsets: this._monthOffsets,
       }
     );
   }
@@ -81,6 +85,7 @@ export class HijriMonth {
       undefined,
       {
         offset: this._offset || 0,
+        monthOffsets: this._monthOffsets,
       }
     );
   }
@@ -99,6 +104,7 @@ export class HijriMonth {
       undefined,
       {
         offset: this._offset || 0,
+        monthOffsets: this._monthOffsets,
       }
     );
   }

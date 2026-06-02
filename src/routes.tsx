@@ -17,6 +17,7 @@ import {
 import { useScreenSize } from "./modules/components/screen-size-wrapper";
 import GeneralSettings from "./modules/settings/pages/general-settings";
 import NotificationSettings from "./modules/settings/pages/notifications";
+import HijriDateSettings from "./modules/settings/pages/hijri-date-settings";
 import { AnimatePresence } from "framer-motion";
 import Search from "./modules/task/search";
 import { NotFound } from "./modules/components/not-found";
@@ -53,6 +54,10 @@ const desktopSettingsSections: SettingsSection[] = [
   {
     ...defaultSettingsSections.find((s) => s.id === "notifications")!,
     path: "/settings/notifications",
+  },
+  {
+    ...defaultSettingsSections.find((s) => s.id === "hijri_date")!,
+    path: "/settings/hijri-date",
   },
   {
     ...defaultSettingsSections.find((s) => s.id === "sync")!,
@@ -112,6 +117,7 @@ export const AppRoutes = () => {
             path="settings/notifications"
             element={<NotificationSettings />}
           />
+          <Route path="settings/hijri-date" element={<HijriDateSettings />} />
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />
@@ -132,6 +138,7 @@ export const AppRoutes = () => {
               path="settings/notifications"
               element={<NotificationSettings />}
             />
+            <Route path="settings/hijri-date" element={<HijriDateSettings />} />
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<Sync />} />

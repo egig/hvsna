@@ -39,13 +39,10 @@ export const useTaskForm = (
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
 
-  const {
-    latitude,
-    longitude,
-    manualOffset: offset,
-    createHijriDate,
-  } = useHijriDate();
+  const { latitude, longitude, createHijriDate, toHijriDate } = useHijriDate();
   const getTaskEpoch = useTaskEpoch();
+
+  const monthOffsets = settings.hijriMonthOffsets ?? {};
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
@@ -96,6 +93,13 @@ export const useTaskForm = (
       ) as number;
     }
 
+    // Calculate the offset for the task's scheduled month
+    let hijriDateOffset = 0;
+    if (formData.scheduleAt.date) {
+      const hijriDate = toHijriDate(formData.scheduleAt.date);
+      hijriDateOffset = monthOffsets?.[hijriDate.month] ?? 0;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -130,7 +134,7 @@ export const useTaskForm = (
           lat: latitude,
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
-          hijriDateOffset: offset,
+          hijriDateOffset,
           tags: formData.tags,
           recurringEnd: formData.repeat.end,
           recurringEndEpoch: repeatEndEpoch,
@@ -150,7 +154,7 @@ export const useTaskForm = (
           lat: latitude,
           long: longitude,
           timezone: settings.timezone || "Asia/Jakarta",
-          hijriDateOffset: offset,
+          hijriDateOffset,
           tags: formData.tags.length > 0 ? formData.tags : [],
         };
 

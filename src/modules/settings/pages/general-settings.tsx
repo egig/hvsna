@@ -22,10 +22,6 @@ export default function GeneralSettings() {
     await updateSettings({ timezone: newTimezone });
   };
 
-  const handleDateOffsetChange = async (newOffset: number) => {
-    await updateSettings({ manualDateOffset: newOffset });
-  };
-
   return (
     <Page>
       <Navbar title={t("general")} showBackButton={true} />
@@ -69,23 +65,6 @@ export default function GeneralSettings() {
           title={t("timezone")}
           dismissable={true}
         />
-
-        <div className="space-y-4">
-          <ListInputSelect
-            label={t("manual_date_offset")}
-            value={settings.manualDateOffset?.toString() || "0"}
-            onValueChange={(value) => handleDateOffsetChange(parseInt(value))}
-            disabled={loading}
-            options={[
-              { value: "-2", label: t("days_offset_negative", { count: 2 }) },
-              { value: "-1", label: t("day_offset_negative") },
-              { value: "0", label: t("no_offset") },
-              { value: "1", label: t("day_offset_positive") },
-              { value: "2", label: t("days_offset_positive", { count: 2 }) },
-            ]}
-            helpText={t("hijri_calendar_offset")}
-          />
-        </div>
       </div>
     </Page>
   );

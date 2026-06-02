@@ -22,7 +22,6 @@ export interface UseHijriCalendarReturn {
   timezone: string;
   latitude?: number;
   longitude?: number;
-  manualOffset?: number;
 
   // Date conversion utilities
   toHijriDate: (date: Date) => HijriDate;
@@ -77,24 +76,24 @@ export function useHijriDate(): UseHijriCalendarReturn {
   const latitude = location.lat ?? _fallback.latitude;
   const longitude = location.lng ?? _fallback.longitude;
   const hasLocation = !!(latitude && longitude);
-  const manualOffset = settings.manualDateOffset;
+  const monthOffsets = settings.hijriMonthOffsets ?? {};
   const timezone = settings.timezone;
 
   // Create current hijri date based on options or current time
   const currentHijriDate = useMemo(() => {
     return HijriDate.fromDate(latitude, longitude, new Date(), {
-      offset: manualOffset,
+      monthOffsets,
     });
-  }, [latitude, longitude, manualOffset]);
+  }, [latitude, longitude, monthOffsets]);
 
   // Convert Gregorian date to Hijri date
   const toHijriDate = useCallback(
     (date: Date): HijriDate => {
       return HijriDate.fromDate(latitude, longitude, date, {
-        offset: manualOffset,
+        monthOffsets,
       });
     },
-    [latitude, longitude, manualOffset]
+    [latitude, longitude, monthOffsets]
   );
 
   // Convert Hijri date to Gregorian date
@@ -108,27 +107,27 @@ export function useHijriDate(): UseHijriCalendarReturn {
   // Get today's hijri date
   const getToday = useCallback((): HijriDate => {
     return HijriDate.fromDate(latitude, longitude, new Date(), {
-      offset: manualOffset,
+      monthOffsets,
     });
-  }, [latitude, longitude, manualOffset]);
+  }, [latitude, longitude, monthOffsets]);
 
   // Get tomorrow's hijri date
   const getTomorrow = useCallback((): HijriDate => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     return HijriDate.fromDate(latitude, longitude, tomorrow, {
-      offset: manualOffset,
+      monthOffsets,
     });
-  }, [latitude, longitude, manualOffset]);
+  }, [latitude, longitude, monthOffsets]);
 
   // Get yesterday's hijri date
   const getYesterday = useCallback((): HijriDate => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     return HijriDate.fromDate(latitude, longitude, yesterday, {
-      offset: manualOffset,
+      monthOffsets,
     });
-  }, [latitude, longitude, manualOffset]);
+  }, [latitude, longitude, monthOffsets]);
 
   // Check if hijri date is today
   const isToday = useCallback((hijriDate: HijriDate): boolean => {
@@ -192,29 +191,29 @@ export function useHijriDate(): UseHijriCalendarReturn {
         seconds,
         milliseconds,
         {
-          offset: manualOffset,
+          monthOffsets,
         }
       );
     },
-    [latitude, longitude, manualOffset]
+    [latitude, longitude, monthOffsets]
   );
 
   // Create hijri month with specific year and month
   const createHijriMonth = useCallback(
     (year: number, month: number): HijriMonth => {
       return new HijriMonth(latitude, longitude, year, month, {
-        offset: manualOffset,
+        monthOffsets,
       });
     },
-    [latitude, longitude, manualOffset]
+    [latitude, longitude, monthOffsets]
   );
 
   // Get current hijri month
   const currentHijriMonth = useCallback((): HijriMonth => {
     return HijriMonth.getCurrent(latitude, longitude, {
-      offset: manualOffset,
+      monthOffsets,
     });
-  }, [latitude, longitude, manualOffset]);
+  }, [latitude, longitude, monthOffsets]);
 
   return {
     // Current hijri date
@@ -224,7 +223,6 @@ export function useHijriDate(): UseHijriCalendarReturn {
     timezone,
     latitude,
     longitude,
-    manualOffset,
 
     // Date conversion utilities
     toHijriDate,

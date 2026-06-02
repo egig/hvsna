@@ -9,8 +9,7 @@ import {
   HvRefreshCw,
   HvUser,
   HvLogOut,
-  HvClock,
-  HvList,
+  HvCalendar,
 } from "@/modules/icons";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../components/menu-item";
@@ -42,6 +41,11 @@ export default function Settings() {
         title={t("notifications")}
         icon={HvBell}
         to="/settings/notifications"
+      />
+      <MenuItem
+        title={t("hijri_date")}
+        icon={HvCalendar}
+        to="/settings/hijri-date"
       />
       <MenuItem
         title={t("sync")}

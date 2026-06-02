@@ -27,6 +27,7 @@ export interface TimeComponents {
  */
 export interface ConversionOptions {
   offset: number;
+  monthOffsets?: Partial<Record<number, number>>;
 }
 
 /**
@@ -49,7 +50,7 @@ export function toDate(
   milliseconds: number = 0,
   options: ConversionOptions
 ): { epoch: number; startOfDay: number } {
-  const offset = options?.offset ?? 0;
+  const resolvedOffset = options?.monthOffsets?.[month] ?? options?.offset ?? 0;
 
   const adjustedHijri = _applyOffset(
     {
@@ -57,7 +58,7 @@ export function toDate(
       month,
       day,
     },
-    -1 * offset
+    -1 * resolvedOffset
   );
 
   const gregorian = hijriToGregorian(adjustedHijri);
@@ -124,8 +125,6 @@ export function fromDate(
   gregorianDate: Date,
   options: ConversionOptions
 ): HijriDateComponents & TimeComponents {
-  const offset = options?.offset ?? 0;
-
   let hijriDate = gregorianToHijri({
     year: gregorianDate.getFullYear(),
     month: gregorianDate.getMonth() + 1, // JavaScript months are 0-based
@@ -146,7 +145,9 @@ export function fromDate(
     sunsetShift = 1;
   }
 
-  const adjustedHijri = _applyOffset(hijriDate, offset);
+  const resolvedOffset =
+    options?.monthOffsets?.[hijriDate.month] ?? options?.offset ?? 0;
+  const adjustedHijri = _applyOffset(hijriDate, resolvedOffset);
   return Object.assign(adjustedHijri, {
     sunsetShift: sunsetShift,
     hour: gregorianDate.getHours(),
@@ -231,12 +232,12 @@ export function _applyOffset(
     }
 
     while (adjustedDay < 1) {
-      adjustedDay += _daysInMonth(adjustedYear, adjustedMonth - 1);
       adjustedMonth--;
       if (adjustedMonth < 1) {
         adjustedMonth = 12;
         adjustedYear--;
       }
+      adjustedDay += _daysInMonth(adjustedYear, adjustedMonth);
     }
   }
 
