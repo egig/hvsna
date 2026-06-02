@@ -496,8 +496,8 @@ export const taskTranslations = {
     id: "Ini dan semua acara mendatang",
   },
   change_all_future_events_desc: {
-    en: "Delete this and all upcoming pending occurrences",
-    id: "Hapus kejadian ini dan semua kejadian mendatang yang tertunda",
+    en: "Change this and all upcoming pending occurrences",
+    id: "Ubah tugas ini dan semua kejadian mendatang yang tertunda",
   },
 
   // Repeat end conditions

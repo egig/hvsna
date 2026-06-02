@@ -165,10 +165,10 @@ export class HijriDate {
     );
   }
 
-  next(): HijriDate {
+  next(count = 1): HijriDate {
     const next = _applyOffset(
       { year: this.year, month: this.month, day: this.day },
-      1
+      count
     );
     return new HijriDate(
       this._latitude,

@@ -52,7 +52,6 @@ export function useRecurringOccurance() {
     endEpoch: number
   ): number[] => {
     const interval = template.recurringInterval ?? 1;
-    const opts = templateHijriOpts(template);
 
     let hour: number | undefined;
     let minutes: number | undefined;
@@ -151,8 +150,17 @@ export function useRecurringOccurance() {
         endEpoch
       );
 
-      const takenEpochs = new Set(
-        exceptions.filter((t) => !t.deletedAt).map((t) => t.atEpochMillis)
+      const takenHijriDates = new Set(
+        exceptions
+          .filter((t) => !t.deletedAt)
+          .map((t) => {
+            if (!t.atEpochMillis) {
+              return null;
+            }
+            const h = toHijriDate(new Date(t.atEpochMillis));
+            return formatHijriDateString(h.year, h.month, h.day);
+          })
+          .filter((s) => !!s)
       );
       const deletedEpochs = new Set(
         exceptions.filter((t) => t.deletedAt).map((t) => t.atEpochMillis)
@@ -160,7 +168,10 @@ export function useRecurringOccurance() {
 
       for (const epoch of occurrences) {
         if (deletedEpochs.has(epoch)) continue;
-        if (takenEpochs.has(epoch)) continue;
+
+        const h = toHijriDate(new Date(epoch));
+        let occHijriStr = formatHijriDateString(h.year, h.month, h.day);
+        if (takenHijriDates.has(occHijriStr)) continue;
         all.push(createVirtualTask(template, epoch));
       }
 
@@ -204,14 +215,11 @@ export function useRecurringOccurance() {
 
     const n = Math.max(1, interval);
     const { year, month, day } = parseHijriDateString(atDateHijri);
-    const coords = { offset };
 
     if (recurringType === "daily" || recurringType === "weekly") {
       const days = recurringType === "weekly" ? n * 7 : n;
       const hijriDate = createHijriDate(year, month, day, hour, minutes);
-      const greg = hijriDate.toDate();
-      greg.setDate(greg.getDate() + days);
-      const next = toHijriDate(greg);
+      const next = hijriDate.next(days);
       return formatHijriDateString(next.year, next.month, next.day);
     }
 

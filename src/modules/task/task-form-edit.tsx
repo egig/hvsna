@@ -39,8 +39,6 @@ export default function TaskFormEdit({
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
   const { isDesktop } = useScreenSize();
-  const { navigate } = useAppNavigation();
-  const { closeTaskForm } = useTaskContext();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isFormFocused, setIsFormFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
@@ -327,7 +325,9 @@ export default function TaskFormEdit({
     >
       <ModalNavbar
         title="Edit Task"
-        onModalClose={() => {}}
+        onModalClose={() => {
+          onSuccess(task);
+        }}
         rightAction={
           <div className="flex items-center gap-2">
             {(isFormFocused || isFormDirty) && (

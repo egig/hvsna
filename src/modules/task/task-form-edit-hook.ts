@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  useTaskEpoch,
-  parseHijriDateString,
-} from "./task-form-helpers";
+import { useTaskEpoch, parseHijriDateString } from "./task-form-helpers";
 import { useTaskContext } from "./task-context";
 import { useHijriDate } from "../calendar/hijri";
 import type { PrayerTime, Task, TaskUpdateInput } from "@/domain/task";
@@ -228,7 +225,7 @@ export const useTaskFormEdit = (
           task: task!,
           repeatConfig: formData.repeat,
         });
-        setShowRecurringEditScope(true);
+        // setShowRecurringEditScope(true);
         setIsSubmitting(false);
         return;
       } else if (!wasRegular && isNowRecurring) {

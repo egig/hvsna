@@ -132,15 +132,14 @@ export class PouchDBRecurringTaskRepository
       existingDoc
     ).toRecurringTask();
 
-    const updateData: RecurringTask = {
-      ...existingTask,
+    const updateData = {
+      ...existingDoc,
       ...input,
       updated_at: Date.now(),
       tags: input.tags ?? undefined,
     };
 
-    const doc = PouchDBRecurringTaskDocument.fromRecurringTask(updateData);
-    const response = await this.db.put(doc);
+    const response = await this.db.put(updateData);
 
     const updatedDoc = new PouchDBRecurringTaskDocument({
       ...updateData,
