@@ -166,10 +166,9 @@ export const useTaskFormEdit = (
 
       if (wasRegular && isNowRecurring && formData.scheduleAt.date) {
         // Promote: regular → recurring
-        const baseDateEpoch = toHijriDate(formData.scheduleAt.date)
-          .endOfDay()
-          .toDate()
-          .valueOf();
+        const baseDateEpoch = toHijriDate(
+          formData.scheduleAt.date
+        ).endOfDayEpoch();
         const repeatEndEpoch =
           formData.repeat.end === "on_date" && formData.repeat.endDate
             ? (() => {
@@ -178,10 +177,7 @@ export const useTaskFormEdit = (
                   month: em,
                   day: ed,
                 } = parseHijriDateString(formData.repeat.endDate as string);
-                return createHijriDate(ey, em, ed)
-                  .endOfDay()
-                  .toDate()
-                  .valueOf();
+                return createHijriDate(ey, em, ed).endOfDayEpoch();
               })()
             : undefined;
 

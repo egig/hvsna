@@ -17,7 +17,7 @@ export function usePrayerTimes() {
       const params = CalculationMethod.UmmAlQura();
       // IMPORTANT ! we allways get the prayer times by the end of hijri date
       // so we can decide that the maghrib always at yesterday
-      let da = d.endOfDay().toDate();
+      let da = new Date(d.endOfDayEpoch());
       const prayerTimes = new PrayerTimes(coordinates, da, params);
       const yesterday = dayjs(da).subtract(1, "day").toDate();
       const ptYesterday = new PrayerTimes(coordinates, yesterday, params);

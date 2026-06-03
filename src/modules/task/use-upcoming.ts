@@ -30,7 +30,7 @@ export function useUpcoming(horizonDays = 30) {
 
     const todayStartOfDay = today.startOfDay().toDate();
     const tomorrowStartOfDay = today.next().startOfDay().toDate();
-    const endOfWeekDate = today.endOfWeek().endOfDay();
+    const endOfWeekDate = today.endOfWeek();
 
     tasks.forEach((task) => {
       if (!task.atEpochMillis) {

@@ -4,7 +4,6 @@ import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
 import { Task, type TaskQuery, type TaskTypeFilter } from "@/domain/task";
-import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import { useRecurringOccurance } from "./recurring-task-generator";
 import type { RecurringTask } from "./recurring-task";
@@ -43,8 +42,8 @@ export function useSearch() {
   const recurringTaskUseCases = createRecurringTaskUseCases(db);
 
   const [dateRangeFilter, setDateRangeFilter] = useState<{
-    startDate: HijriDate;
-    endDate: HijriDate;
+    startDate: number;
+    endDate: number;
   } | null>(null);
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
@@ -60,7 +59,7 @@ export function useSearch() {
 
   const filterKey = [
     dateRangeFilter
-      ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
+      ? `${dateRangeFilter.startDate}-${dateRangeFilter.endDate}`
       : "",
     searchTextFilter || "",
     unscheduledFilter ? "1" : "",
@@ -75,11 +74,9 @@ export function useSearch() {
     }
 
     if (dateRangeFilter) {
-      const startEpoch = dateRangeFilter.startDate.toDate().valueOf();
-      const endEpoch = dateRangeFilter.endDate.toDate().valueOf();
       query.atEpochMillis = {
-        $gte: startEpoch,
-        $lte: endEpoch,
+        $gte: dateRangeFilter.startDate,
+        $lte: dateRangeFilter.endDate,
       };
     }
 

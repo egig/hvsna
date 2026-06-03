@@ -108,8 +108,8 @@ export function useTaskEpoch() {
   const { getPrayerEndTime } = usePrayerTimes();
   const { toHijriDate } = useHijriDate();
   return function getTaskEpoch(date: Date, atTime: string): number | null {
+    const d = toHijriDate(date);
     if (!!atTime && !atTime.includes(":")) {
-      const d = toHijriDate(date);
       return getPrayerEndTime(atTime.toLowerCase(), d).valueOf();
     }
 
@@ -120,8 +120,6 @@ export function useTaskEpoch() {
       return da.valueOf();
     }
 
-    let r = toHijriDate(date);
-    let e = r.endOfDay().toDate();
-    return e.valueOf();
+    return d.endOfDayEpoch();
   };
 }

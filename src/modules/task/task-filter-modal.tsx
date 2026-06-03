@@ -1,7 +1,6 @@
 import { ModalNavbar } from "../navigation";
 import { HvCheck, HvX } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
-import { HijriDate } from "../calendar/hijri/hijri-date";
 import { HijriDateRangeInput } from "../calendar/hijri-date-range-input";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTags } from "./use-tags";
@@ -9,12 +8,12 @@ import { useTags } from "./use-tags";
 interface TaskFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  dateRangeFilter: { startDate: HijriDate; endDate: HijriDate } | null;
+  dateRangeFilter: { startDate: number; endDate: number } | null;
   searchTextFilter: string;
   unscheduledFilter: boolean;
   tagFilter: string[];
   onDateRangeFilterChange: (
-    dateRange: { startDate: HijriDate; endDate: HijriDate } | null
+    dateRange: { startDate: number; endDate: number } | null
   ) => void;
   onSearchTextFilterChange: (value: string) => void;
   onUnscheduledFilterChange: (value: boolean) => void;

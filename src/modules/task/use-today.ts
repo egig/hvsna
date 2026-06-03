@@ -20,10 +20,9 @@ export function useToday() {
 
   const pendingTasksQuery = usePendingTasks();
   const startOfToday = today.startOfDay();
-  const endOfToday = today.endOfDay().toDate();
   const virtualTaskQuery = useVirtualTasks(
     startOfToday.toDate().valueOf(),
-    endOfToday.valueOf()
+    today.endOfDayEpoch()
   );
 
   const allTasks = [
@@ -41,7 +40,7 @@ export function useToday() {
     return (
       t.atEpochMillis != null &&
       Math.ceil(t.atEpochMillis / 60000) <=
-        Math.ceil(endOfToday.valueOf() / 60000)
+        Math.ceil(today.endOfDayEpoch() / 60000)
     );
   });
 

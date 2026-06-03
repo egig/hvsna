@@ -4,7 +4,6 @@ import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
 import type { Task, TaskQuery, TaskTypeFilter } from "@/domain/task";
-import { HijriDate } from "../calendar/hijri";
 import { useTaskContext } from "./task-context";
 import log from "../logger";
 
@@ -20,8 +19,8 @@ export function useTasks() {
 
   // Local filter state
   const [dateRangeFilter, setDateRangeFilter] = useState<{
-    startDate: HijriDate;
-    endDate: HijriDate;
+    startDate: number;
+    endDate: number;
   } | null>(null);
   const [searchTextFilter, setSearchTextFilter] = useState<string>("");
   const [unscheduledFilter, setUnscheduledFilter] = useState<boolean>(false);
@@ -39,7 +38,7 @@ export function useTasks() {
   // Create filter key for React Query
   const filterKey = [
     dateRangeFilter
-      ? `${dateRangeFilter.startDate.toString()}-${dateRangeFilter.endDate.toString()}`
+      ? `${dateRangeFilter.startDate}-${dateRangeFilter.endDate}`
       : "",
     searchTextFilter || "",
     unscheduledFilter ? "1" : "",
@@ -57,11 +56,9 @@ export function useTasks() {
 
     // Add date range filter
     if (dateRangeFilter) {
-      const startEpoch = dateRangeFilter.startDate.toDate().valueOf();
-      const endEpoch = dateRangeFilter.endDate.toDate().valueOf();
       query.atEpochMillis = {
-        $gte: startEpoch,
-        $lte: endEpoch,
+        $gte: dateRangeFilter.startDate,
+        $lte: dateRangeFilter.endDate,
       };
     }
 

@@ -36,8 +36,9 @@ export function HijriCalendar() {
       id: "end-of-current-day",
       label: "End of Current Day",
       value: {
-        primary: getToday().endOfDay().toDate().toString(),
-        secondary: "Gregorian: " + getToday().endOfDay().toDate().toString(),
+        primary: new Date(getToday().endOfDayEpoch()).toString(),
+        secondary:
+          "Gregorian: " + new Date(getToday().endOfDayEpoch()).toString(),
       },
       color: "text-[var(--hvsna-warning-color)]",
     },

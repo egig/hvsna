@@ -293,7 +293,7 @@ export default function Upcoming() {
     } else {
       const [y, m, d] = (over.id as string).split("-").map(Number);
       const hijri = toHijriDate(new Date(y, m - 1, d));
-      const atEpochMillis = hijri.endOfDay().toDate().valueOf();
+      const atEpochMillis = hijri.endOfDayEpoch();
       updateTask(task.id!, { atEpochMillis });
     }
   };

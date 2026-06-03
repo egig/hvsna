@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { HijriDate } from "./hijri/hijri-date";
 import { HijriDateRangeModal } from "./hijri-date-range-modal";
 import { HvCalendar, HvX } from "@/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useHijriDate } from "./hijri";
 
 interface DateRange {
-  startDate: HijriDate;
-  endDate: HijriDate;
+  startDate: number; // epoch ms
+  endDate: number; // epoch ms
 }
 
 interface HijriDateRangeInputProps {
@@ -27,6 +27,7 @@ export function HijriDateRangeInput({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(null);
   const { t } = useLanguageContext();
+  const { toHijriDate } = useHijriDate();
 
   // Initialize from value
   useEffect(() => {
@@ -49,47 +50,37 @@ export function HijriDateRangeInput({
     setIsModalOpen(false);
   };
 
-  const formatDateRangeDisplay = (range: DateRange | null) => {
-    if (!range) return placeholder;
-
-    const { startDate, endDate } = range;
-
-    // If same day, show just one date
-    if (
-      startDate.year === endDate.year &&
-      startDate.month === endDate.month &&
-      startDate.day === endDate.day
-    ) {
-      return formatDateDisplay(startDate);
-    }
-
-    // Show date range
-    return `${formatDateDisplay(startDate)} - ${formatDateDisplay(endDate)}`;
-  };
-
-  const formatDateDisplay = (date: HijriDate) => {
-    if (date.isToday()) {
-      return t("today");
-    }
-
-    if (date.isTomorrow()) {
-      return t("tomorrow");
-    }
-
+  const formatDateDisplay = (epoch: number) => {
+    const date = toHijriDate(new Date(epoch));
+    if (date.isToday()) return t("today");
+    if (date.isTomorrow()) return t("tomorrow");
     return date.format("DD MMMM YYYY");
   };
 
-  const handleButtonClick = () => {
-    if (!disabled) {
-      setIsModalOpen(true);
+  const formatDateRangeDisplay = (range: DateRange | null) => {
+    if (!range) return placeholder;
+
+    const startHijri = toHijriDate(new Date(range.startDate));
+    const endHijri = toHijriDate(new Date(range.endDate));
+
+    if (
+      startHijri.year === endHijri.year &&
+      startHijri.month === endHijri.month &&
+      startHijri.day === endHijri.day
+    ) {
+      return formatDateDisplay(range.startDate);
     }
+
+    return `${formatDateDisplay(range.startDate)} - ${formatDateDisplay(
+      range.endDate
+    )}`;
   };
 
   return (
     <div className={`${className} w-full`}>
       <button
         type="button"
-        onClick={handleButtonClick}
+        onClick={() => !disabled && setIsModalOpen(true)}
         disabled={disabled}
         className={`
           w-full px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm

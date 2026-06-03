@@ -118,10 +118,7 @@ export const useTaskForm = (
                   month: em,
                   day: ed,
                 } = parseHijriDateString(formData.repeat.endDate as string);
-                return createHijriDate(ey, em, ed)
-                  .endOfDay()
-                  .toDate()
-                  .valueOf();
+                return createHijriDate(ey, em, ed).endOfDayEpoch();
               })()
             : undefined;
         const template = await createRecurringTask({

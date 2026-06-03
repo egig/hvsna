@@ -128,7 +128,7 @@ export function CalendarModal({
 
   const isSelectedToday = () => {
     if (!selectedDate) return false;
-    const today = getToday().endOfDay();
+    const today = getToday();
     const selectedHijri = toHijriDate(selectedDate);
     return (
       selectedHijri.year === today.year &&
@@ -139,7 +139,7 @@ export function CalendarModal({
 
   const isSelectedTomorrow = () => {
     if (!selectedDate) return false;
-    const tomorrow = getToday().next().endOfDay();
+    const tomorrow = getToday().next();
     const selectedHijri = toHijriDate(selectedDate);
     return (
       selectedHijri.year === tomorrow.year &&
@@ -150,17 +150,15 @@ export function CalendarModal({
 
   const isSelectedNextWeek = () => {
     if (!selectedDate) return false;
-    const today = getToday().endOfDay();
+    const today = getToday();
     const dayOfWeek = today.toDate().getDay(); // 0=Sun ... 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
 
     // Create next Friday by adding days using next() method
     let nextFriday = today;
     for (let i = 0; i < daysUntilFriday; i++) {
-      nextFriday = nextFriday.next().endOfDay();
+      nextFriday = nextFriday.next();
     }
-    nextFriday = nextFriday.endOfDay();
-
     const selectedHijri = toHijriDate(selectedDate);
     return (
       selectedHijri.year === nextFriday.year &&
@@ -174,7 +172,7 @@ export function CalendarModal({
   };
 
   const handleToday = () => {
-    const today = getToday().endOfDay().toDate();
+    const today = new Date(getToday().endOfDayEpoch());
     onConfirm(
       today,
       tempRepeat,
@@ -187,7 +185,7 @@ export function CalendarModal({
   };
 
   const handleTomorrow = () => {
-    const tomorrow = getToday().next().endOfDay().toDate();
+    const tomorrow = new Date(getToday().next().endOfDayEpoch());
     onConfirm(
       tomorrow,
       tempRepeat,
@@ -200,13 +198,13 @@ export function CalendarModal({
   };
 
   const handleNextWeek = () => {
-    const today = getToday().endOfDay();
+    const today = getToday();
     const dayOfWeek = today.toDate().getDay(); // 0=Sun … 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
     let date = today;
     for (let i = 0; i < daysUntilFriday; i++) date = date.next();
     onConfirm(
-      date.endOfDay().toDate(),
+      date.toDate(),
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,

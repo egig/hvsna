@@ -1,5 +1,6 @@
 import { hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { _applyOffset, fromDate, getSunset, toDate } from "./core";
+import { CalculationMethod, Coordinates, PrayerTimes } from "adhan";
 
 /**
  * Options for HijriDate calculations
@@ -393,19 +394,26 @@ export class HijriDate {
     );
   }
 
-  endOfDay(): HijriDate {
-    let nextStartEpoch = this.next().startOfDay().toDate().valueOf();
-    return HijriDate.fromDate(
-      this._latitude,
-      this._longitude,
-      new Date(nextStartEpoch - 1000),
-      {
-        offset: this._offset,
-        monthOffsets: this._monthOffsets,
-        startOfWeek: this._startOfWeek,
-        sunsetShift: this._sunsetShift,
-      }
+  endOfDayEpoch() {
+    const withOffset = _applyOffset(
+      { year: this.year, month: this.month, day: this.day },
+      this._offset || 0
     );
+    let greg = hijriToGregorian(withOffset);
+    let gredDate = new Date(greg.year, greg.month - 1, greg.day);
+    let pTimes = this._prayerTimes(gredDate);
+    return pTimes.maghrib.valueOf() - 1000;
+  }
+
+  _prayerTimes(da: Date) {
+    const coordinates = new Coordinates(
+      this._latitude as number,
+      this._longitude as number
+    );
+    const params = CalculationMethod.UmmAlQura();
+    // IMPORTANT ! we allways get the prayer times by the end of hijri date
+    // so we can decide that the maghrib always at yesterday
+    return new PrayerTimes(coordinates, da, params);
   }
 }
 
