@@ -19,9 +19,8 @@ export function useToday() {
   const todayString = today.toString();
 
   const pendingTasksQuery = usePendingTasks();
-  const startOfToday = today.startOfDay();
   const virtualTaskQuery = useVirtualTasks(
-    startOfToday.toDate().valueOf(),
+    today.startOfDayEpoch(),
     today.endOfDayEpoch()
   );
 

@@ -22,7 +22,7 @@ export function HijriCalendar() {
       id: "start-of-current-day",
       label: "Start of Current Day",
       value: {
-        primary: getToday().startOfDay().toDate().toString(),
+        primary: new Date(getToday().startOfDayEpoch()).toString(),
         secondary: "",
         tertiary: `Hijri: ${formatDate(
           getToday(),
@@ -46,7 +46,7 @@ export function HijriCalendar() {
       id: "start-of-next-day",
       label: "Start of Next Day",
       value: {
-        primary: getToday().next().startOfDay().toDate().toString(),
+        primary: new Date(getToday().next().startOfDayEpoch()).toString(),
         secondary: `Hijri: ${formatDate(
           getToday().next(),
           "DD MMMM YYYY HH:mm:ss.SSS"

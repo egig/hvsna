@@ -68,7 +68,7 @@ export function HijriDateRangeModal({
   }, [selectedRange]);
 
   const handleDateClick = (date: HijriDate) => {
-    const startOfDay = date.startOfDay().toDate().valueOf();
+    const startOfDay = date.startOfDayEpoch();
     const endOfDay = date.endOfDayEpoch();
     const tempStartHijri = tempStartDate ? epochToHijri(tempStartDate) : null;
 

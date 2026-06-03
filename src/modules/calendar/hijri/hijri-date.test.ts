@@ -839,22 +839,6 @@ describe("HijriDate", () => {
       expect(convertedDate.getTime()).toBe(originalDate.getTime());
     });
 
-    it("should handle startOfDay with precise sunset times", () => {
-      const hijriDate = HijriDate.fromDate(
-        21.4225,
-        39.8262,
-        new Date(2023, 6, 6, 12, -6.2088, 106.8456, 0),
-        {}
-      );
-
-      const startOfDay = hijriDate.startOfDay();
-
-      // Should have sunset time with seconds and milliseconds
-      expect(startOfDay.hour).toBeGreaterThanOrEqual(17); // Around sunset time
-      expect(startOfDay.second).toBeGreaterThanOrEqual(0);
-      expect(startOfDay.millisecond).toBeGreaterThanOrEqual(0);
-    });
-
     it("should handle edge case with maximum milliseconds", () => {
       const hijriDate = HijriDate.fromDate(
         -6.2088,

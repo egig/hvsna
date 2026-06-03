@@ -379,15 +379,13 @@ export class PouchDBTaskRepository implements ITaskRepository {
       },
     });
 
-    const todayStart = todayHijri.startOfDay().toDate();
-    const todayEnd = todayHijri.next().startOfDay().toDate();
     const mangoQuery = {
       selector: {
         type: "task",
         status: 1, // completed status
         completedAt: {
-          $gte: todayStart.getTime(),
-          $lte: todayEnd.getTime(),
+          $gte: todayHijri.startOfDayEpoch(),
+          $lte: todayHijri.endOfDayEpoch(),
         },
         deletedAt: { $exists: false },
       },

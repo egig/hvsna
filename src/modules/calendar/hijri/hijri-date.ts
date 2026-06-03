@@ -380,18 +380,8 @@ export class HijriDate {
     return weekDates;
   }
 
-  startOfDay(): HijriDate {
-    return HijriDate.fromDate(
-      this._latitude,
-      this._longitude,
-      new Date(this._startOfDayEpoch),
-      {
-        offset: this._offset,
-        monthOffsets: this._monthOffsets,
-        startOfWeek: this._startOfWeek,
-        sunsetShift: this._sunsetShift,
-      }
-    );
+  startOfDayEpoch() {
+    return this._startOfDayEpoch;
   }
 
   endOfDayEpoch() {

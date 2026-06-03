@@ -12,7 +12,7 @@ export function useUpcoming(horizonDays = 30) {
   const tomorrow = today.next();
   const endOfWeek = today.endOfWeek();
 
-  const startOfToday = today.startOfDay().toDate().valueOf();
+  const startOfToday = today.startOfDayEpoch();
   const endEpoch = startOfToday + horizonDays * 24 * 60 * 60 * 1000;
   const pendingTasksQuery = usePendingTasksInRange(startOfToday, endEpoch);
   const virtualTaskQuery = useVirtualTasks(startOfToday, endEpoch);
@@ -28,8 +28,6 @@ export function useUpcoming(horizonDays = 30) {
 
     const laterMap = new Map<string, LaterGroup>();
 
-    const todayStartOfDay = today.startOfDay().toDate();
-    const tomorrowStartOfDay = today.next().startOfDay().toDate();
     const endOfWeekDate = today.endOfWeek();
 
     tasks.forEach((task) => {
@@ -39,34 +37,39 @@ export function useUpcoming(horizonDays = 30) {
       }
 
       try {
-        const taskDate = new Date(task.atEpochMillis);
-
-        if (taskDate >= todayStartOfDay && taskDate < tomorrowStartOfDay) {
+        if (
+          task.atEpochMillis >= today.startOfDayEpoch() &&
+          task.atEpochMillis < tomorrow.startOfDayEpoch()
+        ) {
           fixed.today.tasks.push(task);
           return;
         }
 
         if (
-          taskDate >= tomorrowStartOfDay &&
-          taskDate <
-            new Date(tomorrowStartOfDay.getTime() + 24 * 60 * 60 * 1000)
+          task.atEpochMillis >= tomorrow.startOfDayEpoch() &&
+          task.atEpochMillis < tomorrow.endOfDayEpoch()
         ) {
           fixed.tomorrow.tasks.push(task);
           return;
         }
 
         if (
-          taskDate > tomorrowStartOfDay &&
-          taskDate <= endOfWeekDate.toDate()
+          task.atEpochMillis < tomorrow.endOfDayEpoch() &&
+          task.atEpochMillis <= endOfWeekDate.toDate().valueOf()
         ) {
           fixed.thisWeek.tasks.push(task);
           return;
         }
 
-        const taskHijri = toHijriDate(taskDate);
-        if (taskHijri.year === today.year && taskHijri.month === today.month) {
-          fixed.thisMonth.tasks.push(task);
-          return;
+        const taskHijri = toHijriDate(new Date(task.atEpochMillis));
+        if (task.atEpochMillis > endOfWeekDate.toDate().valueOf()) {
+          if (
+            taskHijri.year === today.year &&
+            taskHijri.month === today.month
+          ) {
+            fixed.thisMonth.tasks.push(task);
+            return;
+          }
         }
 
         // Beyond thisMonth — group by Hijri month (same year) or Hijri year (future years)
