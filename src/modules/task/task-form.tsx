@@ -3,7 +3,7 @@ import { HvArrowUp } from "@/modules/icons";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskForm } from "./task-form-hook";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useLocation } from "react-router";
+import { usePageContext } from "./use-page-context";
 import type { Task } from "@/domain/task";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
@@ -29,7 +29,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
     updateScheduleAt,
     updateRepeatConfig,
   } = useTaskForm(onSuccess, onError);
-  const location = useLocation();
+  const { page, params } = usePageContext();
   const { currentHijriDate } = useHijriDate();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
@@ -40,14 +40,22 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
     }
   }, []);
 
+  // Date prefill
   useEffect(() => {
-    if (["/today", "/upcoming"].includes(location.pathname)) {
+    if (page === "today" || page === "upcoming") {
       updateScheduleAt({
         date: new Date(currentHijriDate.endOfDayEpoch()),
         time: "",
       });
     }
-  }, [location.state]);
+  }, []);
+
+  // Tag prefill
+  useEffect(() => {
+    if (page === "tag" && params.tagName) {
+      updateFormData({ tags: [params.tagName] });
+    }
+  }, []);
 
   useEffect(() => {
     if (error && onError) {
