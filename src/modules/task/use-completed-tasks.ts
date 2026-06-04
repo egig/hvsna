@@ -1,48 +1,49 @@
-import { useState, useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
 import { queryKeys } from "../query-keys";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 10;
 
 export function useCompletedTasks() {
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
-  const [offset, setOffset] = useState(0);
 
-  const query = useQuery({
-    queryKey: [...queryKeys.completedTasks(), offset],
-    queryFn: () => taskUseCases.getTasks({ status: 1 }),
+  const query = useInfiniteQuery({
+    queryKey: queryKeys.completedTasks(),
+    queryFn: ({ pageParam }) =>
+      taskUseCases.getAllCompletedTasks(pageParam, PAGE_SIZE),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      // If we got a full page, return next offset
+      return lastPage.length === PAGE_SIZE
+        ? allPages.length * PAGE_SIZE
+        : undefined;
+    },
     staleTime: 1000 * 60 * 2,
   });
 
-  const loadMore = useCallback(() => {
-    if (!query.isFetching) {
-      setOffset((prev) => prev + PAGE_SIZE);
-    }
-  }, [query.isFetching]);
+  // Flatten all pages into single array
+  const tasks = query.data?.pages.flat() ?? [];
 
-  const handleInfiniteScroll = useCallback(
-    (e: React.UIEvent<HTMLDivElement>) => {
-      const el = e.currentTarget;
-      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 200;
-      if (nearBottom && !query.isFetching) {
-        loadMore();
-      }
-    },
-    [query.isFetching, loadMore]
-  );
+  const loadMore = useCallback(() => {
+    if (query.hasNextPage && !query.isFetchingNextPage) {
+      query.fetchNextPage();
+    }
+  }, [query.hasNextPage, query.isFetchingNextPage, query.fetchNextPage]);
 
   return {
-    tasks: query.data ?? [],
+    tasks,
     loading: query.isPending,
     error: query.error
       ? query.error instanceof Error
         ? query.error.message
         : "Unknown error"
       : null,
-    handleInfiniteScroll,
+    loadMore,
+    hasMore: query.hasNextPage,
+    isLoadingMore: query.isFetchingNextPage,
     refetch: query.refetch,
   };
 }

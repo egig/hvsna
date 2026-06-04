@@ -12,7 +12,8 @@ import { useTaskContext } from "./task-context";
 
 export function Completed() {
   const { t } = useLanguageContext();
-  const { tasks, loading, error, handleInfiniteScroll } = useCompletedTasks();
+  const { tasks, loading, error, loadMore, hasMore, isLoadingMore } =
+    useCompletedTasks();
   const { openEditTaskForm } = useTaskContext();
 
   const handleEditTask = useCallback(
@@ -32,10 +33,7 @@ export function Completed() {
     <Page
       navbarLarge={<LargeNavbar title={t("completed")} showBackButton={true} />}
     >
-      <div
-        className="tasks-scroll-container overflow-y-auto"
-        onScroll={handleInfiniteScroll}
-      >
+      <div className="tasks-scroll-container overflow-y-auto">
         <div className={initiated ? "visible" : "invisible"}>
           {tasks.length === 0 ? (
             <EmptyState
@@ -54,6 +52,21 @@ export function Completed() {
                   className="transition-all hover:shadow-sm"
                 />
               ))}
+            </div>
+          )}
+          {isLoadingMore && (
+            <div className="flex justify-center py-4 text-sm text-gray-400">
+              {"Loading…"}
+            </div>
+          )}
+          {hasMore && (
+            <div className="flex justify-center mb-8">
+              <button
+                className="p-2 font-bold text-gray-500"
+                onClick={loadMore}
+              >
+                Load more
+              </button>
             </div>
           )}
         </div>

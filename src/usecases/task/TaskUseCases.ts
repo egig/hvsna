@@ -148,9 +148,15 @@ export class TaskUseCases {
     await Promise.all(taskIds.map((taskId) => this.deleteTask(taskId)));
   }
 
-  // Query helpers
   async getAllPendingTasks(): Promise<Task[]> {
     return await this.taskRepository.findAllPending(1000);
+  }
+
+  async getAllCompletedTasks(
+    offset: number = 0,
+    limit: number = 50
+  ): Promise<Task[]> {
+    return await this.taskRepository.findAllCompleted(offset, limit);
   }
 
   async getPendingTasksInRange(
