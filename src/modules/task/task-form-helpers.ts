@@ -115,7 +115,7 @@ export function useTaskEpoch() {
 
     if (!!atTime && atTime.includes(":")) {
       const [h, m] = atTime.split(":").map(Number);
-      let da = new Date();
+      let da = new Date(date);
       da.setHours(h, m);
       return da.valueOf();
     }

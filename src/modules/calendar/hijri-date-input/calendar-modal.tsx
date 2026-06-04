@@ -271,7 +271,7 @@ export function CalendarModal({
               onChange={(dateStr) => {
                 const { year, month, day } = parseHijriDateString(dateStr);
                 const h = createHijriDate(year, month, day);
-                setTempSelectedDate(h.toDate());
+                setTempSelectedDate(new Date(h.endOfDayEpoch()));
               }}
             />
 

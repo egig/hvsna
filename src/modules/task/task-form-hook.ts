@@ -39,7 +39,13 @@ export const useTaskForm = (
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
 
-  const { latitude, longitude, createHijriDate, toHijriDate } = useHijriDate();
+  const {
+    latitude,
+    longitude,
+    createHijriDate,
+    toHijriDate,
+    currentHijriDate,
+  } = useHijriDate();
   const getTaskEpoch = useTaskEpoch();
 
   const monthOffsets = settings.hijriMonthOffsets ?? {};
@@ -165,7 +171,7 @@ export const useTaskForm = (
           !isMatchLocationContext(
             location,
             formData.scheduleAt.date as Date,
-            new Date()
+            new Date(currentHijriDate.endOfDayEpoch())
           )
         ) {
           showSnackbar("Task created but not listed in this page");

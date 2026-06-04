@@ -83,13 +83,18 @@ function isInSamePrayerGroup(current: Task, prev: Task) {
   return true;
 }
 
-export function groupTasksByPrayerTimes(tasks: Task[]) {
+export function groupTasksByPrayerTimes(allTasks: Task[]) {
   // Sort task by atEpochMillis
   // atEpochMillis for prayerBased task is the next prayer time
   // for non-time tasks, its the next day
-  tasks.sort(
+  let nonTimeTasks = allTasks.filter((t) => !t.atTime);
+  let timeTasks = allTasks.filter((t) => !!t.atTime);
+  timeTasks.sort(
     (a, b) => (a.atEpochMillis as number) - (b.atEpochMillis as number)
   );
+
+  // put non time tasks at the end
+  const tasks = [...timeTasks, ...nonTimeTasks];
 
   const overdueTasks: Task[] = [];
   let groups = [];

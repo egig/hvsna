@@ -8,6 +8,7 @@ import type { Task } from "@/domain/task";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
 import { TimeInput } from "../calendar/time-input";
+import { useHijriDate } from "../calendar/hijri";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -29,6 +30,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
     updateRepeatConfig,
   } = useTaskForm(onSuccess, onError);
   const location = useLocation();
+  const { currentHijriDate } = useHijriDate();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
   useEffect(() => {
     if (["/today", "/upcoming"].includes(location.pathname)) {
       updateScheduleAt({
-        date: new Date(),
+        date: new Date(currentHijriDate.endOfDayEpoch()),
         time: "",
       });
     }
