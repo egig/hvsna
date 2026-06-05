@@ -10,7 +10,6 @@ import type {
   TaskReminderOptions,
 } from "../../domain/notifications/INotificationsProvider";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
-import type { HijriDate } from "src/modules/calendar/hijri";
 
 export class TaskUseCases {
   constructor(
@@ -194,15 +193,21 @@ export class TaskUseCases {
     });
   }
 
-  async getUpcomingTasks(fromDate: HijriDate): Promise<Task[]> {
-    return await this.taskRepository.findTasksAfter(fromDate);
+  async getUpcomingTasks(fromEpoch: number): Promise<Task[]> {
+    return await this.taskRepository.findTasksAfter(fromEpoch);
   }
 
-  async getTodayTasks(todayHijriDate: HijriDate): Promise<Task[]> {
-    return await this.taskRepository.findTasksBefore(todayHijriDate);
+  async getTodayTasks(beforeEpoch: number): Promise<Task[]> {
+    return await this.taskRepository.findTasksBefore(beforeEpoch);
   }
 
-  async findTodayCompletedTasks(todayHijriDate: HijriDate): Promise<Task[]> {
-    return await this.taskRepository.findTodayCompletedTasks(todayHijriDate);
+  async findTodayCompletedTasks(
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]> {
+    return await this.taskRepository.findTodayCompletedTasks(
+      startEpoch,
+      endEpoch
+    );
   }
 }

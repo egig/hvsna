@@ -2,21 +2,9 @@ import { useState, useEffect } from "react";
 import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { Modal, ModalNavbar } from "src/modules/navigation";
-import {
-  HijriDate,
-  HijriMonth,
-  useHijriDate,
-} from "src/modules/calendar/hijri";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { HijriRangeCalendarGrid } from "./hijri-date-range-grid";
-
-function isBefore(date1: HijriDate, date2: HijriDate): boolean {
-  return date1.toDate() < date2.toDate();
-}
-
-function isAfter(date1: HijriDate, date2: HijriDate): boolean {
-  return date1.toDate() > date2.toDate();
-}
+import dayjs, { type Dayjs } from "dayjs";
 
 interface DateRange {
   startDate: number; // epoch ms
@@ -37,53 +25,57 @@ export function HijriDateRangeModal({
   onRangeSelect,
 }: HijriDateRangeModalProps) {
   const { t } = useLanguageContext();
-  const { createHijriMonth, currentHijriMonth, toHijriDate } = useHijriDate();
 
-  const epochToHijri = (epoch: number) => toHijriDate(new Date(epoch));
+  const initial = selectedRange?.startDate
+    ? dayjs(selectedRange.startDate)
+    : dayjs();
 
-  const [currentMonth, setCurrentMonth] = useState<HijriMonth>(
-    selectedRange?.startDate
-      ? (() => {
-          const h = epochToHijri(selectedRange.startDate);
-          return createHijriMonth(h.year, h.month);
-        })()
-      : currentHijriMonth()
-  );
+  const [year, setYear] = useState(initial.year());
+  const [month, setMonth] = useState(initial.month()); // 0-based
 
   const [tempStartDate, setTempStartDate] = useState<number | null>(
     selectedRange?.startDate ?? null
   );
-
   const [tempEndDate, setTempEndDate] = useState<number | null>(
     selectedRange?.endDate ?? null
   );
 
   useEffect(() => {
     if (selectedRange) {
-      const startHijri = epochToHijri(selectedRange.startDate);
-      setCurrentMonth(createHijriMonth(startHijri.year, startHijri.month));
+      const d = dayjs(selectedRange.startDate);
+      setYear(d.year());
+      setMonth(d.month());
       setTempStartDate(selectedRange.startDate);
       setTempEndDate(selectedRange.endDate);
     }
   }, [selectedRange]);
 
-  const handleDateClick = (date: HijriDate) => {
-    const startOfDay = date.startOfDayEpoch();
-    const endOfDay = date.endOfDayEpoch();
-    const tempStartHijri = tempStartDate ? epochToHijri(tempStartDate) : null;
+  const handlePreviousMonth = () => {
+    if (month === 0) {
+      setYear((y) => y - 1);
+      setMonth(11);
+    } else setMonth((m) => m - 1);
+  };
+
+  const handleNextMonth = () => {
+    if (month === 11) {
+      setYear((y) => y + 1);
+      setMonth(0);
+    } else setMonth((m) => m + 1);
+  };
+
+  const handleDateClick = (date: Dayjs) => {
+    const startOfDay = date.startOf("day").valueOf();
+    const endOfDay = date.endOf("day").valueOf();
 
     if (!tempStartDate) {
       setTempStartDate(startOfDay);
       setTempEndDate(endOfDay);
-    } else if (!tempEndDate || isBefore(date, tempStartHijri!)) {
+    } else if (!tempEndDate || startOfDay < tempStartDate) {
       setTempStartDate(startOfDay);
       setTempEndDate(endOfDay);
     } else {
       setTempEndDate(endOfDay);
-      if (isBefore(date, tempStartHijri!)) {
-        setTempStartDate(startOfDay);
-        setTempEndDate(tempStartHijri!.endOfDayEpoch());
-      }
     }
   };
 
@@ -104,10 +96,10 @@ export function HijriDateRangeModal({
   };
 
   const formatDateDisplay = (epoch: number) => {
-    const date = epochToHijri(epoch);
-    if (date.isToday()) return t("today");
-    if (date.isTomorrow()) return t("tomorrow");
-    return date.format("DD MMMM YYYY");
+    const d = dayjs(epoch);
+    if (d.isSame(dayjs(), "day")) return t("today");
+    if (d.isSame(dayjs().add(1, "day"), "day")) return t("tomorrow");
+    return d.format("DD MMMM YYYY");
   };
 
   return (
@@ -157,11 +149,12 @@ export function HijriDateRangeModal({
         )}
 
         <HijriRangeCalendarGrid
-          currentMonth={currentMonth}
-          onPreviousMonth={() => setCurrentMonth(currentMonth.previous())}
-          onNextMonth={() => setCurrentMonth(currentMonth.next())}
-          startDate={tempStartDate ? epochToHijri(tempStartDate) : null}
-          endDate={tempEndDate ? epochToHijri(tempEndDate) : null}
+          year={year}
+          month={month}
+          onPreviousMonth={handlePreviousMonth}
+          onNextMonth={handleNextMonth}
+          startEpoch={tempStartDate}
+          endEpoch={tempEndDate}
           onDateClick={handleDateClick}
         />
       </div>

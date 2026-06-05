@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import dayjs from "dayjs";
 import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -64,11 +65,7 @@ function getInitialOption(
 
 function formatRepeatEndDate(dateStr: string | null): string {
   if (!dateStr) return "On date";
-  // Format YYYYMMDD to a more readable format
-  const year = dateStr.substring(0, 4);
-  const month = dateStr.substring(4, 6);
-  const day = dateStr.substring(6, 8);
-  return `${day}/${month}/${year}`;
+  return dayjs(dateStr).format("DD/MM/YYYY");
 }
 
 export function RepeatSelectorModal({
@@ -99,7 +96,6 @@ export function RepeatSelectorModal({
   const [endOccurrences, setEndOccurrences] = useState(
     repeatEndOccurrencesProp
   );
-  const [useGregorian, setUseGregorian] = useState(useGregorianProp);
 
   // Sync internal state when props change
   useEffect(() => {
@@ -120,7 +116,7 @@ export function RepeatSelectorModal({
         selectedRepeatEnd,
         recurringEndDate ?? null,
         endOccurrences,
-        useGregorian
+        false
       );
     } else {
       onConfirm(
@@ -129,7 +125,7 @@ export function RepeatSelectorModal({
         selectedRepeatEnd,
         recurringEndDate ?? null,
         endOccurrences,
-        useGregorian
+        false
       );
     }
   };
@@ -223,32 +219,6 @@ export function RepeatSelectorModal({
                 </option>
               ))}
             </select>
-          </div>
-        )}
-
-        {/* Gregorian toggle */}
-        {selectedOption !== "none" && (
-          <div className="flex items-center justify-between px-1 py-2">
-            <span className="text-sm text-gray-700 dark:text-gray-300">
-              {t("repeat_use_gregorian") || "Use Gregorian calendar"}
-            </span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={useGregorian}
-              onClick={() => setUseGregorian((v) => !v)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                useGregorian
-                  ? "bg-[var(--hvsna-primary-color)]"
-                  : "bg-gray-300 dark:bg-gray-600"
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  useGregorian ? "translate-x-6" : "translate-x-1"
-                }`}
-              />
-            </button>
           </div>
         )}
 

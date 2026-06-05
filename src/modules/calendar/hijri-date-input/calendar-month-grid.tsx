@@ -1,19 +1,14 @@
 import { useState } from "react";
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
+import { gregorianToHijri } from "@tabby_ai/hijri-converter";
 import { HvChevronLeft, HvChevronRight } from "@/modules/icons";
 import { useDateTranslationHelper } from "../use-date-translation-helper";
-import { getDaysInMonth } from "../hijri/get-days-in-month";
 import { _applyOffset } from "../hijri/core";
 import { useSettings } from "@/modules/settings/context";
-import { useHijriDate } from "../hijri/use-hijri-date";
-import {
-  formatHijriDateString,
-  parseHijriDateString,
-} from "@/modules/task/task-form-helpers";
+import dayjs from "dayjs";
 
 interface CalendarMonthGridProps {
-  selectedDate: string | null;
-  onChange: (date: string) => void;
+  selectedDate: string | null; // YYYY-MM-DD Gregorian ISO
+  onChange: (date: string) => void; // returns YYYY-MM-DD
 }
 
 function toHijri(date: Date, monthOffsets: Partial<Record<number, number>>) {
@@ -26,67 +21,55 @@ function toHijri(date: Date, monthOffsets: Partial<Record<number, number>>) {
   return _applyOffset(raw, offset);
 }
 
-function toGregorian(
-  year: number,
-  month: number,
-  day: number,
-  monthOffsets: Partial<Record<number, number>>
-) {
-  const offset = monthOffsets?.[month] ?? 0;
-  return hijriToGregorian(_applyOffset({ year, month, day }, -offset));
-}
-
 export function CalendarMonthGrid({
   selectedDate,
   onChange,
 }: CalendarMonthGridProps) {
-  const { weekDays, hijriMonthNames, gregorianMonthNames } =
+  const { weekDays, gregorianMonthNames, hijriMonthNames } =
     useDateTranslationHelper();
   const { settings } = useSettings();
   const monthOffsets = settings.hijriMonthOffsets ?? {};
-  const { currentHijriDate } = useHijriDate();
 
-  const todayHijri = toHijri(new Date(), monthOffsets);
-  const initialHijri = selectedDate
-    ? parseHijriDateString(selectedDate as string)
-    : todayHijri;
+  const today = dayjs();
+  const initial = selectedDate ? dayjs(selectedDate) : today;
 
-  const [year, setYear] = useState(initialHijri.year);
-  const [month, setMonth] = useState(initialHijri.month);
+  const [year, setYear] = useState(initial.year());
+  const [month, setMonth] = useState(initial.month()); // 0-based
 
-  const selectedHijri = selectedDate
-    ? parseHijriDateString(selectedDate)
-    : null;
-  const daysInMonth = getDaysInMonth(year, month);
+  const daysInMonth = dayjs(new Date(year, month, 1)).daysInMonth();
+  const firstDayWeekday = new Date(year, month, 1).getDay(); // 0=Sunday
 
-  const lastDayGreg = toGregorian(year, month, daysInMonth, monthOffsets);
-
-  const firstDayGreg = toGregorian(year, month, 1, monthOffsets);
-  const firstDayDate = new Date(
-    firstDayGreg.year,
-    firstDayGreg.month - 1,
-    firstDayGreg.day
-  );
-  const weekOffset = (firstDayDate.getDay() - 5 + 7) % 7; // week starts Friday
+  // weekDays from helper starts on Friday: [Fri, Sat, Sun, Mon, Tue, Wed, Thu]
+  // Reorder to Sunday-first: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
+  const gregWeekDays = [2, 3, 4, 5, 6, 0, 1].map((i) => weekDays[i]);
 
   const cells: (number | null)[] = [
-    ...Array<null>(weekOffset).fill(null),
+    ...Array<null>(firstDayWeekday).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
 
   const handlePrev = () => {
-    if (month === 1) {
+    if (month === 0) {
       setYear((y) => y - 1);
-      setMonth(12);
+      setMonth(11);
     } else setMonth((m) => m - 1);
   };
 
   const handleNext = () => {
-    if (month === 12) {
+    if (month === 11) {
       setYear((y) => y + 1);
-      setMonth(1);
+      setMonth(0);
     } else setMonth((m) => m + 1);
   };
+
+  const firstHijri = toHijri(new Date(year, month, 1), monthOffsets);
+  const lastHijri = toHijri(new Date(year, month, daysInMonth), monthOffsets);
+  const hijriSubtitle =
+    firstHijri.month !== lastHijri.month
+      ? `${hijriMonthNames[firstHijri.month - 1]} – ${
+          hijriMonthNames[lastHijri.month - 1]
+        } ${lastHijri.year}`
+      : `${hijriMonthNames[firstHijri.month - 1]} ${firstHijri.year}`;
 
   return (
     <div>
@@ -99,11 +82,10 @@ export function CalendarMonthGrid({
         </button>
         <div className="flex flex-col items-center">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-            {hijriMonthNames[month - 1]} {year}
+            {gregorianMonthNames[month]} {year}
           </h3>
-          <p className="text-xs">
-            {firstDayGreg.day} {gregorianMonthNames[firstDayGreg.month - 1]} -{" "}
-            {lastDayGreg.day} {gregorianMonthNames[lastDayGreg.month - 1]}
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {hijriSubtitle}
           </p>
         </div>
         <button
@@ -116,7 +98,7 @@ export function CalendarMonthGrid({
 
       <div className="p-2 border-y border-gray-200">
         <div className="grid grid-cols-7 gap-1 text-center">
-          {weekDays.map((day: string) => (
+          {gregWeekDays.map((day: string) => (
             <div
               key={day}
               className="text-xs font-medium text-gray-500 dark:text-gray-400"
@@ -131,23 +113,20 @@ export function CalendarMonthGrid({
               return <div key={index} className="aspect-3/2 w-full h-full" />;
             }
 
-            const gregDate = toGregorian(year, month, day, monthOffsets);
+            const hijri = toHijri(new Date(year, month, day), monthOffsets);
+            const dateStr = dayjs(new Date(year, month, day)).format(
+              "YYYY-MM-DD"
+            );
             const isToday =
-              year === currentHijriDate.year &&
-              month === currentHijriDate.month &&
-              day === currentHijriDate.day;
-            const isSelected =
-              selectedHijri != null &&
-              year === selectedHijri.year &&
-              month === selectedHijri.month &&
-              day === selectedHijri.day;
+              today.year() === year &&
+              today.month() === month &&
+              today.date() === day;
+            const isSelected = selectedDate === dateStr;
 
             return (
               <div key={index} className="aspect-3/2">
                 <button
-                  onClick={() => {
-                    onChange(formatHijriDateString(year, month, day));
-                  }}
+                  onClick={() => onChange(dateStr)}
                   data-testid={isToday ? "calendar-today-button" : undefined}
                   className={`w-full flex flex-col p-1 items-center justify-center rounded-md text-sm transition-colors ${
                     isSelected
@@ -158,7 +137,7 @@ export function CalendarMonthGrid({
                   }`}
                 >
                   <div className="text-base">{day}</div>
-                  <div className="text-[0.625rem]">{gregDate.day}</div>
+                  <div className="text-[0.625rem]">{hijri.day}</div>
                 </button>
               </div>
             );

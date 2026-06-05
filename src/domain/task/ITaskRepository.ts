@@ -4,7 +4,6 @@ import type {
   TaskUpdateInput,
   TaskQuery,
 } from "@/domain/task";
-import { HijriDate } from "../../modules/calendar/hijri";
 
 export interface ITaskRepository {
   // Task operations
@@ -18,9 +17,12 @@ export interface ITaskRepository {
   findByDate(date: string): Promise<Task[]>;
   findByHijriDate(hijriDate: string): Promise<Task[]>;
   findWithPagination(offset: number, limit?: number): Promise<Task[]>;
-  findTasksBefore(beforeHijri: HijriDate): Promise<Task[]>;
-  findTodayCompletedTasks(todayHijri: HijriDate): Promise<Task[]>;
-  findTasksAfter(todayHijri: HijriDate): Promise<Task[]>;
+  findTasksBefore(beforeEpoch: number): Promise<Task[]>;
+  findTodayCompletedTasks(
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]>;
+  findTasksAfter(fromEpoch: number): Promise<Task[]>;
   findAllPending(limit: number): Promise<Task[]>;
   findAllCompleted(offset: number, limit: number): Promise<Task[]>;
   findPendingInRange(startEpoch: number, endEpoch: number): Promise<Task[]>;

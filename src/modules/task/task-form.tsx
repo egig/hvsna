@@ -9,6 +9,7 @@ import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
 import { TimeInput } from "../calendar/time-input";
 import { useHijriDate } from "../calendar/hijri";
+import dayjs from "dayjs";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -44,7 +45,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
   useEffect(() => {
     if (page === "today" || page === "upcoming") {
       updateScheduleAt({
-        date: new Date(currentHijriDate.endOfDayEpoch()),
+        date: dayjs().endOf("day").toDate(),
         time: "",
       });
     }

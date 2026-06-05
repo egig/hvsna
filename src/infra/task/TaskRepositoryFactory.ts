@@ -1,11 +1,9 @@
 import { PouchDBTaskRepository } from "./PouchDBTaskRepository";
-import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import type {
   Task,
   TaskCreateInput,
   TaskUpdateInput,
   TaskQuery,
-  TaskStatus,
 } from "@/domain/task";
 
 /**
@@ -21,9 +19,12 @@ export interface ITaskAndProjectRepository {
   findTasksByDate(date: string): Promise<Task[]>;
   findTasksByHijriDate(hijriDate: string): Promise<Task[]>;
   findTasksWithPagination(offset: number, limit?: number): Promise<Task[]>;
-  findTasksBefore(beforeHijri: any): Promise<Task[]>;
-  findTodayCompletedTasks(todayHijri: any): Promise<Task[]>;
-  findTasksAfter(todayHijri: any): Promise<Task[]>;
+  findTasksBefore(beforeEpoch: number): Promise<Task[]>;
+  findTodayCompletedTasks(
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]>;
+  findTasksAfter(fromEpoch: number): Promise<Task[]>;
   findBrowsedTasks(
     query?: any,
     offset?: number,

@@ -1,12 +1,10 @@
 import { Page } from "../navigation/page";
 import { useHijriDate } from "./hijri/use-hijri-date";
+import dayjs from "dayjs";
 
 export function HijriCalendar() {
-  const { currentHijriDate, getToday, formatDate, loading, error } =
-    useHijriDate();
+  const { currentHijriDate, formatDate, loading, error } = useHijriDate();
 
-  // Fetch sunset time
-  // Define calendar data structure
   const calendarData = [
     {
       id: "current-hijri-date",
@@ -22,12 +20,8 @@ export function HijriCalendar() {
       id: "start-of-current-day",
       label: "Start of Current Day",
       value: {
-        primary: new Date(getToday().startOfDayEpoch()).toString(),
+        primary: dayjs().startOf("day").toString(),
         secondary: "",
-        tertiary: `Hijri: ${formatDate(
-          getToday(),
-          "DD MMMM YYYY HH:mm:ss.SSS"
-        )}`,
       },
       color: "text-[var(--hvsna-info-color)]",
       striped: true,
@@ -36,9 +30,8 @@ export function HijriCalendar() {
       id: "end-of-current-day",
       label: "End of Current Day",
       value: {
-        primary: new Date(getToday().endOfDayEpoch()).toString(),
-        secondary:
-          "Gregorian: " + new Date(getToday().endOfDayEpoch()).toString(),
+        primary: dayjs().endOf("day").toString(),
+        secondary: "",
       },
       color: "text-[var(--hvsna-warning-color)]",
     },
@@ -46,11 +39,8 @@ export function HijriCalendar() {
       id: "start-of-next-day",
       label: "Start of Next Day",
       value: {
-        primary: new Date(getToday().next().startOfDayEpoch()).toString(),
-        secondary: `Hijri: ${formatDate(
-          getToday().next(),
-          "DD MMMM YYYY HH:mm:ss.SSS"
-        )}`,
+        primary: dayjs().add(1, "day").startOf("day").toString(),
+        secondary: "",
       },
     },
   ];

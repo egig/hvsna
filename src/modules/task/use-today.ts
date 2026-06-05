@@ -16,13 +16,12 @@ export function useToday() {
 
   const today = getToday();
   const gregDate = dayjs(today.toDate());
-  const todayString = today.toString();
+  const startOfDayEpoch = gregDate.startOf("day").valueOf();
+  const endOfDayEpoch = gregDate.endOf("day").valueOf();
+  const todayString = gregDate.format("YYYY-MM-DD");
 
   const pendingTasksQuery = usePendingTasks();
-  const virtualTaskQuery = useVirtualTasks(
-    today.startOfDayEpoch(),
-    today.endOfDayEpoch()
-  );
+  const virtualTaskQuery = useVirtualTasks(startOfDayEpoch, endOfDayEpoch);
 
   const allTasks = [
     ...(pendingTasksQuery.data ?? []),
@@ -31,22 +30,19 @@ export function useToday() {
 
   const todayCompletedTasksQuery = useQuery({
     queryKey: queryKeys.todayCompletedTasks(todayString),
-    queryFn: () => taskUseCases.findTodayCompletedTasks(today),
+    queryFn: () =>
+      taskUseCases.findTodayCompletedTasks(startOfDayEpoch, endOfDayEpoch),
     enabled: hijriCalInititated,
   });
 
   const todayTasks = (allTasks ?? []).filter((t) => {
-    return (
-      t.atEpochMillis != null &&
-      Math.ceil(t.atEpochMillis / 60000) <=
-        Math.ceil(today.endOfDayEpoch() / 60000)
-    );
+    return t.atEpochMillis != null && t.atEpochMillis <= endOfDayEpoch;
   });
 
-  const pageTitle = `${today.day} ${hijriMonthNames[today.month - 1]} ${
+  const subTitle = `${today.day} ${hijriMonthNames[today.month - 1]} ${
     today.year
   }`;
-  const subTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
+  const pageTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
     gregorianMonthNames[gregDate.month()]
   } ${gregDate.year()}`;
 

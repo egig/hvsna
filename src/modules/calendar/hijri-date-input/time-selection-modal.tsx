@@ -38,15 +38,15 @@ export function TimeSelectionModal({
     isCustom ? "custom" : "prayer"
   );
 
-  const prayerTimes: PrayerTime[] = ["Maghrib", "Isha", "Fajr", "Dhuhr", "Asr"];
+  const prayerTimes: PrayerTime[] = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
   const prayerIcons: Record<string, ReactNode> = {
-    Maghrib: <HvMaghrib size={20} />,
-    Isha: <HvIsha size={20} />,
     Fajr: <HvFajr size={20} />,
     Sunrise: <HvSunrise size={20} />,
     Dhuhr: <HvDhuhr size={20} />,
     Asr: <HvAsr size={20} />,
+    Maghrib: <HvMaghrib size={20} />,
+    Isha: <HvIsha size={20} />,
   };
 
   const handleCustomTimeConfirm = () => {

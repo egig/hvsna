@@ -27,7 +27,7 @@ import type { LaterGroup } from "./use-upcoming";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useTaskContext } from "./task-context";
 import { useScreenSize } from "../components/screen-size-wrapper";
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
+import dayjs from "dayjs";
 import { createPortal } from "react-dom";
 
 type ViewMode = "list" | "week";
@@ -270,7 +270,6 @@ export default function Upcoming() {
   const { t } = useLanguageContext();
   const { openEditTaskForm, updateTask } = useTaskContext();
   const { isDesktop } = useScreenSize();
-  const { toHijriDate } = useHijriDate();
 
   const [horizonDays, setHorizonDays] = useState(HORIZON_INITIAL);
   const canLoadMore = horizonDays < HORIZON_MAX;
@@ -292,8 +291,9 @@ export default function Upcoming() {
       updateTask(task.id!, { atEpochMillis: null });
     } else {
       const [y, m, d] = (over.id as string).split("-").map(Number);
-      const hijri = toHijriDate(new Date(y, m - 1, d));
-      const atEpochMillis = hijri.endOfDayEpoch();
+      const atEpochMillis = dayjs(new Date(y, m - 1, d))
+        .endOf("day")
+        .valueOf();
       updateTask(task.id!, { atEpochMillis });
     }
   };

@@ -1,93 +1,98 @@
+import { gregorianToHijri } from "@tabby_ai/hijri-converter";
 import { HvChevronLeft, HvChevronRight } from "@/modules/icons";
 import { useDateTranslationHelper } from "./use-date-translation-helper";
-import {
-  HijriDate,
-  HijriMonth,
-  isSameHijriDate,
-  useHijriDate,
-} from "src/modules/calendar/hijri";
+import { _applyOffset } from "./hijri/core";
+import { useSettings } from "@/modules/settings/context";
+import dayjs, { type Dayjs } from "dayjs";
 
-function isBefore(date1: HijriDate, date2: HijriDate): boolean {
-  return date1.toDate() < date2.toDate();
+function toHijriDay(
+  date: Date,
+  monthOffsets: Partial<Record<number, number>>
+): number {
+  const raw = gregorianToHijri({
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+  });
+  return _applyOffset(raw, monthOffsets?.[raw.month] ?? 0).day;
 }
 
-function isAfter(date1: HijriDate, date2: HijriDate): boolean {
-  return date1.toDate() > date2.toDate();
-}
-
-function isSame(date1: HijriDate, date2: HijriDate): boolean {
-  return isSameHijriDate(date1, date2);
-}
-
-interface HijriRangeCalendarGridProps {
-  currentMonth: HijriMonth;
+interface DateRangeGridProps {
+  year: number;
+  month: number; // 0-based
   onPreviousMonth: () => void;
   onNextMonth: () => void;
-  startDate: HijriDate | null;
-  endDate: HijriDate | null;
-  onDateClick: (date: HijriDate) => void;
+  startEpoch: number | null;
+  endEpoch: number | null;
+  onDateClick: (date: Dayjs) => void;
 }
 
 export function HijriRangeCalendarGrid({
-  currentMonth,
+  year,
+  month,
   onPreviousMonth,
   onNextMonth,
-  startDate,
-  endDate,
+  startEpoch,
+  endEpoch,
   onDateClick,
-}: HijriRangeCalendarGridProps) {
-  const { weekDays, hijriMonthNames, gregorianMonthNames } =
+}: DateRangeGridProps) {
+  const { weekDays, gregorianMonthNames, hijriMonthNames } =
     useDateTranslationHelper();
-  const { createHijriDate } = useHijriDate();
+  const { settings } = useSettings();
+  const monthOffsets = settings.hijriMonthOffsets ?? {};
 
-  const getCalendarDays = () => {
-    const firstDay = currentMonth.getFirstDay();
-    const daysInMonth = currentMonth.getDaysInMonth();
-    const days: (HijriDate | null)[] = [];
-    for (let i = 0; i < firstDay.dayOfWeek; i++) days.push(null);
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(createHijriDate(currentMonth.year, currentMonth.month, day));
-    }
-    return days;
-  };
+  const today = dayjs();
+  const daysInMonth = dayjs(new Date(year, month, 1)).daysInMonth();
+  const firstDayWeekday = new Date(year, month, 1).getDay(); // 0=Sunday
 
-  const firstGreg = createHijriDate(
-    currentMonth.year,
-    currentMonth.month,
-    1
-  ).toDate();
-  const lastGreg = createHijriDate(
-    currentMonth.year,
-    currentMonth.month,
-    currentMonth.getDaysInMonth()
-  ).toDate();
+  // weekDays from helper starts on Friday: [Fri, Sat, Sun, Mon, Tue, Wed, Thu]
+  // Reorder to Sunday-first: [Sun, Mon, Tue, Wed, Thu, Fri, Sat]
+  const gregWeekDays = [2, 3, 4, 5, 6, 0, 1].map((i) => weekDays[i]);
 
-  const isDateInSelectedRange = (date: HijriDate) => {
-    if (!startDate || !endDate) return false;
-    const start = isBefore(startDate, endDate) ? startDate : endDate;
-    const end = isAfter(endDate, startDate) ? endDate : startDate;
-    return (
-      (isAfter(date, start) || isSame(date, start)) &&
-      (isBefore(date, end) || isSame(date, end))
-    );
-  };
+  const cells: (number | null)[] = [
+    ...Array<null>(firstDayWeekday).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
 
-  const isDateStartOrEnd = (date: HijriDate) => {
-    if (!startDate || !endDate) return false;
-    return isSame(date, startDate) || isSame(date, endDate);
-  };
+  const firstHijriName =
+    hijriMonthNames[
+      gregorianToHijri({ year, month: month + 1, day: 1 }).month - 1
+    ];
+  const lastHijriName =
+    hijriMonthNames[
+      gregorianToHijri({ year, month: month + 1, day: daysInMonth }).month - 1
+    ];
+  const hijriSubtitle =
+    firstHijriName !== lastHijriName
+      ? `${firstHijriName} – ${lastHijriName}`
+      : firstHijriName;
 
-  const getDateButtonClass = (date: HijriDate) => {
+  const rangeStart = startEpoch
+    ? dayjs(startEpoch).startOf("day").valueOf()
+    : null;
+  const rangeEnd = endEpoch ? dayjs(endEpoch).startOf("day").valueOf() : null;
+
+  const getButtonClass = (dayStart: number) => {
     const base =
       "w-full flex flex-col p-1 items-center justify-center rounded-md text-sm transition-colors ";
-    if (isDateStartOrEnd(date))
+    const isStartOrEnd =
+      (rangeStart !== null && dayStart === rangeStart) ||
+      (rangeEnd !== null && dayStart === rangeEnd);
+    const isInRange =
+      rangeStart !== null &&
+      rangeEnd !== null &&
+      dayStart > rangeStart &&
+      dayStart < rangeEnd;
+    const isTodayDay = dayStart === today.startOf("day").valueOf();
+
+    if (isStartOrEnd)
       return base + "bg-[var(--hvsna-primary-color)] text-white";
-    if (isDateInSelectedRange(date))
+    if (isInRange)
       return (
         base +
         "bg-[var(--hvsna-primary-color-active-tab)] dark:bg-blue-900 text-white dark:text-white"
       );
-    if (date.isToday())
+    if (isTodayDay)
       return (
         base + "bg-blue-100 dark:bg-blue-800 text-blue-900 dark:text-blue-100"
       );
@@ -108,11 +113,10 @@ export function HijriRangeCalendarGrid({
         </button>
         <div className="flex flex-col items-center">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">
-            {hijriMonthNames[currentMonth.month - 1]} {currentMonth.year}
+            {gregorianMonthNames[month]} {year}
           </h3>
-          <p className="text-xs">
-            {firstGreg.getDate()} {gregorianMonthNames[firstGreg.getMonth()]} –{" "}
-            {lastGreg.getDate()} {gregorianMonthNames[lastGreg.getMonth()]}
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {hijriSubtitle}
           </p>
         </div>
         <button
@@ -125,7 +129,7 @@ export function HijriRangeCalendarGrid({
 
       <div className="p-2 border-y border-gray-200">
         <div className="grid grid-cols-7 gap-1 text-center">
-          {weekDays.map((day: string) => (
+          {gregWeekDays.map((day: string) => (
             <div
               key={day}
               className="text-xs font-medium text-gray-500 dark:text-gray-400"
@@ -135,23 +139,30 @@ export function HijriRangeCalendarGrid({
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
-          {getCalendarDays().map((date, index) => (
-            <div key={index} className="aspect-3/2">
-              {date ? (
+          {cells.map((day, index) => {
+            if (day === null) {
+              return <div key={index} className="aspect-3/2 w-full h-full" />;
+            }
+
+            const date = dayjs(new Date(year, month, day));
+            const dayStart = date.startOf("day").valueOf();
+            const hijriDay = toHijriDay(
+              new Date(year, month, day),
+              monthOffsets
+            );
+
+            return (
+              <div key={index} className="aspect-3/2">
                 <button
                   onClick={() => onDateClick(date)}
-                  className={getDateButtonClass(date)}
+                  className={getButtonClass(dayStart)}
                 >
-                  <div className="text-base">{date.day}</div>
-                  <div className="text-[0.625rem]">
-                    {date.toDate().getDate()}
-                  </div>
+                  <div className="text-base">{day}</div>
+                  <div className="text-[0.625rem]">{hijriDay}</div>
                 </button>
-              ) : (
-                <div className="w-full h-full" />
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

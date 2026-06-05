@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { useTaskContext } from "./task-context";
-import { HijriDate, useHijriDate } from "../calendar/hijri";
+import { useHijriDate } from "../calendar/hijri";
 import { Task, type TaskCreateInput } from "@/domain/task";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { useSnackbar } from "../components/snackbar-provider";
 import { useSettings } from "../settings";
-import { parseHijriDateString, useTaskEpoch } from "./task-form-helpers";
+import { useTaskEpoch } from "./task-form-helpers";
+import dayjs from "dayjs";
 import logger from "../logger";
 import type {
   RepeatConfig,
@@ -39,16 +40,8 @@ export const useTaskForm = (
   const { settings } = useSettings();
   const { createRecurringTask } = useRecurringTasks();
 
-  const {
-    latitude,
-    longitude,
-    createHijriDate,
-    toHijriDate,
-    currentHijriDate,
-  } = useHijriDate();
+  const { latitude, longitude } = useHijriDate();
   const getTaskEpoch = useTaskEpoch();
-
-  const monthOffsets = settings.hijriMonthOffsets ?? {};
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<TaskFormData>({
@@ -99,12 +92,7 @@ export const useTaskForm = (
       ) as number;
     }
 
-    // Calculate the offset for the task's scheduled month
-    let hijriDateOffset = 0;
-    if (formData.scheduleAt.date) {
-      const hijriDate = toHijriDate(formData.scheduleAt.date);
-      hijriDateOffset = monthOffsets?.[hijriDate.month] ?? 0;
-    }
+    const hijriDateOffset = 0;
 
     try {
       setIsSubmitting(true);
@@ -118,14 +106,7 @@ export const useTaskForm = (
         ) as number;
         const repeatEndEpoch =
           formData.repeat.end === "on_date" && formData.repeat.endDate
-            ? (() => {
-                const {
-                  year: ey,
-                  month: em,
-                  day: ed,
-                } = parseHijriDateString(formData.repeat.endDate as string);
-                return createHijriDate(ey, em, ed).endOfDayEpoch();
-              })()
+            ? dayjs(formData.repeat.endDate).endOf("day").valueOf()
             : undefined;
         const template = await createRecurringTask({
           name: taskData.taskName.trim(),
@@ -171,7 +152,7 @@ export const useTaskForm = (
           !isMatchLocationContext(
             location,
             formData.scheduleAt.date as Date,
-            new Date(currentHijriDate.endOfDayEpoch())
+            dayjs().endOf("day").toDate()
           )
         ) {
           showSnackbar("Task created but not listed in this page");

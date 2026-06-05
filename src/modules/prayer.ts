@@ -8,57 +8,48 @@ export function usePrayerTimes() {
   const { currentHijriDate } = useHijriDate();
   const { settings } = useSettings();
 
-  const getPrayerTimesForHijriDate = useCallback(
-    (d: HijriDate) => {
+  const getPrayerTimesForDate = useCallback(
+    (da: Date) => {
       const coordinates = new Coordinates(
         settings.location?.lat as number,
         settings.location?.lng as number
       );
       const params = CalculationMethod.UmmAlQura();
-      // IMPORTANT ! we allways get the prayer times by the end of hijri date
-      // so we can decide that the maghrib always at yesterday
-      let da = new Date(d.endOfDayEpoch());
       const prayerTimes = new PrayerTimes(coordinates, da, params);
-      const yesterday = dayjs(da).subtract(1, "day").toDate();
-      const ptYesterday = new PrayerTimes(coordinates, yesterday, params);
-      prayerTimes.maghrib = ptYesterday.maghrib;
-      prayerTimes.isha = ptYesterday.isha;
       return prayerTimes;
     },
     [settings]
   );
 
   const getTodayPrayerTimes = useCallback(() => {
-    return getPrayerTimesForHijriDate(currentHijriDate);
-  }, [getPrayerTimesForHijriDate, currentHijriDate]);
+    return getPrayerTimesForDate(new Date());
+  }, [getPrayerTimesForDate, currentHijriDate]);
 
   const getPrayerEndTime = useCallback(
-    (prayerName: string, d: HijriDate): Date => {
-      let prayerTimes = getPrayerTimesForHijriDate(d);
+    (prayerName: string, d: Date): Date => {
+      let prayerTimes = getPrayerTimesForDate(d);
       switch (prayerName.toLowerCase()) {
-        case "maghrib":
-          return new Date(prayerTimes.isha.valueOf() - 1000);
-        case "isha":
-          return new Date(prayerTimes.fajr.valueOf() - 1000);
-        // Sunrise / Dhuha is sunnah so we set fajr end time to dhuhr
         case "fajr":
         case "sunrise":
           return new Date(prayerTimes.dhuhr.valueOf() - 1000);
         case "dhuhr":
           return new Date(prayerTimes.asr.valueOf() - 1000);
         case "asr":
-          let tom = getPrayerTimesForHijriDate(d.next());
-          return new Date(tom.maghrib.valueOf() - 1000);
+          return new Date(prayerTimes.maghrib.valueOf() - 1000);
+        case "maghrib":
+          return new Date(prayerTimes.isha.valueOf() - 1000);
+        case "isha":
+          return dayjs().endOf("day").toDate();
       }
 
       throw new Error(`unknown prayer ${prayerName}`);
     },
-    [getPrayerTimesForHijriDate]
+    [getPrayerTimesForDate]
   );
 
   return {
     getTodayPrayerTimes,
-    getPrayerTimesForHijriDate,
+    getPrayerTimesForDate,
     getPrayerEndTime,
   };
 }

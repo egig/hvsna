@@ -1,13 +1,11 @@
 import PouchDB from "pouchdb";
 import { Capacitor } from "@capacitor/core";
-import { HijriDate } from "../../modules/calendar/hijri";
 import type {
   TaskCreateInput,
   TaskQuery,
   TaskRecurringType,
   TaskStatus,
   TaskUpdateInput,
-  PrayerTime,
 } from "@/domain/task";
 import { Task } from "@/domain/task";
 import { generatePrefixedUUID } from "../../modules/uuid";
@@ -342,7 +340,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     }));
   }
 
-  async findTasksBefore(beforeHijri: HijriDate): Promise<Task[]> {
+  async findTasksBefore(beforeEpoch: number): Promise<Task[]> {
     await this.db.createIndex({
       index: {
         fields: ["type", "status", "atEpochMillis", "deletedAt"],
@@ -355,7 +353,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         status: 0,
         atEpochMillis: {
           $gt: null,
-          $lte: beforeHijri.toDate().valueOf(),
+          $lte: beforeEpoch,
         },
         deletedAt: null,
       },
@@ -372,7 +370,10 @@ export class PouchDBTaskRepository implements ITaskRepository {
     );
   }
 
-  async findTodayCompletedTasks(todayHijri: HijriDate): Promise<Task[]> {
+  async findTodayCompletedTasks(
+    startEpoch: number,
+    endEpoch: number
+  ): Promise<Task[]> {
     await this.db.createIndex({
       index: {
         fields: ["type", "status", "completedAt", "deletedAt"],
@@ -384,8 +385,8 @@ export class PouchDBTaskRepository implements ITaskRepository {
         type: "task",
         status: 1, // completed status
         completedAt: {
-          $gte: todayHijri.startOfDayEpoch(),
-          $lte: todayHijri.endOfDayEpoch(),
+          $gte: startEpoch,
+          $lte: endEpoch,
         },
         deletedAt: { $exists: false },
       },
@@ -440,7 +441,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
     return updatedDoc.toTaskItem();
   }
 
-  async findTasksAfter(todayHijri: HijriDate): Promise<Task[]> {
+  async findTasksAfter(fromEpoch: number): Promise<Task[]> {
     await this.db.createIndex({
       index: {
         fields: ["type", "status", "atEpochMillis", "deletedAt"],
@@ -452,7 +453,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
         type: "task",
         status: 0,
         atEpochMillis: {
-          $gte: todayHijri.toDate().valueOf(),
+          $gte: fromEpoch,
         },
         deletedAt: null,
       },

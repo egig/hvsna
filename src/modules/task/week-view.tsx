@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import dayjs from "dayjs";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { Collapsible } from "@base-ui/react/collapsible";
 import {
@@ -117,17 +118,13 @@ function WeekViewColumn({
     [openEditTaskForm]
   );
 
+  const gregorianMainLabel = dayjs(day).format("ddd D");
   const hijriDate = useMemo(() => toHijriDate(day), [day, toHijriDate]);
-  const hijriMainLabel = formatDate(hijriDate, "D MMMM");
-  const gregorianSubLabel = day.toLocaleDateString(undefined, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  const hijriSubLabel = formatDate(hijriDate, "D MMMM");
 
   const taskGroups = useMemo(() => {
     if (!prayerTimings) return [];
-    return groupTasksByPrayerTimes(tasks, prayerTimings);
+    return groupTasksByPrayerTimes(tasks);
   }, [tasks, prayerTimings]);
 
   const getPrayerLabel = useCallback(
@@ -152,7 +149,7 @@ function WeekViewColumn({
           : "",
       ].join(" ")}
     >
-      {/* Column header: Hijri date as main title, Gregorian as subtitle */}
+      {/* Column header: Gregorian date as main title, Hijri as subtitle */}
       <div
         className={[
           "px-3 py-2.5 border-b-2 mb-2",
@@ -169,10 +166,10 @@ function WeekViewColumn({
               : "text-gray-800 dark:text-gray-100",
           ].join(" ")}
         >
-          {hijriMainLabel}
+          {gregorianMainLabel}
         </div>
         <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-          {gregorianSubLabel}
+          {hijriSubLabel}
         </div>
       </div>
 
@@ -259,32 +256,27 @@ function WeekViewColumn({
 }
 
 export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
-  const { toHijriDate, formatDate, currentHijriDate } = useHijriDate();
   const [weekOffset, setWeekOffset] = useState(0);
   const { getTodayPrayerTimes } = usePrayerTimes();
   const prayerTimings = getTodayPrayerTimes();
 
   const days = useMemo(() => {
-    const weekStart = currentHijriDate.startOfWeek().toDate();
-    weekStart.setDate(weekStart.getDate() + weekOffset * 7);
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(weekStart);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
-  }, [weekOffset, currentHijriDate]);
+    const sunday = dayjs()
+      .startOf("week")
+      .add(weekOffset * 7, "day");
+    return Array.from({ length: 7 }, (_, i) => sunday.add(i, "day").toDate());
+  }, [weekOffset]);
 
   const todayStr = useMemo(() => toLocalDateStr(new Date()), []);
 
   const weekLabel = useMemo(() => {
-    const h0 = toHijriDate(days[0]);
-    const h6 = toHijriDate(days[6]);
-    const sameMonth = h0.month === h6.month && h0.year === h6.year;
-    if (sameMonth) {
-      return `${formatDate(h0, "D")} – ${formatDate(h6, "D MMMM YYYY")}`;
+    const start = dayjs(days[0]);
+    const end = dayjs(days[6]);
+    if (start.month() === end.month()) {
+      return `${start.format("D")} – ${end.format("D MMMM YYYY")}`;
     }
-    return `${formatDate(h0, "D MMMM")} – ${formatDate(h6, "D MMMM YYYY")}`;
-  }, [days, toHijriDate, formatDate]);
+    return `${start.format("D MMM")} – ${end.format("D MMM YYYY")}`;
+  }, [days]);
 
   const tasksForDay = useCallback(
     (day: Date) =>

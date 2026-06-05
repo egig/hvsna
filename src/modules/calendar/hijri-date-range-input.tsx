@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { HijriDateRangeModal } from "./hijri-date-range-modal";
 import { HvCalendar, HvX } from "@/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useHijriDate } from "./hijri";
+import dayjs from "dayjs";
 
 interface DateRange {
   startDate: number; // epoch ms
@@ -27,7 +27,6 @@ export function HijriDateRangeInput({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(null);
   const { t } = useLanguageContext();
-  const { toHijriDate } = useHijriDate();
 
   // Initialize from value
   useEffect(() => {
@@ -51,23 +50,19 @@ export function HijriDateRangeInput({
   };
 
   const formatDateDisplay = (epoch: number) => {
-    const date = toHijriDate(new Date(epoch));
-    if (date.isToday()) return t("today");
-    if (date.isTomorrow()) return t("tomorrow");
-    return date.format("DD MMMM YYYY");
+    const d = dayjs(epoch);
+    if (d.isSame(dayjs(), "day")) return t("today");
+    if (d.isSame(dayjs().add(1, "day"), "day")) return t("tomorrow");
+    return d.format("DD MMMM YYYY");
   };
 
   const formatDateRangeDisplay = (range: DateRange | null) => {
     if (!range) return placeholder;
 
-    const startHijri = toHijriDate(new Date(range.startDate));
-    const endHijri = toHijriDate(new Date(range.endDate));
+    const start = dayjs(range.startDate);
+    const end = dayjs(range.endDate);
 
-    if (
-      startHijri.year === endHijri.year &&
-      startHijri.month === endHijri.month &&
-      startHijri.day === endHijri.day
-    ) {
+    if (start.isSame(end, "day")) {
       return formatDateDisplay(range.startDate);
     }
 

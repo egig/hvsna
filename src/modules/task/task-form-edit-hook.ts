@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useTaskEpoch, parseHijriDateString } from "./task-form-helpers";
+import { useTaskEpoch } from "./task-form-helpers";
+import dayjs from "dayjs";
 import { useTaskContext } from "./task-context";
-import { useHijriDate } from "../calendar/hijri";
-import type { PrayerTime, Task, TaskUpdateInput } from "@/domain/task";
+import type { Task, TaskUpdateInput } from "@/domain/task";
 import { useSettings } from "../settings";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
@@ -78,7 +78,6 @@ export const useTaskFormEdit = (
   const [task, setTask] = useState<Task | null>(initialTask ?? null);
   const { settings } = useSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createHijriDate, toHijriDate } = useHijriDate();
   const [removeTime, setRemoveTime] = useState(false);
   const [showDeleteOptions, setShowDeleteOptions] = useState(false);
   const [showRecurringEditScope, setShowRecurringEditScope] = useState(false);
@@ -118,7 +117,6 @@ export const useTaskFormEdit = (
     }));
   };
 
-  const monthOffsets = settings.hijriMonthOffsets ?? {};
   const _fallback = getCoordinateFromTimezone(settings.timezone ?? "");
   const latitude = settings.location?.lat || _fallback.latitude;
   const longitude = settings.location?.lng || _fallback.longitude;
@@ -137,12 +135,7 @@ export const useTaskFormEdit = (
       ) as number;
     }
 
-    // Calculate the offset for the task's scheduled month
-    let hijriDateOffset = 0;
-    if (formData.scheduleAt.date) {
-      const hijriDate = toHijriDate(formData.scheduleAt.date);
-      hijriDateOffset = monthOffsets?.[hijriDate.month] ?? 0;
-    }
+    const hijriDateOffset = 0;
 
     try {
       setIsSubmitting(true);
@@ -166,19 +159,12 @@ export const useTaskFormEdit = (
 
       if (wasRegular && isNowRecurring && formData.scheduleAt.date) {
         // Promote: regular → recurring
-        const baseDateEpoch = toHijriDate(
-          formData.scheduleAt.date
-        ).endOfDayEpoch();
+        const baseDateEpoch = dayjs(formData.scheduleAt.date)
+          .endOf("day")
+          .valueOf();
         const repeatEndEpoch =
           formData.repeat.end === "on_date" && formData.repeat.endDate
-            ? (() => {
-                const {
-                  year: ey,
-                  month: em,
-                  day: ed,
-                } = parseHijriDateString(formData.repeat.endDate as string);
-                return createHijriDate(ey, em, ed).endOfDayEpoch();
-              })()
+            ? dayjs(formData.repeat.endDate).endOf("day").valueOf()
             : undefined;
 
         result = await promoteTaskToRecurring(

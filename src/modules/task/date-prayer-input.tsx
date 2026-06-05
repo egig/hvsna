@@ -6,6 +6,7 @@ import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import type { HijriDate } from "src/modules/calendar/hijri/hijri-date";
 import type { PrayerTime, TaskRecurringType } from "@/domain/task";
 import dayjs from "dayjs";
+import { Today } from "./today";
 
 type RecurringEnd = "never" | "on_date" | "after_occurrences";
 
@@ -30,6 +31,14 @@ interface DatePrayerInputProps {
   onChange: (d: Date | null) => void;
 }
 
+function isSameDate(d: Date, d2: Date) {
+  return (
+    d2.getFullYear() === d.getFullYear() &&
+    d2.getMonth() === d.getMonth() &&
+    d2.getDate() === d.getDate()
+  );
+}
+
 export function DatePrayerInput({
   selectedDate,
   isSubmitting,
@@ -45,14 +54,13 @@ export function DatePrayerInput({
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
   const [isOpen, setIsOpen] = useState(false);
-  const { toHijriDate } = useHijriDate();
 
   const formatDateLabel = () => {
-    if (!selectedDate) return t("date");
-    let d = toHijriDate(selectedDate);
-    if (d.isToday()) return t("today");
-    if (d.isTomorrow()) return t("tomorrow");
-    return d.format("DD MMMM");
+    if (!selectedDate) return "";
+    if (isSameDate(selectedDate as Date, new Date())) return t("today");
+    if (isSameDate(selectedDate as Date, dayjs().add(1, "day").toDate()))
+      return t("tomorrow");
+    return dayjs(selectedDate).format("DD MMMM");
   };
 
   return (

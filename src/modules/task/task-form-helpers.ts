@@ -4,6 +4,7 @@
 import { HijriDate, useHijriDate } from "../calendar/hijri";
 import type { TaskRecurringType } from "@/domain/task";
 import { usePrayerTimes } from "../prayer";
+import dayjs from "dayjs";
 
 /**
  * Parses a Hijri date string in YYYYMMDD format into year, month, and day components
@@ -106,11 +107,9 @@ export function parseTimeString(timeString: string): {
 
 export function useTaskEpoch() {
   const { getPrayerEndTime } = usePrayerTimes();
-  const { toHijriDate } = useHijriDate();
   return function getTaskEpoch(date: Date, atTime: string): number | null {
-    const d = toHijriDate(date);
     if (!!atTime && !atTime.includes(":")) {
-      return getPrayerEndTime(atTime.toLowerCase(), d).valueOf();
+      return getPrayerEndTime(atTime.toLowerCase(), date).valueOf();
     }
 
     if (!!atTime && atTime.includes(":")) {
@@ -119,7 +118,6 @@ export function useTaskEpoch() {
       da.setHours(h, m);
       return da.valueOf();
     }
-
-    return d.endOfDayEpoch();
+    return dayjs(date).endOf("day").valueOf();
   };
 }

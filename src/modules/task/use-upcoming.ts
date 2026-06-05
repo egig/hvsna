@@ -1,19 +1,20 @@
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { usePendingTasksInRange } from "./use-pending-tasks-in-range";
 import { useVirtualTasks } from "./use-virtual-tasks";
 import type { Task } from "@/domain/task";
+import dayjs from "dayjs";
 
 export type LaterGroup = { key: string; label: string; tasks: Task[] };
 
 export function useUpcoming(horizonDays = 30) {
-  const { getToday, toHijriDate, formatDate } = useHijriDate();
-
-  const today = getToday();
-  const tomorrow = today.next();
-  const endOfWeek = today.endOfWeek();
-
-  const startOfToday = today.startOfDayEpoch();
+  const now = dayjs();
+  const startOfToday = now.startOf("day").valueOf();
+  const endOfToday = now.endOf("day").valueOf();
+  const startOfTomorrow = now.add(1, "day").startOf("day").valueOf();
+  const endOfTomorrow = now.add(1, "day").endOf("day").valueOf();
+  const endOfWeek = now.endOf("week").valueOf();
+  const endOfMonth = now.endOf("month").valueOf();
   const endEpoch = startOfToday + horizonDays * 24 * 60 * 60 * 1000;
+
   const pendingTasksQuery = usePendingTasksInRange(startOfToday, endEpoch);
   const virtualTaskQuery = useVirtualTasks(startOfToday, endEpoch);
 
@@ -28,71 +29,53 @@ export function useUpcoming(horizonDays = 30) {
 
     const laterMap = new Map<string, LaterGroup>();
 
-    const endOfWeekDate = today.endOfWeek();
-
     tasks.forEach((task) => {
       if (!task.atEpochMillis) {
         fixed.unscheduled.tasks.push(task);
         return;
       }
 
-      try {
-        if (
-          task.atEpochMillis >= today.startOfDayEpoch() &&
-          task.atEpochMillis < tomorrow.startOfDayEpoch()
-        ) {
-          fixed.today.tasks.push(task);
-          return;
-        }
+      const t = task.atEpochMillis;
 
-        if (
-          task.atEpochMillis >= tomorrow.startOfDayEpoch() &&
-          task.atEpochMillis < tomorrow.endOfDayEpoch()
-        ) {
-          fixed.tomorrow.tasks.push(task);
-          return;
-        }
-
-        if (
-          task.atEpochMillis < tomorrow.endOfDayEpoch() &&
-          task.atEpochMillis <= endOfWeekDate.toDate().valueOf()
-        ) {
-          fixed.thisWeek.tasks.push(task);
-          return;
-        }
-
-        const taskHijri = toHijriDate(new Date(task.atEpochMillis));
-        if (task.atEpochMillis > endOfWeekDate.toDate().valueOf()) {
-          if (
-            taskHijri.year === today.year &&
-            taskHijri.month === today.month
-          ) {
-            fixed.thisMonth.tasks.push(task);
-            return;
-          }
-        }
-
-        // Beyond thisMonth — group by Hijri month (same year) or Hijri year (future years)
-        let key: string;
-        let label: string;
-        if (taskHijri.year === today.year) {
-          key = `month_${taskHijri.year}_${String(taskHijri.month).padStart(
-            2,
-            "0"
-          )}`;
-          label = taskHijri.format("MMMM YYYY");
-        } else {
-          key = `year_${taskHijri.year}`;
-          label = taskHijri.year.toString();
-        }
-
-        if (!laterMap.has(key)) {
-          laterMap.set(key, { key, label, tasks: [] });
-        }
-        laterMap.get(key)!.tasks.push(task);
-      } catch {
-        fixed.unscheduled.tasks.push(task);
+      if (t >= startOfToday && t <= endOfToday) {
+        fixed.today.tasks.push(task);
+        return;
       }
+
+      if (t >= startOfTomorrow && t <= endOfTomorrow) {
+        fixed.tomorrow.tasks.push(task);
+        return;
+      }
+
+      if (t > endOfTomorrow && t <= endOfWeek) {
+        fixed.thisWeek.tasks.push(task);
+        return;
+      }
+
+      if (t > endOfWeek && t <= endOfMonth) {
+        fixed.thisMonth.tasks.push(task);
+        return;
+      }
+
+      // Beyond this month — group by Gregorian month or year
+      const taskDate = dayjs(t);
+      let key: string;
+      let label: string;
+      if (taskDate.year() === now.year()) {
+        key = `month_${taskDate.year()}_${String(taskDate.month() + 1).padStart(
+          2,
+          "0"
+        )}`;
+        label = taskDate.format("MMMM YYYY");
+      } else {
+        key = `year_${taskDate.year()}`;
+        label = taskDate.format("YYYY");
+      }
+
+      if (!laterMap.has(key)) {
+        laterMap.set(key, { key, label, tasks: [] });
+      }
+      laterMap.get(key)!.tasks.push(task);
     });
 
     const laterGroups = Array.from(laterMap.values()).sort((a, b) =>
@@ -111,7 +94,9 @@ export function useUpcoming(horizonDays = 30) {
     if (b.atEpochMillis == null) return -1;
     return a.atEpochMillis - b.atEpochMillis;
   });
+
   const groupedTasks = groupTasksByTimePeriod(upcomingTasks);
+
   return {
     upcomingTasks,
     taskGroups: groupedTasks,
@@ -124,9 +109,5 @@ export function useUpcoming(horizonDays = 30) {
         : "Unknown error"
       : null,
     refreshTasks: () => pendingTasksQuery.refetch(),
-    today,
-    tomorrow,
-    endOfWeek,
-    formatDate,
   };
 }

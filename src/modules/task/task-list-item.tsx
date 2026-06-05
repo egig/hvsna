@@ -12,10 +12,10 @@ import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
-import { isSameHijriDate, useHijriDate } from "../calendar/hijri";
 import { TagList } from "./tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 import { useTaskEpoch } from "./task-form-helpers";
+import dayjs from "dayjs";
 
 interface TaskListItemProps {
   task: Task;
@@ -41,7 +41,6 @@ export function TaskListItem({
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
-  const { getToday, toHijriDate } = useHijriDate();
   const getTaskEpoch = useTaskEpoch();
 
   const x = useMotionValue(0);
@@ -92,40 +91,29 @@ export function TaskListItem({
 
     if (!task.atEpochMillis) return null;
 
-    const today = getToday();
     const time = task.atTime;
-    const taskDate = toHijriDate(new Date(task.atEpochMillis));
-    if (isSameHijriDate(taskDate, today.previous())) {
+    const taskDay = dayjs(task.atEpochMillis).startOf("day");
+    const today = dayjs().startOf("day");
+    const daysDiff = taskDay.diff(today, "day");
+
+    if (daysDiff === -1) {
       return t("yesterday") + (time ? `, ${time}` : "");
     }
-
-    if (isSameHijriDate(taskDate, today)) {
-      if (timeContext === "today") {
-        return time ? time : "";
-      }
+    if (daysDiff === 0) {
+      if (timeContext === "today") return time ?? "";
       return t("today") + (time ? `, ${time}` : "");
     }
-
-    if (isSameHijriDate(taskDate, today.next())) {
+    if (daysDiff === 1) {
       return t("tomorrow") + (time ? `, ${time}` : "");
     }
-
-    try {
-      const todayGregorian = today.toDate();
-      const taskGregorian = taskDate.toDate();
-      const daysDiff = Math.floor(
-        (taskGregorian.getTime() - todayGregorian.getTime()) /
-          (1000 * 60 * 60 * 24)
+    if (daysDiff > 1 && daysDiff <= 7) {
+      return (
+        dayjs(task.atEpochMillis).format("dddd") + (time ? `, ${time}` : "")
       );
-
-      if (daysDiff > 1 && daysDiff <= 7) {
-        return taskDate.format("dddd") + (time ? `, ${time}` : "");
-      }
-
-      return taskDate.format("D MMMM") + (time ? `, ${time}` : "");
-    } catch {
-      return "";
     }
+    return (
+      dayjs(task.atEpochMillis).format("D MMMM") + (time ? `, ${time}` : "")
+    );
   };
 
   const handleStatusClick = async (e: React.MouseEvent) => {

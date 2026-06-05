@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Activity } from "react";
 import { HvCheck, HvChevronLeft, HvRepeat } from "@/modules/icons";
-import { gregorianToHijri, hijriToGregorian } from "@tabby_ai/hijri-converter";
 import { Modal, ModalNavbar } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
 import { ListInput } from "src/modules/components/list-input";
@@ -10,7 +9,7 @@ import { useHijriDate } from "../hijri/use-hijri-date";
 import type { TaskRecurringType } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { CalendarMonthGrid } from "./calendar-month-grid";
-import { parseHijriDateString } from "@/modules/task/task-form-helpers";
+import dayjs from "dayjs";
 
 type RepeatEnd = "never" | "on_date" | "after_occurrences";
 
@@ -67,7 +66,7 @@ export function CalendarModal({
   onConfirm,
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
-  const { getToday, toHijriDate, createHijriDate } = useHijriDate();
+  const { getToday, toHijriDate } = useHijriDate();
 
   // Which sub-view is active inside the modal
   const [view, setView] = useState<
@@ -172,7 +171,7 @@ export function CalendarModal({
   };
 
   const handleToday = () => {
-    const today = new Date(getToday().endOfDayEpoch());
+    const today = dayjs().endOf("day").toDate();
     onConfirm(
       today,
       tempRepeat,
@@ -185,7 +184,7 @@ export function CalendarModal({
   };
 
   const handleTomorrow = () => {
-    const tomorrow = new Date(getToday().next().endOfDayEpoch());
+    const tomorrow = dayjs().add(1, "day").endOf("day").toDate();
     onConfirm(
       tomorrow,
       tempRepeat,
@@ -265,13 +264,11 @@ export function CalendarModal({
             <CalendarMonthGrid
               selectedDate={
                 tempSelectedDate
-                  ? toHijriDate(tempSelectedDate).format("YYYYMMDD")
+                  ? dayjs(tempSelectedDate).format("YYYY-MM-DD")
                   : ""
               }
               onChange={(dateStr) => {
-                const { year, month, day } = parseHijriDateString(dateStr);
-                const h = createHijriDate(year, month, day);
-                setTempSelectedDate(new Date(h.endOfDayEpoch()));
+                setTempSelectedDate(dayjs(dateStr).endOf("day").toDate());
               }}
             />
 
