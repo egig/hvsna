@@ -28,6 +28,11 @@ export class ReminderService {
       return;
     }
 
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+    if (task.atEpochMillis - Date.now() <= ONE_HOUR_MS) {
+      return;
+    }
+
     try {
       // Schedule pre-due reminder
       if (reminderMinutes > 0) {
@@ -41,28 +46,6 @@ export class ReminderService {
 
         await this.notificationsDriver.scheduleTaskReminder(preDueOptions);
       }
-
-      // Schedule due time reminder
-      const dueOptions: TaskReminderOptions = {
-        taskId: task.id || "",
-        taskName: task.name || "Untitled Task",
-        scheduledTime: task.atEpochMillis,
-        reminderMinutes: 0,
-        type: "due",
-      };
-
-      await this.notificationsDriver.scheduleTaskReminder(dueOptions);
-
-      // Schedule overdue reminder (30 minutes after due)
-      const overdueOptions: TaskReminderOptions = {
-        taskId: task.id || "",
-        taskName: task.name || "Untitled Task",
-        scheduledTime: task.atEpochMillis,
-        reminderMinutes: 0,
-        type: "overdue",
-      };
-
-      await this.notificationsDriver.scheduleTaskReminder(overdueOptions);
     } catch (error) {
       logger.error("Failed to schedule task reminders:", error);
     }

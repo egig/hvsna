@@ -117,9 +117,6 @@ export const TaskProvider: React.FC<{
     id: string,
     input: TaskUpdateInput
   ): Promise<Task> => {
-    // Get the current task before updating to check status change
-    const currentTask = await taskUseCases.getTaskById(id);
-
     // Update the task
     const updatedTask = await taskUseCases.updateTask(id, input);
     return updatedTask;
@@ -152,9 +149,12 @@ export const TaskProvider: React.FC<{
   const reopenTaskMutation = useMutation({
     mutationFn: (id: string) => taskUseCases.uncompleteTask(id),
     onSuccess: async (updatedTask: Task, id) => {
-      if (settings.notifications && updatedTask.atEpochMillis) {
+      if (settings.notifications && updatedTask.atTime?.includes(":")) {
         try {
-          await ReminderService.updateTaskReminders(updatedTask);
+          await ReminderService.updateTaskReminders(
+            updatedTask,
+            settings.reminderMinutesBefore ?? 15
+          );
         } catch (error) {
           logger.error("Failed to reschedule task reminders:", error);
         }
@@ -173,9 +173,12 @@ export const TaskProvider: React.FC<{
     mutationFn: (input: TaskCreateInput) => taskUseCases.createTask(input),
     onSuccess: async (createdTask: Task) => {
       // Schedule reminders if notifications are enabled and task has scheduled time
-      if (settings.notifications && createdTask.atEpochMillis) {
+      if (settings.notifications && createdTask.atTime?.includes(":")) {
         try {
-          await ReminderService.scheduleTaskReminders(createdTask);
+          await ReminderService.scheduleTaskReminders(
+            createdTask,
+            settings.reminderMinutesBefore ?? 15
+          );
         } catch (error) {
           console.error("Failed to schedule task reminders:", error);
         }
@@ -203,7 +206,10 @@ export const TaskProvider: React.FC<{
               await ReminderService.cancelTaskReminders(variables.id);
             } else {
               // Task updated - reschedule reminders
-              await ReminderService.updateTaskReminders(updatedTask);
+              await ReminderService.updateTaskReminders(
+                updatedTask,
+                settings.reminderMinutesBefore ?? 15
+              );
             }
           }
         } catch (error) {

@@ -23,6 +23,7 @@ export interface GeneralSettings {
   hijriMonthOffsets?: Partial<Record<number, number>>;
   theme?: "light" | "dark" | "system";
   notifications?: boolean;
+  reminderMinutesBefore?: number;
   onboardedAt?: number;
   prayerTimesFallback?: PrayerTimesFallback;
   location?: LocationSetting;

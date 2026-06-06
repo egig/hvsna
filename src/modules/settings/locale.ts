@@ -341,4 +341,23 @@ export const settingsTranslations = {
     en: "Test notification sent!",
     id: "Notifikasi uji terkirim!",
   },
+
+  // Notification toggle and settings
+  enable_notifications_toggle: {
+    en: "Enable Notifications",
+    id: "Aktifkan Notifikasi",
+  },
+  reminder_minutes_before: {
+    en: "Remind me before",
+    id: "Ingatkan saya sebelum",
+  },
+  notification_permission_denied_help: {
+    en: "Notification permission was denied. Please enable notifications in your device settings to receive task reminders.",
+    id: "Izin notifikasi ditolak. Silakan aktifkan notifikasi di pengaturan perangkat Anda untuk menerima pengingat tugas.",
+  },
+  _5_minutes: { en: "5 minutes", id: "5 menit" },
+  _10_minutes: { en: "10 minutes", id: "10 menit" },
+  _15_minutes: { en: "15 minutes", id: "15 menit" },
+  _30_minutes: { en: "30 minutes", id: "30 menit" },
+  _60_minutes: { en: "60 minutes", id: "60 menit" },
 };

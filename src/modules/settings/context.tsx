@@ -25,6 +25,7 @@ const DEFAULT_SETTINGS: GeneralSettings = {
   timezone: "",
   theme: "system",
   notifications: true,
+  reminderMinutesBefore: 15,
   prayerTimesFallback: DEFAULT_PRAYER_TIMES,
 };
 

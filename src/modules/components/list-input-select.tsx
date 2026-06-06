@@ -37,9 +37,7 @@ export const ListInputSelect: React.FC<ListInputSelectProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3 flex-1 min-w-0">
           {icon && <div className="flex-shrink-0 text-gray-400">{icon}</div>}
-          <span className="text-gray-900 font-semibold text-left truncate">
-            {label}
-          </span>
+          <span className="text-gray-900  text-left truncate">{label}</span>
         </div>
 
         <div className="flex items-center space-x-2 flex-shrink-0 min-w-0 max-w-[50%]">
