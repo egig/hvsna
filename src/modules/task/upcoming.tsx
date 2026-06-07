@@ -5,6 +5,7 @@ import {
   useDraggable,
   useDroppable,
 } from "@dnd-kit/core";
+import { Allotment } from "allotment";
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
   HvCalendar,
@@ -32,6 +33,55 @@ import { createPortal } from "react-dom";
 
 type ViewMode = "list" | "week";
 
+function dropIdForGroup(key: string): string {
+  if (key === "today") return dayjs().format("YYYY-MM-DD");
+  if (key === "tomorrow") return dayjs().add(1, "day").format("YYYY-MM-DD");
+  if (key === "thisWeek") return dayjs().endOf("week").format("YYYY-MM-DD");
+  if (key === "thisMonth") return dayjs().endOf("month").format("YYYY-MM-DD");
+  const monthMatch = key.match(/^month_(\d+)_(\d+)$/);
+  if (monthMatch) {
+    const [, year, month] = monthMatch;
+    return dayjs(`${year}-${month.padStart(2, "0")}-01`)
+      .endOf("month")
+      .format("YYYY-MM-DD");
+  }
+  const yearMatch = key.match(/^year_(\d+)$/);
+  if (yearMatch) return `${yearMatch[1]}-12-31`;
+  return dayjs().endOf("month").format("YYYY-MM-DD");
+}
+
+function DroppableGroup({
+  id,
+  label,
+  tasks,
+  onEdit,
+}: {
+  id: string;
+  label: string;
+  tasks: Task[];
+  onEdit: (task: Task) => void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      className={[
+        "rounded transition-colors",
+        isOver
+          ? "bg-amber-50 dark:bg-amber-950/20 ring-1 ring-inset ring-amber-200 dark:ring-amber-800"
+          : "",
+      ].join(" ")}
+    >
+      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
+        {label}
+      </h3>
+      {tasks.map((task) => (
+        <DraggableTaskItem key={task.id} task={task} onEdit={onEdit} />
+      ))}
+    </div>
+  );
+}
+
 function ScheduledContent({
   upcomingTasks,
   taskGroupsWithLabels,
@@ -40,6 +90,7 @@ function ScheduledContent({
   handleEditTask,
   t,
   droppable,
+  droppableGroups,
   onLoadMore,
   canLoadMore,
   isLoadingMore,
@@ -52,6 +103,7 @@ function ScheduledContent({
   handleEditTask: (task: Task) => void;
   t: (key: string) => string;
   droppable?: boolean;
+  droppableGroups?: boolean;
   onLoadMore: () => void;
   canLoadMore: boolean;
   isLoadingMore: boolean;
@@ -84,40 +136,60 @@ function ScheduledContent({
                 taskGroupsWithLabels[key] &&
                 taskGroupsWithLabels[key].tasks.length > 0
             )
-            .map(({ key, label }) => (
-              <div key={key}>
-                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
-                  {taskGroupsWithLabels[key].label || label}
-                </h3>
-                <>
-                  {taskGroupsWithLabels[key].tasks.map((task: Task) => (
-                    <TaskListItem
-                      key={task.id}
-                      task={task}
-                      onEdit={handleEditTask}
-                    />
-                  ))}
-                </>
-              </div>
-            ))}
+            .map(({ key, label }) =>
+              droppableGroups ? (
+                <DroppableGroup
+                  key={key}
+                  id={dropIdForGroup(key)}
+                  label={taskGroupsWithLabels[key].label || label}
+                  tasks={taskGroupsWithLabels[key].tasks}
+                  onEdit={handleEditTask}
+                />
+              ) : (
+                <div key={key}>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
+                    {taskGroupsWithLabels[key].label || label}
+                  </h3>
+                  <>
+                    {taskGroupsWithLabels[key].tasks.map((task: Task) => (
+                      <TaskListItem
+                        key={task.id}
+                        task={task}
+                        onEdit={handleEditTask}
+                      />
+                    ))}
+                  </>
+                </div>
+              )
+            )}
           {laterGroups
             .filter((g) => g.tasks.length > 0)
-            .map((group) => (
-              <div key={group.key}>
-                <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
-                  {group.label}
-                </h3>
-                <>
-                  {group.tasks.map((task: Task) => (
-                    <TaskListItem
-                      key={task.id}
-                      task={task}
-                      onEdit={handleEditTask}
-                    />
-                  ))}
-                </>
-              </div>
-            ))}
+            .map((group) =>
+              droppableGroups ? (
+                <DroppableGroup
+                  key={group.key}
+                  id={dropIdForGroup(group.key)}
+                  label={group.label}
+                  tasks={group.tasks}
+                  onEdit={handleEditTask}
+                />
+              ) : (
+                <div key={group.key}>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
+                    {group.label}
+                  </h3>
+                  <>
+                    {group.tasks.map((task: Task) => (
+                      <TaskListItem
+                        key={task.id}
+                        task={task}
+                        onEdit={handleEditTask}
+                      />
+                    ))}
+                  </>
+                </div>
+              )
+            )}
           {isLoadingMore && (
             <div className="flex justify-center py-4 text-sm text-gray-400">
               {"Loading…"}
@@ -174,24 +246,24 @@ function UnscheduledContent({
   );
 }
 
-function DraggableInboxItem({
+function DraggableTaskItem({
   task,
   onEdit,
+  showGoalInfo,
+  className,
 }: {
   task: Task;
   onEdit: (task: Task) => void;
+  showGoalInfo?: boolean;
+  className?: string;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({ id: task.id! });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: task.id!,
+  });
 
   return (
     <div
       ref={setNodeRef}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-          : undefined
-      }
       className={[
         "flex items-stretch rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden",
         isDragging ? "opacity-40" : "",
@@ -208,8 +280,8 @@ function DraggableInboxItem({
         <TaskListItem
           task={task}
           onEdit={onEdit}
-          showGoalInfo={false}
-          className="!border-b-0"
+          showGoalInfo={showGoalInfo}
+          className={className}
           disableSwipe
         />
       </div>
@@ -250,10 +322,12 @@ function DroppableInboxSidebar({
         ) : (
           <div className="space-y-2 p-2">
             {inboxTasks.map((task) => (
-              <DraggableInboxItem
+              <DraggableTaskItem
                 key={task.id}
                 task={task}
                 onEdit={handleEditTask}
+                showGoalInfo={false}
+                className="!border-b-0"
               />
             ))}
           </div>
@@ -393,101 +467,77 @@ export default function Upcoming() {
           }}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex flex-col h-full">
-            {/* Split header row: main title + sidebar header at same level */}
-            <div className="flex shrink-0 border-b border-gray-200 dark:border-gray-800">
-              <div className="flex-1 flex items-center justify-between px-4 py-3">
-                <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                  {t("upcoming")}
-                </h1>
-                {navbarActions}
-              </div>
-              <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex items-center gap-2 px-4 py-3 shrink-0">
-                <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
-                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  {t("unscheduled") || "Unscheduled"}
-                </h2>
-              </div>
-            </div>
-
-            {/* Content area: always two columns on desktop */}
-            <div className="flex-1 flex overflow-hidden min-h-0">
-              {/* Main scheduled content */}
-              <div
-                className={
-                  effectiveMode === "week"
-                    ? "flex-1 flex flex-col min-h-0 overflow-hidden"
-                    : "flex-1 overflow-y-auto"
-                }
-              >
+          <Allotment proportionalLayout={false}>
+            {/* Main pane */}
+            <Allotment.Pane minSize={400}>
+              <div className="flex flex-col h-full">
+                <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 py-3">
+                  <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                    {t("upcoming")}
+                  </h1>
+                  {navbarActions}
+                </div>
                 <div
                   className={
                     effectiveMode === "week"
-                      ? "flex-1 flex flex-col min-h-0"
-                      : "max-w-2xl mx-auto w-full"
+                      ? "flex-1 flex flex-col min-h-0 overflow-hidden"
+                      : "flex-1 overflow-y-auto"
                   }
                 >
-                  {initiated && error && (
-                    <div className="text-center py-8">
-                      <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-                    </div>
-                  )}
-                  <ScheduledContent
-                    upcomingTasks={upcomingTasks}
-                    taskGroupsWithLabels={taskGroupsWithLabels}
-                    laterGroups={taskGroups.laterGroups}
-                    isReady={isReady}
-                    effectiveMode={effectiveMode}
-                    handleEditTask={handleEditTask}
-                    t={t}
-                    droppable={effectiveMode === "week"}
-                    onLoadMore={handleLoadMore}
-                    canLoadMore={canLoadMore}
-                    isLoadingMore={isLoadingMore}
-                  />
+                  <div
+                    className={
+                      effectiveMode === "week"
+                        ? "flex-1 flex flex-col min-h-0"
+                        : "max-w-2xl mx-auto w-full"
+                    }
+                  >
+                    {initiated && error && (
+                      <div className="text-center py-8">
+                        <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
+                      </div>
+                    )}
+                    <ScheduledContent
+                      upcomingTasks={upcomingTasks}
+                      taskGroupsWithLabels={taskGroupsWithLabels}
+                      laterGroups={taskGroups.laterGroups}
+                      isReady={isReady}
+                      effectiveMode={effectiveMode}
+                      handleEditTask={handleEditTask}
+                      t={t}
+                      droppable={effectiveMode === "week"}
+                      droppableGroups={effectiveMode === "list"}
+                      onLoadMore={handleLoadMore}
+                      canLoadMore={canLoadMore}
+                      isLoadingMore={isLoadingMore}
+                    />
+                  </div>
                 </div>
               </div>
+            </Allotment.Pane>
 
-              {/* Inbox sidebar - always visible */}
-              <div className="w-72 border-l border-gray-200 dark:border-gray-800 flex flex-col overflow-hidden flex-shrink-0">
-                {effectiveMode === "week" ? (
+            {/* Inbox pane */}
+            <Allotment.Pane preferredSize={288} minSize={160}>
+              <div className="flex flex-col h-full border-l border-gray-200 dark:border-gray-800">
+                <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 px-4 py-3">
+                  <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
+                  <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    {t("unscheduled") || "Unscheduled"}
+                  </h2>
+                </div>
+                <div className="flex-1 overflow-hidden flex flex-col">
                   <DroppableInboxSidebar
                     inboxTasks={unscheduledTasks}
                     inboxInitiated={inboxInitiated}
                     handleEditTask={handleEditTask}
                     t={t}
                   />
-                ) : (
-                  <div className="flex-1 overflow-y-auto">
-                    {inboxInitiated &&
-                      (unscheduledTasks.length === 0 ? (
-                        <EmptyState
-                          icon={<HvOutlineInbox className="w-full h-full" />}
-                          title={t("no_tasks_in_inbox")}
-                          description={t(
-                            "tasks_without_schedule_or_list_will_appear_here"
-                          )}
-                        />
-                      ) : (
-                        <div className="space-y-2 p-2">
-                          {unscheduledTasks.map((task) => (
-                            <TaskListItem
-                              key={task.id}
-                              task={task}
-                              onEdit={handleEditTask}
-                              showGoalInfo={false}
-                            />
-                          ))}
-                        </div>
-                      ))}
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
-          </div>
+            </Allotment.Pane>
+          </Allotment>
 
           {createPortal(
-            <DragOverlay>
+            <DragOverlay dropAnimation={null}>
               {activeTask && (
                 <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
                   <TaskListItem

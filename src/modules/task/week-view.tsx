@@ -55,17 +55,13 @@ function DraggableTaskCard({
   isOverdue: boolean;
   onEdit: (task: Task) => void;
 }) {
-  const { setNodeRef, listeners, attributes, transform, isDragging } =
-    useDraggable({ id: task.id! });
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
+    id: task.id!,
+  });
 
   return (
     <div
       ref={setNodeRef}
-      style={
-        transform
-          ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
-          : undefined
-      }
       className={[
         "rounded-sm border bg-white dark:bg-gray-900 flex items-stretch",
         "shadow-xs hover:shadow-md transition-shadow overflow-hidden",
