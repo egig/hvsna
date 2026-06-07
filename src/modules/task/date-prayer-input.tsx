@@ -56,7 +56,7 @@ export function DatePrayerInput({
   const [isOpen, setIsOpen] = useState(false);
 
   const formatDateLabel = () => {
-    if (!selectedDate) return "";
+    if (!selectedDate) return t("no_date");
     if (isSameDate(selectedDate as Date, new Date())) return t("today");
     if (isSameDate(selectedDate as Date, dayjs().add(1, "day").toDate()))
       return t("tomorrow");

@@ -4,13 +4,14 @@ import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
 import type { Task, PrayerTime } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import { Collapsible } from "@base-ui/react/collapsible";
 import {
   HvChevronRight,
   HvChevronDown,
   HvCheck,
   HvMapPin,
+  HvMaghrib,
 } from "@/modules/icons";
 import { useTaskContext } from "./task-context";
 import { Page } from "../navigation";
@@ -25,11 +26,24 @@ import dayjs from "dayjs";
 interface TodayTasksProps {
   tasks: Task[];
   completedTasks?: Task[];
+  isAfterMaghrib: boolean;
+  endOfTodayEpoch: number;
+  nextHijriLabel: string;
+  tomorrowGregorianLabel: string;
 }
 
 export function TodayContent() {
   const { t } = useLanguageContext();
-  const { todayTasks, todayCompletedTasks, error, initiated } = useToday();
+  const {
+    todayTasks,
+    todayCompletedTasks,
+    error,
+    initiated,
+    isAfterMaghrib,
+    endOfTodayEpoch,
+    nextHijriLabel,
+    tomorrowGregorianLabel,
+  } = useToday();
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
   }
@@ -45,7 +59,14 @@ export function TodayContent() {
           description={t("tasks_scheduled_for_today_will_appear_here")}
         />
       ) : (
-        <TodayTasks tasks={todayTasks} completedTasks={todayCompletedTasks} />
+        <TodayTasks
+          tasks={todayTasks}
+          completedTasks={todayCompletedTasks}
+          isAfterMaghrib={isAfterMaghrib}
+          endOfTodayEpoch={endOfTodayEpoch}
+          nextHijriLabel={nextHijriLabel}
+          tomorrowGregorianLabel={tomorrowGregorianLabel}
+        />
       )}
     </div>
   );
@@ -89,9 +110,37 @@ export function Today() {
   );
 }
 
-// Fallback function for original grouping logic (used while prayer times are loading)
+function SunsetHairline({ nextHijriLabel }: { nextHijriLabel: string }) {
+  return (
+    <div className="flex items-center gap-3 py-3.5 px-0.5">
+      <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+      <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-[#dd7d5f] whitespace-nowrap">
+        <HvMaghrib size={20} />
+        {nextHijriLabel}
+      </span>
+      <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+    </div>
+  );
+}
 
-function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
+function TomorrowDivider({ label }: { label: string }) {
+  return (
+    <div className="-mx-4 my-3.5 mb-0.5 px-4 py-2.5 bg-[#f4f4f9] dark:bg-gray-800 text-center">
+      <div className="text-[11.5px] font-bold text-[#5d5882] dark:text-gray-400 tracking-[.02em]">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function TodayTasks({
+  tasks,
+  completedTasks = [],
+  isAfterMaghrib,
+  endOfTodayEpoch,
+  nextHijriLabel,
+  tomorrowGregorianLabel,
+}: TodayTasksProps) {
   const { openEditTaskForm } = useTaskContext();
   const { t } = useLanguageContext();
   const { getTodayPrayerTimes } = usePrayerTimes();
@@ -109,7 +158,6 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     [openEditTaskForm, materializeVirtualTask]
   );
 
-  // Use new prayer time grouping logic
   const taskGroups = useMemo(() => {
     let g = groupTasksByPrayerTimes(tasks);
     if (completedTasks.length) {
@@ -123,11 +171,30 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
     return g;
   }, [tasks, completedTasks]);
 
+  // State 1: index of the first Maghrib group — hairline goes before it
+  const hairlineIndex = useMemo(() => {
+    if (isAfterMaghrib) return -1;
+    return taskGroups.findIndex((g: any) => g.prayer === "Maghrib");
+  }, [taskGroups, isAfterMaghrib]);
+
+  // State 2: index of the first group whose tasks spill into tomorrow
+  const tomorrowDividerIndex = useMemo(() => {
+    if (!isAfterMaghrib) return -1;
+    return taskGroups.findIndex(
+      (g: any) =>
+        !g.isOverdue &&
+        !g.isCompleted &&
+        g.tasks.some(
+          (t: Task) =>
+            t.atEpochMillis != null && t.atEpochMillis > endOfTodayEpoch
+        )
+    );
+  }, [taskGroups, isAfterMaghrib, endOfTodayEpoch]);
+
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
       const prayerName = t(prayer.toLowerCase());
 
-      // Add actual prayer time if available and not using fallback
       if (
         prayerTimings &&
         prayerTimings[prayer.toLowerCase() as keyof PrayerTimes]
@@ -147,7 +214,7 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
       {taskGroups.map((group: any, groupIndex: number) => {
         const hasLabel = group.isOverdue || group.isCompleted || !!group.prayer;
 
-        const tasks = (
+        const taskNodes = (
           <div className="">
             {group.tasks.map((task: Task) => (
               <TaskListItem
@@ -160,10 +227,6 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
             ))}
           </div>
         );
-
-        if (!hasLabel) {
-          return <div key={`regular-${groupIndex}`}>{tasks}</div>;
-        }
 
         const labelContent = group.isOverdue ? (
           <span className="text-sm font-bold text-gray-700 dark:text-red-400">
@@ -179,34 +242,44 @@ function TodayTasks({ tasks, completedTasks = [] }: TodayTasksProps) {
           </span>
         );
 
+        const groupKey =
+          group.prayer ||
+          (group.isOverdue
+            ? "overdue"
+            : group.isCompleted
+            ? "completed"
+            : group.isTimeBased
+            ? `time-${group.atTime}`
+            : `regular-${groupIndex}`);
+
         return (
-          <Collapsible.Root
-            key={
-              group.prayer ||
-              (group.isOverdue
-                ? "overdue"
-                : group.isCompleted
-                ? "completed"
-                : group.isTimeBased
-                ? `time-${group.atTime}`
-                : `regular-${groupIndex}`)
-            }
-            defaultOpen={!group.isCompleted}
-          >
-            <Collapsible.Trigger className="flex items-center gap-1.5 mb-2 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
-              <HvChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
-              <HvChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
-              {labelContent}
-              {group.isCompleted && (
-                <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
-                  ({group.tasks.length})
-                </span>
-              )}
-            </Collapsible.Trigger>
-            <Collapsible.Panel className="ml-4 overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
-              {tasks}
-            </Collapsible.Panel>
-          </Collapsible.Root>
+          <div key={groupKey}>
+            {groupIndex === hairlineIndex && (
+              <SunsetHairline nextHijriLabel={nextHijriLabel} />
+            )}
+            {groupIndex === tomorrowDividerIndex && (
+              <TomorrowDivider label={`Tomorrow — ${tomorrowGregorianLabel}`} />
+            )}
+            {!hasLabel ? (
+              <div>{taskNodes}</div>
+            ) : (
+              <Collapsible.Root key={groupKey} defaultOpen={!group.isCompleted}>
+                <Collapsible.Trigger className="flex items-center gap-1.5 mb-2 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
+                  <HvChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
+                  <HvChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
+                  {labelContent}
+                  {group.isCompleted && (
+                    <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
+                      ({group.tasks.length})
+                    </span>
+                  )}
+                </Collapsible.Trigger>
+                <Collapsible.Panel className="ml-4 overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
+                  {taskNodes}
+                </Collapsible.Panel>
+              </Collapsible.Root>
+            )}
+          </div>
         );
       })}
     </div>

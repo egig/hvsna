@@ -5,7 +5,6 @@ import { Modal, ModalNavbar } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
 import { ListInput } from "src/modules/components/list-input";
 import { useLanguageContext } from "../../i18n/LanguageContext";
-import { useHijriDate } from "../hijri/use-hijri-date";
 import type { TaskRecurringType } from "@/domain/task";
 import { RepeatSelectorModal } from "src/modules/task/repeat-selector-modal";
 import { CalendarMonthGrid } from "./calendar-month-grid";
@@ -66,7 +65,6 @@ export function CalendarModal({
   onConfirm,
 }: CalendarModalProps) {
   const { t } = useLanguageContext();
-  const { getToday, toHijriDate } = useHijriDate();
 
   // Which sub-view is active inside the modal
   const [view, setView] = useState<
@@ -127,43 +125,20 @@ export function CalendarModal({
 
   const isSelectedToday = () => {
     if (!selectedDate) return false;
-    const today = getToday();
-    const selectedHijri = toHijriDate(selectedDate);
-    return (
-      selectedHijri.year === today.year &&
-      selectedHijri.month === today.month &&
-      selectedHijri.day === today.day
-    );
+    return dayjs(selectedDate).isSame(dayjs(), "day");
   };
 
   const isSelectedTomorrow = () => {
     if (!selectedDate) return false;
-    const tomorrow = getToday().next();
-    const selectedHijri = toHijriDate(selectedDate);
-    return (
-      selectedHijri.year === tomorrow.year &&
-      selectedHijri.month === tomorrow.month &&
-      selectedHijri.day === tomorrow.day
-    );
+    return dayjs(selectedDate).isSame(dayjs().add(1, "day"), "day");
   };
 
   const isSelectedNextWeek = () => {
     if (!selectedDate) return false;
-    const today = getToday();
-    const dayOfWeek = today.toDate().getDay(); // 0=Sun ... 5=Fri
+    const dayOfWeek = dayjs().day(); // 0=Sun ... 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
-
-    // Create next Friday by adding days using next() method
-    let nextFriday = today;
-    for (let i = 0; i < daysUntilFriday; i++) {
-      nextFriday = nextFriday.next();
-    }
-    const selectedHijri = toHijriDate(selectedDate);
-    return (
-      selectedHijri.year === nextFriday.year &&
-      selectedHijri.month === nextFriday.month &&
-      selectedHijri.day === nextFriday.day
-    );
+    const nextFriday = dayjs().add(daysUntilFriday, "day");
+    return dayjs(selectedDate).isSame(nextFriday, "day");
   };
 
   const isSelectedNoDate = () => {
@@ -197,13 +172,14 @@ export function CalendarModal({
   };
 
   const handleNextWeek = () => {
-    const today = getToday();
-    const dayOfWeek = today.toDate().getDay(); // 0=Sun … 5=Fri
+    const dayOfWeek = dayjs().day(); // 0=Sun … 5=Fri
     const daysUntilFriday = (5 - dayOfWeek + 7) % 7 || 7;
-    let date = today;
-    for (let i = 0; i < daysUntilFriday; i++) date = date.next();
+    const nextFriday = dayjs()
+      .add(daysUntilFriday, "day")
+      .endOf("day")
+      .toDate();
     onConfirm(
-      date.toDate(),
+      nextFriday,
       tempRepeat,
       tempRepeatInterval,
       tempRepeatEnd,

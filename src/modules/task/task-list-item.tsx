@@ -238,7 +238,7 @@ export function TaskListItem({
 
   return (
     <motion.div
-      className={`relative overflow-hidden w-full border-b border-gray-200 ${className}`}
+      className={`relative overflow-hidden w-full border-b border-gray-200 last:border-b-0 ${className}`}
       initial={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
