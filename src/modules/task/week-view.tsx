@@ -1,26 +1,14 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import dayjs from "dayjs";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
-import { Collapsible } from "@base-ui/react/collapsible";
 import {
-  HvChevronRight,
-  HvChevronDown,
   HvArrowLeft,
   HvArrowRight,
   HvGripVertical,
 } from "@/modules/icons";
-import { useSettings } from "../settings";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import {
-  getPrayerTimesWithFallback,
-  groupTasksByPrayerTimes,
-} from "../prayer-time-utils";
 import TaskListItem from "./task-list-item";
-import type { Task, PrayerTime } from "@/domain/task";
-import logger from "../logger";
-import type { PrayerTimes } from "adhan";
-import { usePrayerTimes } from "../prayer";
+import type { Task } from "@/domain/task";
 
 function toLocalDateStr(d: Date) {
   return [
@@ -38,7 +26,6 @@ interface WeekViewProps {
 interface WeekViewColumnProps {
   day: Date;
   tasks: Task[];
-  prayerTimings: PrayerTimes;
   isToday: boolean;
   droppable?: boolean;
 }
@@ -58,6 +45,8 @@ function DraggableTaskCard({
 
   return (
     <div
+      {...listeners}
+      {...attributes}
       ref={setNodeRef}
       className={[
         "rounded-sm border bg-white dark:bg-gray-900 flex items-stretch",
@@ -70,11 +59,7 @@ function DraggableTaskCard({
           : "border-gray-200 dark:border-gray-700",
       ].join(" ")}
     >
-      <div
-        {...listeners}
-        {...attributes}
-        className="flex items-center px-1 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500 shrink-0 touch-none"
-      >
+      <div className="flex items-center px-1 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500 shrink-0 touch-none">
         <HvGripVertical className="size-3" />
       </div>
       <div className="flex-1 min-w-0">
@@ -91,11 +76,9 @@ function DraggableTaskCard({
 function WeekViewColumn({
   day,
   tasks,
-  prayerTimings,
   isToday,
   droppable,
 }: WeekViewColumnProps) {
-  const { t } = useLanguageContext();
   const { toHijriDate, formatDate } = useHijriDate();
 
   const dateStr = toLocalDateStr(day);
@@ -108,20 +91,9 @@ function WeekViewColumn({
   const hijriDate = useMemo(() => toHijriDate(day), [day, toHijriDate]);
   const hijriSubLabel = formatDate(hijriDate, "D MMMM");
 
-  const taskGroups = useMemo(() => {
-    if (!prayerTimings) return [];
-    return groupTasksByPrayerTimes(tasks);
-  }, [tasks, prayerTimings]);
-
-  const getPrayerLabel = useCallback(
-    (prayer: PrayerTime) => {
-      const name = t(prayer.toLowerCase());
-      if (prayerTimings && (prayerTimings as any)[prayer]) {
-        return `${name} · ${(prayerTimings as any)[prayer]}`;
-      }
-      return name;
-    },
-    [t, prayerTimings]
+  const sortedTasks = useMemo(
+    () => [...tasks].sort((a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0)),
+    [tasks]
   );
 
   return (
@@ -159,80 +131,24 @@ function WeekViewColumn({
         </div>
       </div>
 
-      {/* Task groups */}
+      {/* Tasks */}
       <div className="flex-1 overflow-y-auto px-2 pb-4">
-        {taskGroups.length === 0 ? (
+        {sortedTasks.length === 0 ? (
           <div className="text-xs text-gray-300 dark:text-gray-600 text-center py-6">
             —
           </div>
         ) : (
-          <div className="space-y-1">
-            {taskGroups.map((group: any, idx: number) => {
-              const groupKey =
-                group.prayer ||
-                (group.isOverdue
-                  ? "overdue"
-                  : group.isCompleted
-                  ? "completed"
-                  : group.isTimeBased
-                  ? `time-${group.atTime}`
-                  : `regular-${idx}`);
-
-              const hasLabel =
-                group.isOverdue || group.isCompleted || !!group.prayer;
-
-              const taskCards = (
-                <div className="space-y-1.5">
-                  {group.tasks.map((task: Task) => (
-                    <DraggableTaskCard
-                      key={task.id}
-                      task={task}
-                      isCompleted={!!group.isCompleted}
-                      isOverdue={!!group.isOverdue}
-                    />
-                  ))}
-                </div>
-              );
-
-              if (!hasLabel) {
-                return <div key={groupKey}>{taskCards}</div>;
-              }
-
-              const labelContent = group.isOverdue ? (
-                <span className="text-[10px] font-semibold text-red-500 dark:text-red-400 uppercase tracking-wider">
-                  {t("overdue")}
-                </span>
-              ) : group.isCompleted ? (
-                <span className="text-[10px] font-semibold text-green-600 dark:text-green-500 uppercase tracking-wider">
-                  {t("completed")}
-                </span>
-              ) : (
-                <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                  {getPrayerLabel(group.prayer!)}
-                </span>
-              );
-
-              return (
-                <Collapsible.Root
-                  key={groupKey}
-                  defaultOpen={!group.isCompleted}
-                >
-                  <Collapsible.Trigger className="flex items-center gap-1 py-1 w-full cursor-pointer group rounded hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors px-1">
-                    <HvChevronRight className="size-2.5 shrink-0 text-gray-300 group-data-[panel-open]:hidden" />
-                    <HvChevronDown className="size-2.5 shrink-0 text-gray-300 hidden group-data-[panel-open]:block" />
-                    {labelContent}
-                    {group.isCompleted && (
-                      <span className="ml-1 text-[10px] text-gray-300 dark:text-gray-600">
-                        ({group.tasks.length})
-                      </span>
-                    )}
-                  </Collapsible.Trigger>
-                  <Collapsible.Panel className="overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
-                    <div className="pl-3 pt-1">{taskCards}</div>
-                  </Collapsible.Panel>
-                </Collapsible.Root>
-              );
-            })}
+          <div className="space-y-1.5">
+            {sortedTasks.map((task) => (
+              <DraggableTaskCard
+                key={task.id}
+                task={task}
+                isCompleted={task.status === 1}
+                isOverdue={
+                  !!task.atEpochMillis && task.atEpochMillis < Date.now() && task.status !== 1
+                }
+              />
+            ))}
           </div>
         )}
       </div>
@@ -242,8 +158,6 @@ function WeekViewColumn({
 
 export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
   const [weekOffset, setWeekOffset] = useState(0);
-  const { getTodayPrayerTimes } = usePrayerTimes();
-  const prayerTimings = getTodayPrayerTimes();
 
   const days = useMemo(() => {
     const sunday = dayjs()
@@ -319,7 +233,6 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
                 key={dateStr}
                 day={day}
                 tasks={tasksForDay(day)}
-                prayerTimings={prayerTimings}
                 isToday={dateStr === todayStr}
                 droppable={droppable}
               />
