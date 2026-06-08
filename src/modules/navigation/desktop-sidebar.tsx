@@ -121,22 +121,19 @@ export function DesktopSidebar({
       className={`${"w-full h-full"} bg-white border-gray-200 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
-        <Button
-          to={"/settings/general"}
-          navType="sidebar"
-          className={`p-1 rounded-lg text-gray-500 transition-colors hover:bg-gray-100 ${
+        <button
+          onClick={onToggleCollapse}
+          className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
             collapsed ? "mx-auto" : "ml-auto"
           }`}
-          aria-label="Settings"
-          state={{
-            context: "settings",
-            settingsBackgroundLocation: location,
-          }}
+          aria-label={collapsed ? t("expand_sidebar") : t("collapse_sidebar")}
         >
-          <span className="text-xl">
-            <HvSettings size={20} />
-          </span>
-        </Button>
+          {collapsed ? (
+            <HvPanelLeft size={18} />
+          ) : (
+            <HvPanelLeftClose size={18} />
+          )}
+        </button>
       </div>
 
       <div className="flex-1 p-2 space-y-2">
@@ -179,6 +176,33 @@ export function DesktopSidebar({
           );
         })}
         <SidebarTagsSection collapsed={collapsed} />
+      </div>
+
+      <div className="border-t border-gray-100 p-2 space-y-2">
+        {bottomTabs.map((tab) => {
+          const isActive = getIsActive(tab.path);
+          return (
+            <Button
+              key={tab.path}
+              to={tab.path}
+              navType="sidebar"
+              className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
+                collapsed ? "justify-center" : "space-x-1"
+              } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
+              aria-label={tab.label}
+              aria-current={isActive ? "page" : undefined}
+              state={{
+                context: tab.context,
+                settingsBackgroundLocation: location,
+              }}
+            >
+              <span className="text-xl">
+                {isActive ? tab.activeIcon : tab.icon}
+              </span>
+              {!collapsed && <span className="text-sm">{tab.label}</span>}
+            </Button>
+          );
+        })}
       </div>
 
       {/* Logout Confirmation Modal */}

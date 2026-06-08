@@ -35,8 +35,6 @@ export {
   MapPin as HvMapPin,
   Merge as HvMerge,
   MoreVertical as HvMoreVertical,
-  PanelLeft as HvPanelLeft,
-  PanelLeftClose as HvPanelLeftClose,
   Plus as HvPlus,
   Repeat as HvRepeat,
   RefreshCw as HvRefreshCw,
@@ -75,6 +73,8 @@ export {
   TbSquareCheckFilled as HvSquareCheckFilled,
   TbSunset2 as HvMaghrib,
   TbMoon as HvIsha,
+  TbLayoutSidebarFilled as HvPanelLeft,
+  TbLayoutSidebar as HvPanelLeftClose,
 } from "react-icons/tb";
 
 export {

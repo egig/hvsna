@@ -1,11 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import dayjs from "dayjs";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
-import {
-  HvArrowLeft,
-  HvArrowRight,
-  HvGripVertical,
-} from "@/modules/icons";
+import { HvArrowLeft, HvArrowRight, HvGripVertical } from "@/modules/icons";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import TaskListItem from "./task-list-item";
 import type { Task } from "@/domain/task";
@@ -92,7 +88,10 @@ function WeekViewColumn({
   const hijriSubLabel = formatDate(hijriDate, "D MMMM");
 
   const sortedTasks = useMemo(
-    () => [...tasks].sort((a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0)),
+    () =>
+      [...tasks].sort(
+        (a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0)
+      ),
     [tasks]
   );
 
@@ -145,7 +144,9 @@ function WeekViewColumn({
                 task={task}
                 isCompleted={task.status === 1}
                 isOverdue={
-                  !!task.atEpochMillis && task.atEpochMillis < Date.now() && task.status !== 1
+                  !!task.atEpochMillis &&
+                  task.atEpochMillis < Date.now() &&
+                  task.status !== 1
                 }
               />
             ))}

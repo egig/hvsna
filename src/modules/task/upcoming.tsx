@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Allotment } from "allotment";
+import { Allotment, LayoutPriority, type AllotmentHandle } from "allotment";
 import type { DragEndEvent } from "@dnd-kit/core";
 import {
   HvCalendar,
@@ -18,6 +18,8 @@ import {
   HvOutlineInbox,
   HvHiInbox,
   HvGripVertical,
+  HvPanelLeft,
+  HvPanelLeftClose,
 } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Page } from "../navigation";
@@ -74,7 +76,7 @@ function DroppableGroup({
       }
       containerRef={setNodeRef}
       containerClassName={[
-        "rounded transition-colors",
+        "rounded transition-colors p-2",
         isOver
           ? "bg-amber-50 dark:bg-amber-950/20 ring-1 ring-inset ring-amber-200 dark:ring-amber-800"
           : "",
@@ -192,13 +194,13 @@ function ScheduledContent({
               {"Loading…"}
             </div>
           )}
-          {canLoadMore && (
+          {canLoadMore && isLoadingMore && (
             <div className="flex justify-center mb-8">
               <button
                 className="p-2 font-bold text-gray-500"
                 onClick={onLoadMore}
               >
-                Load more
+                {t("load_more")}
               </button>
             </div>
           )}
@@ -363,6 +365,21 @@ export default function Upcoming() {
     return stored === "week" ? "week" : "list";
   });
 
+  const allotmentRef = useRef<AllotmentHandle>(null);
+  const [inboxCollapsed, setInboxCollapsed] = useState(false);
+
+  const handleToggleInbox = useCallback(() => {
+    const newCollapsed = !inboxCollapsed;
+    setInboxCollapsed(newCollapsed);
+    const newSize = newCollapsed ? 0 : 288;
+    const mainSize = window.innerWidth - newSize;
+    allotmentRef.current?.resize([mainSize, newSize]);
+  }, [inboxCollapsed]);
+
+  const handleAllotmentChange = useCallback((sizes: number[]) => {
+    setInboxCollapsed(sizes[1] < 40);
+  }, []);
+
   const effectiveMode: ViewMode = isDesktop ? viewMode : "list";
 
   const toggleMode = (mode: ViewMode) => {
@@ -428,6 +445,15 @@ export default function Upcoming() {
           >
             <HvCalendarMonth className="size-4" />
           </button>
+          {inboxCollapsed && (
+            <button
+              onClick={handleToggleInbox}
+              className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title={inboxCollapsed ? "Show inbox" : "Hide inbox"}
+            >
+              <HvHiInbox className="size-4 -scale-x-100" />
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -448,73 +474,88 @@ export default function Upcoming() {
 
   if (isDesktop) {
     return (
-      <PageTransition>
-        <DndContext
-          sensors={sensors}
-          onDragStart={(e) => {
-            const task =
-              unscheduledTasks.find((t) => t.id === e.active.id) ??
-              upcomingTasks.find((t) => t.id === e.active.id);
-            setActiveTask(task ?? null);
-          }}
-          onDragEnd={handleDragEnd}
+      <DndContext
+        sensors={sensors}
+        onDragStart={(e) => {
+          const task =
+            unscheduledTasks.find((t) => t.id === e.active.id) ??
+            upcomingTasks.find((t) => t.id === e.active.id);
+          setActiveTask(task ?? null);
+        }}
+        onDragEnd={handleDragEnd}
+      >
+        <Allotment
+          ref={allotmentRef}
+          proportionalLayout={false}
+          onChange={handleAllotmentChange}
         >
-          <Allotment proportionalLayout={false}>
-            {/* Main pane */}
-            <Allotment.Pane minSize={400}>
-              <div className="flex flex-col h-full">
-                <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 py-3">
-                  <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                    {t("upcoming")}
-                  </h1>
-                  {navbarActions}
-                </div>
+          {/* Main pane */}
+          <Allotment.Pane minSize={400} priority={LayoutPriority.High}>
+            <div className="flex flex-col h-full">
+              <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 py-3">
+                <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  {t("upcoming")}
+                </h1>
+                {navbarActions}
+              </div>
+              <div
+                className={
+                  effectiveMode === "week"
+                    ? "flex-1 flex flex-col min-h-0 overflow-hidden"
+                    : "flex-1 overflow-y-auto"
+                }
+              >
                 <div
                   className={
                     effectiveMode === "week"
-                      ? "flex-1 flex flex-col min-h-0 overflow-hidden"
-                      : "flex-1 overflow-y-auto"
+                      ? "flex-1 flex flex-col min-h-0"
+                      : "max-w-2xl mx-auto w-full"
                   }
                 >
-                  <div
-                    className={
-                      effectiveMode === "week"
-                        ? "flex-1 flex flex-col min-h-0"
-                        : "max-w-2xl mx-auto w-full"
-                    }
-                  >
-                    {initiated && error && (
-                      <div className="text-center py-8">
-                        <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
-                      </div>
-                    )}
-                    <ScheduledContent
-                      upcomingTasks={upcomingTasks}
-                      taskGroupsWithLabels={taskGroupsWithLabels}
-                      laterGroups={taskGroups.laterGroups}
-                      isReady={isReady}
-                      effectiveMode={effectiveMode}
-                      t={t}
-                      droppable={effectiveMode === "week"}
-                      droppableGroups={effectiveMode === "list"}
-                      onLoadMore={handleLoadMore}
-                      canLoadMore={canLoadMore}
-                      isLoadingMore={isLoadingMore}
-                    />
-                  </div>
+                  {initiated && error && (
+                    <div className="text-center py-8">
+                      <div className="text-red-600 mb-4">{`Error: ${error}`}</div>
+                    </div>
+                  )}
+                  <ScheduledContent
+                    upcomingTasks={upcomingTasks}
+                    taskGroupsWithLabels={taskGroupsWithLabels}
+                    laterGroups={taskGroups.laterGroups}
+                    isReady={isReady}
+                    effectiveMode={effectiveMode}
+                    t={t}
+                    droppable={effectiveMode === "week"}
+                    droppableGroups={effectiveMode === "list"}
+                    onLoadMore={handleLoadMore}
+                    canLoadMore={canLoadMore}
+                    isLoadingMore={isLoadingMore}
+                  />
                 </div>
               </div>
-            </Allotment.Pane>
+            </div>
+          </Allotment.Pane>
 
-            {/* Inbox pane */}
-            <Allotment.Pane preferredSize={288} minSize={160}>
-              <div className="flex flex-col h-full border-l border-gray-200 dark:border-gray-800">
-                <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 px-4 py-3">
+          {/* Inbox pane */}
+          <Allotment.Pane preferredSize={288} minSize={0} snap>
+            <div className="flex flex-col h-full border-l border-gray-200 dark:border-gray-800">
+              <div className="flex justify-between shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 px-4 py-3">
+                <div className="flex-1 flex justify-items-center items-center gap-1">
                   <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
                   <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {t("unscheduled") || "Unscheduled"}
                   </h2>
                 </div>
+                {inboxCollapsed || (
+                  <button
+                    onClick={handleToggleInbox}
+                    className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    title={inboxCollapsed ? "Show inbox" : "Hide inbox"}
+                  >
+                    <HvPanelLeftClose className="size-4 -scale-x-100" />
+                  </button>
+                )}
+              </div>
+              {!inboxCollapsed && (
                 <div className="flex-1 overflow-hidden flex flex-col">
                   <DroppableInboxSidebar
                     inboxTasks={unscheduledTasks}
@@ -522,26 +563,26 @@ export default function Upcoming() {
                     t={t}
                   />
                 </div>
-              </div>
-            </Allotment.Pane>
-          </Allotment>
-
-          {createPortal(
-            <DragOverlay dropAnimation={null}>
-              {activeTask && (
-                <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
-                  <TaskListItem
-                    task={activeTask}
-                    onEdit={() => {}}
-                    showGoalInfo={false}
-                  />
-                </div>
               )}
-            </DragOverlay>,
-            document.body
-          )}
-        </DndContext>
-      </PageTransition>
+            </div>
+          </Allotment.Pane>
+        </Allotment>
+
+        {createPortal(
+          <DragOverlay dropAnimation={null}>
+            {activeTask && (
+              <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
+                <TaskListItem
+                  task={activeTask}
+                  onEdit={() => {}}
+                  showGoalInfo={false}
+                />
+              </div>
+            )}
+          </DragOverlay>,
+          document.body
+        )}
+      </DndContext>
     );
   }
 

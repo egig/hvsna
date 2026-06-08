@@ -112,7 +112,7 @@ export function TodayContent() {
     return taskGroups.findIndex((g: any) => g.isTomorrow);
   }, [taskGroups, isAfterMaghrib]);
 
-  console.log(tomorrowDividerIndex, "tomorrowDividerIndex")
+  console.log(tomorrowDividerIndex, "tomorrowDividerIndex");
 
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
@@ -241,7 +241,7 @@ function TodayTasks({
               <SunsetHairline nextHijriLabel={nextHijriLabel} />
             )}
             {groupIndex === tomorrowDividerIndex && (
-              <TomorrowDivider label={`Tomorrow — ${tomorrowGregorianLabel}`} />
+              <TomorrowDivider label={tomorrowGregorianLabel} />
             )}
             {!hasLabel ? (
               <div>{taskNodes}</div>
@@ -282,10 +282,12 @@ function SunsetHairline({ nextHijriLabel }: { nextHijriLabel: string }) {
 
 function TomorrowDivider({ label }: { label: string }) {
   return (
-    <div className="-mx-4 my-3.5 mb-0.5 px-4 py-2.5 bg-[#f4f4f9] dark:bg-gray-800 text-center">
-      <div className="text-[11.5px] font-bold text-[#5d5882] dark:text-gray-400 tracking-[.02em]">
+    <div className="flex items-center gap-3 py-3.5 px-0.5">
+      <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+      <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-[#5d5882] dark:text-gray-400 whitespace-nowrap">
         {label}
-      </div>
+      </span>
+      <span className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
     </div>
   );
 }
