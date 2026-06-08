@@ -67,84 +67,73 @@ export function isPrayerBased(t: Task) {
   return typeof t.atTime === "string" && !t.atTime.includes(":");
 }
 
-function isInSamePrayerGroup(current: Task, prev: Task) {
-  if (isPrayerBased(current) && isPrayerBased(prev)) {
-    return current.atTime === prev.atTime;
-  }
+export function groupTasksByPrayerTimes(
+  tasks: Task[],
+  endOfTodayEpoch?: number,
+  _prayerTimings?: PrayerTimes | null
+) {
+  const now = Date.now();
 
-  if (isPrayerBased(current) && !isPrayerBased(prev)) {
-    return false;
-  }
+  const overdue: Task[] = [];
+  const groupMap = new Map<string, Task[]>();
+  const endOfDay: Task[] = [];
+  const tomorrow: Task[] = [];
 
-  if (!isPrayerBased(current) && isPrayerBased(prev)) {
-    return false;
-  }
-
-  return true;
-}
-
-export function groupTasksByPrayerTimes(allTasks: Task[]) {
-  // Sort task by atEpochMillis
-  // atEpochMillis for prayerBased task is the next prayer time
-  // for non-time tasks, its the next day
-  let nonTimeTasks = allTasks.filter((t) => !t.atTime);
-  let timeTasks = allTasks.filter((t) => !!t.atTime);
-  timeTasks.sort(
-    (a, b) => (a.atEpochMillis as number) - (b.atEpochMillis as number)
-  );
-
-  // put non time tasks at the end
-  const tasks = [...timeTasks, ...nonTimeTasks];
-
-  const overdueTasks: Task[] = [];
-  let groups = [];
-  let currentGroup: Task[] = [];
-  for (let i = 0; i < tasks.length; i++) {
-    let current = tasks[i];
-    if (!current.atEpochMillis) {
+  for (const task of tasks) {
+    if (
+      endOfTodayEpoch != null &&
+      task.atEpochMillis != null &&
+      task.atEpochMillis > endOfTodayEpoch
+    ) {
+      tomorrow.push(task);
       continue;
     }
 
-    if (current.atEpochMillis < new Date().valueOf()) {
-      overdueTasks.push(current);
-      continue;
+    if (!task.atTime) {
+      endOfDay.push(task);
+    } else if (task.atEpochMillis != null && task.atEpochMillis < now) {
+      overdue.push(task);
+    } else if (task.atEpochMillis != null) {
+      const key = task.atTime;
+      if (!groupMap.has(key)) groupMap.set(key, []);
+      groupMap.get(key)!.push(task);
     }
-
-    if (i > 0) {
-      let prev = tasks[i - 1];
-      if (!isInSamePrayerGroup(current, prev)) {
-        if (!!currentGroup.length) {
-          let a = currentGroup[currentGroup.length - 1];
-          groups.push({
-            label: isPrayerBased(a) ? a.atTime : "",
-            prayer: isPrayerBased(a) ? a.atTime : "",
-            tasks: [...currentGroup],
-          });
-          currentGroup = [];
-        }
-      }
-    }
-
-    currentGroup.push(current);
-  }
-  if (!!currentGroup.length) {
-    groups.push({
-      label: isPrayerBased(currentGroup[currentGroup.length - 1])
-        ? currentGroup[currentGroup.length - 1].atTime
-        : "",
-      prayer: isPrayerBased(currentGroup[currentGroup.length - 1])
-        ? currentGroup[currentGroup.length - 1].atTime
-        : "",
-      tasks: [...currentGroup],
-    });
   }
 
-  if (overdueTasks.length) {
-    groups.unshift({
-      label: "overdue",
-      isOverdue: true,
-      tasks: overdueTasks,
-    });
+  overdue.sort((a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0));
+  tomorrow.sort((a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0));
+
+  const scheduledGroups = Array.from(groupMap.values())
+    .map((groupTasks) => {
+      const sorted = [...groupTasks].sort(
+        (a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0)
+      );
+      const prayer = isPrayerBased(sorted[0]) ? sorted[0].atTime! : undefined;
+      return {
+        label: prayer ?? "",
+        prayer,
+        tasks: sorted,
+        _minEpoch: sorted[0].atEpochMillis!,
+      };
+    })
+    .sort((a, b) => a._minEpoch - b._minEpoch);
+
+  const groups: any[] = [];
+
+  if (overdue.length) {
+    groups.push({ label: "overdue", isOverdue: true, tasks: overdue });
+  }
+
+  for (const { _minEpoch: _ignored, ...g } of scheduledGroups) {
+    groups.push(g);
+  }
+
+  if (endOfDay.length) {
+    groups.push({ label: "", isEndOfDay: true, tasks: endOfDay });
+  }
+
+  if (tomorrow.length) {
+    groups.push({ label: "", isTomorrow: true, tasks: tomorrow });
   }
 
   return groups;

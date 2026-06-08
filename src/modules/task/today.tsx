@@ -88,7 +88,7 @@ export function TodayContent() {
   const prayerTimings = getPrayerTimesForDate(getNow());
 
   const taskGroups = useMemo(() => {
-    let g = groupTasksByPrayerTimes(todayTasks);
+    let g = groupTasksByPrayerTimes(todayTasks, endOfTodayEpoch, prayerTimings);
     if (todayCompletedTasks.length) {
       g.push({
         label: "completed",
@@ -98,7 +98,7 @@ export function TodayContent() {
       });
     }
     return g;
-  }, [todayTasks, todayCompletedTasks]);
+  }, [todayTasks, todayCompletedTasks, endOfTodayEpoch]);
 
   // Index of the first Maghrib group — hairline goes before it
   const hairlineIndex = useMemo(() => {
@@ -106,19 +106,13 @@ export function TodayContent() {
     return taskGroups.findIndex((g: any) => g.prayer === "Maghrib");
   }, [taskGroups, isAfterMaghrib]);
 
-  // Index of the first group whose tasks spill into tomorrow
+  // Index of the first tomorrow group — divider goes before it
   const tomorrowDividerIndex = useMemo(() => {
     if (!isAfterMaghrib) return -1;
-    return taskGroups.findIndex(
-      (g: any) =>
-        !g.isOverdue &&
-        !g.isCompleted &&
-        g.tasks.some(
-          (t: Task) =>
-            t.atEpochMillis != null && t.atEpochMillis > endOfTodayEpoch
-        )
-    );
-  }, [taskGroups, isAfterMaghrib, endOfTodayEpoch]);
+    return taskGroups.findIndex((g: any) => g.isTomorrow);
+  }, [taskGroups, isAfterMaghrib]);
+
+  console.log(tomorrowDividerIndex, "tomorrowDividerIndex")
 
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
@@ -185,11 +179,15 @@ function TaskGroupLabel({ group, getPrayerTimeDisplay }: TaskGroupLabelProps) {
     ? t("overdue")
     : group.isCompleted
     ? t("completed")
+    : group.isEndOfDay
+    ? t("end_of_day")
     : getPrayerTimeDisplay(group.prayer!);
 
   const colorClass = group.isOverdue
     ? "text-danger-700"
     : group.isCompleted
+    ? "text-gray-500"
+    : group.isEndOfDay
     ? "text-gray-500"
     : "text-gray-700 dark:text-gray-300";
 

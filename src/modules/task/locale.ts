@@ -643,4 +643,8 @@ export const taskTranslations = {
     en: "No tasks until sunset",
     id: "Tidak ada tugas hingga magrib",
   },
+  end_of_day: {
+    en: "End of Day",
+    id: "Akhir Hari",
+  },
 };
