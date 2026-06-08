@@ -106,10 +106,7 @@ export default function HijriDateSettings() {
           const showWarning = gap > 1 && index < 11;
 
           return (
-            <div
-              key={month.key}
-              className="border-b border-gray-200 last:border-b-0"
-            >
+            <div key={month.key} className="">
               <ListInputSelect
                 label={t(month.nameKey)}
                 value={currentOffset.toString()}

@@ -20,11 +20,8 @@ export function Button({
   children,
   className = "",
   onClick,
-  disabled = false,
   state,
 }: ButtonProps) {
-  const { navigate } = useAppNavigation();
-
   const handleClick = (e: React.MouseEvent) => {
     onClick?.();
   };

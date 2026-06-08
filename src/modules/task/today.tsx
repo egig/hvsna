@@ -241,7 +241,7 @@ function TodayTasks({
             : `regular-${groupIndex}`);
 
         return (
-          <div key={groupKey}>
+          <div key={groupKey} className="mb-2">
             {groupIndex === 0 && groupIndex === hairlineIndex && (
               <p className="p-6 text-gray-500">{t("no_tasks_until_sunset")}</p>
             )}
@@ -255,7 +255,7 @@ function TodayTasks({
               <div>{taskNodes}</div>
             ) : (
               <Collapsible.Root key={groupKey} defaultOpen={!group.isCompleted}>
-                <Collapsible.Trigger className="flex items-center gap-1.5 mb-2 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
+                <Collapsible.Trigger className="flex items-center gap-1.5 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
                   <HvChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
                   <HvChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
                   <TaskGroupLabel
@@ -268,7 +268,7 @@ function TodayTasks({
                     </span>
                   )}
                 </Collapsible.Trigger>
-                <Collapsible.Panel className="ml-4 overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
+                <Collapsible.Panel className="overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
                   {taskNodes}
                 </Collapsible.Panel>
               </Collapsible.Root>
