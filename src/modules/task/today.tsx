@@ -235,10 +235,17 @@ function TodayTasks({
         return (
           <div key={groupKey} className="mb-2">
             {groupIndex === 0 && groupIndex === hairlineIndex && (
-              <p className="p-6 text-gray-500">{t("no_tasks_until_sunset")}</p>
+              <p className="p-6 text-gray-500 text-base">
+                {t("no_tasks_until_sunset")}.
+              </p>
             )}
             {groupIndex === hairlineIndex && (
               <SunsetHairline nextHijriLabel={nextHijriLabel} />
+            )}
+            {groupIndex === 0 && groupIndex === tomorrowDividerIndex && (
+              <p className="p-6 text-gray-500 text-base">
+                {t("no_tasks_until_tomorrow")}.
+              </p>
             )}
             {groupIndex === tomorrowDividerIndex && (
               <TomorrowDivider label={tomorrowGregorianLabel} />

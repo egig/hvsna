@@ -640,11 +640,15 @@ export const taskTranslations = {
     id: "Kotak Masuk",
   },
   no_tasks_until_sunset: {
-    en: "No tasks until sunset",
-    id: "Tidak ada tugas hingga magrib",
+    en: "No more tasks until sunset",
+    id: "Tidak ada tugas lagi hingga magrib",
   },
   end_of_day: {
     en: "End of Day",
     id: "Akhir Hari",
+  },
+  no_tasks_until_tomorrow: {
+    en: "No more tasks until tomorrow",
+    id: "Tidak ada tugas lagi hingga besok",
   },
 };
