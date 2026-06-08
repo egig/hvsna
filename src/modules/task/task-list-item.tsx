@@ -15,6 +15,7 @@ import { useTaskContext } from "./task-context";
 import { TagList } from "./tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 import { useTaskEpoch } from "./task-form-helpers";
+import { useScreenSize } from "../components/screen-size-wrapper";
 import dayjs from "dayjs";
 
 interface TaskListItemProps {
@@ -43,6 +44,8 @@ export function TaskListItem({
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
   const getTaskEpoch = useTaskEpoch();
+  const { isDesktop } = useScreenSize();
+  const shouldDisableSwipe = disableSwipe || isDesktop;
 
   const x = useMotionValue(0);
   const controls = useAnimation();
@@ -246,13 +249,13 @@ export function TaskListItem({
 
   return (
     <motion.div
-      className={`relative overflow-hidden w-full border-b border-gray-200 last:border-b-0 ${className}`}
+      className={`relative overflow-hidden w-full border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${className}`}
       initial={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       layout
     >
-      {!disableSwipe && (
+      {!shouldDisableSwipe && (
         <>
           <div className="absolute left-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center bg-[var(--hvsna-success-color)] text-white select-none">
             <HvCheck size={22} strokeWidth={2} />
@@ -272,8 +275,8 @@ export function TaskListItem({
       )}
 
       <motion.div
-        className={`relative z-10 w-full px-6 py-2 transition-colors cursor-pointer ${contentBg}`}
-        drag={disableSwipe ? false : "x"}
+        className={`relative z-10 w-full px-4 py-2 transition-colors cursor-pointer ${contentBg}`}
+        drag={shouldDisableSwipe ? false : "x"}
         dragConstraints={{ left: -120, right: 120 }}
         dragElastic={0.5}
         dragDirectionLock

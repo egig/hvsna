@@ -2,8 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
+  MouseSensor,
+  TouchSensor,
   useDraggable,
   useDroppable,
+  useSensor,
+  useSensors,
 } from "@dnd-kit/core";
 import { Allotment } from "allotment";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -20,6 +24,7 @@ import { Page } from "../navigation";
 import { PageTransition } from "../navigation/page-transition";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
+import { TaskGroupCollapsible } from "./task-group-collapsible";
 import { useUpcoming } from "./use-upcoming";
 import { useUnscheduled } from "./use-unscheduled";
 import { WeekView } from "./week-view";
@@ -61,22 +66,24 @@ function DroppableGroup({
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div
-      ref={setNodeRef}
-      className={[
+    <TaskGroupCollapsible
+      label={
+        <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+          {label}
+        </span>
+      }
+      containerRef={setNodeRef}
+      containerClassName={[
         "rounded transition-colors",
         isOver
           ? "bg-amber-50 dark:bg-amber-950/20 ring-1 ring-inset ring-amber-200 dark:ring-amber-800"
           : "",
       ].join(" ")}
     >
-      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
-        {label}
-      </h3>
       {tasks.map((task) => (
         <DraggableTaskItem key={task.id} task={task} />
       ))}
-    </div>
+    </TaskGroupCollapsible>
   );
 }
 
@@ -141,16 +148,18 @@ function ScheduledContent({
                   tasks={taskGroupsWithLabels[key].tasks}
                 />
               ) : (
-                <div key={key}>
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
-                    {taskGroupsWithLabels[key].label || label}
-                  </h3>
-                  <>
-                    {taskGroupsWithLabels[key].tasks.map((task: Task) => (
-                      <TaskListItem key={task.id} task={task} />
-                    ))}
-                  </>
-                </div>
+                <TaskGroupCollapsible
+                  key={key}
+                  label={
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                      {taskGroupsWithLabels[key].label || label}
+                    </span>
+                  }
+                >
+                  {taskGroupsWithLabels[key].tasks.map((task: Task) => (
+                    <TaskListItem key={task.id} task={task} />
+                  ))}
+                </TaskGroupCollapsible>
               )
             )}
           {laterGroups
@@ -164,16 +173,18 @@ function ScheduledContent({
                   tasks={group.tasks}
                 />
               ) : (
-                <div key={group.key}>
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 m-3">
-                    {group.label}
-                  </h3>
-                  <>
-                    {group.tasks.map((task: Task) => (
-                      <TaskListItem key={task.id} task={task} />
-                    ))}
-                  </>
-                </div>
+                <TaskGroupCollapsible
+                  key={group.key}
+                  label={
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                      {group.label}
+                    </span>
+                  }
+                >
+                  {group.tasks.map((task: Task) => (
+                    <TaskListItem key={task.id} task={task} />
+                  ))}
+                </TaskGroupCollapsible>
               )
             )}
           {isLoadingMore && (
@@ -241,16 +252,14 @@ function DraggableTaskItem({
   return (
     <div
       ref={setNodeRef}
+      {...listeners}
+      {...attributes}
       className={[
-        "flex items-stretch rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden",
+        "group relative flex items-stretch rounded bg-white border-b border-gray-200 dark:bg-gray-900 overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:shadow-sm",
         isDragging ? "opacity-40" : "",
       ].join(" ")}
     >
-      <div
-        {...listeners}
-        {...attributes}
-        className="flex items-center px-1 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500 shrink-0 touch-none"
-      >
+      <div className="absolute left-0 top-0 bottom-0 z-50 flex items-center px-1 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 dark:group-hover:text-gray-500 shrink-0 touch-none opacity-0 group-hover:opacity-100 transition-opacity">
         <HvGripVertical className="size-3" />
       </div>
       <div className="flex-1 min-w-0">
@@ -424,10 +433,24 @@ export default function Upcoming() {
     </div>
   );
 
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
   if (isDesktop) {
     return (
       <PageTransition>
         <DndContext
+          sensors={sensors}
           onDragStart={(e) => {
             const task =
               unscheduledTasks.find((t) => t.id === e.active.id) ??

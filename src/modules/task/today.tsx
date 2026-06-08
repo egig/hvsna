@@ -1,4 +1,5 @@
 import TaskListItem from "./task-list-item";
+import { TaskGroupCollapsible } from "./task-group-collapsible";
 import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
@@ -10,14 +11,7 @@ import {
 import type { Task, PrayerTime } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
-import { Collapsible } from "@base-ui/react/collapsible";
-import {
-  HvChevronRight,
-  HvChevronDown,
-  HvCheck,
-  HvMapPin,
-  HvMaghrib,
-} from "@/modules/icons";
+import { HvCheck, HvMapPin, HvMaghrib } from "@/modules/icons";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
 import { useLocationContext } from "../location/context";
@@ -254,24 +248,19 @@ function TodayTasks({
             {!hasLabel ? (
               <div>{taskNodes}</div>
             ) : (
-              <Collapsible.Root key={groupKey} defaultOpen={!group.isCompleted}>
-                <Collapsible.Trigger className="flex items-center gap-1.5 px-4 w-full cursor-pointer group rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 py-1 transition-colors duration-150">
-                  <HvChevronRight className="size-3.5 shrink-0 text-gray-500 group-data-[panel-open]:hidden" />
-                  <HvChevronDown className="size-3.5 shrink-0 text-gray-500 hidden group-data-[panel-open]:block" />
+              <TaskGroupCollapsible
+                key={groupKey}
+                defaultOpen={!group.isCompleted}
+                label={
                   <TaskGroupLabel
                     group={group}
                     getPrayerTimeDisplay={getPrayerTimeDisplay}
                   />
-                  {group.isCompleted && (
-                    <span className="ml-1 text-xs font-normal text-gray-400 dark:text-gray-500">
-                      ({group.tasks.length})
-                    </span>
-                  )}
-                </Collapsible.Trigger>
-                <Collapsible.Panel className="overflow-hidden data-[starting-style]:h-0 data-[ending-style]:h-0">
-                  {taskNodes}
-                </Collapsible.Panel>
-              </Collapsible.Root>
+                }
+                count={group.isCompleted ? group.tasks.length : undefined}
+              >
+                {taskNodes}
+              </TaskGroupCollapsible>
             )}
           </div>
         );
