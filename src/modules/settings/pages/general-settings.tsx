@@ -40,7 +40,7 @@ export default function GeneralSettings() {
       <div className="bg-white">
         <div className="p-2 border-b border-gray-200 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-gray-900 font-semibold text-left truncate flex-1 min-w-0">
+            <span className="text-gray-900 text-left truncate flex-1 min-w-0">
               {t("timezone")}
             </span>
             <button

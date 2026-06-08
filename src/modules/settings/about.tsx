@@ -24,14 +24,9 @@ export default function About() {
     <Page>
       <LargeNavbar title={t("about")} showBackButton={true} />
       <div className="prose prose-sm p-6">
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-2">Hvsna</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            v{nativeVersion ?? packageInfo.version}
-          </p>
-          <p>{t("about_description")}</p>
-        </div>
-
+        <p className="text-gray-600 dark:text-gray-400 mb-4 text-center">
+          Hvsna v{nativeVersion ?? packageInfo.version}
+        </p>
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             <button

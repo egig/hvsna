@@ -22,7 +22,7 @@ export default function Browse() {
           title={""}
           showBackButton={false}
           rightAction={
-            <Button to={"/settings"}>
+            <Button to={"/settings"} className="text-gray-500">
               <HvSettings />
             </Button>
           }

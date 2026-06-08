@@ -323,7 +323,8 @@ export default function TaskFormEdit({
       <ModalNavbar
         title="Edit Task"
         onModalClose={() => {
-          //..
+          // @ts-ignore
+          onSuccess();
         }}
         rightAction={
           <div className="flex items-center gap-2">
