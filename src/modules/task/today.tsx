@@ -2,6 +2,11 @@ import TaskListItem from "./task-list-item";
 import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useToday } from "./use-today";
+import {
+  MockTimeProvider,
+  MockTimeControl,
+  useMockTime,
+} from "./mock-time-context";
 import type { Task, PrayerTime } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
@@ -23,40 +28,51 @@ import { groupTasksByPrayerTimes } from "../prayer-time-utils";
 import dayjs from "dayjs";
 
 export function Today() {
+  return (
+    <MockTimeProvider>
+      <TodayInner />
+    </MockTimeProvider>
+  );
+}
+
+function TodayInner() {
   const { pageTitle, subTitle } = useToday();
   const { location, ensureLocation, loading } = useLocationContext();
   const { isOnline, initiated: networkInit } = useNetworkContext();
 
   return (
-    <Page
-      navbarLarge={
-        <LargeNavbar
-          showBackButton={false}
-          title={pageTitle}
-          subtitle={subTitle}
-          leftAction={
-            <button
-              onClick={async () => {
-                await ensureLocation();
-              }}
-              className="flex gap-1 w-max px-4 text-sm cursor-pointer hover:bg-gray-100 py-2 text-gray-600 rounded-lg"
-            >
-              <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
-            </button>
-          }
-          rightAction={
-            !isOnline &&
-            networkInit && (
-              <div className="text-sm text-gray-500 px-1 mr-3 rounded-sm border-1 border-gray-300">
-                Offline
-              </div>
-            )
-          }
-        />
-      }
-    >
-      <TodayContent />
-    </Page>
+    <>
+      <Page
+        navbarLarge={
+          <LargeNavbar
+            showBackButton={false}
+            title={pageTitle}
+            subtitle={subTitle}
+            leftAction={
+              <button
+                onClick={async () => {
+                  await ensureLocation();
+                }}
+                className="flex gap-1 w-max px-4 text-sm cursor-pointer hover:bg-gray-100 py-2 text-gray-600 rounded-lg"
+              >
+                <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
+              </button>
+            }
+            rightAction={
+              !isOnline &&
+              networkInit && (
+                <div className="text-sm text-gray-500 px-1 mr-3 rounded-sm border-1 border-gray-300">
+                  Offline
+                </div>
+              )
+            }
+          />
+        }
+      >
+        <TodayContent />
+      </Page>
+      <MockTimeControl />
+    </>
   );
 }
 
@@ -73,8 +89,9 @@ export function TodayContent() {
     tomorrowGregorianLabel,
   } = useToday();
 
-  const { getTodayPrayerTimes } = usePrayerTimes();
-  const prayerTimings = getTodayPrayerTimes();
+  const { now: getNow } = useMockTime();
+  const { getPrayerTimesForDate } = usePrayerTimes();
+  const prayerTimings = getPrayerTimesForDate(getNow());
 
   const taskGroups = useMemo(() => {
     let g = groupTasksByPrayerTimes(todayTasks);
@@ -125,15 +142,11 @@ export function TodayContent() {
     [t, prayerTimings]
   );
 
-  if (initiated && error) {
-    return <ErrorDisplay error={error} />;
-  }
+  if (initiated && error) return <ErrorDisplay error={error} />;
 
   const isEmpty = todayTasks.length === 0 && todayCompletedTasks.length === 0;
 
-  if (!initiated) {
-    return null;
-  }
+  if (!initiated) return null;
 
   if (isEmpty) {
     return (

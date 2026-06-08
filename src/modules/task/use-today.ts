@@ -7,9 +7,13 @@ import { queryKeys } from "../query-keys";
 import { useVirtualTasks } from "./use-virtual-tasks";
 import { usePendingTasks } from "./use-pending-tasks";
 import { usePrayerTimes } from "../prayer";
+import { useMockTime } from "./mock-time-context";
 import dayjs from "dayjs";
 
 export function useToday() {
+  const { now: getNow } = useMockTime();
+  const now = getNow();
+
   const { hijriMonthNames, gregorianMonthNames } = useDateTranslationHelper();
   const {
     currentHijriDate,
@@ -20,13 +24,12 @@ export function useToday() {
   const taskUseCases = createTaskUseCases(db);
   const { getPrayerTimesForDate } = usePrayerTimes();
 
-  const gregDate = dayjs(new Date());
+  const gregDate = dayjs(now);
   const startOfDayEpoch = gregDate.startOf("day").valueOf();
   const endOfDayEpoch = gregDate.endOf("day").valueOf();
   const todayString = gregDate.format("YYYY-MM-DD");
 
   // Detect whether current time is past today's Maghrib (sunset)
-  const now = new Date();
   let maghribEpoch: number | null = null;
   try {
     const todayPrayerTimes = getPrayerTimesForDate(now);
@@ -41,31 +44,31 @@ export function useToday() {
 
   // When after Maghrib, extend the task window to tomorrow's Maghrib
   const tomorrowStartEpoch = gregDate.add(1, "day").startOf("day").valueOf();
-  let tomorrowMaghribEpoch: number | null = null;
+  let tomorrowEndEpoch: number | null = null;
   try {
     if (isAfterMaghrib) {
-      const tomorrowPrayer = getPrayerTimesForDate(
-        dayjs().add(1, "day").toDate()
-      );
-      const tm = tomorrowPrayer?.maghrib;
+      const tm = dayjs(now).add(1, "day").endOf("day").toDate();
       if (tm && !isNaN(tm.valueOf())) {
-        tomorrowMaghribEpoch = tm.valueOf();
+        tomorrowEndEpoch = tm.valueOf();
       }
     }
   } catch {
     // Ignore
   }
   const taskEndEpoch =
-    isAfterMaghrib && tomorrowMaghribEpoch
-      ? tomorrowMaghribEpoch
-      : endOfDayEpoch;
+    isAfterMaghrib && tomorrowEndEpoch ? tomorrowEndEpoch : endOfDayEpoch;
+
+  console.log(
+    "isAfterMaghrib && tomorrowEndEpoch",
+    isAfterMaghrib && tomorrowEndEpoch
+  );
 
   const pendingTasksQuery = usePendingTasks();
   const virtualTaskQuery = useVirtualTasks(startOfDayEpoch, endOfDayEpoch);
   // Always call — enabled only when isAfterMaghrib; falls back to empty range otherwise
   const tomorrowVirtualTaskQuery = useVirtualTasks(
     tomorrowStartEpoch,
-    tomorrowMaghribEpoch ?? tomorrowStartEpoch
+    tomorrowEndEpoch ?? tomorrowStartEpoch
   );
 
   const allTasks = [
@@ -102,7 +105,7 @@ export function useToday() {
   } ${nextHijriDate.year}`;
 
   // Label for the "Tomorrow" calendar-day divider shown in State 2
-  const tomorrowGreg = dayjs().add(1, "day");
+  const tomorrowGreg = dayjs(now).add(1, "day");
   const tomorrowGregorianLabel = `${tomorrowGreg.format(
     "ddd"
   )}, ${tomorrowGreg.date()} ${gregorianMonthNames[tomorrowGreg.month()]}`;
