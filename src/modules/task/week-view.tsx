@@ -11,7 +11,6 @@ import {
 } from "@/modules/icons";
 import { useSettings } from "../settings";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import {
   getPrayerTimesWithFallback,
@@ -48,12 +47,10 @@ function DraggableTaskCard({
   task,
   isCompleted,
   isOverdue,
-  onEdit,
 }: {
   task: Task;
   isCompleted: boolean;
   isOverdue: boolean;
-  onEdit: (task: Task) => void;
 }) {
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: task.id!,
@@ -83,7 +80,6 @@ function DraggableTaskCard({
       <div className="flex-1 min-w-0">
         <TaskListItem
           task={task}
-          onEdit={onEdit}
           showGoalInfo={false}
           className="!border-b-0"
         />
@@ -100,7 +96,6 @@ function WeekViewColumn({
   droppable,
 }: WeekViewColumnProps) {
   const { t } = useLanguageContext();
-  const { openEditTaskForm } = useTaskContext();
   const { toHijriDate, formatDate } = useHijriDate();
 
   const dateStr = toLocalDateStr(day);
@@ -108,11 +103,6 @@ function WeekViewColumn({
     id: dateStr,
     disabled: !droppable,
   });
-
-  const handleEditTask = useCallback(
-    (task: Task) => openEditTaskForm(task.id as string),
-    [openEditTaskForm]
-  );
 
   const gregorianMainLabel = dayjs(day).format("ddd D");
   const hijriDate = useMemo(() => toHijriDate(day), [day, toHijriDate]);
@@ -199,7 +189,6 @@ function WeekViewColumn({
                       task={task}
                       isCompleted={!!group.isCompleted}
                       isOverdue={!!group.isOverdue}
-                      onEdit={handleEditTask}
                     />
                   ))}
                 </div>

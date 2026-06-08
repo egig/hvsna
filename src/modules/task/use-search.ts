@@ -36,7 +36,6 @@ function recurringTemplateToVirtualTask(
 export function useSearch() {
   const [initiated, setInitiated] = useState(false);
 
-  const { openEditTaskForm } = useTaskContext();
   const { db } = usePouchDB();
   const taskUseCases = createTaskUseCases(db);
   const recurringTaskUseCases = createRecurringTaskUseCases(db);
@@ -152,13 +151,6 @@ export function useSearch() {
     setInitiated(true);
   }, []);
 
-  const openEditPopup = useCallback(
-    (task: Task) => {
-      openEditTaskForm(task.id as string, task);
-    },
-    [openEditTaskForm]
-  );
-
   const refreshSearch = useCallback(() => {
     searchQuery.refetch();
   }, [searchQuery]);
@@ -193,7 +185,6 @@ export function useSearch() {
     tagFilter,
 
     refreshTasks: refreshSearch,
-    openEditPopup,
 
     setDateRangeFilter,
     setSearchTextFilter,

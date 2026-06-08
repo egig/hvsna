@@ -54,12 +54,10 @@ function DroppableGroup({
   id,
   label,
   tasks,
-  onEdit,
 }: {
   id: string;
   label: string;
   tasks: Task[];
-  onEdit: (task: Task) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
@@ -76,7 +74,7 @@ function DroppableGroup({
         {label}
       </h3>
       {tasks.map((task) => (
-        <DraggableTaskItem key={task.id} task={task} onEdit={onEdit} />
+        <DraggableTaskItem key={task.id} task={task} />
       ))}
     </div>
   );
@@ -87,7 +85,6 @@ function ScheduledContent({
   taskGroupsWithLabels,
   laterGroups,
   effectiveMode,
-  handleEditTask,
   t,
   droppable,
   droppableGroups,
@@ -100,7 +97,6 @@ function ScheduledContent({
   laterGroups: LaterGroup[];
   isReady: boolean;
   effectiveMode: ViewMode;
-  handleEditTask: (task: Task) => void;
   t: (key: string) => string;
   droppable?: boolean;
   droppableGroups?: boolean;
@@ -143,7 +139,6 @@ function ScheduledContent({
                   id={dropIdForGroup(key)}
                   label={taskGroupsWithLabels[key].label || label}
                   tasks={taskGroupsWithLabels[key].tasks}
-                  onEdit={handleEditTask}
                 />
               ) : (
                 <div key={key}>
@@ -152,11 +147,7 @@ function ScheduledContent({
                   </h3>
                   <>
                     {taskGroupsWithLabels[key].tasks.map((task: Task) => (
-                      <TaskListItem
-                        key={task.id}
-                        task={task}
-                        onEdit={handleEditTask}
-                      />
+                      <TaskListItem key={task.id} task={task} />
                     ))}
                   </>
                 </div>
@@ -171,7 +162,6 @@ function ScheduledContent({
                   id={dropIdForGroup(group.key)}
                   label={group.label}
                   tasks={group.tasks}
-                  onEdit={handleEditTask}
                 />
               ) : (
                 <div key={group.key}>
@@ -180,11 +170,7 @@ function ScheduledContent({
                   </h3>
                   <>
                     {group.tasks.map((task: Task) => (
-                      <TaskListItem
-                        key={task.id}
-                        task={task}
-                        onEdit={handleEditTask}
-                      />
+                      <TaskListItem key={task.id} task={task} />
                     ))}
                   </>
                 </div>
@@ -214,12 +200,10 @@ function ScheduledContent({
 function UnscheduledContent({
   inboxTasks,
   inboxInitiated,
-  handleEditTask,
   t,
 }: {
   inboxTasks: Task[];
   inboxInitiated: boolean;
-  handleEditTask: (task: Task) => void;
   t: (key: string) => string;
 }) {
   return (
@@ -233,12 +217,7 @@ function UnscheduledContent({
       ) : (
         <div className="space-y-2">
           {inboxTasks.map((task: Task) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              onEdit={handleEditTask}
-              showGoalInfo={false}
-            />
+            <TaskListItem key={task.id} task={task} showGoalInfo={false} />
           ))}
         </div>
       )}
@@ -248,12 +227,10 @@ function UnscheduledContent({
 
 function DraggableTaskItem({
   task,
-  onEdit,
   showGoalInfo,
   className,
 }: {
   task: Task;
-  onEdit: (task: Task) => void;
   showGoalInfo?: boolean;
   className?: string;
 }) {
@@ -279,7 +256,6 @@ function DraggableTaskItem({
       <div className="flex-1 min-w-0">
         <TaskListItem
           task={task}
-          onEdit={onEdit}
           showGoalInfo={showGoalInfo}
           className={className}
           disableSwipe
@@ -292,12 +268,10 @@ function DraggableTaskItem({
 function DroppableInboxSidebar({
   inboxTasks,
   inboxInitiated,
-  handleEditTask,
   t,
 }: {
   inboxTasks: Task[];
   inboxInitiated: boolean;
-  handleEditTask: (task: Task) => void;
   t: (key: string) => string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: "inbox" });
@@ -325,7 +299,6 @@ function DroppableInboxSidebar({
               <DraggableTaskItem
                 key={task.id}
                 task={task}
-                onEdit={handleEditTask}
                 showGoalInfo={false}
                 className="!border-b-0"
               />
@@ -342,7 +315,7 @@ const HORIZON_MAX = 365;
 
 export default function Upcoming() {
   const { t } = useLanguageContext();
-  const { openEditTaskForm, updateTask } = useTaskContext();
+  const { updateTask } = useTaskContext();
   const { isDesktop } = useScreenSize();
 
   const [horizonDays, setHorizonDays] = useState(HORIZON_INITIAL);
@@ -414,10 +387,6 @@ export default function Upcoming() {
     thisWeek: { ...taskGroups.thisWeek, label: t("this_week") },
     thisMonth: { ...taskGroups.thisMonth, label: t("this_month") },
     unscheduled: { ...taskGroups.unscheduled, label: t("unscheduled") },
-  };
-
-  const handleEditTask = (task: Task) => {
-    openEditTaskForm(task.id as string, task.isVirtual ? task : undefined);
   };
 
   const isReady = initiated && !loading && !error;
@@ -502,7 +471,6 @@ export default function Upcoming() {
                       laterGroups={taskGroups.laterGroups}
                       isReady={isReady}
                       effectiveMode={effectiveMode}
-                      handleEditTask={handleEditTask}
                       t={t}
                       droppable={effectiveMode === "week"}
                       droppableGroups={effectiveMode === "list"}
@@ -528,7 +496,6 @@ export default function Upcoming() {
                   <DroppableInboxSidebar
                     inboxTasks={unscheduledTasks}
                     inboxInitiated={inboxInitiated}
-                    handleEditTask={handleEditTask}
                     t={t}
                   />
                 </div>
@@ -602,7 +569,6 @@ export default function Upcoming() {
             laterGroups={taskGroups.laterGroups}
             isReady={isReady}
             effectiveMode="list"
-            handleEditTask={handleEditTask}
             t={t}
             onLoadMore={handleLoadMore}
             canLoadMore={canLoadMore}
@@ -613,7 +579,6 @@ export default function Upcoming() {
         <UnscheduledContent
           inboxTasks={unscheduledTasks}
           inboxInitiated={inboxInitiated}
-          handleEditTask={handleEditTask}
           t={t}
         />
       )}

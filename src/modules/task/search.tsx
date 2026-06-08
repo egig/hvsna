@@ -19,7 +19,6 @@ export default function Search() {
     initiated,
     error,
     refreshTasks,
-    openEditPopup,
     dateRangeFilter,
     searchTextFilter,
     unscheduledFilter,
@@ -96,11 +95,7 @@ export default function Search() {
           ) : (
             <>
               {tasks.map((task) => (
-                <TaskListItem
-                  key={task.id}
-                  task={task}
-                  onEdit={openEditPopup}
-                />
+                <TaskListItem key={task.id} task={task} />
               ))}
             </>
           )}

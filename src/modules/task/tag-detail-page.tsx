@@ -6,7 +6,6 @@ import { Button, Modal, Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { useAllTasks } from "./use-all-tasks";
-import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTags } from "./use-tags";
 import { Menu } from "@base-ui/react/menu";
@@ -16,7 +15,6 @@ export default function TagDetailPage() {
   const { tagName } = useParams<{ tagName: string }>();
   const navigate = useNavigate();
   const { t } = useLanguageContext();
-  const { openEditTaskForm } = useTaskContext();
   const allTasksQuery = useAllTasks();
   const { renameTag, deleteTag } = useTags();
 
@@ -39,10 +37,6 @@ export default function TagDetailPage() {
       (task) => task.tags?.includes(decodedTag) && task.status === 1
     );
   }, [allTasksQuery.data, decodedTag]);
-
-  const handleEditTask = (task: Task) => {
-    openEditTaskForm(task.id as string);
-  };
 
   const openRename = () => {
     setNewTagName(decodedTag);
@@ -140,7 +134,7 @@ export default function TagDetailPage() {
       {tasks.length > 0 && (
         <div>
           {tasks.map((task) => (
-            <TaskListItem key={task.id} task={task} onEdit={handleEditTask} />
+            <TaskListItem key={task.id} task={task} />
           ))}
         </div>
       )}
@@ -151,7 +145,7 @@ export default function TagDetailPage() {
             {t("completed") || "Completed"}
           </h3>
           {completedTasks.map((task) => (
-            <TaskListItem key={task.id} task={task} onEdit={handleEditTask} />
+            <TaskListItem key={task.id} task={task} />
           ))}
         </div>
       )}

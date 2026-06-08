@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   motion,
   useMotionValue,
@@ -37,7 +37,8 @@ export function TaskListItem({
   disableSwipe = false,
 }: TaskListItemProps) {
   const { completeTask, reopenTask } = useTaskListItem();
-  const { updateTask, materializeVirtualTask } = useTaskContext();
+  const { updateTask, materializeVirtualTask, openEditTaskForm } =
+    useTaskContext();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
@@ -207,10 +208,12 @@ export function TaskListItem({
     }, 100);
   };
 
-  const handleItemClick = () => {
+  const handleItemClick = async () => {
     if (isDraggingRef.current) return;
     if (onEdit) {
       onEdit(task);
+    } else {
+      await handleEditTask();
     }
   };
 
@@ -230,6 +233,11 @@ export function TaskListItem({
     });
     setIsScheduleModalOpen(false);
   };
+
+  const handleEditTask = useCallback(async () => {
+    const realTask = task.isVirtual ? await materializeVirtualTask(task) : task;
+    openEditTaskForm(realTask.id as string, task.isVirtual ? task : undefined);
+  }, [task, materializeVirtualTask, openEditTaskForm]);
 
   const isOnTodayPage =
     location.pathname === "/today" || location.pathname === "/tasks";

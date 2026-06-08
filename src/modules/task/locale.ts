@@ -639,4 +639,8 @@ export const taskTranslations = {
     en: "Inbox",
     id: "Kotak Masuk",
   },
+  no_tasks_until_sunset: {
+    en: "No tasks until sunset",
+    id: "Tidak ada tugas hingga magrib",
+  },
 };

@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { Page } from "../navigation";
 import TaskListItem from "./task-list-item";
 import { ErrorDisplay } from "../components/error-display";
@@ -6,21 +5,11 @@ import { EmptyState } from "../components/empty-state";
 import { useRecurringTaskList } from "./use-recurring-task-list";
 import { LargeNavbar } from "../navigation/navbar";
 import { HvRepeat } from "@/modules/icons";
-import type { Task } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useTaskContext } from "./task-context";
 
 export function Recurring() {
   const { t } = useLanguageContext();
   const { tasks, loading, error } = useRecurringTaskList();
-  const { openEditTaskForm } = useTaskContext();
-
-  const handleEditTask = useCallback(
-    (task: Task) => {
-      openEditTaskForm(task.id as string, task);
-    },
-    [openEditTaskForm]
-  );
 
   const initiated = !loading;
 
@@ -42,11 +31,10 @@ export function Recurring() {
             />
           ) : (
             <div>
-              {tasks.map((task: Task) => (
+              {tasks.map((task) => (
                 <TaskListItem
                   key={task.id}
                   task={task}
-                  onEdit={handleEditTask}
                   showGoalInfo={false}
                   disableSwipe={true}
                 />

@@ -101,7 +101,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
         disabled={isSubmitting}
       />
 
-      <div className="flex flex-wrap gap-3 px-4 py-2">
+      <div className="flex flex-wrap gap-2 px-4 py-2">
         <DatePrayerInput
           selectedDate={formData.scheduleAt.date}
           isSubmitting={isSubmitting}

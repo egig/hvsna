@@ -223,7 +223,7 @@ export default function TaskFormEdit({
         disabled={isSubmitting}
       />
 
-      <div className="flex flex-wrap gap-3 px-4">
+      <div className="flex flex-wrap gap-2 px-4">
         <DatePrayerInput
           selectedDate={formData.scheduleAt.date as Date}
           isSubmitting={isSubmitting}

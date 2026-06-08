@@ -4,25 +4,13 @@ import { ErrorDisplay } from "../components/error-display";
 import { EmptyState } from "../components/empty-state";
 import { useUnscheduled } from "./use-unscheduled";
 import { LargeNavbar } from "../navigation/navbar";
-import type { Task } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { useCallback } from "react";
-import { useTaskContext } from "./task-context";
 import { HvOutlineInbox } from "@/modules/icons";
 
 export function Inbox() {
   const { t } = useLanguageContext();
   const { inboxTasks, error, pageTitle, subTitle, initiated, refetch } =
     useUnscheduled();
-
-  const { openEditTaskForm } = useTaskContext();
-
-  const handleEditTask = useCallback(
-    (task: Task) => {
-      openEditTaskForm(task.id as string);
-    },
-    [openEditTaskForm]
-  );
 
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
@@ -41,11 +29,10 @@ export function Inbox() {
           />
         ) : (
           <div className="space-y-2">
-            {inboxTasks.map((task: Task) => (
+            {inboxTasks.map((task) => (
               <TaskListItem
                 key={task.id}
                 task={task}
-                onEdit={handleEditTask}
                 showGoalInfo={false}
                 className="transition-all hover:shadow-sm"
               />
