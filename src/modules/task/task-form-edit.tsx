@@ -10,12 +10,9 @@ import { NavActionButton } from "../components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "./date-prayer-input";
 import { useTaskFormEdit } from "./task-form-edit-hook";
-import { useTaskContext } from "./task-context";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { ModalNavbar } from "../navigation";
-import { useAppNavigation } from "../navigation/use-app-navigation";
-import type { PrayerTime, Task } from "@/domain/task";
-import type { HijriDate } from "../calendar/hijri";
+import type { Task } from "@/domain/task";
 import { Modal } from "../navigation/modal";
 import TaskPreview from "./task-preview";
 import { useScreenSize } from "../components/screen-size-wrapper";
@@ -326,7 +323,7 @@ export default function TaskFormEdit({
       <ModalNavbar
         title="Edit Task"
         onModalClose={() => {
-          onSuccess(task);
+          //..
         }}
         rightAction={
           <div className="flex items-center gap-2">

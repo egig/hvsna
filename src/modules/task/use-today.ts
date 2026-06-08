@@ -58,11 +58,6 @@ export function useToday() {
   const taskEndEpoch =
     isAfterMaghrib && tomorrowEndEpoch ? tomorrowEndEpoch : endOfDayEpoch;
 
-  console.log(
-    "isAfterMaghrib && tomorrowEndEpoch",
-    isAfterMaghrib && tomorrowEndEpoch
-  );
-
   const pendingTasksQuery = usePendingTasks();
   const virtualTaskQuery = useVirtualTasks(startOfDayEpoch, endOfDayEpoch);
   // Always call — enabled only when isAfterMaghrib; falls back to empty range otherwise
