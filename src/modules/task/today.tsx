@@ -194,7 +194,7 @@ function TaskGroupLabel({ group, getPrayerTimeDisplay }: TaskGroupLabelProps) {
     : getPrayerTimeDisplay(group.prayer!);
 
   const colorClass = group.isOverdue
-    ? "text-red-400"
+    ? "text-danger-700"
     : group.isCompleted
     ? "text-gray-500"
     : "text-gray-700 dark:text-gray-300";
