@@ -344,13 +344,13 @@ export default function Upcoming() {
       upcomingTasks.find((t) => t.id === active.id);
     if (!task) return;
     if (over.id === "inbox") {
-      updateTask(task.id!, { atEpochMillis: null });
+      updateTask(task.id!, { atEpochMillis: null, atTime: "" });
     } else {
       const [y, m, d] = (over.id as string).split("-").map(Number);
       const atEpochMillis = dayjs(new Date(y, m - 1, d))
         .endOf("day")
         .valueOf();
-      updateTask(task.id!, { atEpochMillis });
+      updateTask(task.id!, { atEpochMillis, atTime: "" });
     }
   };
 
