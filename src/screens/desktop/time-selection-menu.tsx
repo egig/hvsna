@@ -59,11 +59,11 @@ export function TimeSelectionMenu({
       <div className="text-center">
         <button
           className="p-2 mb-2 rounded-md text-sm text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)]"
-            onClick={handleConfirm}
-            disabled={inputMode === "prayer" ? !selectedTimeTemp : false}
-          >
-            Confirm
-          </button>
+          onClick={handleConfirm}
+          disabled={inputMode === "prayer" ? !selectedTimeTemp : false}
+        >
+          Confirm
+        </button>
       </div>
     </div>
   );
