@@ -1,23 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  HvArrowUp,
-  HvTrash2,
-  HvInfo,
-  HvMoreVertical,
-  HvCheck,
-} from "@/modules/icons";
-import { NavActionButton } from "../components/nav-action-button";
+import { HvTrash2, HvInfo, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
-import { DatePrayerInput } from "./date-prayer-input";
-import { useTaskFormEdit } from "./task-form-edit-hook";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { ModalNavbar } from "../navigation";
+import { DatePrayerInput } from "@/modules/task/date-prayer-input";
+import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
+import { useLanguageContext } from "@/modules/i18n/LanguageContext";
+import TaskPreview from "@/modules/task/task-preview";
+import { TagInput } from "@/modules/task/tag-input";
 import type { Task } from "@/domain/task";
-import { Modal } from "../navigation/modal";
-import TaskPreview from "./task-preview";
-import { useScreenSize } from "../components/screen-size-wrapper";
-import { TagInput } from "./tag-input";
-import { TimeInput } from "../calendar/time-input";
+import { Modal } from "./modal";
+import TimeInputDesktop from "./time-input";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -27,7 +18,7 @@ interface TaskFormEditProps {
   onDelete?: (taskId: string) => void;
 }
 
-export default function TaskFormEdit({
+export default function TaskFormEditDesktop({
   taskId,
   initialTask,
   onSuccess,
@@ -35,9 +26,7 @@ export default function TaskFormEdit({
   onDelete,
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
-  const { isDesktop } = useScreenSize();
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [isFormFocused, setIsFormFocused] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const {
     error,
@@ -63,10 +52,10 @@ export default function TaskFormEdit({
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (isDesktop && nameInputRef.current) {
+    if (nameInputRef.current) {
       nameInputRef.current.focus();
     }
-  }, [isDesktop]);
+  }, []);
 
   useEffect(() => {
     if (error && onError) {
@@ -77,14 +66,10 @@ export default function TaskFormEdit({
   const menu = (
     <Menu.Root>
       <Menu.Trigger
-        className={
-          isDesktop
-            ? "w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center transition-colors"
-            : "w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full flex items-center justify-center transition-colors z-50"
-        }
+        className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center transition-colors"
         aria-label={t("more_options")}
       >
-        <HvMoreVertical size={isDesktop ? 18 : 20} />
+        <HvMoreVertical size={18} />
       </Menu.Trigger>
 
       <Menu.Portal>
@@ -197,8 +182,6 @@ export default function TaskFormEdit({
         autoCapitalize="off"
         aria-label={t("task_name")}
         onChange={() => setIsFormDirty(true)}
-        onFocus={() => setIsFormFocused(true)}
-        onBlur={() => setIsFormFocused(false)}
       />
       <textarea
         name="taskDescription"
@@ -208,8 +191,6 @@ export default function TaskFormEdit({
         disabled={isSubmitting}
         style={{ resize: "none" }}
         onChange={() => setIsFormDirty(true)}
-        onFocus={() => setIsFormFocused(true)}
-        onBlur={() => setIsFormFocused(false)}
       />
       <TagInput
         selectedTags={formData.tags}
@@ -257,7 +238,7 @@ export default function TaskFormEdit({
         />
 
         {formData.scheduleAt.date && (
-          <TimeInput
+          <TimeInputDesktop
             label=""
             name={"atTime"}
             time={formData.scheduleAt.time}
@@ -276,75 +257,35 @@ export default function TaskFormEdit({
     </>
   );
 
-  if (isDesktop) {
-    return (
-      <form
-        className="h-[100%]"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget as HTMLFormElement);
-          await handleSubmit(formData);
-        }}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {t("edit_task")}
-          </h2>
-          <div className="flex items-center gap-2">{menu}</div>
-        </div>
-
-        {fields}
-
-        <div className="flex justify-end p-4">
-          <button
-            className="px-6 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md shadow-sm flex items-center justify-center transition-colors"
-            aria-label={t("add_new_task")}
-            data-testid="task-form-submit"
-            type="submit"
-          >
-            {t("submit")}
-          </button>
-        </div>
-
-        {modals}
-      </form>
-    );
-  }
-
   return (
     <form
-      className="h-[100%] mb-4 pb-[env(safe-area-inset-bottom)]"
+      className="h-[100%]"
       onSubmit={async (e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget as HTMLFormElement);
         await handleSubmit(formData);
       }}
     >
-      <ModalNavbar
-        title="Edit Task"
-        onModalClose={() => {
-          // @ts-ignore
-          onSuccess();
-        }}
-        rightAction={
-          <div className="flex items-center gap-2">
-            {(isFormFocused || isFormDirty) && (
-              <NavActionButton
-                variant="primary"
-                className="shadow-lg z-50"
-                aria-label={t("add_new_task")}
-                data-testid="task-form-submit"
-                type="submit"
-              >
-                <HvCheck />
-              </NavActionButton>
-            )}
-            {isFormFocused || isFormDirty || menu}
-          </div>
-        }
-      />
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          {t("edit_task")}
+        </h2>
+        <div className="flex items-center gap-2">{menu}</div>
+      </div>
 
       {fields}
+
+      <div className="flex justify-end p-4">
+        <button
+          className="px-6 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md shadow-sm flex items-center justify-center transition-colors"
+          aria-label={t("add_new_task")}
+          data-testid="task-form-submit"
+          type="submit"
+        >
+          {t("submit")}
+        </button>
+      </div>
+
       {modals}
     </form>
   );

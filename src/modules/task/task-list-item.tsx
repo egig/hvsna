@@ -12,6 +12,7 @@ import { useSnackbar } from "../components/snackbar-provider";
 import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
+import { useTaskFormContext } from "./task-form-context";
 import { TagList } from "./tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 import { useTaskEpoch } from "./task-form-helpers";
@@ -38,8 +39,8 @@ export function TaskListItem({
   disableSwipe = false,
 }: TaskListItemProps) {
   const { completeTask, reopenTask } = useTaskListItem();
-  const { updateTask, materializeVirtualTask, openEditTaskForm } =
-    useTaskContext();
+  const { updateTask, materializeVirtualTask } = useTaskContext();
+  const { openEditTaskForm } = useTaskFormContext();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();

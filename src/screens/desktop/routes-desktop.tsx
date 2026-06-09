@@ -31,6 +31,7 @@ import Profile from "../../modules/settings/pages/profile";
 import TagDetailPage from "../../modules/task/tag-detail-page";
 import Sync from "../../modules/sync/sync";
 import UpcomingDesktop from "./upcoming";
+import DesktopTaskFormProvider from "./task-form-provider";
 
 export const RoutesDesktop = () => {
   // https://blog.logrocket.com/building-react-modal-module-with-react-router/
@@ -39,7 +40,7 @@ export const RoutesDesktop = () => {
   const settingsBackgroundLocation = location.state?.settingsBackgroundLocation;
   const isSettingsOpen = !!settingsBackgroundLocation;
   return (
-    <>
+    <DesktopTaskFormProvider>
       {/* Note that animate present depends to the useLocation hook so it should be here */}
       <Routes
         location={settingsBackgroundLocation || location}
@@ -91,6 +92,6 @@ export const RoutesDesktop = () => {
           </Routes>
         </SettingsModal>
       )}
-    </>
+    </DesktopTaskFormProvider>
   );
 };

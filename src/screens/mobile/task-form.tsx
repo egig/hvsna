@@ -1,14 +1,13 @@
 import { useEffect, useRef } from "react";
 import { HvArrowUp } from "@/modules/icons";
-import { DatePrayerInput } from "./date-prayer-input";
-import { useTaskForm } from "./task-form-hook";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { usePageContext } from "./use-page-context";
+import { DatePrayerInput } from "@/modules/task/date-prayer-input";
+import { useTaskForm } from "@/modules/task/task-form-hook";
+import { useLanguageContext } from "@/modules/i18n/LanguageContext";
+import { usePageContext } from "@/modules/task/use-page-context";
 import type { Task } from "@/domain/task";
-import { useScreenSize } from "../components/screen-size-wrapper";
-import { TagInput } from "./tag-input";
-import { TimeInput } from "../calendar/time-input";
+import { TagInput } from "@/modules/task/tag-input";
 import dayjs from "dayjs";
+import TimeInputMobile from "./time-input";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -17,9 +16,8 @@ interface TaskFormProps {
   onDelete?: (taskId: string) => void;
 }
 
-export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
+export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
   const { t } = useLanguageContext();
-  const { isDesktop } = useScreenSize();
   const {
     error,
     handleSubmit,
@@ -133,7 +131,7 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
           }}
         />
         {formData.scheduleAt.date && (
-          <TimeInput
+          <TimeInputMobile
             label=""
             name={"atTime"}
             time={formData.scheduleAt.time}
@@ -147,25 +145,14 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
       </div>
 
       <div className="flex justify-end p-4">
-        {isDesktop ? (
-          <button
-            className="px-6 py-2 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md shadow-sm flex items-center justify-center transition-colors"
-            aria-label={t("add_new_task")}
-            data-testid="task-form-submit"
-            type="submit"
-          >
-            {t("submit")}
-          </button>
-        ) : (
-          <button
-            className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
-            aria-label={t("add_new_task")}
-            data-testid="task-form-submit"
-            type="submit"
-          >
-            <HvArrowUp />
-          </button>
-        )}
+        <button
+          className="w-12 h-12 bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-50"
+          aria-label={t("add_new_task")}
+          data-testid="task-form-submit"
+          type="submit"
+        >
+          <HvArrowUp />
+        </button>
       </div>
     </form>
   );

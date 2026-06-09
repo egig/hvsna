@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  DndContext,
   DragOverlay,
   MouseSensor,
   TouchSensor,
@@ -9,22 +8,14 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { Allotment, LayoutPriority, type AllotmentHandle } from "allotment";
 import type { DragEndEvent } from "@dnd-kit/core";
-import {
-  HvLayoutList,
-  HvCalendarMonth,
-  HvOutlineInbox,
-  HvHiInbox,
-  HvGripVertical,
-  HvPanelLeftClose,
-} from "@/modules/icons";
+import { HvOutlineInbox, HvGripVertical } from "@/modules/icons";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { TaskGroupCollapsible } from "./task-group-collapsible";
 import { useUpcoming } from "./use-upcoming";
 import { useUnscheduled } from "./use-unscheduled";
-import { WeekView } from "./week-view";
+import { WeekView } from "../../screens/desktop/week-view";
 import type { Task } from "@/domain/task";
 import type { LaterGroup } from "./use-upcoming";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";

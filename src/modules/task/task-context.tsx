@@ -16,9 +16,6 @@ import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
-import TaskFormEdit from "./task-form-edit";
-import { Modal } from "../navigation";
-import TaskForm from "./task-form";
 
 interface TaskContextType {
   // Task data
@@ -33,16 +30,6 @@ interface TaskContextType {
   reopenTask: (id: string) => Promise<Task>;
   materializeVirtualTask: (task: Task) => Promise<Task>;
   reset: () => void;
-
-  // Form state management
-  editingTaskId: string | null;
-  editingTask: Task | null;
-  formOpen: boolean;
-  openCreateTaskForm: () => void;
-  openEditTaskForm: (taskId: string, initialTask?: Task) => void;
-  closeTaskForm: () => void;
-  setEditingTaskId: (taskId: string | null) => void;
-  preselectedListId: string | null;
 
   // Legacy compatibility
   refreshAllTaskLists: (today: any) => Promise<void>;
@@ -60,14 +47,6 @@ export const TaskProvider: React.FC<{
   const taskUseCases = createTaskUseCases(db);
   const [task, setTask] = useState<Task | null>(null);
   const scheduleRecurringTaskReminders = useTaskReminder();
-
-  // Local form state
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [formOpen, setFormOpen] = useState<boolean>(false);
-  const [preselectedListId, setPreselectedListId] = useState<string | null>(
-    null
-  );
 
   useEffect(() => {
     if (taskId) {
@@ -93,25 +72,6 @@ export const TaskProvider: React.FC<{
         logger.error("Failed to schedule recurring task reminders:", err)
       );
   }, [db]);
-
-  // Local form functions
-  const openCreateTaskForm = () => {
-    setEditingTaskId(null);
-    setFormOpen(true);
-  };
-
-  const openEditTaskForm = (taskId: string, initialTask?: Task) => {
-    setEditingTaskId(taskId);
-    setEditingTask(initialTask ?? null);
-    setFormOpen(true);
-  };
-
-  const closeTaskForm = () => {
-    setEditingTaskId(null);
-    setEditingTask(null);
-    setPreselectedListId(null);
-    setFormOpen(false);
-  };
 
   const updateTaskWithLog = async (
     id: string,
@@ -237,7 +197,6 @@ export const TaskProvider: React.FC<{
         }
       }
       invalidateTaskQueries();
-      setFormOpen(false);
     },
     onError: (error) => {
       console.error("Failed to delete task:", error);
@@ -288,35 +247,11 @@ export const TaskProvider: React.FC<{
     reopenTask: (id: string) => reopenTaskMutation.mutateAsync(id),
     materializeVirtualTask,
     reset: () => setTask(null),
-    editingTaskId,
-    editingTask,
-    formOpen,
-    openCreateTaskForm,
-    openEditTaskForm,
-    closeTaskForm,
-    setEditingTaskId,
-    preselectedListId,
     refreshAllTaskLists: () => Promise.resolve(), // Legacy compatibility
   };
 
   return (
-    <TaskContext.Provider value={contextValue}>
-      {children}
-
-      <Modal isOpen={formOpen} onClose={closeTaskForm}>
-        {editingTaskId && (
-          <TaskFormEdit
-            taskId={editingTaskId}
-            initialTask={editingTask ?? undefined}
-            onSuccess={closeTaskForm}
-            onDelete={closeTaskForm}
-          />
-        )}
-        {!editingTaskId && (
-          <TaskForm onSuccess={closeTaskForm} onCancel={closeTaskForm} />
-        )}
-      </Modal>
-    </TaskContext.Provider>
+    <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>
   );
 };
 

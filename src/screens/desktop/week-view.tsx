@@ -2,8 +2,8 @@ import { useState, useMemo, useCallback } from "react";
 import dayjs from "dayjs";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { HvArrowLeft, HvArrowRight, HvGripVertical } from "@/modules/icons";
-import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import TaskListItem from "./task-list-item";
+import { useHijriDate } from "../../modules/calendar/hijri/use-hijri-date";
+import TaskListItem from "../../modules/task/task-list-item";
 import type { Task } from "@/domain/task";
 
 function toLocalDateStr(d: Date) {

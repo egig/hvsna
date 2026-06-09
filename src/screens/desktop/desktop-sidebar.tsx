@@ -21,6 +21,7 @@ import { SidebarTagsSection } from "../../modules/task/sidebar-tags-section";
 import { Modal } from "../../modules/navigation/modal";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 import { useTaskContext } from "../../modules/task/task-context";
+import { useTaskFormContext } from "../../modules/task/task-form-context";
 import { useState } from "react";
 import { useAuth } from "../../modules/auth/use-auth";
 
@@ -35,7 +36,7 @@ export function DesktopSidebar({
 }: DesktopSidebarProps) {
   const { t } = useLanguageContext();
   const location = useLocation();
-  const { openCreateTaskForm } = useTaskContext();
+  const { openCreateTaskForm } = useTaskFormContext();
   const { user, isAuthenticated, logout } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 

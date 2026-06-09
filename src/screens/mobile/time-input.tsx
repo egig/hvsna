@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { HvClock } from "@/modules/icons";
-import { Modal } from "src/modules/navigation";
-import { TimeSelectionModal } from "./hijri-date-input/time-selection-modal";
+import { Modal } from "./modal";
+import { TimeSelectionModal } from "@/modules/calendar/hijri-date-input/time-selection-modal";
 import type { PrayerTime } from "@/domain/task";
 
 interface TimeInputProps {
@@ -15,7 +15,7 @@ interface TimeInputProps {
   onChange: (time: string | null, prayerTime?: PrayerTime) => void;
 }
 
-export function TimeInput({
+export default function TimeInputMobile({
   name,
   label,
   time,

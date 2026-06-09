@@ -22,44 +22,47 @@ import Browse from "./browse";
 import TagDetailPage from "../../modules/task/tag-detail-page";
 import LayoutMobile from "./layout-mobile";
 import UpcomingMobile from "./upcoming";
+import MobileTaskFormProvider from "./task-form-provider";
 
 export const RoutesMobile = () => {
   const location = useLocation();
   useMobileNavigation();
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route element={<LayoutMobile />}>
-          <Route index element={<Navigate to="/today" replace />} />
-          <Route path="search" element={<Search />} />
-          <Route path="today" element={<Today />} />
-          <Route path="upcoming" element={<UpcomingMobile />} />
-          <Route path="inbox" element={<Inbox />} />
-          <Route path="recurring" element={<Recurring />} />
-          <Route path="completed" element={<Completed />} />
-          <Route path="browse" element={<Browse />} />
-          <Route path="tags/:tagName" element={<TagDetailPage />} />
-        </Route>
-        <Route path="settings" element={<Settings />} />
-        <Route path="about" element={<About />} />
-        <Route path="wipe-local" element={<WipeData />} />
-        <Route path="signin" element={<SignInPage />} />
-        <Route path="signin/:action" element={<SignInPage />} />
-        <Route path="signup" element={<SignUpPage />} />
-        <Route path="signup/:action" element={<SignUpPage />} />
-        <Route path="sync" element={<SyncPage />} />
-        <Route path="settings/general" element={<GeneralSettings />} />
-        <Route
-          path="settings/notifications"
-          element={<NotificationSettings />}
-        />
-        <Route path="settings/hijri-date" element={<HijriDateSettings />} />
-        <Route path="hijri-calendar" element={<HijriCalendar />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="profile/:action" element={<Profile />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
+    <MobileTaskFormProvider>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route element={<LayoutMobile />}>
+            <Route index element={<Navigate to="/today" replace />} />
+            <Route path="search" element={<Search />} />
+            <Route path="today" element={<Today />} />
+            <Route path="upcoming" element={<UpcomingMobile />} />
+            <Route path="inbox" element={<Inbox />} />
+            <Route path="recurring" element={<Recurring />} />
+            <Route path="completed" element={<Completed />} />
+            <Route path="browse" element={<Browse />} />
+            <Route path="tags/:tagName" element={<TagDetailPage />} />
+          </Route>
+          <Route path="settings" element={<Settings />} />
+          <Route path="about" element={<About />} />
+          <Route path="wipe-local" element={<WipeData />} />
+          <Route path="signin" element={<SignInPage />} />
+          <Route path="signin/:action" element={<SignInPage />} />
+          <Route path="signup" element={<SignUpPage />} />
+          <Route path="signup/:action" element={<SignUpPage />} />
+          <Route path="sync" element={<SyncPage />} />
+          <Route path="settings/general" element={<GeneralSettings />} />
+          <Route
+            path="settings/notifications"
+            element={<NotificationSettings />}
+          />
+          <Route path="settings/hijri-date" element={<HijriDateSettings />} />
+          <Route path="hijri-calendar" element={<HijriCalendar />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="profile/:action" element={<Profile />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AnimatePresence>
+    </MobileTaskFormProvider>
   );
 };
