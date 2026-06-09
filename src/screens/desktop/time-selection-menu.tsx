@@ -1,10 +1,10 @@
 import { HvCheck } from "@/modules/icons";
-import { NavActionButton } from "../../components/nav-action-button";
+import { NavActionButton } from "../../modules/components/nav-action-button";
 import { useState } from "react";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { ModalNavbar } from "src/modules/navigation";
 import type { PrayerTime } from "@/domain/task";
-import { TimeSelectionContent } from "./time-selection-content";
+import { TimeSelectionContent } from "../../modules/calendar/hijri-date-input/time-selection-content";
 
 interface TimeSelectionModalProps {
   selectedTime: string | null;
@@ -13,7 +13,7 @@ interface TimeSelectionModalProps {
   onRemoveTime: () => void;
 }
 
-export function TimeSelectionModal({
+export function TimeSelectionMenu({
   selectedTime,
   onBack,
   onConfirm,
@@ -48,21 +48,7 @@ export function TimeSelectionModal({
   };
 
   return (
-    <div className="min-h-[25dvh]">
-      <ModalNavbar
-        title={t("time")}
-        onModalClose={onBack}
-        rightAction={
-          <NavActionButton
-            variant="primary"
-            onClick={handleConfirm}
-            disabled={inputMode === "prayer" ? !selectedTimeTemp : false}
-          >
-            <HvCheck />
-          </NavActionButton>
-        }
-      />
-
+    <div className="">
       <TimeSelectionContent
         selectedTimeTemp={selectedTimeTemp}
         inputMode={inputMode}
@@ -70,6 +56,15 @@ export function TimeSelectionModal({
         onCustomTimeChange={handleCustomTimeChange}
         onRemoveTime={onRemoveTime}
       />
+      <div className="text-center">
+        <button
+          className="p-2 mb-2 rounded-md text-sm text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)]"
+            onClick={handleConfirm}
+            disabled={inputMode === "prayer" ? !selectedTimeTemp : false}
+          >
+            Confirm
+          </button>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { HvClock } from "@/modules/icons";
 import { Popover, PopoverDisclosure, usePopoverStore } from "@ariakit/react";
-import { TimeSelectionModal } from "@/modules/calendar/hijri-date-input/time-selection-modal";
 import type { PrayerTime } from "@/domain/task";
+import { TimeSelectionMenu } from "@/screens/desktop/time-selection-menu";
 
 interface TimeInputProps {
   name: string;
@@ -78,7 +77,7 @@ export default function TimeInputDesktop({
         hideOnInteractOutside={true}
         className="z-[10001] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 pointer-events-auto"
       >
-        <TimeSelectionModal
+        <TimeSelectionMenu
           selectedTime={time}
           onBack={() => popover.hide()}
           onConfirm={handleTimeConfirm}
