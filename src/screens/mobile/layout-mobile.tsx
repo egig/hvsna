@@ -1,8 +1,8 @@
 import { Outlet } from "react-router";
 import { HvPlus } from "@/modules/icons";
-import { TabBar } from "./modules/navigation/tab-bar";
-import { useTaskContext } from "./modules/task/task-context";
-import { usePageContext } from "./modules/task/use-page-context";
+import { TabBar } from "./tab-bar";
+import { useTaskContext } from "../../modules/task/task-context";
+import { usePageContext } from "../../modules/task/use-page-context";
 
 export default function LayoutMobile() {
   const { openCreateTaskForm } = useTaskContext();

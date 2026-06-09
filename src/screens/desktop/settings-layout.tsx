@@ -11,9 +11,9 @@ import {
   HvCalendar,
   HvClock,
 } from "@/modules/icons";
-import { Modal } from "../navigation/modal";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { useAuth } from "../auth/use-auth";
+import { Modal } from "../../modules/navigation/modal";
+import { useLanguageContext } from "../../modules/i18n/LanguageContext";
+import { useAuth } from "../../modules/auth/use-auth";
 import { useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -187,47 +187,55 @@ interface SettingsLayoutProps {
   children?: ReactNode;
 }
 
-export const defaultSettingsSections: Omit<SettingsSection, "path">[] = [
+export const defaultSettingsSections: SettingsSection[] = [
   {
     id: "signin",
     title: "Sign In",
     icon: HvLogIn,
     hideWhenSignedIn: true,
+    path: "/signin",
   },
   {
     id: "account",
     title: "Account",
     icon: HvUser,
     requiresAuth: true,
+    path: "/profile",
   },
   {
     id: "general",
     title: "General",
     icon: HvSettings,
+    path: "/settings/general",
   },
   {
     id: "notifications",
     title: "Notifications",
     icon: HvBell,
+    path: "/settings/notifications",
   },
   {
     id: "sync",
     title: "Sync",
     icon: HvRefreshCw,
+    path: "/sync",
   },
   {
     id: "hijri_date",
     title: "Hijri Date",
     icon: HvCalendar,
+    path: "/settings/hijri-date",
   },
   {
     id: "reset",
     title: "Reset Data",
     icon: HvTrash,
+    path: "/wipe-local",
   },
   {
     id: "about",
     title: "About",
     icon: HvInfo,
+    path: "/about",
   },
 ];

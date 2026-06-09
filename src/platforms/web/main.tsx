@@ -7,6 +7,7 @@ import { configureLogger } from "@/modules/logger";
 import { registerWebImplementations } from "./register";
 import log from "@/modules/logger";
 import { BrowserRouter } from "react-router";
+import { ResponsiveRoutes } from "@/routes";
 
 registerWebImplementations();
 
@@ -28,7 +29,13 @@ configureLogger();
 
 (async () => {
   root.render(
-    <App config={config} db={db} platform="web" Router={BrowserRouter} />
+    <App
+      config={config}
+      db={db}
+      platform="web"
+      Router={BrowserRouter}
+      Routes={ResponsiveRoutes}
+    />
   );
   // @ts-ignore
   window.__dtMounted = true;

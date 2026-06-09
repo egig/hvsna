@@ -1,7 +1,6 @@
 import { useLocation } from "react-router";
-import { Button } from "./button";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { useScreenSize } from "../components/screen-size-wrapper";
+import { Button } from "../../modules/navigation/button";
+import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 import {
   HvCalendarMonth,
   HvCalendarMonthFilled,
@@ -16,7 +15,6 @@ import {
 export function TabBar() {
   const { t } = useLanguageContext();
   const location = useLocation();
-  const { isDesktop } = useScreenSize();
 
   const tabs = [
     {
@@ -55,11 +53,6 @@ export function TabBar() {
     const isChildTab = location.pathname.startsWith(`${tabPath}/`);
     return isRootTab ? isCurrentTab : isChildTab || isCurrentTab;
   };
-
-  // Only render mobile layout - desktop is handled by DesktopSidebar
-  if (isDesktop) {
-    return null;
-  }
 
   // Mobile Layout - Horizontal Bottom Bar
   return (

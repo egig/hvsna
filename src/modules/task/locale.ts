@@ -651,4 +651,8 @@ export const taskTranslations = {
     en: "No more tasks until tomorrow",
     id: "Tidak ada tugas lagi hingga besok",
   },
+  load_more: {
+    en: "Load more",
+    id: "Muat lebih banyak",
+  },
 };

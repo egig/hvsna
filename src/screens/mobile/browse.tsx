@@ -4,12 +4,13 @@ import {
   HvCheckSquare2,
   HvReplayCircle,
 } from "@/modules/icons";
-import { Navbar } from "../navigation/navbar";
-import { Button, Page } from "../navigation";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { MenuItem } from "../components/menu-item";
-import { useTags } from "./use-tags";
-import BlockTitle from "../components/block-title";
+import { Navbar } from "../../modules/navigation/navbar";
+import { Button } from "../../modules/navigation";
+import { useLanguageContext } from "../../modules/i18n/LanguageContext";
+import { MenuItem } from "../../modules/components/menu-item";
+import { useTags } from "../../modules/task/use-tags";
+import BlockTitle from "../../modules/components/block-title";
+import { Page } from "./page";
 
 export default function Browse() {
   const { t } = useLanguageContext();

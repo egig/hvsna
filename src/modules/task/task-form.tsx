@@ -8,7 +8,6 @@ import type { Task } from "@/domain/task";
 import { useScreenSize } from "../components/screen-size-wrapper";
 import { TagInput } from "./tag-input";
 import { TimeInput } from "../calendar/time-input";
-import { useHijriDate } from "../calendar/hijri";
 import dayjs from "dayjs";
 
 interface TaskFormProps {
@@ -31,7 +30,6 @@ export default function TaskForm({ onSuccess, onError }: TaskFormProps) {
     updateRepeatConfig,
   } = useTaskForm(onSuccess, onError);
   const { page, params } = usePageContext();
-  const { currentHijriDate } = useHijriDate();
 
   const nameInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {

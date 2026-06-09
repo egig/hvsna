@@ -1,5 +1,4 @@
 import { BrowserRouter, MemoryRouter } from "react-router";
-import { AppRoutes } from "src/routes";
 import "@/app.css";
 import { PouchDBProvider } from "@/pouchdb";
 import DroppableContext from "@/modules/components/droppable-context";
@@ -20,6 +19,7 @@ import { PlatformProvider } from "@/modules/platform";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
 import { LocationProvider } from "./modules/location/context";
 import { NetworkProvider } from "./modules/network/context";
+import type React from "react";
 
 export interface AppConfig {
   basePath?: string;
@@ -48,11 +48,13 @@ export default function App({
   db,
   platform,
   Router,
+  Routes,
 }: {
   platform: "web" | "capacitor";
   config: AppConfig;
   db: PouchDB.Database;
   Router: typeof BrowserRouter | typeof MemoryRouter;
+  Routes: React.FC;
 }) {
   return (
     <EnsureRequiredParams
@@ -96,7 +98,7 @@ export default function App({
                                       <PostHogSessionTracker
                                         platform={platform}
                                       />
-                                      <AppRoutes />
+                                      <Routes />
                                     </TaskProvider>
                                   </Router>
                                 </SyncProvider>

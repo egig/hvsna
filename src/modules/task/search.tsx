@@ -4,7 +4,7 @@ import { Navbar } from "../navigation/navbar";
 import { Modal } from "../navigation/modal";
 import { EmptyState } from "../components/empty-state";
 import TaskFilterModal from "./task-filter-modal";
-import { Button, Page } from "../navigation";
+import { Page } from "../navigation";
 import TaskListItem from "src/modules/task/task-list-item";
 import { useSearch } from "./use-search";
 import { useLanguageContext } from "../i18n/LanguageContext";
@@ -53,7 +53,7 @@ export default function Search() {
           searchPlaceholder={t("search_tasks")}
           showBackButton={false}
           rightAction={
-            <Button
+            <button
               onClick={() => setFilterModalOpened(true)}
               aria-label={t("filter_options")}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500"
@@ -62,7 +62,7 @@ export default function Search() {
                 <div className="absolute w-2 h-2 bg-[var(--hvsna-primary-color)] opacity-[0.8] rounded-full" />
               )}
               <HvFilter size={20} />
-            </Button>
+            </button>
           }
         />
       }

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { HvHash, HvMoreVertical, HvEdit, HvTrash2 } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
-import { Button, Modal, Page } from "../navigation";
+import { Modal, Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { useAllTasks } from "./use-all-tasks";

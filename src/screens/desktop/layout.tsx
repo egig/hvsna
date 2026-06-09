@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Outlet } from "react-router";
 import { Allotment, type AllotmentHandle } from "allotment";
-import { DesktopSidebar } from "./modules/navigation/desktop-sidebar";
+import { DesktopSidebar } from "@/screens/desktop/desktop-sidebar";
 
 import "allotment/dist/style.css";
 

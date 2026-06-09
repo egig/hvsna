@@ -5,6 +5,7 @@ import { getPouchDBInstance } from "@/modules/pouchdb-singleton";
 import { configureLogger } from "@/modules/logger";
 import { registerCapacitorImplementations } from "./register";
 import { MemoryRouter } from "react-router";
+import { RoutesMobile } from "@/screens/mobile/routes";
 
 registerCapacitorImplementations();
 
@@ -26,7 +27,13 @@ configureLogger();
 
 (async () => {
   root.render(
-    <App config={config} db={db} platform="capacitor" Router={MemoryRouter} />
+    <App
+      config={config}
+      db={db}
+      platform="capacitor"
+      Router={MemoryRouter}
+      Routes={RoutesMobile}
+    />
   );
   // @ts-ignore
   window.__dtMounted = true;

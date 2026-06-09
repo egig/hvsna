@@ -16,14 +16,13 @@ import {
   HvReplayCircle,
   HvReplayCircleFilled,
 } from "@/modules/icons";
-import { useLocation } from "react-router";
-import { SidebarTagsSection } from "../task/sidebar-tags-section";
-import { Button } from "./button";
-import { Modal } from "./modal";
-import { useLanguageContext } from "../i18n/LanguageContext";
-import { useTaskContext } from "../task/task-context";
+import { NavLink, useLocation } from "react-router";
+import { SidebarTagsSection } from "../../modules/task/sidebar-tags-section";
+import { Modal } from "../../modules/navigation/modal";
+import { useLanguageContext } from "../../modules/i18n/LanguageContext";
+import { useTaskContext } from "../../modules/task/task-context";
 import { useState } from "react";
-import { useAuth } from "../auth/use-auth";
+import { useAuth } from "../../modules/auth/use-auth";
 
 interface DesktopSidebarProps {
   collapsed?: boolean;
@@ -157,10 +156,9 @@ export function DesktopSidebar({
         {mainTabs.map((tab) => {
           const isActive = getIsActive(tab.path);
           return (
-            <Button
+            <NavLink
               key={tab.path}
               to={tab.path}
-              navType="sidebar"
               className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
                 collapsed ? "justify-center" : "space-x-1"
               } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
@@ -172,7 +170,7 @@ export function DesktopSidebar({
                 {isActive ? tab.activeIcon : tab.icon}
               </span>
               {!collapsed && <span className="text-sm">{tab.label}</span>}
-            </Button>
+            </NavLink>
           );
         })}
         <SidebarTagsSection collapsed={collapsed} />
@@ -182,10 +180,9 @@ export function DesktopSidebar({
         {bottomTabs.map((tab) => {
           const isActive = getIsActive(tab.path);
           return (
-            <Button
+            <NavLink
               key={tab.path}
               to={tab.path}
-              navType="sidebar"
               className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
                 collapsed ? "justify-center" : "space-x-1"
               } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
@@ -200,7 +197,7 @@ export function DesktopSidebar({
                 {isActive ? tab.activeIcon : tab.icon}
               </span>
               {!collapsed && <span className="text-sm">{tab.label}</span>}
-            </Button>
+            </NavLink>
           );
         })}
       </div>
