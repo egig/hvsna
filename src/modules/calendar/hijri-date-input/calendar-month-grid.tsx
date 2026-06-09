@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 interface CalendarMonthGridProps {
   selectedDate: string | null;
   onChange: (date: string) => void;
+  isOpen?: boolean;
 }
 
 function toHijri(date: Date, monthOffsets: Partial<Record<number, number>>) {
@@ -24,6 +25,7 @@ function toHijri(date: Date, monthOffsets: Partial<Record<number, number>>) {
 export function CalendarMonthGrid({
   selectedDate,
   onChange,
+  isOpen,
 }: CalendarMonthGridProps) {
   const { weekDays, gregorianMonthNames, hijriMonthNames } =
     useDateTranslationHelper();
@@ -127,14 +129,25 @@ export function CalendarMonthGrid({
     return () => container.removeEventListener("scroll", handleScroll);
   }, [months]);
 
-  // Jump to the initial month on mount without animation
+  // Scroll to the selected month whenever the popover opens or selectedDate changes.
+  // Must depend on isOpen because offsetTop is 0 while the popover is hidden (display:none).
   useEffect(() => {
+    if (isOpen === false) return;
     const container = scrollContainerRef.current;
-    const el = monthRefs.current[initialIdx];
-    if (container && el) {
-      container.scrollTop = el.offsetTop;
+    if (!container) return;
+
+    let idx = initialIdx;
+    if (selectedDate) {
+      const d = dayjs(selectedDate);
+      const found = months.findIndex(
+        (m) => m.year === d.year() && m.month === d.month()
+      );
+      if (found !== -1) idx = found;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const el = monthRefs.current[idx];
+    if (el) container.scrollTop = el.offsetTop;
+  }, [isOpen, selectedDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePrev = () => {
     const idx = visibleIdx - 1;

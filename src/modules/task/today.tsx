@@ -112,8 +112,6 @@ export function TodayContent() {
     return taskGroups.findIndex((g: any) => g.isTomorrow);
   }, [taskGroups, isAfterMaghrib]);
 
-  console.log(tomorrowDividerIndex, "tomorrowDividerIndex");
-
   const getPrayerTimeDisplay = useCallback(
     (prayer: PrayerTime) => {
       const prayerName = t(prayer.toLowerCase());

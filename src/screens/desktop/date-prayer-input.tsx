@@ -328,6 +328,7 @@ export default function DatePrayerInputDesktop({
 
         {/* Calendar */}
         <CalendarMonthGrid
+          isOpen={isDateOpen}
           selectedDate={tempDate ? dayjs(tempDate).format("YYYY-MM-DD") : ""}
           onChange={(dateStr) =>
             setTempDate(dayjs(dateStr).endOf("day").toDate())
