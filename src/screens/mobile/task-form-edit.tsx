@@ -1,11 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  HvArrowUp,
-  HvTrash2,
-  HvInfo,
-  HvMoreVertical,
-  HvCheck,
-} from "@/modules/icons";
+import { HvTrash2, HvInfo, HvMoreVertical, HvCheck } from "@/modules/icons";
 import { NavActionButton } from "@/modules/components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "@/modules/task/date-prayer-input";
@@ -13,10 +7,10 @@ import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { ModalNavbar } from "@/modules/navigation/modal-navbar";
 import TaskPreview from "@/modules/task/task-preview";
-import { TagInput } from "@/modules/task/tag-input";
 import type { Task } from "@/domain/task";
 import { Modal } from "./modal";
 import TimeInputMobile from "./time-input";
+import { TagInput } from "./tag-input";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -275,10 +269,6 @@ export default function TaskFormEditMobile({
     >
       <ModalNavbar
         title="Edit Task"
-        onModalClose={() => {
-          // @ts-ignore
-          onSuccess();
-        }}
         rightAction={
           <div className="flex items-center gap-2">
             {(isFormFocused || isFormDirty) && (

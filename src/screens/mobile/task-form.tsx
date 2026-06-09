@@ -5,9 +5,9 @@ import { useTaskForm } from "@/modules/task/task-form-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { usePageContext } from "@/modules/task/use-page-context";
 import type { Task } from "@/domain/task";
-import { TagInput } from "@/modules/task/tag-input";
 import dayjs from "dayjs";
 import TimeInputMobile from "./time-input";
+import { TagInput } from "./tag-input";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;

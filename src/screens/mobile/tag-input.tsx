@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { useTags, normalizeTag } from "./use-tags";
-import { HvCheck, HvSearch, HvX } from "../icons";
-import { Modal, ModalNavbar } from "../navigation";
-import { NavActionButton } from "../components/nav-action-button";
+import { useTags, normalizeTag } from "../../modules/task/use-tags";
+import { HvCheck, HvSearch, HvX } from "../../modules/icons";
+import { Modal, ModalNavbar } from "../../modules/navigation";
+import { NavActionButton } from "../../modules/components/nav-action-button";
 
 interface TagPickerModalProps {
   isOpen: boolean;

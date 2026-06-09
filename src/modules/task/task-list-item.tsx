@@ -13,7 +13,7 @@ import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
 import { useTaskFormContext } from "./task-form-context";
-import { TagList } from "./tag-input";
+import { TagList } from "../../screens/mobile/tag-input";
 import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
 import { useTaskEpoch } from "./task-form-helpers";
 import { useScreenSize } from "../components/screen-size-wrapper";

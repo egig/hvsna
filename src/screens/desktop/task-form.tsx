@@ -4,9 +4,9 @@ import { useTaskForm } from "@/modules/task/task-form-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { usePageContext } from "@/modules/task/use-page-context";
 import type { Task } from "@/domain/task";
-import { TagInput } from "@/modules/task/tag-input";
 import dayjs from "dayjs";
 import TimeInputDesktop from "./time-input";
+import { TagInputDesktop } from "./tag-input";
 
 interface TaskFormProps {
   onSuccess?: (task: Task) => void;
@@ -90,7 +90,7 @@ export default function TaskFormDesktop({ onSuccess, onError }: TaskFormProps) {
         style={{ resize: "none" }}
       />
 
-      <TagInput
+      <TagInputDesktop
         selectedTags={formData.tags}
         onTagsChange={(tags) => updateFormData({ tags })}
         disabled={isSubmitting}

@@ -5,10 +5,10 @@ import DatePrayerInputDesktop from "@/screens/desktop/date-prayer-input";
 import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import TaskPreview from "@/modules/task/task-preview";
-import { TagInput } from "@/modules/task/tag-input";
 import type { Task } from "@/domain/task";
 import { Modal } from "./modal";
 import TimeInputDesktop from "./time-input";
+import { TagInputDesktop } from "./tag-input";
 
 interface TaskFormEditProps {
   taskId: string;
@@ -192,7 +192,7 @@ export default function TaskFormEditDesktop({
         style={{ resize: "none" }}
         onChange={() => setIsFormDirty(true)}
       />
-      <TagInput
+      <TagInputDesktop
         selectedTags={formData.tags}
         onTagsChange={(tags) => {
           updateFormData({ tags });

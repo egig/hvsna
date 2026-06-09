@@ -1,4 +1,4 @@
-import { HvChevronLeft, HvX, HvSearch } from "@/modules/icons";
+import { HvChevronLeft, HvX, HvSearch, HvArrowLeft } from "@/modules/icons";
 import { useAppNavigation } from "./use-app-navigation";
 import { useLocation } from "react-router";
 import { useState, useEffect } from "react";
@@ -80,10 +80,10 @@ export function Navbar({
           <button
             onClick={handleBack}
             data-testid="navbar-back-button"
-            className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
+            className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90  transition-opacity no-select active:scale-95 transition-transform"
             aria-label="Go back"
           >
-            {modal ? <HvX /> : <HvChevronLeft />}
+            {modal ? <HvX /> : <HvArrowLeft />}
           </button>
         ) : (
           leftAction
