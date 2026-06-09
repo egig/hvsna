@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { HvTrash2, HvInfo, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
-import { DatePrayerInput } from "@/modules/task/date-prayer-input";
+import DatePrayerInputDesktop from "@/screens/desktop/date-prayer-input";
 import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import TaskPreview from "@/modules/task/task-preview";
@@ -202,7 +202,7 @@ export default function TaskFormEditDesktop({
       />
 
       <div className="flex flex-wrap gap-2 px-4">
-        <DatePrayerInput
+        <DatePrayerInputDesktop
           selectedDate={formData.scheduleAt.date as Date}
           isSubmitting={isSubmitting}
           recurringType={formData.repeat.recurringType}

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { DatePrayerInput } from "@/modules/task/date-prayer-input";
+import DatePrayerInputDesktop from "@/screens/desktop/date-prayer-input";
 import { useTaskForm } from "@/modules/task/task-form-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { usePageContext } from "@/modules/task/use-page-context";
@@ -97,7 +97,7 @@ export default function TaskFormDesktop({ onSuccess, onError }: TaskFormProps) {
       />
 
       <div className="flex flex-wrap gap-2 px-4 py-2">
-        <DatePrayerInput
+        <DatePrayerInputDesktop
           selectedDate={formData.scheduleAt.date}
           isSubmitting={isSubmitting}
           recurringType={formData.repeat.recurringType}
