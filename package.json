@@ -21,6 +21,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@ariakit/react": "^0.4.29",
     "@base-ui/react": "^1.2.0",
     "@capacitor/android": "^8.0.1",
     "@capacitor/app": "^8.1.0",
