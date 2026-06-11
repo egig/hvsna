@@ -206,6 +206,7 @@ export const useTaskFormEdit = (
                 ? formData.repeat.endOccurrences
                 : undefined,
             useGregorian: formData.repeat.useGregorian,
+            tags: taskInput.tags ?? undefined,
           },
           {
             createRecurringTask,
@@ -390,6 +391,7 @@ export const useTaskFormEdit = (
             atTime: pendingOperation.taskInput.atTime,
             recurringType: pendingOperation.repeatConfig.recurringType,
             recurringInterval: pendingOperation.repeatConfig.interval,
+            tags: pendingOperation.taskInput.tags,
           },
           {
             updateTask,

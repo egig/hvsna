@@ -135,15 +135,15 @@ export class PouchDBRecurringTaskRepository
       existingDoc
     ).toRecurringTask();
 
-    const { occurrenceExceptions, ...restInput } = input;
+    const { occurrenceExceptions, tags: tagsInput, ...restInput } = input;
     const updateData = {
       ...existingDoc,
       ...restInput,
       ...(occurrenceExceptions !== undefined && {
         occurrence_exceptions: occurrenceExceptions,
       }),
+      ...(tagsInput !== undefined && { tags: tagsInput }),
       updated_at: Date.now(),
-      tags: input.tags ?? undefined,
     };
 
     const response = await this.db.put(updateData);
