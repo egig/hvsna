@@ -69,11 +69,15 @@ export default function TimeInputDesktop({
     popover.hide();
   };
 
+  const triggerIcon = PRAYER_TIMES.find((p) => p.value === time)?.icon ?? (
+    <HvClock className="w-4 h-4 flex-shrink-0" />
+  );
+
   const triggerButton = (
     <button
       type="button"
       disabled={disabled}
-      className={`h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-md flex items-center gap-2 text-sm transition-colors ${
+      className={`h-[38px] px-3 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center gap-2 text-sm transition-colors ${
         disabled
           ? "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600"
           : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
@@ -83,7 +87,7 @@ export default function TimeInputDesktop({
           : "text-gray-500 dark:text-gray-400"
       }`}
     >
-      <HvClock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+      {triggerIcon}
       {time && <span>{time}</span>}
     </button>
   );
@@ -101,9 +105,9 @@ export default function TimeInputDesktop({
         store={popover}
         gutter={8}
         hideOnInteractOutside={true}
-        className="z-[10001] w-[260px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+        className="z-[10001] w-[240px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
       >
-        <div className="p-3">
+        <div className="p-2">
           {/* Prayer times + custom time in one grid */}
           <div className="grid grid-cols-2 gap-1.5">
             {PRAYER_TIMES.map(({ value, icon }) => (
@@ -111,7 +115,7 @@ export default function TimeInputDesktop({
                 key={value}
                 type="button"
                 onClick={() => handlePrayerSelect(value)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg border text-sm transition-colors ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border text-sm transition-colors ${
                   inputMode === "prayer" && time === value
                     ? activeBtn
                     : inactiveBtn
@@ -124,14 +128,15 @@ export default function TimeInputDesktop({
 
             {/* Custom time — button-style container with embedded input */}
             <div
-              className={`relative flex items-center px-3 py-2 rounded-lg border text-sm transition-colors ${
+              className={`relative flex items-center gap-1.5 px-2 py-1 rounded-lg border text-sm transition-colors ${
                 inputMode === "custom" ? activeBtn : inactiveBtn
               } ${
                 !customTime || inputMode === "prayer"
-                  ? "before:content-['Custom'] before:text-gray-400 before:dark:text-gray-500 before:absolute before:left-3 before:pointer-events-none focus-within:before:hidden"
+                  ? "before:content-['Custom'] before:text-gray-400 before:dark:text-gray-500 before:absolute before:left-8 before:pointer-events-none focus-within:before:hidden"
                   : ""
               }`}
             >
+              <HvClock size={16} className="flex-shrink-0" />
               <input
                 type="time"
                 value={inputMode === "custom" ? customTime : ""}

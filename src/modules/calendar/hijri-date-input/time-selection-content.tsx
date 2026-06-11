@@ -1,5 +1,6 @@
 import {
   HvAsr,
+  HvClock,
   HvDhuhr,
   HvFajr,
   HvIsha,
@@ -68,17 +69,18 @@ export function TimeSelectionContent({
             </Toggle>
           ))}
           <div
-            className={`relative flex items-center px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
+            className={`relative flex items-center gap-1.5 px-3 py-2 rounded-md border transition-colors text-sm font-medium ${
               inputMode === "custom"
                 ? "bg-[var(--hvsna-primary-color)] text-white border-[var(--hvsna-primary-color)]"
                 : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
             } ${
               (!selectedTimeTemp && inputMode === "custom") ||
               inputMode === "prayer"
-                ? "before:content-['Custom_Time'] before:text-gray-500 before:dark:text-gray-400 before:absolute before:left-3 before:pointer-events-none focus-within:before:hidden"
+                ? "before:content-['Custom'] before:text-gray-500 before:dark:text-gray-400 before:absolute before:left-10 before:pointer-events-none focus-within:before:hidden"
                 : ""
             }`}
           >
+            <HvClock size={20} className="flex-shrink-0" />
             <input
               className={`outline-none bg-transparent w-full relative z-10 focus:text-inherit ${
                 inputMode === "prayer" ? "text-transparent" : ""

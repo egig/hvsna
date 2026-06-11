@@ -97,7 +97,15 @@ export const useTaskFormEdit = (
     const rtask = await getRecurringTask(recurringTaskId);
     if (!rtask) return;
     const dateStr = dayjs(epoch).format("YYYYMMDD");
-    const next = [...new Set([...(rtask.occurrenceExceptions ?? []), dateStr])];
+    // Prune entries older than 60 days — the generator's overdue lookback window
+    // is 60 days, so anything older is never checked and just grows the document.
+    const cutoff = dayjs().subtract(60, "day").format("YYYYMMDD");
+    const next = [
+      ...new Set([
+        ...(rtask.occurrenceExceptions ?? []).filter((d) => d >= cutoff),
+        dateStr,
+      ]),
+    ];
     await updateRecurringTask(rtask.id, { occurrenceExceptions: next });
   }
 

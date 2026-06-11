@@ -98,7 +98,7 @@ export default function DatePrayerInputDesktop({
 }: DatePrayerInputDesktopProps) {
   const { t } = useLanguageContext();
 
-  const datePopover = usePopoverStore({ placement: "bottom-start" });
+  const datePopover = usePopoverStore({ placement: "right-start" });
   const repeatPopover = usePopoverStore({ placement: "right-start" });
   const endDatePopover = usePopoverStore({ placement: "right-start" });
 
@@ -261,7 +261,7 @@ export default function DatePrayerInputDesktop({
       type="button"
       disabled={isSubmitting}
       data-testid="date-prayer-input-button"
-      className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors border-gray-300 dark:border-gray-600 ${
+      className={`h-[38px] px-3 border rounded-lg flex items-center gap-2 text-sm transition-colors border-gray-300 dark:border-gray-600 ${
         selectedDate
           ? "text-gray-900 dark:text-white"
           : "text-gray-500 dark:text-gray-400"
