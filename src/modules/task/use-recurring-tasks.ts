@@ -58,6 +58,9 @@ export function useRecurringTasks() {
       id: string;
       input: RecurringTaskUpdateInput;
     }) => recurringTaskUseCases.updateRecurringTask(id, input),
+    onSuccess: () => {
+      invalidateTaskQueries();
+    },
     onError: (error) => {
       console.error("Failed to update recurring task:", error);
       throw error;

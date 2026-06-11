@@ -27,6 +27,7 @@ class PouchDBRecurringTaskDocument {
   recurringEndEpoch?: number;
   recurringEndOccurrences?: number;
   useGregorian?: boolean;
+  occurrence_exceptions?: string[];
   created_at?: number;
   updated_at?: number;
 
@@ -53,6 +54,7 @@ class PouchDBRecurringTaskDocument {
       recurringEndEpoch: this.recurringEndEpoch,
       recurringEndOccurrences: this.recurringEndOccurrences,
       useGregorian: this.useGregorian,
+      occurrenceExceptions: this.occurrence_exceptions,
       created_at: this.created_at,
       updated_at: this.updated_at,
     };
@@ -79,6 +81,7 @@ class PouchDBRecurringTaskDocument {
     doc.recurringEndEpoch = t.recurringEndEpoch;
     doc.recurringEndOccurrences = t.recurringEndOccurrences;
     doc.useGregorian = t.useGregorian;
+    doc.occurrence_exceptions = t.occurrenceExceptions;
     doc.created_at = t.created_at;
     doc.updated_at = t.updated_at;
     return doc;
@@ -132,9 +135,13 @@ export class PouchDBRecurringTaskRepository
       existingDoc
     ).toRecurringTask();
 
+    const { occurrenceExceptions, ...restInput } = input;
     const updateData = {
       ...existingDoc,
-      ...input,
+      ...restInput,
+      ...(occurrenceExceptions !== undefined && {
+        occurrence_exceptions: occurrenceExceptions,
+      }),
       updated_at: Date.now(),
       tags: input.tags ?? undefined,
     };

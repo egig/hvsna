@@ -1,6 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
-import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import { useRecurringOccurance } from "./recurring-task-generator";
 import type { RecurringTask } from "./recurring-task";
 
@@ -20,15 +19,16 @@ export function useVirtualTasks(startEpoch: number, endEpoch: number) {
 
       const templates = response.rows
         .filter((row: any) => row.doc && row.doc.baseDateEpoch)
-        .map((row: any) => row.doc as RecurringTask);
+        .map(
+          (row: any) =>
+            ({
+              ...row.doc,
+              id: row.doc._id || row.doc.id || "",
+              occurrenceExceptions: row.doc.occurrence_exceptions,
+            } as RecurringTask)
+        );
 
-      const taskRepository = new PouchDBTaskRepository(db);
-      return await buildVirtualTasksForRange(
-        templates,
-        taskRepository,
-        startEpoch,
-        endEpoch
-      );
+      return await buildVirtualTasksForRange(templates, startEpoch, endEpoch);
     },
     staleTime: 1000 * 60 * 2,
     placeholderData: keepPreviousData,

@@ -12,7 +12,6 @@ import { createTaskUseCases } from "../../usecases/task";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings";
 import { useTaskReminder } from "./recurring-reminder-scheduler";
-import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
 import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
@@ -60,13 +59,19 @@ export const TaskProvider: React.FC<{
 
   // Schedule reminders for virtual recurring task occurrences on startup
   useEffect(() => {
-    const taskRepository = new PouchDBTaskRepository(db);
     db.allDocs({ include_docs: true, startkey: "rtask_", endkey: "rtask_￿" })
       .then((response) => {
         const templates = response.rows
           .filter((row: any) => row.doc && row.doc.baseDateEpoch)
-          .map((row: any) => row.doc as RecurringTask);
-        return scheduleRecurringTaskReminders(db, templates, taskRepository);
+          .map(
+            (row: any) =>
+              ({
+                ...row.doc,
+                id: row.doc._id || row.doc.id || "",
+                occurrenceExceptions: row.doc.occurrence_exceptions,
+              } as RecurringTask)
+          );
+        return scheduleRecurringTaskReminders(db, templates);
       })
       .catch((err) =>
         logger.error("Failed to schedule recurring task reminders:", err)

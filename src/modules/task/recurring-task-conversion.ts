@@ -62,6 +62,7 @@ export async function updateRecurringSeries(
   await updateRecurringTask(task.recurringTaskId!, {
     ...templateInput,
     baseDateEpoch: task.atEpochMillis ?? undefined,
+    occurrenceExceptions: [],
   });
 
   return updateTask(taskId, taskInput);

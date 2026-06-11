@@ -18,6 +18,7 @@ export interface RecurringTask {
   recurringEndEpoch?: number;
   recurringEndOccurrences?: number;
   useGregorian?: boolean;
+  occurrenceExceptions?: string[];
   created_at?: number;
   updated_at?: number;
 }
@@ -57,6 +58,7 @@ export interface RecurringTaskUpdateInput {
   recurringEndEpoch?: number;
   recurringEndOccurrences?: number;
   useGregorian?: boolean;
+  occurrenceExceptions?: string[];
 }
 
 export interface RecurringTaskChange {

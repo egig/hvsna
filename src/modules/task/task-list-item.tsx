@@ -217,7 +217,7 @@ export function TaskListItem({
     if (onEdit) {
       onEdit(task);
     } else {
-      await handleEditTask();
+      handleEditTask();
     }
   };
 
@@ -238,10 +238,9 @@ export function TaskListItem({
     setIsScheduleModalOpen(false);
   };
 
-  const handleEditTask = useCallback(async () => {
-    const realTask = task.isVirtual ? await materializeVirtualTask(task) : task;
-    openEditTaskForm(realTask.id as string, task.isVirtual ? task : undefined);
-  }, [task, materializeVirtualTask, openEditTaskForm]);
+  const handleEditTask = useCallback(() => {
+    openEditTaskForm(task.id as string, task.isVirtual ? task : undefined);
+  }, [task, openEditTaskForm]);
 
   const isOnTodayPage =
     location.pathname === "/today" || location.pathname === "/tasks";

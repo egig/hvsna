@@ -1,5 +1,4 @@
 import type { RecurringTask } from "./recurring-task";
-import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import { useTaskEpoch } from "./task-form-helpers";
 import { Task, type TaskRecurringType } from "@/domain/task";
 import dayjs from "dayjs";
@@ -84,61 +83,32 @@ export function useRecurringOccurance() {
 
   /**
    * Builds ephemeral virtual Task objects for all templates within
-   * [startEpoch, endEpoch], skipping dates that already have a real task
-   * (edited/completed) or a soft-deleted task (user deleted that occurrence).
+   * [startEpoch, endEpoch], skipping dates that are in occurrenceExceptions.
    * Also surfaces at most one overdue virtual per template.
    */
   async function buildVirtualTasksForRange(
     templates: RecurringTask[],
-    taskRepository: ITaskRepository,
     startEpoch: number,
     endEpoch: number
   ): Promise<Task[]> {
     const all: Task[] = [];
 
     for (const template of templates) {
+      const exceptionsSet = new Set(template.occurrenceExceptions ?? []);
       const occurrences = computeOccurrencesInRange(
         template,
         startEpoch,
         endEpoch
       );
 
-      const exceptions = await taskRepository.findByRecurringTaskIdInRange(
-        template.id,
-        startEpoch,
-        endEpoch
-      );
-
-      const takenDates = new Set(
-        exceptions
-          .filter((t) => !t.deletedAt)
-          .map((t) =>
-            t.atEpochMillis ? dayjs(t.atEpochMillis).format("YYYY-MM-DD") : null
-          )
-          .filter((s): s is string => s !== null)
-      );
-      const deletedEpochs = new Set(
-        exceptions.filter((t) => t.deletedAt).map((t) => t.atEpochMillis)
-      );
-
       for (const epoch of occurrences) {
-        if (deletedEpochs.has(epoch)) continue;
-        if (takenDates.has(dayjs(epoch).format("YYYY-MM-DD"))) continue;
+        if (exceptionsSet.has(dayjs(epoch).format("YYYYMMDD"))) continue;
         all.push(createVirtualTask(template, epoch));
       }
 
       const overdueEpoch = findLatestOccurrenceBefore(template, startEpoch);
       if (overdueEpoch !== null) {
-        const overdueExceptions =
-          await taskRepository.findByRecurringTaskIdInRange(
-            template.id,
-            overdueEpoch - 1,
-            overdueEpoch + 1
-          );
-        const resolved = overdueExceptions.some(
-          (t) => t.atEpochMillis === overdueEpoch
-        );
-        if (!resolved) {
+        if (!exceptionsSet.has(dayjs(overdueEpoch).format("YYYYMMDD"))) {
           all.push(createVirtualTask(template, overdueEpoch));
         }
       }

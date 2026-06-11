@@ -1,5 +1,4 @@
 import type { RecurringTask } from "./recurring-task";
-import type { ITaskRepository } from "../../domain/task/ITaskRepository";
 import { useRecurringOccurance } from "./recurring-task-generator";
 import { ReminderService } from "./reminder-service";
 import logger from "../logger";
@@ -48,8 +47,7 @@ export function useTaskReminder() {
   const { buildVirtualTasksForRange } = useRecurringOccurance();
   return async function scheduleRecurringTaskReminders(
     db: PouchDB.Database,
-    templates: RecurringTask[],
-    taskRepository: ITaskRepository
+    templates: RecurringTask[]
   ): Promise<void> {
     if (templates.length === 0) return;
 
@@ -66,7 +64,6 @@ export function useTaskReminder() {
     // Build virtual tasks for the coming week
     const virtualTasks = await buildVirtualTasksForRange(
       templates,
-      taskRepository,
       now,
       horizon
     );

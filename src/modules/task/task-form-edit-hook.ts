@@ -71,8 +71,12 @@ export const useTaskFormEdit = (
     getTask,
     materializeVirtualTask,
   } = useTaskContext();
-  const { createRecurringTask, deleteRecurringTask, updateRecurringTask } =
-    useRecurringTasks();
+  const {
+    createRecurringTask,
+    deleteRecurringTask,
+    updateRecurringTask,
+    getRecurringTask,
+  } = useRecurringTasks();
   const { db } = usePouchDB();
 
   const [task, setTask] = useState<Task | null>(initialTask ?? null);
@@ -85,6 +89,17 @@ export const useTaskFormEdit = (
     useState<PendingOperationData | null>(null);
 
   const getTaskEpoch = useTaskEpoch();
+
+  async function addOccurrenceException(
+    recurringTaskId: string,
+    epoch: number
+  ) {
+    const rtask = await getRecurringTask(recurringTaskId);
+    if (!rtask) return;
+    const dateStr = dayjs(epoch).format("YYYYMMDD");
+    const next = [...new Set([...(rtask.occurrenceExceptions ?? []), dateStr])];
+    await updateRecurringTask(rtask.id, { occurrenceExceptions: next });
+  }
 
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { date: null, time: "" },
@@ -269,6 +284,9 @@ export const useTaskFormEdit = (
         ? ((await materializeVirtualTask(task)).id as string)
         : taskId;
       await deleteTask(idToDelete);
+      if (task?.recurringTaskId && task.atEpochMillis) {
+        await addOccurrenceException(task.recurringTaskId, task.atEpochMillis);
+      }
       setTask(null);
       onDelete?.(taskId);
     } catch (error) {
@@ -313,6 +331,15 @@ export const useTaskFormEdit = (
           ? ((await materializeVirtualTask(pendingOperation.task)).id as string)
           : pendingOperation.taskId;
         result = await updateTask(targetId, pendingOperation.taskInput);
+      }
+      if (
+        pendingOperation.task.recurringTaskId &&
+        pendingOperation.task.atEpochMillis
+      ) {
+        await addOccurrenceException(
+          pendingOperation.task.recurringTaskId,
+          pendingOperation.task.atEpochMillis
+        );
       }
       setPendingOperation(null);
       setTask(null);
