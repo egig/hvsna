@@ -93,7 +93,7 @@ export function TimeSelectionContent({
         </ToggleGroup>
       </div>
 
-      <div className="mt-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-2 border-t border-gray-200 dark:border-gray-700 safe-bottom">
         <button
           type="button"
           onClick={onRemoveTime}
