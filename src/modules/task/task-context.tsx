@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "@/domain/task";
 import { usePouchDB } from "../../pouchdb";
 import { createTaskUseCases } from "../../usecases/task";
+import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings";
 import { useTaskReminder } from "./recurring-reminder-scheduler";
@@ -93,8 +94,21 @@ export const TaskProvider: React.FC<{
       return taskUseCases.completeTask(id);
     },
     onSuccess: async (updatedTask: Task, id) => {
+      // Mark this occurrence as an exception so the generator skips it
+      if (updatedTask.recurringTaskId && updatedTask.atEpochMillis) {
+        try {
+          await createRecurringTaskUseCases(db).addOccurrenceException(
+            updatedTask.recurringTaskId,
+            updatedTask.atEpochMillis
+          );
+        } catch (err) {
+          logger.error("Failed to update occurrence exceptions on complete:", err);
+        }
+      }
+
       // Cancel reminders when task is completed
       if (settings.notifications) {
+        console.log("debug cancel reminder", id)
         try {
           await ReminderService.cancelTaskReminders(id);
         } catch (error) {

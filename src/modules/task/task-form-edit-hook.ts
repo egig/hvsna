@@ -7,6 +7,7 @@ import { useSettings } from "../settings";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
+import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
 import {
   promoteTaskToRecurring,
   demoteTaskFromRecurring,
@@ -75,7 +76,6 @@ export const useTaskFormEdit = (
     createRecurringTask,
     deleteRecurringTask,
     updateRecurringTask,
-    getRecurringTask,
   } = useRecurringTasks();
   const { db } = usePouchDB();
 
@@ -94,19 +94,10 @@ export const useTaskFormEdit = (
     recurringTaskId: string,
     epoch: number
   ) {
-    const rtask = await getRecurringTask(recurringTaskId);
-    if (!rtask) return;
-    const dateStr = dayjs(epoch).format("YYYYMMDD");
-    // Prune entries older than 60 days — the generator's overdue lookback window
-    // is 60 days, so anything older is never checked and just grows the document.
-    const cutoff = dayjs().subtract(60, "day").format("YYYYMMDD");
-    const next = [
-      ...new Set([
-        ...(rtask.occurrenceExceptions ?? []).filter((d) => d >= cutoff),
-        dateStr,
-      ]),
-    ];
-    await updateRecurringTask(rtask.id, { occurrenceExceptions: next });
+    await createRecurringTaskUseCases(db).addOccurrenceException(
+      recurringTaskId,
+      epoch
+    );
   }
 
   const [formData, setFormData] = useState<EditFormData>({

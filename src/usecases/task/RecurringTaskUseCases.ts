@@ -5,6 +5,7 @@ import type {
   RecurringTaskQuery,
 } from "../../modules/task/recurring-task";
 import type { IRecurringTaskRepository } from "../../domain/task/IRecurringTaskRepository";
+import dayjs from "dayjs";
 
 export class RecurringTaskUseCases {
   constructor(
@@ -36,5 +37,21 @@ export class RecurringTaskUseCases {
     query?: RecurringTaskQuery
   ): Promise<RecurringTask[]> {
     return await this.recurringTaskRepository.find(query);
+  }
+
+  async addOccurrenceException(id: string, epoch: number): Promise<void> {
+    const rtask = await this.recurringTaskRepository.findById(id);
+    if (!rtask) return;
+    const dateStr = dayjs(epoch).format("YYYYMMDD");
+    // Prune entries older than 60 days — the generator's overdue lookback window
+    // is 60 days, so anything older is never checked and just grows the document.
+    const cutoff = dayjs().subtract(60, "day").format("YYYYMMDD");
+    const next = [
+      ...new Set([
+        ...(rtask.occurrenceExceptions ?? []).filter((d) => d >= cutoff),
+        dateStr,
+      ]),
+    ];
+    await this.recurringTaskRepository.update(id, { occurrenceExceptions: next });
   }
 }
