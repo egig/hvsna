@@ -108,7 +108,6 @@ export const TaskProvider: React.FC<{
 
       // Cancel reminders when task is completed
       if (settings.notifications) {
-        console.log("debug cancel reminder", id)
         try {
           await ReminderService.cancelTaskReminders(id);
         } catch (error) {
