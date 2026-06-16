@@ -39,7 +39,7 @@ export function usePrayerTimes() {
         case "maghrib":
           return new Date(prayerTimes.isha.valueOf() - 1000);
         case "isha":
-          return dayjs().endOf("day").toDate();
+          return dayjs(d).endOf("day").toDate();
       }
 
       throw new Error(`unknown prayer ${prayerName}`);
