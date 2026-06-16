@@ -12,7 +12,7 @@ import { createTaskUseCases } from "../../usecases/task";
 import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings";
-import { useTaskReminder } from "./recurring-reminder-scheduler";
+import { useTaskReminder, cancelVirtualReminder } from "./recurring-reminder-scheduler";
 import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
@@ -94,22 +94,16 @@ export const TaskProvider: React.FC<{
       return taskUseCases.completeTask(id);
     },
     onSuccess: async (updatedTask: Task, id) => {
-      // Mark this occurrence as an exception so the generator skips it
-      if (updatedTask.recurringTaskId && updatedTask.atEpochMillis) {
-        try {
-          await createRecurringTaskUseCases(db).addOccurrenceException(
-            updatedTask.recurringTaskId,
-            updatedTask.atEpochMillis
-          );
-        } catch (err) {
-          logger.error("Failed to update occurrence exceptions on complete:", err);
-        }
-      }
-
       // Cancel reminders when task is completed
       if (settings.notifications) {
         try {
           await ReminderService.cancelTaskReminders(id);
+          // The reminder may have been scheduled under the virtual task ID before
+          // materialization — cancel that too so it doesn't still fire.
+          if (updatedTask.recurringTaskId && updatedTask.atEpochMillis) {
+            const virtualId = `vtask_${updatedTask.recurringTaskId}_${updatedTask.atEpochMillis}`;
+            await ReminderService.cancelTaskReminders(virtualId);
+          }
         } catch (error) {
           logger.error("Failed to cancel task reminders:", error);
         }
@@ -223,21 +217,28 @@ export const TaskProvider: React.FC<{
   });
 
   const materializeVirtualTask = async (task: Task): Promise<Task> => {
-    if (!task.isVirtual) return task;
-    return createTaskMutation.mutateAsync({
-      name: task.name || "",
-      description: task.description,
-      atEpochMillis: task.atEpochMillis,
-      atTime: task.atTime,
-      lat: task.lat,
-      long: task.long,
-      timezone: task.timezone,
-      hijriDateOffset: task.hijriDateOffset,
-      recurringType: task.recurringType,
-      recurringInterval: task.recurringInterval,
-      recurringTaskId: task.recurringTaskId ?? undefined,
-      tags: task.tags ?? [],
-    });
+    const cancelReminder = settings.notifications
+      ? (virtualTaskId: string) => cancelVirtualReminder(db, virtualTaskId)
+      : undefined;
+
+    const created = await createRecurringTaskUseCases(db).materializeVirtualTask(
+      task,
+      cancelReminder
+    );
+
+    if (settings.notifications && created.atTime?.includes(":")) {
+      try {
+        await ReminderService.scheduleTaskReminders(
+          created,
+          settings.reminderMinutesBefore ?? 15
+        );
+      } catch (error) {
+        logger.error("Failed to schedule reminders for materialized task:", error);
+      }
+    }
+    invalidateTaskQueries();
+
+    return created;
   };
 
   const deleteRecurringTaskSeries = async (recurringTaskId: string) => {

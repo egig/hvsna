@@ -14,6 +14,7 @@ import {
   demoteTaskFromRecurringAndDeleteFuture,
   updateRecurringSeries,
 } from "./recurring-task-conversion";
+import { cancelVirtualReminder } from "./recurring-reminder-scheduler";
 import logger from "src/modules/logger";
 import { getCoordinateFromTimezone } from "@/config";
 import type {
@@ -94,6 +95,12 @@ export const useTaskFormEdit = (
     recurringTaskId: string,
     epoch: number
   ) {
+    const virtualId = `vtask_${recurringTaskId}_${epoch}`;
+    try {
+      await cancelVirtualReminder(db, virtualId);
+    } catch (err) {
+      logger.error("Failed to cancel virtual reminder on occurrence exception:", err);
+    }
     await createRecurringTaskUseCases(db).addOccurrenceException(
       recurringTaskId,
       epoch
@@ -284,9 +291,6 @@ export const useTaskFormEdit = (
         ? ((await materializeVirtualTask(task)).id as string)
         : taskId;
       await deleteTask(idToDelete);
-      if (task?.recurringTaskId && task.atEpochMillis) {
-        await addOccurrenceException(task.recurringTaskId, task.atEpochMillis);
-      }
       setTask(null);
       onDelete?.(taskId);
     } catch (error) {
@@ -334,7 +338,10 @@ export const useTaskFormEdit = (
       }
       if (
         pendingOperation.task.recurringTaskId &&
-        pendingOperation.task.atEpochMillis
+        pendingOperation.task.atEpochMillis &&
+        // demote path never calls materializeVirtualTask so always needs the exception;
+        // non-demote virtual path already got it inside materializeVirtualTask
+        (pendingOperation.type === "demote" || !pendingOperation.task.isVirtual)
       ) {
         await addOccurrenceException(
           pendingOperation.task.recurringTaskId,

@@ -1,12 +1,9 @@
 import { useState } from "react";
 import { HvCalendar, HvRepeat } from "@/modules/icons";
 import { CalendarModal } from "src/modules/calendar/hijri-date-input/calendar-modal";
-import { useHijriDate } from "src/modules/calendar/hijri";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
-import type { HijriDate } from "src/modules/calendar/hijri/hijri-date";
-import type { PrayerTime, TaskRecurringType } from "@/domain/task";
+import type { TaskRecurringType } from "@/domain/task";
 import dayjs from "dayjs";
-import { Today } from "./today";
 
 type RecurringEnd = "never" | "on_date" | "after_occurrences";
 
