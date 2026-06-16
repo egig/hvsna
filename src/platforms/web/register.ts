@@ -3,14 +3,14 @@ import { BrowserNotificationsDriver } from "@/infra/notifications/BrowserNotific
 import { BrowserPermissionsProvider } from "@/infra/permissions/BrowserPermissionsProvider";
 import { BrowserNetworkDriver } from "@/infra/network/BrowserNetworkDriver";
 import { BrowserLocationDriver } from "@/infra/location/BrowserLocationDriver";
-import { initAuthUseCases } from "@/infra/auth/AuthServiceFactory";
+import { initAuthService } from "@/infra/auth/AuthServiceFactory";
 import { initNotificationsProvider } from "@/infra/notifications";
 import { initPermissionsProvider } from "@/infra/permissions";
 import { initNetworkProvider } from "@/infra/network";
 import { initLocationProvider } from "@/infra/location/CapacitorLocationDriver";
 
 export function registerWebImplementations(): void {
-  initAuthUseCases(new WebSessionRepository());
+  initAuthService(new WebSessionRepository());
   initNotificationsProvider(new BrowserNotificationsDriver());
   initPermissionsProvider(new BrowserPermissionsProvider());
   initNetworkProvider(new BrowserNetworkDriver());

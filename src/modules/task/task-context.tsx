@@ -13,7 +13,10 @@ import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 import { materializeVirtualTask as materializeVirtualTaskFn } from "./recurring-task-utils";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings";
-import { useTaskReminder, cancelVirtualReminder } from "./recurring-reminder-scheduler";
+import {
+  useTaskReminder,
+  cancelVirtualReminder,
+} from "./recurring-reminder-scheduler";
 import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
@@ -237,7 +240,10 @@ export const TaskProvider: React.FC<{
           settings.reminderMinutesBefore ?? 15
         );
       } catch (error) {
-        logger.error("Failed to schedule reminders for materialized task:", error);
+        logger.error(
+          "Failed to schedule reminders for materialized task:",
+          error
+        );
       }
     }
     invalidateTaskQueries();

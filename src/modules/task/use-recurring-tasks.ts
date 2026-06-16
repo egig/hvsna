@@ -40,8 +40,7 @@ export function useRecurringTasks() {
   });
 
   const getRecurringTasksMutation = useMutation({
-    mutationFn: (query?: RecurringTaskQuery) =>
-      recurringRepo.find(query),
+    mutationFn: (query?: RecurringTaskQuery) => recurringRepo.find(query),
     onError: (error) => {
       console.error("Failed to get recurring tasks:", error);
       throw error;

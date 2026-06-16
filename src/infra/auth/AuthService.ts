@@ -25,13 +25,13 @@ export interface BaseResponse<T> {
   data: T;
 }
 
-/** Minimal HTTP interface — no axios dependency in the use-case layer */
+/** Minimal HTTP interface — no axios dependency in the auth service */
 export interface AuthHttpPort {
   post<T>(url: string, data?: unknown): Promise<T>;
   get<T>(url: string): Promise<T>;
 }
 
-export class AuthUseCases {
+export class AuthService {
   private refreshPromise: Promise<Session> | null = null;
 
   constructor(
@@ -123,22 +123,5 @@ export class AuthUseCases {
         await this.sessionRepo.clearRefreshToken();
       }
     }
-  }
-
-  validateEmail(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  validatePassword(password: string): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    if (password.length < 8)
-      errors.push("Password must be at least 8 characters long");
-    if (!/[A-Z]/.test(password))
-      errors.push("Password must contain at least one uppercase letter");
-    if (!/[a-z]/.test(password))
-      errors.push("Password must contain at least one lowercase letter");
-    if (!/\d/.test(password))
-      errors.push("Password must contain at least one number");
-    return { isValid: errors.length === 0, errors };
   }
 }

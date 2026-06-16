@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAuthContext } from "./auth-context";
-import { getAuthUseCases } from "../../infra/auth/AuthServiceFactory";
+import { getAuthService } from "../../infra/auth/AuthServiceFactory";
 
 export const useAuth = () => {
   const {
@@ -20,7 +20,7 @@ export const useAuth = () => {
     (async () => {
       try {
         // Check if user has valid tokens (is authenticated)
-        const hasTokens = await getAuthUseCases().isAuthenticated();
+        const hasTokens = await getAuthService().isAuthenticated();
 
         // If authenticated but no user data, fetch user details
         if (hasTokens && !user && !loading) {

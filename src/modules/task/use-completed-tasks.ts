@@ -10,8 +10,7 @@ export function useCompletedTasks() {
 
   const query = useInfiniteQuery({
     queryKey: queryKeys.completedTasks(),
-    queryFn: ({ pageParam }) =>
-      taskRepo.findAllCompleted(pageParam, PAGE_SIZE),
+    queryFn: ({ pageParam }) => taskRepo.findAllCompleted(pageParam, PAGE_SIZE),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       // If we got a full page, return next offset

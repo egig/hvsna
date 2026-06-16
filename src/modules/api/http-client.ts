@@ -6,7 +6,7 @@ import type {
 } from "axios";
 import {
   getTokenStore,
-  getAuthUseCases,
+  getAuthService,
 } from "../../infra/auth/AuthServiceFactory";
 
 export interface ApiError {
@@ -57,7 +57,7 @@ httpClient.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        await getAuthUseCases().refreshSession();
+        await getAuthService().refreshSession();
 
         // Get the new token and retry the original request
         const authHeader = getTokenStore().getAuthHeader();

@@ -73,11 +73,8 @@ export const useTaskFormEdit = (
     getTask,
     materializeVirtualTask,
   } = useTaskContext();
-  const {
-    createRecurringTask,
-    deleteRecurringTask,
-    updateRecurringTask,
-  } = useRecurringTasks();
+  const { createRecurringTask, deleteRecurringTask, updateRecurringTask } =
+    useRecurringTasks();
   const { db } = usePouchDB();
   const recurringRepo = useRecurringTaskRepository();
 
@@ -91,7 +88,6 @@ export const useTaskFormEdit = (
     useState<PendingOperationData | null>(null);
 
   const getTaskEpoch = useTaskEpoch();
-
 
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { date: null, time: "" },
@@ -322,7 +318,7 @@ export const useTaskFormEdit = (
           : pendingOperation.taskId;
         result = await updateTask(targetId, pendingOperation.taskInput);
       }
-      
+
       setPendingOperation(null);
       setTask(null);
       if (onSuccess) onSuccess(result);

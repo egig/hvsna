@@ -4,9 +4,7 @@ import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
 import Block from "src/modules/components/block";
 import { useAuth } from "../use-auth";
-import { getAuthUseCases } from "../../../infra/auth/AuthServiceFactory";
-
-const authService = getAuthUseCases();
+import { validateEmail, validatePassword } from "../validation";
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -40,11 +38,11 @@ export default function SignUpPage() {
 
     if (!formData.email) {
       errors.push("Email is required");
-    } else if (!authService.validateEmail(formData.email)) {
+    } else if (!validateEmail(formData.email)) {
       errors.push("Please enter a valid email address");
     }
 
-    const passwordValidation = authService.validatePassword(formData.password);
+    const passwordValidation = validatePassword(formData.password);
     if (!passwordValidation.isValid) {
       errors.push(...passwordValidation.errors);
     }

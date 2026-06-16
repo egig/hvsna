@@ -5,9 +5,7 @@ import { Navbar } from "src/modules/navigation";
 import Block from "src/modules/components/block";
 import { useAuth } from "../use-auth";
 import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
-import { getAuthUseCases } from "../../../infra/auth/AuthServiceFactory";
-
-const authService = getAuthUseCases();
+import { validateEmail } from "../validation";
 
 export default function SignInPage() {
   const navigate = useNavigate();
@@ -39,7 +37,7 @@ export default function SignInPage() {
 
     if (!formData.email) {
       errors.push("Email is required");
-    } else if (!authService.validateEmail(formData.email)) {
+    } else if (!validateEmail(formData.email)) {
       errors.push("Please enter a valid email address");
     }
 

@@ -6,28 +6,10 @@ import React, {
   useEffect,
 } from "react";
 import type { ReactNode } from "react";
-import type { GeneralSettings, PrayerTimesFallback } from "./settings";
-import { usePouchDB } from "@/pouchdb";
-import { createSettingsUseCases } from "@/infra/settings/SettingsUseCasesFactory";
+import type { GeneralSettings } from "./settings";
+import { DEFAULT_SETTINGS, withDefaults } from "./settings-defaults";
+import { useSettingsRepository } from "./use-settings-repository";
 import type { Language } from "../i18n/language";
-
-const DEFAULT_PRAYER_TIMES: PrayerTimesFallback = {
-  fajr: "05:00",
-  sunrise: "06:00",
-  dzuhr: "12:00",
-  asr: "15:00",
-  maghrib: "18:00",
-  isha: "19:00",
-};
-
-const DEFAULT_SETTINGS: GeneralSettings = {
-  language: "en",
-  timezone: "",
-  theme: "system",
-  notifications: true,
-  reminderMinutesBefore: 15,
-  prayerTimesFallback: DEFAULT_PRAYER_TIMES,
-};
 
 interface SettingsState {
   settings: GeneralSettings;
@@ -98,8 +80,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(settingsReducer, initialState);
-  const { db } = usePouchDB();
-  const useCases = createSettingsUseCases(db);
+  const settingsRepo = useSettingsRepository();
 
   const setLoading = useCallback((loading: boolean) => {
     dispatch({ type: "SET_LOADING", payload: loading });
@@ -136,22 +117,22 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     setLoading(true);
     clearError();
     try {
-      const loaded = await useCases.loadSettings();
-      setSettings(loaded);
+      const saved = await settingsRepo.load();
+      setSettings(withDefaults(saved));
     } catch (err: any) {
       setError(err.message || "Failed to load settings");
     } finally {
       setLoading(false);
       setInitiated(true);
     }
-  }, [db]);
+  }, [settingsRepo]);
 
   const updateSettings = useCallback(
     async (updates: Partial<GeneralSettings>): Promise<void> => {
       setLoading(true);
       clearError();
       try {
-        await useCases.updateSettings(state.settings, updates);
+        await settingsRepo.save({ ...state.settings, ...updates });
         updateSettingsStore(updates);
       } catch (err: any) {
         setError(err.message || "Failed to update settings");
@@ -159,7 +140,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         setLoading(false);
       }
     },
-    [db, state.settings]
+    [settingsRepo, state.settings]
   );
 
   const setLanguage = useCallback(
@@ -173,14 +154,15 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     setLoading(true);
     clearError();
     try {
-      const defaults = await useCases.resetSettings();
+      const defaults = { ...DEFAULT_SETTINGS };
+      await settingsRepo.save(defaults);
       setSettings(defaults);
     } catch (err: any) {
       setError(err.message || "Failed to reset settings");
     } finally {
       setLoading(false);
     }
-  }, [db]);
+  }, [settingsRepo]);
 
   const contextValue: SettingsContextType = {
     ...state,
