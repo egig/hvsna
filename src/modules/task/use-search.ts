@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../usecases/task";
-import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
+import { useTaskRepository } from "./use-task-repository";
+import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 import { Task, type TaskQuery, type TaskTypeFilter } from "@/domain/task";
 import { useTaskContext } from "./task-context";
 import { useRecurringOccurance } from "./recurring-task-generator";
@@ -36,9 +35,8 @@ function recurringTemplateToVirtualTask(
 export function useSearch() {
   const [initiated, setInitiated] = useState(false);
 
-  const { db } = usePouchDB();
-  const taskUseCases = createTaskUseCases(db);
-  const recurringTaskUseCases = createRecurringTaskUseCases(db);
+  const taskRepo = useTaskRepository();
+  const recurringRepo = useRecurringTaskRepository();
 
   const [dateRangeFilter, setDateRangeFilter] = useState<{
     startDate: number;
@@ -93,11 +91,11 @@ export function useSearch() {
   const searchQuery = useQuery({
     queryKey: ["search-tasks", filterKey],
     queryFn: async () => {
-      const regularTasksPromise = taskUseCases.getTasks(
+      const regularTasksPromise = taskRepo.findBrowsedTasks(
         buildRegularTaskQuery()
       );
 
-      const recurringTasksPromise = recurringTaskUseCases.getRecurringTasks();
+      const recurringTasksPromise = recurringRepo.find();
 
       const [regularTasks, recurringTemplates] = await Promise.all([
         regularTasksPromise,

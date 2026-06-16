@@ -6,18 +6,16 @@ import type {
   RecurringTaskQuery,
   RecurringTaskUpdateInput,
 } from "./recurring-task";
-import { usePouchDB } from "../../pouchdb";
-import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
+import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 
 export function useRecurringTasks() {
-  const { db } = usePouchDB();
   const invalidateTaskQueries = useInvalidateTaskQueries();
 
-  const recurringTaskUseCases = createRecurringTaskUseCases(db);
+  const recurringRepo = useRecurringTaskRepository();
 
   const createRecurringTaskMutation = useMutation({
     mutationFn: (input: RecurringTaskCreateInput) =>
-      recurringTaskUseCases.createRecurringTask(input),
+      recurringRepo.create(input),
     onSuccess: () => {
       invalidateTaskQueries();
     },
@@ -29,7 +27,7 @@ export function useRecurringTasks() {
 
   const getRecurringTaskMutation = useMutation({
     mutationFn: async (id: string) => {
-      const recurringTask = await recurringTaskUseCases.getRecurringTask(id);
+      const recurringTask = await recurringRepo.findById(id);
       if (!recurringTask) {
         throw new Error("Recurring task not found");
       }
@@ -43,7 +41,7 @@ export function useRecurringTasks() {
 
   const getRecurringTasksMutation = useMutation({
     mutationFn: (query?: RecurringTaskQuery) =>
-      recurringTaskUseCases.getRecurringTasks(query),
+      recurringRepo.find(query),
     onError: (error) => {
       console.error("Failed to get recurring tasks:", error);
       throw error;
@@ -57,7 +55,7 @@ export function useRecurringTasks() {
     }: {
       id: string;
       input: RecurringTaskUpdateInput;
-    }) => recurringTaskUseCases.updateRecurringTask(id, input),
+    }) => recurringRepo.update(id, input),
     onSuccess: () => {
       invalidateTaskQueries();
     },
@@ -68,7 +66,7 @@ export function useRecurringTasks() {
   });
 
   const deleteRecurringTaskMutation = useMutation({
-    mutationFn: (id: string) => recurringTaskUseCases.deleteRecurringTask(id),
+    mutationFn: (id: string) => recurringRepo.delete(id),
     onError: (error) => {
       console.error("Failed to delete recurring task:", error);
       throw error;

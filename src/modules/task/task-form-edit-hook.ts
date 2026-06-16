@@ -7,7 +7,7 @@ import { useSettings } from "../settings";
 import { useRecurringTasks } from "./use-recurring-tasks";
 import { usePouchDB } from "../../pouchdb";
 import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
-import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
+import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 import {
   promoteTaskToRecurring,
   demoteTaskFromRecurring,
@@ -79,6 +79,7 @@ export const useTaskFormEdit = (
     updateRecurringTask,
   } = useRecurringTasks();
   const { db } = usePouchDB();
+  const recurringRepo = useRecurringTaskRepository();
 
   const [task, setTask] = useState<Task | null>(initialTask ?? null);
   const { settings } = useSettings();
@@ -91,21 +92,6 @@ export const useTaskFormEdit = (
 
   const getTaskEpoch = useTaskEpoch();
 
-  async function addOccurrenceException(
-    recurringTaskId: string,
-    epoch: number
-  ) {
-    const virtualId = `vtask_${recurringTaskId}_${epoch}`;
-    try {
-      await cancelVirtualReminder(db, virtualId);
-    } catch (err) {
-      logger.error("Failed to cancel virtual reminder on occurrence exception:", err);
-    }
-    await createRecurringTaskUseCases(db).addOccurrenceException(
-      recurringTaskId,
-      epoch
-    );
-  }
 
   const [formData, setFormData] = useState<EditFormData>({
     scheduleAt: { date: null, time: "" },
@@ -336,18 +322,7 @@ export const useTaskFormEdit = (
           : pendingOperation.taskId;
         result = await updateTask(targetId, pendingOperation.taskInput);
       }
-      if (
-        pendingOperation.task.recurringTaskId &&
-        pendingOperation.task.atEpochMillis &&
-        // demote path never calls materializeVirtualTask so always needs the exception;
-        // non-demote virtual path already got it inside materializeVirtualTask
-        (pendingOperation.type === "demote" || !pendingOperation.task.isVirtual)
-      ) {
-        await addOccurrenceException(
-          pendingOperation.task.recurringTaskId,
-          pendingOperation.task.atEpochMillis
-        );
-      }
+      
       setPendingOperation(null);
       setTask(null);
       if (onSuccess) onSuccess(result);

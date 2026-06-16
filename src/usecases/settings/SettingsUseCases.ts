@@ -1,8 +1,4 @@
 import type { ISettingsRepository } from "../../domain/settings/ISettingsRepository";
-import type {
-  ILocationProvider,
-  GeolocationOptions,
-} from "../../domain/settings/ILocationProvider";
 import type { ITimezoneProvider } from "../../domain/location/ITimezoneProvider";
 import type { GeneralSettings } from "../../modules/settings/settings";
 import type { Language } from "../../modules/i18n/language";

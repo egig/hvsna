@@ -13,15 +13,15 @@ vi.mock("../../../pouchdb", () => ({
   usePouchDB: () => ({ db: {} as any }),
 }));
 
-// Mock task use cases
-let mockUseCases = {
-  getTasks: mockGetTasks,
-  getAllPendingTasks: mockGetAllPendingTasks,
-  updateTask: mockUpdateTask,
+// Mock the task repository hook
+let mockRepo = {
+  findBrowsedTasks: mockGetTasks,
+  findAllPending: mockGetAllPendingTasks,
+  update: mockUpdateTask,
 };
 
-vi.mock("../../../usecases/task", () => ({
-  createTaskUseCases: () => mockUseCases,
+vi.mock("../use-task-repository", () => ({
+  useTaskRepository: () => mockRepo,
 }));
 
 // Mock logger
@@ -69,10 +69,10 @@ describe("useTags", () => {
     mockGetTasks.mockResolvedValue(mockTasks);
     mockGetAllPendingTasks.mockResolvedValue(mockTasks);
     mockUpdateTask.mockResolvedValue({});
-    mockUseCases = {
-      getTasks: mockGetTasks,
-      getAllPendingTasks: mockGetAllPendingTasks,
-      updateTask: mockUpdateTask,
+    mockRepo = {
+      findBrowsedTasks: mockGetTasks,
+      findAllPending: mockGetAllPendingTasks,
+      update: mockUpdateTask,
     };
   });
 

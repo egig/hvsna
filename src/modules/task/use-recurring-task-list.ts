@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePouchDB } from "../../pouchdb";
-import { createRecurringTaskUseCases } from "@/usecases/task/RecurringTaskUseCasesFactory";
+import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 import { queryKeys } from "../query-keys";
 import { useRecurringOccurance } from "./recurring-task-generator";
 import { Task } from "@/domain/task";
@@ -33,6 +33,7 @@ function toVirtualTask(
 
 export function useRecurringTaskList() {
   const { db } = usePouchDB();
+  const recurringRepo = useRecurringTaskRepository();
   const { computeOccurrencesInRange } = useRecurringOccurance();
 
   const {
@@ -42,8 +43,7 @@ export function useRecurringTaskList() {
   } = useQuery({
     queryKey: queryKeys.recurringTaskList(),
     queryFn: async () => {
-      const useCases = createRecurringTaskUseCases(db);
-      const templates = await useCases.getRecurringTasks();
+      const templates = await recurringRepo.find();
 
       const now = Date.now();
 

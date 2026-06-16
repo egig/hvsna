@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
-import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../usecases/task";
+import { useTaskRepository } from "./use-task-repository";
 import { queryKeys } from "../query-keys";
 import { useVirtualTasks } from "./use-virtual-tasks";
 import { usePendingTasks } from "./use-pending-tasks";
@@ -20,8 +19,7 @@ export function useToday() {
     getTomorrow,
     initiated: hijriCalInititated,
   } = useHijriDate();
-  const { db } = usePouchDB();
-  const taskUseCases = createTaskUseCases(db);
+  const taskRepo = useTaskRepository();
   const { getPrayerTimesForDate } = usePrayerTimes();
 
   const gregDate = dayjs(now);
@@ -75,7 +73,7 @@ export function useToday() {
   const todayCompletedTasksQuery = useQuery({
     queryKey: queryKeys.todayCompletedTasks(todayString),
     queryFn: () =>
-      taskUseCases.findTodayCompletedTasks(startOfDayEpoch, endOfDayEpoch),
+      taskRepo.findTodayCompletedTasks(startOfDayEpoch, endOfDayEpoch),
     enabled: hijriCalInititated,
   });
 

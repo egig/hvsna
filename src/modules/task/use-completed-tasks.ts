@@ -1,19 +1,17 @@
 import { useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../usecases/task";
+import { useTaskRepository } from "./use-task-repository";
 import { queryKeys } from "../query-keys";
 
 const PAGE_SIZE = 10;
 
 export function useCompletedTasks() {
-  const { db } = usePouchDB();
-  const taskUseCases = createTaskUseCases(db);
+  const taskRepo = useTaskRepository();
 
   const query = useInfiniteQuery({
     queryKey: queryKeys.completedTasks(),
     queryFn: ({ pageParam }) =>
-      taskUseCases.getAllCompletedTasks(pageParam, PAGE_SIZE),
+      taskRepo.findAllCompleted(pageParam, PAGE_SIZE),
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) => {
       // If we got a full page, return next offset

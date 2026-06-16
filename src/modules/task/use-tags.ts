@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { usePouchDB } from "../../pouchdb";
-import { createTaskUseCases } from "../../usecases/task";
+import { useTaskRepository } from "./use-task-repository";
 import { queryKeys } from "../query-keys";
 import { useAllTasks } from "./use-all-tasks";
 import log from "../logger";
@@ -16,8 +15,7 @@ export interface UseTagsOptions {
 }
 
 export function useTags(options?: UseTagsOptions) {
-  const { db } = usePouchDB();
-  const taskUseCases = createTaskUseCases(db);
+  const taskRepo = useTaskRepository();
   const queryClient = useQueryClient();
   const limit = options?.limit;
 
@@ -78,7 +76,7 @@ export function useTags(options?: UseTagsOptions) {
           tag === oldName ? normalizedNew : tag
         );
         try {
-          await taskUseCases.updateTask(task.id!, { tags: updatedTags });
+          await taskRepo.update(task.id!, { tags: updatedTags });
         } catch (err) {
           log.error(`Failed to update tag on task ${task.id}:`, err);
         }
@@ -86,7 +84,7 @@ export function useTags(options?: UseTagsOptions) {
 
       refreshTags();
     },
-    [tasks, taskUseCases, refreshTags]
+    [tasks, taskRepo, refreshTags]
   );
 
   // Delete a tag from all tasks
@@ -99,7 +97,7 @@ export function useTags(options?: UseTagsOptions) {
       for (const task of tasksToUpdate) {
         const updatedTags = task.tags!.filter((tag) => tag !== tagName);
         try {
-          await taskUseCases.updateTask(task.id!, {
+          await taskRepo.update(task.id!, {
             tags: updatedTags.length > 0 ? updatedTags : null,
           });
         } catch (err) {
@@ -109,7 +107,7 @@ export function useTags(options?: UseTagsOptions) {
 
       refreshTags();
     },
-    [tasks, taskUseCases, refreshTags]
+    [tasks, taskRepo, refreshTags]
   );
 
   return {
