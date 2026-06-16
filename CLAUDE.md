@@ -69,11 +69,6 @@ src/
     task/          # PouchDBTaskRepository, TaskRepositoryFactory
     index.ts       # Exports all infra providers
 
-  usecases/        # Business logic orchestration
-    auth/          # AuthUseCases
-    settings/      # SettingsUseCases, SettingsUseCasesFactory
-    task/          # TaskUseCases, TaskUseCasesFactory
-
   modules/         # Feature modules and shared UI
     api/           # Axios HTTP client
     auth/          # Auth context, hooks, sign-in/sign-up pages
