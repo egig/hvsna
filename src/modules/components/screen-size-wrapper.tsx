@@ -43,8 +43,6 @@ export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [setDesktop]);
 
-  console.log("isDesktop", isDesktop);
-
   return (
     <ScreenSizeContext.Provider value={{ isDesktop }}>
       {children}
