@@ -42,14 +42,7 @@ export const RoutesDesktop = () => {
   return (
     <DesktopTaskFormProvider>
       {/* Note that animate present depends to the useLocation hook so it should be here */}
-      <Routes
-        location={settingsBackgroundLocation || location}
-        key={
-          isSettingsOpen
-            ? settingsBackgroundLocation.pathname
-            : location.pathname
-        }
-      >
+      <Routes location={settingsBackgroundLocation || location}>
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/today" replace />} />
           <Route path="search" element={<Search />} />

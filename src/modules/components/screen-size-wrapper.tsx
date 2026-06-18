@@ -26,7 +26,9 @@ interface ScreenSizeProviderProps {
 export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
   children,
 }) => {
-  const [isDesktop, setDesktop] = useState<boolean>(false);
+  const [isDesktop, setDesktop] = useState<boolean>(
+    () => typeof window !== "undefined" && window.innerWidth >= 1080
+  );
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -40,6 +42,8 @@ export const ScreenSizeProvider: React.FC<ScreenSizeProviderProps> = ({
 
     return () => window.removeEventListener("resize", checkScreenSize);
   }, [setDesktop]);
+
+  console.log("isDesktop", isDesktop);
 
   return (
     <ScreenSizeContext.Provider value={{ isDesktop }}>

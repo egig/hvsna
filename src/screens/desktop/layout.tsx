@@ -26,6 +26,7 @@ export default function Layout() {
       ref={allotmentRef}
       className="h-screen"
       proportionalLayout={false}
+      defaultSizes={[192, window.innerWidth]}
       onChange={handleSidebarChange}
     >
       {/* Sidebar pane */}

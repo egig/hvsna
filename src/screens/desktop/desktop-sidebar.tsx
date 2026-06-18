@@ -17,6 +17,7 @@ import {
   HvReplayCircleFilled,
 } from "@/modules/icons";
 import { NavLink, useLocation } from "react-router";
+import type { ReactNode } from "react";
 import { SidebarTagsSection } from "../../modules/task/sidebar-tags-section";
 import { Modal } from "../../modules/navigation/modal";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
@@ -30,12 +31,71 @@ interface DesktopSidebarProps {
   onToggleCollapse?: () => void;
 }
 
+interface SidebarTab {
+  path: string;
+  label: string;
+  icon: ReactNode;
+  activeIcon: ReactNode;
+  context: string;
+}
+
+const navLinkClass = (isActive: boolean, collapsed: boolean) =>
+  `flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
+    collapsed ? "justify-center" : "space-x-1"
+  } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`;
+
+function SidebarNavLink({
+  tab,
+  collapsed,
+  extraState,
+}: {
+  tab: SidebarTab;
+  collapsed: boolean;
+  extraState?: Record<string, unknown>;
+}) {
+  return (
+    <NavLink
+      to={tab.path}
+      className={({ isActive }) => navLinkClass(isActive, collapsed)}
+      aria-label={tab.label}
+      state={{ context: tab.context, ...extraState }}
+    >
+      {({ isActive }) => (
+        <>
+          <span className="text-xl">
+            {isActive ? tab.activeIcon : tab.icon}
+          </span>
+          {!collapsed && <span className="text-sm">{tab.label}</span>}
+        </>
+      )}
+    </NavLink>
+  );
+}
+
+// Isolated so only this leaf subscribes to location changes (needed to pass the
+// current location as the modal background), keeping the sidebar itself static.
+function SettingsNavLink({
+  tab,
+  collapsed,
+}: {
+  tab: SidebarTab;
+  collapsed: boolean;
+}) {
+  const location = useLocation();
+  return (
+    <SidebarNavLink
+      tab={tab}
+      collapsed={collapsed}
+      extraState={{ settingsBackgroundLocation: location }}
+    />
+  );
+}
+
 export function DesktopSidebar({
   collapsed = false,
   onToggleCollapse,
 }: DesktopSidebarProps) {
   const { t } = useLanguageContext();
-  const location = useLocation();
   const { openCreateTaskForm } = useTaskFormContext();
   const { user, isAuthenticated, logout } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -109,13 +169,6 @@ export function DesktopSidebar({
     tab.path.startsWith("/settings")
   );
 
-  const getIsActive = (tabPath: string) => {
-    const isRootTab = tabPath === "/";
-    const isCurrentTab = location.pathname === tabPath;
-    const isChildTab = location.pathname.startsWith(`${tabPath}/`);
-    return isRootTab ? isCurrentTab : isChildTab || isCurrentTab;
-  };
-
   return (
     <div
       className={`${"w-full h-full"} bg-white border-gray-200 flex flex-col overflow-hidden`}
@@ -154,53 +207,16 @@ export function DesktopSidebar({
             </span>
           )}
         </button>
-        {mainTabs.map((tab) => {
-          const isActive = getIsActive(tab.path);
-          return (
-            <NavLink
-              key={tab.path}
-              to={tab.path}
-              className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
-                collapsed ? "justify-center" : "space-x-1"
-              } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
-              aria-label={tab.label}
-              aria-current={isActive ? "page" : undefined}
-              state={{ context: tab.context }}
-            >
-              <span className="text-xl">
-                {isActive ? tab.activeIcon : tab.icon}
-              </span>
-              {!collapsed && <span className="text-sm">{tab.label}</span>}
-            </NavLink>
-          );
-        })}
+        {mainTabs.map((tab) => (
+          <SidebarNavLink key={tab.path} tab={tab} collapsed={collapsed} />
+        ))}
         <SidebarTagsSection collapsed={collapsed} />
       </div>
 
       <div className="border-t border-gray-100 p-2 space-y-2">
-        {bottomTabs.map((tab) => {
-          const isActive = getIsActive(tab.path);
-          return (
-            <NavLink
-              key={tab.path}
-              to={tab.path}
-              className={`flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
-                collapsed ? "justify-center" : "space-x-1"
-              } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`}
-              aria-label={tab.label}
-              aria-current={isActive ? "page" : undefined}
-              state={{
-                context: tab.context,
-                settingsBackgroundLocation: location,
-              }}
-            >
-              <span className="text-xl">
-                {isActive ? tab.activeIcon : tab.icon}
-              </span>
-              {!collapsed && <span className="text-sm">{tab.label}</span>}
-            </NavLink>
-          );
-        })}
+        {bottomTabs.map((tab) => (
+          <SettingsNavLink key={tab.path} tab={tab} collapsed={collapsed} />
+        ))}
       </div>
 
       {/* Logout Confirmation Modal */}

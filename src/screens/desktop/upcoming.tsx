@@ -112,7 +112,9 @@ export default function UpcomingDesktop() {
     >
       <Allotment
         ref={allotmentRef}
+        className="h-full"
         proportionalLayout={false}
+        defaultSizes={[window.innerWidth, 288]}
         onChange={handleAllotmentChange}
       >
         {/* Main pane */}
