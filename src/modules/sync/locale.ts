@@ -16,6 +16,14 @@ export const syncTranslations = {
     en: "Syncing...",
     id: "Mensinkronkan...",
   },
+  synced: {
+    en: "Synced",
+    id: "Tersinkron",
+  },
+  offline: {
+    en: "Offline",
+    id: "Luring",
+  },
   auto_syncing: {
     en: "Auto-syncing",
     id: "Otomatis sinkron",

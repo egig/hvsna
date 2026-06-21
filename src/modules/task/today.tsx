@@ -15,7 +15,7 @@ import { HvCheck, HvMapPin, HvMaghrib } from "@/modules/icons";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
 import { useLocationContext } from "../location/context";
-import { useNetworkContext } from "../network/context";
+import { SyncStatusBadge } from "../sync/components/sync-status-badge";
 import { usePrayerTimes } from "../prayer";
 import type { PrayerTimes } from "adhan";
 import { groupTasksByPrayerTimes } from "../prayer-time-utils";
@@ -32,7 +32,6 @@ export function Today() {
 function TodayInner() {
   const { pageTitle, subTitle } = useToday();
   const { location, ensureLocation, loading } = useLocationContext();
-  const { isOnline, initiated: networkInit } = useNetworkContext();
 
   return (
     <>
@@ -52,14 +51,7 @@ function TodayInner() {
                 <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
               </button>
             }
-            rightAction={
-              !isOnline &&
-              networkInit && (
-                <div className="text-sm text-gray-500 px-1 mr-3 rounded-sm border-1 border-gray-300">
-                  Offline
-                </div>
-              )
-            }
+            rightAction={<SyncStatusBadge />}
           />
         }
       >

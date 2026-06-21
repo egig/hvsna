@@ -75,6 +75,9 @@ export {
   TbMoon as HvIsha,
   TbLayoutSidebarFilled as HvPanelLeft,
   TbLayoutSidebar as HvPanelLeftClose,
+  TbCloudOff as HvCloudOff,
+  TbCloudCheck as HvCloudCheck,
+  TbCloudX as HvCloudX,
 } from "react-icons/tb";
 
 export {
