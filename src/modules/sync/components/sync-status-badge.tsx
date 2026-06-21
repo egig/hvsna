@@ -20,26 +20,15 @@ export function SyncStatusBadge() {
     );
   }
 
-  if (isSyncing || isManualSyncing) {
-    return (
-      <div className={`${badgeClass} text-gray-500 border-none`}>
-        <HvRefreshCw size={20} className="animate-spin" />
-      </div>
-    );
-  }
+  const icon = isSyncing || isManualSyncing
+  ? <HvRefreshCw size={20} className="animate-spin" />
+  : lastSyncTime
+    ? <HvCloudCheck size={24} />
+    : <HvCloudOff size={24} />;
 
-  // Only show the synced state once a sync has actually happened.
-  if (lastSyncTime) {
-    return (
-      <div className={`${badgeClass} text-gray-500 border-note` }>
-        <HvCloudCheck size={24} />
-      </div>
-    );
-  }
-
-   return (
-      <div className={`${badgeClass} text-gray-500 border-none`}>
-        <HvCloudOff size={24} />
-      </div>
-    );
+return (
+  <div className={`${badgeClass} text-gray-500 border-none`}>
+    {icon}
+  </div>
+);
 }

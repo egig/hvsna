@@ -61,8 +61,7 @@ const storeSyncTimeToDB = async (
       await db.put({
         _id: "_local/syncTime",
         lastSyncTime: syncTime.toISOString(),
-      });
-    }
+      });    }
   } catch (error) {
     console.error("[sync] Failed to store syncTime:", error);
   }
@@ -400,6 +399,8 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
           })
           .on("change", async (info: any) => {
             log.info("[sync] change:", info);
+            // Changes are actively being replicated.
+            setIsSyncing(true);
             queryClient.invalidateQueries();
             const now = new Date();
             setLastSyncTime(now);
@@ -407,21 +408,27 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
           })
           .on("paused", (err: any) => {
             log.info("[sync] paused:", err);
+            // Replication caught up (or paused) — no longer actively syncing.
+            setIsSyncing(false);
           })
           .on("active", () => {
             log.info("[sync] active");
+            // Replication resumed transferring changes.
+            setIsSyncing(true);
           })
           .on("denied", (err: any) => {
             console.error("[sync] denied:", err);
           })
           .on("complete", async (info: any) => {
             log.info("[sync] complete:", info);
+            setIsSyncing(false);
             const now = new Date();
             setLastSyncTime(now);
             await storeSyncTimeToDB(db, now);
           })
           .on("error", (err: any) => {
             console.error("[sync] error:", err);
+            setIsSyncing(false);
           });
 
         // Store the replication reference for cleanup

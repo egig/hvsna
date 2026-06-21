@@ -54,12 +54,10 @@ export default function Sync() {
   const getStatusIcon = () => {
     if (isSyncing) {
       return (
-        <span
-          className="text-sm font-medium"
+        <HvRefreshCw
+          className="h-5 w-5 animate-spin"
           style={{ color: "var(--hvsna-primary-color)" }}
-        >
-          {t("auto_syncing")}
-        </span>
+        />
       );
     }
 
@@ -136,15 +134,23 @@ export default function Sync() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">{t("status")}:</span>
                 <span
-                  className={`text-sm font-medium ${
-                    manualSyncStatus === "success" ||
-                    (lastSyncTime && manualSyncStatus === "idle")
+                  className={`flex items-center gap-1.5 text-sm font-medium ${
+                    isSyncing
+                      ? ""
+                      : manualSyncStatus === "success" ||
+                        (lastSyncTime && manualSyncStatus === "idle")
                       ? "text-green-600"
                       : manualSyncStatus === "error"
                       ? "text-red-600"
                       : "text-gray-600"
                   }`}
+                  style={
+                    isSyncing
+                      ? { color: "var(--hvsna-primary-color)" }
+                      : undefined
+                  }
                 >
+                  {getStatusIcon()}
                   {getStatusText()}
                 </span>
               </div>
