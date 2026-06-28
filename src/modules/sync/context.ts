@@ -6,9 +6,9 @@ import React, {
   useCallback,
   type ReactNode,
 } from "react";
-import { useAuth } from "src/modules/auth/use-auth";
+import { useAuth } from "@/modules/auth/use-auth";
 import PouchDB from "pouchdb";
-import { usePouchDB } from "src/pouchdb";
+import { usePouchDB } from "@/pouchdb";
 import { useQueryClient } from "@tanstack/react-query";
 import { SyncInitDialog } from "./components/sync-init-dialog";
 import {

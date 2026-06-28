@@ -80,6 +80,15 @@ export function groupTasksByPrayerTimes(
   const tomorrow: Task[] = [];
 
   for (const task of tasks) {
+    if (!task.atEpochMillis) {
+      continue;
+    }
+
+    if (task.atEpochMillis < now) {
+      overdue.push(task);
+      continue;
+    }
+
     if (
       endOfTodayEpoch != null &&
       task.atEpochMillis != null &&
@@ -91,13 +100,12 @@ export function groupTasksByPrayerTimes(
 
     if (!task.atTime) {
       endOfDay.push(task);
-    } else if (task.atEpochMillis != null && task.atEpochMillis < now) {
-      overdue.push(task);
-    } else if (task.atEpochMillis != null) {
-      const key = task.atTime;
-      if (!groupMap.has(key)) groupMap.set(key, []);
-      groupMap.get(key)!.push(task);
+      continue;
     }
+
+    const key = task.atTime;
+    if (!groupMap.has(key)) groupMap.set(key, []);
+    groupMap.get(key)!.push(task);
   }
 
   overdue.sort((a, b) => (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0));

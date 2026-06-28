@@ -2,7 +2,7 @@ import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 import dayjs from "dayjs";
 import { useSettings } from "./settings";
 import { useCallback } from "react";
-import { HijriDate, useHijriDate } from "./calendar/hijri";
+import { useHijriDate } from "./calendar/hijri";
 
 export function usePrayerTimes() {
   const { currentHijriDate } = useHijriDate();
