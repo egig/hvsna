@@ -55,8 +55,8 @@ export function useTasks() {
     // Add date range filter
     if (dateRangeFilter) {
       query.atEpochMillis = {
-        $gte: dateRangeFilter.startDate,
-        $lte: dateRangeFilter.endDate,
+        from: dateRangeFilter.startDate,
+        to: dateRangeFilter.endDate,
       };
     }
 

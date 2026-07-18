@@ -132,7 +132,7 @@ export function getCoordinateFromTimezone(timezone: string): {
   latitude: number;
   longitude: number;
 } {
-  return TIMEZONE_COORDINATES[timezone];
+  return TIMEZONE_COORDINATES[timezone] ?? TIMEZONE_COORDINATES["Asia/Jakarta"];
 }
 
 /**

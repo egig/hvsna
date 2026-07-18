@@ -1,4 +1,4 @@
-import { BrowserRouter, MemoryRouter } from "react-router";
+import { BrowserRouter } from "react-router";
 import "@/app.css";
 import { PouchDBProvider } from "@/pouchdb";
 import DroppableContext from "@/modules/components/droppable-context";
@@ -19,6 +19,10 @@ import { PlatformProvider } from "@/modules/platform";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
 import { LocationProvider } from "./modules/location/context";
 import { NetworkProvider } from "./modules/network/context";
+import {
+  RepositoriesProvider,
+  createWebRepositories,
+} from "@/modules/repositories-context";
 import type React from "react";
 
 export interface AppConfig {
@@ -50,12 +54,14 @@ export default function App({
   Router,
   Routes,
 }: {
-  platform: "web" | "capacitor";
+  platform: "web";
   config: AppConfig;
   db: PouchDB.Database;
-  Router: typeof BrowserRouter | typeof MemoryRouter;
+  Router: typeof BrowserRouter;
   Routes: React.FC;
 }) {
+  const repositories = createWebRepositories(db);
+
   return (
     <EnsureRequiredParams
       component={PostHogProvider}
@@ -87,26 +93,28 @@ export default function App({
                 <SnackbarProvider>
                   <ScreenSizeProvider>
                     <PouchDBProvider dbInstance={db}>
-                      <AuthProvider>
-                        <SettingsProvider>
-                          <LanguageProviderWrapper>
-                            <LocationProvider>
-                              <DroppableContext>
-                                <SyncProvider>
-                                  <Router>
-                                    <TaskProvider>
-                                      <PostHogSessionTracker
-                                        platform={platform}
-                                      />
-                                      <Routes />
-                                    </TaskProvider>
-                                  </Router>
-                                </SyncProvider>
-                              </DroppableContext>
-                            </LocationProvider>
-                          </LanguageProviderWrapper>
-                        </SettingsProvider>
-                      </AuthProvider>
+                      <RepositoriesProvider repositories={repositories}>
+                        <AuthProvider>
+                          <SettingsProvider>
+                            <LanguageProviderWrapper>
+                              <LocationProvider>
+                                <DroppableContext>
+                                  <SyncProvider>
+                                    <Router>
+                                      <TaskProvider>
+                                        <PostHogSessionTracker
+                                          platform={platform}
+                                        />
+                                        <Routes />
+                                      </TaskProvider>
+                                    </Router>
+                                  </SyncProvider>
+                                </DroppableContext>
+                              </LocationProvider>
+                            </LanguageProviderWrapper>
+                          </SettingsProvider>
+                        </AuthProvider>
+                      </RepositoriesProvider>
                     </PouchDBProvider>
                   </ScreenSizeProvider>
                 </SnackbarProvider>

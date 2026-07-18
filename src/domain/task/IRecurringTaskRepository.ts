@@ -8,8 +8,11 @@ import type {
 export interface IRecurringTaskRepository {
   // CRUD operations
   create(input: RecurringTaskCreateInput): Promise<RecurringTask>;
-  update(id: string, input: RecurringTaskUpdateInput): Promise<RecurringTask>;
-  delete(id: string): Promise<void>;
-  findById(id: string): Promise<RecurringTask | null>;
+  update(
+    id: string | number,
+    input: RecurringTaskUpdateInput
+  ): Promise<RecurringTask>;
+  delete(id: string | number): Promise<void>;
+  findById(id: string | number): Promise<RecurringTask | null>;
   find(query?: RecurringTaskQuery): Promise<RecurringTask[]>;
 }

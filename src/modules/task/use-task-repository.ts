@@ -1,8 +1,6 @@
-import { useMemo } from "react";
-import { usePouchDB } from "../../pouchdb";
-import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
+import type { ITaskRepository } from "@/domain/task/ITaskRepository";
+import { useRepositories } from "../repositories-context";
 
-export function useTaskRepository(): PouchDBTaskRepository {
-  const { db } = usePouchDB();
-  return useMemo(() => new PouchDBTaskRepository(db), [db]);
+export function useTaskRepository(): ITaskRepository {
+  return useRepositories().taskRepository;
 }

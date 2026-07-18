@@ -1,23 +1,15 @@
 import React, { createContext, useContext, useMemo } from "react";
 import type { ReactNode } from "react";
-import { Capacitor } from "@capacitor/core";
 
-export type PlatformType = "web" | "pwa" | "capacitor";
-export type NativePlatform = "ios" | "android" | "web";
+export type PlatformType = "web" | "pwa";
 
 interface PlatformContextType {
   platform: PlatformType;
-  nativePlatform: NativePlatform;
-  isNative: boolean;
   isPWA: boolean;
   isWeb: boolean;
 }
 
 const detectPlatform = (): PlatformType => {
-  if (Capacitor.isNativePlatform()) {
-    return "capacitor";
-  }
-
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||
     (window.navigator as Navigator & { standalone?: boolean }).standalone ===
@@ -43,12 +35,9 @@ export const PlatformProvider: React.FC<PlatformProviderProps> = ({
 }) => {
   const value = useMemo<PlatformContextType>(() => {
     const platform = detectPlatform();
-    const nativePlatform = Capacitor.getPlatform() as NativePlatform;
 
     return {
       platform,
-      nativePlatform,
-      isNative: platform === "capacitor",
       isPWA: platform === "pwa",
       isWeb: platform === "web",
     };

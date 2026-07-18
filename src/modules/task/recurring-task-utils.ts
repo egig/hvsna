@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import type { Task } from "@/domain/task";
-import type { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
-import type { PouchDBRecurringTaskRepository } from "../../infra/task/PouchDBRecurringTaskRepository";
+import type { ITaskRepository } from "@/domain/task/ITaskRepository";
+import type { IRecurringTaskRepository } from "@/domain/task/IRecurringTaskRepository";
 
 /**
  * Converts a virtual recurring occurrence into a persisted Task document,
@@ -13,15 +13,15 @@ import type { PouchDBRecurringTaskRepository } from "../../infra/task/PouchDBRec
  */
 export async function materializeVirtualTask(
   task: Task,
-  taskRepo: PouchDBTaskRepository,
-  recurringRepo: PouchDBRecurringTaskRepository,
+  taskRepo: ITaskRepository,
+  recurringRepo: IRecurringTaskRepository,
   cancelReminder?: (virtualTaskId: string) => Promise<void>
 ): Promise<Task> {
   if (!task.isVirtual) return task;
 
   if (cancelReminder && task.id) {
     try {
-      await cancelReminder(task.id as string);
+      await cancelReminder(String(task.id));
     } catch {
       // best-effort: missing reminder is not fatal
     }
@@ -54,9 +54,9 @@ export async function materializeVirtualTask(
 }
 
 async function addOccurrenceException(
-  id: string,
+  id: string | number,
   epoch: number,
-  recurringRepo: PouchDBRecurringTaskRepository
+  recurringRepo: IRecurringTaskRepository
 ): Promise<void> {
   const rtask = await recurringRepo.findById(id);
   if (!rtask) return;

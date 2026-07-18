@@ -6,7 +6,7 @@ const SESSION_KEY = "ph_session_tracked";
 export function PostHogSessionTracker({
   platform,
 }: {
-  platform: "web" | "capacitor";
+  platform: "web";
 }) {
   const posthog = usePostHog();
 

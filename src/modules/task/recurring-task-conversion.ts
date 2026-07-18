@@ -8,7 +8,7 @@ import type {
 export interface UpdateRecurringSeriesDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   updateRecurringTask: (
-    id: string,
+    id: string | number,
     input: RecurringTaskUpdateInput
   ) => Promise<RecurringTask>;
   taskRepository: ITaskRepository;
@@ -16,7 +16,7 @@ export interface UpdateRecurringSeriesDeps {
 
 export interface DemoteAndDeleteFutureDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
-  deleteRecurringTask: (id: string) => Promise<void>;
+  deleteRecurringTask: (id: string | number) => Promise<void>;
   taskRepository: ITaskRepository;
 }
 

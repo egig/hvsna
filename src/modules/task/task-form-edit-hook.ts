@@ -5,8 +5,7 @@ import { useTaskContext } from "./task-context";
 import type { Task, TaskUpdateInput } from "@/domain/task";
 import { useSettings } from "../settings";
 import { useRecurringTasks } from "./use-recurring-tasks";
-import { usePouchDB } from "../../pouchdb";
-import { PouchDBTaskRepository } from "../../infra/task/PouchDBTaskRepository";
+import { useTaskRepository } from "./use-task-repository";
 import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 import {
   promoteTaskToRecurring,
@@ -75,7 +74,7 @@ export const useTaskFormEdit = (
   } = useTaskContext();
   const { createRecurringTask, deleteRecurringTask, updateRecurringTask } =
     useRecurringTasks();
-  const { db } = usePouchDB();
+  const taskRepo = useTaskRepository();
   const recurringRepo = useRecurringTaskRepository();
 
   const [task, setTask] = useState<Task | null>(initialTask ?? null);
@@ -199,7 +198,7 @@ export const useTaskFormEdit = (
           {
             createRecurringTask,
             updateTask,
-            taskRepository: new PouchDBTaskRepository(db),
+            taskRepository: taskRepo,
           }
         );
       } else if (!wasRegular && !isNowRecurring) {
@@ -345,7 +344,7 @@ export const useTaskFormEdit = (
           {
             updateTask,
             deleteRecurringTask,
-            taskRepository: new PouchDBTaskRepository(db),
+            taskRepository: taskRepo,
           }
         );
       } else {
@@ -373,7 +372,7 @@ export const useTaskFormEdit = (
           {
             updateTask,
             updateRecurringTask,
-            taskRepository: new PouchDBTaskRepository(db),
+            taskRepository: taskRepo,
           }
         );
       }

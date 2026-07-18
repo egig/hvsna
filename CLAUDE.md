@@ -39,7 +39,7 @@ npm run android
 - **Framework**: React 19 + React Router 7 (client-side only, no SSR)
 - **Styling**: TailwindCSS v4 with Vite plugin
 - **Build**: Vite 7 with TypeScript (strict mode)
-- **Database**: PouchDB (web: IndexedDB, native: SQLite via pouchdb-adapter-cordova-sqlite)
+- **Database**: PouchDB on web (IndexedDB, synced live against a CouchDB backend); SQLite via Drizzle ORM + `@capacitor-community/sqlite` on native (offline-only for now, no sync yet)
 - **State**: React Context + TanStack Query v5
 - **Mobile**: Capacitor (iOS/Android)
 - **Testing**: Vitest with UI support
@@ -65,8 +65,9 @@ src/
     network/       # Browser + Capacitor network detection
     notifications/ # Browser + Capacitor push notifications
     permissions/   # Browser + Capacitor permission handling
-    settings/      # PouchDB settings, SettingsUseCasesFactory
-    task/          # PouchDBTaskRepository, TaskRepositoryFactory
+    settings/      # PouchDBSettingsRepository (web), SQLiteSettingsRepository (native)
+    sqlite/        # Drizzle schema, migrations, native db connection
+    task/          # PouchDB*Repository (web), SQLite*Repository (native)
     index.ts       # Exports all infra providers
 
   modules/         # Feature modules and shared UI
@@ -114,15 +115,13 @@ Infrastructure is injected via React providers (dependency injection). Factories
 
 #### Platform Abstraction (Capacitor vs Browser)
 
-Each infra capability has both a Browser and Capacitor implementation. Factories select at runtime:
+Each infra capability has both a Browser and Capacitor implementation. For task/settings repositories, `src/modules/repositories-context.tsx` builds the right set once per platform and exposes them via `RepositoriesProvider`/`useRepositories()`:
 
 ```typescript
-// Example from infra/task/TaskRepositoryFactory.ts
-export function createTaskRepository(): ITaskRepository {
-  return Capacitor.isNativePlatform()
-    ? new PouchDBTaskRepository({ adapter: 'cordova-sqlite' })
-    : new PouchDBTaskRepository({ adapter: 'idb' });
-}
+// Example from modules/repositories-context.tsx
+const repositories = platform === "capacitor"
+  ? createNativeRepositories(sqliteDb)   // Drizzle + @capacitor-community/sqlite
+  : createWebRepositories(pouchDb);       // PouchDB
 ```
 
 #### Hijri Calendar System
@@ -155,16 +154,22 @@ Located in `src/modules/task/` (41 files). Key files:
 - CRUD forms: `task-form.tsx`, `task-form-edit.tsx` (mobile and desktop variants)
 - Views: `tasks.tsx`, `today.tsx`, `upcoming.tsx`, `inbox.tsx`, `browse.tsx`
 
-#### PouchDB
+#### PouchDB (web only)
 
 - Singleton managed in `src/pouchdb.ts` and `src/modules/pouchdb-singleton.ts`
-- Web: uses IndexedDB adapter
-- Native: uses Cordova SQLite adapter
-- Supports CouchDB sync for cross-device data
+- Uses the IndexedDB adapter
+- Supports live CouchDB sync for cross-device data (`src/modules/sync/`)
+
+#### SQLite + Drizzle (native only)
+
+- Connection + Drizzle client managed in `src/infra/sqlite/db-connection.ts`
+- Schema in `src/infra/sqlite/schema.ts`; drizzle-kit migrations in `drizzle/`, applied at startup by `src/infra/sqlite/migration-runner.ts`
+- Offline-only for now — no sync. `src/modules/sync/sync-stub-context.tsx` shows a "coming soon" state instead of the live web sync UI
+- `npm run dev:capacitor` in a browser uses the `jeep-sqlite` WASM shim (see `src/platforms/capacitor/main.tsx`) instead of native SQLite
 
 #### Settings
 
-- Persisted via `PouchDBSettingsRepository` in `src/infra/settings/`
+- Persisted via `PouchDBSettingsRepository` (web) / `SQLiteSettingsRepository` (native) in `src/infra/settings/`
 - Context in `src/modules/settings/settings-context.tsx`
 - Includes prayer method and general app preferences
 - Location/timezone logic lives in `src/infra/location/` and `src/modules/location/`

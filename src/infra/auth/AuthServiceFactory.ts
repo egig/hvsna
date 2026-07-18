@@ -1,6 +1,4 @@
-import { Capacitor } from "@capacitor/core";
 import { WebSessionRepository } from "./WebSessionRepository";
-import { CapacitorSessionRepository } from "./CapacitorSessionRepository";
 import { InMemoryTokenStore } from "./InMemoryTokenStore";
 import { AuthService } from "./AuthService";
 import { api } from "../../modules/api/http-client";
@@ -25,9 +23,7 @@ export function initAuthService(sessionRepo: ISessionRepository): void {
 
 export function getAuthService(): AuthService {
   if (!authServiceInstance) {
-    const sessionRepo = Capacitor.isNativePlatform()
-      ? new CapacitorSessionRepository()
-      : new WebSessionRepository();
+    const sessionRepo = new WebSessionRepository();
 
     authServiceInstance = new AuthService(sessionRepo, getTokenStore(), api);
   }

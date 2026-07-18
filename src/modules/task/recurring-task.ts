@@ -1,7 +1,7 @@
 import type { TaskRecurringType } from "@/domain/task";
 
 export interface RecurringTask {
-  id: string;
+  id: string | number;
   user_id?: string;
   name: string;
   description?: string;
@@ -24,7 +24,7 @@ export interface RecurringTask {
 }
 
 export interface RecurringTaskCreateInput {
-  id?: string;
+  id?: string | number;
   name: string;
   description?: string;
   recurringType: TaskRecurringType;
@@ -62,7 +62,7 @@ export interface RecurringTaskUpdateInput {
 }
 
 export interface RecurringTaskChange {
-  id: string;
+  id: string | number;
   documentId: string;
   type: "create" | "update" | "delete";
   timestamp: Date;
@@ -70,6 +70,6 @@ export interface RecurringTaskChange {
 }
 
 export type RecurringTaskQuery = {
-  id?: string;
+  id?: string | number;
   recurringType?: TaskRecurringType;
 };

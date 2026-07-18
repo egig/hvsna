@@ -7,9 +7,9 @@ import React, {
 } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { Task, TaskCreateInput, TaskUpdateInput } from "@/domain/task";
-import { usePouchDB } from "../../pouchdb";
 import { useTaskRepository } from "./use-task-repository";
 import { useRecurringTaskRepository } from "./use-recurring-task-repository";
+import { useReminderRegistryRepository } from "./use-reminder-registry-repository";
 import { materializeVirtualTask as materializeVirtualTaskFn } from "./recurring-task-utils";
 import { ReminderService } from "./reminder-service";
 import { useSettings } from "../settings";
@@ -17,7 +17,6 @@ import {
   useTaskReminder,
   cancelVirtualReminder,
 } from "./recurring-reminder-scheduler";
-import type { RecurringTask } from "./recurring-task";
 import { useInvalidateTaskQueries } from "./use-invalidate-task-queries";
 import logger from "../logger";
 
@@ -26,12 +25,14 @@ interface TaskContextType {
   task: Task | null;
 
   createTask: (input: TaskCreateInput) => Promise<Task>;
-  updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
-  deleteTask: (id: string) => Promise<void>;
-  deleteRecurringTaskSeries: (recurringTaskId: string) => Promise<void>;
-  getTask: (id: string) => Promise<Task | null>;
-  completeTask: (id: string) => Promise<Task>;
-  reopenTask: (id: string) => Promise<Task>;
+  updateTask: (id: string | number, input: TaskUpdateInput) => Promise<Task>;
+  deleteTask: (id: string | number) => Promise<void>;
+  deleteRecurringTaskSeries: (
+    recurringTaskId: string | number
+  ) => Promise<void>;
+  getTask: (id: string | number) => Promise<Task | null>;
+  completeTask: (id: string | number) => Promise<Task>;
+  reopenTask: (id: string | number) => Promise<Task>;
   materializeVirtualTask: (task: Task) => Promise<Task>;
   reset: () => void;
 
@@ -47,9 +48,9 @@ export const TaskProvider: React.FC<{
 }> = ({ children, taskId }) => {
   const invalidateTaskQueries = useInvalidateTaskQueries();
   const { settings } = useSettings();
-  const { db } = usePouchDB();
   const taskRepo = useTaskRepository();
   const recurringRepo = useRecurringTaskRepository();
+  const reminderRegistry = useReminderRegistryRepository();
   const [task, setTask] = useState<Task | null>(null);
   const scheduleRecurringTaskReminders = useTaskReminder();
 
@@ -65,27 +66,18 @@ export const TaskProvider: React.FC<{
 
   // Schedule reminders for virtual recurring task occurrences on startup
   useEffect(() => {
-    db.allDocs({ include_docs: true, startkey: "rtask_", endkey: "rtask_￿" })
-      .then((response) => {
-        const templates = response.rows
-          .filter((row: any) => row.doc && row.doc.baseDateEpoch)
-          .map(
-            (row: any) =>
-              ({
-                ...row.doc,
-                id: row.doc._id || row.doc.id || "",
-                occurrenceExceptions: row.doc.occurrence_exceptions,
-              } as RecurringTask)
-          );
-        return scheduleRecurringTaskReminders(db, templates);
-      })
+    recurringRepo
+      .find()
+      .then((templates) =>
+        scheduleRecurringTaskReminders(reminderRegistry, templates)
+      )
       .catch((err) =>
         logger.error("Failed to schedule recurring task reminders:", err)
       );
-  }, [db]);
+  }, [recurringRepo, reminderRegistry, scheduleRecurringTaskReminders]);
 
   const updateTaskWithLog = async (
-    id: string,
+    id: string | number,
     input: TaskUpdateInput
   ): Promise<Task> => {
     // Update the task
@@ -95,7 +87,7 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for completing tasks
   const completeTaskMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: string | number) => {
       return taskRepo.completeTask(id);
     },
     onSuccess: async (updatedTask: Task, id) => {
@@ -124,7 +116,7 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for reopening tasks
   const reopenTaskMutation = useMutation({
-    mutationFn: (id: string) => taskRepo.reopenTask(id),
+    mutationFn: (id: string | number) => taskRepo.reopenTask(id),
     onSuccess: async (updatedTask: Task, id) => {
       if (settings.notifications && updatedTask.atTime?.includes(":")) {
         try {
@@ -170,8 +162,13 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for updating tasks
   const updateTaskMutation = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: TaskUpdateInput }) =>
-      updateTaskWithLog(id, input),
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string | number;
+      input: TaskUpdateInput;
+    }) => updateTaskWithLog(id, input),
     onSuccess: async (_, variables) => {
       // Update reminders if notifications are enabled
       if (settings.notifications) {
@@ -203,7 +200,7 @@ export const TaskProvider: React.FC<{
 
   // React Query mutation for deleting tasks
   const deleteTaskMutation = useMutation({
-    mutationFn: (id: string) => taskRepo.delete(id),
+    mutationFn: (id: string | number) => taskRepo.delete(id),
     onSuccess: async (_, variables) => {
       // Cancel all reminders for the deleted task
       if (settings.notifications) {
@@ -223,7 +220,8 @@ export const TaskProvider: React.FC<{
 
   const materializeVirtualTask = async (task: Task): Promise<Task> => {
     const cancelReminder = settings.notifications
-      ? (virtualTaskId: string) => cancelVirtualReminder(db, virtualTaskId)
+      ? (virtualTaskId: string) =>
+          cancelVirtualReminder(reminderRegistry, virtualTaskId)
       : undefined;
 
     const created = await materializeVirtualTaskFn(
@@ -251,12 +249,13 @@ export const TaskProvider: React.FC<{
     return created;
   };
 
-  const deleteRecurringTaskSeries = async (recurringTaskId: string) => {
+  const deleteRecurringTaskSeries = async (
+    recurringTaskId: string | number
+  ) => {
     await taskRepo.deletePendingByRecurringTaskId(recurringTaskId);
     // Also delete the template document
     try {
-      const templateDoc = await db.get(recurringTaskId);
-      await db.remove(templateDoc as any);
+      await recurringRepo.delete(recurringTaskId);
     } catch (err) {
       logger.error("Failed to delete recurring task template:", err);
     }
@@ -267,13 +266,13 @@ export const TaskProvider: React.FC<{
     task,
     createTask: (input: TaskCreateInput) =>
       createTaskMutation.mutateAsync(input),
-    updateTask: (id: string, input: TaskUpdateInput) =>
+    updateTask: (id: string | number, input: TaskUpdateInput) =>
       updateTaskMutation.mutateAsync({ id, input }),
-    deleteTask: (id: string) => deleteTaskMutation.mutateAsync(id),
+    deleteTask: (id: string | number) => deleteTaskMutation.mutateAsync(id),
     deleteRecurringTaskSeries,
-    getTask: (id: string) => taskRepo.findById(id),
-    completeTask: (id: string) => completeTaskMutation.mutateAsync(id),
-    reopenTask: (id: string) => reopenTaskMutation.mutateAsync(id),
+    getTask: (id: string | number) => taskRepo.findById(id),
+    completeTask: (id: string | number) => completeTaskMutation.mutateAsync(id),
+    reopenTask: (id: string | number) => reopenTaskMutation.mutateAsync(id),
     materializeVirtualTask,
     reset: () => setTask(null),
     refreshAllTaskLists: () => Promise.resolve(), // Legacy compatibility

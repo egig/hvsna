@@ -1,41 +1,9 @@
 import type { RecurringTask } from "./recurring-task";
 import { useRecurringOccurance } from "./recurring-task-generator";
 import { ReminderService } from "./reminder-service";
-import logger from "../logger";
+import type { IReminderRegistryRepository } from "@/domain/task/IReminderRegistryRepository";
 
-const REGISTRY_DOC_ID = "reminder_registry_virtual";
 const HORIZON_DAYS = 7;
-
-interface ReminderRegistry {
-  _id: string;
-  _rev?: string;
-  type: "reminder_registry";
-  scheduledIds: string[];
-}
-
-async function loadRegistry(db: PouchDB.Database): Promise<ReminderRegistry> {
-  try {
-    return (await db.get(REGISTRY_DOC_ID)) as ReminderRegistry;
-  } catch {
-    return {
-      _id: REGISTRY_DOC_ID,
-      type: "reminder_registry",
-      scheduledIds: [],
-    };
-  }
-}
-
-async function saveRegistry(
-  db: PouchDB.Database,
-  registry: ReminderRegistry,
-  scheduledIds: string[]
-): Promise<void> {
-  try {
-    await db.put({ ...registry, scheduledIds });
-  } catch (err) {
-    logger.error("Failed to save reminder registry:", err);
-  }
-}
 
 /**
  * Cancels all previously registered virtual reminders, then schedules
@@ -46,7 +14,7 @@ async function saveRegistry(
 export function useTaskReminder() {
   const { buildVirtualTasksForRange } = useRecurringOccurance();
   return async function scheduleRecurringTaskReminders(
-    db: PouchDB.Database,
+    registry: IReminderRegistryRepository,
     templates: RecurringTask[]
   ): Promise<void> {
     if (templates.length === 0) return;
@@ -54,11 +22,11 @@ export function useTaskReminder() {
     const now = Date.now();
     const horizon = now + HORIZON_DAYS * 24 * 60 * 60 * 1000;
 
-    const registry = await loadRegistry(db);
+    const scheduledIds = await registry.load();
 
     // Cancel all previously scheduled virtual reminders to avoid stale ones
     await Promise.allSettled(
-      registry.scheduledIds.map((id) => ReminderService.cancelTaskReminders(id))
+      scheduledIds.map((id) => ReminderService.cancelTaskReminders(id))
     );
 
     // Build virtual tasks for the coming week
@@ -75,11 +43,7 @@ export function useTaskReminder() {
 
     await ReminderService.scheduleMultipleTaskReminders(schedulable);
 
-    await saveRegistry(
-      db,
-      registry,
-      schedulable.map((t) => t.id as string)
-    );
+    await registry.save(schedulable.map((t) => String(t.id)));
   };
 }
 
@@ -88,12 +52,12 @@ export function useTaskReminder() {
  * from the registry. Call this when a virtual task is materialized.
  */
 export async function cancelVirtualReminder(
-  db: PouchDB.Database,
+  registry: IReminderRegistryRepository,
   virtualTaskId: string
 ): Promise<void> {
   await ReminderService.cancelTaskReminders(virtualTaskId);
 
-  const registry = await loadRegistry(db);
-  const updated = registry.scheduledIds.filter((id) => id !== virtualTaskId);
-  await saveRegistry(db, registry, updated);
+  const scheduledIds = await registry.load();
+  const updated = scheduledIds.filter((id) => id !== virtualTaskId);
+  await registry.save(updated);
 }

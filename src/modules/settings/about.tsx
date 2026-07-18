@@ -3,29 +3,18 @@ import { Page } from "../navigation";
 import packageInfo from "../../../package.json";
 import { LargeNavbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { usePlatform } from "../platform";
 import { usePWARefresh } from "@/platforms/web/usePWARefresh";
-import { useEffect, useState } from "react";
-import { App } from "@capacitor/app";
 
 export default function About() {
   const { t } = useLanguageContext();
-  const { isNative } = usePlatform();
   const { needRefresh, updateServiceWorker } = usePWARefresh();
-  const [nativeVersion, setNativeVersion] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (isNative) {
-      App.getInfo().then((info) => setNativeVersion(info.version));
-    }
-  }, [isNative]);
 
   return (
     <Page>
       <LargeNavbar title={t("about")} showBackButton={true} />
       <div className="prose prose-sm p-6">
         <p className="text-gray-600 dark:text-gray-400 mb-4 text-center">
-          Hvsna v{nativeVersion ?? packageInfo.version}
+          Hvsna v{packageInfo.version}
         </p>
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -118,7 +107,7 @@ export default function About() {
           </div>
         </div>
 
-        {!isNative && needRefresh && (
+        {needRefresh && (
           <div
             className="border rounded-lg p-4 flex items-center justify-between gap-4"
             style={{

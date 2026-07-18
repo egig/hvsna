@@ -8,9 +8,9 @@ import type {
 export interface ITaskRepository {
   // Task operations
   create(input: TaskCreateInput): Promise<Task>;
-  update(id: string, input: TaskUpdateInput): Promise<Task>;
-  delete(id: string): Promise<void>;
-  findById(id: string): Promise<Task | null>;
+  update(id: string | number, input: TaskUpdateInput): Promise<Task>;
+  delete(id: string | number): Promise<void>;
+  findById(id: string | number): Promise<Task | null>;
   find(query?: TaskQuery): Promise<Task[]>;
 
   // Task query operations
@@ -27,22 +27,22 @@ export interface ITaskRepository {
   findAllCompleted(offset: number, limit: number): Promise<Task[]>;
   findPendingInRange(startEpoch: number, endEpoch: number): Promise<Task[]>;
   findBrowsedTasks(
-    query?: any,
+    query?: TaskQuery,
     offset?: number,
     limit?: number
   ): Promise<Task[]>;
   findUnscheduledTasks(): Promise<Task[]>;
 
   // Recurring task operations
-  findByRecurringTaskId(recurringTaskId: string): Promise<Task[]>;
+  findByRecurringTaskId(recurringTaskId: string | number): Promise<Task[]>;
   findByRecurringTaskIdInRange(
-    recurringTaskId: string,
+    recurringTaskId: string | number,
     startEpoch: number,
     endEpoch: number
   ): Promise<Task[]>;
-  deletePendingByRecurringTaskId(recurringTaskId: string): Promise<void>;
+  deletePendingByRecurringTaskId(recurringTaskId: string | number): Promise<void>;
 
   // Task status operations
-  completeTask(id: string): Promise<Task>;
-  reopenTask(id: string): Promise<Task>;
+  completeTask(id: string | number): Promise<Task>;
+  reopenTask(id: string | number): Promise<Task>;
 }

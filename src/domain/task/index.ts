@@ -14,7 +14,7 @@ export type PrayerTime =
   | "Isha";
 
 export class Task {
-  id?: string;
+  id?: string | number;
   rev?: string;
   name?: string;
   description?: string;
@@ -26,7 +26,7 @@ export class Task {
   timezone?: string;
   recurringType?: TaskRecurringType;
   recurringInterval?: number;
-  recurringTaskId?: string | null;
+  recurringTaskId?: string | number | null;
   hijriDateOffset?: number;
   tags?: string[] | null = null;
   createdAt?: number;
@@ -64,7 +64,7 @@ export interface TaskCreateInput {
   timezone?: string;
   recurringType?: TaskRecurringType;
   recurringInterval?: number;
-  recurringTaskId?: string;
+  recurringTaskId?: string | number;
   hijriDateOffset?: number;
   tags: string[];
 }
@@ -80,7 +80,7 @@ export interface TaskUpdateInput {
   timezone?: string;
   recurringType?: TaskRecurringType;
   recurringInterval?: number;
-  recurringTaskId?: string | null;
+  recurringTaskId?: string | number | null;
   hijriDateOffset?: number;
   removeTime?: boolean;
   tags?: string[] | null;
@@ -88,7 +88,7 @@ export interface TaskUpdateInput {
 }
 
 export interface TaskChange {
-  id: string;
+  id: string | number;
   documentId: string;
   type: "create" | "update" | "delete";
   timestamp: Date;
@@ -100,7 +100,7 @@ export type TaskTypeFilter = "all" | "recurring";
 export type TaskQuery = {
   status?: TaskStatus;
   atTime?: string;
-  atEpochMillis?: number | { $gte?: number; $lte?: number };
+  atEpochMillis?: number | { from?: number; to?: number };
   unscheduled?: number;
   searchText?: string;
   taskType?: TaskTypeFilter;

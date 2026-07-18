@@ -1,8 +1,6 @@
-import { useMemo } from "react";
-import { usePouchDB } from "../../pouchdb";
-import { PouchDBSettingsRepository } from "../../infra/settings/PouchDBSettingsRepository";
+import type { ISettingsRepository } from "../../domain/settings/ISettingsRepository";
+import { useRepositories } from "../repositories-context";
 
-export function useSettingsRepository(): PouchDBSettingsRepository {
-  const { db } = usePouchDB();
-  return useMemo(() => new PouchDBSettingsRepository(db), [db]);
+export function useSettingsRepository(): ISettingsRepository {
+  return useRepositories().settingsRepository;
 }

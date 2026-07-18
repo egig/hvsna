@@ -68,7 +68,7 @@ const storeSyncTimeToDB = async (
 };
 
 // Database Context
-type SyncContextType = {
+export type SyncContextType = {
   replication: any | null;
   lastSyncTime: Date | null;
   isSyncing: boolean;
@@ -80,9 +80,13 @@ type SyncContextType = {
   handleSyncMerge: () => Promise<void>;
   handleSyncDeleteLocal: () => Promise<void>;
   closeSyncDialog: () => void;
+  /** True on native, where sync is not built yet (offline-only phase). */
+  nativeSyncUnavailable?: boolean;
 };
 
-const SyncContext = createContext<SyncContextType | undefined>(undefined);
+export const SyncContext = createContext<SyncContextType | undefined>(
+  undefined
+);
 
 export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const { db } = usePouchDB();

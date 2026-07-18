@@ -1,5 +1,3 @@
-import PouchDB from "pouchdb";
-import { Capacitor } from "@capacitor/core";
 import type {
   TaskCreateInput,
   TaskQuery,
@@ -7,6 +5,16 @@ import type {
   TaskStatus,
   TaskUpdateInput,
 } from "@/domain/task";
+
+function toMangoEpochRange(
+  range: number | { from?: number; to?: number }
+): any {
+  if (typeof range === "number") return range;
+  const mango: { $gte?: number; $lte?: number } = {};
+  if (range.from !== undefined) mango.$gte = range.from;
+  if (range.to !== undefined) mango.$lte = range.to;
+  return mango;
+}
 import { Task } from "@/domain/task";
 import { generatePrefixedUUID } from "../../modules/uuid";
 import type { ITaskRepository } from "../../domain/task/ITaskRepository";
@@ -65,7 +73,7 @@ class PouchDBTaskDocument {
 
   static fromTaskItem(t: Task) {
     let a = new PouchDBTaskDocument(t);
-    a._id = t.id;
+    a._id = t.id !== undefined ? String(t.id) : undefined;
     a._rev = t.rev;
     a.atEpochMillis = t.atEpochMillis ?? null;
     a.lat = t.lat;
@@ -79,46 +87,7 @@ class PouchDBTaskDocument {
 }
 
 export class PouchDBTaskRepository implements ITaskRepository {
-  private readonly db: PouchDB.Database;
-
-  constructor(dbOrName?: PouchDB.Database | string) {
-    if (dbOrName instanceof PouchDB) {
-      // Use provided database instance
-      this.db = dbOrName;
-    } else {
-      // Create database with appropriate adapter
-      this.db = PouchDBTaskRepository.createDatabase(dbOrName);
-    }
-  }
-
-  static createWebDatabase(dbName = "hvsna-tasks"): PouchDB.Database {
-    return new PouchDB(dbName);
-  }
-
-  static createNativeDatabase(dbName = "hvsna-tasks"): PouchDB.Database {
-    try {
-      PouchDB.plugin(require("pouchdb-adapter-cordova-sqlite"));
-      return new PouchDB(dbName, { adapter: "cordova-sqlite" });
-    } catch (error) {
-      console.warn(
-        "Failed to load SQLite adapter, falling back to IndexedDB:",
-        error
-      );
-      return new PouchDB(dbName);
-    }
-  }
-
-  /**
-   * Factory method to create a PouchDB instance with the appropriate adapter
-   * based on the current platform. Prefer createWebDatabase/createNativeDatabase
-   * in platform-specific entry points.
-   */
-  static createDatabase(dbName?: string): PouchDB.Database {
-    const databaseName = dbName || "hvsna-tasks";
-    return Capacitor.isNativePlatform()
-      ? this.createNativeDatabase(databaseName)
-      : this.createWebDatabase(databaseName);
-  }
+  constructor(private readonly db: PouchDB.Database) {}
 
   async create(input: TaskCreateInput): Promise<Task> {
     const now = Date.now().valueOf();
@@ -559,7 +528,7 @@ export class PouchDBTaskRepository implements ITaskRepository {
   }
 
   async findBrowsedTasks(
-    query?: any,
+    query?: TaskQuery,
     offset: number = 0,
     limit: number = 50
   ): Promise<Task[]> {
@@ -593,7 +562,9 @@ export class PouchDBTaskRepository implements ITaskRepository {
         mangoQuery.selector.status = Number(query.status);
       }
       if (query.atEpochMillis) {
-        mangoQuery.selector.atEpochMillis = query.atEpochMillis;
+        mangoQuery.selector.atEpochMillis = toMangoEpochRange(
+          query.atEpochMillis
+        );
       }
       if (query.searchText && query.searchText.trim()) {
         const searchLower = query.searchText.toLowerCase().trim();
@@ -688,6 +659,6 @@ export class PouchDBTaskRepository implements ITaskRepository {
   async deletePendingByRecurringTaskId(recurringTaskId: string): Promise<void> {
     const tasks = await this.findByRecurringTaskId(recurringTaskId);
     const pending = tasks.filter((t) => t.status !== 1);
-    await Promise.all(pending.map((t) => this.delete(t.id!)));
+    await Promise.all(pending.map((t) => this.delete(String(t.id!))));
   }
 }

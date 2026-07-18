@@ -1,8 +1,6 @@
-import { useMemo } from "react";
-import { usePouchDB } from "../../pouchdb";
-import { PouchDBRecurringTaskRepository } from "../../infra/task/PouchDBRecurringTaskRepository";
+import type { IRecurringTaskRepository } from "@/domain/task/IRecurringTaskRepository";
+import { useRepositories } from "../repositories-context";
 
-export function useRecurringTaskRepository(): PouchDBRecurringTaskRepository {
-  const { db } = usePouchDB();
-  return useMemo(() => new PouchDBRecurringTaskRepository(db), [db]);
+export function useRecurringTaskRepository(): IRecurringTaskRepository {
+  return useRepositories().recurringTaskRepository;
 }

@@ -62,9 +62,9 @@ class PouchDBRecurringTaskDocument {
 
   static fromRecurringTask(t: RecurringTask): PouchDBRecurringTaskDocument {
     const doc = new PouchDBRecurringTaskDocument(t);
-    doc._id = t.id;
+    doc._id = String(t.id);
     doc._rev = (t as any)._rev;
-    doc.id = t.id;
+    doc.id = String(t.id);
     doc.user_id = t.user_id;
     doc.name = t.name;
     doc.description = t.description;

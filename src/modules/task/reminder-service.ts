@@ -37,7 +37,7 @@ export class ReminderService {
       // Schedule pre-due reminder
       if (reminderMinutes > 0) {
         const preDueOptions: TaskReminderOptions = {
-          taskId: task.id || "",
+          taskId: task.id !== undefined ? String(task.id) : "",
           taskName: task.name || "Untitled Task",
           scheduledTime: task.atEpochMillis,
           reminderMinutes,
@@ -54,9 +54,9 @@ export class ReminderService {
   /**
    * Cancel all reminders for a task
    */
-  static async cancelTaskReminders(taskId: string): Promise<void> {
+  static async cancelTaskReminders(taskId: string | number): Promise<void> {
     try {
-      await this.notificationsDriver.cancelTaskReminder(taskId);
+      await this.notificationsDriver.cancelTaskReminder(String(taskId));
     } catch (error) {
       logger.error("Failed to cancel task reminders:", error);
     }
@@ -74,7 +74,7 @@ export class ReminderService {
     }
 
     // Cancel existing reminders
-    await this.cancelTaskReminders(task.id);
+    await this.cancelTaskReminders(String(task.id));
 
     // Schedule new reminders
     await this.scheduleTaskReminders(task, reminderMinutes);

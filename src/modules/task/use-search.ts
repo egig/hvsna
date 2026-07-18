@@ -72,8 +72,8 @@ export function useSearch() {
 
     if (dateRangeFilter) {
       query.atEpochMillis = {
-        $gte: dateRangeFilter.startDate,
-        $lte: dateRangeFilter.endDate,
+        from: dateRangeFilter.startDate,
+        to: dateRangeFilter.endDate,
       };
     }
 

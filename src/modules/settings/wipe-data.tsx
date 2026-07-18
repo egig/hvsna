@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { HvDatabase, HvTrash2, HvAlertTriangle } from "@/modules/icons";
-import { usePouchDB } from "../../pouchdb";
+import { getPouchDBInstance } from "../pouchdb-singleton";
 import { Navbar, Page } from "../navigation";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 
+async function wipeLocalData(): Promise<void> {
+  await getPouchDBInstance().destroy();
+}
+
 export default function WipeData() {
   const { t } = useLanguageContext();
-  const { db } = usePouchDB();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleWipePouchDB = async () => {
+  const handleWipeData = async () => {
     if (isDeleting) return;
 
     const confirmed = window.confirm(t("confirm_delete_database"));
@@ -19,8 +22,7 @@ export default function WipeData() {
     setIsDeleting(true);
 
     try {
-      // Destroy the entire database
-      await db.destroy();
+      await wipeLocalData();
 
       alert(t("database_deleted"));
 
@@ -67,7 +69,7 @@ export default function WipeData() {
           </p>
 
           <button
-            onClick={handleWipePouchDB}
+            onClick={handleWipeData}
             disabled={isDeleting}
             className=" text-sm w-full md:w-fit px-4 py-2 flex items-center justify-center space-x-2 bg-[var(--hvsna-danger-color)] hover:bg-[var(--hvsna-danger-color-hover)] disabled:bg-[var(--hvsna-danger-color-pressed)] text-white font-medium rounded-lg transition-colors duration-200 active:scale-95 transition-transform"
           >

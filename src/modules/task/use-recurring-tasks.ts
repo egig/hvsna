@@ -26,7 +26,7 @@ export function useRecurringTasks() {
   });
 
   const getRecurringTaskMutation = useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (id: string | number) => {
       const recurringTask = await recurringRepo.findById(id);
       if (!recurringTask) {
         throw new Error("Recurring task not found");
@@ -52,7 +52,7 @@ export function useRecurringTasks() {
       id,
       input,
     }: {
-      id: string;
+      id: string | number;
       input: RecurringTaskUpdateInput;
     }) => recurringRepo.update(id, input),
     onSuccess: () => {
@@ -65,7 +65,7 @@ export function useRecurringTasks() {
   });
 
   const deleteRecurringTaskMutation = useMutation({
-    mutationFn: (id: string) => recurringRepo.delete(id),
+    mutationFn: (id: string | number) => recurringRepo.delete(id),
     onError: (error) => {
       console.error("Failed to delete recurring task:", error);
       throw error;
@@ -75,12 +75,15 @@ export function useRecurringTasks() {
   return {
     createRecurringTask: (input: RecurringTaskCreateInput) =>
       createRecurringTaskMutation.mutateAsync(input),
-    getRecurringTask: (id: string) => getRecurringTaskMutation.mutateAsync(id),
+    getRecurringTask: (id: string | number) =>
+      getRecurringTaskMutation.mutateAsync(id),
     getRecurringTasks: (query?: RecurringTaskQuery) =>
       getRecurringTasksMutation.mutateAsync(query),
-    updateRecurringTask: (id: string, input: RecurringTaskUpdateInput) =>
-      updateRecurringTaskMutation.mutateAsync({ id, input }),
-    deleteRecurringTask: (id: string) =>
+    updateRecurringTask: (
+      id: string | number,
+      input: RecurringTaskUpdateInput
+    ) => updateRecurringTaskMutation.mutateAsync({ id, input }),
+    deleteRecurringTask: (id: string | number) =>
       deleteRecurringTaskMutation.mutateAsync(id),
     loading:
       createRecurringTaskMutation.isPending ||

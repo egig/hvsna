@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { usePouchDB } from "../../pouchdb";
 import { useRecurringTaskRepository } from "./use-recurring-task-repository";
 import { queryKeys } from "../query-keys";
 import { useRecurringOccurance } from "./recurring-task-generator";
@@ -32,7 +31,6 @@ function toVirtualTask(
 }
 
 export function useRecurringTaskList() {
-  const { db } = usePouchDB();
   const recurringRepo = useRecurringTaskRepository();
   const { computeOccurrencesInRange } = useRecurringOccurance();
 
@@ -61,7 +59,6 @@ export function useRecurringTaskList() {
         .sort((a, b) => a.nextEpoch! - b.nextEpoch!)
         .map(({ template, nextEpoch }) => toVirtualTask(template, nextEpoch));
     },
-    enabled: !!db,
   });
 
   return { tasks, loading, error: error as Error | null };
