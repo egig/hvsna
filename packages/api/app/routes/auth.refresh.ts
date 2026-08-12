@@ -1,13 +1,9 @@
-import { handlePreflight, withCors } from "@/lib/cors";
 import { signAccessToken } from "@/lib/jwt";
 import { readJsonBody } from "@/lib/request";
 import { ApiError, jsonOk, jsonUnexpectedError } from "@/lib/response";
 import { rotateRefreshToken } from "@/lib/tokens";
 
 export async function action({ request }: { request: Request }) {
-  const preflight = handlePreflight(request);
-  if (preflight) return preflight;
-
   try {
     const body = await readJsonBody(request);
     const { refresh_token: refreshToken } = body;
@@ -22,11 +18,8 @@ export async function action({ request }: { request: Request }) {
 
     const accessToken = await signAccessToken(rotated.userId);
 
-    return withCors(
-      request,
-      jsonOk({ access_token: accessToken, refresh_token: rotated.refreshToken })
-    );
+    return jsonOk({ access_token: accessToken, refresh_token: rotated.refreshToken });
   } catch (error) {
-    return withCors(request, jsonUnexpectedError(error));
+    return jsonUnexpectedError(error);
   }
 }

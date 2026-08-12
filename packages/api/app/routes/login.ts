@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
-import { handlePreflight, withCors } from "@/lib/cors";
 import { signAccessToken } from "@/lib/jwt";
 import { verifyPassword } from "@/lib/password";
 import { readJsonBody } from "@/lib/request";
@@ -9,9 +8,6 @@ import { ApiError, jsonOk, jsonUnexpectedError } from "@/lib/response";
 import { issueRefreshToken } from "@/lib/tokens";
 
 export async function action({ request }: { request: Request }) {
-  const preflight = handlePreflight(request);
-  if (preflight) return preflight;
-
   try {
     const body = await readJsonBody(request);
     const { email, password } = body;
@@ -34,11 +30,8 @@ export async function action({ request }: { request: Request }) {
       issueRefreshToken(user.id),
     ]);
 
-    return withCors(
-      request,
-      jsonOk({ access_token: accessToken, refresh_token: refreshToken })
-    );
+    return jsonOk({ access_token: accessToken, refresh_token: refreshToken });
   } catch (error) {
-    return withCors(request, jsonUnexpectedError(error));
+    return jsonUnexpectedError(error);
   }
 }

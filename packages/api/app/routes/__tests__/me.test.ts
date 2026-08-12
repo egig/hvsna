@@ -6,7 +6,7 @@ const { db } = vi.hoisted(() => ({ db: { select: vi.fn() } }));
 
 vi.mock("@/db/client", () => ({ db }));
 
-const { action, loader } = await import("../me");
+const { loader } = await import("../me");
 
 function makeRequest(token?: string) {
   const headers: Record<string, string> = { Origin: "http://localhost:5173" };
@@ -70,18 +70,5 @@ describe("GET /me", () => {
     const response = await loader({ request: makeRequest(token) });
 
     expect(response.status).toBe(401);
-  });
-});
-
-describe("OPTIONS /me", () => {
-  it("answers CORS preflight with 204", async () => {
-    const request = new Request("http://api.test/me", {
-      method: "OPTIONS",
-      headers: { Origin: "http://localhost:5173" },
-    });
-
-    const response = await action({ request });
-
-    expect(response.status).toBe(204);
   });
 });

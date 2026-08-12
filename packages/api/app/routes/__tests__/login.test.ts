@@ -45,7 +45,6 @@ describe("POST /login", () => {
     const body = await response.json();
     expect(body.data.access_token).toEqual(expect.any(String));
     expect(body.data.refresh_token).toEqual(expect.any(String));
-    expect(response.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:5173");
   });
 
   it("returns 401 INVALID_CREDENTIALS for a wrong password", async () => {

@@ -18,7 +18,7 @@ function corsHeaders(origin: string | null): Headers {
 }
 
 /** Adds CORS headers to a response for the given request's origin. */
-export function withCors(request: Request, response: Response): Response {
+export function applyCors(request: Request, response: Response): Response {
   const headers = new Headers(response.headers);
   for (const [key, value] of corsHeaders(request.headers.get("Origin"))) {
     headers.set(key, value);
@@ -29,9 +29,8 @@ export function withCors(request: Request, response: Response): Response {
   });
 }
 
-/** Returns a 204 preflight response if this is an OPTIONS request, else null. */
-export function handlePreflight(request: Request): Response | null {
-  if (request.method !== "OPTIONS") return null;
+/** A 204 response answering a CORS preflight OPTIONS request. */
+export function preflightResponse(request: Request): Response {
   return new Response(null, {
     status: 204,
     headers: corsHeaders(request.headers.get("Origin")),

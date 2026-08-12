@@ -39,7 +39,12 @@ describe("POST /register", () => {
   });
 
   it("returns 409 EMAIL_TAKEN on a unique constraint violation", async () => {
-    db.insert.mockReturnValue(createRejectingChain({ code: "23505" }));
+    // drizzle-orm/neon-http wraps the real Postgres error (with .code) in
+    // .cause on a DrizzleQueryError — this is the actual shape it throws,
+    // not a flat { code } object.
+    const queryError = new Error("Failed query");
+    (queryError as { cause?: unknown }).cause = { code: "23505" };
+    db.insert.mockReturnValue(createRejectingChain(queryError));
 
     const response = await action({
       request: makeRequest({ email: "dup@example.com", password: "supersecret1" }),

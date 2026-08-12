@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
@@ -16,10 +16,11 @@ export default function SignInPage() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Redirect to home if already authenticated
-  if (isAuthenticated) {
-    navigate("/", { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) navigate("/", { replace: true });
+  }, [isAuthenticated, navigate]);
+
+  if (isAuthenticated) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

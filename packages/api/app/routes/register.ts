@@ -1,6 +1,5 @@
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
-import { handlePreflight, withCors } from "@/lib/cors";
 import { signAccessToken } from "@/lib/jwt";
 import { hashPassword, isPasswordValid, MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { readJsonBody } from "@/lib/request";
@@ -9,19 +8,25 @@ import { issueRefreshToken } from "@/lib/tokens";
 
 const POSTGRES_UNIQUE_VIOLATION = "23505";
 
+function getErrorCode(error: unknown): unknown {
+  if (typeof error !== "object" || error === null) return undefined;
+  if ("code" in error) return (error as { code: unknown }).code;
+  return undefined;
+}
+
+/**
+ * drizzle-orm/neon-http throws a DrizzleQueryError whose .code is undefined;
+ * the actual Postgres error code (e.g. "23505") lives on its .cause.
+ */
 function isUniqueViolation(error: unknown): boolean {
+  const cause = error instanceof Error ? error.cause : undefined;
   return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: unknown }).code === POSTGRES_UNIQUE_VIOLATION
+    getErrorCode(error) === POSTGRES_UNIQUE_VIOLATION ||
+    getErrorCode(cause) === POSTGRES_UNIQUE_VIOLATION
   );
 }
 
 export async function action({ request }: { request: Request }) {
-  const preflight = handlePreflight(request);
-  if (preflight) return preflight;
-
   try {
     const body = await readJsonBody(request);
     const { email, password, firstName, lastName } = body;
@@ -63,11 +68,8 @@ export async function action({ request }: { request: Request }) {
       issueRefreshToken(userId),
     ]);
 
-    return withCors(
-      request,
-      jsonOk({ access_token: accessToken, refresh_token: refreshToken })
-    );
+    return jsonOk({ access_token: accessToken, refresh_token: refreshToken });
   } catch (error) {
-    return withCors(request, jsonUnexpectedError(error));
+    return jsonUnexpectedError(error);
   }
 }
