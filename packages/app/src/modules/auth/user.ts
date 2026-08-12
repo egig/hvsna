@@ -2,13 +2,10 @@ import type { FeatureFlags } from "../feature-flags/types";
 
 export interface User {
   userId: string;
-  externalId: string;
   firstName: string;
   lastName: string;
   email: string;
   createdAt: string;
-  dbName: string;
-  syncURL?: string;
   featureFlags?: FeatureFlags;
 }
 

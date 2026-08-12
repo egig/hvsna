@@ -2,25 +2,35 @@
 
 ## Monorepo layout
 
-npm workspaces, single package today: [packages/app/](packages/app/) (`@hvsna/app`) — the Vite/React client. Root `package.json` only holds workspace config and delegates scripts (e.g. `npm run dev` → `npm run dev -w @hvsna/app`); run everything from the repo root. `../hvsna-sync2` (the Cloudflare Worker backend) is still a separate sibling repo, not yet part of this monorepo.
+npm workspaces, three packages: [packages/app/](packages/app/) (`@hvsna/app`) — the Vite/React client — [packages/website/](packages/website/) (`@hvsna/website`) — the marketing/docs site — and [packages/api/](packages/api/) (`@hvsna/api`) — the backend (React Router v8 framework mode, deployed to Vercel). Root `package.json` only holds workspace config and delegates scripts (e.g. `npm run dev` → `npm run dev -w @hvsna/app`); run everything from the repo root. `../hvsna-sync2` (the old Cloudflare Worker backend) is a separate sibling repo, fully decoupled — no longer referenced by anything in this monorepo.
 
 ## Commands
 
 ```sh
-npm run dev          # Vite dev server at http://localhost:5173
+npm run dev          # Vite dev server at http://localhost:5173 (@hvsna/app)
 npm run build        # vite build → packages/app/dist/
 npm run typecheck    # tsc (noEmit strict mode)
 npm test             # vitest run --reporter=tree (co-located __tests__/ dirs)
 npm test -- <file>   # single test file
 npm run test:ui      # vitest --ui
 npm run test:e2e     # Playwright (packages/app/e2e/tests/, mobile Chrome emulation)
-```
 
-No lint configured. Pre-commit hook (husky) runs `npm test`.
+npm run dev:website        # Vite dev server at http://localhost:5174 (@hvsna/website)
+npm run build:website      # client + SSR build, then prerenders every route to static HTML
+npm run typecheck:website  # tsc (noEmit strict mode)
+
+npm run dev:api        # React Router dev server at http://localhost:3000 (@hvsna/api)
+npm run build:api       # react-router build
+npm run typecheck:api   # tsc (noEmit strict mode)
+npm run test:api        # vitest run --reporter=tree (DB layer mocked)
+```
+`packages/api` also has `db:generate` / `db:migrate` (drizzle-kit) — run with `npm run db:generate -w @hvsna/api` etc.
+
+No lint configured. Pre-commit hook (husky) runs `npm run test --workspaces --if-present` — every workspace with a `test` script (`@hvsna/app`, `@hvsna/api`; `@hvsna/website` has no test suite so it's skipped automatically).
 
 ## Architecture
 
-The sync backend lives in a sibling repo, `../hvsna-sync2` (a Cloudflare Worker package — its own `package.json`/`node_modules`, run its `npm test`/`npm run typecheck` there separately). Path alias `@/*` → `./src/*` in `packages/app`.
+Path alias `@/*` → `./src/*` in both `packages/app` and `packages/api`.
 
 ### Entry point
 `packages/app/index.html` → `packages/app/src/main.tsx` → `<App platform="web" Router={BrowserRouter} Routes={ResponsiveRoutes} />`. Client-side React only (no SSR).
@@ -33,11 +43,11 @@ The sync backend lives in a sibling repo, `../hvsna-sync2` (a Cloudflare Worker 
 ### Database
 **Client**: `wa-sqlite` (`AccessHandlePoolVFS`, OPFS-backed) running in a dedicated Web Worker (`packages/app/src/modules/sqlite/worker.ts`), talked to via `SqliteClient` (`packages/app/src/modules/sqlite/client.ts`) and exposed through `SqliteProvider`/`useSqliteClient()`. No ORM client-side — repositories hand-write parameterized SQL.
 
-**Backend**: one Cloudflare Worker (in `../hvsna-sync2`) fronting a Cloudflare D1 database *per user* (control-plane mapping in a separate, statically-bound D1 database). Per-user databases are reached via D1's HTTP/REST API, not a native binding, since bindings are static and can't target "whichever DB belongs to this user" at runtime — see `../hvsna-sync2/src/lib/d1-http-client.ts`. Schema lives in a Drizzle schema file (`../hvsna-sync2/src/db/schema.ts`); `drizzle-kit` generates the migrations in `../hvsna-sync2/migrations/user/`. Those `.sql` files are copied verbatim into `packages/app/src/modules/sqlite/migrations/user/` (imported via Vite `?raw`) to bootstrap the client's own SQLite database from the exact same DDL — re-copy and update `packages/app/src/modules/sqlite/schema.ts`'s `userMigrations` list whenever the worker schema changes.
+**Backend**: `packages/api` (`@hvsna/api`), a Neon Postgres database accessed via `drizzle-orm/neon-http` (see `packages/api/src/db/`). Schema is auth-only so far — `users` + `refresh_tokens` (`packages/api/src/db/schema.ts`) — migrations generated with `drizzle-kit generate` into `packages/api/drizzle/`. Local (client-side) SQLite migrations under `packages/app/src/modules/sqlite/migrations/user/` are first-party now, owned directly by the app rather than mirrored from an external backend — see the comment on `packages/app/src/modules/sqlite/schema.ts`'s `userMigrations`.
 
-Sync (`packages/app/src/modules/sync/`) is **not implemented yet** — `SyncProvider` is a stub (`syncUnavailable: true`) showing "coming soon" UI. The client schema already carries the scaffolding for a future push/pull design (`_dirty` flags on `tasks`/`recurring_tasks`/`settings`, a `_sync_state` key/value table for cursor bookkeeping — see `packages/app/src/modules/sqlite/schema.ts`), but nothing reads or writes it yet.
+Sync (`packages/app/src/modules/sync/`) is **not implemented yet** — `SyncProvider` is a stub (`syncUnavailable: true`) showing "coming soon" UI. The client schema already carries the scaffolding for a future push/pull design (`_dirty` flags on `tasks`/`recurring_tasks`/`settings`, a `_sync_state` key/value table for cursor bookkeeping — see `packages/app/src/modules/sqlite/schema.ts`), but nothing reads or writes it yet, and `packages/api` doesn't define those tables yet either.
 
-Auth is the pre-existing hand-rolled system: `AuthService`/`AuthServiceFactory` + `WebSessionRepository`/`InMemoryTokenStore` in `packages/app/src/infra/auth/`, domain interfaces in `packages/app/src/domain/auth/`, wired through `AuthProvider`/`useAuth()` in `packages/app/src/modules/auth/`. Untouched by this migration — only the storage layer (PouchDB → SQLite) changed.
+Auth is the pre-existing hand-rolled system: `AuthService`/`AuthServiceFactory` + `WebSessionRepository`/`InMemoryTokenStore` in `packages/app/src/infra/auth/`, domain interfaces in `packages/app/src/domain/auth/`, wired through `AuthProvider`/`useAuth()` in `packages/app/src/modules/auth/`. It now talks to `packages/api` over HTTP (`VITE_API_URL`, see `packages/app/src/modules/api/http-client.ts`): `POST /login`, `POST /register`, `GET /me`, `POST /auth/refresh`, `POST /auth/logout` — argon2-hashed passwords, a 15-minute JWT access token, and a DB-backed, rotate-on-use refresh token (30-day TTL). A `401` with body `{ code: "TOKEN_EXPIRED" }` is what triggers the client's silent-refresh-and-retry interceptor — any new failure mode on the API side must use that exact code or the client won't know to refresh.
 
 ### Routing
 Client-side React Router 7. Routes split by screen size (under `packages/app/src/`):
@@ -47,6 +57,19 @@ Client-side React Router 7. Routes split by screen size (under `packages/app/src
 
 ### State
 React Context + TanStack Query v5.
+
+### Website (`packages/website/`)
+Separate Vite/React app for marketing pages + docs, unrelated to the SQLite/domain/infra architecture above — no shared code with `packages/app`. Bilingual: English at `/`, `/about`, `/features`, `/pricing`, `/privacy`, `/terms`; Indonesian mirrored under `/id/*` (see `src/routes.tsx`). Docs live as MDX files in `src/content/docs/`, ordered by `meta.json`'s `pages` list and loaded via `import.meta.glob` in `src/pages/docs/registry.ts`.
+
+Static-generated, not SSR-served: `npm run build:website` builds the client bundle, then an SSR bundle (`src/entry-server.tsx`), then `scripts/prerender.mjs` renders every route (listed in `entry-server.tsx`'s `routes` array) to a static `index.html` under `dist/`. The client (`src/main.tsx`) deliberately does a fresh `createRoot` render rather than `hydrateRoot` — the prerendered HTML is for crawlers/social scrapers, not hydration, avoiding server/client mismatch bugs at the cost of a brief first-paint flash. Deploys to Vercel (`vercel.json`).
+
+### API (`packages/api/`)
+React Router v8 in framework mode, used purely as a backend — every route under `app/routes/` is a resource route (`loader`/`action` export only, no component) returning JSON, never rendering HTML. `app/root.tsx` exists only because framework mode requires a root route; it's never actually rendered since all leaf routes are resource routes. Node runtime (not Edge) — needed for `@node-rs/argon2`'s native bindings. No `@vercel/react-router` preset yet (as of writing it only supports React Router v7 as a peer dep); Vercel's zero-config framework detection deploys this fine in the meantime — see `react-router.config.ts`.
+
+- `src/db/` — Drizzle schema + `neon-http` client (Neon Postgres, HTTP driver — no TCP pooling to manage across serverless cold starts)
+- `src/lib/` — `password.ts` (argon2), `jwt.ts` (jose, HS256 access tokens), `tokens.ts` (refresh token issue/rotate/revoke), `response.ts` (`BaseResponse<T>` envelope + `ApiError`), `cors.ts` (origin allow-list via `ALLOWED_ORIGINS`)
+- No cookies anywhere — Bearer access token + refresh token in the request body, matching what `packages/app`'s client already expects (see Database section above)
+- Tests (`__tests__/` next to each module) mock `@/db/client` entirely rather than hitting a real Postgres instance — see `src/__tests__/mock-db.ts` for the chainable query-builder mock
 
 ## Conventions
 
@@ -60,7 +83,7 @@ React Context + TanStack Query v5.
 
 ## Testing quirks
 
-- Vitest uses `jsdom` environment + `@testing-library/jest-dom` matchers
+- `@hvsna/app`'s Vitest uses `jsdom` environment + `@testing-library/jest-dom` matchers; `@hvsna/api`'s uses plain `node` environment (no DOM needed) and mocks `@/db/client` instead of hitting real Postgres
 - E2E uses Playwright with Pixel 5 emulation, 15s action timeout (Framer Motion), geolocation enabled by default
 - E2E runs serially per-browser (`fullyParallel: false` — SQLite/OPFS storage is per-origin, shared across tests in the same browser context)
 - E2E resets local state via `window.__hvsnaResetLocalData` (dev-only hook set in `main.tsx`), not direct storage manipulation — see `packages/app/e2e/helpers/db-reset.ts`
@@ -70,5 +93,6 @@ React Context + TanStack Query v5.
 - `packages/app/src/config.ts` — prayer tuning, timezone→coordinate map
 - `packages/app/src/app.tsx` — root provider tree (AuthProvider → SettingsProvider → LocationProvider → TaskProvider)
 - `packages/app/src/modules/calendar/hijri/` — HijriDate/HijriMonth classes using `@tabby_ai/hijri-converter`
-- `packages/app/src/modules/sync/` — sync UI/context; currently a stub (see Database section) pending a push/pull rebuild against the Cloudflare Worker
-- `../hvsna-sync2/` — the Cloudflare Worker backend, in its own repo; run `npm test`/`npm run typecheck` there separately from the main app
+- `packages/app/src/modules/sync/` — sync UI/context; currently a stub (see Database section) pending a push/pull rebuild against `packages/api`
+- `packages/api/src/db/schema.ts` — auth-only Drizzle schema (`users`, `refresh_tokens`); `packages/api/app/routes/` — the five auth resource routes
+- `packages/website/src/routes.tsx` — website route table; `packages/website/src/content/docs/` — MDX docs content

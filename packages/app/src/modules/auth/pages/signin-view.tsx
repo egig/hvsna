@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { useAuth } from "../use-auth";
-import { useFeatureFlag } from "src/modules/feature-flags/useFeatureFlags";
 import { validateEmail } from "../validation";
 
 export function SignInView() {
   const navigate = useNavigate();
   const { login, loading, error } = useAuth();
-  const isSignupEnabled = useFeatureFlag("signup");
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
@@ -115,21 +113,12 @@ export function SignInView() {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Don't have an account?{" "}
-        {isSignupEnabled ? (
-          <Link
-            to="/signup"
-            className="text-primary-600 hover:text-primary-700 font-medium"
-          >
-            Sign up
-          </Link>
-        ) : (
-          <a
-            href="https://recraftory.notion.site/318c304e3c0e809aaaddfadf5b543091"
-            className="text-primary-500 font-medium"
-          >
-            Request Access
-          </a>
-        )}
+        <Link
+          to="/signup"
+          className="text-primary-600 hover:text-primary-700 font-medium"
+        >
+          Sign up
+        </Link>
       </p>
     </div>
   );

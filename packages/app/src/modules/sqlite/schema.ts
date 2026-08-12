@@ -1,10 +1,10 @@
 import userMigration0000 from "./migrations/user/0000_rainy_brother_voodoo.sql?raw";
 
 /**
- * Copied verbatim from ../hvsna-sync2/migrations/user/*.sql (see that repo's
- * src/db/user-migrations.ts for the server-side equivalent list), applied in
- * order to bootstrap a new local database. Re-copy into migrations/user/ and
- * add to both lists whenever the schema evolves.
+ * Local-first schema, owned directly by this app (no longer mirrored from
+ * an external backend), applied in order to bootstrap a new local database.
+ * A future sync rebuild against packages/api will need to reconcile this
+ * with whatever server-side schema it introduces for synced data.
  */
 export const userMigrations: string[] = [userMigration0000];
 

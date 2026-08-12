@@ -17,6 +17,12 @@
     "dev:website": "npm run dev -w @hvsna/website",
     "build:website": "npm run build -w @hvsna/website",
     "typecheck:website": "npm run typecheck -w @hvsna/website",
+    "dev:api": "npm run dev -w @hvsna/api",
+    "build:api": "npm run build -w @hvsna/api",
+    "typecheck:api": "npm run typecheck -w @hvsna/api",
+    "test:api": "npm run test -w @hvsna/api",
+    "db:generate": "npm run db:generate -w @hvsna/api",
+    "db:migrate": "npm run db:migrate -w @hvsna/api",
     "prepare": "husky || true"
   },
   "devDependencies": {
