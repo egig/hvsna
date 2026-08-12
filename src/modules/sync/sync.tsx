@@ -19,14 +19,14 @@ export default function Sync() {
     isSyncing,
     manualSync,
     isManualSyncing,
-    nativeSyncUnavailable,
+    syncUnavailable,
   } = useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  if (nativeSyncUnavailable) {
+  if (syncUnavailable) {
     return (
       <Page>
         <Navbar title={t("sync")} />

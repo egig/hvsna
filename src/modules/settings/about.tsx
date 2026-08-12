@@ -3,7 +3,7 @@ import { Page } from "../navigation";
 import packageInfo from "../../../package.json";
 import { LargeNavbar } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { usePWARefresh } from "@/platforms/web/usePWARefresh";
+import { usePWARefresh } from "@/usePWARefresh";
 
 export default function About() {
   const { t } = useLanguageContext();

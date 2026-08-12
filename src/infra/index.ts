@@ -9,5 +9,5 @@ export { BrowserPermissionsProvider } from "./permissions/BrowserPermissionsProv
 
 export { SqliteTaskRepository } from "./task";
 
-export { createLocationProvider } from "./location/CapacitorLocationDriver";
+export { createLocationProvider } from "./location";
 export { BrowserLocationDriver as BrowserLocationProvider } from "./location/BrowserLocationDriver";

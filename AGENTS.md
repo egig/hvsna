@@ -19,7 +19,7 @@ No lint configured. Pre-commit hook (husky) runs `npm test`.
 The sync backend lives in a sibling repo, `../hvsna-sync2` (a Cloudflare Worker package — its own `package.json`/`node_modules`, run its `npm test`/`npm run typecheck` there separately). Path alias `@/*` → `./src/*` in the main app.
 
 ### Entry point
-`index.html` → `src/platforms/web/main.tsx` → `<App platform="web" Router={BrowserRouter} Routes={ResponsiveRoutes} />`. Client-side React only (no SSR).
+`index.html` → `src/main.tsx` → `<App platform="web" Router={BrowserRouter} Routes={ResponsiveRoutes} />`. Client-side React only (no SSR).
 
 ### Clean architecture — three layers
 1. `src/domain/` — interfaces only, no deps
@@ -31,7 +31,7 @@ The sync backend lives in a sibling repo, `../hvsna-sync2` (a Cloudflare Worker 
 
 **Backend**: one Cloudflare Worker (in `../hvsna-sync2`) fronting a Cloudflare D1 database *per user* (control-plane mapping in a separate, statically-bound D1 database). Per-user databases are reached via D1's HTTP/REST API, not a native binding, since bindings are static and can't target "whichever DB belongs to this user" at runtime — see `../hvsna-sync2/src/lib/d1-http-client.ts`. Schema lives in a Drizzle schema file (`../hvsna-sync2/src/db/schema.ts`); `drizzle-kit` generates the migrations in `../hvsna-sync2/migrations/user/`. Those `.sql` files are copied verbatim into `src/modules/sqlite/migrations/user/` (imported via Vite `?raw`) to bootstrap the client's own SQLite database from the exact same DDL — re-copy and update `src/modules/sqlite/schema.ts`'s `userMigrations` list whenever the worker schema changes.
 
-Sync (`src/modules/sync/`) is **not implemented yet** — `SyncProvider` is a stub (`nativeSyncUnavailable: true`) reusing the "coming soon" UI that the native/offline-only platform used before this migration. The client schema already carries the scaffolding for a future push/pull design (`_dirty` flags on `tasks`/`recurring_tasks`/`settings`, a `_sync_state` key/value table for cursor bookkeeping — see `src/modules/sqlite/schema.ts`), but nothing reads or writes it yet.
+Sync (`src/modules/sync/`) is **not implemented yet** — `SyncProvider` is a stub (`syncUnavailable: true`) showing "coming soon" UI. The client schema already carries the scaffolding for a future push/pull design (`_dirty` flags on `tasks`/`recurring_tasks`/`settings`, a `_sync_state` key/value table for cursor bookkeeping — see `src/modules/sqlite/schema.ts`), but nothing reads or writes it yet.
 
 Auth is the pre-existing hand-rolled system: `AuthService`/`AuthServiceFactory` + `WebSessionRepository`/`InMemoryTokenStore` in `src/infra/auth/`, domain interfaces in `src/domain/auth/`, wired through `AuthProvider`/`useAuth()` in `src/modules/auth/`. Untouched by this migration — only the storage layer (PouchDB → SQLite) changed.
 

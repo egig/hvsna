@@ -16,7 +16,6 @@ import { TaskProvider } from "@/modules/task/task-context";
 import { AuthProvider } from "@/modules/auth";
 import { SettingsProvider } from "@/modules/settings";
 import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker";
-import { PlatformProvider } from "@/modules/platform";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
 import { LocationProvider } from "./modules/location/context";
 import { NetworkProvider } from "./modules/network/context";
@@ -90,36 +89,34 @@ export default function App({
         <QueryClientProvider client={queryClient}>
           <ErrorBoundary>
             <NetworkProvider>
-              <PlatformProvider>
-                <SnackbarProvider>
-                  <ScreenSizeProvider>
-                    <SqliteProvider client={sqliteClient}>
-                      <RepositoriesProvider repositories={repositories}>
-                        <AuthProvider>
-                          <SettingsProvider>
-                            <LanguageProviderWrapper>
-                              <LocationProvider>
-                                <DroppableContext>
-                                  <SyncProvider>
-                                    <Router>
-                                      <TaskProvider>
-                                        <PostHogSessionTracker
-                                          platform={platform}
-                                        />
-                                        <Routes />
-                                      </TaskProvider>
-                                    </Router>
-                                  </SyncProvider>
-                                </DroppableContext>
-                              </LocationProvider>
-                            </LanguageProviderWrapper>
-                          </SettingsProvider>
-                        </AuthProvider>
-                      </RepositoriesProvider>
-                    </SqliteProvider>
-                  </ScreenSizeProvider>
-                </SnackbarProvider>
-              </PlatformProvider>
+              <SnackbarProvider>
+                <ScreenSizeProvider>
+                  <SqliteProvider client={sqliteClient}>
+                    <RepositoriesProvider repositories={repositories}>
+                      <AuthProvider>
+                        <SettingsProvider>
+                          <LanguageProviderWrapper>
+                            <LocationProvider>
+                              <DroppableContext>
+                                <SyncProvider>
+                                  <Router>
+                                    <TaskProvider>
+                                      <PostHogSessionTracker
+                                        platform={platform}
+                                      />
+                                      <Routes />
+                                    </TaskProvider>
+                                  </Router>
+                                </SyncProvider>
+                              </DroppableContext>
+                            </LocationProvider>
+                          </LanguageProviderWrapper>
+                        </SettingsProvider>
+                      </AuthProvider>
+                    </RepositoriesProvider>
+                  </SqliteProvider>
+                </ScreenSizeProvider>
+              </SnackbarProvider>
             </NetworkProvider>
           </ErrorBoundary>
         </QueryClientProvider>

@@ -7,7 +7,7 @@ import { initAuthService } from "@/infra/auth/AuthServiceFactory";
 import { initNotificationsProvider } from "@/infra/notifications";
 import { initPermissionsProvider } from "@/infra/permissions";
 import { initNetworkProvider } from "@/infra/network";
-import { initLocationProvider } from "@/infra/location/CapacitorLocationDriver";
+import { initLocationProvider } from "@/infra/location";
 
 export function registerWebImplementations(): void {
   initAuthService(new WebSessionRepository());

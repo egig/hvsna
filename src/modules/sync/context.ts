@@ -13,8 +13,8 @@ export type SyncContextType = {
   handleSyncMerge: () => Promise<void>;
   handleSyncDeleteLocal: () => Promise<void>;
   closeSyncDialog: () => void;
-  /** True on native, where sync is not built yet (offline-only phase). */
-  nativeSyncUnavailable?: boolean;
+  /** True while sync is not built yet. */
+  syncUnavailable?: boolean;
 };
 
 export const SyncContext = createContext<SyncContextType | undefined>(
@@ -24,8 +24,7 @@ export const SyncContext = createContext<SyncContextType | undefined>(
 /**
  * Storage moved from PouchDB (which synced live against a CouchDB-protocol
  * backend) to local-only wa-sqlite. Sync hasn't been rebuilt for the new
- * backend yet, so this is a stub — same shape the native/offline-only
- * platform already used (`nativeSyncUnavailable`), reused here so
+ * backend yet, so this is a stub (`syncUnavailable`) that lets
  * `sync.tsx` / `sync-status-badge.tsx` fall back to their existing
  * "coming soon" UI without changes.
  */
@@ -44,7 +43,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     handleSyncMerge: async () => {},
     handleSyncDeleteLocal: async () => {},
     closeSyncDialog: () => {},
-    nativeSyncUnavailable: true,
+    syncUnavailable: true,
   };
 
   return React.createElement(SyncContext.Provider, { value }, children);
