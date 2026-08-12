@@ -2,7 +2,7 @@ import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import type { AppConfig } from "@/app";
 import App from "@/app";
-import { getPouchDBInstance } from "@/modules/pouchdb-singleton";
+import { getSqliteClient } from "@/modules/sqlite/sqlite-singleton";
 import { configureLogger } from "@/modules/logger";
 import { registerWebImplementations } from "./register";
 import log from "@/modules/logger";
@@ -23,7 +23,7 @@ const config: AppConfig = {
 };
 
 const root = createRoot(document.getElementById("root") as Container);
-const db = getPouchDBInstance();
+const sqliteClient = getSqliteClient();
 
 configureLogger();
 
@@ -31,7 +31,7 @@ configureLogger();
   root.render(
     <App
       config={config}
-      db={db}
+      sqliteClient={sqliteClient}
       platform="web"
       Router={BrowserRouter}
       Routes={ResponsiveRoutes}
@@ -39,6 +39,15 @@ configureLogger();
   );
   // @ts-ignore
   window.__dtMounted = true;
+
+  if (import.meta.env.DEV) {
+    // E2E-test-only hook (see e2e/helpers/db-reset.ts) — wipes local SQLite
+    // storage the same way the in-app "wipe data" settings feature does.
+    // Stripped from production builds since import.meta.env.DEV is inlined
+    // and dead-code-eliminated by Vite.
+    // @ts-ignore
+    window.__hvsnaResetLocalData = () => sqliteClient.wipe();
+  }
 })();
 
 registerSW({

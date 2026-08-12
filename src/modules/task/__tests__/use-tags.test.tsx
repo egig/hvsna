@@ -8,11 +8,6 @@ const mockGetTasks = vi.fn();
 const mockGetAllPendingTasks = vi.fn();
 const mockUpdateTask = vi.fn();
 
-// Mock the pouchdb hook
-vi.mock("../../../pouchdb", () => ({
-  usePouchDB: () => ({ db: {} as any }),
-}));
-
 // Mock the task repository hook
 let mockRepo = {
   findBrowsedTasks: mockGetTasks,

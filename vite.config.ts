@@ -15,6 +15,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  // wa-sqlite.mjs locates its .wasm file at runtime via
+  // `new URL("wa-sqlite.wasm", import.meta.url)`. If esbuild pre-bundles it
+  // into node_modules/.vite/deps/, the .wasm sibling isn't copied there, so
+  // that URL 404s — which the dev server's SPA fallback answers with
+  // index.html, and WebAssembly.compile() then rejects with "wasm
+  // validation error: failed to match magic number" (it got HTML, not the
+  // wasm binary). Excluding it from pre-bundling keeps it at its real path.
+  optimizeDeps: {
+    exclude: ["wa-sqlite"],
+  },
   plugins: [
     tailwindcss(),
     tsconfigPaths(),

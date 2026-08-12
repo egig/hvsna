@@ -1,0 +1,126 @@
+// @vitest-environment node
+import { describe, expect, it } from "vitest";
+import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
+import { SqliteTaskRepository } from "../SqliteTaskRepository";
+
+async function makeRepo() {
+  const client = await createTestSqliteClient();
+  return { client, repo: new SqliteTaskRepository(client) };
+}
+
+describe("SqliteTaskRepository", () => {
+  it("creates a task and marks it dirty", async () => {
+    const { client, repo } = await makeRepo();
+
+    const task = await repo.create({ name: "Buy milk", tags: ["errands"] });
+
+    expect(task.id).toMatch(/^task_/);
+    expect(task.status).toBe(0);
+    expect(task.tags).toEqual(["errands"]);
+
+    const [row] = await client.run(`SELECT _dirty, tags FROM tasks WHERE id = ?`, [
+      String(task.id),
+    ]);
+    expect(row._dirty).toBe(1);
+    expect(JSON.parse(String(row.tags))).toEqual(["errands"]);
+  });
+
+  it("findById returns null for soft-deleted tasks", async () => {
+    const { repo } = await makeRepo();
+    const task = await repo.create({ name: "Buy milk", tags: [] });
+
+    await repo.delete(task.id!);
+
+    expect(await repo.findById(task.id!)).toBeNull();
+  });
+
+  it("update merges only provided fields and re-dirties the row", async () => {
+    const { client, repo } = await makeRepo();
+    const task = await repo.create({ name: "Buy milk", description: "2%", tags: [] });
+    await client.run(`UPDATE tasks SET _dirty = 0 WHERE id = ?`, [String(task.id)]);
+
+    const updated = await repo.update(task.id!, { name: "Buy oat milk" });
+
+    expect(updated.name).toBe("Buy oat milk");
+    expect(updated.description).toBe("2%"); // untouched field preserved
+    const [row] = await client.run(`SELECT _dirty FROM tasks WHERE id = ?`, [String(task.id)]);
+    expect(row._dirty).toBe(1);
+  });
+
+  it("update with removeTime clears atTime", async () => {
+    const { repo } = await makeRepo();
+    const task = await repo.create({ name: "Buy milk", atTime: "09:00", tags: [] });
+
+    const updated = await repo.update(task.id!, { removeTime: true });
+
+    expect(updated.atTime).toBe("");
+  });
+
+  it("completeTask sets status=1 and completedAt; reopenTask reverses it", async () => {
+    const { repo } = await makeRepo();
+    const task = await repo.create({ name: "Buy milk", tags: [] });
+
+    const completed = await repo.completeTask(task.id!);
+    expect(completed.status).toBe(1);
+    expect(completed.completedAt).toBeTypeOf("number");
+
+    const reopened = await repo.reopenTask(task.id!);
+    expect(reopened.status).toBe(0);
+    expect(reopened.completedAt).toBeUndefined();
+  });
+
+  it("find filters by status and excludes soft-deleted rows", async () => {
+    const { repo } = await makeRepo();
+    const a = await repo.create({ name: "Pending", tags: [] });
+    const b = await repo.create({ name: "Done", tags: [] });
+    await repo.completeTask(b.id!);
+    const c = await repo.create({ name: "Deleted", tags: [] });
+    await repo.delete(c.id!);
+
+    const pending = await repo.find({ status: 0 });
+    expect(pending.map((t) => t.name)).toEqual(["Pending"]);
+
+    const all = await repo.find();
+    expect(all.map((t) => t.id).sort()).toEqual([a.id, b.id].sort());
+  });
+
+  it("find filters by tags using json_each", async () => {
+    const { repo } = await makeRepo();
+    await repo.create({ name: "Tagged", tags: ["work", "urgent"] });
+    await repo.create({ name: "Untagged", tags: [] });
+
+    const results = await repo.find({ tags: ["urgent"] });
+
+    expect(results.map((t) => t.name)).toEqual(["Tagged"]);
+  });
+
+  it("findByRecurringTaskId and deletePendingByRecurringTaskId only touch pending instances", async () => {
+    const { repo } = await makeRepo();
+    const pending = await repo.create({
+      name: "Instance 1",
+      tags: [],
+      recurringTaskId: "rtask_1",
+    });
+    const completed = await repo.create({
+      name: "Instance 2",
+      tags: [],
+      recurringTaskId: "rtask_1",
+    });
+    await repo.completeTask(completed.id!);
+
+    const before = await repo.findByRecurringTaskId("rtask_1");
+    expect(before).toHaveLength(2);
+
+    await repo.deletePendingByRecurringTaskId("rtask_1");
+
+    expect(await repo.findById(pending.id!)).toBeNull();
+    expect(await repo.findById(completed.id!)).not.toBeNull();
+  });
+
+  it("findByHijriDate always returns [] (matches pre-existing behavior — see code comment)", async () => {
+    const { repo } = await makeRepo();
+    await repo.create({ name: "Task", tags: [] });
+
+    expect(await repo.findByHijriDate("1447-01-01")).toEqual([]);
+  });
+});

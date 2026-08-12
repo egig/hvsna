@@ -1,5 +1,5 @@
 import { test as base, type Page } from "@playwright/test";
-import { resetPouchDB } from "../helpers/db-reset";
+import { resetLocalData } from "../helpers/db-reset";
 import { mockAladhanAPI } from "../helpers/api-mocks";
 
 type AppFixtures = {
@@ -35,8 +35,8 @@ export const test = base.extend<AppFixtures>({
   appPage: async ({ page }, use) => {
     await mockAladhanAPI(page);
     await use(page);
-    // Cleanup: reset PouchDB after each test
-    await resetPouchDB(page);
+    // Cleanup: wipe local data after each test
+    await resetLocalData(page);
   },
 
   /**
@@ -45,19 +45,19 @@ export const test = base.extend<AppFixtures>({
    */
   taskPage: async ({ page }, use) => {
     await mockAladhanAPI(page);
-    // Navigate first so IndexedDB is accessible, then wipe any leftover state
+    // Navigate first so the SQLite Worker/OPFS storage is accessible, then wipe any leftover state
     await page.goto("/");
-    await resetPouchDB(page);
+    await resetLocalData(page);
     await page.evaluate(() => localStorage.clear());
     // Reload into a guaranteed-clean state — OnboardingGuard will redirect to /onboarding
     await page.reload({ waitUntil: "networkidle" });
-    // DB is empty so OnboardingGuard always redirects; wait for it (async PouchDB read)
+    // DB is empty so OnboardingGuard always redirects; wait for it (async SQLite read)
     await page.waitForURL("/onboarding", { timeout: 10_000 });
     await completeOnboarding(page);
 
     await use(page);
     // Post-test cleanup for the next test
-    await resetPouchDB(page);
+    await resetLocalData(page);
     await page.evaluate(() => localStorage.clear());
   },
 });

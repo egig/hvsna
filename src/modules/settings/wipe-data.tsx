@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { HvDatabase, HvTrash2, HvAlertTriangle } from "@/modules/icons";
-import { getPouchDBInstance } from "../pouchdb-singleton";
+import { getSqliteClient } from "../sqlite/sqlite-singleton";
 import { Navbar, Page } from "../navigation";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 
 async function wipeLocalData(): Promise<void> {
-  await getPouchDBInstance().destroy();
+  await getSqliteClient().wipe();
 }
 
 export default function WipeData() {

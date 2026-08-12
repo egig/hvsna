@@ -1,3 +1,3 @@
-export { PouchDBTaskRepository } from "./PouchDBTaskRepository";
-export { PouchDBRecurringTaskRepository } from "./PouchDBRecurringTaskRepository";
-export { PouchDBReminderRegistryRepository } from "./PouchDBReminderRegistryRepository";
+export { SqliteTaskRepository } from "./SqliteTaskRepository";
+export { SqliteRecurringTaskRepository } from "./SqliteRecurringTaskRepository";
+export { LocalReminderRegistryRepository } from "./LocalReminderRegistryRepository";

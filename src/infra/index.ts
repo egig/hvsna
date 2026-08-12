@@ -7,7 +7,7 @@ export { BrowserNotificationsDriver } from "./notifications/BrowserNotifications
 export { createPermissionsProvider } from "./permissions";
 export { BrowserPermissionsProvider } from "./permissions/BrowserPermissionsProvider";
 
-export { PouchDBTaskRepository } from "./task";
+export { SqliteTaskRepository } from "./task";
 
 export { createLocationProvider } from "./location/CapacitorLocationDriver";
 export { BrowserLocationDriver as BrowserLocationProvider } from "./location/BrowserLocationDriver";

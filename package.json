@@ -23,7 +23,6 @@
     "@tabby_ai/hijri-converter": "^1.0.5",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/react-query": "^5.90.21",
-    "@types/pouchdb": "^6.4.2",
     "add": "^2.0.6",
     "adhan": "^4.4.3",
     "allotment": "^1.20.5",
@@ -39,9 +38,6 @@
     "loglevel": "^1.9.2",
     "lucide-react": "^0.562.0",
     "npm": "^11.7.0",
-    "pouchdb": "^9.0.0",
-    "pouchdb-adapter-memory": "^9.0.0",
-    "pouchdb-find": "^9.0.0",
     "prosemirror-commands": "^1.7.1",
     "prosemirror-dropcursor": "^1.8.2",
     "prosemirror-gapcursor": "^1.4.0",
@@ -64,6 +60,7 @@
     "swiper": "^12.0.3",
     "vaul": "^1.1.2",
     "vite-plugin-pwa": "^1.2.0",
+    "wa-sqlite": "^1.0.0",
     "workbox-window": "^7.4.0"
   },
   "devDependencies": {
@@ -80,7 +77,6 @@
     "husky": "^9.1.7",
     "jsdom": "^27.4.0",
     "node-fetch": "^3.3.2",
-    "pouchdb-memory": "^6.0.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",

@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router";
 import "@/app.css";
-import { PouchDBProvider } from "@/pouchdb";
+import { SqliteProvider } from "@/modules/sqlite/context";
+import type { SqliteClient } from "@/modules/sqlite/client";
 import DroppableContext from "@/modules/components/droppable-context";
 import { ScreenSizeProvider } from "@/modules/components/screen-size-wrapper";
 import { Provider } from "@rollbar/react";
@@ -49,18 +50,18 @@ const posthogOptions = {
 
 export default function App({
   config,
-  db,
+  sqliteClient,
   platform,
   Router,
   Routes,
 }: {
   platform: "web";
   config: AppConfig;
-  db: PouchDB.Database;
+  sqliteClient: SqliteClient;
   Router: typeof BrowserRouter;
   Routes: React.FC;
 }) {
-  const repositories = createWebRepositories(db);
+  const repositories = createWebRepositories(sqliteClient);
 
   return (
     <EnsureRequiredParams
@@ -92,7 +93,7 @@ export default function App({
               <PlatformProvider>
                 <SnackbarProvider>
                   <ScreenSizeProvider>
-                    <PouchDBProvider dbInstance={db}>
+                    <SqliteProvider client={sqliteClient}>
                       <RepositoriesProvider repositories={repositories}>
                         <AuthProvider>
                           <SettingsProvider>
@@ -115,7 +116,7 @@ export default function App({
                           </SettingsProvider>
                         </AuthProvider>
                       </RepositoriesProvider>
-                    </PouchDBProvider>
+                    </SqliteProvider>
                   </ScreenSizeProvider>
                 </SnackbarProvider>
               </PlatformProvider>

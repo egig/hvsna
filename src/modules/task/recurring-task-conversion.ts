@@ -72,7 +72,7 @@ export async function updateRecurringSeries(
  * Converts a regular task into a recurring task series.
  *
  * Steps:
- * 1. Create a RecurringTask template in PouchDB (rtask_ doc).
+ * 1. Create a RecurringTask template (rtask_ row).
  * 2. Link this task to the template first — so the occurrence generator
  *    finds it via findByRecurringTaskId and skips this date (no duplicate).
  * 3. Generate future instances up to the horizon.
