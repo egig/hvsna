@@ -2,15 +2,18 @@ import { vi } from "vitest";
 
 /**
  * A drizzle-style chainable query builder mock: every intermediate call
- * (.from/.where/.limit/.values/.returning/.set) returns the same chain, and
- * awaiting the chain at any point resolves to `result`.
+ * (.from/.where/.limit/.orderBy/.values/.onConflictDoUpdate/.returning/.set)
+ * returns the same chain, and awaiting the chain at any point resolves to
+ * `result`.
  */
 export function createChain<T>(result: T) {
   const chain = {
     from: vi.fn(() => chain),
     where: vi.fn(() => chain),
     limit: vi.fn(() => chain),
+    orderBy: vi.fn(() => chain),
     values: vi.fn(() => chain),
+    onConflictDoUpdate: vi.fn(() => chain),
     returning: vi.fn(() => chain),
     set: vi.fn(() => chain),
     then: (
@@ -27,7 +30,9 @@ export function createRejectingChain(error: unknown) {
     from: vi.fn(() => chain),
     where: vi.fn(() => chain),
     limit: vi.fn(() => chain),
+    orderBy: vi.fn(() => chain),
     values: vi.fn(() => chain),
+    onConflictDoUpdate: vi.fn(() => chain),
     returning: vi.fn(() => chain),
     set: vi.fn(() => chain),
     then: (
