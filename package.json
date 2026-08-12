@@ -14,7 +14,7 @@
     "test:e2e": "npm run test:e2e -w @hvsna/app",
     "test:e2e:ui": "npm run test:e2e:ui -w @hvsna/app",
     "test:e2e:debug": "npm run test:e2e:debug -w @hvsna/app",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "husky": "^9.1.7"
