@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { HvSearch } from "@/modules/icons";
 import { Modal } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { searchLocations } from "@/infra/location/nominatim";
 
 export type Location = {
   name: string;
@@ -9,24 +10,8 @@ export type Location = {
   lng: number;
 };
 
-interface NominatimResult {
-  display_name: string;
-  lat: string;
-  lon: string;
-}
-
 async function searchNominatim(query: string): Promise<Location[]> {
-  const params = new URLSearchParams({
-    q: query,
-    format: "jsonv2",
-    limit: "8",
-    addressdetails: "0",
-  });
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/search?${params}`
-  );
-  if (!res.ok) throw new Error("Nominatim error");
-  const data: NominatimResult[] = await res.json();
+  const data = await searchLocations(query);
   return data.map((r) => ({
     name: r.display_name,
     lat: parseFloat(r.lat),

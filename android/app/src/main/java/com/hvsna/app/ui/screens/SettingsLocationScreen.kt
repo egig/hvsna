@@ -62,18 +62,25 @@ fun SettingsLocationScreen(
     var isSearching by remember { mutableStateOf(false) }
     var isDetecting by remember { mutableStateOf(false) }
 
+    // On a transient reverse-geocode failure, keep whatever city name is already
+    // persisted rather than clobbering it with a raw coordinate string; only fall
+    // back to coordinates when there's no prior name to fall back to.
+    suspend fun detectAndUpdateLocation() {
+        val location = locationRepository.getLastLocation()
+        if (location != null) {
+            val cityName = locationRepository.reverseGeocode(location.first, location.second)
+                ?: settings.cityName.ifEmpty { "${location.first}, ${location.second}" }
+            settingsRepository.updateLocation(location.first, location.second, cityName)
+        }
+    }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
             isDetecting = true
             scope.launch {
-                val location = locationRepository.getLastLocation()
-                if (location != null) {
-                    val cityName = locationRepository.reverseGeocode(location.first, location.second)
-                        ?: "${location.first}, ${location.second}"
-                    settingsRepository.updateLocation(location.first, location.second, cityName)
-                }
+                detectAndUpdateLocation()
                 isDetecting = false
             }
         }
@@ -87,12 +94,7 @@ fun SettingsLocationScreen(
         if (hasPermission) {
             isDetecting = true
             scope.launch {
-                val location = locationRepository.getLastLocation()
-                if (location != null) {
-                    val cityName = locationRepository.reverseGeocode(location.first, location.second)
-                        ?: "${location.first}, ${location.second}"
-                    settingsRepository.updateLocation(location.first, location.second, cityName)
-                }
+                detectAndUpdateLocation()
                 isDetecting = false
             }
         } else {

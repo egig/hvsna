@@ -9,6 +9,7 @@ import {
 import { LocationUseCases } from "./usecase";
 import { createLocationProvider } from "@/infra";
 import { TimeAPITimezoneProvider } from "@/infra/location/TimeAPITimezoneProvider";
+import { reverseGeocode as fetchReverseGeocode } from "@/infra/location/nominatim";
 import { useSettings } from "../settings";
 import {
   LocationPickerModal,
@@ -22,18 +23,8 @@ async function reverseGeocode(
   lat: number,
   lon: number
 ): Promise<string | null> {
-  const params = new URLSearchParams({
-    lat: String(lat),
-    lon: String(lon),
-    format: "jsonv2",
-    zoom: "10",
-  });
-  const res = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?${params}`,
-    { headers: { "User-Agent": "hvsna/1.0 (egigundari@gmail.com)" } }
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
+  const data = await fetchReverseGeocode(lat, lon);
+  if (!data) return null;
 
   let displayName =
     data.address.county ?? data.address.city ?? data.address.display_name;
@@ -45,7 +36,7 @@ async function reverseGeocode(
     displayName = `${data.address.town}, ${displayName}`;
   }
 
-  return displayName;
+  return displayName ?? null;
 }
 
 interface LocationContextType {

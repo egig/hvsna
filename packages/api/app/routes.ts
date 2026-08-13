@@ -8,4 +8,6 @@ export default [
   route("auth/logout", "routes/auth.logout.ts"),
   route("sync/push", "routes/sync.push.ts"),
   route("sync/pull", "routes/sync.pull.ts"),
+  route("geocode/reverse", "routes/geocode.reverse.ts"),
+  route("geocode/search", "routes/geocode.search.ts"),
 ] satisfies RouteConfig;

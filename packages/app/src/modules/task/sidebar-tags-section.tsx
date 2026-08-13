@@ -1,6 +1,7 @@
 import { useTags } from "./use-tags";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Link } from "react-router";
+import { HashIcon } from "lucide-react";
 
 interface SidebarTagsSectionProps {
   collapsed?: boolean;
@@ -29,10 +30,9 @@ export function SidebarTagsSection({
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           >
             <span
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: tag.color }}
+              style={{color: tag.color }}
               aria-hidden
-            />
+            ><HashIcon size={14}/></span>
             <span className="text-sm truncate flex-1">{tag.name}</span>
             <span className="text-xs text-gray-400">{tag.count}</span>
           </Link>
