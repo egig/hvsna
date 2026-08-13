@@ -5,6 +5,7 @@ const CURSOR_KEY: Record<SyncTable, string> = {
   tasks: "sync_cursor_tasks",
   recurring_tasks: "sync_cursor_recurring_tasks",
   settings: "sync_cursor_settings",
+  tags: "sync_cursor_tags",
 };
 
 const LAST_SUCCESS_KEY = "sync_last_success_at";

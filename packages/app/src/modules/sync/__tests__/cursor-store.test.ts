@@ -9,16 +9,19 @@ describe("cursor-store", () => {
     expect(await getCursor(client, "tasks")).toBe(0);
     expect(await getCursor(client, "recurring_tasks")).toBe(0);
     expect(await getCursor(client, "settings")).toBe(0);
+    expect(await getCursor(client, "tags")).toBe(0);
   });
 
   it("persists a cursor per entity type independently", async () => {
     const client = await createTestSqliteClient();
     await setCursor(client, "tasks", 42);
     await setCursor(client, "recurring_tasks", 7);
+    await setCursor(client, "tags", 3);
 
     expect(await getCursor(client, "tasks")).toBe(42);
     expect(await getCursor(client, "recurring_tasks")).toBe(7);
     expect(await getCursor(client, "settings")).toBe(0);
+    expect(await getCursor(client, "tags")).toBe(3);
   });
 
   it("overwrites a previously-set cursor", async () => {

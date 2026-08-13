@@ -15,6 +15,20 @@
       "when": 1786547131045,
       "tag": "0001_perfect_xorn",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786585326167,
+      "tag": "0002_normalize_tags_and_kv_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786585331640,
+      "tag": "0003_drop_legacy_tags_and_settings_columns",
+      "breakpoints": true
     }
   ]
 }

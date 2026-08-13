@@ -16,6 +16,7 @@ function emptyPushResponse(): SyncPushResponse {
     tasks: { applied: [], rejected: [] },
     recurring_tasks: { applied: [], rejected: [] },
     settings: { applied: [], rejected: [] },
+    tags: { applied: [], rejected: [] },
   };
 }
 
@@ -24,6 +25,7 @@ function emptyPullResponse(cursors: SyncPullCursors): SyncPullResponse {
     tasks: { rows: [], next_cursor: cursors.tasks, has_more: false },
     recurring_tasks: { rows: [], next_cursor: cursors.recurring_tasks, has_more: false },
     settings: { rows: [], next_cursor: cursors.settings, has_more: false },
+    tags: { rows: [], next_cursor: cursors.tags, has_more: false },
   };
 }
 
@@ -42,7 +44,7 @@ function remoteTaskRow(overrides: Partial<Record<string, unknown>> = {}) {
     recurring_interval: null,
     recurring_task_id: null,
     hijri_date_offset: null,
-    tags: null,
+    tag_ids: [],
     created_at: 1000,
     updated_at: 1000,
     completed_at: null,
@@ -136,9 +138,8 @@ describe("sync-engine", () => {
     const apiClient: SyncApiPort = {
       push: async () => emptyPushResponse(),
       pull: async (cursors) => ({
+        ...emptyPullResponse(cursors),
         tasks: { rows: [remoteTaskRow({ rev: 3 })], next_cursor: 3, has_more: false },
-        recurring_tasks: { rows: [], next_cursor: cursors.recurring_tasks, has_more: false },
-        settings: { rows: [], next_cursor: cursors.settings, has_more: false },
       }),
     };
 
@@ -160,13 +161,12 @@ describe("sync-engine", () => {
         call += 1;
         if (call === 1) {
           return {
+            ...emptyPullResponse(cursors),
             tasks: {
               rows: [remoteTaskRow({ id: "task_a", rev: 1 })],
               next_cursor: 1,
               has_more: true,
             },
-            recurring_tasks: { rows: [], next_cursor: cursors.recurring_tasks, has_more: false },
-            settings: { rows: [], next_cursor: cursors.settings, has_more: false },
           };
         }
         return emptyPullResponse(cursors);

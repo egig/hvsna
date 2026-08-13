@@ -30,6 +30,7 @@ export class SyncApiClient {
       tasks_cursor: String(cursors.tasks),
       recurring_tasks_cursor: String(cursors.recurring_tasks),
       settings_cursor: String(cursors.settings),
+      tags_cursor: String(cursors.tags),
       limit: String(limit),
     });
     const response = await this.http.get<BaseResponse<SyncPullResponse>>(

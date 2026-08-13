@@ -22,7 +22,8 @@ export interface TaskWireRow {
   recurring_interval: number | null;
   recurring_task_id: string | null;
   hijri_date_offset: number | null;
-  tags: string | null;
+  /** Full current membership snapshot — the owning row's `task_tags`. */
+  tag_ids: string[];
   created_at: number;
   updated_at: number;
   completed_at: number | null;
@@ -41,7 +42,8 @@ export interface RecurringTaskWireRow {
   lng: number | null;
   timezone: string | null;
   hijri_date_offset: number | null;
-  tags: string | null;
+  /** Full current membership snapshot — the owning row's `recurring_task_tags`. */
+  tag_ids: string[];
   recurring_end: string | null;
   recurring_end_epoch: number | null;
   recurring_end_occurrences: number | null;
@@ -52,18 +54,29 @@ export interface RecurringTaskWireRow {
   deleted_at: number | null;
 }
 
+/** Key/value settings row — see infra/settings/SqliteSettingsRepository.ts. */
 export interface SettingsWireRow {
-  id: string;
-  payload: string;
+  key: string;
+  value: string;
   updated_at: number;
 }
 
-export type WireRow = TaskWireRow | RecurringTaskWireRow | SettingsWireRow;
+export interface TagWireRow {
+  id: string;
+  name: string;
+  color: string;
+  created_at: number;
+  updated_at: number;
+  deleted_at: number | null;
+}
+
+export type WireRow = TaskWireRow | RecurringTaskWireRow | SettingsWireRow | TagWireRow;
 
 export interface SyncPushRequest {
   tasks: TaskWireRow[];
   recurring_tasks: RecurringTaskWireRow[];
   settings: SettingsWireRow[];
+  tags: TagWireRow[];
 }
 
 /**
@@ -71,7 +84,8 @@ export interface SyncPushRequest {
  * last-write-wins loss, safe to apply locally) or a lightweight
  * `{id, reason}` marker (e.g. `INVALID_REFERENCE` when a task's
  * `recurring_task_id` doesn't exist server-side yet) that carries no row
- * data to apply.
+ * data to apply. `id` identifies the row's primary key value regardless of
+ * what that column is called on the table (settings' key column included).
  */
 export type RejectedServerRow<T extends WireRow> =
   | (T & { rev: number })
@@ -86,6 +100,7 @@ export interface SyncPushResponse {
   tasks: SyncPushTableResult<TaskWireRow>;
   recurring_tasks: SyncPushTableResult<RecurringTaskWireRow>;
   settings: SyncPushTableResult<SettingsWireRow>;
+  tags: SyncPushTableResult<TagWireRow>;
 }
 
 export interface SyncPullTableResult<T extends WireRow> {
@@ -98,10 +113,12 @@ export interface SyncPullResponse {
   tasks: SyncPullTableResult<TaskWireRow>;
   recurring_tasks: SyncPullTableResult<RecurringTaskWireRow>;
   settings: SyncPullTableResult<SettingsWireRow>;
+  tags: SyncPullTableResult<TagWireRow>;
 }
 
 export interface SyncPullCursors {
   tasks: number;
   recurring_tasks: number;
   settings: number;
+  tags: number;
 }

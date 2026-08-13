@@ -30,7 +30,10 @@ describe("GET /sync/pull", () => {
   it("returns empty pages with cursors unchanged when nothing changed", async () => {
     const token = await signAccessToken("user-1");
     const response = await loader({
-      request: makeRequest("?tasks_cursor=10&recurring_tasks_cursor=3&settings_cursor=1", token),
+      request: makeRequest(
+        "?tasks_cursor=10&recurring_tasks_cursor=3&settings_cursor=1&tags_cursor=2",
+        token
+      ),
     });
 
     expect(response.status).toBe(200);
@@ -38,21 +41,30 @@ describe("GET /sync/pull", () => {
     expect(body.data.tasks).toEqual({ rows: [], next_cursor: 10, has_more: false });
     expect(body.data.recurring_tasks).toEqual({ rows: [], next_cursor: 3, has_more: false });
     expect(body.data.settings).toEqual({ rows: [], next_cursor: 1, has_more: false });
+    expect(body.data.tags).toEqual({ rows: [], next_cursor: 2, has_more: false });
   });
 
-  it("advances the cursor and signals has_more when a full page is returned", async () => {
+  it("advances the cursor, signals has_more, and attaches each task's tag_ids", async () => {
     const token = await signAccessToken("user-1");
     const rows = Array.from({ length: 2 }, (_, i) => ({ id: `task_${i}`, rev: i + 1 }));
+    // Route pull order: tags, recurring_tasks, tasks, settings — then a
+    // follow-up select for the tag_ids of whatever tasks rows came back.
+    db.select.mockReturnValueOnce(createChain([])); // tags
     db.select.mockReturnValueOnce(createChain([])); // recurring_tasks
     db.select.mockReturnValueOnce(createChain(rows)); // tasks
     db.select.mockReturnValueOnce(createChain([])); // settings
+    // task_tags lookup for task_0/task_1 falls through to the beforeEach default ([])
 
     const response = await loader({
       request: makeRequest("?limit=2", token),
     });
 
     const body = await response.json();
-    expect(body.data.tasks).toEqual({ rows, next_cursor: 2, has_more: true });
+    expect(body.data.tasks).toEqual({
+      rows: rows.map((r) => ({ ...r, tag_ids: [] })),
+      next_cursor: 2,
+      has_more: true,
+    });
   });
 
   it("clamps an out-of-range limit", async () => {

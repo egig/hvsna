@@ -1,4 +1,4 @@
-import { recurringTasks, settings, tasks } from "@/db/schema";
+import { recurringTasks, settings, tags, tasks } from "@/db/schema";
 
 /**
  * Maps each synced table's Drizzle columns onto the snake_case wire keys
@@ -21,7 +21,6 @@ export const taskWireColumns = {
   recurring_interval: tasks.recurringInterval,
   recurring_task_id: tasks.recurringTaskId,
   hijri_date_offset: tasks.hijriDateOffset,
-  tags: tasks.tags,
   created_at: tasks.createdAt,
   updated_at: tasks.updatedAt,
   completed_at: tasks.completedAt,
@@ -41,7 +40,6 @@ export const recurringTaskWireColumns = {
   lng: recurringTasks.lng,
   timezone: recurringTasks.timezone,
   hijri_date_offset: recurringTasks.hijriDateOffset,
-  tags: recurringTasks.tags,
   recurring_end: recurringTasks.recurringEnd,
   recurring_end_epoch: recurringTasks.recurringEndEpoch,
   recurring_end_occurrences: recurringTasks.recurringEndOccurrences,
@@ -54,8 +52,18 @@ export const recurringTaskWireColumns = {
 } as const;
 
 export const settingsWireColumns = {
-  id: settings.id,
-  payload: settings.payload,
+  key: settings.key,
+  value: settings.value,
   updated_at: settings.updatedAt,
   rev: settings.rev,
+} as const;
+
+export const tagWireColumns = {
+  id: tags.id,
+  name: tags.name,
+  color: tags.color,
+  created_at: tags.createdAt,
+  updated_at: tags.updatedAt,
+  deleted_at: tags.deletedAt,
+  rev: tags.rev,
 } as const;

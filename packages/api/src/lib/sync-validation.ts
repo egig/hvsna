@@ -2,6 +2,7 @@ import { ApiError } from "./response";
 import type {
   RecurringTaskPushRow,
   SettingsPushRow,
+  TagPushRow,
   TaskPushRow,
 } from "./sync-types";
 
@@ -21,6 +22,10 @@ function isNumber(v: unknown): v is number {
 
 function isNullableNumber(v: unknown): v is number | null {
   return v === null || v === undefined || isNumber(v);
+}
+
+function isStringArray(v: unknown): v is string[] {
+  return Array.isArray(v) && v.every((item) => typeof item === "string");
 }
 
 function invalid(entityType: string, index: number, field: string): never {
@@ -61,7 +66,7 @@ export function validateTaskRows(input: unknown): TaskPushRow[] {
     if (!isNullableNumber(row.recurring_interval)) invalid("tasks", i, "recurring_interval");
     if (!isNullableString(row.recurring_task_id)) invalid("tasks", i, "recurring_task_id");
     if (!isNullableNumber(row.hijri_date_offset)) invalid("tasks", i, "hijri_date_offset");
-    if (!isNullableString(row.tags)) invalid("tasks", i, "tags");
+    if (!isStringArray(row.tag_ids)) invalid("tasks", i, "tag_ids");
     if (!isNumber(row.created_at)) invalid("tasks", i, "created_at");
     if (!isNumber(row.updated_at)) invalid("tasks", i, "updated_at");
     if (!isNullableNumber(row.completed_at)) invalid("tasks", i, "completed_at");
@@ -81,7 +86,7 @@ export function validateTaskRows(input: unknown): TaskPushRow[] {
       recurring_interval: (row.recurring_interval ?? null) as number | null,
       recurring_task_id: (row.recurring_task_id ?? null) as string | null,
       hijri_date_offset: (row.hijri_date_offset ?? null) as number | null,
-      tags: (row.tags ?? null) as string | null,
+      tag_ids: row.tag_ids as string[],
       created_at: row.created_at,
       updated_at: row.updated_at,
       completed_at: (row.completed_at ?? null) as number | null,
@@ -110,7 +115,7 @@ export function validateRecurringTaskRows(input: unknown): RecurringTaskPushRow[
     if (!isNullableNumber(row.lng)) invalid(e, i, "lng");
     if (!isNullableString(row.timezone)) invalid(e, i, "timezone");
     if (!isNullableNumber(row.hijri_date_offset)) invalid(e, i, "hijri_date_offset");
-    if (!isNullableString(row.tags)) invalid(e, i, "tags");
+    if (!isStringArray(row.tag_ids)) invalid(e, i, "tag_ids");
     if (!isNullableString(row.recurring_end)) invalid(e, i, "recurring_end");
     if (!isNullableNumber(row.recurring_end_epoch)) invalid(e, i, "recurring_end_epoch");
     if (!isNullableNumber(row.recurring_end_occurrences))
@@ -133,7 +138,7 @@ export function validateRecurringTaskRows(input: unknown): RecurringTaskPushRow[
       lng: (row.lng ?? null) as number | null,
       timezone: (row.timezone ?? null) as string | null,
       hijri_date_offset: (row.hijri_date_offset ?? null) as number | null,
-      tags: (row.tags ?? null) as string | null,
+      tag_ids: row.tag_ids as string[],
       recurring_end: (row.recurring_end ?? null) as string | null,
       recurring_end_epoch: (row.recurring_end_epoch ?? null) as number | null,
       recurring_end_occurrences: (row.recurring_end_occurrences ?? null) as number | null,
@@ -154,14 +159,39 @@ export function validateSettingsRows(input: unknown): SettingsPushRow[] {
 
   return input.map((raw, i) => {
     const row = raw as Record<string, unknown>;
-    if (!isString(row.id)) invalid("settings", i, "id");
-    if (!isString(row.payload)) invalid("settings", i, "payload");
+    if (!isString(row.key)) invalid("settings", i, "key");
+    if (!isString(row.value)) invalid("settings", i, "value");
     if (!isNumber(row.updated_at)) invalid("settings", i, "updated_at");
 
     return {
-      id: row.id,
-      payload: row.payload,
+      key: row.key,
+      value: row.value,
       updated_at: row.updated_at,
     } satisfies SettingsPushRow;
+  });
+}
+
+export function validateTagRows(input: unknown): TagPushRow[] {
+  if (input === undefined) return [];
+  if (!Array.isArray(input)) throw new ApiError(400, "INVALID_REQUEST", "tags must be an array");
+  assertBatchSize("tags", input);
+
+  return input.map((raw, i) => {
+    const row = raw as Record<string, unknown>;
+    if (!isString(row.id)) invalid("tags", i, "id");
+    if (!isString(row.name)) invalid("tags", i, "name");
+    if (!isString(row.color)) invalid("tags", i, "color");
+    if (!isNumber(row.created_at)) invalid("tags", i, "created_at");
+    if (!isNumber(row.updated_at)) invalid("tags", i, "updated_at");
+    if (!isNullableNumber(row.deleted_at)) invalid("tags", i, "deleted_at");
+
+    return {
+      id: row.id,
+      name: row.name,
+      color: row.color,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      deleted_at: (row.deleted_at ?? null) as number | null,
+    } satisfies TagPushRow;
   });
 }

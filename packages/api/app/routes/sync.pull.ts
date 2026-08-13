@@ -5,6 +5,7 @@ import {
   parseCursor,
   pullRecurringTasks,
   pullSettings,
+  pullTags,
   pullTasks,
 } from "@/lib/sync-pull";
 
@@ -16,14 +17,17 @@ export async function loader({ request }: { request: Request }) {
     const tasksCursor = parseCursor(url.searchParams.get("tasks_cursor"));
     const recurringTasksCursor = parseCursor(url.searchParams.get("recurring_tasks_cursor"));
     const settingsCursor = parseCursor(url.searchParams.get("settings_cursor"));
+    const tagsCursor = parseCursor(url.searchParams.get("tags_cursor"));
 
-    const [recurringTasksResult, tasksResult, settingsResult] = await Promise.all([
+    const [tagsResult, recurringTasksResult, tasksResult, settingsResult] = await Promise.all([
+      pullTags(userId, tagsCursor, limit),
       pullRecurringTasks(userId, recurringTasksCursor, limit),
       pullTasks(userId, tasksCursor, limit),
       pullSettings(userId, settingsCursor, limit),
     ]);
 
     return jsonOk({
+      tags: tagsResult,
       recurring_tasks: recurringTasksResult,
       tasks: tasksResult,
       settings: settingsResult,

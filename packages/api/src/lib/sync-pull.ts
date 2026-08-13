@@ -1,11 +1,13 @@
 import { and, asc, eq, gt } from "drizzle-orm";
 import { db } from "@/db/client";
-import { recurringTasks, settings, tasks } from "@/db/schema";
+import { recurringTasks, settings, tags, tasks } from "@/db/schema";
 import {
   recurringTaskWireColumns,
   settingsWireColumns,
+  tagWireColumns,
   taskWireColumns,
 } from "./sync-columns";
+import { fetchRecurringTaskTagIds, fetchTaskTagIds } from "./sync-tag-links";
 import type { SyncPullTableResult } from "./sync-types";
 
 export const DEFAULT_PULL_LIMIT = 500;
@@ -40,7 +42,13 @@ export async function pullRecurringTasks(
     .orderBy(asc(recurringTasks.rev))
     .limit(limit);
 
-  return toResult(rows, cursor, limit);
+  const tagMap = await fetchRecurringTaskTagIds(
+    userId,
+    rows.map((r) => r.id)
+  );
+  const withTags = rows.map((row) => ({ ...row, tag_ids: tagMap.get(row.id) ?? [] }));
+
+  return toResult(withTags, cursor, limit);
 }
 
 export async function pullTasks(
@@ -55,7 +63,13 @@ export async function pullTasks(
     .orderBy(asc(tasks.rev))
     .limit(limit);
 
-  return toResult(rows, cursor, limit);
+  const tagMap = await fetchTaskTagIds(
+    userId,
+    rows.map((r) => r.id)
+  );
+  const withTags = rows.map((row) => ({ ...row, tag_ids: tagMap.get(row.id) ?? [] }));
+
+  return toResult(withTags, cursor, limit);
 }
 
 export async function pullSettings(
@@ -68,6 +82,21 @@ export async function pullSettings(
     .from(settings)
     .where(and(eq(settings.userId, userId), gt(settings.rev, cursor)))
     .orderBy(asc(settings.rev))
+    .limit(limit);
+
+  return toResult(rows, cursor, limit);
+}
+
+export async function pullTags(
+  userId: string,
+  cursor: number,
+  limit: number
+): Promise<SyncPullTableResult> {
+  const rows = await db
+    .select(tagWireColumns)
+    .from(tags)
+    .where(and(eq(tags.userId, userId), gt(tags.rev, cursor)))
+    .orderBy(asc(tags.rev))
     .limit(limit);
 
   return toResult(rows, cursor, limit);

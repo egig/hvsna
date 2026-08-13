@@ -1,15 +1,23 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { recurringTasks, settings, tasks } from "@/db/schema";
+import { recurringTasks, settings, tags, tasks } from "@/db/schema";
 import {
   recurringTaskWireColumns,
   settingsWireColumns,
+  tagWireColumns,
   taskWireColumns,
 } from "./sync-columns";
+import {
+  fetchRecurringTaskTagIds,
+  fetchTaskTagIds,
+  replaceRecurringTaskTagLinks,
+  replaceTaskTagLinks,
+} from "./sync-tag-links";
 import type {
   RecurringTaskPushRow,
   SettingsPushRow,
   SyncPushTableResult,
+  TagPushRow,
   TaskPushRow,
 } from "./sync-types";
 
@@ -27,6 +35,53 @@ function isForeignKeyViolation(error: unknown): boolean {
 function diffIds(inputIds: string[], returnedIds: string[]): string[] {
   const returned = new Set(returnedIds);
   return inputIds.filter((id) => !returned.has(id));
+}
+
+export async function pushTags(userId: string, rows: TagPushRow[]): Promise<SyncPushTableResult> {
+  if (rows.length === 0) return { applied: [], rejected: [] };
+
+  const values = rows.map((r) => ({
+    userId,
+    id: r.id,
+    name: r.name,
+    color: r.color,
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+    deletedAt: r.deleted_at,
+  }));
+
+  const returned = await db
+    .insert(tags)
+    .values(values)
+    .onConflictDoUpdate({
+      target: [tags.userId, tags.id],
+      set: {
+        name: sql`excluded.name`,
+        color: sql`excluded.color`,
+        updatedAt: sql`excluded.updated_at`,
+        deletedAt: sql`excluded.deleted_at`,
+        rev: sql`nextval('tags_rev_seq')`,
+      },
+      where: sql`excluded.updated_at >= ${tags.updatedAt}`,
+    })
+    .returning({ id: tags.id });
+
+  const applied = returned.map((r) => r.id);
+  const rejectedIds = diffIds(
+    rows.map((r) => r.id),
+    applied
+  );
+  if (rejectedIds.length === 0) return { applied, rejected: [] };
+
+  const serverRows = await db
+    .select(tagWireColumns)
+    .from(tags)
+    .where(and(eq(tags.userId, userId), inArray(tags.id, rejectedIds)));
+
+  return {
+    applied,
+    rejected: serverRows.map((row) => ({ id: row.id, server_row: row })),
+  };
 }
 
 export async function pushRecurringTasks(
@@ -48,7 +103,6 @@ export async function pushRecurringTasks(
     lng: r.lng,
     timezone: r.timezone,
     hijriDateOffset: r.hijri_date_offset,
-    tags: r.tags,
     recurringEnd: r.recurring_end,
     recurringEndEpoch: r.recurring_end_epoch,
     recurringEndOccurrences: r.recurring_end_occurrences,
@@ -75,7 +129,6 @@ export async function pushRecurringTasks(
         lng: sql`excluded.lng`,
         timezone: sql`excluded.timezone`,
         hijriDateOffset: sql`excluded.hijri_date_offset`,
-        tags: sql`excluded.tags`,
         recurringEnd: sql`excluded.recurring_end`,
         recurringEndEpoch: sql`excluded.recurring_end_epoch`,
         recurringEndOccurrences: sql`excluded.recurring_end_occurrences`,
@@ -90,6 +143,11 @@ export async function pushRecurringTasks(
     .returning({ id: recurringTasks.id });
 
   const applied = returned.map((r) => r.id);
+  await replaceRecurringTaskTagLinks(
+    userId,
+    rows.filter((r) => applied.includes(r.id)).map((r) => ({ id: r.id, tag_ids: r.tag_ids }))
+  );
+
   const rejectedIds = diffIds(
     rows.map((r) => r.id),
     applied
@@ -100,10 +158,14 @@ export async function pushRecurringTasks(
     .select(recurringTaskWireColumns)
     .from(recurringTasks)
     .where(and(eq(recurringTasks.userId, userId), inArray(recurringTasks.id, rejectedIds)));
+  const tagMap = await fetchRecurringTaskTagIds(userId, rejectedIds);
 
   return {
     applied,
-    rejected: serverRows.map((row) => ({ id: row.id, server_row: row })),
+    rejected: serverRows.map((row) => ({
+      id: row.id,
+      server_row: { ...row, tag_ids: tagMap.get(row.id) ?? [] },
+    })),
   };
 }
 
@@ -125,7 +187,6 @@ async function upsertTaskRow(userId: string, r: TaskPushRow): Promise<string | n
       recurringInterval: r.recurring_interval,
       recurringTaskId: r.recurring_task_id,
       hijriDateOffset: r.hijri_date_offset,
-      tags: r.tags,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
       completedAt: r.completed_at,
@@ -146,7 +207,6 @@ async function upsertTaskRow(userId: string, r: TaskPushRow): Promise<string | n
         recurringInterval: sql`excluded.recurring_interval`,
         recurringTaskId: sql`excluded.recurring_task_id`,
         hijriDateOffset: sql`excluded.hijri_date_offset`,
-        tags: sql`excluded.tags`,
         updatedAt: sql`excluded.updated_at`,
         completedAt: sql`excluded.completed_at`,
         deletedAt: sql`excluded.deleted_at`,
@@ -184,7 +244,6 @@ export async function pushTasks(
       recurringInterval: r.recurring_interval,
       recurringTaskId: r.recurring_task_id,
       hijriDateOffset: r.hijri_date_offset,
-      tags: r.tags,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
       completedAt: r.completed_at,
@@ -209,7 +268,6 @@ export async function pushTasks(
           recurringInterval: sql`excluded.recurring_interval`,
           recurringTaskId: sql`excluded.recurring_task_id`,
           hijriDateOffset: sql`excluded.hijri_date_offset`,
-          tags: sql`excluded.tags`,
           updatedAt: sql`excluded.updated_at`,
           completedAt: sql`excluded.completed_at`,
           deletedAt: sql`excluded.deleted_at`,
@@ -238,6 +296,11 @@ export async function pushTasks(
     }
   }
 
+  await replaceTaskTagLinks(
+    userId,
+    rows.filter((r) => applied.includes(r.id)).map((r) => ({ id: r.id, tag_ids: r.tag_ids }))
+  );
+
   const rejectedIds = diffIds(
     rows.map((r) => r.id),
     applied
@@ -249,11 +312,15 @@ export async function pushTasks(
         .from(tasks)
         .where(and(eq(tasks.userId, userId), inArray(tasks.id, rejectedIds)))
     : [];
+  const tagMap = await fetchTaskTagIds(userId, rejectedIds);
 
   return {
     applied,
     rejected: [
-      ...serverRows.map((row) => ({ id: row.id, server_row: row })),
+      ...serverRows.map((row) => ({
+        id: row.id,
+        server_row: { ...row, tag_ids: tagMap.get(row.id) ?? [] },
+      })),
       ...invalidReferenceIds.map((id) => ({
         id,
         server_row: { id, reason: "INVALID_REFERENCE" },
@@ -270,8 +337,8 @@ export async function pushSettings(
 
   const values = rows.map((r) => ({
     userId,
-    id: r.id,
-    payload: r.payload,
+    key: r.key,
+    value: r.value,
     updatedAt: r.updated_at,
   }));
 
@@ -279,19 +346,19 @@ export async function pushSettings(
     .insert(settings)
     .values(values)
     .onConflictDoUpdate({
-      target: [settings.userId, settings.id],
+      target: [settings.userId, settings.key],
       set: {
-        payload: sql`excluded.payload`,
+        value: sql`excluded.value`,
         updatedAt: sql`excluded.updated_at`,
         rev: sql`nextval('settings_rev_seq')`,
       },
       where: sql`excluded.updated_at >= ${settings.updatedAt}`,
     })
-    .returning({ id: settings.id });
+    .returning({ id: settings.key });
 
   const applied = returned.map((r) => r.id);
   const rejectedIds = diffIds(
-    rows.map((r) => r.id),
+    rows.map((r) => r.key),
     applied
   );
   if (rejectedIds.length === 0) return { applied, rejected: [] };
@@ -299,10 +366,10 @@ export async function pushSettings(
   const serverRows = await db
     .select(settingsWireColumns)
     .from(settings)
-    .where(and(eq(settings.userId, userId), inArray(settings.id, rejectedIds)));
+    .where(and(eq(settings.userId, userId), inArray(settings.key, rejectedIds)));
 
   return {
     applied,
-    rejected: serverRows.map((row) => ({ id: row.id, server_row: row })),
+    rejected: serverRows.map((row) => ({ id: row.key, server_row: row })),
   };
 }

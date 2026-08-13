@@ -3,7 +3,7 @@ import { createChain } from "../../../src/__tests__/mock-db";
 import { signAccessToken } from "../../../src/lib/jwt";
 
 const { db } = vi.hoisted(() => ({
-  db: { insert: vi.fn(), select: vi.fn() },
+  db: { insert: vi.fn(), select: vi.fn(), delete: vi.fn() },
 }));
 
 vi.mock("@/db/client", () => ({ db }));
@@ -34,15 +34,22 @@ const taskRow = {
   recurring_interval: null,
   recurring_task_id: null,
   hijri_date_offset: null,
-  tags: null,
+  tag_ids: [],
   created_at: 1000,
   updated_at: 2000,
   completed_at: null,
   deleted_at: null,
 };
 
+const emptyResult = { applied: [], rejected: [] };
+
 beforeEach(() => {
   vi.clearAllMocks();
+  // Association replace (task_tags/recurring_task_tags) and the tag-id
+  // lookup for rejected rows fall back to this whenever a test doesn't
+  // care about them.
+  db.select.mockReturnValue(createChain([]));
+  db.delete.mockReturnValue(createChain([]));
 });
 
 describe("POST /sync/push", () => {
@@ -74,15 +81,19 @@ describe("POST /sync/push", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.data.tasks).toEqual({ applied: ["task_1"], rejected: [] });
-    expect(body.data.recurring_tasks).toEqual({ applied: [], rejected: [] });
-    expect(body.data.settings).toEqual({ applied: [], rejected: [] });
+    expect(body.data.recurring_tasks).toEqual(emptyResult);
+    expect(body.data.settings).toEqual(emptyResult);
+    expect(body.data.tags).toEqual(emptyResult);
+    // Membership is replaced (deleted then re-inserted) for every applied
+    // row, even one with no tags, so a locally-cleared tag list propagates.
+    expect(db.delete).toHaveBeenCalled();
   });
 
-  it("reports a stale row as rejected with the winning server row", async () => {
+  it("reports a stale row as rejected with the winning server row and its current tags", async () => {
     const token = await signAccessToken("user-1");
     const serverRow = { ...taskRow, updated_at: 9999, rev: 5 };
     db.insert.mockReturnValueOnce(createChain([])); // conflict predicate rejected the row
-    db.select.mockReturnValueOnce(createChain([serverRow]));
+    db.select.mockReturnValueOnce(createChain([serverRow])); // rejected-row lookup
 
     const response = await action({
       request: makeRequest({ tasks: [taskRow] }, token),
@@ -91,6 +102,26 @@ describe("POST /sync/push", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.data.tasks.applied).toEqual([]);
-    expect(body.data.tasks.rejected).toEqual([{ id: "task_1", server_row: serverRow }]);
+    expect(body.data.tasks.rejected).toEqual([
+      { id: "task_1", server_row: { ...serverRow, tag_ids: [] } },
+    ]);
+  });
+
+  it("pushes tags before recurring_tasks and tasks", async () => {
+    const token = await signAccessToken("user-1");
+    db.insert.mockReturnValueOnce(createChain([{ id: "tag_1" }])); // tags
+    db.insert.mockReturnValueOnce(createChain([{ id: "task_1" }])); // tasks (no recurring_tasks sent, so pushRecurringTasks never calls insert)
+
+    const response = await action({
+      request: makeRequest(
+        { tags: [{ id: "tag_1", name: "urgent", color: "#fff", created_at: 1, updated_at: 1, deleted_at: null }], tasks: [taskRow] },
+        token
+      ),
+    });
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.data.tags).toEqual({ applied: ["tag_1"], rejected: [] });
+    expect(body.data.tasks).toEqual({ applied: ["task_1"], rejected: [] });
   });
 });
