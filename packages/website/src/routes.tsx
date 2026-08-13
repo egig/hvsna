@@ -36,7 +36,7 @@ export function AppRoutes() {
       <Route path="/id/privacy" element={<PrivacyId />} />
       <Route path="/id/terms" element={<TermsId />} />
 
-      <Route path="/docs" element={<DocsLayout />}>
+      <Route path="/help" element={<DocsLayout />}>
         <Route index element={<DocsPage />} />
         <Route path=":slug" element={<DocsPage />} />
       </Route>

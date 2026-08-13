@@ -16,19 +16,20 @@ export interface TagUpdateInput {
   color?: string;
 }
 
-export const DEFAULT_TAG_COLOR = "#64748B";
+export const DEFAULT_TAG_COLOR = "#90A4AE";
 
-/** Small rotating palette assigned to newly created tags. */
+/** Small rotating palette assigned to newly created tags — mirrors android's TagPalette (Color.kt). */
 export const TAG_COLOR_PALETTE = [
-  "#64748B", // slate
-  "#EF4444", // red
-  "#F97316", // orange
-  "#EAB308", // yellow
-  "#22C55E", // green
-  "#14B8A6", // teal
-  "#3B82F6", // blue
-  "#8B5CF6", // violet
-  "#EC4899", // pink
+  "#E57373", // red
+  "#FFB74D", // orange
+  "#FFD54F", // amber
+  "#81C784", // green
+  "#4DB6AC", // teal
+  "#64B5F6", // blue
+  "#9575CD", // purple
+  "#F06292", // pink
+  "#A1887F", // brown
+  "#90A4AE", // blue grey
 ] as const;
 
 export function normalizeTagName(name: string): string {

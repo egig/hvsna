@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { Moon, Sun, Menu, X, Globe } from "lucide-react";
 import { useTheme } from "@/theme/theme-provider";
 
-export default function Header({ currentLang = "en" }: { currentLang?: string }) {
+export default function Header({ currentLang = "en", doc = false }: { currentLang?: string, doc?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
@@ -36,7 +36,7 @@ export default function Header({ currentLang = "en" }: { currentLang?: string })
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+      <div className={`${doc ? "max-w-6xl" : "max-w-3xl"} mx-auto px-4 sm:px-6`}>
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to={currentLang === "id" ? "/id" : "/"} className="flex items-center space-x-2 outline-none">

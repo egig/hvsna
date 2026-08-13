@@ -22,8 +22,8 @@ export const routes: string[] = [
   "/id/pricing",
   "/id/privacy",
   "/id/terms",
-  "/docs",
-  ...docsPages.filter((page) => page.slug !== "index").map((page) => `/docs/${page.slug}`),
+  "/help",
+  ...docsPages.filter((page) => page.slug !== "index").map((page) => `/help/${page.slug}`),
 ];
 
 export function render(url: string): { html: string; head: string } {

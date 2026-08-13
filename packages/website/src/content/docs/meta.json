@@ -1,8 +1,9 @@
 {
-  "title": "Hvsna Documentation",
+  "title": "Hvsna Help",
   "pages": [
     "index",
     "what-is-hvsna",
+    "getting-started",
     "first-launch",
     "location",
     "prayer-times",
@@ -13,6 +14,7 @@
     "general-settings",
     "sync",
     "offline",
+    "account",
     "faq"
   ]
 }

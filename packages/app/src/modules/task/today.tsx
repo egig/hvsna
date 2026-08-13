@@ -15,7 +15,6 @@ import { HvCheck, HvMapPin, HvMaghrib } from "@/modules/icons";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
 import { useLocationContext } from "../location/context";
-import { SyncStatusBadge } from "../sync/components/sync-status-badge";
 import { usePrayerTimes } from "../prayer";
 import type { PrayerTimes } from "adhan";
 import { groupTasksByPrayerTimes } from "../prayer-time-utils";
@@ -51,7 +50,6 @@ function TodayInner() {
                 <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
               </button>
             }
-            rightAction={<SyncStatusBadge />}
           />
         }
       >

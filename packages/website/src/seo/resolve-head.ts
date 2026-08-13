@@ -4,13 +4,13 @@ import { getDocPage } from "@/pages/docs/registry";
 export function resolveMetaForPath(pathname: string): RouteMeta {
   const base = getRouteMeta(pathname);
 
-  if (pathname === "/docs" || pathname.startsWith("/docs/")) {
-    const slug = pathname === "/docs" ? undefined : pathname.slice("/docs/".length);
+  if (pathname === "/help" || pathname.startsWith("/help/")) {
+    const slug = pathname === "/help" ? undefined : pathname.slice("/help/".length);
     const page = getDocPage(slug);
     if (page) {
-      return { ...base, title: `${page.title} - Hvsna Docs`, description: page.description ?? base.description };
+      return { ...base, title: `${page.title} - Hvsna Help`, description: page.description ?? base.description };
     }
-    return { ...base, title: "Not Found - Hvsna Docs" };
+    return { ...base, title: "Not Found - Hvsna Help" };
   }
 
   return base;

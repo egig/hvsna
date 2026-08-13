@@ -42,7 +42,7 @@ interface SidebarTab {
 const navLinkClass = (isActive: boolean, collapsed: boolean) =>
   `flex text-[var(--hvsna-primary-color)] items-center w-full px-3 py-2 rounded-lg transition-colors ${
     collapsed ? "justify-center" : "space-x-1"
-  } ${isActive ? "bg-gray-100" : "hover:bg-gray-100"}`;
+  } ${isActive ? "bg-gray-200" : "hover:bg-gray-200"}`;
 
 function SidebarNavLink({
   tab,
@@ -171,7 +171,7 @@ export function DesktopSidebar({
 
   return (
     <div
-      className={`${"w-full h-full"} bg-white border-gray-200 flex flex-col overflow-hidden`}
+      className={`${"w-full h-full"} bg-gray-50 border-gray-400 flex flex-col overflow-hidden`}
     >
       <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
         <button

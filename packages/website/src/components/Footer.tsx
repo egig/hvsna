@@ -36,7 +36,8 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
         links: [
           { name: "Tentang", href: "/id/about" },
           { name: "Harga", href: "/id/pricing" },
-          { name: "Fitur", href: "#fitur" },
+          { name: "Fitur", href: "/id/features" },
+          { name: "Bantuan", href: "/help" },
         ],
       },
       legal: {

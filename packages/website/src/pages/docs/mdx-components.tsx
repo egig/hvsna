@@ -5,9 +5,21 @@ export const mdxComponents = {
   h2: (props: ComponentPropsWithoutRef<"h2">) => <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-10 mb-4" {...props} />,
   h3: (props: ComponentPropsWithoutRef<"h3">) => <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-8 mb-3" {...props} />,
   p: (props: ComponentPropsWithoutRef<"p">) => <p className="text-lg text-gray-600 dark:text-gray-300 mb-5 leading-relaxed" {...props} />,
-  ul: (props: ComponentPropsWithoutRef<"ul">) => <ul className="list-disc list-inside text-lg text-gray-600 dark:text-gray-300 mb-5 space-y-2 pl-4" {...props} />,
+  ul: ({ className, ...props }: ComponentPropsWithoutRef<"ul">) => {
+    const isTaskList = className?.includes("contains-task-list");
+    return (
+      <ul
+        className={`text-lg text-gray-600 dark:text-gray-300 mb-5 space-y-2 pl-4 ${isTaskList ? "list-none pl-0" : "list-disc list-inside"}`}
+        {...props}
+      />
+    );
+  },
   ol: (props: ComponentPropsWithoutRef<"ol">) => <ol className="list-decimal list-inside text-lg text-gray-600 dark:text-gray-300 mb-5 space-y-2 pl-4" {...props} />,
-  li: (props: ComponentPropsWithoutRef<"li">) => <li {...props} />,
+  li: ({ className, ...props }: ComponentPropsWithoutRef<"li">) => (
+    <li className={className?.includes("task-list-item") ? "flex items-start gap-2" : undefined} {...props} />
+  ),
+  input: (props: ComponentPropsWithoutRef<"input">) =>
+    props.type === "checkbox" ? <input className="mt-1.5 accent-primary-600" disabled {...props} /> : <input {...props} />,
   a: (props: ComponentPropsWithoutRef<"a">) => <a className="text-primary-600 dark:text-primary-400 underline hover:no-underline" {...props} />,
   strong: (props: ComponentPropsWithoutRef<"strong">) => <strong className="text-gray-900 dark:text-white" {...props} />,
   code: (props: ComponentPropsWithoutRef<"code">) => (

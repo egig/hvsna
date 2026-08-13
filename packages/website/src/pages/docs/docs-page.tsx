@@ -38,7 +38,7 @@ export default function DocsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const toc = useOnPageToc(containerRef, [page?.slug]);
 
-  useSeo(page ? { title: `${page.title} - Hvsna Docs`, description: page.description } : { title: "Not Found - Hvsna Docs" });
+  useSeo(page ? { title: `${page.title} - Hvsna Help`, description: page.description } : { title: "Not Found - Hvsna Help" });
 
   if (!page) {
     return (
