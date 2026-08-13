@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createChain, createRejectingChain } from "../../../src/__tests__/mock-db";
 
-const { db } = vi.hoisted(() => ({ db: { insert: vi.fn() } }));
+const { db } = vi.hoisted(() => ({ db: { insert: vi.fn(), delete: vi.fn() } }));
 
 vi.mock("@/db/client", () => ({ db }));
 
@@ -17,6 +17,7 @@ function makeRequest(body: unknown) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  db.delete.mockReturnValue(createChain([]));
 });
 
 describe("POST /register", () => {
@@ -69,5 +70,39 @@ describe("POST /register", () => {
     });
 
     expect(response.status).toBe(400);
+  });
+
+  it("issues an email verification token alongside the user", async () => {
+    db.insert.mockReturnValue(createChain([{ id: "user-1" }]));
+
+    await action({
+      request: makeRequest({ email: "new@example.com", password: "supersecret1" }),
+    });
+
+    // one insert each for: the user row, the refresh token, the verification token
+    expect(db.insert).toHaveBeenCalledTimes(3);
+  });
+
+  it("still succeeds even if sending the verification email fails", async () => {
+    db.insert.mockReturnValue(createChain([{ id: "user-1" }]));
+    const originalEnv = process.env.RESEND_API_KEY;
+    process.env.RESEND_API_KEY = "test-key";
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("boom", { status: 500 })
+    );
+
+    try {
+      const response = await action({
+        request: makeRequest({ email: "new@example.com", password: "supersecret1" }),
+      });
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.data.access_token).toEqual(expect.any(String));
+      expect(fetchSpy).toHaveBeenCalled();
+    } finally {
+      process.env.RESEND_API_KEY = originalEnv;
+      fetchSpy.mockRestore();
+    }
   });
 });

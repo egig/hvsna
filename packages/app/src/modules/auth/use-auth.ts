@@ -13,6 +13,8 @@ export const useAuth = () => {
     register,
     logout,
     setUser,
+    verifyEmail,
+    resendVerification,
   } = useAuthContext();
 
   // Auto-fetch user on mount if authenticated but user data not loaded
@@ -43,5 +45,7 @@ export const useAuth = () => {
     register,
     logout,
     setUser,
+    verifyEmail,
+    resendVerification,
   };
 };

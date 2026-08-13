@@ -30,6 +30,7 @@ describe("GET /me", () => {
           passwordHash: "irrelevant",
           firstName: "A",
           lastName: "B",
+          emailVerified: true,
           createdAt,
         },
       ])
@@ -44,6 +45,7 @@ describe("GET /me", () => {
       firstName: "A",
       lastName: "B",
       email: "person@example.com",
+      emailVerified: true,
       createdAt: createdAt.toISOString(),
       featureFlags: {},
     });

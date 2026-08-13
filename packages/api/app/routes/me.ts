@@ -27,6 +27,7 @@ export async function loader({ request }: { request: Request }) {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      emailVerified: user.emailVerified,
       createdAt: user.createdAt.toISOString(),
       featureFlags: {},
     });

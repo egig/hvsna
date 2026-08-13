@@ -29,6 +29,13 @@
       "when": 1786585331640,
       "tag": "0003_drop_legacy_tags_and_settings_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786635554546,
+      "tag": "0004_funny_dorian_gray",
+      "breakpoints": true
     }
   ]
 }

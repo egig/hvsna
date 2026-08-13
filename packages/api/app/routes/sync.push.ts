@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/require-auth";
+import { requireVerifiedAuth } from "@/lib/require-auth";
 import { readJsonBody } from "@/lib/request";
 import { jsonOk, jsonUnexpectedError } from "@/lib/response";
 import { pushRecurringTasks, pushSettings, pushTags, pushTasks } from "@/lib/sync-push";
@@ -11,7 +11,7 @@ import {
 
 export async function action({ request }: { request: Request }) {
   try {
-    const userId = await requireAuth(request);
+    const userId = await requireVerifiedAuth(request);
     const body = await readJsonBody(request);
 
     const tagRows = validateTagRows(body.tags);

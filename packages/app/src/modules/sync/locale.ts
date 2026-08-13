@@ -52,4 +52,24 @@ export const syncTranslations = {
     en: "Your data is automatically synced when you're online. You can also manually trigger a sync to ensure all your latest changes are saved.",
     id: "Data anda otomatis disinkronkan saat anda online. Anda juga dapat memicu sinkronisasi manual untuk memastikan semua perubahan terbaru anda tersimpan.",
   },
+  verify_email_required: {
+    en: "Verify your email to enable sync",
+    id: "Verifikasi email anda untuk mengaktifkan sinkronisasi",
+  },
+  verify_email_banner_description: {
+    en: "We sent a verification link to your email address when you signed up. Confirm it to start syncing across your devices.",
+    id: "Kami mengirimkan tautan verifikasi ke alamat email anda saat mendaftar. Konfirmasi untuk mulai menyinkronkan data di semua perangkat anda.",
+  },
+  resend_verification_email: {
+    en: "Resend verification email",
+    id: "Kirim ulang email verifikasi",
+  },
+  verification_email_sent: {
+    en: "Verification email sent",
+    id: "Email verifikasi telah dikirim",
+  },
+  verification_email_failed: {
+    en: "Couldn't send the verification email. Try again shortly.",
+    id: "Gagal mengirim email verifikasi. Coba lagi sebentar lagi.",
+  },
 };

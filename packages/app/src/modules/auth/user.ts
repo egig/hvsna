@@ -5,6 +5,7 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  emailVerified: boolean;
   createdAt: string;
   featureFlags?: FeatureFlags;
 }
@@ -27,4 +28,6 @@ export interface AuthActions {
     lastName?: string;
   }) => Promise<User>;
   logout: () => Promise<void>;
+  verifyEmail: (token: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
 }

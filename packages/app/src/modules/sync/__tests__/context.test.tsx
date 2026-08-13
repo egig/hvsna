@@ -5,6 +5,7 @@ import { SyncProvider, useSync } from "../context";
 
 const mockFullSync = vi.fn();
 let mockIsAuthenticated = false;
+let mockEmailVerified = false;
 
 vi.mock("@/modules/sqlite/context", () => ({
   useSqliteClient: () => ({ client: {} }),
@@ -13,7 +14,10 @@ vi.mock("@/modules/network/context", () => ({
   useNetworkContext: () => ({ isOnline: true }),
 }));
 vi.mock("@/modules/auth", () => ({
-  useAuth: () => ({ isAuthenticated: mockIsAuthenticated }),
+  useAuth: () => ({
+    isAuthenticated: mockIsAuthenticated,
+    user: mockIsAuthenticated ? { emailVerified: mockEmailVerified } : null,
+  }),
 }));
 vi.mock("@/modules/settings", () => ({
   useSettings: () => ({ setSettings: vi.fn() }),
@@ -55,9 +59,10 @@ async function flushMicrotasks() {
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(SyncProvider, null, children);
 
-/** Signs in and waits for the resulting initial sync to complete. */
+/** Signs in with a verified email and waits for the resulting initial sync to complete. */
 async function signIn(rerender: () => void) {
   mockIsAuthenticated = true;
+  mockEmailVerified = true;
   rerender();
   await flushMicrotasks();
 }
@@ -67,6 +72,7 @@ describe("SyncProvider poll trigger", () => {
     vi.useFakeTimers();
     mockFullSync.mockReset().mockResolvedValue(false);
     mockIsAuthenticated = false;
+    mockEmailVerified = false;
     setVisibility("visible");
   });
 
@@ -152,6 +158,56 @@ describe("SyncProvider poll trigger", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(120_000);
     });
+    expect(mockFullSync).not.toHaveBeenCalled();
+  });
+
+  it("does not sync a signed-in user whose email isn't verified yet", async () => {
+    const { result, rerender } = renderHook(() => useSync(), { wrapper });
+
+    mockIsAuthenticated = true;
+    mockEmailVerified = false;
+    rerender();
+    await flushMicrotasks();
+
+    expect(result.current.initialSyncPerformed).toBe(false);
+    expect(mockFullSync).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120_000);
+    });
+    expect(mockFullSync).not.toHaveBeenCalled();
+  });
+
+  it("starts syncing once an already-signed-in user verifies their email", async () => {
+    const { result, rerender } = renderHook(() => useSync(), { wrapper });
+
+    mockIsAuthenticated = true;
+    mockEmailVerified = false;
+    rerender();
+    await flushMicrotasks();
+    expect(mockFullSync).not.toHaveBeenCalled();
+
+    mockEmailVerified = true;
+    rerender();
+    await flushMicrotasks();
+
+    expect(result.current.initialSyncPerformed).toBe(true);
+    expect(mockFullSync).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects manualSync for an unverified user without calling fullSync", async () => {
+    const { result, rerender } = renderHook(() => useSync(), { wrapper });
+
+    mockIsAuthenticated = true;
+    mockEmailVerified = false;
+    rerender();
+    await flushMicrotasks();
+
+    await expect(
+      act(async () => {
+        await result.current.manualSync();
+      })
+    ).rejects.toThrow(/verify your email/i);
     expect(mockFullSync).not.toHaveBeenCalled();
   });
 });
