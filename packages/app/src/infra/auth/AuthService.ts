@@ -108,6 +108,14 @@ export class AuthService {
     return response.data;
   }
 
+  async verifyEmail(token: string): Promise<void> {
+    await this.http.post("/auth/verify-email", { token });
+  }
+
+  async resendVerification(): Promise<void> {
+    await this.http.post("/auth/resend-verification");
+  }
+
   async isAuthenticated(): Promise<boolean> {
     const hasAccess = !!this.tokenStore.getAccessToken();
     const hasRefresh = !!(await this.sessionRepo.getRefreshToken());

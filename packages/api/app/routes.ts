@@ -6,6 +6,8 @@ export default [
   route("me", "routes/me.ts"),
   route("auth/refresh", "routes/auth.refresh.ts"),
   route("auth/logout", "routes/auth.logout.ts"),
+  route("auth/verify-email", "routes/auth.verify-email.ts"),
+  route("auth/resend-verification", "routes/auth.resend-verification.ts"),
   route("sync/push", "routes/sync.push.ts"),
   route("sync/pull", "routes/sync.pull.ts"),
   route("geocode/reverse", "routes/geocode.reverse.ts"),

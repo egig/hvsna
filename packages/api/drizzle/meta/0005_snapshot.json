@@ -1,6 +1,6 @@
 {
-  "id": "6ae3b130-04f8-4687-8625-077fd4d29c5b",
-  "prevId": "8f6c3496-a092-470b-b72a-fcb371b4e410",
+  "id": "d51cd9a1-79cc-43ef-bdec-e3c57e128e82",
+  "prevId": "6ae3b130-04f8-4687-8625-077fd4d29c5b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -516,6 +516,147 @@
         }
       },
       "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.subscriptions": {
+      "name": "subscriptions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lemon_squeezy_subscription_id": {
+          "name": "lemon_squeezy_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lemon_squeezy_customer_id": {
+          "name": "lemon_squeezy_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lemon_squeezy_order_id": {
+          "name": "lemon_squeezy_order_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "variant_id": {
+          "name": "variant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "renews_at": {
+          "name": "renews_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ends_at": {
+          "name": "ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trial_ends_at": {
+          "name": "trial_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "card_brand": {
+          "name": "card_brand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "card_last_four": {
+          "name": "card_last_four",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "update_payment_method_url": {
+          "name": "update_payment_method_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_portal_url": {
+          "name": "customer_portal_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "subscriptions_user_id_users_id_fk": {
+          "name": "subscriptions_user_id_users_id_fk",
+          "tableFrom": "subscriptions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "subscriptions_user_id_unique": {
+          "name": "subscriptions_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id"
+          ]
+        },
+        "subscriptions_lemon_squeezy_subscription_id_unique": {
+          "name": "subscriptions_lemon_squeezy_subscription_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "lemon_squeezy_subscription_id"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

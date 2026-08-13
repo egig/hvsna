@@ -76,12 +76,14 @@ httpClient.interceptors.response.use(
       }
     }
 
-    // Handle 403 Forbidden errors - don't retry, just propagate
+    // Handle 403 Forbidden errors - don't retry, just propagate. Preserve
+    // the server's own code (e.g. EMAIL_NOT_VERIFIED) when it sends one,
+    // rather than flattening every 403 into a generic FORBIDDEN.
     if (error.response?.status === 403) {
       const apiError: ApiError = {
-        message: "Access forbidden",
+        message: responseData?.message || "Access forbidden",
         status: 403,
-        code: "FORBIDDEN",
+        code: responseData?.code || "FORBIDDEN",
       };
       return Promise.reject(apiError);
     }

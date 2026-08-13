@@ -26,6 +26,7 @@ export type SyncContextType = {
   isSyncing: boolean;
   isManualSyncing: boolean;
   initialSyncPerformed: boolean;
+  canSync: boolean;
   manualSync: () => Promise<void>;
 };
 
@@ -52,7 +53,12 @@ export const SyncContext = createContext<SyncContextType | undefined>(
 export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const { client } = useSqliteClient();
   const { isOnline } = useNetworkContext();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  // Signed in isn't enough — the API rejects /sync/push and /sync/pull with
+  // 403 EMAIL_NOT_VERIFIED until the user confirms their address, so every
+  // auto-trigger gates on this too (matching that server-side check) rather
+  // than firing requests that are guaranteed to fail.
+  const canSync = isAuthenticated && !!user?.emailVerified;
   const invalidateTaskQueries = useInvalidateTaskQueries();
   const settingsRepo = useSettingsRepository();
   const { setSettings } = useSettings();
@@ -110,6 +116,9 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const manualSync = async (): Promise<void> => {
+    if (!canSync) {
+      throw new Error("Verify your email before syncing");
+    }
     setIsManualSyncing(true);
     try {
       await runSync();
@@ -124,28 +133,30 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  // Trigger: network reconnect while signed in.
+  // Trigger: network reconnect while signed in and verified.
   const wasOnlineRef = useRef(isOnline);
   useEffect(() => {
     const cameOnline = !wasOnlineRef.current && isOnline;
     wasOnlineRef.current = isOnline;
-    if (cameOnline && isAuthenticated) backgroundSync();
+    if (cameOnline && canSync) backgroundSync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnline]);
+  }, [isOnline, canSync]);
 
-  // Trigger: sign-in, or app reload with a still-valid session.
-  const wasAuthenticatedRef = useRef(isAuthenticated);
+  // Trigger: sign-in, or app reload with a still-valid session (only once
+  // the account is verified — a freshly-registered, unverified user has
+  // nothing to pull yet anyway).
+  const wasAbleToSyncRef = useRef(canSync);
   useEffect(() => {
-    const justAuthenticated = !wasAuthenticatedRef.current && isAuthenticated;
-    wasAuthenticatedRef.current = isAuthenticated;
-    if (justAuthenticated) backgroundSync();
+    const justAbleToSync = !wasAbleToSyncRef.current && canSync;
+    wasAbleToSyncRef.current = canSync;
+    if (justAbleToSync) backgroundSync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [canSync]);
 
   // Trigger: 30s poll while the tab is visible, once the initial sync has
   // run. Silent (doesn't flip isSyncing) — see the block comment above.
   useEffect(() => {
-    if (!initialSyncPerformed || !isAuthenticated) return;
+    if (!initialSyncPerformed || !canSync) return;
 
     const pollTick = () => {
       if (document.visibilityState !== "visible") return;
@@ -161,7 +172,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       document.removeEventListener("visibilitychange", pollTick);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialSyncPerformed, isAuthenticated]);
+  }, [initialSyncPerformed, canSync]);
 
   const value: SyncContextType = {
     replication: null,
@@ -169,6 +180,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     isSyncing,
     isManualSyncing,
     initialSyncPerformed,
+    canSync,
     manualSync,
   };
 

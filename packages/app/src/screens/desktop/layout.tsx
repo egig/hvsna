@@ -24,7 +24,7 @@ export default function Layout() {
   return (
     <Allotment
       ref={allotmentRef}
-      className="h-screen"
+      className="h-full"
       proportionalLayout={false}
       defaultSizes={[192, window.innerWidth]}
       onChange={handleSidebarChange}

@@ -6,6 +6,7 @@ import {
   integer,
   bigint,
   bigserial,
+  boolean,
   doublePrecision,
   primaryKey,
   foreignKey,
@@ -18,6 +19,7 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   firstName: text("first_name").notNull().default(""),
   lastName: text("last_name").notNull().default(""),
+  emailVerified: boolean("email_verified").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -36,9 +38,28 @@ export const refreshTokens = pgTable("refresh_tokens", {
     .defaultNow(),
 });
 
+/**
+ * One-time tokens emailed to a user to prove control of their address.
+ * Mirrors refresh_tokens' hash-in-DB / raw-token-in-transit pattern —
+ * only a sha256 hash is ever stored, the raw token lives solely in the
+ * emailed link. Consuming a token deletes its row (single use).
+ */
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type NewUserRow = typeof users.$inferInsert;
 export type RefreshTokenRow = typeof refreshTokens.$inferSelect;
+export type EmailVerificationTokenRow = typeof emailVerificationTokens.$inferSelect;
 
 /**
  * One row per user (unique `user_id`) tracking their single Lemon Squeezy

@@ -1,10 +1,12 @@
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
+import { sendVerificationEmail } from "@/lib/email";
 import { signAccessToken } from "@/lib/jwt";
 import { hashPassword, isPasswordValid, MIN_PASSWORD_LENGTH } from "@/lib/password";
 import { readJsonBody } from "@/lib/request";
 import { ApiError, jsonOk, jsonUnexpectedError } from "@/lib/response";
 import { issueRefreshToken } from "@/lib/tokens";
+import { buildVerificationUrl, issueEmailVerificationToken } from "@/lib/verification-tokens";
 
 const POSTGRES_UNIQUE_VIOLATION = "23505";
 
@@ -67,6 +69,16 @@ export async function action({ request }: { request: Request }) {
       signAccessToken(userId),
       issueRefreshToken(userId),
     ]);
+
+    try {
+      const verificationToken = await issueEmailVerificationToken(userId);
+      await sendVerificationEmail(email.toLowerCase(), buildVerificationUrl(verificationToken));
+    } catch (error) {
+      // Registration already succeeded; the user can request a new
+      // verification email later, so a delivery failure here shouldn't
+      // fail the whole request.
+      console.error("Failed to send verification email", error);
+    }
 
     return jsonOk({ access_token: accessToken, refresh_token: refreshToken });
   } catch (error) {

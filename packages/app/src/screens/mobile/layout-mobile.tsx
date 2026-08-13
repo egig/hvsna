@@ -9,7 +9,7 @@ export default function LayoutMobile() {
   const { page } = usePageContext();
 
   return (
-    <div className="h-[100dvh] flex flex-col">
+    <div className="h-full flex flex-col">
       <div className="flex-1 overflow-hidden">
         <Outlet />
       </div>
