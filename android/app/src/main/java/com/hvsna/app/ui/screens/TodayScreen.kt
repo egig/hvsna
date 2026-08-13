@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.data.hijriDateLabel
+import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.TaskListItem
@@ -100,7 +101,7 @@ fun TodayScreen(
 
     val now = System.currentTimeMillis()
     val (timeOverdue, activeTodayTasks) = todayTasks.partition {
-        !it.task.isAllDay && (it.task.scheduledTime ?: Long.MAX_VALUE) < now
+        it.task.atTime != null && (it.task.scheduledTime ?: Long.MAX_VALUE) < now
     }
     val allOverdueTasks = overdueTasks + timeOverdue.sortedBy { it.task.scheduledTime }
 
@@ -110,18 +111,18 @@ fun TodayScreen(
     // midnight, ahead of unrelated tasks that fall earlier in the evening. Use the prayer's
     // actual start time from prayerTimeMap for display ordering instead.
     fun displaySortKey(entry: TaskWithTags): Long {
-        val prayer = entry.task.prayerName
-        return if (prayer != null) prayerTimeMap[prayer] ?: entry.task.scheduledTime ?: Long.MAX_VALUE
+        val atTime = entry.task.atTime
+        return if (atTime != null && isPrayerAnchored(atTime)) prayerTimeMap[atTime] ?: entry.task.scheduledTime ?: Long.MAX_VALUE
         else entry.task.scheduledTime ?: Long.MAX_VALUE
     }
 
     val flatTodayItems = buildList {
         val seenPrayers = mutableSetOf<String>()
         for (entry in activeTodayTasks.sortedBy(::displaySortKey)) {
-            val prayer = entry.task.prayerName
-            if (prayer != null && prayer !in seenPrayers) {
-                add(TodayListItem.PrayerHeader(prayer))
-                seenPrayers.add(prayer)
+            val atTime = entry.task.atTime
+            if (atTime != null && isPrayerAnchored(atTime) && atTime !in seenPrayers) {
+                add(TodayListItem.PrayerHeader(atTime))
+                seenPrayers.add(atTime)
             }
             add(TodayListItem.TaskEntry(entry))
         }

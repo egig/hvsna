@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
 fun HvsnaApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.TODAY) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
-    var selectedTagId by rememberSaveable { mutableStateOf<Int?>(null) }
+    var selectedTagId by rememberSaveable { mutableStateOf<String?>(null) }
     var showTaskSheet by remember { mutableStateOf(false) }
     var editingTask by remember { mutableStateOf<TaskWithTags?>(null) }
     var taskDefaultScheduledTime by remember { mutableStateOf<Long?>(null) }
@@ -152,7 +152,7 @@ fun HvsnaApp() {
             task = editingTask?.task,
             sheetState = taskSheetState,
             onDismiss = { showTaskSheet = false },
-            onSave = { task, tagIds, recurrence -> taskViewModel.upsert(task, tagIds, recurrence) },
+            onSave = { task, tagIds, recurrence -> taskViewModel.upsert(editingTask?.task, task, tagIds, recurrence) },
             onDelete = { taskViewModel.delete(it) },
             hasLocation = settings.hasLocation,
             remindersGloballyEnabled = settings.remindersEnabled,
@@ -163,7 +163,7 @@ fun HvsnaApp() {
             initialTagIds = editingTask?.tags?.map { it.id }?.toSet() ?: emptySet(),
             onCreateTag = { taskViewModel.createTag(it) },
             defaultScheduledTime = taskDefaultScheduledTime,
-            recurrenceRule = editingTask?.task?.recurrenceId?.let { id -> allRecurrenceRules.firstOrNull { it.id == id } },
+            recurrenceRule = editingTask?.task?.recurringTaskId?.let { id -> allRecurrenceRules.firstOrNull { it.id == id } },
         )
     }
 }

@@ -8,10 +8,11 @@ class ReminderTimingTest {
 
     private val now = 1_000_000_000L
     private val baseTask = Task(
-        id = 1,
+        id = "test-task",
         title = "Test",
         description = "",
         scheduledTime = now + 3_600_000L, // 1 hour from now
+        atTime = "14:00",
         reminderEnabled = true,
         reminderOffsetMinutes = 0,
     )
@@ -46,13 +47,13 @@ class ReminderTimingTest {
 
     @Test
     fun `all-day task yields null regardless of offset`() {
-        val task = baseTask.copy(isAllDay = true)
+        val task = baseTask.copy(atTime = null)
         assertNull(reminderFireTimeOrNull(task, remindersEnabled = true, nowMs = now))
     }
 
     @Test
     fun `prayer-linked task yields null regardless of offset`() {
-        val task = baseTask.copy(prayerName = "Dhuhr")
+        val task = baseTask.copy(atTime = "Dhuhr")
         assertNull(reminderFireTimeOrNull(task, remindersEnabled = true, nowMs = now))
     }
 

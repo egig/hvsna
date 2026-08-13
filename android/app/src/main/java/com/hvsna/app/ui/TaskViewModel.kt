@@ -22,13 +22,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-data class RecurringSeriesUiModel(val rule: RecurrenceRule, val nextOccurrence: TaskWithTags)
+data class RecurringSeriesUiModel(val rule: RecurrenceRule, val nextOccurrence: Task)
+
+private const val UPCOMING_HORIZON_DAYS = 365L
+private const val VIRTUAL_TASK_ID_PREFIX = "vtask_"
+
+fun Task.isVirtual(): Boolean = id.startsWith(VIRTUAL_TASK_ID_PREFIX)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskViewModel(
@@ -40,9 +44,6 @@ class TaskViewModel(
 ) : ViewModel() {
 
     init {
-        viewModelScope.launch {
-            recurrenceManager.materializeAll(settingsRepository.settings.first())
-        }
         viewModelScope.launch {
             settingsRepository.settings.drop(1).collectLatest { recurrenceManager.recomputeAllPrayerAnchoredTasks(it) }
         }
@@ -59,29 +60,57 @@ class TaskViewModel(
 
     private fun tomorrowStart(): Long = todayStart() + 86_400_000L
 
-    val overdueTasks: StateFlow<List<TaskWithTags>> = repository
-        .getOverdue(todayStart())
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val settings: StateFlow<AppSettings> = settingsRepository.settings
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
 
-    val todayTasks: StateFlow<List<TaskWithTags>> = repository
-        .getToday(todayStart(), tomorrowStart())
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    /** Merges real DB rows with lazily-computed virtual occurrences from every active RecurrenceRule in range — virtual rows carry no tags (see RecurrenceRule's tag-model note in RecurrenceManager). */
+    private fun withVirtualOccurrences(
+        real: Flow<List<TaskWithTags>>,
+        rangeStart: Long,
+        rangeEnd: Long,
+    ): Flow<List<TaskWithTags>> = combine(real, repository.getAllRecurrenceRules(), settings) { realTasks, rules, appSettings ->
+        val virtual = rules.flatMap { rule -> recurrenceManager.virtualOccurrencesFor(rule, rangeStart, rangeEnd, appSettings) }
+            .filter { it.isDone == 0 }
+            .map { TaskWithTags(it, emptyList()) }
+        (realTasks + virtual).sortedWith(compareBy(nullsLast()) { it.task.scheduledTime })
+    }
+
+    val overdueTasks: StateFlow<List<TaskWithTags>> = combine(
+        repository.getOverdue(todayStart()),
+        repository.getAllRecurrenceRules(),
+        settings,
+    ) { real, rules, appSettings ->
+        val virtual = rules.mapNotNull { rule -> recurrenceManager.overdueOccurrenceFor(rule, todayStart(), appSettings) }
+            .filter { it.isDone == 0 }
+            .map { TaskWithTags(it, emptyList()) }
+        (real + virtual).sortedWith(compareBy(nullsLast()) { it.task.scheduledTime })
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val todayTasks: StateFlow<List<TaskWithTags>> =
+        withVirtualOccurrences(repository.getToday(todayStart(), tomorrowStart()), todayStart(), tomorrowStart() - 1)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val completedTasks: StateFlow<List<TaskWithTags>> = repository
         .getCompleted(todayStart(), tomorrowStart())
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val upcomingTasks: StateFlow<List<TaskWithTags>> = repository
-        .getUpcoming(tomorrowStart())
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val upcomingTasks: StateFlow<List<TaskWithTags>> =
+        withVirtualOccurrences(
+            repository.getUpcoming(tomorrowStart()),
+            tomorrowStart(),
+            tomorrowStart() + UPCOMING_HORIZON_DAYS * 86_400_000L,
+        ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val unscheduledTasks: StateFlow<List<TaskWithTags>> = repository
         .getUnscheduled()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val browseTasks: StateFlow<List<TaskWithTags>> = repository
-        .getBrowse()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val browseTasks: StateFlow<List<TaskWithTags>> =
+        withVirtualOccurrences(
+            repository.getBrowse(),
+            todayStart(),
+            todayStart() + UPCOMING_HORIZON_DAYS * 86_400_000L,
+        ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val allCompletedTasks: StateFlow<List<TaskWithTags>> = repository
         .getAllCompleted()
@@ -97,10 +126,13 @@ class TaskViewModel(
 
     val recurringSeries: StateFlow<List<RecurringSeriesUiModel>> = combine(
         repository.getAllRecurrenceRules(),
-        repository.getNextOccurrencePerSeries(),
-    ) { rules, next ->
-        val byRuleId = next.associateBy { it.task.recurrenceId }
-        rules.mapNotNull { rule -> byRuleId[rule.id]?.let { RecurringSeriesUiModel(rule, it) } }
+        settings,
+    ) { rules, appSettings ->
+        val now = System.currentTimeMillis()
+        val horizon = now + UPCOMING_HORIZON_DAYS * 86_400_000L
+        rules.mapNotNull { rule ->
+            recurrenceManager.nextOccurrenceFor(rule, now, horizon, appSettings)?.let { RecurringSeriesUiModel(rule, it) }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _searchQuery = MutableStateFlow("")
@@ -110,52 +142,64 @@ class TaskViewModel(
         .flatMapLatest { query -> repository.search(query) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val settings: StateFlow<AppSettings> = settingsRepository.settings
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
-
     fun search(query: String) {
         _searchQuery.value = query
     }
 
-    fun tasksForTag(tagId: Int): Flow<List<TaskWithTags>> = repository.getTasksForTag(tagId)
+    fun tasksForTag(tagId: String): Flow<List<TaskWithTags>> = repository.getTasksForTag(tagId)
 
-    fun upsert(task: Task, tagIds: List<Int>, recurrence: RecurrenceInput = RecurrenceInput.None) = viewModelScope.launch {
-        var taskToSave = task
-        if (task.recurrenceId != null && !recurrence.enabled) {
-            recurrenceManager.stopSeries(task.recurrenceId, exceptTaskId = task.id)
-            taskToSave = task.copy(recurrenceId = null)
+    /**
+     * [original] is the task being edited (null when creating brand new) —
+     * `null` vs. non-null decides insert-vs-update, and `original.isVirtual()`
+     * decides whether [edited] needs materializing first, since a virtual
+     * occurrence has no existing DB row for `update` to target.
+     */
+    fun upsert(original: Task?, edited: Task, tagIds: List<String>, recurrence: RecurrenceInput = RecurrenceInput.None) = viewModelScope.launch {
+        val now = System.currentTimeMillis()
+        var taskToSave = edited.copy(updatedAt = now, _dirty = 1)
+
+        if (original?.recurringTaskId != null && !recurrence.enabled) {
+            recurrenceManager.stopSeries(original.recurringTaskId, exceptTaskId = original.id)
+            taskToSave = taskToSave.copy(recurringTaskId = null)
         }
 
-        val taskId = if (taskToSave.id == 0) repository.insert(taskToSave).toInt() else {
-            repository.update(taskToSave)
-            taskToSave.id
+        taskToSave = when {
+            original == null -> { repository.insert(taskToSave); taskToSave }
+            original.isVirtual() -> recurrenceManager.materialize(original, taskToSave)
+            else -> { repository.update(taskToSave); taskToSave }
         }
-        repository.setTagsForTask(taskId, tagIds)
-        reminderScheduler.sync(taskToSave.copy(id = taskId), settings.value.remindersEnabled)
 
-        if (recurrence.enabled && task.recurrenceId == null) {
-            recurrenceManager.createSeries(taskToSave.copy(id = taskId), recurrence.intervalCount, recurrence.unit, settings.value)
-        } else if (recurrence.enabled && task.recurrenceId != null) {
-            recurrenceManager.updateSeries(
-                task.recurrenceId, taskToSave.copy(id = taskId),
-                recurrence.intervalCount, recurrence.unit, tagIds, settings.value,
-            )
+        repository.setTagsForTask(taskToSave.id, tagIds)
+        reminderScheduler.sync(taskToSave, settings.value.remindersEnabled)
+
+        if (recurrence.enabled && original?.recurringTaskId == null) {
+            recurrenceManager.createSeries(taskToSave, recurrence)
+        } else if (recurrence.enabled && original?.recurringTaskId != null) {
+            recurrenceManager.updateSeries(original.recurringTaskId, taskToSave, recurrence)
         }
     }
 
     fun delete(task: Task) = viewModelScope.launch {
-        if (task.recurrenceId != null && task.isDone == 0) {
-            recurrenceManager.stopSeries(task.recurrenceId, exceptTaskId = task.id)
+        if (task.recurringTaskId != null && task.isDone == 0) {
+            // Deleting any pending instance of a series stops the whole series —
+            // matches the pre-existing behavior this app already had.
+            recurrenceManager.stopSeries(task.recurringTaskId, exceptTaskId = task.id)
         }
-        repository.delete(task)
-        reminderScheduler.cancel(task.id)
+        if (!task.isVirtual()) {
+            repository.delete(task.id)
+            reminderScheduler.cancel(task.id)
+        }
     }
 
     fun toggleDone(task: Task) = viewModelScope.launch {
         val nowDone = task.isDone == 0
-        val updated = task.copy(
+        val now = System.currentTimeMillis()
+        val target = if (task.isVirtual()) recurrenceManager.materialize(task) else task
+        val updated = target.copy(
             isDone = if (nowDone) 1 else 0,
-            completedTime = if (nowDone) System.currentTimeMillis() else null,
+            completedTime = if (nowDone) now else null,
+            updatedAt = now,
+            _dirty = 1,
         )
         repository.update(updated)
         reminderScheduler.sync(updated, settings.value.remindersEnabled)
@@ -163,12 +207,13 @@ class TaskViewModel(
 
     suspend fun createTag(name: String): Tag {
         val color = 0xFF90A4AE // Default to Blue Grey
-        val id = repository.insertTag(Tag(name = name, color = color))
-        return Tag(id = id.toInt(), name = name, color = color)
+        val tag = Tag(name = name, color = color)
+        repository.insertTag(tag)
+        return tag
     }
 
     fun updateTag(tag: Tag) = viewModelScope.launch {
-        repository.updateTag(tag)
+        repository.updateTag(tag.copy(updatedAt = System.currentTimeMillis(), _dirty = 1))
     }
 
     fun deleteTag(tag: Tag) = viewModelScope.launch {

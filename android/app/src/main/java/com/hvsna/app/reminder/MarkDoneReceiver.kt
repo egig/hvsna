@@ -10,8 +10,7 @@ import kotlinx.coroutines.launch
 
 class MarkDoneReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val taskId = intent.getIntExtra(EXTRA_TASK_ID, -1)
-        if (taskId == -1) return
+        val taskId = intent.getStringExtra(EXTRA_TASK_ID) ?: return
 
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
@@ -19,7 +18,8 @@ class MarkDoneReceiver : BroadcastReceiver() {
                 val dao = TaskDatabase.getInstance(context).taskDao()
                 val task = dao.getTaskById(taskId)
                 if (task != null && task.isDone == 0) {
-                    dao.update(task.copy(isDone = 1, completedTime = System.currentTimeMillis()))
+                    val now = System.currentTimeMillis()
+                    dao.update(task.copy(isDone = 1, completedTime = now, updatedAt = now, _dirty = 1))
                 }
                 ReminderNotifications.cancel(context, taskId)
             } finally {

@@ -40,8 +40,9 @@ object ReminderNotifications {
             return
         }
 
+        val requestCode = taskRequestCode(task.id)
         val contentIntent = PendingIntent.getActivity(
-            context, task.id, Intent(context, MainActivity::class.java),
+            context, requestCode, Intent(context, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val markDoneIntent = Intent(context, MarkDoneReceiver::class.java).apply {
@@ -49,7 +50,7 @@ object ReminderNotifications {
             putExtra(EXTRA_TASK_ID, task.id)
         }
         val markDonePendingIntent = PendingIntent.getBroadcast(
-            context, task.id, markDoneIntent,
+            context, requestCode, markDoneIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -64,10 +65,10 @@ object ReminderNotifications {
             .addAction(0, "Mark Done", markDonePendingIntent)
             .build()
 
-        notificationManagerCompat.notify(task.id, notification)
+        notificationManagerCompat.notify(requestCode, notification)
     }
 
-    fun cancel(context: Context, taskId: Int) {
-        NotificationManagerCompat.from(context).cancel(taskId)
+    fun cancel(context: Context, taskId: String) {
+        NotificationManagerCompat.from(context).cancel(taskRequestCode(taskId))
     }
 }

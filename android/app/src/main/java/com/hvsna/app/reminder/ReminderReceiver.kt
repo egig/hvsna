@@ -10,8 +10,7 @@ import kotlinx.coroutines.launch
 
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val taskId = intent.getIntExtra(EXTRA_TASK_ID, -1)
-        if (taskId == -1) return
+        val taskId = intent.getStringExtra(EXTRA_TASK_ID) ?: return
 
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {

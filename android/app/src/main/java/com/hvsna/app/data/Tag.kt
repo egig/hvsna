@@ -1,16 +1,18 @@
 package com.hvsna.app.data
 
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
 @Serializable
-@Entity(indices = [Index(value = ["uuid"], unique = true)])
+@Entity
 data class Tag(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val name: String,
     val color: Long,
-    val uuid: String = UUID.randomUUID().toString(),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
+    val deletedAt: Long? = null,
+    val _dirty: Int = 1,
 )

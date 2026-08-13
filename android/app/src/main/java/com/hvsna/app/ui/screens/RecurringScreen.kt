@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import com.hvsna.app.data.RecurrenceUnit
+import com.hvsna.app.data.RecurringType
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
@@ -35,8 +35,14 @@ import java.util.Locale
 
 private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
-private fun cadenceLabel(intervalCount: Int, unit: RecurrenceUnit): String {
-    val unitName = unit.name.lowercase()
+private fun cadenceLabel(intervalCount: Int, recurringType: String): String {
+    val unitName = when (recurringType) {
+        RecurringType.DAILY -> "day"
+        RecurringType.WEEKLY -> "week"
+        RecurringType.MONTHLY -> "month"
+        RecurringType.YEARLY -> "year"
+        else -> recurringType
+    }
     return if (intervalCount == 1) "every $unitName" else "every $intervalCount ${unitName}s"
 }
 
@@ -88,16 +94,15 @@ fun RecurringScreen(
         ) {
             items(series, key = { it.rule.id }) { entry ->
                 ListItem(
-                    headlineContent = { Text(entry.nextOccurrence.task.title) },
+                    headlineContent = { Text(entry.nextOccurrence.title) },
                     supportingContent = {
-                        val unit = RecurrenceUnit.valueOf(entry.rule.unit)
-                        val nextDate = entry.nextOccurrence.task.scheduledTime?.let { dateFormat.format(Date(it)) }
-                        Text("${cadenceLabel(entry.rule.intervalCount, unit)} · next $nextDate")
+                        val nextDate = entry.nextOccurrence.scheduledTime?.let { dateFormat.format(Date(it)) }
+                        Text("${cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType)} · next $nextDate")
                     },
                     leadingContent = {
                         Icon(TablerIcons.Repeat, contentDescription = null)
                     },
-                    modifier = Modifier.clickable { onEditTask(entry.nextOccurrence, null) },
+                    modifier = Modifier.clickable { onEditTask(TaskWithTags(entry.nextOccurrence, emptyList()), null) },
                 )
             }
         }

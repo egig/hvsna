@@ -61,9 +61,11 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.hvsna.app.data.RecurrenceInput
 import com.hvsna.app.data.RecurrenceRule
-import com.hvsna.app.data.RecurrenceUnit
+import com.hvsna.app.data.RecurringEnd
+import com.hvsna.app.data.RecurringType
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
+import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.data.nextPrayerTime
 import com.hvsna.app.data.reminderOffsetPresets
 import compose.icons.TablerIcons
@@ -155,14 +157,14 @@ fun TaskBottomSheet(
     task: Task?,
     sheetState: SheetState,
     onDismiss: () -> Unit,
-    onSave: (Task, List<Int>, RecurrenceInput) -> Unit,
+    onSave: (Task, List<String>, RecurrenceInput) -> Unit,
     onDelete: ((Task) -> Unit)? = null,
     hasLocation: Boolean = false,
     getPrayerTimes: (year: Int, month: Int, day: Int) -> List<Pair<String, Long>> = { _, _, _ -> emptyList() },
     onOpenSettings: () -> Unit = {},
     hijriAdjustment: Int = 0,
     allTags: List<Tag> = emptyList(),
-    initialTagIds: Set<Int> = emptySet(),
+    initialTagIds: Set<String> = emptySet(),
     onCreateTag: suspend (String) -> Tag = { Tag(name = it, color = 0L) },
     defaultScheduledTime: Long? = null,
     recurrenceRule: RecurrenceRule? = null,
@@ -177,13 +179,16 @@ fun TaskBottomSheet(
         mutableStateOf<Long?>(if (task != null) task.scheduledTime else defaultScheduledTime)
     }
     var repeatEnabled by remember(task, recurrenceRule) { mutableStateOf(recurrenceRule != null) }
-    var repeatIntervalCount by remember(task, recurrenceRule) { mutableStateOf(recurrenceRule?.intervalCount ?: 1) }
-    var repeatUnit by remember(task, recurrenceRule) {
-        mutableStateOf(recurrenceRule?.let { RecurrenceUnit.valueOf(it.unit) } ?: RecurrenceUnit.DAY)
+    var repeatIntervalCount by remember(task, recurrenceRule) { mutableStateOf(recurrenceRule?.recurringInterval ?: 1) }
+    var repeatType by remember(task, recurrenceRule) {
+        mutableStateOf(recurrenceRule?.recurringType ?: RecurringType.DAILY)
     }
-    var selectedPrayerName by remember(task) { mutableStateOf(task?.prayerName) }
+    var selectedPrayerName by remember(task) { mutableStateOf(task?.atTime?.takeIf { isPrayerAnchored(it) }) }
     var isAllDay by remember(task) {
-        mutableStateOf(if (task != null) task.isAllDay else defaultScheduledTime != null)
+        mutableStateOf(
+            if (task != null) task.scheduledTime != null && task.atTime == null
+            else defaultScheduledTime != null
+        )
     }
     var reminderEnabled by remember(task) { mutableStateOf(task?.reminderEnabled ?: false) }
     var reminderOffsetMinutes by remember(task) { mutableStateOf(task?.reminderOffsetMinutes ?: 0) }
@@ -617,11 +622,17 @@ fun TaskBottomSheet(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            RecurrenceUnit.entries.forEach { unit ->
+                            val unitLabels = listOf(
+                                RecurringType.DAILY to "Day",
+                                RecurringType.WEEKLY to "Week",
+                                RecurringType.MONTHLY to "Month",
+                                RecurringType.YEARLY to "Year",
+                            )
+                            unitLabels.forEach { (type, noun) ->
                                 FilterChip(
-                                    selected = repeatUnit == unit,
-                                    onClick = { repeatUnit = unit },
-                                    label = { Text(unit.name.lowercase().replaceFirstChar { it.uppercase() } + if (repeatIntervalCount != 1) "s" else "") },
+                                    selected = repeatType == type,
+                                    onClick = { repeatType = type },
+                                    label = { Text(noun + if (repeatIntervalCount != 1) "s" else "") },
                                 )
                             }
                         }
@@ -630,22 +641,33 @@ fun TaskBottomSheet(
 
                 Button(
                     onClick = {
+                        val atTime = when {
+                            selectedPrayerName != null -> selectedPrayerName
+                            isAllDay || scheduledTime == null -> null
+                            else -> {
+                                val cal = calFromTime()
+                                "%02d:%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+                            }
+                        }
                         onSave(
                             Task(
-                                id = task?.id ?: 0,
+                                id = task?.id ?: java.util.UUID.randomUUID().toString(),
                                 title = title.trim(),
                                 description = description.trim(),
                                 scheduledTime = scheduledTime,
                                 isDone = task?.isDone ?: 0,
-                                prayerName = selectedPrayerName,
-                                isAllDay = isAllDay,
-                                recurrenceId = task?.recurrenceId,
+                                atTime = atTime,
+                                recurringTaskId = task?.recurringTaskId,
+                                lat = task?.lat,
+                                lng = task?.lng,
+                                timezone = task?.timezone,
+                                hijriDateOffset = task?.hijriDateOffset,
                                 reminderEnabled = reminderEnabled && !isAllDay && selectedPrayerName == null,
                                 reminderOffsetMinutes = reminderOffsetMinutes,
                             ),
                             selectedTagIds.toList(),
                             if (scheduledTime != null && repeatEnabled) {
-                                RecurrenceInput(true, repeatIntervalCount, repeatUnit)
+                                RecurrenceInput(enabled = true, recurringType = repeatType, recurringInterval = repeatIntervalCount, recurringEnd = RecurringEnd.NEVER)
                             } else {
                                 RecurrenceInput.None
                             },

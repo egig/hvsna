@@ -20,34 +20,35 @@ class TaskRepository(private val dao: TaskDao, context: Context) {
     fun getBrowse(): Flow<List<TaskWithTags>> = dao.getBrowse()
     fun getAllCompleted(): Flow<List<TaskWithTags>> = dao.getAllCompleted()
     fun search(query: String): Flow<List<TaskWithTags>> = dao.search(query)
-    fun getTasksForTag(tagId: Int): Flow<List<TaskWithTags>> = dao.getTasksForTag(tagId)
+    fun getTasksForTag(tagId: String): Flow<List<TaskWithTags>> = dao.getTasksForTag(tagId)
 
-    suspend fun insert(task: Task): Long = dao.insert(task).also { notifyBackupDataChanged() }
+    suspend fun insert(task: Task) { dao.insert(task); notifyBackupDataChanged() }
     suspend fun update(task: Task) { dao.update(task); notifyBackupDataChanged() }
-    suspend fun delete(task: Task) { dao.delete(task); notifyBackupDataChanged() }
+    suspend fun delete(id: String) { dao.delete(id); notifyBackupDataChanged() }
 
     fun getAllTags(): Flow<List<Tag>> = dao.getAllTags()
-    suspend fun insertTag(tag: Tag): Long = dao.insertTag(tag).also { notifyBackupDataChanged() }
+    suspend fun insertTag(tag: Tag) { dao.insertTag(tag); notifyBackupDataChanged() }
     suspend fun updateTag(tag: Tag) { dao.updateTag(tag); notifyBackupDataChanged() }
     suspend fun deleteTag(tag: Tag) { dao.deleteTag(tag); notifyBackupDataChanged() }
     suspend fun getTagCount(): Int = dao.getTagCount()
-    suspend fun setTagsForTask(taskId: Int, tagIds: List<Int>) { dao.setTagsForTask(taskId, tagIds); notifyBackupDataChanged() }
+    suspend fun setTagsForTask(taskId: String, tagIds: List<String>) { dao.setTagsForTask(taskId, tagIds); notifyBackupDataChanged() }
 
-    suspend fun insertRecurrenceRule(rule: RecurrenceRule): Long = dao.insertRecurrenceRule(rule).also { notifyBackupDataChanged() }
+    suspend fun insertRecurrenceRule(rule: RecurrenceRule) { dao.insertRecurrenceRule(rule); notifyBackupDataChanged() }
     suspend fun updateRecurrenceRule(rule: RecurrenceRule) { dao.updateRecurrenceRule(rule); notifyBackupDataChanged() }
     suspend fun deleteRecurrenceRule(rule: RecurrenceRule) { dao.deleteRecurrenceRule(rule); notifyBackupDataChanged() }
-    suspend fun getRecurrenceRule(id: Int): RecurrenceRule? = dao.getRecurrenceRule(id)
+    suspend fun getRecurrenceRule(id: String): RecurrenceRule? = dao.getRecurrenceRule(id)
     fun getAllRecurrenceRules(): Flow<List<RecurrenceRule>> = dao.getAllRecurrenceRules()
-    fun getNextOccurrencePerSeries(): Flow<List<TaskWithTags>> = dao.getNextOccurrencePerSeries()
-    suspend fun countUndoneForRecurrence(recurrenceId: Int): Int = dao.countUndoneForRecurrence(recurrenceId)
-    suspend fun countAllForRecurrence(recurrenceId: Int): Int = dao.countAllForRecurrence(recurrenceId)
-    suspend fun getTagIdsForTask(taskId: Int): List<Int> = dao.getTagIdsForTask(taskId)
-    suspend fun getLatestTaskForRecurrence(recurrenceId: Int): Task? = dao.getLatestTaskForRecurrence(recurrenceId)
-    suspend fun getUndoneTasksForRecurrence(recurrenceId: Int): List<Task> = dao.getUndoneTasksForRecurrence(recurrenceId)
-    suspend fun deleteUndoneForRecurrenceExcept(recurrenceId: Int, exceptTaskId: Int) { dao.deleteUndoneForRecurrenceExcept(recurrenceId, exceptTaskId); notifyBackupDataChanged() }
-    suspend fun getAllUndonePrayerPinnedTasks(): List<Task> = dao.getAllUndonePrayerPinnedTasks()
+    suspend fun countUndoneForRecurrence(recurringTaskId: String): Int = dao.countUndoneForRecurrence(recurringTaskId)
+    suspend fun getTagIdsForTask(taskId: String): List<String> = dao.getTagIdsForTask(taskId)
+    suspend fun getLatestTaskForRecurrence(recurringTaskId: String): Task? = dao.getLatestTaskForRecurrence(recurringTaskId)
+    suspend fun getUndoneTasksForRecurrence(recurringTaskId: String): List<Task> = dao.getUndoneTasksForRecurrence(recurringTaskId)
+    suspend fun deleteUndoneForRecurrenceExcept(recurringTaskId: String, exceptTaskId: String) {
+        dao.deleteUndoneForRecurrenceExcept(recurringTaskId, exceptTaskId)
+        notifyBackupDataChanged()
+    }
+    suspend fun getAllUndonePrayerAnchoredTasks(): List<Task> = dao.getAllUndonePrayerAnchoredTasks()
     suspend fun getAllUndoneReminderEnabledTasks(): List<Task> = dao.getAllUndoneReminderEnabledTasks()
-    suspend fun getTaskById(taskId: Int): Task? = dao.getTaskById(taskId)
+    suspend fun getTaskById(taskId: String): Task? = dao.getTaskById(taskId)
 
     suspend fun getAllTasksSnapshot(): List<Task> = dao.getAllTasksSnapshot()
     suspend fun getAllTaskTagCrossRefsSnapshot(): List<TaskTagCrossRef> = dao.getAllTaskTagCrossRefsSnapshot()

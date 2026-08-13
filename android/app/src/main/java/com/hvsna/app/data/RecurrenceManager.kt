@@ -1,154 +1,133 @@
 package com.hvsna.app.data
 
 import com.hvsna.app.reminder.ReminderScheduler
-import kotlinx.coroutines.flow.first
 import java.time.LocalDate
-import java.util.Calendar
 
 class RecurrenceManager(
     private val repository: TaskRepository,
     private val prayerTimesRepository: PrayerTimesRepository,
     private val reminderScheduler: ReminderScheduler,
 ) {
-    companion object {
-        const val MATERIALIZATION_WINDOW = 10
+    private fun prayerEndTimeResolver(settings: AppSettings): (String, LocalDate) -> Long? = resolver@{ prayerName, date ->
+        if (!settings.hasLocation) return@resolver null
+        val prayers = prayerTimesRepository.getPrayerList(
+            date.year, date.monthValue, date.dayOfMonth,
+            settings.lat, settings.lng, settings.calculationMethod, settings.madhab,
+        )
+        nextPrayerTime(prayerName, prayers, stampMidnight(date))
     }
 
-    suspend fun createSeries(
-        anchorTask: Task,
-        intervalCount: Int,
-        unit: RecurrenceUnit,
-        settings: AppSettings,
-    ): Task {
+    /** Starts a series anchored on [anchorTask], which itself becomes the series' first real row. */
+    suspend fun createSeries(anchorTask: Task, recurrence: RecurrenceInput): Task {
         val anchorDate = epochMillisToLocalDate(anchorTask.scheduledTime!!)
-        val clockTime = clockTimeOf(anchorTask)
         val rule = RecurrenceRule(
             title = anchorTask.title,
             description = anchorTask.description,
-            intervalCount = intervalCount,
-            unit = unit.name,
-            anchorEpochDay = anchorDate.toEpochDay(),
-            nextOccurrenceIndex = 1,
-            hour = clockTime?.get(Calendar.HOUR_OF_DAY),
-            minute = clockTime?.get(Calendar.MINUTE),
-            prayerName = anchorTask.prayerName,
-            isAllDay = anchorTask.isAllDay,
+            recurringType = recurrence.recurringType,
+            recurringInterval = recurrence.recurringInterval,
+            baseDateEpoch = stampMidnight(anchorDate),
+            atTime = anchorTask.atTime,
+            lat = anchorTask.lat,
+            lng = anchorTask.lng,
+            timezone = anchorTask.timezone,
+            hijriDateOffset = anchorTask.hijriDateOffset,
+            recurringEnd = recurrence.recurringEnd,
+            recurringEndEpoch = recurrence.recurringEndEpoch,
+            recurringEndOccurrences = recurrence.recurringEndOccurrences,
+            occurrenceExceptions = serializeOccurrenceExceptions(setOf(occurrenceDateKey(anchorDate))),
             reminderEnabled = anchorTask.reminderEnabled,
             reminderOffsetMinutes = anchorTask.reminderOffsetMinutes,
         )
-        val ruleId = repository.insertRecurrenceRule(rule).toInt()
-        val linkedTask = anchorTask.copy(recurrenceId = ruleId)
+        repository.insertRecurrenceRule(rule)
+        val linkedTask = anchorTask.copy(
+            recurringTaskId = rule.id,
+            recurringType = rule.recurringType,
+            recurringInterval = rule.recurringInterval,
+        )
         repository.update(linkedTask)
-        materializeOne(rule.copy(id = ruleId), settings)
         return linkedTask
     }
 
-    suspend fun updateSeries(
-        recurrenceId: Int,
-        editedTask: Task,
-        intervalCount: Int,
-        unit: RecurrenceUnit,
-        tagIds: List<Int>,
-        settings: AppSettings,
-    ) {
-        val existingRule = repository.getRecurrenceRule(recurrenceId) ?: return
+    /**
+     * "This and all future occurrences" edit scope: deletes every other
+     * pending (undone) materialized row for the series, then rebases the
+     * template on [editedTask] so the generator's virtual stream restarts
+     * cleanly from here — mirrors updateRecurringSeries in packages/app.
+     * Completed past instances are left untouched.
+     */
+    suspend fun updateSeries(recurringTaskId: String, editedTask: Task, recurrence: RecurrenceInput) {
+        val existingRule = repository.getRecurrenceRule(recurringTaskId) ?: return
+        repository.deleteUndoneForRecurrenceExcept(recurringTaskId, exceptTaskId = editedTask.id)
         val anchorDate = epochMillisToLocalDate(editedTask.scheduledTime!!)
-        val clockTime = clockTimeOf(editedTask)
         val updatedRule = existingRule.copy(
             title = editedTask.title,
             description = editedTask.description,
-            intervalCount = intervalCount,
-            unit = unit.name,
-            anchorEpochDay = anchorDate.toEpochDay(),
-            nextOccurrenceIndex = 1,
-            hour = clockTime?.get(Calendar.HOUR_OF_DAY),
-            minute = clockTime?.get(Calendar.MINUTE),
-            prayerName = editedTask.prayerName,
-            isAllDay = editedTask.isAllDay,
+            recurringType = recurrence.recurringType,
+            recurringInterval = recurrence.recurringInterval,
+            baseDateEpoch = stampMidnight(anchorDate),
+            atTime = editedTask.atTime,
+            lat = editedTask.lat,
+            lng = editedTask.lng,
+            timezone = editedTask.timezone,
+            hijriDateOffset = editedTask.hijriDateOffset,
+            recurringEnd = recurrence.recurringEnd,
+            recurringEndEpoch = recurrence.recurringEndEpoch,
+            recurringEndOccurrences = recurrence.recurringEndOccurrences,
+            occurrenceExceptions = serializeOccurrenceExceptions(setOf(occurrenceDateKey(anchorDate))),
             reminderEnabled = editedTask.reminderEnabled,
             reminderOffsetMinutes = editedTask.reminderOffsetMinutes,
         )
         repository.updateRecurrenceRule(updatedRule)
-
-        repository.getUndoneTasksForRecurrence(recurrenceId)
-            .filter { it.id != editedTask.id }
-            .forEach { other ->
-                repository.update(other.copy(title = editedTask.title, description = editedTask.description))
-                repository.setTagsForTask(other.id, tagIds)
-            }
-
-        materializeOne(updatedRule, settings)
     }
 
-    suspend fun stopSeries(recurrenceId: Int, exceptTaskId: Int) {
-        repository.deleteUndoneForRecurrenceExcept(recurrenceId, exceptTaskId)
-        repository.getRecurrenceRule(recurrenceId)?.let { repository.deleteRecurrenceRule(it) }
+    /** Ends a series: removes every other pending row and soft-deletes the template itself. */
+    suspend fun stopSeries(recurringTaskId: String, exceptTaskId: String) {
+        repository.deleteUndoneForRecurrenceExcept(recurringTaskId, exceptTaskId)
+        repository.getRecurrenceRule(recurringTaskId)?.let { repository.deleteRecurrenceRule(it) }
     }
 
-    suspend fun materializeAll(settings: AppSettings) {
-        repository.getAllRecurrenceRules().first().forEach { rule -> materializeOne(rule, settings) }
+    /**
+     * Persists a virtual (never-before-saved) occurrence as a real row —
+     * [edited] supplies the field values to save (defaults to [original]
+     * unchanged), while [original]'s date is what gets recorded on the
+     * template's occurrenceExceptions, since that's the slot the generator
+     * must stop re-emitting regardless of whether the saved row's own date
+     * was itself edited. The on-interaction counterpart to web's
+     * materializeVirtualTask.
+     */
+    suspend fun materialize(original: Task, edited: Task = original): Task {
+        val rule = repository.getRecurrenceRule(original.recurringTaskId!!)
+        val real = edited.copy(id = java.util.UUID.randomUUID().toString(), recurringTaskId = original.recurringTaskId)
+        repository.insert(real)
+        if (rule != null) {
+            repository.updateRecurrenceRule(addOccurrenceException(rule, original.scheduledTime!!))
+        }
+        return real
     }
 
     suspend fun recomputeAllPrayerAnchoredTasks(settings: AppSettings) {
         if (!settings.hasLocation) return
-        repository.getAllUndonePrayerPinnedTasks().forEach { task ->
+        val resolver = prayerEndTimeResolver(settings)
+        repository.getAllUndonePrayerAnchoredTasks().forEach { task ->
             val time = task.scheduledTime ?: return@forEach
             val date = epochMillisToLocalDate(time)
-            val prayers = prayerTimesRepository.getPrayerList(
-                date.year, date.monthValue, date.dayOfMonth,
-                settings.lat, settings.lng, settings.calculationMethod, settings.madhab,
-            )
-            val newTime = nextPrayerTime(task.prayerName!!, prayers, stampMidnight(date))
-            if (newTime != task.scheduledTime) repository.update(task.copy(scheduledTime = newTime))
+            val newTime = resolver(task.atTime!!, date) ?: return@forEach
+            if (newTime != task.scheduledTime) {
+                val updated = task.copy(scheduledTime = newTime, updatedAt = System.currentTimeMillis(), _dirty = 1)
+                repository.update(updated)
+                reminderScheduler.sync(updated, settings.remindersEnabled)
+            }
         }
     }
 
-    private suspend fun materializeOne(rule: RecurrenceRule, settings: AppSettings) {
-        var undoneCount = repository.countUndoneForRecurrence(rule.id)
-        if (undoneCount >= MATERIALIZATION_WINDOW) return
-        val latest = repository.getLatestTaskForRecurrence(rule.id) ?: return
-        val tagIds = repository.getTagIdsForTask(latest.id)
-        val unit = RecurrenceUnit.valueOf(rule.unit)
-        val anchorDate = LocalDate.ofEpochDay(rule.anchorEpochDay)
-        var index = rule.nextOccurrenceIndex
-        while (undoneCount < MATERIALIZATION_WINDOW) {
-            val date = occurrenceDate(anchorDate, rule.intervalCount, unit, index)
-            val newTask = Task(
-                title = rule.title,
-                description = rule.description,
-                scheduledTime = resolveScheduledTime(date, rule, settings),
-                prayerName = rule.prayerName,
-                isAllDay = rule.isAllDay,
-                recurrenceId = rule.id,
-                reminderEnabled = rule.reminderEnabled,
-                reminderOffsetMinutes = rule.reminderOffsetMinutes,
-            )
-            val newTaskId = repository.insert(newTask).toInt()
-            repository.setTagsForTask(newTaskId, tagIds)
-            reminderScheduler.sync(newTask.copy(id = newTaskId), settings.remindersEnabled)
-            index++
-            undoneCount++
-        }
-        repository.updateRecurrenceRule(rule.copy(nextOccurrenceIndex = index))
-    }
+    /** Virtual occurrences for [rule] in `[fromEpoch, horizonEpoch]`, excluding dates already materialized as real rows. */
+    fun virtualOccurrencesFor(rule: RecurrenceRule, fromEpoch: Long, horizonEpoch: Long, settings: AppSettings): List<Task> =
+        occurrencesInRange(rule, fromEpoch, horizonEpoch, prayerEndTimeResolver(settings))
 
-    private fun resolveScheduledTime(date: LocalDate, rule: RecurrenceRule, settings: AppSettings): Long = when {
-        rule.prayerName != null && settings.hasLocation -> {
-            val prayers = prayerTimesRepository.getPrayerList(
-                date.year, date.monthValue, date.dayOfMonth,
-                settings.lat, settings.lng, settings.calculationMethod, settings.madhab,
-            )
-            nextPrayerTime(rule.prayerName, prayers, stampMidnight(date))
-        }
-        rule.prayerName != null -> stampAllDay(date)
-        rule.isAllDay -> stampAllDay(date)
-        else -> stampClockTime(date, rule.hour ?: 0, rule.minute ?: 0)
-    }
+    /** The one virtual occurrence of [rule] strictly before [beforeEpoch], if any — for the Overdue screen only. */
+    fun overdueOccurrenceFor(rule: RecurrenceRule, beforeEpoch: Long, settings: AppSettings): Task? =
+        overdueOccurrence(rule, beforeEpoch, prayerEndTimeResolver(settings))
 
-    private fun clockTimeOf(task: Task): Calendar? =
-        if (task.prayerName == null && !task.isAllDay) {
-            Calendar.getInstance().apply { timeInMillis = task.scheduledTime!! }
-        } else {
-            null
-        }
+    fun nextOccurrenceFor(rule: RecurrenceRule, fromEpoch: Long, horizonEpoch: Long, settings: AppSettings): Task? =
+        nextOccurrence(rule, fromEpoch, horizonEpoch, prayerEndTimeResolver(settings))
 }

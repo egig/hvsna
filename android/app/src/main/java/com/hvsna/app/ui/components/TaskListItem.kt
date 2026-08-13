@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
+import com.hvsna.app.data.isPrayerAnchored
 import compose.icons.TablerIcons
 import compose.icons.tablericons.Check
 import java.text.SimpleDateFormat
@@ -88,9 +89,9 @@ fun TaskListItem(
 ) {
     val done = task.isDone == 1
     val timeLabel = when {
-        task.isAllDay -> ""
-        task.prayerName != null && inPrayerSection -> ""
-        task.prayerName != null -> task.prayerName
+        task.atTime == null -> ""
+        isPrayerAnchored(task.atTime) && inPrayerSection -> ""
+        isPrayerAnchored(task.atTime) -> task.atTime
         else -> task.scheduledTime?.let { timeFormat.format(Date(it)) } ?: ""
     }
     val textColor = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
