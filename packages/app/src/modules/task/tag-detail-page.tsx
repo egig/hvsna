@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { HvHash, HvMoreVertical, HvEdit, HvTrash2, HvCheck } from "@/modules/icons";
+import { HvHash, HvMoreVertical, HvEdit, HvTrash2, HvCheck, HvPlus } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Modal, Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
@@ -22,9 +22,12 @@ export default function TagDetailPage() {
   const decodedTag = tagName ? decodeURIComponent(tagName) : "";
   const tagColor = tags.find((t) => t.name === decodedTag)?.color ?? DEFAULT_TAG_COLOR;
 
-  const [modalMode, setModalMode] = useState<null | "rename" | "color" | "delete">(null);
+  const [modalMode, setModalMode] = useState<null | "edit" | "delete">(null);
   const [newTagName, setNewTagName] = useState("");
+  const [editColor, setEditColor] = useState(DEFAULT_TAG_COLOR);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isCustomColor = !(TAG_COLOR_PALETTE as readonly string[]).includes(editColor);
 
   const tasks = useMemo<Task[]>(() => {
     if (!allTasksQuery.data || !decodedTag) return [];
@@ -40,12 +43,11 @@ export default function TagDetailPage() {
     );
   }, [allTasksQuery.data, decodedTag]);
 
-  const openRename = () => {
+  const openEdit = () => {
     setNewTagName(decodedTag);
-    setModalMode("rename");
+    setEditColor(tagColor);
+    setModalMode("edit");
   };
-
-  const openColorPicker = () => setModalMode("color");
 
   const openDelete = () => setModalMode("delete");
 
@@ -55,28 +57,27 @@ export default function TagDetailPage() {
     setIsSubmitting(false);
   };
 
-  const handlePickColor = async (color: string) => {
-    setIsSubmitting(true);
-    try {
-      await setTagColor(decodedTag, color);
-      closeModal();
-    } catch (err) {
-      console.error("Recolor failed:", err);
-      setIsSubmitting(false);
-    }
-  };
+  const canSaveEdit =
+    newTagName.trim().length > 0 &&
+    (newTagName.trim() !== decodedTag || editColor !== tagColor);
 
-  const handleRename = async () => {
-    if (!newTagName.trim() || newTagName === decodedTag) return;
+  const handleSaveEdit = async () => {
+    const trimmedName = newTagName.trim();
+    if (!canSaveEdit) return;
     setIsSubmitting(true);
     try {
-      await renameTag(decodedTag, newTagName.trim());
-      navigate(`/tags/${encodeURIComponent(newTagName.trim())}`, {
-        replace: true,
-      });
+      if (editColor !== tagColor) {
+        await setTagColor(decodedTag, editColor);
+      }
+      if (trimmedName !== decodedTag) {
+        await renameTag(decodedTag, trimmedName);
+        navigate(`/tags/${encodeURIComponent(trimmedName)}`, {
+          replace: true,
+        });
+      }
       closeModal();
     } catch (err) {
-      console.error("Rename failed:", err);
+      console.error("Edit tag failed:", err);
     } finally {
       setIsSubmitting(false);
     }
@@ -106,22 +107,11 @@ export default function TagDetailPage() {
         <Menu.Positioner className="z-[9999]">
           <Menu.Popup className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-[160px]">
             <Menu.Item
-              onClick={openRename}
+              onClick={openEdit}
               className="px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer"
             >
               <HvEdit size={16} />
-              {t("rename_tag")}
-            </Menu.Item>
-            <Menu.Item
-              onClick={openColorPicker}
-              className="px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer"
-            >
-              <span
-                className="w-4 h-4 rounded-full shrink-0"
-                style={{ backgroundColor: tagColor }}
-                aria-hidden
-              />
-              {t("change_tag_color") || "Change color"}
+              {t("edit_tag")}
             </Menu.Item>
             <Menu.Item
               onClick={openDelete}
@@ -188,9 +178,9 @@ export default function TagDetailPage() {
       )}
 
       <Modal
-        isOpen={modalMode === "rename"}
+        isOpen={modalMode === "edit"}
         onClose={closeModal}
-        title={t("rename_tag")}
+        title={t("edit_tag")}
       >
         <div className="p-4 space-y-4">
           <input
@@ -200,8 +190,50 @@ export default function TagDetailPage() {
             placeholder={t("new_tag_name")}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
             autoFocus
-            onKeyDown={(e) => e.key === "Enter" && handleRename()}
+            onKeyDown={(e) => e.key === "Enter" && handleSaveEdit()}
           />
+
+          <div>
+            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+              {t("tag_color")}
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              {TAG_COLOR_PALETTE.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => setEditColor(color)}
+                  aria-label={color}
+                  className="w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
+                  style={{ backgroundColor: color }}
+                >
+                  {!isCustomColor && color === editColor && (
+                    <HvCheck size={16} className="text-white" />
+                  )}
+                </button>
+              ))}
+              <label
+                className="relative w-10 h-10 rounded-full flex items-center justify-center cursor-pointer overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600"
+                style={isCustomColor ? { backgroundColor: editColor, borderStyle: "solid", borderColor: editColor } : undefined}
+                aria-label={t("custom_color")}
+              >
+                {isCustomColor ? (
+                  <HvCheck size={16} className="text-white" />
+                ) : (
+                  <HvPlus size={16} className="text-gray-400 dark:text-gray-500" />
+                )}
+                <input
+                  type="color"
+                  value={editColor}
+                  disabled={isSubmitting}
+                  onChange={(e) => setEditColor(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="flex justify-end gap-2">
             <button
               onClick={closeModal}
@@ -210,36 +242,12 @@ export default function TagDetailPage() {
               {t("cancel")}
             </button>
             <button
-              onClick={handleRename}
-              disabled={isSubmitting || !newTagName.trim()}
+              onClick={handleSaveEdit}
+              disabled={isSubmitting || !canSaveEdit}
               className="px-4 py-2 text-sm text-white bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] rounded-md transition-colors disabled:opacity-50"
             >
               {t("submit")}
             </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={modalMode === "color"}
-        onClose={closeModal}
-        title={t("change_tag_color") || "Change color"}
-      >
-        <div className="p-4">
-          <div className="grid grid-cols-5 gap-3">
-            {TAG_COLOR_PALETTE.map((color) => (
-              <button
-                key={color}
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => handlePickColor(color)}
-                aria-label={color}
-                className="w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
-                style={{ backgroundColor: color }}
-              >
-                {color === tagColor && <HvCheck size={16} className="text-white" />}
-              </button>
-            ))}
           </div>
         </div>
       </Modal>

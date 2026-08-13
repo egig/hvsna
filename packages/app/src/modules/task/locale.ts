@@ -538,6 +538,18 @@ export const taskTranslations = {
     en: "Rename Tag",
     id: "Ubah Nama Tag",
   },
+  edit_tag: {
+    en: "Edit Tag",
+    id: "Ubah Tag",
+  },
+  tag_color: {
+    en: "Color",
+    id: "Warna",
+  },
+  custom_color: {
+    en: "Custom color",
+    id: "Warna kustom",
+  },
   merge_tags: {
     en: "Merge Tags",
     id: "Gabungkan Tag",
