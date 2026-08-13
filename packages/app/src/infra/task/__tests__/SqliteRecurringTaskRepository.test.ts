@@ -2,10 +2,12 @@
 import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteRecurringTaskRepository } from "../SqliteRecurringTaskRepository";
+import { SqliteTagRepository } from "@/infra/tag/SqliteTagRepository";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
-  return { client, repo: new SqliteRecurringTaskRepository(client) };
+  const tagRepo = new SqliteTagRepository(client);
+  return { client, repo: new SqliteRecurringTaskRepository(client, tagRepo) };
 }
 
 describe("SqliteRecurringTaskRepository", () => {

@@ -3,32 +3,29 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import { useTags, normalizeTag } from "../use-tags";
+import type { TagWithCount } from "@/domain/tag";
 
-const mockGetTasks = vi.fn();
-const mockGetAllPendingTasks = vi.fn();
-const mockUpdateTask = vi.fn();
+const mockFindAll = vi.fn();
+const mockUpdate = vi.fn();
+const mockDelete = vi.fn();
 
-// Mock the task repository hook
 let mockRepo = {
-  findBrowsedTasks: mockGetTasks,
-  findAllPending: mockGetAllPendingTasks,
-  update: mockUpdateTask,
+  findAll: mockFindAll,
+  update: mockUpdate,
+  delete: mockDelete,
 };
 
-vi.mock("../use-task-repository", () => ({
-  useTaskRepository: () => mockRepo,
+vi.mock("../use-tag-repository", () => ({
+  useTagRepository: () => mockRepo,
 }));
 
-// Mock logger
 vi.mock("../../logger", () => ({
   default: { error: vi.fn(), info: vi.fn() },
 }));
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
+    defaultOptions: { queries: { retry: false } },
   });
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -49,61 +46,52 @@ describe("normalizeTag", () => {
 });
 
 describe("useTags", () => {
-  const mockTasks = [
-    { id: "task_1", tags: ["work", "urgent"] },
-    { id: "task_2", tags: ["work", "personal"] },
-    { id: "task_3", tags: ["urgent"] },
-    { id: "task_4", tags: [] },
-    { id: "task_5", tags: undefined },
+  const mockTags: TagWithCount[] = [
+    { id: "tag_1", name: "personal", color: "#000000", count: 1, createdAt: 0, updatedAt: 0 },
+    { id: "tag_2", name: "urgent", color: "#111111", count: 2, createdAt: 0, updatedAt: 0 },
+    { id: "tag_3", name: "work", color: "#222222", count: 2, createdAt: 0, updatedAt: 0 },
   ];
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetTasks.mockReset();
-    mockUpdateTask.mockReset();
-    mockGetTasks.mockResolvedValue(mockTasks);
-    mockGetAllPendingTasks.mockResolvedValue(mockTasks);
-    mockUpdateTask.mockResolvedValue({});
-    mockRepo = {
-      findBrowsedTasks: mockGetTasks,
-      findAllPending: mockGetAllPendingTasks,
-      update: mockUpdateTask,
-    };
+    mockFindAll.mockReset();
+    mockUpdate.mockReset();
+    mockDelete.mockReset();
+    mockFindAll.mockResolvedValue(mockTags);
+    mockUpdate.mockResolvedValue({});
+    mockDelete.mockResolvedValue(undefined);
+    mockRepo = { findAll: mockFindAll, update: mockUpdate, delete: mockDelete };
   });
 
-  it("extracts unique tags with counts from tasks", async () => {
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
+  it("exposes tags with counts sorted by the repository", async () => {
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    const tags = result.current.tags;
-    expect(tags).toHaveLength(3);
-    expect(tags).toContainEqual({ name: "work", count: 2 });
-    expect(tags).toContainEqual({ name: "urgent", count: 2 });
-    expect(tags).toContainEqual({ name: "personal", count: 1 });
-    expect(tags[0].name).toBe("personal"); // sorted alphabetically
+    expect(result.current.tags).toEqual(mockTags);
+    expect(result.current.tags[0].name).toBe("personal");
   });
 
   it("exposes tagNames list", async () => {
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     expect(result.current.tagNames).toEqual(["personal", "urgent", "work"]);
   });
 
-  it("handles tasks with no tags", async () => {
-    const noTagTasks = [{ id: "task_1", tags: undefined }, { id: "task_2" }];
-    mockGetTasks.mockResolvedValue(noTagTasks);
-    mockGetAllPendingTasks.mockResolvedValue(noTagTasks);
+  it("applies the limit option", async () => {
+    const { result } = renderHook(() => useTags({ limit: 2 }), { wrapper: createWrapper() });
 
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(result.current.tags).toHaveLength(2);
+  });
+
+  it("handles no tags", async () => {
+    mockFindAll.mockResolvedValue([]);
+
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
@@ -111,59 +99,43 @@ describe("useTags", () => {
     expect(result.current.tagNames).toEqual([]);
   });
 
-  it("normalizes tags during extraction", async () => {
-    const normalizedTasks = [
-      { id: "task_1", tags: ["Work", "WORK", " work "] },
-    ];
-    mockGetTasks.mockResolvedValue(normalizedTasks);
-    mockGetAllPendingTasks.mockResolvedValue(normalizedTasks);
-
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    expect(result.current.tags).toEqual([{ name: "work", count: 3 }]);
-  });
-
-  it("can delete a tag", async () => {
-    const updateTask = vi.fn().mockResolvedValue({});
-    mockGetTasks.mockResolvedValue(mockTasks);
-    mockUpdateTask.mockImplementation(updateTask);
-
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
+  it("can delete a tag by resolving its id", async () => {
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await result.current.deleteTag("urgent");
 
-    expect(updateTask).toHaveBeenCalledTimes(2);
-    expect(updateTask).toHaveBeenCalledWith("task_1", { tags: ["work"] });
-    expect(updateTask).toHaveBeenCalledWith("task_3", { tags: null });
+    expect(mockDelete).toHaveBeenCalledWith("tag_2");
   });
 
-  it("can rename a tag", async () => {
-    const updateTask = vi.fn().mockResolvedValue({});
-    mockGetTasks.mockResolvedValue(mockTasks);
-    mockUpdateTask.mockImplementation(updateTask);
-
-    const { result } = renderHook(() => useTags(), {
-      wrapper: createWrapper(),
-    });
+  it("can rename a tag by resolving its id", async () => {
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
 
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await result.current.renameTag("urgent", "critical");
 
-    expect(updateTask).toHaveBeenCalledTimes(2);
-    expect(updateTask).toHaveBeenCalledWith("task_1", {
-      tags: ["work", "critical"],
-    });
-    expect(updateTask).toHaveBeenCalledWith("task_3", {
-      tags: ["critical"],
-    });
+    expect(mockUpdate).toHaveBeenCalledWith("tag_2", { name: "critical" });
+  });
+
+  it("can recolor a tag by resolving its id", async () => {
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await result.current.setTagColor("urgent", "#ff0000");
+
+    expect(mockUpdate).toHaveBeenCalledWith("tag_2", { color: "#ff0000" });
+  });
+
+  it("no-ops renaming to the same normalized name", async () => {
+    const { result } = renderHook(() => useTags(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await result.current.renameTag("urgent", " URGENT ");
+
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 });

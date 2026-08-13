@@ -15,7 +15,7 @@ describe("SqliteSettingsRepository", () => {
     expect(await repo.load()).toBeNull();
   });
 
-  it("saves and loads a settings blob, and marks the row dirty", async () => {
+  it("saves and loads settings as one row per key, and marks rows dirty", async () => {
     const { client, repo } = await makeRepo();
     const settings = { theme: "dark", language: "en" } as unknown as GeneralSettings;
 
@@ -23,8 +23,11 @@ describe("SqliteSettingsRepository", () => {
     const loaded = await repo.load();
 
     expect(loaded).toEqual(settings);
-    const [row] = await client.run(`SELECT _dirty FROM settings WHERE id = 'settings'`);
-    expect(row._dirty).toBe(1);
+    const rows = await client.run(`SELECT key, _dirty FROM settings ORDER BY key`);
+    expect(rows).toEqual([
+      { key: "language", _dirty: 1 },
+      { key: "theme", _dirty: 1 },
+    ]);
   });
 
   it("save is idempotent (upsert, not insert-only)", async () => {
@@ -34,5 +37,26 @@ describe("SqliteSettingsRepository", () => {
 
     const loaded = await repo.load();
     expect(loaded).toEqual({ theme: "light" });
+  });
+
+  it("drops keys no longer present in the saved object", async () => {
+    const { repo } = await makeRepo();
+    await repo.save({ theme: "dark", language: "en" } as unknown as GeneralSettings);
+    await repo.save({ theme: "dark" } as unknown as GeneralSettings);
+
+    expect(await repo.load()).toEqual({ theme: "dark" });
+  });
+
+  it("round-trips nested objects and non-string values", async () => {
+    const { repo } = await makeRepo();
+    const settings = {
+      notifications: true,
+      reminderMinutesBefore: 15,
+      location: { source: "auto", resolvedAt: 1, lat: 1.1, lng: 2.2, name: "Jakarta" },
+    } as unknown as GeneralSettings;
+
+    await repo.save(settings);
+
+    expect(await repo.load()).toEqual(settings);
   });
 });

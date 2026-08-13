@@ -5,6 +5,7 @@ import type {
   TaskUpdateInput,
 } from "@/domain/task";
 import type { ITaskRepository } from "@/domain/task/ITaskRepository";
+import type { ITagRepository } from "@/domain/tag/ITagRepository";
 import { generatePrefixedUUID } from "@/modules/uuid";
 import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
 
@@ -31,7 +32,6 @@ function rowToTask(row: TaskRow): Task {
     recurringTaskId: row.recurring_task_id !== null ? String(row.recurring_task_id) : null,
     hijriDateOffset:
       row.hijri_date_offset !== null ? Number(row.hijri_date_offset) : undefined,
-    tags: row.tags !== null ? JSON.parse(String(row.tags)) : null,
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
     completedAt: row.completed_at !== null ? Number(row.completed_at) : undefined,
@@ -42,20 +42,22 @@ function rowToTask(row: TaskRow): Task {
 /**
  * Every write marks `_dirty = 1` so the next /sync/push knows to send this
  * row (see src/modules/sync/context.ts). Pull writes clear it explicitly.
+ * Tags live in the normalized `tags`/`task_tags` tables (see
+ * infra/tag/SqliteTagRepository.ts), not a column here.
  */
 const UPSERT_SQL = `
   INSERT INTO tasks (
     id, name, description, status, at_time, at_epoch_millis, lat, lng, timezone,
     recurring_type, recurring_interval, recurring_task_id, hijri_date_offset,
-    tags, created_at, updated_at, completed_at, deleted_at, _dirty
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    created_at, updated_at, completed_at, deleted_at, _dirty
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
   ON CONFLICT(id) DO UPDATE SET
     name = excluded.name, description = excluded.description, status = excluded.status,
     at_time = excluded.at_time, at_epoch_millis = excluded.at_epoch_millis,
     lat = excluded.lat, lng = excluded.lng, timezone = excluded.timezone,
     recurring_type = excluded.recurring_type, recurring_interval = excluded.recurring_interval,
     recurring_task_id = excluded.recurring_task_id, hijri_date_offset = excluded.hijri_date_offset,
-    tags = excluded.tags, updated_at = excluded.updated_at,
+    updated_at = excluded.updated_at,
     completed_at = excluded.completed_at, deleted_at = excluded.deleted_at, _dirty = 1
 `;
 
@@ -76,7 +78,6 @@ function taskParams(task: Task): SqliteValue[] {
       ? String(task.recurringTaskId)
       : null,
     task.hijriDateOffset ?? null,
-    task.tags ? JSON.stringify(task.tags) : null,
     task.createdAt ?? Date.now(),
     task.updatedAt ?? Date.now(),
     task.completedAt ?? null,
@@ -84,8 +85,38 @@ function taskParams(task: Task): SqliteValue[] {
   ];
 }
 
+function tagFilterCondition(tags: string[]): string {
+  return `EXISTS (
+    SELECT 1 FROM task_tags tt
+    JOIN tags ON tags.id = tt.tag_id AND tags.deleted_at IS NULL
+    WHERE tt.task_id = tasks.id AND tags.name IN (${tags.map(() => "?").join(",")})
+  )`;
+}
+
 export class SqliteTaskRepository implements ITaskRepository {
-  constructor(private readonly client: SqliteExecutor) {}
+  constructor(
+    private readonly client: SqliteExecutor,
+    private readonly tagRepo: ITagRepository
+  ) {}
+
+  private async attachTags(tasks: Task[]): Promise<Task[]> {
+    if (tasks.length === 0) return tasks;
+    const tagMap = await this.tagRepo.getTagsForTasks(tasks.map((t) => String(t.id)));
+    for (const task of tasks) {
+      const names = tagMap.get(String(task.id));
+      task.tags = names && names.length > 0 ? names : null;
+    }
+    return tasks;
+  }
+
+  private async attachTag(task: Task): Promise<Task> {
+    const [result] = await this.attachTags([task]);
+    return result;
+  }
+
+  private async mapRows(rows: TaskRow[]): Promise<Task[]> {
+    return this.attachTags(rows.map(rowToTask));
+  }
 
   async create(input: TaskCreateInput): Promise<Task> {
     const now = Date.now();
@@ -105,10 +136,10 @@ export class SqliteTaskRepository implements ITaskRepository {
       recurringType: input.recurringType,
       recurringInterval: input.recurringInterval,
       recurringTaskId: input.recurringTaskId,
-      tags: input.tags,
     });
     await this.client.run(UPSERT_SQL, taskParams(task));
-    return task;
+    await this.tagRepo.setTaskTags(String(task.id), input.tags ?? []);
+    return this.attachTag(task);
   }
 
   async update(id: string | number, input: TaskUpdateInput): Promise<Task> {
@@ -130,7 +161,10 @@ export class SqliteTaskRepository implements ITaskRepository {
     }
 
     await this.client.run(UPSERT_SQL, taskParams(merged));
-    return merged;
+    if (input.tags !== undefined) {
+      await this.tagRepo.setTaskTags(String(merged.id), input.tags ?? []);
+    }
+    return this.attachTag(merged);
   }
 
   async delete(id: string | number): Promise<void> {
@@ -146,7 +180,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE id = ? AND deleted_at IS NULL`,
       [toStr(id)]
     );
-    return rows[0] ? rowToTask(rows[0]) : null;
+    return rows[0] ? this.attachTag(rowToTask(rows[0])) : null;
   }
 
   async find(query?: TaskQuery): Promise<Task[]> {
@@ -163,9 +197,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       params.push(needle, needle);
     }
     if (query?.tags && query.tags.length > 0) {
-      conditions.push(
-        `EXISTS (SELECT 1 FROM json_each(tasks.tags) WHERE json_each.value IN (${query.tags.map(() => "?").join(",")}))`
-      );
+      conditions.push(tagFilterCondition(query.tags));
       params.push(...query.tags);
     }
 
@@ -173,7 +205,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE ${conditions.join(" AND ")} ORDER BY status ASC, at_epoch_millis ASC`,
       params
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findByDate(date: string): Promise<Task[]> {
@@ -186,7 +218,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE at_epoch_millis BETWEEN ? AND ? AND deleted_at IS NULL ORDER BY at_epoch_millis ASC`,
       [start.getTime(), end.getTime()]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findByHijriDate(_hijriDate: string): Promise<Task[]> {
@@ -220,7 +252,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE status = 0 AND at_epoch_millis IS NOT NULL AND at_epoch_millis <= ? AND deleted_at IS NULL ORDER BY at_epoch_millis ASC`,
       [beforeEpoch]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findTodayCompletedTasks(startEpoch: number, endEpoch: number): Promise<Task[]> {
@@ -228,7 +260,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE status = 1 AND completed_at BETWEEN ? AND ? AND deleted_at IS NULL ORDER BY completed_at DESC`,
       [startEpoch, endEpoch]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findTasksAfter(fromEpoch: number): Promise<Task[]> {
@@ -236,7 +268,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE status = 0 AND at_epoch_millis >= ? AND deleted_at IS NULL ORDER BY at_epoch_millis ASC`,
       [fromEpoch]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findAllPending(limit: number): Promise<Task[]> {
@@ -244,7 +276,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE status = 0 AND deleted_at IS NULL ORDER BY at_epoch_millis ASC LIMIT ?`,
       [limit]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findAllCompleted(offset: number, limit: number): Promise<Task[]> {
@@ -252,7 +284,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE status = 1 AND completed_at IS NOT NULL AND deleted_at IS NULL ORDER BY completed_at DESC LIMIT ? OFFSET ?`,
       [limit, offset]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findPendingInRange(startEpoch: number, endEpoch: number): Promise<Task[]> {
@@ -260,7 +292,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE status = 0 AND at_epoch_millis BETWEEN ? AND ? AND deleted_at IS NULL ORDER BY at_epoch_millis ASC`,
       [startEpoch, endEpoch]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findBrowsedTasks(
@@ -298,9 +330,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       params.push(needle, needle);
     }
     if (query?.tags && query.tags.length > 0) {
-      conditions.push(
-        `EXISTS (SELECT 1 FROM json_each(tasks.tags) WHERE json_each.value IN (${query.tags.map(() => "?").join(",")}))`
-      );
+      conditions.push(tagFilterCondition(query.tags));
       params.push(...query.tags);
     }
 
@@ -309,14 +339,14 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE ${conditions.join(" AND ")} ORDER BY status ASC, at_epoch_millis ASC LIMIT ? OFFSET ?`,
       params
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findUnscheduledTasks(): Promise<Task[]> {
     const rows = await this.client.run(
       `SELECT * FROM tasks WHERE at_epoch_millis IS NULL AND status = 0 AND deleted_at IS NULL ORDER BY created_at ASC`
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findByRecurringTaskId(recurringTaskId: string | number): Promise<Task[]> {
@@ -324,7 +354,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE recurring_task_id = ? AND deleted_at IS NULL`,
       [toStr(recurringTaskId)]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async findByRecurringTaskIdInRange(
@@ -336,7 +366,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `SELECT * FROM tasks WHERE recurring_task_id = ? AND at_epoch_millis BETWEEN ? AND ?`,
       [toStr(recurringTaskId), startEpoch, endEpoch]
     );
-    return rows.map(rowToTask);
+    return this.mapRows(rows);
   }
 
   async deletePendingByRecurringTaskId(recurringTaskId: string | number): Promise<void> {

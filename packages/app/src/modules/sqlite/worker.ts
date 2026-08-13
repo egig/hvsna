@@ -1,7 +1,7 @@
 import SQLiteESMFactory from "wa-sqlite/dist/wa-sqlite.mjs";
 import * as SQLite from "wa-sqlite";
 import { AccessHandlePoolVFS } from "wa-sqlite/src/examples/AccessHandlePoolVFS.js";
-import { userMigrations, CLIENT_ONLY_MIGRATION } from "./schema";
+import { applyMigrations } from "./migration-runner";
 import { runQuery } from "./sql-runner";
 import type { SqliteRequest, SqliteResponse } from "./protocol";
 
@@ -36,17 +36,7 @@ async function bootstrap(): Promise<void> {
 
   db = await sqlite3.open_v2("hvsna.sqlite3");
 
-  const [{ tableCount }] = await runQuery(
-    sqlite3,
-    db,
-    "SELECT count(*) AS tableCount FROM sqlite_master WHERE type = 'table' AND name = 'tasks'"
-  );
-  if (Number(tableCount) === 0) {
-    for (const migration of userMigrations) {
-      await sqlite3.exec(db, migration);
-    }
-    await sqlite3.exec(db, CLIENT_ONLY_MIGRATION);
-  }
+  await applyMigrations(sqlite3, db);
 }
 
 /**

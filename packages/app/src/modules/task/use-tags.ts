@@ -1,12 +1,14 @@
 import { useCallback, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useTaskRepository } from "./use-task-repository";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { normalizeTagName } from "@/domain/tag";
+import { useTagRepository } from "./use-tag-repository";
 import { queryKeys } from "../query-keys";
-import { useAllTasks } from "./use-all-tasks";
 import log from "../logger";
 
 export interface TagInfo {
+  id: string;
   name: string;
+  color: string;
   count: number;
 }
 
@@ -15,116 +17,95 @@ export interface UseTagsOptions {
 }
 
 export function useTags(options?: UseTagsOptions) {
-  const taskRepo = useTaskRepository();
+  const tagRepo = useTagRepository();
   const queryClient = useQueryClient();
   const limit = options?.limit;
 
-  const allTasksQuery = useAllTasks();
-  const tasks = allTasksQuery.data || [];
+  const tagsQuery = useQuery({
+    queryKey: queryKeys.tags(),
+    queryFn: () => tagRepo.findAll(),
+  });
 
-  // Extract unique tags with usage counts
-  const tags = useMemo<TagInfo[]>(() => {
-    const tagCounts = new Map<string, number>();
-
-    for (const task of tasks) {
-      if (task.tags && Array.isArray(task.tags)) {
-        for (const tag of task.tags) {
-          const normalized = normalizeTag(tag);
-          if (normalized) {
-            tagCounts.set(normalized, (tagCounts.get(normalized) || 0) + 1);
-          }
-        }
-      }
-    }
-
-    let result = Array.from(tagCounts.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (limit && result.length > limit) {
-      result = result.slice(0, limit);
-    }
-
-    return result;
-  }, [tasks, limit]);
-
+  const allTags = useMemo(() => tagsQuery.data ?? [], [tagsQuery.data]);
+  const tags = useMemo<TagInfo[]>(
+    () => (limit && allTags.length > limit ? allTags.slice(0, limit) : allTags),
+    [allTags, limit]
+  );
   const tagNames = useMemo(() => tags.map((t) => t.name), [tags]);
 
   const refreshTags = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.tags() });
     queryClient.invalidateQueries({ queryKey: queryKeys.allTasks() });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
   }, [queryClient]);
 
-  // Rename a tag across all tasks
   const renameTag = useCallback(
     async (oldName: string, newName: string): Promise<void> => {
-      const normalizedNew = normalizeTag(newName);
-      if (!normalizedNew) {
-        throw new Error("Invalid tag name");
-      }
-      if (oldName === normalizedNew) {
-        return;
-      }
+      const normalizedNew = normalizeTagName(newName);
+      if (!normalizedNew || oldName === normalizedNew) return;
 
-      const tasksToUpdate = tasks.filter(
-        (task) =>
-          task.tags?.includes(oldName) && !task.tags?.includes(normalizedNew)
-      );
+      const existing = allTags.find((t) => t.name === oldName);
+      if (!existing) return;
 
-      for (const task of tasksToUpdate) {
-        const updatedTags = task.tags!.map((tag) =>
-          tag === oldName ? normalizedNew : tag
-        );
-        try {
-          await taskRepo.update(task.id!, { tags: updatedTags });
-        } catch (err) {
-          log.error(`Failed to update tag on task ${task.id}:`, err);
-        }
+      try {
+        await tagRepo.update(existing.id, { name: normalizedNew });
+      } catch (err) {
+        log.error(`Failed to rename tag ${oldName}:`, err);
+        throw err;
       }
-
       refreshTags();
     },
-    [tasks, taskRepo, refreshTags]
+    [allTags, tagRepo, refreshTags]
   );
 
-  // Delete a tag from all tasks
-  const deleteTag = useCallback(
-    async (tagName: string): Promise<void> => {
-      const tasksToUpdate = tasks.filter((task) =>
-        task.tags?.includes(tagName)
-      );
+  const setTagColor = useCallback(
+    async (tagName: string, color: string): Promise<void> => {
+      const existing = allTags.find((t) => t.name === tagName);
+      if (!existing) return;
 
-      for (const task of tasksToUpdate) {
-        const updatedTags = task.tags!.filter((tag) => tag !== tagName);
-        try {
-          await taskRepo.update(task.id!, {
-            tags: updatedTags.length > 0 ? updatedTags : null,
-          });
-        } catch (err) {
-          log.error(`Failed to remove tag from task ${task.id}:`, err);
-        }
+      try {
+        await tagRepo.update(existing.id, { color });
+      } catch (err) {
+        log.error(`Failed to recolor tag ${tagName}:`, err);
+        throw err;
       }
-
       refreshTags();
     },
-    [tasks, taskRepo, refreshTags]
+    [allTags, tagRepo, refreshTags]
+  );
+
+  const deleteTag = useCallback(
+    async (tagName: string): Promise<void> => {
+      const existing = allTags.find((t) => t.name === tagName);
+      if (!existing) return;
+
+      try {
+        await tagRepo.delete(existing.id);
+      } catch (err) {
+        log.error(`Failed to delete tag ${tagName}:`, err);
+        throw err;
+      }
+      refreshTags();
+    },
+    [allTags, tagRepo, refreshTags]
   );
 
   return {
     tags,
     tagNames,
-    loading: allTasksQuery.isPending,
-    error: allTasksQuery.error
-      ? allTasksQuery.error instanceof Error
-        ? allTasksQuery.error.message
+    loading: tagsQuery.isPending,
+    error: tagsQuery.error
+      ? tagsQuery.error instanceof Error
+        ? tagsQuery.error.message
         : "Unknown error"
       : null,
     refreshTags,
     renameTag,
+    setTagColor,
     deleteTag,
   };
 }
 
 export function normalizeTag(tag: string): string {
-  return tag.trim().toLowerCase();
+  return normalizeTagName(tag);
 }

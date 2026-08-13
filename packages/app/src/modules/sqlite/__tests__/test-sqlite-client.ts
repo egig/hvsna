@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import SQLiteESMFactory from "wa-sqlite/dist/wa-sqlite.mjs";
 import * as SQLite from "wa-sqlite";
 import { MemoryVFS } from "wa-sqlite/src/examples/MemoryVFS.js";
-import { userMigrations, CLIENT_ONLY_MIGRATION } from "../schema";
+import { applyMigrations } from "../migration-runner";
 import { runQuery } from "../sql-runner";
 import type { SqliteExecutor, SqliteValue } from "../client";
 
@@ -52,10 +52,7 @@ export async function createTestSqliteClient(): Promise<SqliteExecutor> {
 
   const db = await sqlite3.open_v2("test.sqlite3");
 
-  for (const migration of userMigrations) {
-    await sqlite3.exec(db, migration);
-  }
-  await sqlite3.exec(db, CLIENT_ONLY_MIGRATION);
+  await applyMigrations(sqlite3, db);
 
   return {
     async exec(sql: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { HvHash, HvMoreVertical, HvEdit, HvTrash2 } from "@/modules/icons";
+import { HvHash, HvMoreVertical, HvEdit, HvTrash2, HvCheck } from "@/modules/icons";
 import { Navbar } from "../navigation/navbar";
 import { Modal, Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
@@ -10,17 +10,19 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTags } from "./use-tags";
 import { Menu } from "@base-ui/react/menu";
 import type { Task } from "@/domain/task";
+import { TAG_COLOR_PALETTE, DEFAULT_TAG_COLOR } from "@/domain/tag";
 
 export default function TagDetailPage() {
   const { tagName } = useParams<{ tagName: string }>();
   const navigate = useNavigate();
   const { t } = useLanguageContext();
   const allTasksQuery = useAllTasks();
-  const { renameTag, deleteTag } = useTags();
+  const { tags, renameTag, setTagColor, deleteTag } = useTags();
 
   const decodedTag = tagName ? decodeURIComponent(tagName) : "";
+  const tagColor = tags.find((t) => t.name === decodedTag)?.color ?? DEFAULT_TAG_COLOR;
 
-  const [modalMode, setModalMode] = useState<null | "rename" | "delete">(null);
+  const [modalMode, setModalMode] = useState<null | "rename" | "color" | "delete">(null);
   const [newTagName, setNewTagName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,12 +45,25 @@ export default function TagDetailPage() {
     setModalMode("rename");
   };
 
+  const openColorPicker = () => setModalMode("color");
+
   const openDelete = () => setModalMode("delete");
 
   const closeModal = () => {
     setModalMode(null);
     setNewTagName("");
     setIsSubmitting(false);
+  };
+
+  const handlePickColor = async (color: string) => {
+    setIsSubmitting(true);
+    try {
+      await setTagColor(decodedTag, color);
+      closeModal();
+    } catch (err) {
+      console.error("Recolor failed:", err);
+      setIsSubmitting(false);
+    }
   };
 
   const handleRename = async () => {
@@ -98,6 +113,17 @@ export default function TagDetailPage() {
               {t("rename_tag")}
             </Menu.Item>
             <Menu.Item
+              onClick={openColorPicker}
+              className="px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer"
+            >
+              <span
+                className="w-4 h-4 rounded-full shrink-0"
+                style={{ backgroundColor: tagColor }}
+                aria-hidden
+              />
+              {t("change_tag_color") || "Change color"}
+            </Menu.Item>
+            <Menu.Item
               onClick={openDelete}
               className="px-4 py-3 text-left text-sm text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer"
             >
@@ -110,8 +136,19 @@ export default function TagDetailPage() {
     </Menu.Root>
   );
 
+  const navTitle = (
+    <span className="flex items-center gap-2">
+      <span
+        className="w-2.5 h-2.5 rounded-full shrink-0"
+        style={{ backgroundColor: tagColor }}
+        aria-hidden
+      />
+      {`#${decodedTag}`}
+    </span>
+  );
+
   return (
-    <Page navbar={<Navbar title={`#${decodedTag}`} rightAction={moreMenu} />}>
+    <Page navbar={<Navbar title={navTitle} rightAction={moreMenu} />}>
       {allTasksQuery.isPending && (
         <div className="flex justify-center items-center h-32 text-gray-500 text-sm">
           {t("loading") || "Loading..."}
@@ -179,6 +216,30 @@ export default function TagDetailPage() {
             >
               {t("submit")}
             </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={modalMode === "color"}
+        onClose={closeModal}
+        title={t("change_tag_color") || "Change color"}
+      >
+        <div className="p-4">
+          <div className="grid grid-cols-5 gap-3">
+            {TAG_COLOR_PALETTE.map((color) => (
+              <button
+                key={color}
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => handlePickColor(color)}
+                aria-label={color}
+                className="w-10 h-10 rounded-full flex items-center justify-center disabled:opacity-50"
+                style={{ backgroundColor: color }}
+              >
+                {color === tagColor && <HvCheck size={16} className="text-white" />}
+              </button>
+            ))}
           </div>
         </div>
       </Modal>
