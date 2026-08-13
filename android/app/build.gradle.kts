@@ -30,8 +30,8 @@ android {
         minSdk = 24
         targetSdk = 36
         // Must stay above the live Play Console versionCode, not just this repo's Capacitor build.gradle (13) — verify before release.
-        versionCode = 14
-        versionName = "2.0.0"
+        versionCode = 15
+        versionName = "2.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

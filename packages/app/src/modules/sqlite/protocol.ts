@@ -14,3 +14,12 @@ export type SqliteRequest = SqliteRequestPayload & { id: number };
 export type SqliteResponse =
   | { id: number; ok: true; rows: Record<string, SqliteValue>[] }
   | { id: number; ok: false; error: string };
+
+// Unsolicited (no request `id`) messages the worker pushes about cross-tab
+// database lock state — see the Web Locks coordination in worker.ts's
+// `waitForDbLock`, which gates bootstrap() until this tab holds the lock.
+export type SqliteStatusMessage =
+  | { kind: "status"; state: "locked" }
+  | { kind: "status"; state: "ready" };
+
+export type SqliteWorkerMessage = SqliteResponse | SqliteStatusMessage;

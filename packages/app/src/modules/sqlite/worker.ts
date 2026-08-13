@@ -3,19 +3,21 @@ import * as SQLite from "wa-sqlite";
 import { AccessHandlePoolVFS } from "wa-sqlite/src/examples/AccessHandlePoolVFS.js";
 import { applyMigrations } from "./migration-runner";
 import { runQuery } from "./sql-runner";
-import type { SqliteRequest, SqliteResponse } from "./protocol";
+import type { SqliteRequest, SqliteWorkerMessage } from "./protocol";
 
 // OPFS sync access handles (what AccessHandlePoolVFS uses) only exist inside
 // a dedicated Worker — this file must run there, never on the main thread.
-// This VFS also does not implement SQLite's locking protocol, so concurrent
-// access across browser tabs isn't coordinated by wa-sqlite itself; a second
-// tab opening the same database is a known follow-up, not handled here.
+// This VFS also does not implement SQLite's locking protocol itself, so a
+// second tab opening the same OPFS files would throw
+// NoModificationAllowedError — waitForDbLock() below uses the Web Locks API
+// to serialize tabs instead, queueing this one until the other releases it.
 declare const self: {
   onmessage: ((event: MessageEvent<SqliteRequest>) => void) | null;
-  postMessage: (message: SqliteResponse) => void;
+  postMessage: (message: SqliteWorkerMessage) => void;
 };
 
 const OPFS_DIRECTORY = "hvsna";
+const DB_LOCK_NAME = "hvsna-sqlite-db";
 
 // SQLiteAPI is declared globally (ambient) by wa-sqlite's own type
 // definitions — no import needed, see wa-sqlite/src/types/index.d.ts.
@@ -52,7 +54,40 @@ async function wipe(): Promise<void> {
   await root.removeEntry(OPFS_DIRECTORY, { recursive: true });
 }
 
-const ready = bootstrap();
+/**
+ * Resolves once this tab holds the exclusive `DB_LOCK_NAME` Web Lock, which
+ * is then held for the worker's entire lifetime (the browser releases it
+ * automatically when the tab closes or reloads — nothing here ever calls
+ * `release`). If another tab already holds it, posts a "locked" status
+ * message so the UI can prompt the user, then queues a blocking request and
+ * posts "ready" once granted.
+ */
+function waitForDbLock(): Promise<void> {
+  return new Promise<void>((resolveHeld) => {
+    void navigator.locks.request(
+      DB_LOCK_NAME,
+      { ifAvailable: true },
+      async (lock) => {
+        if (lock) {
+          resolveHeld();
+          await new Promise<void>(() => {});
+          return;
+        }
+        self.postMessage({ kind: "status", state: "locked" });
+        await navigator.locks.request(DB_LOCK_NAME, async () => {
+          self.postMessage({ kind: "status", state: "ready" });
+          resolveHeld();
+          await new Promise<void>(() => {});
+        });
+      }
+    );
+  });
+}
+
+const ready = (async () => {
+  await waitForDbLock();
+  await bootstrap();
+})();
 
 self.onmessage = async (event) => {
   const message = event.data;

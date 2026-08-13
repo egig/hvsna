@@ -1,10 +1,13 @@
 import React, {
   createContext,
   useContext,
+  useEffect,
+  useState,
   type ReactNode,
   type Context,
 } from "react";
 import type { SqliteClient } from "./client";
+import { DatabaseLockedOverlay } from "./database-locked-overlay";
 
 export interface SqliteContextType {
   client: SqliteClient;
@@ -23,9 +26,16 @@ export const SqliteProvider: React.FC<SqliteProviderProps> = ({
   client,
   children,
 }) => {
+  const [locked, setLocked] = useState(false);
+
+  useEffect(() => {
+    return client.onLockStateChange((state) => setLocked(state === "locked"));
+  }, [client]);
+
   return React.createElement(
     SqliteContext.Provider,
     { value: { client } },
+    locked && React.createElement(DatabaseLockedOverlay),
     children
   );
 };

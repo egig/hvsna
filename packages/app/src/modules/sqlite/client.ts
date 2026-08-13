@@ -1,11 +1,14 @@
 import type {
   SqliteRequest,
   SqliteRequestPayload,
-  SqliteResponse,
   SqliteValue,
+  SqliteWorkerMessage,
 } from "./protocol";
 
 export type { SqliteValue };
+
+/** Cross-tab database lock state — see worker.ts's `waitForDbLock`. */
+export type SqliteLockState = "locked" | "ready";
 
 /**
  * The surface Sqlite*Repository classes actually depend on. Repositories are
@@ -36,13 +39,19 @@ export class SqliteClient implements SqliteExecutor {
       reject: (error: Error) => void;
     }
   >();
+  private lockListeners = new Set<(state: SqliteLockState) => void>();
 
   constructor() {
     this.worker = new Worker(new URL("./worker.ts", import.meta.url), {
       type: "module",
     });
-    this.worker.onmessage = (event: MessageEvent<SqliteResponse>) => {
-      const response = event.data;
+    this.worker.onmessage = (event: MessageEvent<SqliteWorkerMessage>) => {
+      const message = event.data;
+      if ("kind" in message) {
+        this.lockListeners.forEach((listener) => listener(message.state));
+        return;
+      }
+      const response = message;
       const pending = this.pending.get(response.id);
       if (!pending) return;
       this.pending.delete(response.id);
@@ -52,6 +61,16 @@ export class SqliteClient implements SqliteExecutor {
         pending.reject(new Error(response.error));
       }
     };
+  }
+
+  /**
+   * Subscribes to cross-tab DB lock status changes (fired when this tab is
+   * blocked behind another tab's open database, and again once it's no
+   * longer blocked). Returns an unsubscribe function.
+   */
+  onLockStateChange(listener: (state: SqliteLockState) => void): () => void {
+    this.lockListeners.add(listener);
+    return () => this.lockListeners.delete(listener);
   }
 
   private send(
