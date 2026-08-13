@@ -14,36 +14,11 @@ import { useSync } from "src/modules/sync/context";
 
 export default function Sync() {
   const { t } = useLanguageContext();
-  const {
-    lastSyncTime,
-    isSyncing,
-    manualSync,
-    isManualSyncing,
-    syncUnavailable,
-  } = useSync();
+  const { lastSyncTime, isSyncing, manualSync, isManualSyncing } = useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-
-  if (syncUnavailable) {
-    return (
-      <Page>
-        <Navbar title={t("sync")} />
-        <Block>
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center space-y-2">
-            <HvClock className="h-8 w-8 text-gray-400 mx-auto" />
-            <h3 className="text-sm font-medium text-gray-700">
-              {t("sync_coming_soon")}
-            </h3>
-            <p className="text-sm text-gray-500">
-              {t("sync_coming_soon_description")}
-            </p>
-          </div>
-        </Block>
-      </Page>
-    );
-  }
 
   const handleManualSync = async () => {
     setManualSyncStatus("idle");

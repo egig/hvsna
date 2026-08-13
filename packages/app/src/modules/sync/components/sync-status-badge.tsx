@@ -10,19 +10,11 @@ const badgeClass =
 export function SyncStatusBadge() {
   const { t } = useLanguageContext();
   const { isOnline, initiated: networkInit } = useNetworkContext();
-  const { isSyncing, lastSyncTime, syncUnavailable } = useSync();
+  const { isSyncing, lastSyncTime } = useSync();
   const {isAuthenticated} = useAuth()
 
   if (!networkInit) {
     return null
-  }
-
-  if (syncUnavailable) {
-    return (
-      <div className={`${badgeClass} text-gray-400 border-gray-300`}>
-        {t("sync_coming_soon")}
-      </div>
-    );
   }
 
   if (!isOnline) {

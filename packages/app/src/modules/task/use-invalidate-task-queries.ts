@@ -20,5 +20,6 @@ export function useInvalidateTaskQueries() {
     queryClient.invalidateQueries({ queryKey: ["search-tasks"] });
     queryClient.invalidateQueries({ queryKey: ["browsed-tasks"] });
     queryClient.invalidateQueries({ queryKey: queryKeys.recurringTaskList() });
+    queryClient.invalidateQueries({ queryKey: queryKeys.tags() });
   };
 }

@@ -17,6 +17,8 @@ import { getSyncApiClient } from "@/infra/sync/SyncApiClientFactory";
 import { createSyncEngine, type SyncEngine } from "./sync-engine";
 import { getLastSuccessAt } from "./cursor-store";
 
+const POLL_INTERVAL_MS = 30_000;
+
 // Database Context
 export type SyncContextType = {
   replication: any | null;
@@ -24,14 +26,7 @@ export type SyncContextType = {
   isSyncing: boolean;
   isManualSyncing: boolean;
   initialSyncPerformed: boolean;
-  showSyncDialog: boolean;
-  localDocCount: number;
   manualSync: () => Promise<void>;
-  handleSyncMerge: () => Promise<void>;
-  handleSyncDeleteLocal: () => Promise<void>;
-  closeSyncDialog: () => void;
-  /** True while sync is not built yet. */
-  syncUnavailable?: boolean;
 };
 
 export const SyncContext = createContext<SyncContextType | undefined>(
@@ -44,12 +39,15 @@ export const SyncContext = createContext<SyncContextType | undefined>(
  * modules/sync/sync-engine.ts for the actual push/pull/LWW logic this
  * provider just triggers and reports the status of.
  *
- * Sync runs on three triggers: the manual "Sync now" button, the network
- * coming back online while signed in, and signing in / reloading with a
+ * Sync runs on four triggers: the manual "Sync now" button, the network
+ * coming back online while signed in, signing in / reloading with a
  * still-valid session (so a fresh device actually pulls its data without
- * the user having to notice and click the button). No periodic polling —
- * there's no precedent for it elsewhere in the app and it's out of scope
- * for this pass.
+ * the user having to notice and click the button), and a 30s poll while the
+ * tab is visible and signed in (mirrors Android's periodic WorkManager sync,
+ * but on a much tighter interval since the web app has no OS-level floor).
+ * The poll runs silently — it doesn't flip isSyncing — so it doesn't
+ * flicker the UI every tick; it only surfaces via lastSyncTime / query
+ * invalidation when a pull actually applies something.
  */
 export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const { client } = useSqliteClient();
@@ -80,13 +78,13 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       .catch(() => {});
   }, [client]);
 
-  const runSync = async (): Promise<boolean> => {
+  const runSync = async (silent = false): Promise<boolean> => {
     if (inFlightRef.current) {
       rerunRef.current = true;
       return false;
     }
     inFlightRef.current = true;
-    setIsSyncing(true);
+    if (!silent) setIsSyncing(true);
     try {
       let applied = false;
       do {
@@ -107,7 +105,7 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
       return applied;
     } finally {
       inFlightRef.current = false;
-      setIsSyncing(false);
+      if (!silent) setIsSyncing(false);
     }
   };
 
@@ -144,18 +142,34 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  // Trigger: 30s poll while the tab is visible, once the initial sync has
+  // run. Silent (doesn't flip isSyncing) — see the block comment above.
+  useEffect(() => {
+    if (!initialSyncPerformed || !isAuthenticated) return;
+
+    const pollTick = () => {
+      if (document.visibilityState !== "visible") return;
+      runSync(true).catch((error) => {
+        console.error("Poll sync failed:", error);
+      });
+    };
+    const intervalId = setInterval(pollTick, POLL_INTERVAL_MS);
+    document.addEventListener("visibilitychange", pollTick);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", pollTick);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSyncPerformed, isAuthenticated]);
+
   const value: SyncContextType = {
     replication: null,
     lastSyncTime,
     isSyncing,
     isManualSyncing,
     initialSyncPerformed,
-    showSyncDialog: false,
-    localDocCount: 0,
     manualSync,
-    handleSyncMerge: async () => {},
-    handleSyncDeleteLocal: async () => {},
-    closeSyncDialog: () => {},
   };
 
   return React.createElement(SyncContext.Provider, { value }, children);

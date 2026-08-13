@@ -52,12 +52,4 @@ export const syncTranslations = {
     en: "Your data is automatically synced when you're online. You can also manually trigger a sync to ensure all your latest changes are saved.",
     id: "Data anda otomatis disinkronkan saat anda online. Anda juga dapat memicu sinkronisasi manual untuk memastikan semua perubahan terbaru anda tersimpan.",
   },
-  sync_coming_soon: {
-    en: "Sync coming soon",
-    id: "Sinkronisasi segera hadir",
-  },
-  sync_coming_soon_description: {
-    en: "Sync isn't available on this device yet. Your tasks are saved locally and will stay on this device for now.",
-    id: "Sinkronisasi belum tersedia di perangkat ini. Tugas anda disimpan secara lokal dan akan tetap berada di perangkat ini untuk saat ini.",
-  },
 };
