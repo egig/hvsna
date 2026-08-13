@@ -10,6 +10,7 @@ import {
   HvLogOut,
   HvCalendar,
   HvClock,
+  HvCreditCard,
 } from "@/modules/icons";
 import { Modal } from "../../modules/navigation/modal";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
@@ -219,6 +220,13 @@ export const defaultSettingsSections: SettingsSection[] = [
     title: "Sync",
     icon: HvRefreshCw,
     path: "/sync",
+  },
+  {
+    id: "subscription",
+    title: "Subscription",
+    icon: HvCreditCard,
+    requiresAuth: true,
+    path: "/settings/subscription",
   },
   {
     id: "hijri_date",

@@ -6,6 +6,7 @@ import { datetimeTranslations } from "../../datetime";
 import { syncTranslations } from "../../sync/locale";
 import { commonTranslations } from "../../locale";
 import { authTranslations } from "../../auth/locale";
+import { subscriptionTranslations } from "../../subscription/locale";
 import type { Translations } from "../language";
 
 export const translations: Translations = {
@@ -18,4 +19,5 @@ export const translations: Translations = {
   ...navigationTranslations,
   ...datetimeTranslations,
   ...syncTranslations,
+  ...subscriptionTranslations,
 };

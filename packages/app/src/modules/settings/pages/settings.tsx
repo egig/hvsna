@@ -10,6 +10,7 @@ import {
   HvUser,
   HvLogOut,
   HvCalendar,
+  HvCreditCard,
 } from "@/modules/icons";
 import { Page } from "../../navigation";
 import { MenuItem } from "../../components/menu-item";
@@ -52,6 +53,13 @@ export default function Settings() {
         icon={HvRefreshCw}
         to={isAuthenticated ? "/sync" : "/signin"}
       />
+      {isAuthenticated && (
+        <MenuItem
+          title={t("subscription")}
+          icon={HvCreditCard}
+          to="/settings/subscription"
+        />
+      )}
       <MenuItem
         title={t("reset_device_data")}
         icon={HvTrash}

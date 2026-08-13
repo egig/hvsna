@@ -30,6 +30,7 @@ import { HijriCalendar } from "../../modules/calendar/hijri-calendar";
 import Profile from "../../modules/settings/pages/profile";
 import TagDetailPage from "../../modules/task/tag-detail-page";
 import Sync from "../../modules/sync/sync";
+import Subscription from "../../modules/subscription/subscription";
 import UpcomingDesktop from "./upcoming";
 import DesktopTaskFormProvider from "./task-form-provider";
 
@@ -58,6 +59,7 @@ export const RoutesDesktop = () => {
         <Route path="signup" element={<SignUpPage />} />
         <Route path="signup/:action" element={<SignUpPage />} />
         <Route path="sync" element={<SyncPage />} />
+        <Route path="settings/subscription" element={<Subscription />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {isSettingsOpen && (
@@ -78,6 +80,7 @@ export const RoutesDesktop = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="profile/:action" element={<Profile />} />
             <Route path="sync" element={<Sync />} />
+            <Route path="settings/subscription" element={<Subscription />} />
             <Route path="hijri-calendar" element={<HijriCalendar />} />
             <Route path="wipe-local" element={<WipeData />} />
             <Route path="about" element={<About />} />

@@ -41,6 +41,45 @@ export type NewUserRow = typeof users.$inferInsert;
 export type RefreshTokenRow = typeof refreshTokens.$inferSelect;
 
 /**
+ * One row per user (unique `user_id`) tracking their single Lemon Squeezy
+ * subscription — a second checkout for an already-subscribed user re-uses
+ * the same row rather than creating a new one, since the product only has
+ * one paid plan. Fully server-authored (via webhooks, see
+ * app/routes/webhooks.lemonsqueezy.ts), so plain `timestamp` columns are
+ * used rather than the client-authored epoch-millis convention the sync
+ * tables use.
+ */
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .unique()
+    .references(() => users.id, { onDelete: "cascade" }),
+  lemonSqueezySubscriptionId: text("lemon_squeezy_subscription_id")
+    .notNull()
+    .unique(),
+  lemonSqueezyCustomerId: text("lemon_squeezy_customer_id").notNull(),
+  lemonSqueezyOrderId: text("lemon_squeezy_order_id"),
+  variantId: text("variant_id").notNull(),
+  status: text("status").notNull(),
+  renewsAt: timestamp("renews_at", { withTimezone: true }),
+  endsAt: timestamp("ends_at", { withTimezone: true }),
+  trialEndsAt: timestamp("trial_ends_at", { withTimezone: true }),
+  cardBrand: text("card_brand"),
+  cardLastFour: text("card_last_four"),
+  updatePaymentMethodUrl: text("update_payment_method_url"),
+  customerPortalUrl: text("customer_portal_url"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export type SubscriptionRow = typeof subscriptions.$inferSelect;
+
+/**
  * Sync tables mirror packages/app's client-owned wa-sqlite schema
  * (src/modules/sqlite/migrations/user/0000_rainy_brother_voodoo.sql) column
  * for column, scoped per user. Timestamps stay epoch-millis `bigint`
