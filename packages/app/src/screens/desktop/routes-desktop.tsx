@@ -26,6 +26,7 @@ import { Recurring } from "../../modules/task/recurring";
 import SignInPage from "../../modules/auth/pages/signin";
 import { SignInView } from "../../modules/auth/pages/signin-view";
 import SignUpPage from "../../modules/auth/pages/signup";
+import VerifyEmailPage from "../../modules/auth/pages/verify-email";
 import { HijriCalendar } from "../../modules/calendar/hijri-calendar";
 import Profile from "../../modules/settings/pages/profile";
 import TagDetailPage from "../../modules/task/tag-detail-page";
@@ -57,6 +58,7 @@ export const RoutesDesktop = () => {
         <Route path="signin/:action" element={<SignInPage />} />
         <Route path="signup" element={<SignUpPage />} />
         <Route path="signup/:action" element={<SignUpPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route path="sync" element={<SyncPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

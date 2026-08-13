@@ -1,3 +1,6 @@
+import { eq } from "drizzle-orm";
+import { db } from "@/db/client";
+import { users } from "@/db/schema";
 import { verifyAccessToken } from "./jwt";
 import { ApiError } from "./response";
 
@@ -20,5 +23,29 @@ export async function requireAuth(request: Request): Promise<string> {
   if (!userId) {
     throw new ApiError(401, "TOKEN_EXPIRED", "Access token is missing or invalid");
   }
+  return userId;
+}
+
+/**
+ * Like requireAuth, but additionally requires the user has verified their
+ * email — used to gate sync, which needs a real DB round trip anyway to
+ * check `emailVerified` (unlike requireAuth, which deliberately skips one).
+ */
+export async function requireVerifiedAuth(request: Request): Promise<string> {
+  const userId = await requireAuth(request);
+
+  const [user] = await db
+    .select({ emailVerified: users.emailVerified })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user) {
+    throw new ApiError(401, "TOKEN_EXPIRED", "User no longer exists");
+  }
+  if (!user.emailVerified) {
+    throw new ApiError(403, "EMAIL_NOT_VERIFIED", "Verify your email before syncing");
+  }
+
   return userId;
 }

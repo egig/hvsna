@@ -52,6 +52,15 @@ beforeEach(() => {
   db.delete.mockReturnValue(createChain([]));
 });
 
+/**
+ * requireVerifiedAuth's emailVerified lookup is the first db.select call
+ * on any authenticated request — queue it ahead of any test-specific
+ * mockReturnValueOnce sequence.
+ */
+function mockVerifiedAuth() {
+  db.select.mockReturnValueOnce(createChain([{ emailVerified: true }]));
+}
+
 describe("POST /sync/push", () => {
   it("returns 401 TOKEN_EXPIRED without a bearer token", async () => {
     const response = await action({ request: makeRequest({}) });
@@ -60,8 +69,22 @@ describe("POST /sync/push", () => {
     expect(body.code).toBe("TOKEN_EXPIRED");
   });
 
+  it("returns 403 EMAIL_NOT_VERIFIED when the user hasn't verified their email", async () => {
+    const token = await signAccessToken("user-1");
+    db.select.mockReturnValueOnce(createChain([{ emailVerified: false }]));
+
+    const response = await action({
+      request: makeRequest({ tasks: [taskRow] }, token),
+    });
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.code).toBe("EMAIL_NOT_VERIFIED");
+  });
+
   it("returns 400 INVALID_REQUEST for a malformed task row", async () => {
     const token = await signAccessToken("user-1");
+    mockVerifiedAuth();
     const response = await action({
       request: makeRequest({ tasks: [{ id: "task_1" }] }, token),
     });
@@ -72,6 +95,7 @@ describe("POST /sync/push", () => {
 
   it("upserts applied rows and reports them back", async () => {
     const token = await signAccessToken("user-1");
+    mockVerifiedAuth();
     db.insert.mockReturnValueOnce(createChain([{ id: "task_1" }]));
 
     const response = await action({
@@ -91,6 +115,7 @@ describe("POST /sync/push", () => {
 
   it("reports a stale row as rejected with the winning server row and its current tags", async () => {
     const token = await signAccessToken("user-1");
+    mockVerifiedAuth();
     const serverRow = { ...taskRow, updated_at: 9999, rev: 5 };
     db.insert.mockReturnValueOnce(createChain([])); // conflict predicate rejected the row
     db.select.mockReturnValueOnce(createChain([serverRow])); // rejected-row lookup
@@ -109,6 +134,7 @@ describe("POST /sync/push", () => {
 
   it("pushes tags before recurring_tasks and tasks", async () => {
     const token = await signAccessToken("user-1");
+    mockVerifiedAuth();
     db.insert.mockReturnValueOnce(createChain([{ id: "tag_1" }])); // tags
     db.insert.mockReturnValueOnce(createChain([{ id: "task_1" }])); // tasks (no recurring_tasks sent, so pushRecurringTasks never calls insert)
 

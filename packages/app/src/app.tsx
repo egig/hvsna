@@ -13,7 +13,7 @@ import { ErrorBoundary } from "@/modules/components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/modules/query-client";
 import { TaskProvider } from "@/modules/task/task-context";
-import { AuthProvider } from "@/modules/auth";
+import { AuthProvider, VerifyEmailBanner } from "@/modules/auth";
 import { SettingsProvider } from "@/modules/settings";
 import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
@@ -99,14 +99,23 @@ export default function App({
                             <LocationProvider>
                               <DroppableContext>
                                 <SyncProvider>
-                                  <Router>
-                                    <TaskProvider>
-                                      <PostHogSessionTracker
-                                        platform={platform}
-                                      />
-                                      <Routes />
-                                    </TaskProvider>
-                                  </Router>
+                                  {/* Sized to the viewport here (not in Layout/LayoutMobile)
+                                      so VerifyEmailBanner can occupy normal flow above the
+                                      routed content and have it shrink to fit, instead of
+                                      overlapping it. */}
+                                  <div className="h-[100dvh] flex flex-col">
+                                    <VerifyEmailBanner />
+                                    <div className="flex-1 min-h-0">
+                                      <Router>
+                                        <TaskProvider>
+                                          <PostHogSessionTracker
+                                            platform={platform}
+                                          />
+                                          <Routes />
+                                        </TaskProvider>
+                                      </Router>
+                                    </div>
+                                  </div>
                                 </SyncProvider>
                               </DroppableContext>
                             </LocationProvider>

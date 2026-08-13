@@ -16,6 +16,7 @@ import { Completed } from "../../modules/task/completed";
 import { Recurring } from "../../modules/task/recurring";
 import SignInPage from "../../modules/auth/pages/signin";
 import SignUpPage from "../../modules/auth/pages/signup";
+import VerifyEmailPage from "../../modules/auth/pages/verify-email";
 import { HijriCalendar } from "../../modules/calendar/hijri-calendar";
 import Profile from "../../modules/settings/pages/profile";
 import Browse from "./browse";
@@ -50,6 +51,7 @@ export const RoutesMobile = () => {
           <Route path="signin/:action" element={<SignInPage />} />
           <Route path="signup" element={<SignUpPage />} />
           <Route path="signup/:action" element={<SignUpPage />} />
+          <Route path="verify-email" element={<VerifyEmailPage />} />
           <Route path="sync" element={<SyncPage />} />
           <Route path="settings/general" element={<GeneralSettings />} />
           <Route

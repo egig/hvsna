@@ -95,6 +95,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     },
   });
 
+  // Verify email mutation
+  const verifyEmailMutation = useMutation({
+    mutationFn: async (token: string) => {
+      await authService.verifyEmail(token);
+    },
+    onSuccess: () => {
+      // Refresh the cached user (if any is loaded in this tab) so its
+      // emailVerified flag flips without waiting for a token refresh.
+      if (userQuery.data) userQuery.refetch();
+    },
+  });
+
+  // Resend verification email mutation
+  const resendVerificationMutation = useMutation({
+    mutationFn: async () => {
+      await authService.resendVerification();
+    },
+  });
+
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -165,6 +184,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return logoutMutation.mutateAsync();
   }, [logoutMutation]);
 
+  const verifyEmail = useCallback(
+    async (token: string) => {
+      return verifyEmailMutation.mutateAsync(token);
+    },
+    [verifyEmailMutation]
+  );
+
+  const resendVerification = useCallback(async () => {
+    return resendVerificationMutation.mutateAsync();
+  }, [resendVerificationMutation]);
+
   const contextValue: AuthContextType = {
     user: userQuery.data || null,
     loading:
@@ -188,6 +218,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     register,
     logout,
+    verifyEmail,
+    resendVerification,
   };
 
   return (

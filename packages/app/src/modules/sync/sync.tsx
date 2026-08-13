@@ -14,7 +14,8 @@ import { useSync } from "src/modules/sync/context";
 
 export default function Sync() {
   const { t } = useLanguageContext();
-  const { lastSyncTime, isSyncing, manualSync, isManualSyncing } = useSync();
+  const { lastSyncTime, isSyncing, manualSync, isManualSyncing, canSync } =
+    useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
@@ -160,19 +161,21 @@ export default function Sync() {
           {/* Manual Sync Button */}
           <button
             onClick={handleManualSync}
-            disabled={isManualSyncing}
+            disabled={isManualSyncing || !canSync}
             className={`text-sm w-full md:w-fit px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 border ${
-              isManualSyncing
+              isManualSyncing || !canSync
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
                 : "text-white hover:opacity-90"
             }`}
             style={{
-              backgroundColor: isManualSyncing
-                ? undefined
-                : "var(--hvsna-primary-color)",
-              borderColor: isManualSyncing
-                ? undefined
-                : "var(--hvsna-primary-color)",
+              backgroundColor:
+                isManualSyncing || !canSync
+                  ? undefined
+                  : "var(--hvsna-primary-color)",
+              borderColor:
+                isManualSyncing || !canSync
+                  ? undefined
+                  : "var(--hvsna-primary-color)",
             }}
           >
             {isManualSyncing ? (
