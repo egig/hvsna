@@ -60,10 +60,12 @@ import com.hvsna.app.backup.BackupFileService
 import com.hvsna.app.data.CityResult
 import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.SettingsRepository
+import com.hvsna.app.sync.SyncManager
 import com.hvsna.app.ui.AuthViewModel
 import compose.icons.TablerIcons
 import compose.icons.tablericons.ArrowLeft
 import compose.icons.tablericons.ChevronRight
+import compose.icons.tablericons.Cloud
 import compose.icons.tablericons.CloudUpload
 import compose.icons.tablericons.Minus
 import compose.icons.tablericons.Plus
@@ -108,6 +110,7 @@ fun SettingsScreen(
     locationRepository: LocationRepository,
     backupFileService: BackupFileService,
     authViewModel: AuthViewModel,
+    syncManager: SyncManager,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -128,6 +131,7 @@ fun SettingsScreen(
 
     var showLogin by remember { mutableStateOf(false) }
     var showBackup by remember { mutableStateOf(false) }
+    var showSync by remember { mutableStateOf(false) }
 
     if (showLogin) {
         SettingsLoginScreen(viewModel = authViewModel, onBack = { showLogin = false }, modifier = modifier)
@@ -135,6 +139,10 @@ fun SettingsScreen(
     }
     if (showBackup) {
         SettingsBackupScreen(backupFileService = backupFileService, onBack = { showBackup = false }, modifier = modifier)
+        return
+    }
+    if (showSync) {
+        SettingsSyncScreen(syncManager = syncManager, authViewModel = authViewModel, onBack = { showSync = false }, modifier = modifier)
         return
     }
 
@@ -272,6 +280,12 @@ fun SettingsScreen(
             leadingContent = { Icon(TablerIcons.User, contentDescription = null) },
             trailingContent = { Icon(TablerIcons.ChevronRight, contentDescription = null) },
             modifier = Modifier.fillMaxWidth().clickable { showLogin = true },
+        )
+        ListItem(
+            headlineContent = { Text("Sync") },
+            leadingContent = { Icon(TablerIcons.Cloud, contentDescription = null) },
+            trailingContent = { Icon(TablerIcons.ChevronRight, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth().clickable { showSync = true },
         )
         ListItem(
             headlineContent = { Text("Backup & Restore") },

@@ -205,6 +205,79 @@ interface TaskDao {
         insertTaskTagCrossRefs(taskTagCrossRefs)
     }
 
+    // --- sync support: LWW-guarded apply, mirroring the server's
+    // `INSERT ... ON CONFLICT DO UPDATE ... WHERE excluded.updated_at >= existing.updated_at`
+    // as a guarded-update-else-insert pair, since Room doesn't support that
+    // SQL shape as a typed query. Reads bypass the `deletedAt IS NULL` filter
+    // other DAO reads use, since a tombstone must still be seen as "existing"
+    // here. reminderEnabled/reminderOffsetMinutes have no wire counterpart —
+    // an incoming apply from a smaller record preserves whatever the local
+    // row already had for those fields rather than clobbering them. Returns
+    // whether the write was applied (false = local was already newer/equal).
+
+    @Query("SELECT * FROM task WHERE id = :id")
+    suspend fun findTaskByIdIncludingDeleted(id: String): Task?
+
+    @Transaction
+    suspend fun applyIncomingTask(incoming: Task, tagIds: List<String>): Boolean {
+        val existing = findTaskByIdIncludingDeleted(incoming.id)
+        if (existing != null && existing.updatedAt >= incoming.updatedAt) return false
+        val toSave = incoming.copy(
+            reminderEnabled = existing?.reminderEnabled ?: incoming.reminderEnabled,
+            reminderOffsetMinutes = existing?.reminderOffsetMinutes ?: incoming.reminderOffsetMinutes,
+            _dirty = 0,
+        )
+        if (existing != null) update(toSave) else insert(toSave)
+        setTagsForTask(incoming.id, tagIds)
+        return true
+    }
+
+    @Query("SELECT * FROM recurrence_rule WHERE id = :id")
+    suspend fun findRecurrenceRuleByIdIncludingDeleted(id: String): RecurrenceRule?
+
+    @Transaction
+    suspend fun applyIncomingRecurrenceRule(incoming: RecurrenceRule): Boolean {
+        val existing = findRecurrenceRuleByIdIncludingDeleted(incoming.id)
+        if (existing != null && existing.updatedAt >= incoming.updatedAt) return false
+        val toSave = incoming.copy(
+            reminderEnabled = existing?.reminderEnabled ?: incoming.reminderEnabled,
+            reminderOffsetMinutes = existing?.reminderOffsetMinutes ?: incoming.reminderOffsetMinutes,
+            _dirty = 0,
+        )
+        if (existing != null) updateRecurrenceRule(toSave) else insertRecurrenceRule(toSave)
+        return true
+    }
+
+    @Query("SELECT * FROM tag WHERE id = :id")
+    suspend fun findTagByIdIncludingDeleted(id: String): Tag?
+
+    @Transaction
+    suspend fun applyIncomingTag(incoming: Tag): Boolean {
+        val existing = findTagByIdIncludingDeleted(incoming.id)
+        if (existing != null && existing.updatedAt >= incoming.updatedAt) return false
+        val toSave = incoming.copy(_dirty = 0)
+        if (existing != null) updateTag(toSave) else insertTag(toSave)
+        return true
+    }
+
+    @Query("SELECT * FROM task WHERE _dirty = 1 LIMIT :limit")
+    suspend fun findDirtyTasks(limit: Int): List<Task>
+
+    @Query("UPDATE task SET _dirty = 0 WHERE id IN (:ids)")
+    suspend fun clearDirtyTasks(ids: List<String>)
+
+    @Query("SELECT * FROM recurrence_rule WHERE _dirty = 1 LIMIT :limit")
+    suspend fun findDirtyRecurrenceRules(limit: Int): List<RecurrenceRule>
+
+    @Query("UPDATE recurrence_rule SET _dirty = 0 WHERE id IN (:ids)")
+    suspend fun clearDirtyRecurrenceRules(ids: List<String>)
+
+    @Query("SELECT * FROM tag WHERE _dirty = 1 LIMIT :limit")
+    suspend fun findDirtyTags(limit: Int): List<Tag>
+
+    @Query("UPDATE tag SET _dirty = 0 WHERE id IN (:ids)")
+    suspend fun clearDirtyTags(ids: List<String>)
+
     @Transaction
     suspend fun mergeAll(
         tasks: List<Task>,

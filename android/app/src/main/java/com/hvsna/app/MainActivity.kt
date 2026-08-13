@@ -10,10 +10,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,6 +36,13 @@ import com.hvsna.app.data.TaskDatabase
 import com.hvsna.app.data.TaskRepository
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.reminder.ReminderScheduler
+import com.hvsna.app.sync.CursorStore
+import com.hvsna.app.sync.SyncApi
+import com.hvsna.app.sync.SyncEngine
+import com.hvsna.app.sync.SyncManager
+import com.hvsna.app.sync.SyncRepository
+import com.hvsna.app.sync.SyncWorker
+import com.hvsna.app.sync.networkReconnectEvents
 import com.hvsna.app.ui.AuthViewModel
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.TaskBottomSheet
@@ -89,10 +98,41 @@ fun HvsnaApp() {
     val taskViewModel: TaskViewModel = viewModel(
         factory = TaskViewModel.Factory(taskRepo, settingsRepo, prayerTimesRepo, recurrenceManager, reminderScheduler)
     )
+    val tokenStore = remember { TokenStore() }
     val authService = remember {
-        AuthService(AuthApi(okHttpClient), TokenStore(), SessionRepository(context))
+        AuthService(AuthApi(okHttpClient), tokenStore, SessionRepository(context))
     }
     val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(authService))
+    val authState by authViewModel.state.collectAsState()
+
+    val syncCoroutineScope = rememberCoroutineScope()
+    val syncEngine = remember {
+        SyncEngine(
+            SyncRepository(db.taskDao(), db.settingsDao()),
+            SyncApi(okHttpClient, authService, tokenStore),
+            CursorStore(db.syncStateDao()),
+        )
+    }
+    val syncManager = remember {
+        SyncManager(syncEngine, isAuthenticated = { authService.isAuthenticated() }, scope = syncCoroutineScope)
+    }
+
+    // Sign-in / app-foreground trigger, plus WorkManager (de)scheduling on auth transitions.
+    LaunchedEffect(authState.user != null) {
+        if (authState.user != null) {
+            syncManager.requestSync()
+            SyncWorker.schedule(context)
+        } else if (!authState.loading) {
+            SyncWorker.cancel(context)
+        }
+    }
+    // Reconnect trigger.
+    LaunchedEffect(Unit) {
+        networkReconnectEvents(context).collect {
+            if (authService.isAuthenticated()) syncManager.requestSync()
+        }
+    }
+
     val allTags by taskViewModel.allTags.collectAsState()
     val allRecurrenceRules by taskViewModel.allRecurrenceRules.collectAsState()
     val settings by taskViewModel.settings.collectAsState()
@@ -110,6 +150,7 @@ fun HvsnaApp() {
             locationRepository = locationRepo,
             backupFileService = backupFileService,
             authViewModel = authViewModel,
+            syncManager = syncManager,
             onBack = { showSettings = false },
         )
     } else if (activeTag != null) {
