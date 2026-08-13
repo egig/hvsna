@@ -42,7 +42,7 @@ import compose.icons.tablericons.Moon
 import compose.icons.tablericons.User
 
 private enum class SettingsSubScreen {
-    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_ADJUSTMENT, REMINDERS, ABOUT
+    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, ABOUT
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,8 +84,8 @@ fun SettingsScreen(
             SettingsPrayerTimeScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
-        SettingsSubScreen.HIJRI_ADJUSTMENT -> {
-            SettingsHijriAdjustmentScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
+        SettingsSubScreen.HIJRI_MONTH_OFFSETS -> {
+            SettingsHijriMonthOffsetsScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
         SettingsSubScreen.REMINDERS -> {
@@ -155,7 +155,7 @@ fun SettingsScreen(
             ListItem(
                 headlineContent = { Text("Hijri Date") },
                 leadingContent = { Icon(TablerIcons.Moon, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.HIJRI_ADJUSTMENT },
+                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.HIJRI_MONTH_OFFSETS },
             )
             ListItem(
                 headlineContent = { Text("Reminders") },

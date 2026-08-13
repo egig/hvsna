@@ -199,7 +199,7 @@ fun HvsnaApp() {
             remindersGloballyEnabled = settings.remindersEnabled,
             getPrayerTimes = taskViewModel::getPrayerTimesForDate,
             onOpenSettings = { showSettings = true },
-            hijriAdjustment = settings.hijriAdjustment,
+            hijriMonthOffsets = settings.hijriMonthOffsets,
             allTags = allTags,
             initialTagIds = editingTask?.tags?.map { it.id }?.toSet() ?: emptySet(),
             onCreateTag = { taskViewModel.createTag(it) },

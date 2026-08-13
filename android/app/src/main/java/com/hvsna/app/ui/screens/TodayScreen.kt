@@ -157,7 +157,7 @@ fun TodayScreen(
                         Text(
                             hijriDateLabel(
                                 epochMillis = now,
-                                adjustmentDays = settings.hijriAdjustment,
+                                monthOffsets = settings.hijriMonthOffsets,
                                 maghribEpochMillis = prayerTimeMap["Maghrib"],
                             ).uppercase(),
                             fontWeight = FontWeight.SemiBold,

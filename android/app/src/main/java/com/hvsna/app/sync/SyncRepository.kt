@@ -18,7 +18,6 @@ class SyncRepository(private val taskDao: TaskDao, private val settingsDao: Sett
     private val settingsPushExclusions = setOf(
         com.hvsna.app.data.SettingsKeys.CALCULATION_METHOD,
         com.hvsna.app.data.SettingsKeys.MADHAB,
-        com.hvsna.app.data.SettingsKeys.HIJRI_ADJUSTMENT,
     )
 
     suspend fun findDirtyTasks(limit: Int): List<Task> = taskDao.findDirtyTasks(limit)

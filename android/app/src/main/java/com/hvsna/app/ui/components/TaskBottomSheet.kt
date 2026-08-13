@@ -162,7 +162,7 @@ fun TaskBottomSheet(
     hasLocation: Boolean = false,
     getPrayerTimes: (year: Int, month: Int, day: Int) -> List<Pair<String, Long>> = { _, _, _ -> emptyList() },
     onOpenSettings: () -> Unit = {},
-    hijriAdjustment: Int = 0,
+    hijriMonthOffsets: Map<Int, Int> = emptyMap(),
     allTags: List<Tag> = emptyList(),
     initialTagIds: Set<String> = emptySet(),
     onCreateTag: suspend (String) -> Tag = { Tag(name = it, color = 0L) },
@@ -293,7 +293,7 @@ fun TaskBottomSheet(
 
                 HijriDatePicker(
                     initialDate = initialDate,
-                    hijriAdjustment = hijriAdjustment,
+                    hijriMonthOffsets = hijriMonthOffsets,
                     onDateSelected = { date -> applySelectedDate(date) },
                     modifier = Modifier.fillMaxWidth(),
                 )

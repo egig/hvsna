@@ -17,13 +17,14 @@ val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(na
 private val settingsJson = Json { ignoreUnknownKeys = true }
 
 /**
- * `location`/`calculationMethod`/`madhab`/`hijriAdjustment` live in Room as a
- * key-value table (see [SettingsEntry]) so they can flow through sync — only
- * `location` has a web counterpart though (shaped to match
- * packages/app/src/modules/settings/settings.ts's LocationSetting exactly),
- * the rest are Android-only and excluded from push/pull (see the sync
- * module's settings allowlist). remindersEnabled stays in DataStore — it's a
- * device-local notification preference, not something that should sync.
+ * `location`/`calculationMethod`/`madhab`/`hijriMonthOffsets` live in Room as
+ * a key-value table (see [SettingsEntry]) so they can flow through sync —
+ * `location` and `hijriMonthOffsets` have web counterparts (shaped to match
+ * packages/app/src/modules/settings/settings.ts's `LocationSetting` and
+ * `GeneralSettings.hijriMonthOffsets` exactly), `calculationMethod`/`madhab`
+ * are Android-only and excluded from push/pull (see the sync module's
+ * exclusion set). remindersEnabled stays in DataStore — it's a device-local
+ * notification preference, not something that should sync.
  */
 class SettingsRepository(private val context: Context, private val settingsDao: SettingsDao) {
 
@@ -36,13 +37,16 @@ class SettingsRepository(private val context: Context, private val settingsDao: 
         val location = values[SettingsKeys.LOCATION]?.let {
             runCatching { settingsJson.decodeFromString<LocationSettingValue>(it) }.getOrNull()
         }
+        val hijriMonthOffsets = values[SettingsKeys.HIJRI_MONTH_OFFSETS]?.let {
+            runCatching { settingsJson.decodeFromString<Map<String, Int>>(it).mapKeys { entry -> entry.key.toInt() } }.getOrNull()
+        } ?: emptyMap()
         AppSettings(
             lat = location?.lat ?: 0.0,
             lng = location?.lng ?: 0.0,
             cityName = location?.name ?: "",
             calculationMethod = values[SettingsKeys.CALCULATION_METHOD] ?: "MOON_SIGHTING_COMMITTEE",
             madhab = values[SettingsKeys.MADHAB] ?: "SHAFI",
-            hijriAdjustment = values[SettingsKeys.HIJRI_ADJUSTMENT]?.toIntOrNull() ?: 0,
+            hijriMonthOffsets = hijriMonthOffsets,
             remindersEnabled = prefs[Keys.REMINDERS_ENABLED] ?: false,
         )
     }
@@ -61,9 +65,11 @@ class SettingsRepository(private val context: Context, private val settingsDao: 
         settingsDao.upsert(SettingsEntry(SettingsKeys.MADHAB, madhab, System.currentTimeMillis()))
     }
 
-    suspend fun updateHijriAdjustment(days: Int) {
-        val clamped = days.coerceIn(-2, 2)
-        settingsDao.upsert(SettingsEntry(SettingsKeys.HIJRI_ADJUSTMENT, clamped.toString(), System.currentTimeMillis()))
+    suspend fun updateHijriMonthOffsets(offsets: Map<Int, Int>) {
+        val cleaned = offsets.filterValues { it != 0 }.mapKeys { it.key.toString() }
+        settingsDao.upsert(
+            SettingsEntry(SettingsKeys.HIJRI_MONTH_OFFSETS, settingsJson.encodeToString(cleaned), System.currentTimeMillis()),
+        )
     }
 
     suspend fun updateRemindersEnabled(enabled: Boolean) {

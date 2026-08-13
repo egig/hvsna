@@ -6,7 +6,7 @@ data class AppSettings(
     val cityName: String = "",
     val calculationMethod: String = "MOON_SIGHTING_COMMITTEE",
     val madhab: String = "SHAFI",
-    val hijriAdjustment: Int = 0,
+    val hijriMonthOffsets: Map<Int, Int> = emptyMap(),
     val remindersEnabled: Boolean = false,
 ) {
     val hasLocation: Boolean get() = lat != 0.0 || lng != 0.0

@@ -45,7 +45,7 @@ import java.util.Locale
 @Composable
 fun HijriDatePicker(
     initialDate: LocalDate,
-    hijriAdjustment: Int,
+    hijriMonthOffsets: Map<Int, Int>,
     onDateSelected: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     locale: Locale = Locale.getDefault(),
@@ -66,7 +66,7 @@ fun HijriDatePicker(
         MonthGridPane(
             displayedMonth = displayedMonth,
             selectedDate = initialDate,
-            hijriAdjustment = hijriAdjustment,
+            hijriMonthOffsets = hijriMonthOffsets,
             onMonthChange = { displayedMonth = it },
             onHeaderClick = { showMonthList = true },
             onDateSelected = { date ->
@@ -83,7 +83,7 @@ fun HijriDatePicker(
 private fun MonthGridPane(
     displayedMonth: YearMonth,
     selectedDate: LocalDate,
-    hijriAdjustment: Int,
+    hijriMonthOffsets: Map<Int, Int>,
     onMonthChange: (YearMonth) -> Unit,
     onHeaderClick: () -> Unit,
     onDateSelected: (LocalDate) -> Unit,
@@ -102,8 +102,8 @@ private fun MonthGridPane(
         firstDayOfWeek.plus(offset.toLong()).getDisplayName(TextStyle.SHORT, locale)
     }
 
-    val hijriRangeStart = hijriDateParts(firstOfMonth, hijriAdjustment)
-    val hijriRangeEnd = hijriDateParts(displayedMonth.atEndOfMonth(), hijriAdjustment)
+    val hijriRangeStart = hijriDateParts(firstOfMonth, hijriMonthOffsets)
+    val hijriRangeEnd = hijriDateParts(displayedMonth.atEndOfMonth(), hijriMonthOffsets)
     val hijriRangeLabel = "${hijriRangeStart.day} ${hijriRangeStart.monthName} – " +
         "${hijriRangeEnd.day} ${hijriRangeEnd.monthName}"
 
@@ -156,7 +156,7 @@ private fun MonthGridPane(
                     val date = gridStart.plusDays((week * 7 + dayOfWeek).toLong())
                     DayCell(
                         date = date,
-                        hijriAdjustment = hijriAdjustment,
+                        hijriMonthOffsets = hijriMonthOffsets,
                         isCurrentMonth = YearMonth.from(date) == displayedMonth,
                         isSelected = date == selectedDate,
                         isToday = date == today,
@@ -192,7 +192,7 @@ private fun MonthGridPane(
 @Composable
 private fun DayCell(
     date: LocalDate,
-    hijriAdjustment: Int,
+    hijriMonthOffsets: Map<Int, Int>,
     isCurrentMonth: Boolean,
     isSelected: Boolean,
     isToday: Boolean,
@@ -228,7 +228,7 @@ private fun DayCell(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(date.dayOfMonth.toString(), style = MaterialTheme.typography.bodyMedium, color = contentColor)
             Text(
-                hijriDayOfMonth(date, hijriAdjustment).toString(),
+                hijriDayOfMonth(date, hijriMonthOffsets).toString(),
                 style = MaterialTheme.typography.labelSmall,
                 color = hijriColor,
             )
