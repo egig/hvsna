@@ -2,17 +2,21 @@ import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
 import type {
   RecurringTaskWireRow,
   SettingsWireRow,
+  TagWireRow,
   TaskWireRow,
 } from "@/infra/sync/types";
 
-export type SyncTable = "tasks" | "recurring_tasks" | "settings";
+export type SyncTable = "tasks" | "recurring_tasks" | "settings" | "tags";
 
 /**
- * Column lists mirror the sqlite base migration exactly (see
- * modules/sqlite/migrations/user/0000_rainy_brother_voodoo.sql) — wire rows
- * are snake_case with the same field names as these columns, so no mapping
- * layer is needed between a dirty-row scan and a push request body, or
- * between a pulled row and a local upsert.
+ * Column lists mirror the sqlite schema exactly (see
+ * modules/sqlite/migrations/user/0000_rainy_brother_voodoo.sql and
+ * 0001_normalize_tags_and_settings.sql) — wire rows are snake_case with the
+ * same field names as these columns, so no mapping layer is needed between
+ * a dirty-row scan and a push request body, or between a pulled row and a
+ * local upsert. `tasks`/`recurring_tasks` no longer carry a `tags` column —
+ * their tag membership lives in `task_tags`/`recurring_task_tags` and is
+ * attached separately (see TAG_ASSOCIATIONS below).
  */
 const TABLE_COLUMNS: Record<SyncTable, readonly string[]> = {
   tasks: [
@@ -29,7 +33,6 @@ const TABLE_COLUMNS: Record<SyncTable, readonly string[]> = {
     "recurring_interval",
     "recurring_task_id",
     "hijri_date_offset",
-    "tags",
     "created_at",
     "updated_at",
     "completed_at",
@@ -47,7 +50,6 @@ const TABLE_COLUMNS: Record<SyncTable, readonly string[]> = {
     "lng",
     "timezone",
     "hijri_date_offset",
-    "tags",
     "recurring_end",
     "recurring_end_epoch",
     "recurring_end_occurrences",
@@ -57,24 +59,55 @@ const TABLE_COLUMNS: Record<SyncTable, readonly string[]> = {
     "updated_at",
     "deleted_at",
   ],
-  settings: ["id", "payload", "updated_at"],
+  settings: ["key", "value", "updated_at"],
+  tags: ["id", "name", "color", "created_at", "updated_at", "deleted_at"],
 };
 
 /** Columns never overwritten by an update — set only when the row is first inserted. */
 const IMMUTABLE_ON_UPDATE: Record<SyncTable, readonly string[]> = {
   tasks: ["id", "created_at"],
   recurring_tasks: ["id", "created_at"],
-  settings: ["id"],
+  settings: ["key"],
+  tags: ["id", "created_at"],
+};
+
+/** The column identifying a row, keyed per table — `settings` uses `key`, everything else `id`. */
+const PRIMARY_KEY: Record<SyncTable, string> = {
+  tasks: "id",
+  recurring_tasks: "id",
+  settings: "key",
+  tags: "id",
+};
+
+/**
+ * Tables whose rows carry a full tag-membership snapshot on the wire
+ * (`tag_ids`), backed by a join table that itself has no `_dirty`/
+ * `updated_at` of its own — membership rides along with the owning row's
+ * own push/pull instead of being synced independently (see
+ * infra/tag/SqliteTagRepository.ts: every write to task_tags/
+ * recurring_task_tags happens alongside a write to the owning task/
+ * recurring_task row, which is what actually gets marked dirty).
+ */
+const TAG_ASSOCIATIONS: Partial<Record<SyncTable, { joinTable: string; column: string }>> = {
+  tasks: { joinTable: "task_tags", column: "task_id" },
+  recurring_tasks: { joinTable: "recurring_task_tags", column: "recurring_task_id" },
 };
 
 export type WireRowFor<T extends SyncTable> = T extends "tasks"
   ? TaskWireRow
   : T extends "recurring_tasks"
     ? RecurringTaskWireRow
-    : SettingsWireRow;
+    : T extends "settings"
+      ? SettingsWireRow
+      : TagWireRow;
 
 function rowToWire<T extends SyncTable>(row: Record<string, SqliteValue>): WireRowFor<T> {
   return row as unknown as WireRowFor<T>;
+}
+
+function parseTagIds(value: SqliteValue | undefined): string[] {
+  if (value === undefined || value === null) return [];
+  return JSON.parse(String(value)) as string[];
 }
 
 /** Reads up to `limit` locally-dirty rows for a table, tombstones included. */
@@ -84,11 +117,17 @@ export async function findDirty<T extends SyncTable>(
   limit: number
 ): Promise<WireRowFor<T>[]> {
   const columns = TABLE_COLUMNS[table].join(", ");
+  const assoc = TAG_ASSOCIATIONS[table];
+  const tagSelect = assoc
+    ? `, (SELECT COALESCE(json_group_array(tag_id), '[]') FROM ${assoc.joinTable} WHERE ${assoc.column} = ${table}.id) AS tag_ids`
+    : "";
   const rows = await executor.run(
-    `SELECT ${columns} FROM ${table} WHERE _dirty = 1 LIMIT ?`,
+    `SELECT ${columns}${tagSelect} FROM ${table} WHERE _dirty = 1 LIMIT ?`,
     [limit]
   );
-  return rows.map((row) => rowToWire<T>(row));
+  return rows.map((row) =>
+    rowToWire<T>(assoc ? { ...row, tag_ids: parseTagIds(row.tag_ids) as unknown as SqliteValue } : row)
+  );
 }
 
 /** Clears `_dirty` on the given ids after a successful push. */
@@ -99,7 +138,25 @@ export async function clearDirty(
 ): Promise<void> {
   if (ids.length === 0) return;
   const placeholders = ids.map(() => "?").join(", ");
-  await executor.run(`UPDATE ${table} SET _dirty = 0 WHERE id IN (${placeholders})`, ids);
+  await executor.run(
+    `UPDATE ${table} SET _dirty = 0 WHERE ${PRIMARY_KEY[table]} IN (${placeholders})`,
+    ids
+  );
+}
+
+async function replaceTagAssociations(
+  executor: SqliteExecutor,
+  assoc: { joinTable: string; column: string },
+  entityId: string,
+  tagIds: string[]
+): Promise<void> {
+  await executor.run(`DELETE FROM ${assoc.joinTable} WHERE ${assoc.column} = ?`, [entityId]);
+  for (const tagId of tagIds) {
+    await executor.run(
+      `INSERT OR IGNORE INTO ${assoc.joinTable} (${assoc.column}, tag_id) VALUES (?, ?)`,
+      [entityId, tagId]
+    );
+  }
 }
 
 /**
@@ -107,7 +164,9 @@ export async function clearDirty(
  * winning server_row) with `_dirty` forced to 0 — this is data that already
  * matches the server, so it must not be re-queued for push. Guarded by the
  * same last-write-wins predicate the server itself applies, so an in-flight
- * pull can never clobber a newer local edit made since the pull started.
+ * pull can never clobber a newer local edit made since the pull started —
+ * `RETURNING` tells us whether the guard actually let the write through, so
+ * tag membership (for tasks/recurring_tasks) is only replaced when it did.
  */
 export async function applyRemoteRow<T extends SyncTable>(
   executor: SqliteExecutor,
@@ -115,6 +174,7 @@ export async function applyRemoteRow<T extends SyncTable>(
   row: WireRowFor<T>
 ): Promise<void> {
   const columns = TABLE_COLUMNS[table];
+  const pk = PRIMARY_KEY[table];
   const immutable = new Set(IMMUTABLE_ON_UPDATE[table]);
   const updateSet = columns
     .filter((c) => !immutable.has(c))
@@ -125,9 +185,17 @@ export async function applyRemoteRow<T extends SyncTable>(
   const sql = `
     INSERT INTO ${table} (${columns.join(", ")}, _dirty)
     VALUES (${columns.map(() => "?").join(", ")}, 0)
-    ON CONFLICT(id) DO UPDATE SET ${updateSet}
+    ON CONFLICT(${pk}) DO UPDATE SET ${updateSet}
     WHERE excluded.updated_at >= ${table}.updated_at
+    RETURNING ${pk}
   `;
   const params = columns.map((c) => (row as unknown as Record<string, SqliteValue>)[c] ?? null);
-  await executor.run(sql, params);
+  const result = await executor.run(sql, params);
+
+  const assoc = TAG_ASSOCIATIONS[table];
+  if (assoc && result.length > 0) {
+    const entityId = String(result[0][pk]);
+    const tagIds = (row as unknown as { tag_ids?: string[] }).tag_ids ?? [];
+    await replaceTagAssociations(executor, assoc, entityId, tagIds);
+  }
 }

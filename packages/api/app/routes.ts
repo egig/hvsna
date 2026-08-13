@@ -6,4 +6,6 @@ export default [
   route("me", "routes/me.ts"),
   route("auth/refresh", "routes/auth.refresh.ts"),
   route("auth/logout", "routes/auth.logout.ts"),
+  route("sync/push", "routes/sync.push.ts"),
+  route("sync/pull", "routes/sync.pull.ts"),
 ] satisfies RouteConfig;
