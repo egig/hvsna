@@ -167,10 +167,6 @@ fun TodayScreen(
                         )
                         Text(
                             todayHeaderFormat.format(Date()),
-                            fontFamily = FontFamily.Serif,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 30.sp,
-                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(top = 6.dp, bottom = 6.dp),
                         )
                     }
@@ -290,7 +286,6 @@ private fun OverdueHeader(
     ) {
         Text(
             "Overdue",
-            fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.SemiBold,
             fontSize = 17.sp,
             color = MaterialTheme.colorScheme.error,
@@ -323,7 +318,6 @@ private fun PrayerSectionHeader(name: String, time: String?) {
     ) {
         Text(
             name,
-            fontFamily = FontFamily.Serif,
             fontWeight = FontWeight.SemiBold,
             fontSize = 17.sp,
             color = MaterialTheme.colorScheme.onSurface,

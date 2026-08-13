@@ -28,7 +28,7 @@ import com.hvsna.app.ui.AuthViewModel
 private val EMAIL_REGEX = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
 private const val MIN_PASSWORD_LENGTH = 8
 
-/** Account section embedded in [com.hvsna.app.ui.screens.SettingsScreen] — renders as sibling rows in the caller's Column. */
+/** Account section embedded in [com.hvsna.app.ui.screens.SettingsLoginScreen] — renders as sibling rows in the caller's Column. */
 @Composable
 fun ColumnScope.AuthAccountSection(viewModel: AuthViewModel) {
     val state by viewModel.state.collectAsState()

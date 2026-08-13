@@ -4,10 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -18,11 +16,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.hvsna.app.auth.AuthApi
@@ -76,7 +71,6 @@ fun HvsnaApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.TODAY) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
     var selectedTagId by rememberSaveable { mutableStateOf<Int?>(null) }
-    val settingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showTaskSheet by remember { mutableStateOf(false) }
     var editingTask by remember { mutableStateOf<TaskWithTags?>(null) }
     var taskDefaultScheduledTime by remember { mutableStateOf<Long?>(null) }
@@ -110,7 +104,15 @@ fun HvsnaApp() {
         showTaskSheet = true
     }
 
-    if (activeTag != null) {
+    if (showSettings) {
+        SettingsScreen(
+            settingsRepository = settingsRepo,
+            locationRepository = locationRepo,
+            backupFileService = backupFileService,
+            authViewModel = authViewModel,
+            onBack = { showSettings = false },
+        )
+    } else if (activeTag != null) {
         TagDetailScreen(
             viewModel = taskViewModel,
             tag = activeTag,
@@ -163,22 +165,6 @@ fun HvsnaApp() {
             defaultScheduledTime = taskDefaultScheduledTime,
             recurrenceRule = editingTask?.task?.recurrenceId?.let { id -> allRecurrenceRules.firstOrNull { it.id == id } },
         )
-    }
-
-    if (showSettings) {
-        val maxSheetHeight = LocalConfiguration.current.screenHeightDp.dp * 0.8f
-        ModalBottomSheet(
-            onDismissRequest = { showSettings = false },
-            sheetState = settingsSheetState,
-        ) {
-            SettingsScreen(
-                settingsRepository = settingsRepo,
-                locationRepository = locationRepo,
-                backupFileService = backupFileService,
-                authViewModel = authViewModel,
-                modifier = Modifier.heightIn(max = maxSheetHeight),
-            )
-        }
     }
 }
 

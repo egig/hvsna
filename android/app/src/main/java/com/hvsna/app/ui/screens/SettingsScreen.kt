@@ -14,11 +14,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -29,12 +29,14 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +47,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -59,9 +62,13 @@ import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.ui.AuthViewModel
 import compose.icons.TablerIcons
+import compose.icons.tablericons.ArrowLeft
+import compose.icons.tablericons.ChevronRight
+import compose.icons.tablericons.CloudUpload
 import compose.icons.tablericons.Minus
 import compose.icons.tablericons.Plus
 import compose.icons.tablericons.Search
+import compose.icons.tablericons.User
 import kotlinx.coroutines.launch
 
 private fun hasNotificationPermission(context: Context): Boolean =
@@ -101,6 +108,7 @@ fun SettingsScreen(
     locationRepository: LocationRepository,
     backupFileService: BackupFileService,
     authViewModel: AuthViewModel,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -118,47 +126,16 @@ fun SettingsScreen(
     var remindersPendingEnable by remember { mutableStateOf(false) }
     var remindersMessage by remember { mutableStateOf<String?>(null) }
 
-    var isExporting by remember { mutableStateOf(false) }
-    var isImporting by remember { mutableStateOf(false) }
-    var dataMessage by remember { mutableStateOf<String?>(null) }
-    var showImportOptions by remember { mutableStateOf(false) }
-    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+    var showLogin by remember { mutableStateOf(false) }
+    var showBackup by remember { mutableStateOf(false) }
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/json")
-    ) { uri ->
-        if (uri != null) {
-            isExporting = true
-            scope.launch {
-                val result = backupFileService.exportTo(uri)
-                dataMessage = result.fold(
-                    onSuccess = { "Backup exported" },
-                    onFailure = { "Export failed: ${it.localizedMessage}" },
-                )
-                isExporting = false
-            }
-        }
+    if (showLogin) {
+        SettingsLoginScreen(viewModel = authViewModel, onBack = { showLogin = false }, modifier = modifier)
+        return
     }
-
-    val importLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri != null) {
-            pendingImportUri = uri
-            showImportOptions = true
-        }
-    }
-
-    fun runImport(mode: suspend (Uri) -> Result<Unit>, uri: Uri) {
-        isImporting = true
-        scope.launch {
-            val result = mode(uri)
-            dataMessage = result.fold(
-                onSuccess = { "Backup imported" },
-                onFailure = { "Import failed: ${it.localizedMessage}" },
-            )
-            isImporting = false
-        }
+    if (showBackup) {
+        SettingsBackupScreen(backupFileService = backupFileService, onBack = { showBackup = false }, modifier = modifier)
+        return
     }
 
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
@@ -264,16 +241,44 @@ fun SettingsScreen(
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text("Settings", style = MaterialTheme.typography.titleLarge)
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-        AuthAccountSection(authViewModel)
+    Scaffold(
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            LargeTopAppBar(
+                title = { Text("Settings") },
+                scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+        ListItem(
+            headlineContent = { Text("Account") },
+            leadingContent = { Icon(TablerIcons.User, contentDescription = null) },
+            trailingContent = { Icon(TablerIcons.ChevronRight, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth().clickable { showLogin = true },
+        )
+        ListItem(
+            headlineContent = { Text("Backup & Restore") },
+            leadingContent = { Icon(TablerIcons.CloudUpload, contentDescription = null) },
+            trailingContent = { Icon(TablerIcons.ChevronRight, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth().clickable { showBackup = true },
+        )
 
         HorizontalDivider()
 
@@ -485,92 +490,6 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
-        // Data section
-        Text("Data", style = MaterialTheme.typography.titleMedium)
-        Text(
-            "Export your tasks to a file, or restore from a previous export.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Button(
-            onClick = {
-                dataMessage = null
-                exportLauncher.launch("hvsna-backup-${System.currentTimeMillis()}.json")
-            },
-            enabled = !isExporting && !isImporting,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            if (isExporting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.padding(end = 8.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
-            Text(if (isExporting) "Exporting…" else "Export data")
-        }
-        Button(
-            onClick = {
-                dataMessage = null
-                importLauncher.launch(arrayOf("application/json"))
-            },
-            enabled = !isExporting && !isImporting,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            if (isImporting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.padding(end = 8.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
-            Text(if (isImporting) "Importing…" else "Import data")
-        }
-        dataMessage?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-
-        if (showImportOptions) {
-            AlertDialog(
-                onDismissRequest = {
-                    showImportOptions = false
-                    pendingImportUri = null
-                },
-                title = { Text("Import backup") },
-                text = {
-                    Text(
-                        "Replace deletes all current tasks, tags, and recurring reminders and " +
-                            "substitutes this backup's contents. Merge keeps your current data and " +
-                            "adds this backup's tasks, tags, and recurring reminders alongside it."
-                    )
-                },
-                confirmButton = {
-                    Row {
-                        TextButton(onClick = {
-                            val uri = pendingImportUri
-                            showImportOptions = false
-                            pendingImportUri = null
-                            if (uri != null) runImport(backupFileService::importMerging, uri)
-                        }) { Text("Merge") }
-                        TextButton(onClick = {
-                            val uri = pendingImportUri
-                            showImportOptions = false
-                            pendingImportUri = null
-                            if (uri != null) runImport(backupFileService::importReplacing, uri)
-                        }) { Text("Replace") }
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = {
-                        showImportOptions = false
-                        pendingImportUri = null
-                    }) { Text("Cancel") }
-                },
-            )
-        }
-
-        HorizontalDivider()
-
         // Legal section
         Text("Legal", style = MaterialTheme.typography.titleMedium)
         Column {
@@ -615,5 +534,6 @@ fun SettingsScreen(
 
         // bottom spacer
         Text("", modifier = Modifier.padding(bottom = 16.dp))
+    }
     }
 }
