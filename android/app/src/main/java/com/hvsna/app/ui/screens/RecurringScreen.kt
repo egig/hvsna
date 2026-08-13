@@ -1,0 +1,105 @@
+package com.hvsna.app.ui.screens
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import com.hvsna.app.data.RecurrenceUnit
+import com.hvsna.app.data.Tag
+import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.ui.TaskViewModel
+import com.hvsna.app.ui.components.EmptyState
+import compose.icons.TablerIcons
+import compose.icons.tablericons.ArrowLeft
+import compose.icons.tablericons.Repeat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+
+private fun cadenceLabel(intervalCount: Int, unit: RecurrenceUnit): String {
+    val unitName = unit.name.lowercase()
+    return if (intervalCount == 1) "every $unitName" else "every $intervalCount ${unitName}s"
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecurringScreen(
+    viewModel: TaskViewModel,
+    onBack: () -> Unit,
+    onTagClick: (Tag) -> Unit = {},
+    onEditTask: (TaskWithTags?, Long?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val series by viewModel.recurringSeries.collectAsState()
+
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val listState = rememberLazyListState()
+    val isEmpty = series.isEmpty()
+    val canScroll = !isEmpty && (listState.canScrollForward || listState.canScrollBackward)
+
+    Scaffold(
+        modifier = modifier
+            .fillMaxSize()
+            .let { if (canScroll) it.nestedScroll(scrollBehavior.nestedScrollConnection) else it },
+        topBar = {
+            LargeTopAppBar(
+                title = { Text("Recurring") },
+                scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                    }
+                },
+            )
+        },
+    ) { innerPadding ->
+        if (isEmpty) {
+            EmptyState(
+                icon = TablerIcons.Repeat,
+                title = "No recurring tasks yet",
+                subtitle = "Enable Repeat on a task to see it here.",
+                modifier = Modifier.padding(innerPadding),
+            )
+            return@Scaffold
+        }
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = innerPadding,
+        ) {
+            items(series, key = { it.rule.id }) { entry ->
+                ListItem(
+                    headlineContent = { Text(entry.nextOccurrence.task.title) },
+                    supportingContent = {
+                        val unit = RecurrenceUnit.valueOf(entry.rule.unit)
+                        val nextDate = entry.nextOccurrence.task.scheduledTime?.let { dateFormat.format(Date(it)) }
+                        Text("${cadenceLabel(entry.rule.intervalCount, unit)} · next $nextDate")
+                    },
+                    leadingContent = {
+                        Icon(TablerIcons.Repeat, contentDescription = null)
+                    },
+                    modifier = Modifier.clickable { onEditTask(entry.nextOccurrence, null) },
+                )
+            }
+        }
+    }
+}

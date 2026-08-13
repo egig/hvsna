@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "113852770657",
+    "project_id": "hvsna-e2342",
+    "storage_bucket": "hvsna-e2342.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:113852770657:android:d15d6becf7d38ffa65bd20",
+        "android_client_info": {
+          "package_name": "com.hvsna.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBn7etdOEfmNIyLvJf4Hx7nWE2K71scBbs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

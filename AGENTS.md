@@ -4,6 +4,8 @@
 
 npm workspaces, three packages: [packages/app/](packages/app/) (`@hvsna/app`) — the Vite/React client — [packages/website/](packages/website/) (`@hvsna/website`) — the marketing/docs site — and [packages/api/](packages/api/) (`@hvsna/api`) — the backend (React Router v8 framework mode, deployed to Vercel). Root `package.json` only holds workspace config and delegates scripts (e.g. `npm run dev` → `npm run dev -w @hvsna/app`); run everything from the repo root. `../hvsna-sync2` (the old Cloudflare Worker backend) is a separate sibling repo, fully decoupled — no longer referenced by anything in this monorepo.
 
+[android/](android/) is a native Android app (Kotlin, Jetpack Compose, Room) — a from-scratch reimplementation of the same task/reminder/prayer-time/Hijri-calendar concept as `packages/app`, not an npm workspace and sharing no code with it (own Room-based `TaskDatabase` instead of `wa-sqlite`). Has its own `android/CLAUDE.md` with build/test commands (Gradle) and architecture notes — read that file before working in `android/`.
+
 ## Commands
 
 ```sh
@@ -96,3 +98,4 @@ React Router v8 in framework mode, used purely as a backend — every route unde
 - `packages/app/src/modules/sync/` — sync UI/context; currently a stub (see Database section) pending a push/pull rebuild against `packages/api`
 - `packages/api/src/db/schema.ts` — auth-only Drizzle schema (`users`, `refresh_tokens`); `packages/api/app/routes/` — the five auth resource routes
 - `packages/website/src/routes.tsx` — website route table; `packages/website/src/content/docs/` — MDX docs content
+- `android/CLAUDE.md` — native Android app (Compose + Room) build commands and architecture, standalone from `packages/app`
