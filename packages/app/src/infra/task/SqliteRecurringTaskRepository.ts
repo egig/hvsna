@@ -5,6 +5,7 @@ import type {
   RecurringTaskUpdateInput,
 } from "@/modules/task/recurring-task";
 import type { IRecurringTaskRepository } from "@/domain/task/IRecurringTaskRepository";
+import type { ITagRepository } from "@/domain/tag/ITagRepository";
 import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
 
 type RecurringTaskRow = Record<string, SqliteValue>;
@@ -26,7 +27,6 @@ function rowToRecurringTask(row: RecurringTaskRow): RecurringTask {
     long: row.lng !== null ? Number(row.lng) : undefined,
     timezone: row.timezone !== null ? String(row.timezone) : undefined,
     hijriDateOffset: row.hijri_date_offset !== null ? Number(row.hijri_date_offset) : undefined,
-    tags: row.tags !== null ? JSON.parse(String(row.tags)) : undefined,
     recurringEnd: row.recurring_end as RecurringTask["recurringEnd"],
     recurringEndEpoch:
       row.recurring_end_epoch !== null ? Number(row.recurring_end_epoch) : undefined,
@@ -40,19 +40,20 @@ function rowToRecurringTask(row: RecurringTaskRow): RecurringTask {
   };
 }
 
+/** Tags live in the normalized `tags`/`recurring_task_tags` tables (see infra/tag/SqliteTagRepository.ts), not a column here. */
 const UPSERT_SQL = `
   INSERT INTO recurring_tasks (
     id, name, description, recurring_type, recurring_interval, base_date_epoch, at_time,
-    lat, lng, timezone, hijri_date_offset, tags, recurring_end, recurring_end_epoch,
+    lat, lng, timezone, hijri_date_offset, recurring_end, recurring_end_epoch,
     recurring_end_occurrences, use_gregorian, occurrence_exceptions, created_at, updated_at,
     deleted_at, _dirty
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
   ON CONFLICT(id) DO UPDATE SET
     name = excluded.name, description = excluded.description,
     recurring_type = excluded.recurring_type, recurring_interval = excluded.recurring_interval,
     base_date_epoch = excluded.base_date_epoch, at_time = excluded.at_time,
     lat = excluded.lat, lng = excluded.lng, timezone = excluded.timezone,
-    hijri_date_offset = excluded.hijri_date_offset, tags = excluded.tags,
+    hijri_date_offset = excluded.hijri_date_offset,
     recurring_end = excluded.recurring_end, recurring_end_epoch = excluded.recurring_end_epoch,
     recurring_end_occurrences = excluded.recurring_end_occurrences,
     use_gregorian = excluded.use_gregorian, occurrence_exceptions = excluded.occurrence_exceptions,
@@ -72,7 +73,6 @@ function recurringTaskParams(t: RecurringTask): SqliteValue[] {
     t.long ?? null,
     t.timezone ?? null,
     t.hijriDateOffset ?? null,
-    t.tags ? JSON.stringify(t.tags) : null,
     t.recurringEnd ?? null,
     t.recurringEndEpoch ?? null,
     t.recurringEndOccurrences ?? null,
@@ -85,7 +85,26 @@ function recurringTaskParams(t: RecurringTask): SqliteValue[] {
 }
 
 export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
-  constructor(private readonly client: SqliteExecutor) {}
+  constructor(
+    private readonly client: SqliteExecutor,
+    private readonly tagRepo: ITagRepository
+  ) {}
+
+  private async attachTags(recurringTasks: RecurringTask[]): Promise<RecurringTask[]> {
+    if (recurringTasks.length === 0) return recurringTasks;
+    const tagMap = await this.tagRepo.getTagsForRecurringTasks(
+      recurringTasks.map((t) => String(t.id))
+    );
+    for (const rtask of recurringTasks) {
+      rtask.tags = tagMap.get(String(rtask.id)) ?? undefined;
+    }
+    return recurringTasks;
+  }
+
+  private async attachTag(rtask: RecurringTask): Promise<RecurringTask> {
+    const [result] = await this.attachTags([rtask]);
+    return result;
+  }
 
   async create(input: RecurringTaskCreateInput): Promise<RecurringTask> {
     const now = Date.now();
@@ -107,10 +126,10 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       recurringEndEpoch: input.recurringEndEpoch,
       recurringEndOccurrences: input.recurringEndOccurrences,
       useGregorian: input.useGregorian,
-      tags: input.tags,
     };
     await this.client.run(UPSERT_SQL, recurringTaskParams(recurringTask));
-    return recurringTask;
+    await this.tagRepo.setRecurringTaskTags(String(recurringTask.id), input.tags ?? []);
+    return this.attachTag(recurringTask);
   }
 
   async update(
@@ -129,7 +148,10 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
     };
 
     await this.client.run(UPSERT_SQL, recurringTaskParams(merged));
-    return merged;
+    if (input.tags !== undefined) {
+      await this.tagRepo.setRecurringTaskTags(String(merged.id), input.tags ?? []);
+    }
+    return this.attachTag(merged);
   }
 
   /**
@@ -151,7 +173,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       `SELECT * FROM recurring_tasks WHERE id = ? AND deleted_at IS NULL`,
       [toStr(id)]
     );
-    return rows[0] ? rowToRecurringTask(rows[0]) : null;
+    return rows[0] ? this.attachTag(rowToRecurringTask(rows[0])) : null;
   }
 
   async find(query?: RecurringTaskQuery): Promise<RecurringTask[]> {
@@ -171,6 +193,6 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       `SELECT * FROM recurring_tasks WHERE ${conditions.join(" AND ")} ORDER BY recurring_type ASC`,
       params
     );
-    return rows.map(rowToRecurringTask);
+    return this.attachTags(rows.map(rowToRecurringTask));
   }
 }

@@ -2,10 +2,12 @@
 import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteTaskRepository } from "../SqliteTaskRepository";
+import { SqliteTagRepository } from "@/infra/tag/SqliteTagRepository";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
-  return { client, repo: new SqliteTaskRepository(client) };
+  const tagRepo = new SqliteTagRepository(client);
+  return { client, repo: new SqliteTaskRepository(client, tagRepo) };
 }
 
 describe("SqliteTaskRepository", () => {
@@ -18,11 +20,14 @@ describe("SqliteTaskRepository", () => {
     expect(task.status).toBe(0);
     expect(task.tags).toEqual(["errands"]);
 
-    const [row] = await client.run(`SELECT _dirty, tags FROM tasks WHERE id = ?`, [
-      String(task.id),
-    ]);
+    const [row] = await client.run(`SELECT _dirty FROM tasks WHERE id = ?`, [String(task.id)]);
     expect(row._dirty).toBe(1);
-    expect(JSON.parse(String(row.tags))).toEqual(["errands"]);
+
+    const tagRows = await client.run(
+      `SELECT tags.name FROM task_tags JOIN tags ON tags.id = task_tags.tag_id WHERE task_tags.task_id = ?`,
+      [String(task.id)]
+    );
+    expect(tagRows.map((r) => r.name)).toEqual(["errands"]);
   });
 
   it("findById returns null for soft-deleted tasks", async () => {
@@ -84,7 +89,7 @@ describe("SqliteTaskRepository", () => {
     expect(all.map((t) => t.id).sort()).toEqual([a.id, b.id].sort());
   });
 
-  it("find filters by tags using json_each", async () => {
+  it("find filters by tags via the tags/task_tags join", async () => {
     const { repo } = await makeRepo();
     await repo.create({ name: "Tagged", tags: ["work", "urgent"] });
     await repo.create({ name: "Untagged", tags: [] });
@@ -115,6 +120,30 @@ describe("SqliteTaskRepository", () => {
 
     expect(await repo.findById(pending.id!)).toBeNull();
     expect(await repo.findById(completed.id!)).not.toBeNull();
+  });
+
+  it("update leaves tags untouched when input.tags is omitted, and replaces them when provided", async () => {
+    const { repo } = await makeRepo();
+    const task = await repo.create({ name: "Buy milk", tags: ["errands"] });
+
+    const untouched = await repo.update(task.id!, { name: "Buy oat milk" });
+    expect(untouched.tags).toEqual(["errands"]);
+
+    const replaced = await repo.update(task.id!, { tags: ["groceries"] });
+    expect(replaced.tags).toEqual(["groceries"]);
+
+    const cleared = await repo.update(task.id!, { tags: null });
+    expect(cleared.tags).toBeNull();
+  });
+
+  it("reuses the same underlying tag row across tasks with the same normalized name", async () => {
+    const { client, repo } = await makeRepo();
+    await repo.create({ name: "Task A", tags: [" Work "] });
+    await repo.create({ name: "Task B", tags: ["WORK"] });
+
+    const tagRows = await client.run(`SELECT id, name FROM tags`);
+    expect(tagRows).toHaveLength(1);
+    expect(tagRows[0].name).toBe("work");
   });
 
   it("findByHijriDate always returns [] (matches pre-existing behavior — see code comment)", async () => {
