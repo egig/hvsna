@@ -11,30 +11,15 @@ import {
 } from "@/modules/icons";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
 import { useSync } from "src/modules/sync/context";
-import { useAuth } from "src/modules/auth";
 
 export default function Sync() {
   const { t } = useLanguageContext();
   const { lastSyncTime, isSyncing, manualSync, isManualSyncing, canSync } =
     useSync();
-  const { user, resendVerification } = useAuth();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
-  const [resendStatus, setResendStatus] = useState<
-    "idle" | "sending" | "sent" | "error"
-  >("idle");
-
-  const handleResendVerification = async () => {
-    setResendStatus("sending");
-    try {
-      await resendVerification();
-      setResendStatus("sent");
-    } catch {
-      setResendStatus("error");
-    }
-  };
 
   const handleManualSync = async () => {
     setManualSyncStatus("idle");
@@ -118,41 +103,6 @@ export default function Sync() {
       <Navbar title={t("sync")} />
       <Block>
         <div className="space-y-6">
-          {/* Email verification required */}
-          {user && !user.emailVerified && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-              <div className="flex items-start gap-3">
-                <HvAlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-amber-800 mb-1">
-                    {t("verify_email_required")}
-                  </h3>
-                  <p className="text-sm text-amber-700 mb-3">
-                    {t("verify_email_banner_description")}
-                  </p>
-                  {resendStatus === "sent" ? (
-                    <p className="text-sm text-amber-800 font-medium">
-                      {t("verification_email_sent")}
-                    </p>
-                  ) : (
-                    <button
-                      onClick={handleResendVerification}
-                      disabled={resendStatus === "sending"}
-                      className="text-sm font-medium text-amber-800 hover:text-amber-900 underline disabled:opacity-50"
-                    >
-                      {t("resend_verification_email")}
-                    </button>
-                  )}
-                  {resendStatus === "error" && (
-                    <p className="text-sm text-red-700 mt-2">
-                      {t("verification_email_failed")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Error Message Section */}
           {manualSyncStatus === "error" && errorMessage && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4">
