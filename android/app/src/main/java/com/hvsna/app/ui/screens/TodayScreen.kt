@@ -160,7 +160,6 @@ fun TodayScreen(
                                 adjustmentDays = settings.hijriAdjustment,
                                 maghribEpochMillis = prayerTimeMap["Maghrib"],
                             ).uppercase(),
-                            fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.sp,
                             letterSpacing = 1.sp,
@@ -333,7 +332,6 @@ private fun PrayerSectionHeader(name: String, time: String?) {
         if (time != null) {
             Text(
                 time,
-                fontFamily = FontFamily.Monospace,
                 fontSize = 11.sp,
                 letterSpacing = 0.3.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -358,8 +356,7 @@ private fun CompletedHeader(
             .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 10.dp),
     ) {
         Text(
-            "Completed ($count)".uppercase(),
-            fontFamily = FontFamily.Monospace,
+            "Completed ($count)",
             fontWeight = FontWeight.Bold,
             fontSize = 13.sp,
             letterSpacing = 1.sp,

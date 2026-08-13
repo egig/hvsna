@@ -112,7 +112,6 @@ fun TaskListItem(
                 Spacer(Modifier.width(12.dp))
                 Text(
                     task.title,
-                    fontFamily = FontFamily.Serif,
                     fontSize = 16.sp,
                     color = textColor,
                     textDecoration = if (done) TextDecoration.LineThrough else null,
@@ -122,7 +121,6 @@ fun TaskListItem(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         timeLabel,
-                        fontFamily = FontFamily.Monospace,
                         fontSize = 11.sp,
                         color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -132,7 +130,6 @@ fun TaskListItem(
             if (task.description.isNotEmpty()) {
                 Text(
                     task.description,
-                    fontFamily = FontFamily.Serif,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = leadingColumnWidth, top = 3.dp),
@@ -147,7 +144,6 @@ fun TaskListItem(
                     tags.forEach { tag ->
                         Text(
                             "#${tag.name}",
-                            fontFamily = FontFamily.Monospace,
                             fontSize = 10.sp,
                             letterSpacing = 0.5.sp,
                             color = Color(tag.color.toInt()),
