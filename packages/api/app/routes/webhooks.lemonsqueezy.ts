@@ -7,6 +7,23 @@ import {
 import { ApiError, jsonOk, jsonUnexpectedError } from "@/lib/response";
 
 /**
+ * Lemon Squeezy event payloads vary in which attributes they include (e.g.
+ * `payment_*` events don't carry the same fields as `subscription_*`
+ * events). These leave a field `undefined` (rather than coercing to `null`)
+ * when it's absent from the payload, so Drizzle's `.set()`/`.values()` skip
+ * it and preserve whatever is already stored — only an explicit `null` from
+ * Lemon Squeezy should clear a previously-set value.
+ */
+function dateOrNull(value: string | null | undefined): Date | null | undefined {
+  if (value === undefined) return undefined;
+  return value ? new Date(value) : null;
+}
+
+function idStringOrUndefined(value: number | undefined): string | undefined {
+  return value === undefined ? undefined : String(value);
+}
+
+/**
  * Receives Lemon Squeezy's subscription lifecycle events (created, updated,
  * cancelled, resumed, expired, paused, unpaused, payment_*) and upserts the
  * one `subscriptions` row for the user identified by `meta.custom_data.
@@ -55,25 +72,25 @@ export async function action({ request }: { request: Request }) {
         trialEndsAt: attributes.trial_ends_at ? new Date(attributes.trial_ends_at) : null,
         cardBrand: attributes.card_brand,
         cardLastFour: attributes.card_last_four,
-        updatePaymentMethodUrl: attributes.urls.update_payment_method ?? null,
-        customerPortalUrl: attributes.urls.customer_portal ?? null,
+        updatePaymentMethodUrl: attributes.urls?.update_payment_method ?? null,
+        customerPortalUrl: attributes.urls?.customer_portal ?? null,
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
         target: subscriptions.userId,
         set: {
           lemonSqueezySubscriptionId: payload.data.id,
-          lemonSqueezyCustomerId: String(attributes.customer_id),
-          lemonSqueezyOrderId: String(attributes.order_id),
-          variantId: String(attributes.variant_id),
+          lemonSqueezyCustomerId: idStringOrUndefined(attributes.customer_id),
+          lemonSqueezyOrderId: idStringOrUndefined(attributes.order_id),
+          variantId: idStringOrUndefined(attributes.variant_id),
           status: attributes.status,
-          renewsAt: attributes.renews_at ? new Date(attributes.renews_at) : null,
-          endsAt: attributes.ends_at ? new Date(attributes.ends_at) : null,
-          trialEndsAt: attributes.trial_ends_at ? new Date(attributes.trial_ends_at) : null,
+          renewsAt: dateOrNull(attributes.renews_at),
+          endsAt: dateOrNull(attributes.ends_at),
+          trialEndsAt: dateOrNull(attributes.trial_ends_at),
           cardBrand: attributes.card_brand,
           cardLastFour: attributes.card_last_four,
-          updatePaymentMethodUrl: attributes.urls.update_payment_method ?? null,
-          customerPortalUrl: attributes.urls.customer_portal ?? null,
+          updatePaymentMethodUrl: attributes.urls?.update_payment_method ?? (attributes.urls ? null : undefined),
+          customerPortalUrl: attributes.urls?.customer_portal ?? (attributes.urls ? null : undefined),
           updatedAt: new Date(),
         },
       });

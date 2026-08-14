@@ -33,7 +33,6 @@ export default function Subscription() {
   }, []);
 
   const isPaid = !!subscription && ACTIVE_STATUSES.includes(subscription.status);
-
   const formatDate = (isoDate: string | null) => {
     if (!isoDate) return null;
     return new Date(isoDate).toLocaleDateString();

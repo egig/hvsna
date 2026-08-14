@@ -21,11 +21,15 @@ export const subscriptionTranslations = {
   },
   free_plan_description: {
     en: "You're on the free plan. Upgrade to Sync to back up and sync your data across devices.",
-    id: "Anda menggunakan paket gratis. Tingkatkan ke Sync untuk mencadangkan dan menyinkronkan data Anda di semua perangkat.",
+    id: "Anda menggunakan paket gratis. Upgrade subscription untuk mencadangkan dan menyinkronkan data Anda di semua perangkat.",
   },
   status_on_trial: {
     en: "On trial",
     id: "Masa percobaan",
+  },
+  status_paid: {
+    en: "Paid",
+    id: "Dibayar",
   },
   status_active: {
     en: "Active",
