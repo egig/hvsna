@@ -31,13 +31,12 @@ import com.hvsna.app.data.AppSettings
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.hijriDateParts
 import com.hvsna.app.data.hijriMonthNames
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Minus
-import compose.icons.tablericons.Plus
 import java.time.LocalDate
 import kotlin.math.abs
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +70,7 @@ fun SettingsHijriMonthOffsetsScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -147,7 +146,7 @@ fun SettingsHijriMonthOffsetsScreen(
                             },
                             enabled = currentOffset > -2,
                         ) {
-                            Icon(TablerIcons.Minus, contentDescription = "Decrease")
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_minus), contentDescription = "Decrease")
                         }
                         Text(
                             if (currentOffset == 0) "0" else "%+d".format(currentOffset),
@@ -162,7 +161,7 @@ fun SettingsHijriMonthOffsetsScreen(
                             },
                             enabled = currentOffset < 2,
                         ) {
-                            Icon(TablerIcons.Plus, contentDescription = "Increase")
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = "Increase")
                         }
                     }
                 }

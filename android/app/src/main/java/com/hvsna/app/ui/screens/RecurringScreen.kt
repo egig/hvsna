@@ -26,12 +26,12 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Repeat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
@@ -76,7 +76,7 @@ fun RecurringScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -84,7 +84,7 @@ fun RecurringScreen(
     ) { innerPadding ->
         if (isEmpty) {
             EmptyState(
-                icon = TablerIcons.Repeat,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_repeat),
                 title = "No recurring tasks yet",
                 subtitle = "Enable Repeat on a task to see it here.",
                 modifier = Modifier.padding(innerPadding),
@@ -104,7 +104,7 @@ fun RecurringScreen(
                         Text("${cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType)} · next $nextDate")
                     },
                     leadingContent = {
-                        Icon(TablerIcons.Repeat, contentDescription = null)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null)
                     },
                     modifier = Modifier.clickable { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
                 )

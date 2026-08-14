@@ -5,7 +5,7 @@ import {
   useAnimation,
   type PanInfo,
 } from "framer-motion";
-import { HvSquare, HvCheckSquare2, HvCalendar, HvCheck } from "@/modules/icons";
+import { HvSquare, HvSquareCheckFilled, HvCalendar, HvCheck } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
@@ -65,9 +65,7 @@ export function TaskListItem({
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
       case 1:
-        return (
-          <HvCheckSquare2 strokeWidth={1} size={24} className="text-gray-400" />
-        );
+        return <HvSquareCheckFilled size={24} className="text-gray-400" />;
       case 0:
         return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
       default:

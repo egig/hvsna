@@ -47,14 +47,13 @@ import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.TaskListItem
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ChevronDown
-import compose.icons.tablericons.ListCheck
-import compose.icons.tablericons.Plus
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val todayHeaderFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
 private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
@@ -185,13 +184,13 @@ fun TodayScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
-                Icon(TablerIcons.Plus, contentDescription = "Add task")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = "Add task")
             }
         },
     ) { innerPadding ->
         if (isEmpty) {
             EmptyState(
-                icon = TablerIcons.ListCheck,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_list_check),
                 title = "Nothing scheduled today",
                 subtitle = "Tap + to add a task.",
                 modifier = Modifier.padding(innerPadding),
@@ -307,7 +306,7 @@ private fun OverdueHeader(
                 .dashedLine(MaterialTheme.colorScheme.outlineVariant),
         )
         Icon(
-            imageVector = TablerIcons.ChevronDown,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
             contentDescription = if (isExpanded) "Collapse" else "Expand",
             tint = MaterialTheme.colorScheme.error,
             modifier = Modifier
@@ -315,6 +314,16 @@ private fun OverdueHeader(
                 .size(16.dp),
         )
     }
+}
+
+private fun prayerIconRes(name: String): Int = when (name) {
+    "Fajr" -> R.drawable.ic_sunrise
+    "Sunrise" -> R.drawable.ic_sun_low
+    "Dhuhr" -> R.drawable.ic_sun
+    "Asr" -> R.drawable.ic_sun_high
+    "Maghrib" -> R.drawable.ic_sunset_2
+    "Isha" -> R.drawable.ic_moon
+    else -> R.drawable.ic_clock
 }
 
 @Composable
@@ -325,6 +334,14 @@ private fun PrayerSectionHeader(name: String, time: String?) {
             .fillMaxWidth()
             .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 8.dp),
     ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(id = prayerIconRes(name)),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(end = 6.dp, bottom = 1.dp)
+                .size(16.dp),
+        )
         Text(
             name,
             fontWeight = FontWeight.SemiBold,
@@ -373,7 +390,7 @@ private fun CompletedHeader(
             modifier = Modifier.weight(1f),
         )
         Icon(
-            imageVector = TablerIcons.ChevronDown,
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
             contentDescription = if (isExpanded) "Collapse" else "Expand",
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

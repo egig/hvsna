@@ -1,7 +1,7 @@
 import {
   HvSettings,
   HvHash,
-  HvCheckSquare2,
+  HvSquareCheck,
   HvReplayCircle,
 } from "@/modules/icons";
 import { Navbar } from "../../modules/navigation/navbar";
@@ -38,7 +38,7 @@ export default function Browse() {
             to="/recurring"
           />
           <MenuItem
-            icon={HvCheckSquare2}
+            icon={HvSquareCheck}
             title={t("completed") || "Completed"}
             to="/completed"
           />

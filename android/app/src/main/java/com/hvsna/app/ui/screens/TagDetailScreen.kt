@@ -36,12 +36,11 @@ import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.GroupHeader
 import com.hvsna.app.ui.components.TagEditBottomSheet
 import com.hvsna.app.ui.components.TaskListItem
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Hash
-import compose.icons.tablericons.Pencil
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Calendar
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -103,12 +102,12 @@ fun TagDetailScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
                 actions = {
                     IconButton(onClick = { showEditTagSheet = true }) {
-                        Icon(TablerIcons.Pencil, contentDescription = "Edit tag")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = "Edit tag")
                     }
                 },
             )
@@ -116,7 +115,7 @@ fun TagDetailScreen(
     ) { innerPadding ->
         if (isEmpty) {
             EmptyState(
-                icon = TablerIcons.Hash,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_hash),
                 title = "No tasks with this tag",
                 modifier = Modifier.padding(innerPadding),
             )

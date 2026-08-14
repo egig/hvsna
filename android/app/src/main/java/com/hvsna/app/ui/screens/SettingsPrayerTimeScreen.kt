@@ -31,9 +31,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.SettingsRepository
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val calculationMethods = listOf(
     "Muslim World League" to "MUSLIM_WORLD_LEAGUE",
@@ -93,7 +94,7 @@ fun SettingsPrayerTimeScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )

@@ -40,10 +40,10 @@ import androidx.core.content.ContextCompat
 import com.hvsna.app.data.CityResult
 import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.SettingsRepository
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Search
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +118,7 @@ fun SettingsLocationScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -173,7 +173,7 @@ fun SettingsLocationScreen(
                         if (isSearching) {
                             CircularProgressIndicator(strokeWidth = 2.dp)
                         } else {
-                            Icon(TablerIcons.Search, contentDescription = "Search")
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_search), contentDescription = "Search")
                         }
                     }
                 },

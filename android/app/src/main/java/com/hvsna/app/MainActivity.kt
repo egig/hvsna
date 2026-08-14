@@ -55,13 +55,8 @@ import com.hvsna.app.ui.screens.TagDetailScreen
 import com.hvsna.app.ui.screens.TodayScreen
 import com.hvsna.app.ui.screens.UpcomingScreen
 import com.hvsna.app.ui.theme.HvsnaTheme
-import compose.icons.TablerIcons
-import compose.icons.tablericons.Calendar
-import compose.icons.tablericons.CalendarEvent
-import compose.icons.tablericons.DotsCircleHorizontal
-import compose.icons.tablericons.DotsVertical
-import compose.icons.tablericons.Search
 import okhttp3.OkHttpClient
+import androidx.compose.ui.res.vectorResource
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -173,7 +168,7 @@ fun HvsnaApp() {
                     item(
                         icon = {
                             Icon(
-                                imageVector = it.icon,
+                                imageVector = ImageVector.vectorResource(id = it.iconRes),
                                 contentDescription = it.label
                             )
                         },
@@ -217,10 +212,10 @@ fun HvsnaApp() {
 
 enum class AppDestinations(
     val label: String,
-    val icon: ImageVector,
+    val iconRes: Int,
 ) {
-    TODAY("Today", TablerIcons.Calendar),
-    UPCOMING("Upcoming", TablerIcons.CalendarEvent),
-    SEARCH("Search", TablerIcons.Search),
-    BROWSE("More", TablerIcons.DotsCircleHorizontal),
+    TODAY("Today", R.drawable.ic_calendar_event),
+    UPCOMING("Upcoming", R.drawable.ic_calendar_month),
+    SEARCH("Search", R.drawable.ic_search),
+    BROWSE("More", R.drawable.ic_dots_circle_horizontal),
 }

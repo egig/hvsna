@@ -23,9 +23,14 @@
     "test:api": "npm run test -w @hvsna/api",
     "db:generate": "npm run db:generate -w @hvsna/api",
     "db:migrate": "npm run db:migrate -w @hvsna/api",
+    "gen:icons": "node scripts/gen-icons.mjs",
     "prepare": "husky || true"
   },
   "devDependencies": {
-    "husky": "^9.1.7"
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
+    "husky": "^9.1.7",
+    "svg2vectordrawable": "^2.9.1"
   }
 }

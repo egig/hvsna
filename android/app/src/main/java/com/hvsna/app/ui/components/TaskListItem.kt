@@ -34,11 +34,12 @@ import androidx.compose.ui.unit.sp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 import com.hvsna.app.data.isPrayerAnchored
-import compose.icons.TablerIcons
-import compose.icons.tablericons.Check
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 private val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
@@ -63,7 +64,7 @@ fun TaskCheckbox(
     ) {
         if (checked) {
             Icon(
-                imageVector = TablerIcons.Check,
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(13.dp),

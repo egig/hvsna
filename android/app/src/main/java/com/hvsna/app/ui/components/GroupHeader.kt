@@ -14,8 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ChevronDown
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @Composable
 fun GroupHeader(
@@ -36,7 +37,7 @@ fun GroupHeader(
             },
             trailingContent = {
                 Icon(
-                    imageVector = TablerIcons.ChevronDown,
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
                     contentDescription = if (isExpanded) "Collapse" else "Expand",
                     modifier = Modifier.rotate(chevronRotation).size(14.dp),
                 )

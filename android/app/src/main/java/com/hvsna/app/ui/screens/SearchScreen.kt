@@ -36,9 +36,9 @@ import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.TaskListItem
-import compose.icons.TablerIcons
-import compose.icons.tablericons.Search
-import compose.icons.tablericons.X
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,13 +77,13 @@ fun SearchScreen(
 
             if (query.isBlank()) {
                 EmptyState(
-                    icon = TablerIcons.Search,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_search),
                     title = "Search your tasks",
                     subtitle = "Find tasks by title or description.",
                 )
             } else if (results.isEmpty()) {
                 EmptyState(
-                    icon = TablerIcons.Search,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_search),
                     title = "No tasks found",
                     subtitle = "Try a different search term.",
                 )
@@ -133,12 +133,12 @@ private fun SearchField(
                     interactionSource = interactionSource,
                     placeholder = { Text("Search tasks…") },
                     leadingIcon = {
-                        Icon(TablerIcons.Search, contentDescription = null)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_search), contentDescription = null)
                     },
                     trailingIcon = if (query.isNotEmpty()) {
                         {
                             IconButton(onClick = { onQueryChange("") }) {
-                                Icon(TablerIcons.X, contentDescription = "Clear search")
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Clear search")
                             }
                         }
                     } else null,

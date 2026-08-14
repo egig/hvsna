@@ -32,13 +32,13 @@ import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.GroupHeader
 import com.hvsna.app.ui.components.TaskListItem
-import compose.icons.TablerIcons
-import compose.icons.tablericons.CalendarEvent
-import compose.icons.tablericons.Plus
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val dateHeaderFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
 
@@ -114,14 +114,14 @@ fun UpcomingScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
-                Icon(TablerIcons.Plus, contentDescription = "Add task")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = "Add task")
             }
         },
     ) { innerPadding ->
         when (selectedTab) {
             TAB_SCHEDULED -> if (isScheduledEmpty) {
                 EmptyState(
-                    icon = TablerIcons.CalendarEvent,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendar_event),
                     title = "No upcoming tasks",
                     subtitle = "Tasks you schedule for the future will show up here.",
                     modifier = Modifier.padding(innerPadding),
@@ -160,7 +160,7 @@ fun UpcomingScreen(
 
             TAB_UNSCHEDULED -> if (isUnscheduledEmpty) {
                 EmptyState(
-                    icon = TablerIcons.CalendarEvent,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendar_event),
                     title = "No unscheduled tasks",
                     subtitle = "Tasks without a date will show up here.",
                     modifier = Modifier.padding(innerPadding),

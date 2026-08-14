@@ -32,15 +32,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.hijriDateParts
 import com.hvsna.app.data.hijriDayOfMonth
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ChevronLeft
-import compose.icons.tablericons.ChevronRight
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @Composable
 fun HijriDatePicker(
@@ -113,7 +113,7 @@ private fun MonthGridPane(
             modifier = Modifier.fillMaxWidth(),
         ) {
             IconButton(onClick = { onMonthChange(displayedMonth.minusMonths(1)) }) {
-                Icon(TablerIcons.ChevronLeft, contentDescription = "Previous month")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_left), contentDescription = "Previous month")
             }
             Text(
                 displayedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)),
@@ -124,7 +124,7 @@ private fun MonthGridPane(
                     .clickable { onHeaderClick() },
             )
             IconButton(onClick = { onMonthChange(displayedMonth.plusMonths(1)) }) {
-                Icon(TablerIcons.ChevronRight, contentDescription = "Next month")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = "Next month")
             }
         }
 

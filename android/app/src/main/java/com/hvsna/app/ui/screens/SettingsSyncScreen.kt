@@ -25,12 +25,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.sync.SyncManager
 import com.hvsna.app.ui.AuthViewModel
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Cloud
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val lastSyncedFormat = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
 
@@ -63,7 +63,7 @@ fun SettingsSyncScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -89,7 +89,7 @@ fun SettingsSyncScreen(
                     )
                 } else {
                     Icon(
-                        TablerIcons.Cloud,
+                        ImageVector.vectorResource(id = R.drawable.ic_cloud),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(bottom = 4.dp),
