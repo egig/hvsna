@@ -23,6 +23,8 @@ private val DarkColorScheme = darkColorScheme(
     onTertiary = Color.Black,
     onBackground = Color(0xFFE6E1E5),
     onSurface = Color(0xFFE6E1E5),
+    secondaryContainer = PurpleGrey80,
+    onSecondaryContainer = Color.Black,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -39,6 +41,8 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = Color(0xFF49454F),
     outline = Color(0xFF79747E),
     outlineVariant = Color(0xFFCAC4D0),
+    secondaryContainer = PurpleGrey80,
+    onSecondaryContainer = Color.Black,
 )
 
 @Composable
