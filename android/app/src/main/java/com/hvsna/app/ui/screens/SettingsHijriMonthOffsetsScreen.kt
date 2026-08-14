@@ -65,6 +65,10 @@ fun SettingsHijriMonthOffsetsScreen(
             LargeTopAppBar(
                 title = { Text("Hijri Date") },
                 scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(TablerIcons.ArrowLeft, contentDescription = "Back")

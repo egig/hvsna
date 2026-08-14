@@ -1,6 +1,7 @@
 package com.hvsna.app.backup
 
 import com.hvsna.app.data.RecurrenceRule
+import com.hvsna.app.data.RecurrenceRuleTagCrossRef
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 import com.hvsna.app.data.TaskTagCrossRef
@@ -14,8 +15,9 @@ data class BackupPayload(
     val tags: List<Tag>,
     val taskTagCrossRefs: List<TaskTagCrossRef>,
     val recurrenceRules: List<RecurrenceRule>,
+    val recurrenceRuleTagCrossRefs: List<RecurrenceRuleTagCrossRef> = emptyList(),
 ) {
     companion object {
-        const val CURRENT_FORMAT_VERSION = 2
+        const val CURRENT_FORMAT_VERSION = 3
     }
 }

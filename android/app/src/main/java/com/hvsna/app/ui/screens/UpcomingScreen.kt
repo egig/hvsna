@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -88,6 +89,10 @@ fun UpcomingScreen(
                 LargeTopAppBar(
                     title = { Text("Upcoming") },
                     scrollBehavior = scrollBehavior,
+                    colors = TopAppBarDefaults.largeTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                    ),
                 )
                 TabRow(selectedTabIndex = selectedTab) {
                     Tab(
@@ -106,6 +111,8 @@ fun UpcomingScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onEditTask(null, defaultScheduledTime) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(TablerIcons.Plus, contentDescription = "Add task")
             }
@@ -141,6 +148,7 @@ fun UpcomingScreen(
                                 TaskListItem(
                                     task = entry.task,
                                     tags = entry.tags,
+                                    showDate = false,
                                     onToggleDone = { viewModel.toggleDone(entry.task) },
                                     onClick = { onEditTask(entry, null) },
                                 )
@@ -167,6 +175,7 @@ fun UpcomingScreen(
                         TaskListItem(
                             task = entry.task,
                             tags = entry.tags,
+                            showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry.task) },
                             onClick = { onEditTask(entry, null) },
                         )

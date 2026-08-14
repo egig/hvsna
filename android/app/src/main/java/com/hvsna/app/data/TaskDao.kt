@@ -137,6 +137,25 @@ interface TaskDao {
     @Query("SELECT * FROM recurrence_rule WHERE deletedAt IS NULL ORDER BY createdAt ASC")
     fun getAllRecurrenceRules(): Flow<List<RecurrenceRule>>
 
+    @Transaction
+    @Query("SELECT * FROM recurrence_rule WHERE deletedAt IS NULL ORDER BY createdAt ASC")
+    fun getAllRecurrenceRulesWithTags(): Flow<List<RecurrenceRuleWithTags>>
+
+    @Query("SELECT tagId FROM recurrence_rule_tag_cross_ref WHERE ruleId = :ruleId")
+    suspend fun getTagIdsForRule(ruleId: String): List<String>
+
+    @Query("DELETE FROM recurrence_rule_tag_cross_ref WHERE ruleId = :ruleId")
+    suspend fun clearTagsForRule(ruleId: String)
+
+    @Insert
+    suspend fun insertRecurrenceRuleTagCrossRefs(crossRefs: List<RecurrenceRuleTagCrossRef>)
+
+    @Transaction
+    suspend fun setTagsForRule(ruleId: String, tagIds: List<String>) {
+        clearTagsForRule(ruleId)
+        insertRecurrenceRuleTagCrossRefs(tagIds.map { RecurrenceRuleTagCrossRef(ruleId, it) })
+    }
+
     @Query("SELECT COUNT(*) FROM task WHERE recurringTaskId = :recurringTaskId AND isDone = 0 AND deletedAt IS NULL")
     suspend fun countUndoneForRecurrence(recurringTaskId: String): Int
 
@@ -167,6 +186,9 @@ interface TaskDao {
     @Query("SELECT * FROM task_tag_cross_ref")
     suspend fun getAllTaskTagCrossRefsSnapshot(): List<TaskTagCrossRef>
 
+    @Query("SELECT * FROM recurrence_rule_tag_cross_ref")
+    suspend fun getAllRecurrenceRuleTagCrossRefsSnapshot(): List<RecurrenceRuleTagCrossRef>
+
     @Insert
     suspend fun insertTasks(tasks: List<Task>)
 
@@ -188,14 +210,19 @@ interface TaskDao {
     @Query("DELETE FROM recurrence_rule")
     suspend fun clearAllRecurrenceRules()
 
+    @Query("DELETE FROM recurrence_rule_tag_cross_ref")
+    suspend fun clearAllRecurrenceRuleTagCrossRefs()
+
     @Transaction
     suspend fun replaceAll(
         tasks: List<Task>,
         tags: List<Tag>,
         taskTagCrossRefs: List<TaskTagCrossRef>,
         recurrenceRules: List<RecurrenceRule>,
+        recurrenceRuleTagCrossRefs: List<RecurrenceRuleTagCrossRef> = emptyList(),
     ) {
         clearAllTaskTagCrossRefs()
+        clearAllRecurrenceRuleTagCrossRefs()
         clearAllTasks()
         clearAllTags()
         clearAllRecurrenceRules()
@@ -203,6 +230,7 @@ interface TaskDao {
         insertTags(tags)
         insertTasks(tasks)
         insertTaskTagCrossRefs(taskTagCrossRefs)
+        insertRecurrenceRuleTagCrossRefs(recurrenceRuleTagCrossRefs)
     }
 
     // --- sync support: LWW-guarded apply, mirroring the server's
@@ -236,7 +264,7 @@ interface TaskDao {
     suspend fun findRecurrenceRuleByIdIncludingDeleted(id: String): RecurrenceRule?
 
     @Transaction
-    suspend fun applyIncomingRecurrenceRule(incoming: RecurrenceRule): Boolean {
+    suspend fun applyIncomingRecurrenceRule(incoming: RecurrenceRule, tagIds: List<String>): Boolean {
         val existing = findRecurrenceRuleByIdIncludingDeleted(incoming.id)
         if (existing != null && existing.updatedAt >= incoming.updatedAt) return false
         val toSave = incoming.copy(
@@ -245,6 +273,7 @@ interface TaskDao {
             _dirty = 0,
         )
         if (existing != null) updateRecurrenceRule(toSave) else insertRecurrenceRule(toSave)
+        setTagsForRule(incoming.id, tagIds)
         return true
     }
 
@@ -284,6 +313,7 @@ interface TaskDao {
         tags: List<Tag>,
         taskTagCrossRefs: List<TaskTagCrossRef>,
         recurrenceRules: List<RecurrenceRule>,
+        recurrenceRuleTagCrossRefs: List<RecurrenceRuleTagCrossRef> = emptyList(),
     ) {
         // Ids are globally-unique uuids now, so a merge-import just needs fresh
         // ids to avoid colliding with anything already on this device — no more
@@ -308,5 +338,11 @@ interface TaskDao {
             if (newTaskId != null && newTagId != null) TaskTagCrossRef(newTaskId, newTagId) else null
         }
         insertTaskTagCrossRefs(remappedCrossRefs)
+        val remappedRuleCrossRefs = recurrenceRuleTagCrossRefs.mapNotNull { ref ->
+            val newRuleId = recurrenceIdMap[ref.ruleId]
+            val newTagId = tagIdMap[ref.tagId]
+            if (newRuleId != null && newTagId != null) RecurrenceRuleTagCrossRef(newRuleId, newTagId) else null
+        }
+        insertRecurrenceRuleTagCrossRefs(remappedRuleCrossRefs)
     }
 }

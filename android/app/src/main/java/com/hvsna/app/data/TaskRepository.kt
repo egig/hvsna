@@ -38,8 +38,11 @@ class TaskRepository(private val dao: TaskDao, context: Context) {
     suspend fun deleteRecurrenceRule(rule: RecurrenceRule) { dao.deleteRecurrenceRule(rule); notifyBackupDataChanged() }
     suspend fun getRecurrenceRule(id: String): RecurrenceRule? = dao.getRecurrenceRule(id)
     fun getAllRecurrenceRules(): Flow<List<RecurrenceRule>> = dao.getAllRecurrenceRules()
+    fun getAllRecurrenceRulesWithTags(): Flow<List<RecurrenceRuleWithTags>> = dao.getAllRecurrenceRulesWithTags()
     suspend fun countUndoneForRecurrence(recurringTaskId: String): Int = dao.countUndoneForRecurrence(recurringTaskId)
     suspend fun getTagIdsForTask(taskId: String): List<String> = dao.getTagIdsForTask(taskId)
+    suspend fun getTagIdsForRule(ruleId: String): List<String> = dao.getTagIdsForRule(ruleId)
+    suspend fun setTagsForRule(ruleId: String, tagIds: List<String>) { dao.setTagsForRule(ruleId, tagIds); notifyBackupDataChanged() }
     suspend fun getLatestTaskForRecurrence(recurringTaskId: String): Task? = dao.getLatestTaskForRecurrence(recurringTaskId)
     suspend fun getUndoneTasksForRecurrence(recurringTaskId: String): List<Task> = dao.getUndoneTasksForRecurrence(recurringTaskId)
     suspend fun deleteUndoneForRecurrenceExcept(recurringTaskId: String, exceptTaskId: String) {
@@ -52,14 +55,16 @@ class TaskRepository(private val dao: TaskDao, context: Context) {
 
     suspend fun getAllTasksSnapshot(): List<Task> = dao.getAllTasksSnapshot()
     suspend fun getAllTaskTagCrossRefsSnapshot(): List<TaskTagCrossRef> = dao.getAllTaskTagCrossRefsSnapshot()
+    suspend fun getAllRecurrenceRuleTagCrossRefsSnapshot(): List<RecurrenceRuleTagCrossRef> = dao.getAllRecurrenceRuleTagCrossRefsSnapshot()
 
     suspend fun replaceAll(
         tasks: List<Task>,
         tags: List<Tag>,
         taskTagCrossRefs: List<TaskTagCrossRef>,
         recurrenceRules: List<RecurrenceRule>,
+        recurrenceRuleTagCrossRefs: List<RecurrenceRuleTagCrossRef> = emptyList(),
     ) {
-        dao.replaceAll(tasks, tags, taskTagCrossRefs, recurrenceRules)
+        dao.replaceAll(tasks, tags, taskTagCrossRefs, recurrenceRules, recurrenceRuleTagCrossRefs)
         notifyBackupDataChanged()
     }
 
@@ -68,8 +73,9 @@ class TaskRepository(private val dao: TaskDao, context: Context) {
         tags: List<Tag>,
         taskTagCrossRefs: List<TaskTagCrossRef>,
         recurrenceRules: List<RecurrenceRule>,
+        recurrenceRuleTagCrossRefs: List<RecurrenceRuleTagCrossRef> = emptyList(),
     ) {
-        dao.mergeAll(tasks, tags, taskTagCrossRefs, recurrenceRules)
+        dao.mergeAll(tasks, tags, taskTagCrossRefs, recurrenceRules, recurrenceRuleTagCrossRefs)
         notifyBackupDataChanged()
     }
 }

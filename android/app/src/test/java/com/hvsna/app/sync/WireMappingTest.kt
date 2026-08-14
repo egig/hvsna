@@ -60,7 +60,7 @@ class WireMappingTest {
     }
 
     @Test
-    fun `recurrence rule round-trips and always reports empty tag_ids`() {
+    fun `recurrence rule round-trips and carries its tag_ids`() {
         val rule = RecurrenceRule(
             id = "rule-1",
             title = "Standup",
@@ -76,14 +76,14 @@ class WireMappingTest {
             createdAt = 1_699_000_000_000L,
             updatedAt = 1_700_000_000_000L,
         )
-        val wire = rule.toWireRow()
+        val wire = rule.toWireRow(tagIds = listOf("tag-a", "tag-b"))
 
         assertEquals(rule.id, wire.id)
         assertEquals(rule.title, wire.name)
         assertEquals(rule.recurringType, wire.recurring_type)
         assertEquals(rule.baseDateEpoch, wire.base_date_epoch)
         assertEquals(0, wire.use_gregorian)
-        assertEquals(emptyList<String>(), wire.tag_ids)
+        assertEquals(listOf("tag-a", "tag-b"), wire.tag_ids)
         assertEquals(rule.occurrenceExceptions, wire.occurrence_exceptions)
 
         val roundTripped = wire.toRecurrenceRule()

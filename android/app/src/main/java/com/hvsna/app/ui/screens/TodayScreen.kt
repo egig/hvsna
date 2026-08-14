@@ -172,12 +172,18 @@ fun TodayScreen(
                     }
                 },
                 scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                ),
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onEditTask(null, defaultScheduledTime) },
                 shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(TablerIcons.Plus, contentDescription = "Add task")
             }
@@ -213,6 +219,7 @@ fun TodayScreen(
                             tags = entry.tags,
                             isOverdue = true,
                             inPrayerSection = false,
+                            showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry.task) },
                             onClick = { onEditTask(entry, null) },
                         )
@@ -239,6 +246,7 @@ fun TodayScreen(
                         tags = item.entry.tags,
                         isOverdue = false,
                         inPrayerSection = true,
+                        showDate = false,
                         onToggleDone = { viewModel.toggleDone(item.entry.task) },
                         onClick = { onEditTask(item.entry, null) },
                     )
@@ -261,6 +269,7 @@ fun TodayScreen(
                             tags = entry.tags,
                             isOverdue = false,
                             inPrayerSection = false,
+                            showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry.task) },
                             onClick = { onEditTask(entry, null) },
                         )

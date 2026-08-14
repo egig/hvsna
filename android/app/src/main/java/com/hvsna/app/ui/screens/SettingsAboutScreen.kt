@@ -54,6 +54,10 @@ fun SettingsAboutScreen(
             LargeTopAppBar(
                 title = { Text("About") },
                 scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.largeTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface,
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
