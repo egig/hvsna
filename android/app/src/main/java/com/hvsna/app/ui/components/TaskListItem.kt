@@ -74,6 +74,40 @@ fun TaskCheckbox(
 }
 
 /**
+ * Colored tag pill shared by every screen that lists tags (task rows, Browse screen's tag list,
+ * the task edit form's selected-tags row). Pass [onClick] to make the pill tappable (e.g.
+ * navigating to that tag's detail screen) and [trailingContent] to append e.g. a remove icon.
+ */
+@Composable
+fun TagPill(
+    tag: Tag,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+) {
+    val tagColor = Color(tag.color.toInt())
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(tagColor.copy(alpha = 0.15f))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+            .padding(horizontal = 6.dp, vertical = 0.dp),
+    ) {
+        Text(
+            "#${tag.name}",
+            fontSize = 10.sp,
+            letterSpacing = 0.5.sp,
+            color = tagColor,
+        )
+        if (trailingContent != null) {
+            Spacer(Modifier.width(4.dp))
+            trailingContent()
+        }
+    }
+}
+
+/**
  * Shared task row used by every task list screen (Today, Upcoming, Search, Completed, Tag detail).
  * [isOverdue] tints the time label red; [inPrayerSection] suppresses the prayer-name label when a
  * prayer section header already shows it (Today screen groups tasks under prayer headers).
@@ -152,22 +186,7 @@ fun TaskListItem(
                             modifier = Modifier.padding(vertical = 2.dp),
                         )
                     }
-                    tags.forEach { tag ->
-                        val tagColor = Color(tag.color.toInt())
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(tagColor.copy(alpha = 0.15f))
-                                .padding(horizontal = 6.dp, vertical = 0.dp),
-                        ) {
-                            Text(
-                                "#${tag.name}",
-                                fontSize = 10.sp,
-                                letterSpacing = 0.5.sp,
-                                color = tagColor,
-                            )
-                        }
-                    }
+                    tags.forEach { tag -> TagPill(tag = tag) }
                 }
             }
         }

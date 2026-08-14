@@ -165,15 +165,18 @@ fun HvsnaApp() {
             ),
             navigationSuiteItems = {
                 AppDestinations.entries.forEach {
+                    val isSelected = it == currentDestination
                     item(
                         icon = {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = it.iconRes),
+                                imageVector = ImageVector.vectorResource(
+                                    id = if (isSelected) it.activeIconRes else it.iconRes
+                                ),
                                 contentDescription = it.label
                             )
                         },
                         label = { Text(it.label) },
-                        selected = it == currentDestination,
+                        selected = isSelected,
                         onClick = { currentDestination = it }
                     )
                 }
@@ -213,9 +216,10 @@ fun HvsnaApp() {
 enum class AppDestinations(
     val label: String,
     val iconRes: Int,
+    val activeIconRes: Int,
 ) {
-    TODAY("Today", R.drawable.ic_calendar_event),
-    UPCOMING("Upcoming", R.drawable.ic_calendar_month),
-    SEARCH("Search", R.drawable.ic_search),
-    BROWSE("More", R.drawable.ic_dots_circle_horizontal),
+    TODAY("Today", R.drawable.ic_calendar_event, R.drawable.ic_calendar_event_filled),
+    UPCOMING("Upcoming", R.drawable.ic_calendar_month, R.drawable.ic_calendar_month_filled),
+    SEARCH("Search", R.drawable.ic_search, R.drawable.ic_search_filled),
+    BROWSE("More", R.drawable.ic_dots_circle_horizontal, R.drawable.ic_dots_circle_horizontal),
 }

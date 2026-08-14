@@ -16,8 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -27,11 +25,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
+import com.hvsna.app.ui.components.TagPill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
@@ -127,12 +125,10 @@ fun BrowseScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         tags.forEach { tag ->
-                            SuggestionChip(
-                                onClick = { onTagClick(tag) },
-                                label = { Text("#" + tag.name, color = Color(tag.color.toInt())) },
-                            )
+                            TagPill(tag = tag, onClick = { onTagClick(tag) })
                         }
                     }
                 }

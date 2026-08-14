@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -440,20 +439,19 @@ fun TaskBottomSheet(
                             .onSizeChanged { tagRowSize = it },
                     ) {
                         allTags.filter { it.id in selectedTagIds }.forEach { tag ->
-                            FilterChip(
-                                selected = true,
-                                onClick = {},
-                                label = { Text("#" + tag.name, color = Color(tag.color.toInt())) },
-                                trailingIcon = {
+                            TagPill(
+                                tag = tag,
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                trailingContent = {
                                     Icon(
                                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                         contentDescription = "Remove ${tag.name}",
+                                        tint = Color(tag.color.toInt()),
                                         modifier = Modifier
-                                            .size(FilterChipDefaults.IconSize)
+                                            .size(12.dp)
                                             .clickable { selectedTagIds = selectedTagIds - tag.id },
                                     )
                                 },
-                                modifier = Modifier.align(Alignment.CenterVertically),
                             )
                         }
 

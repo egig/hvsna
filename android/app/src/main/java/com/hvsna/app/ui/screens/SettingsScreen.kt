@@ -93,7 +93,7 @@ fun SettingsScreen(
         SettingsSubScreen.NONE -> Unit
     }
 
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = modifier
