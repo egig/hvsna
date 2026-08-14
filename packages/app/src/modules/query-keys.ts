@@ -13,4 +13,5 @@ export const queryKeys = {
   completedTasks: () => ["completed-tasks"] as const,
   recurringTaskList: () => ["recurring-task-list"] as const,
   tags: () => ["tags"] as const,
+  subscription: () => ["subscription"] as const,
 } as const;

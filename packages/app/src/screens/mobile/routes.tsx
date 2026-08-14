@@ -11,6 +11,7 @@ import { NotFound } from "../../modules/components/not-found";
 import { Today } from "../../modules/task/today";
 import WipeData from "../../modules/settings/wipe-data";
 import SyncPage from "../../modules/sync/sync";
+import Subscription from "../../modules/subscription/subscription";
 import { Inbox } from "../../modules/task/inbox";
 import { Completed } from "../../modules/task/completed";
 import { Recurring } from "../../modules/task/recurring";
@@ -59,6 +60,7 @@ export const RoutesMobile = () => {
             element={<NotificationSettings />}
           />
           <Route path="settings/hijri-date" element={<HijriDateSettings />} />
+          <Route path="settings/subscription" element={<Subscription />} />
           <Route path="hijri-calendar" element={<HijriCalendar />} />
           <Route path="profile" element={<Profile />} />
           <Route path="profile/:action" element={<Profile />} />

@@ -12,4 +12,7 @@ export default [
   route("sync/pull", "routes/sync.pull.ts"),
   route("geocode/reverse", "routes/geocode.reverse.ts"),
   route("geocode/search", "routes/geocode.search.ts"),
+  route("subscription", "routes/subscription.ts"),
+  route("subscription/checkout", "routes/subscription.checkout.ts"),
+  route("webhooks/lemonsqueezy", "routes/webhooks.lemonsqueezy.ts"),
 ] satisfies RouteConfig;
