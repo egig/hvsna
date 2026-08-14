@@ -11,6 +11,7 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
           { name: "About", href: "/about" },
           { name: "Pricing", href: "/pricing" },
           { name: "Features", href: "/features" },
+          { name: "Help", href: "/help" },
         ],
       },
       legal: {

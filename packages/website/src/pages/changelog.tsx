@@ -21,6 +21,43 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    date: "August 14, 2026",
+    releases: [
+      {
+        platform: "Web",
+        version: "v1.0.1",
+        changes: {
+          new: ["Subscription checkout via Lemon Squeezy in Settings"],
+          improved: ["Email verification moved into a global announcement bar", "Sync now requires a verified email"],
+          fixed: ["Webhook event handling"],
+        },
+      },
+      {
+        platform: "Android",
+        version: "v2.1.0",
+        changes: {
+          new: ["Authentication", "Sync"],
+          improved: ["UI Improvement"],
+          fixed: [],
+        },
+      },
+    ],
+  },
+  {
+    date: "July 16, 2026",
+    releases: [
+     {
+        platform: "Android (Beta)",
+        version: "v2.0.0",
+        changes: {
+          new: [],
+          improved: ["UI Revamp using android native"],
+          fixed: [],
+        },
+      }, 
+    ]
+  },
+  {
     date: "June 15, 2026",
     releases: [
       {

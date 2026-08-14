@@ -43,7 +43,7 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">{t.subtitle}</p>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-row gap-4 justify-center">
               <a href="https://play.google.com/store/apps/details?id=com.hvsna.app" target="_blank" rel="noreferrer" className="inline-flex items-center">
                 <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={t.primaryCTA} className="h-14 w-auto" />
               </a>
