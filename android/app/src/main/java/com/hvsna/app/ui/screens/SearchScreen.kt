@@ -113,15 +113,15 @@ private fun SearchField(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.secondaryContainer,
         tonalElevation = 3.dp,
     ) {
         BasicTextField(
             value = query,
             onValueChange = onQueryChange,
             singleLine = true,
-            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
+            textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSecondaryContainer),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSecondaryContainer),
             interactionSource = interactionSource,
             decorationBox = { innerTextField ->
                 TextFieldDefaults.DecorationBox(

@@ -208,7 +208,7 @@ class TaskViewModel(
     }
 
     suspend fun createTag(name: String): Tag {
-        val color = 0xFF90A4AE // Default to Blue Grey
+        val color = 0xFF4b4953
         val tag = Tag(name = name, color = color)
         repository.insertTag(tag)
         return tag
