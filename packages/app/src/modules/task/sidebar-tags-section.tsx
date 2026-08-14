@@ -1,7 +1,7 @@
 import { useTags } from "./use-tags";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { Link } from "react-router";
-import { HashIcon } from "lucide-react";
+import { HvHash } from "@/modules/icons";
 
 interface SidebarTagsSectionProps {
   collapsed?: boolean;
@@ -32,7 +32,7 @@ export function SidebarTagsSection({
             <span
               style={{color: tag.color }}
               aria-hidden
-            ><HashIcon size={14}/></span>
+            ><HvHash size={14}/></span>
             <span className="text-sm truncate flex-1">{tag.name}</span>
             <span className="text-xs text-gray-400">{tag.count}</span>
           </Link>

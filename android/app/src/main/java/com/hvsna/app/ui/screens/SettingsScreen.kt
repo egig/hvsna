@@ -31,16 +31,9 @@ import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.sync.SyncManager
 import com.hvsna.app.ui.AuthViewModel
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Bell
-import compose.icons.tablericons.Clock
-import compose.icons.tablericons.Cloud
-import compose.icons.tablericons.CloudUpload
-import compose.icons.tablericons.InfoCircle
-import compose.icons.tablericons.MapPin
-import compose.icons.tablericons.Moon
-import compose.icons.tablericons.User
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private enum class SettingsSubScreen {
     NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, ABOUT
@@ -116,7 +109,7 @@ fun SettingsScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -131,17 +124,17 @@ fun SettingsScreen(
         ) {
             ListItem(
                 headlineContent = { Text("Account") },
-                leadingContent = { Icon(TablerIcons.User, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_user), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.LOGIN },
             )
             ListItem(
                 headlineContent = { Text("Sync") },
-                leadingContent = { Icon(TablerIcons.Cloud, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.SYNC },
             )
             ListItem(
                 headlineContent = { Text("Backup & Restore") },
-                leadingContent = { Icon(TablerIcons.CloudUpload, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud_upload), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.BACKUP },
             )
 
@@ -149,22 +142,22 @@ fun SettingsScreen(
 
             ListItem(
                 headlineContent = { Text("Location") },
-                leadingContent = { Icon(TablerIcons.MapPin, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_map_pin), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.LOCATION },
             )
             ListItem(
                 headlineContent = { Text("Prayer Time") },
-                leadingContent = { Icon(TablerIcons.Clock, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.PRAYER_TIME },
             )
             ListItem(
                 headlineContent = { Text("Hijri Date") },
-                leadingContent = { Icon(TablerIcons.Moon, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_moon), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.HIJRI_MONTH_OFFSETS },
             )
             ListItem(
                 headlineContent = { Text("Reminders") },
-                leadingContent = { Icon(TablerIcons.Bell, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_bell), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.REMINDERS },
             )
 
@@ -172,7 +165,7 @@ fun SettingsScreen(
 
             ListItem(
                 headlineContent = { Text("About") },
-                leadingContent = { Icon(TablerIcons.InfoCircle, contentDescription = null) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_info_circle), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.ABOUT },
             )
         }

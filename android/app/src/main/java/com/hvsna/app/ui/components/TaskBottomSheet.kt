@@ -68,10 +68,6 @@ import com.hvsna.app.data.Task
 import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.data.nextPrayerTime
 import com.hvsna.app.data.reminderOffsetPresets
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.Repeat
-import compose.icons.tablericons.X
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -79,6 +75,9 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
 import java.util.Locale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 private val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
@@ -286,7 +285,7 @@ fun TaskBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     IconButton(onClick = { showDatePicker = false }) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                     Text("Select date", style = MaterialTheme.typography.titleLarge)
                 }
@@ -314,7 +313,7 @@ fun TaskBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     IconButton(onClick = { showPrayerPicker = false }) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                     Text("Select time", style = MaterialTheme.typography.titleLarge)
                 }
@@ -447,7 +446,7 @@ fun TaskBottomSheet(
                                 label = { Text("#" + tag.name, color = Color(tag.color.toInt())) },
                                 trailingIcon = {
                                     Icon(
-                                        imageVector = TablerIcons.X,
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                         contentDescription = "Remove ${tag.name}",
                                         modifier = Modifier
                                             .size(FilterChipDefaults.IconSize)
@@ -593,7 +592,7 @@ fun TaskBottomSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Icon(TablerIcons.Repeat, contentDescription = null)
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null)
                         Text(
                             "Repeat",
                             style = MaterialTheme.typography.bodyLarge,

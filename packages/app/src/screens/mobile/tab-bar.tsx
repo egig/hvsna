@@ -8,8 +8,7 @@ import {
   HvSearchAlt,
   HvCalendarEvent,
   HvCalendarEventFilled,
-  HvDotsThreeOutlineLight,
-  HvDotsThreeOutlineFill,
+  HvDotsCircleHorizontal,
 } from "@/modules/icons";
 
 export function TabBar() {
@@ -41,8 +40,8 @@ export function TabBar() {
     {
       path: "/browse",
       label: t("more") || "More",
-      icon: <HvDotsThreeOutlineLight />,
-      activeIcon: <HvDotsThreeOutlineFill />,
+      icon: <HvDotsCircleHorizontal />,
+      activeIcon: <HvDotsCircleHorizontal />,
       context: "more",
     },
   ];

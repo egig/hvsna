@@ -24,9 +24,9 @@ import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.TaskListItem
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
-import compose.icons.tablericons.SquareCheck
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +58,7 @@ fun CompletedScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )
@@ -66,7 +66,7 @@ fun CompletedScreen(
     ) { innerPadding ->
         if (isEmpty) {
             EmptyState(
-                icon = TablerIcons.SquareCheck,
+                icon = ImageVector.vectorResource(id = R.drawable.ic_square_check),
                 title = "No completed tasks yet",
                 modifier = Modifier.padding(innerPadding),
             )

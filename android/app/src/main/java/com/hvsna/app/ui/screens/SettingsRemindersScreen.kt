@@ -42,9 +42,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.hvsna.app.data.SettingsRepository
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ArrowLeft
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 private fun hasNotificationPermission(context: Context): Boolean =
     NotificationManagerCompat.from(context).areNotificationsEnabled()
@@ -142,7 +143,7 @@ fun SettingsRemindersScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(TablerIcons.ArrowLeft, contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
                     }
                 },
             )

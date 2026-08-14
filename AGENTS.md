@@ -6,6 +6,8 @@ npm workspaces, three packages: [packages/app/](packages/app/) (`@hvsna/app`) �
 
 [android/](android/) is a native Android app (Kotlin, Jetpack Compose, Room) — a from-scratch reimplementation of the same task/reminder/prayer-time/Hijri-calendar concept as `packages/app`, not an npm workspace and sharing no code with it (own Room-based `TaskDatabase` instead of `wa-sqlite`). Has its own `android/CLAUDE.md` with build/test commands (Gradle) and architecture notes — read that file before working in `android/`.
 
+[icons/](icons/) is the one thing actually shared between `packages/app` and `android/`: vendored Tabler Icons SVGs (MIT), the single source of truth for iconography on both platforms — see `icons/README.md`. `scripts/gen-icons.mjs` (`npm run gen:icons`) generates typed React components into `packages/app/src/modules/icons/generated/` and Android vector drawables into `android/app/src/main/res/drawable/` from those SVGs; neither generated tree is meant to be hand-edited. Web's `packages/app/src/modules/icons/index.ts` barrel curates which generated components are actually exported (as `Hv*`-prefixed names); Android references drawables directly by resource ID (`R.drawable.ic_*`).
+
 ## Commands
 
 ```sh
@@ -27,6 +29,8 @@ npm run typecheck:api   # tsc (noEmit strict mode)
 npm run test:api        # vitest run --reporter=tree (DB layer mocked)
 ```
 `packages/api` also has `db:generate` / `db:migrate` (drizzle-kit) — run with `npm run db:generate -w @hvsna/api` etc.
+
+`npm run gen:icons` regenerates the web/Android icon output from `icons/*.svg` — run it after adding, removing, or updating a vendored icon (see `icons/README.md`).
 
 No lint configured. Pre-commit hook (husky) runs `npm run test --workspaces --if-present` — every workspace with a `test` script (`@hvsna/app`, `@hvsna/api`; `@hvsna/website` has no test suite so it's skipped automatically).
 
@@ -99,3 +103,4 @@ React Router v8 in framework mode, used purely as a backend — every route unde
 - `packages/api/src/db/schema.ts` — auth-only Drizzle schema (`users`, `refresh_tokens`); `packages/api/app/routes/` — the five auth resource routes
 - `packages/website/src/routes.tsx` — website route table; `packages/website/src/content/docs/` — MDX docs content
 - `android/CLAUDE.md` — native Android app (Compose + Room) build commands and architecture, standalone from `packages/app`
+- `icons/README.md` — how the shared icon set works; `scripts/gen-icons.mjs` — the generator itself

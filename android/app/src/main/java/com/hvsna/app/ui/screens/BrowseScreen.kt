@@ -32,12 +32,9 @@ import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
-import compose.icons.TablerIcons
-import compose.icons.tablericons.ChevronRight
-import compose.icons.tablericons.Hash
-import compose.icons.tablericons.Repeat
-import compose.icons.tablericons.Settings
-import compose.icons.tablericons.SquareCheck
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import com.hvsna.app.R
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -82,7 +79,7 @@ fun BrowseScreen(
                 title = {},
                 actions = {
                     IconButton(onClick = onOpenSettings) {
-                        Icon(TablerIcons.Settings, contentDescription = "Settings")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_settings), contentDescription = "Settings")
                     }
                 },
             )
@@ -95,8 +92,8 @@ fun BrowseScreen(
             item {
                 ListItem(
                     headlineContent = { Text("Recurring", style = MaterialTheme.typography.bodyLarge) },
-                    leadingContent = { Icon(TablerIcons.Repeat, contentDescription = null) },
-                    trailingContent = { Icon(TablerIcons.ChevronRight, contentDescription = null) },
+                    leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null) },
+                    trailingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = null) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showRecurring = true },
@@ -106,8 +103,8 @@ fun BrowseScreen(
             item {
                 ListItem(
                     headlineContent = { Text("Completed", style = MaterialTheme.typography.bodyLarge) },
-                    leadingContent = { Icon(TablerIcons.SquareCheck, contentDescription = null) },
-                    trailingContent = { Icon(TablerIcons.ChevronRight, contentDescription = null) },
+                    leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_square_check), contentDescription = null) },
+                    trailingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = null) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showCompleted = true },
