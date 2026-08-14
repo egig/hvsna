@@ -47,6 +47,11 @@ export async function action({ request }: { request: Request }) {
     } catch {
       throw new ApiError(400, "INVALID_REQUEST", "Webhook body must be valid JSON");
     }
+    
+    // We skip handle payment status for now
+    if (payload.meta.event_name.startsWith("subscription_payment_")) {
+      return jsonOk({ handled: false });
+    }
 
     if (!payload.meta.event_name.startsWith("subscription_")) {
       return jsonOk({ handled: false });
