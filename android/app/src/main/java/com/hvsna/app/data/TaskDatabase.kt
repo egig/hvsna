@@ -7,10 +7,14 @@ import androidx.room.RoomDatabase
 import com.hvsna.app.data.migrations.MIGRATION_1_2
 import com.hvsna.app.data.migrations.MIGRATION_2_3
 import com.hvsna.app.data.migrations.MIGRATION_3_4
+import com.hvsna.app.data.migrations.MIGRATION_4_5
 
 @Database(
-    entities = [Task::class, Tag::class, TaskTagCrossRef::class, RecurrenceRule::class, SettingsEntry::class, SyncStateEntry::class],
-    version = 4,
+    entities = [
+        Task::class, Tag::class, TaskTagCrossRef::class, RecurrenceRule::class,
+        RecurrenceRuleTagCrossRef::class, SettingsEntry::class, SyncStateEntry::class,
+    ],
+    version = 5,
     exportSchema = true,
 )
 abstract class TaskDatabase : RoomDatabase() {
@@ -27,7 +31,7 @@ abstract class TaskDatabase : RoomDatabase() {
                     context.applicationContext,
                     TaskDatabase::class.java,
                     "task_db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build().also { instance = it }
             }
     }

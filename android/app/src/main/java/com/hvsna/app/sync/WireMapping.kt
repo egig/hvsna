@@ -56,8 +56,7 @@ fun TaskWireRow.toTask(): Task = Task(
     deletedAt = deleted_at,
 )
 
-/** tag_ids is always empty going out — Android has no recurring-template tag association (see RecurrenceManager's tag-model note). */
-fun RecurrenceRule.toWireRow(): RecurringTaskWireRow = RecurringTaskWireRow(
+fun RecurrenceRule.toWireRow(tagIds: List<String>): RecurringTaskWireRow = RecurringTaskWireRow(
     id = id,
     name = title,
     description = description,
@@ -69,7 +68,7 @@ fun RecurrenceRule.toWireRow(): RecurringTaskWireRow = RecurringTaskWireRow(
     lng = lng,
     timezone = timezone,
     hijri_date_offset = hijriDateOffset,
-    tag_ids = emptyList(),
+    tag_ids = tagIds,
     recurring_end = recurringEnd,
     recurring_end_epoch = recurringEndEpoch,
     recurring_end_occurrences = recurringEndOccurrences,

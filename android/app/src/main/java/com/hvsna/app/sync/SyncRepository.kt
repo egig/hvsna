@@ -33,9 +33,11 @@ class SyncRepository(private val taskDao: TaskDao, private val settingsDao: Sett
     suspend fun clearDirtySettings(keys: List<String>) = settingsDao.clearDirty(keys)
 
     suspend fun tagIdsForTask(taskId: String): List<String> = taskDao.getTagIdsForTask(taskId)
+    suspend fun tagIdsForRule(ruleId: String): List<String> = taskDao.getTagIdsForRule(ruleId)
 
     suspend fun applyIncomingTask(row: TaskWireRow): Boolean = taskDao.applyIncomingTask(row.toTask(), row.tag_ids)
-    suspend fun applyIncomingRecurrenceRule(row: RecurringTaskWireRow): Boolean = taskDao.applyIncomingRecurrenceRule(row.toRecurrenceRule())
+    suspend fun applyIncomingRecurrenceRule(row: RecurringTaskWireRow): Boolean =
+        taskDao.applyIncomingRecurrenceRule(row.toRecurrenceRule(), row.tag_ids)
     suspend fun applyIncomingTag(row: TagWireRow): Boolean = taskDao.applyIncomingTag(row.toTag())
     suspend fun applyIncomingSetting(row: SettingsWireRow): Boolean = settingsDao.applyIncoming(row.toSettingsEntry())
 }

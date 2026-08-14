@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-data class RecurringSeriesUiModel(val rule: RecurrenceRule, val nextOccurrence: Task)
+data class RecurringSeriesUiModel(val rule: RecurrenceRule, val nextOccurrence: Task, val tags: List<Tag> = emptyList())
 
 private const val UPCOMING_HORIZON_DAYS = 365L
 private const val VIRTUAL_TASK_ID_PREFIX = "vtask_"
@@ -63,26 +63,27 @@ class TaskViewModel(
     val settings: StateFlow<AppSettings> = settingsRepository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
 
-    /** Merges real DB rows with lazily-computed virtual occurrences from every active RecurrenceRule in range — virtual rows carry no tags (see RecurrenceRule's tag-model note in RecurrenceManager). */
+    /** Merges real DB rows with lazily-computed virtual occurrences from every active RecurrenceRule in range — virtual rows inherit the owning rule's tags. */
     private fun withVirtualOccurrences(
         real: Flow<List<TaskWithTags>>,
         rangeStart: Long,
         rangeEnd: Long,
-    ): Flow<List<TaskWithTags>> = combine(real, repository.getAllRecurrenceRules(), settings) { realTasks, rules, appSettings ->
-        val virtual = rules.flatMap { rule -> recurrenceManager.virtualOccurrencesFor(rule, rangeStart, rangeEnd, appSettings) }
-            .filter { it.isDone == 0 }
-            .map { TaskWithTags(it, emptyList()) }
+    ): Flow<List<TaskWithTags>> = combine(real, repository.getAllRecurrenceRulesWithTags(), settings) { realTasks, rules, appSettings ->
+        val virtual = rules.flatMap { entry ->
+            recurrenceManager.virtualOccurrencesFor(entry.rule, rangeStart, rangeEnd, appSettings)
+                .map { TaskWithTags(it, entry.tags) }
+        }.filter { it.task.isDone == 0 }
         (realTasks + virtual).sortedWith(compareBy(nullsLast()) { it.task.scheduledTime })
     }
 
     val overdueTasks: StateFlow<List<TaskWithTags>> = combine(
         repository.getOverdue(todayStart()),
-        repository.getAllRecurrenceRules(),
+        repository.getAllRecurrenceRulesWithTags(),
         settings,
     ) { real, rules, appSettings ->
-        val virtual = rules.mapNotNull { rule -> recurrenceManager.overdueOccurrenceFor(rule, todayStart(), appSettings) }
-            .filter { it.isDone == 0 }
-            .map { TaskWithTags(it, emptyList()) }
+        val virtual = rules.mapNotNull { entry ->
+            recurrenceManager.overdueOccurrenceFor(entry.rule, todayStart(), appSettings)?.let { TaskWithTags(it, entry.tags) }
+        }.filter { it.task.isDone == 0 }
         (real + virtual).sortedWith(compareBy(nullsLast()) { it.task.scheduledTime })
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -125,13 +126,14 @@ class TaskViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val recurringSeries: StateFlow<List<RecurringSeriesUiModel>> = combine(
-        repository.getAllRecurrenceRules(),
+        repository.getAllRecurrenceRulesWithTags(),
         settings,
     ) { rules, appSettings ->
         val now = System.currentTimeMillis()
         val horizon = now + UPCOMING_HORIZON_DAYS * 86_400_000L
-        rules.mapNotNull { rule ->
-            recurrenceManager.nextOccurrenceFor(rule, now, horizon, appSettings)?.let { RecurringSeriesUiModel(rule, it) }
+        rules.mapNotNull { entry ->
+            recurrenceManager.nextOccurrenceFor(entry.rule, now, horizon, appSettings)
+                ?.let { RecurringSeriesUiModel(entry.rule, it, entry.tags) }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -173,9 +175,9 @@ class TaskViewModel(
         reminderScheduler.sync(taskToSave, settings.value.remindersEnabled)
 
         if (recurrence.enabled && original?.recurringTaskId == null) {
-            recurrenceManager.createSeries(taskToSave, recurrence)
+            recurrenceManager.createSeries(taskToSave, recurrence, tagIds)
         } else if (recurrence.enabled && original?.recurringTaskId != null) {
-            recurrenceManager.updateSeries(original.recurringTaskId, taskToSave, recurrence)
+            recurrenceManager.updateSeries(original.recurringTaskId, taskToSave, recurrence, tagIds)
         }
     }
 

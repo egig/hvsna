@@ -1,5 +1,6 @@
 import userMigration0000 from "./migrations/user/0000_rainy_brother_voodoo.sql?raw";
 import userMigration0001 from "./migrations/user/0001_normalize_tags_and_settings.sql?raw";
+import userMigration0002 from "./migrations/user/0002_drop_changes_table.sql?raw";
 
 export interface UserMigration {
   id: string;
@@ -21,6 +22,7 @@ export interface UserMigration {
 export const userMigrations: UserMigration[] = [
   { id: "0000_rainy_brother_voodoo", sql: userMigration0000 },
   { id: "0001_normalize_tags_and_settings", sql: userMigration0001 },
+  { id: "0002_drop_changes_table", sql: userMigration0002 },
 ];
 
 export const CLIENT_ONLY_MIGRATION_ID = "0000_client_only";

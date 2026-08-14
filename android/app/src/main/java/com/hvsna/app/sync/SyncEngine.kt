@@ -34,7 +34,7 @@ class SyncEngine(
 
             val request = SyncPushRequest(
                 tasks = dirtyTasks.map { it.toWireRow(repository.tagIdsForTask(it.id)) },
-                recurring_tasks = dirtyRecurringTasks.map { it.toWireRow() },
+                recurring_tasks = dirtyRecurringTasks.map { it.toWireRow(repository.tagIdsForRule(it.id)) },
                 settings = dirtySettings.map { it.toWireRow() },
                 tags = dirtyTags.map { it.toWireRow() },
             )

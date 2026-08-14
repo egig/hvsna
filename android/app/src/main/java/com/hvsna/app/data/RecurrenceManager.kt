@@ -18,7 +18,7 @@ class RecurrenceManager(
     }
 
     /** Starts a series anchored on [anchorTask], which itself becomes the series' first real row. */
-    suspend fun createSeries(anchorTask: Task, recurrence: RecurrenceInput): Task {
+    suspend fun createSeries(anchorTask: Task, recurrence: RecurrenceInput, tagIds: List<String> = emptyList()): Task {
         val anchorDate = epochMillisToLocalDate(anchorTask.scheduledTime!!)
         val rule = RecurrenceRule(
             title = anchorTask.title,
@@ -39,6 +39,7 @@ class RecurrenceManager(
             reminderOffsetMinutes = anchorTask.reminderOffsetMinutes,
         )
         repository.insertRecurrenceRule(rule)
+        repository.setTagsForRule(rule.id, tagIds)
         val linkedTask = anchorTask.copy(
             recurringTaskId = rule.id,
             recurringType = rule.recurringType,
@@ -55,7 +56,7 @@ class RecurrenceManager(
      * cleanly from here — mirrors updateRecurringSeries in packages/app.
      * Completed past instances are left untouched.
      */
-    suspend fun updateSeries(recurringTaskId: String, editedTask: Task, recurrence: RecurrenceInput) {
+    suspend fun updateSeries(recurringTaskId: String, editedTask: Task, recurrence: RecurrenceInput, tagIds: List<String> = emptyList()) {
         val existingRule = repository.getRecurrenceRule(recurringTaskId) ?: return
         repository.deleteUndoneForRecurrenceExcept(recurringTaskId, exceptTaskId = editedTask.id)
         val anchorDate = epochMillisToLocalDate(editedTask.scheduledTime!!)
@@ -78,6 +79,7 @@ class RecurrenceManager(
             reminderOffsetMinutes = editedTask.reminderOffsetMinutes,
         )
         repository.updateRecurrenceRule(updatedRule)
+        repository.setTagsForRule(updatedRule.id, tagIds)
     }
 
     /** Ends a series: removes every other pending row and soft-deletes the template itself. */

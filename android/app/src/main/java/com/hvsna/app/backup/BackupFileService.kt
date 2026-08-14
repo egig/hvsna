@@ -22,6 +22,7 @@ class BackupFileService(
                 tags = repository.getAllTags().first(),
                 taskTagCrossRefs = repository.getAllTaskTagCrossRefsSnapshot(),
                 recurrenceRules = repository.getAllRecurrenceRules().first(),
+                recurrenceRuleTagCrossRefs = repository.getAllRecurrenceRuleTagCrossRefsSnapshot(),
             )
             val text = json.encodeToString(BackupPayload.serializer(), payload)
             context.contentResolver.openOutputStream(uri)?.use { out ->
@@ -38,6 +39,7 @@ class BackupFileService(
                 tags = payload.tags,
                 taskTagCrossRefs = payload.taskTagCrossRefs,
                 recurrenceRules = payload.recurrenceRules,
+                recurrenceRuleTagCrossRefs = payload.recurrenceRuleTagCrossRefs,
             )
         }
     }
@@ -50,6 +52,7 @@ class BackupFileService(
                 tags = payload.tags,
                 taskTagCrossRefs = payload.taskTagCrossRefs,
                 recurrenceRules = payload.recurrenceRules,
+                recurrenceRuleTagCrossRefs = payload.recurrenceRuleTagCrossRefs,
             )
         }
     }

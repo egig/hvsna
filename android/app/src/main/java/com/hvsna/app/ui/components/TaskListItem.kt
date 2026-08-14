@@ -41,6 +41,7 @@ import java.util.Date
 import java.util.Locale
 
 private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+private val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
 private val leadingColumnWidth = 32.dp
 
 @Composable
@@ -75,6 +76,7 @@ fun TaskCheckbox(
  * Shared task row used by every task list screen (Today, Upcoming, Search, Completed, Tag detail).
  * [isOverdue] tints the time label red; [inPrayerSection] suppresses the prayer-name label when a
  * prayer section header already shows it (Today screen groups tasks under prayer headers).
+ * [showDate] hides the date portion of the label (Today/Upcoming screens already group by date).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -85,14 +87,21 @@ fun TaskListItem(
     onClick: () -> Unit,
     isOverdue: Boolean = false,
     inPrayerSection: Boolean = false,
+    showDate: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val done = task.isDone == 1
-    val timeLabel = when {
+    val dateLabel = if (showDate) task.scheduledTime?.let { dateFormat.format(Date(it)) } ?: "" else ""
+    val timeOnlyLabel = when {
         task.atTime == null -> ""
         isPrayerAnchored(task.atTime) && inPrayerSection -> ""
         isPrayerAnchored(task.atTime) -> task.atTime
         else -> task.scheduledTime?.let { timeFormat.format(Date(it)) } ?: ""
+    }
+    val timeLabel = when {
+        dateLabel.isNotEmpty() && timeOnlyLabel.isNotEmpty() -> "$dateLabel, $timeOnlyLabel"
+        dateLabel.isNotEmpty() -> dateLabel
+        else -> timeOnlyLabel
     }
     val textColor = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
 
@@ -117,14 +126,6 @@ fun TaskListItem(
                     textDecoration = if (done) TextDecoration.LineThrough else null,
                     modifier = Modifier.weight(1f),
                 )
-                if (timeLabel.isNotEmpty()) {
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        timeLabel,
-                        fontSize = 11.sp,
-                        color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
 
             if (task.description.isNotEmpty()) {
@@ -136,18 +137,35 @@ fun TaskListItem(
                 )
             }
 
-            if (tags.isNotEmpty()) {
+            if (timeLabel.isNotEmpty() || tags.isNotEmpty()) {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(start = leadingColumnWidth, top = 4.dp),
                 ) {
-                    tags.forEach { tag ->
+                    if (timeLabel.isNotEmpty()) {
                         Text(
-                            "#${tag.name}",
-                            fontSize = 10.sp,
-                            letterSpacing = 0.5.sp,
-                            color = Color(tag.color.toInt()),
+                            timeLabel,
+                            fontSize = 11.sp,
+                            color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(vertical = 2.dp),
                         )
+                    }
+                    tags.forEach { tag ->
+                        val tagColor = Color(tag.color.toInt())
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(tagColor.copy(alpha = 0.15f))
+                                .padding(horizontal = 6.dp, vertical = 0.dp),
+                        ) {
+                            Text(
+                                "#${tag.name}",
+                                fontSize = 10.sp,
+                                letterSpacing = 0.5.sp,
+                                color = tagColor,
+                            )
+                        }
                     }
                 }
             }
@@ -171,6 +189,7 @@ fun TaskListItemPreview() {
                         title = "Buy Groceries",
                         description = "Milk, Eggs, Bread, and some fruits for the week",
                         scheduledTime = System.currentTimeMillis(),
+                        atTime = "09:30",
                         isDone = 0
                     ),
                     tags = listOf(
@@ -185,6 +204,7 @@ fun TaskListItemPreview() {
                         title = "Completed Task",
                         description = "This task is already done",
                         scheduledTime = System.currentTimeMillis(),
+                        atTime = "14:00",
                         isDone = 1
                     ),
                     onToggleDone = {},
