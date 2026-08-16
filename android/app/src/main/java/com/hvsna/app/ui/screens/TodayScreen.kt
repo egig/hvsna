@@ -320,7 +320,7 @@ private fun prayerIconRes(name: String): Int = when (name) {
     "Fajr" -> R.drawable.ic_sunrise
     "Sunrise" -> R.drawable.ic_sun_low
     "Dhuhr" -> R.drawable.ic_sun
-    "Asr" -> R.drawable.ic_sun_high
+    "Asr" -> R.drawable.ic_sunset
     "Maghrib" -> R.drawable.ic_sunset_2
     "Isha" -> R.drawable.ic_moon
     else -> R.drawable.ic_clock

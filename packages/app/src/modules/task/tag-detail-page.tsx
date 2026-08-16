@@ -10,7 +10,7 @@ import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTags } from "./use-tags";
 import { Menu } from "@base-ui/react/menu";
 import type { Task } from "@/domain/task";
-import { TAG_COLOR_PALETTE, DEFAULT_TAG_COLOR } from "@/domain/tag";
+import { TAG_COLOR_PALETTE, DEFAULT_TAG_COLOR, normalizeTagName } from "@/domain/tag";
 
 export default function TagDetailPage() {
   const { tagName } = useParams<{ tagName: string }>();
@@ -59,7 +59,7 @@ export default function TagDetailPage() {
 
   const canSaveEdit =
     newTagName.trim().length > 0 &&
-    (newTagName.trim() !== decodedTag || editColor !== tagColor);
+    (normalizeTagName(newTagName) !== decodedTag || editColor !== tagColor);
 
   const handleSaveEdit = async () => {
     const trimmedName = newTagName.trim();
@@ -69,9 +69,10 @@ export default function TagDetailPage() {
       if (editColor !== tagColor) {
         await setTagColor(decodedTag, editColor);
       }
-      if (trimmedName !== decodedTag) {
+      const normalizedName = normalizeTagName(trimmedName);
+      if (normalizedName !== decodedTag) {
         await renameTag(decodedTag, trimmedName);
-        navigate(`/tags/${encodeURIComponent(trimmedName)}`, {
+        navigate(`/tags/${encodeURIComponent(normalizedName)}`, {
           replace: true,
         });
       }

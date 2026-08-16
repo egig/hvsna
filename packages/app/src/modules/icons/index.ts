@@ -85,7 +85,7 @@ export { IconCloudX as HvCloudX } from "./generated/cloud-x";
 export { IconSunrise as HvFajr } from "./generated/sunrise";
 export { IconSunLow as HvSunrise } from "./generated/sun-low";
 export { IconSun as HvDhuhr } from "./generated/sun";
-export { IconSunHigh as HvAsr } from "./generated/sun-high";
+export { IconSunset as HvAsr } from "./generated/sunset";
 export { IconSunset2 as HvMaghrib } from "./generated/sunset-2";
 export { IconMoon as HvIsha } from "./generated/moon";
 

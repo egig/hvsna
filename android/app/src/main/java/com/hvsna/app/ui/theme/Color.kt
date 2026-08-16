@@ -6,6 +6,8 @@ val Purple80 = Color(0xFFBCC2FF) // Lightened version of brand for Dark Mode pri
 val PurpleGrey80 = Color(0xFFC6C5D0)
 val Pink80 = Color(0xFFE3C0C6)
 
+val PurpleGrey30 = Color(0xFF46464F) // Dark-mode secondaryContainer — muted, not near-white
+
 val BrandPrimary = Color(0xFF2E335A)
 val Purple40 = BrandPrimary
 val PurpleGrey40 = Color(0xFF5E5E6E)
