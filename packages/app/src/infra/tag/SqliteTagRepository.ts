@@ -9,6 +9,7 @@ import {
 } from "@/domain/tag";
 import { generatePrefixedUUID } from "@/modules/uuid";
 import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
+import type { WriteNotifier } from "@/modules/sync/write-notifier";
 
 type TagRow = Record<string, SqliteValue>;
 
@@ -48,7 +49,10 @@ const FIND_OR_CREATE_SQL = `
 `;
 
 export class SqliteTagRepository implements ITagRepository {
-  constructor(private readonly client: SqliteExecutor) {}
+  constructor(
+    private readonly client: SqliteExecutor,
+    private readonly writeNotifier: WriteNotifier
+  ) {}
 
   async findAll(): Promise<TagWithCount[]> {
     const rows = await this.client.run(`
@@ -87,6 +91,7 @@ export class SqliteTagRepository implements ITagRepository {
       `UPDATE tags SET name = ?, color = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [name, color, now, id]
     );
+    this.writeNotifier.notify("tags");
     return { ...existing, name, color, updatedAt: now };
   }
 
@@ -101,6 +106,7 @@ export class SqliteTagRepository implements ITagRepository {
       `UPDATE tags SET deleted_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, id]
     );
+    this.writeNotifier.notify("tags");
   }
 
   private async findOrCreateTagId(name: string): Promise<string> {

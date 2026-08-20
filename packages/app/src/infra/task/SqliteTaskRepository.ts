@@ -8,6 +8,7 @@ import type { ITaskRepository } from "@/domain/task/ITaskRepository";
 import type { ITagRepository } from "@/domain/tag/ITagRepository";
 import { generatePrefixedUUID } from "@/modules/uuid";
 import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
+import type { WriteNotifier } from "@/modules/sync/write-notifier";
 
 type TaskRow = Record<string, SqliteValue>;
 
@@ -96,7 +97,8 @@ function tagFilterCondition(tags: string[]): string {
 export class SqliteTaskRepository implements ITaskRepository {
   constructor(
     private readonly client: SqliteExecutor,
-    private readonly tagRepo: ITagRepository
+    private readonly tagRepo: ITagRepository,
+    private readonly writeNotifier: WriteNotifier
   ) {}
 
   private async attachTags(tasks: Task[]): Promise<Task[]> {
@@ -138,6 +140,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       recurringTaskId: input.recurringTaskId,
     });
     await this.client.run(UPSERT_SQL, taskParams(task));
+    this.writeNotifier.notify("tasks");
     await this.tagRepo.setTaskTags(String(task.id), input.tags ?? []);
     return this.attachTag(task);
   }
@@ -161,6 +164,7 @@ export class SqliteTaskRepository implements ITaskRepository {
     }
 
     await this.client.run(UPSERT_SQL, taskParams(merged));
+    this.writeNotifier.notify("tasks");
     if (input.tags !== undefined) {
       await this.tagRepo.setTaskTags(String(merged.id), input.tags ?? []);
     }
@@ -173,6 +177,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `UPDATE tasks SET deleted_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, toStr(id)]
     );
+    this.writeNotifier.notify("tasks");
   }
 
   async findById(id: string | number): Promise<Task | null> {
@@ -381,6 +386,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `UPDATE tasks SET status = 1, completed_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, toStr(id)]
     );
+    this.writeNotifier.notify("tasks");
     const task = await this.findById(id);
     if (!task) throw new Error(`Task ${id} not found`);
     return task;
@@ -392,6 +398,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `UPDATE tasks SET status = 0, completed_at = NULL, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, toStr(id)]
     );
+    this.writeNotifier.notify("tasks");
     const task = await this.findById(id);
     if (!task) throw new Error(`Task ${id} not found`);
     return task;

@@ -26,7 +26,11 @@ private val settingsJson = Json { ignoreUnknownKeys = true }
  * exclusion set). remindersEnabled stays in DataStore — it's a device-local
  * notification preference, not something that should sync.
  */
-class SettingsRepository(private val context: Context, private val settingsDao: SettingsDao) {
+                                    class SettingsRepository(
+    private val context: Context,
+    private val settingsDao: SettingsDao,
+    private val onDataChanged: () -> Unit = {},
+) {
 
     private object Keys {
         val REMINDERS_ENABLED = booleanPreferencesKey("reminders_enabled")
@@ -55,14 +59,17 @@ class SettingsRepository(private val context: Context, private val settingsDao: 
         val now = System.currentTimeMillis()
         val value = LocationSettingValue(source = "manual", resolvedAt = now, lat = lat, lng = lng, name = cityName)
         settingsDao.upsert(SettingsEntry(SettingsKeys.LOCATION, settingsJson.encodeToString(value), now))
+        onDataChanged()
     }
 
     suspend fun updateCalculationMethod(method: String) {
         settingsDao.upsert(SettingsEntry(SettingsKeys.CALCULATION_METHOD, method, System.currentTimeMillis()))
+        onDataChanged()
     }
 
     suspend fun updateMadhab(madhab: String) {
         settingsDao.upsert(SettingsEntry(SettingsKeys.MADHAB, madhab, System.currentTimeMillis()))
+        onDataChanged()
     }
 
     suspend fun updateHijriMonthOffsets(offsets: Map<Int, Int>) {
@@ -70,6 +77,7 @@ class SettingsRepository(private val context: Context, private val settingsDao: 
         settingsDao.upsert(
             SettingsEntry(SettingsKeys.HIJRI_MONTH_OFFSETS, settingsJson.encodeToString(cleaned), System.currentTimeMillis()),
         )
+        onDataChanged()
     }
 
     suspend fun updateRemindersEnabled(enabled: Boolean) {

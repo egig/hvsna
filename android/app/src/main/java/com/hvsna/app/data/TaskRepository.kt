@@ -4,12 +4,17 @@ import android.app.backup.BackupManager
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
 
-class TaskRepository(private val dao: TaskDao, context: Context) {
+class TaskRepository(
+    private val dao: TaskDao,
+    context: Context,
+    private val onDataChanged: () -> Unit = {},
+) {
     private val appContext = context.applicationContext
     private val backupManager by lazy { BackupManager(appContext) }
 
     private fun notifyBackupDataChanged() {
         backupManager.dataChanged()
+        onDataChanged()
     }
 
     fun getOverdue(todayStart: Long): Flow<List<TaskWithTags>> = dao.getOverdue(todayStart)

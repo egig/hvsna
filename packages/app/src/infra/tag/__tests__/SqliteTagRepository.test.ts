@@ -2,10 +2,12 @@
 import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteTagRepository } from "../SqliteTagRepository";
+import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
-  return { client, repo: new SqliteTagRepository(client) };
+  const writeNotifier = createWriteNotifier();
+  return { client, writeNotifier, repo: new SqliteTagRepository(client, writeNotifier) };
 }
 
 describe("SqliteTagRepository", () => {
@@ -96,5 +98,26 @@ describe("SqliteTagRepository", () => {
   it("getTagsForTasks returns an empty map for an empty id list", async () => {
     const { repo } = await makeRepo();
     expect(await repo.getTagsForTasks([])).toEqual(new Map());
+  });
+
+  it("notifies the write notifier on update/delete, but not on setTaskTags/setRecurringTaskTags", async () => {
+    const { repo, writeNotifier } = await makeRepo();
+    const notified: string[] = [];
+    writeNotifier.subscribe((table) => notified.push(table));
+
+    // Membership rides on the owning task/recurring-task row's own dirty
+    // flag (see dirty-rows.ts) — SqliteTagRepository itself must not notify
+    // for these, or a tag-only write would be double-counted against the
+    // caller's own notify.
+    await repo.setTaskTags("task_1", ["work"]);
+    await repo.setRecurringTaskTags("rtask_1", ["work"]);
+    expect(notified).toEqual([]);
+
+    const [work] = await repo.findAll();
+    await repo.update(work.id, { color: "#ff0000" });
+    expect(notified).toEqual(["tags"]);
+
+    await repo.delete(work.id);
+    expect(notified).toEqual(["tags", "tags"]);
   });
 });

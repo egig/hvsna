@@ -1,6 +1,8 @@
 package com.hvsna.app.sync
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -13,9 +15,10 @@ import kotlinx.coroutines.sync.withLock
  * concurrently with, or silently dropping, a newly-requested one.
  */
 class SyncManager(
-    private val engine: SyncEngine,
-    private val isAuthenticated: suspend () -> Boolean,
+    private val fullSync: suspend () -> Boolean,
+    private val canSync: suspend () -> Boolean,
     private val scope: CoroutineScope,
+    private val isOnline: () -> Boolean,
 ) {
     private val mutex = Mutex()
     private var running = false
@@ -32,8 +35,21 @@ class SyncManager(
         scope.launch { runSync() }
     }
 
+    private var writeDebounceJob: Job? = null
+
+    /** Debounced (~1.5s trailing) write-triggered sync — a burst of local writes collapses into
+     * one sync instead of one per write. Skipped while offline; the reconnect trigger catches up
+     * once connectivity returns, so a failed attempt here is never the last chance to sync. */
+    fun notifyWrite() {
+        writeDebounceJob?.cancel()
+        writeDebounceJob = scope.launch {
+            delay(WRITE_DEBOUNCE_MILLIS)
+            if (isOnline()) requestSync()
+        }
+    }
+
     suspend fun runSync() {
-        if (!isAuthenticated()) return
+        if (!canSync()) return
         val shouldRun = mutex.withLock {
             if (running) {
                 rerunRequested = true
@@ -49,12 +65,16 @@ class SyncManager(
         try {
             do {
                 rerunRequested = false
-                runCatching { engine.fullSync() }
+                runCatching { fullSync() }
                 _lastSyncedAt.value = System.currentTimeMillis()
             } while (rerunRequested)
         } finally {
             mutex.withLock { running = false }
             _isSyncing.value = false
         }
+    }
+
+    companion object {
+        const val WRITE_DEBOUNCE_MILLIS = 1500L
     }
 }

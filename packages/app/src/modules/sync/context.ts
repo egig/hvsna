@@ -13,11 +13,13 @@ import { useSettings } from "@/modules/settings";
 import { useSettingsRepository } from "@/modules/settings/use-settings-repository";
 import { withDefaults } from "@/modules/settings/settings-defaults";
 import { useInvalidateTaskQueries } from "@/modules/task/use-invalidate-task-queries";
+import { useRepositories } from "@/modules/repositories-context";
 import { getSyncApiClient } from "@/infra/sync/SyncApiClientFactory";
 import { createSyncEngine, type SyncEngine } from "./sync-engine";
 import { getLastSuccessAt } from "./cursor-store";
 
 const POLL_INTERVAL_MS = 30_000;
+const WRITE_DEBOUNCE_MS = 1_500;
 
 // Database Context
 export type SyncContextType = {
@@ -40,20 +42,24 @@ export const SyncContext = createContext<SyncContextType | undefined>(
  * modules/sync/sync-engine.ts for the actual push/pull/LWW logic this
  * provider just triggers and reports the status of.
  *
- * Sync runs on four triggers: the manual "Sync now" button, the network
+ * Sync runs on five triggers: the manual "Sync now" button, the network
  * coming back online while signed in, signing in / reloading with a
  * still-valid session (so a fresh device actually pulls its data without
- * the user having to notice and click the button), and a 30s poll while the
+ * the user having to notice and click the button), a 30s poll while the
  * tab is visible and signed in (mirrors Android's periodic WorkManager sync,
- * but on a much tighter interval since the web app has no OS-level floor).
- * The poll runs silently — it doesn't flip isSyncing — so it doesn't
- * flicker the UI every tick; it only surfaces via lastSyncTime / query
- * invalidation when a pull actually applies something.
+ * but on a much tighter interval since the web app has no OS-level floor),
+ * and a local write anywhere in the app — debounced ~1.5s so a burst of
+ * edits (typing a task name, reordering several tasks) collapses into one
+ * sync instead of one per keystroke. The poll and write-trigger both run
+ * silently — they don't flip isSyncing — so they don't flicker the UI every
+ * tick; they only surface via lastSyncTime / query invalidation when a pull
+ * actually applies something.
  */
 export const SyncProvider = ({ children }: { children: ReactNode }) => {
   const { client } = useSqliteClient();
   const { isOnline } = useNetworkContext();
   const { isAuthenticated, user } = useAuth();
+  const { writeNotifier } = useRepositories();
   // Signed in isn't enough — the API rejects /sync/push and /sync/pull with
   // 403 EMAIL_NOT_VERIFIED until the user confirms their address, so every
   // auto-trigger gates on this too (matching that server-side check) rather
@@ -173,6 +179,29 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSyncPerformed, canSync]);
+
+  // Trigger: a local write anywhere in the app, debounced ~1.5s so a burst
+  // of edits collapses into one sync instead of one per write. Skipped while
+  // offline — the reconnect trigger above catches up once connectivity
+  // returns. Silent, like the poll — see the block comment above.
+  useEffect(() => {
+    if (!canSync) return;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const unsubscribe = writeNotifier.subscribe(() => {
+      if (!isOnline) return;
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => {
+        runSync(true).catch((error) => {
+          console.error("Write-triggered sync failed:", error);
+        });
+      }, WRITE_DEBOUNCE_MS);
+    });
+    return () => {
+      unsubscribe();
+      if (timer) clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSync, isOnline, writeNotifier]);
 
   const value: SyncContextType = {
     replication: null,

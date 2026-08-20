@@ -2,16 +2,22 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import React from "react";
 import { SyncProvider, useSync } from "../context";
+import { createWriteNotifier } from "../write-notifier";
 
 const mockFullSync = vi.fn();
 let mockIsAuthenticated = false;
 let mockEmailVerified = false;
+let mockIsOnline = true;
+const mockWriteNotifier = createWriteNotifier();
 
 vi.mock("@/modules/sqlite/context", () => ({
   useSqliteClient: () => ({ client: {} }),
 }));
 vi.mock("@/modules/network/context", () => ({
-  useNetworkContext: () => ({ isOnline: true }),
+  useNetworkContext: () => ({ isOnline: mockIsOnline }),
+}));
+vi.mock("@/modules/repositories-context", () => ({
+  useRepositories: () => ({ writeNotifier: mockWriteNotifier }),
 }));
 vi.mock("@/modules/auth", () => ({
   useAuth: () => ({
@@ -73,6 +79,7 @@ describe("SyncProvider poll trigger", () => {
     mockFullSync.mockReset().mockResolvedValue(false);
     mockIsAuthenticated = false;
     mockEmailVerified = false;
+    mockIsOnline = true;
     setVisibility("visible");
   });
 
@@ -208,6 +215,128 @@ describe("SyncProvider poll trigger", () => {
         await result.current.manualSync();
       })
     ).rejects.toThrow(/verify your email/i);
+    expect(mockFullSync).not.toHaveBeenCalled();
+  });
+});
+
+describe("SyncProvider write trigger", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    mockFullSync.mockReset().mockResolvedValue(false);
+    mockIsAuthenticated = true;
+    mockEmailVerified = true;
+    mockIsOnline = true;
+    setVisibility("visible");
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("fires a sync 1500ms after a single write, not before", async () => {
+    renderHook(() => useSync(), { wrapper });
+    await flushMicrotasks();
+    mockFullSync.mockClear();
+
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(mockFullSync).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    expect(mockFullSync).toHaveBeenCalledTimes(1);
+  });
+
+  it("collapses a burst of writes into a single sync, 1500ms after the last one", async () => {
+    renderHook(() => useSync(), { wrapper });
+    await flushMicrotasks();
+    mockFullSync.mockClear();
+
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1000);
+    });
+    expect(mockFullSync).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+    expect(mockFullSync).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fire when canSync is false", async () => {
+    mockIsAuthenticated = false;
+    mockEmailVerified = false;
+    renderHook(() => useSync(), { wrapper });
+    await flushMicrotasks();
+    mockFullSync.mockClear();
+
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    expect(mockFullSync).not.toHaveBeenCalled();
+  });
+
+  it("does not fire when offline", async () => {
+    const { rerender } = renderHook(() => useSync(), { wrapper });
+    await flushMicrotasks();
+    mockFullSync.mockClear();
+    mockIsOnline = false;
+    rerender();
+
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
+    expect(mockFullSync).not.toHaveBeenCalled();
+  });
+
+  it("cancels the pending sync if it goes offline mid-debounce", async () => {
+    const { rerender } = renderHook(() => useSync(), { wrapper });
+    await flushMicrotasks();
+    mockFullSync.mockClear();
+
+    act(() => {
+      mockWriteNotifier.notify("tasks");
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    // Going offline mid-debounce must cancel the pending timer outright — not
+    // just suppress its effect — otherwise a stale timer could still fire
+    // (or interact oddly with the separate reconnect trigger) once back online.
+    mockIsOnline = false;
+    rerender();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000);
+    });
     expect(mockFullSync).not.toHaveBeenCalled();
   });
 });

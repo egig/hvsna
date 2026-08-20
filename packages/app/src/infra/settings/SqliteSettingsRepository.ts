@@ -1,6 +1,7 @@
 import type { ISettingsRepository } from "@/domain/settings/ISettingsRepository";
 import type { GeneralSettings } from "@/modules/settings/settings";
 import type { SqliteExecutor } from "@/modules/sqlite/client";
+import type { WriteNotifier } from "@/modules/sync/write-notifier";
 
 /**
  * One row per top-level `GeneralSettings` key, rather than a single JSON
@@ -8,7 +9,10 @@ import type { SqliteExecutor } from "@/modules/sqlite/client";
  * without clobbering fields another device touched concurrently.
  */
 export class SqliteSettingsRepository implements ISettingsRepository {
-  constructor(private readonly client: SqliteExecutor) {}
+  constructor(
+    private readonly client: SqliteExecutor,
+    private readonly writeNotifier: WriteNotifier
+  ) {}
 
   async load(): Promise<GeneralSettings | null> {
     const rows = await this.client.run(`SELECT key, value FROM settings`);
@@ -43,5 +47,6 @@ export class SqliteSettingsRepository implements ISettingsRepository {
         [key, JSON.stringify(value), now]
       );
     }
+    this.writeNotifier.notify("settings");
   }
 }

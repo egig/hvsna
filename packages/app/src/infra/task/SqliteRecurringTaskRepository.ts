@@ -7,6 +7,7 @@ import type {
 import type { IRecurringTaskRepository } from "@/domain/task/IRecurringTaskRepository";
 import type { ITagRepository } from "@/domain/tag/ITagRepository";
 import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
+import type { WriteNotifier } from "@/modules/sync/write-notifier";
 
 type RecurringTaskRow = Record<string, SqliteValue>;
 
@@ -87,7 +88,8 @@ function recurringTaskParams(t: RecurringTask): SqliteValue[] {
 export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
   constructor(
     private readonly client: SqliteExecutor,
-    private readonly tagRepo: ITagRepository
+    private readonly tagRepo: ITagRepository,
+    private readonly writeNotifier: WriteNotifier
   ) {}
 
   private async attachTags(recurringTasks: RecurringTask[]): Promise<RecurringTask[]> {
@@ -128,6 +130,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       useGregorian: input.useGregorian,
     };
     await this.client.run(UPSERT_SQL, recurringTaskParams(recurringTask));
+    this.writeNotifier.notify("recurring_tasks");
     await this.tagRepo.setRecurringTaskTags(String(recurringTask.id), input.tags ?? []);
     return this.attachTag(recurringTask);
   }
@@ -148,6 +151,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
     };
 
     await this.client.run(UPSERT_SQL, recurringTaskParams(merged));
+    this.writeNotifier.notify("recurring_tasks");
     if (input.tags !== undefined) {
       await this.tagRepo.setRecurringTaskTags(String(merged.id), input.tags ?? []);
     }
@@ -166,6 +170,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       `UPDATE recurring_tasks SET deleted_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, toStr(id)]
     );
+    this.writeNotifier.notify("recurring_tasks");
   }
 
   async findById(id: string | number): Promise<RecurringTask | null> {

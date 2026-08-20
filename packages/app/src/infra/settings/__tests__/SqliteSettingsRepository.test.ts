@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteSettingsRepository } from "../SqliteSettingsRepository";
 import type { GeneralSettings } from "@/modules/settings/settings";
+import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
-  return { client, repo: new SqliteSettingsRepository(client) };
+  const writeNotifier = createWriteNotifier();
+  return { client, writeNotifier, repo: new SqliteSettingsRepository(client, writeNotifier) };
 }
 
 describe("SqliteSettingsRepository", () => {
@@ -58,5 +60,18 @@ describe("SqliteSettingsRepository", () => {
     await repo.save(settings);
 
     expect(await repo.load()).toEqual(settings);
+  });
+
+  it("notifies the write notifier exactly once per save() call, regardless of key count", async () => {
+    const { repo, writeNotifier } = await makeRepo();
+    const notified: string[] = [];
+    writeNotifier.subscribe((table) => notified.push(table));
+
+    await repo.save({ theme: "dark", language: "en", notifications: true } as unknown as GeneralSettings);
+    expect(notified).toEqual(["settings"]);
+
+    notified.length = 0;
+    await repo.load();
+    expect(notified).toEqual([]);
   });
 });

@@ -46,6 +46,7 @@ fun SettingsSyncScreen(
     val isSyncing by syncManager.isSyncing.collectAsState()
     val lastSyncedAt by syncManager.lastSyncedAt.collectAsState()
     val isSignedIn = authState.user != null
+    val canSync = authState.user?.emailVerified == true
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -71,20 +72,24 @@ fun SettingsSyncScreen(
     ) { innerPadding ->
         PullToRefreshBox(
             isRefreshing = isSyncing,
-            onRefresh = { if (isSignedIn) syncManager.requestSync() },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            onRefresh = { if (canSync) syncManager.requestSync() },
+            modifier = Modifier.fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(innerPadding)
                     .padding(horizontal = 16.dp, vertical = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 if (!isSignedIn) {
                     Text(
                         "Sign in to sync your tasks across devices.",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                } else if (!canSync) {
+                    Text(
+                        "Verify your email to sync your tasks across devices.",
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 } else {
@@ -116,7 +121,7 @@ fun SettingsSyncScreen(
                         Text(if (isSyncing) "Syncing…" else "Sync now")
                     }
                     Text(
-                        "Syncs automatically when you sign in, reconnect, and every 15 minutes in the background.",
+                        "Syncs automatically as you make changes, when you sign in, reconnect, or pull to refresh, and every 15 minutes in the background.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

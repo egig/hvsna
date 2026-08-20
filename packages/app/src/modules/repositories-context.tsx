@@ -10,6 +10,7 @@ import { LocalReminderRegistryRepository } from "../infra/task/LocalReminderRegi
 import { SqliteSettingsRepository } from "../infra/settings/SqliteSettingsRepository";
 import { SqliteTagRepository } from "../infra/tag/SqliteTagRepository";
 import type { SqliteClient } from "./sqlite/client";
+import { createWriteNotifier, type WriteNotifier } from "./sync/write-notifier";
 
 export interface Repositories {
   taskRepository: ITaskRepository;
@@ -17,16 +18,23 @@ export interface Repositories {
   settingsRepository: ISettingsRepository;
   reminderRegistryRepository: IReminderRegistryRepository;
   tagRepository: ITagRepository;
+  /** Not a repository — cross-cutting "a local write just happened" signal,
+   * shared into each repository above and read by SyncProvider (via
+   * useRepositories()) to debounce a write-triggered sync. See
+   * modules/sync/write-notifier.ts. */
+  writeNotifier: WriteNotifier;
 }
 
 export function createWebRepositories(sqliteClient: SqliteClient): Repositories {
-  const tagRepository = new SqliteTagRepository(sqliteClient);
+  const writeNotifier = createWriteNotifier();
+  const tagRepository = new SqliteTagRepository(sqliteClient, writeNotifier);
   return {
-    taskRepository: new SqliteTaskRepository(sqliteClient, tagRepository),
-    recurringTaskRepository: new SqliteRecurringTaskRepository(sqliteClient, tagRepository),
-    settingsRepository: new SqliteSettingsRepository(sqliteClient),
+    taskRepository: new SqliteTaskRepository(sqliteClient, tagRepository, writeNotifier),
+    recurringTaskRepository: new SqliteRecurringTaskRepository(sqliteClient, tagRepository, writeNotifier),
+    settingsRepository: new SqliteSettingsRepository(sqliteClient, writeNotifier),
     reminderRegistryRepository: new LocalReminderRegistryRepository(),
     tagRepository,
+    writeNotifier,
   };
 }
 

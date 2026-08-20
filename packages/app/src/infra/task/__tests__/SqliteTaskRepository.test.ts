@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteTaskRepository } from "../SqliteTaskRepository";
 import { SqliteTagRepository } from "@/infra/tag/SqliteTagRepository";
+import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
-  const tagRepo = new SqliteTagRepository(client);
-  return { client, repo: new SqliteTaskRepository(client, tagRepo) };
+  const writeNotifier = createWriteNotifier();
+  const tagRepo = new SqliteTagRepository(client, writeNotifier);
+  return { client, writeNotifier, repo: new SqliteTaskRepository(client, tagRepo, writeNotifier) };
 }
 
 describe("SqliteTaskRepository", () => {
@@ -151,5 +153,31 @@ describe("SqliteTaskRepository", () => {
     await repo.create({ name: "Task", tags: [] });
 
     expect(await repo.findByHijriDate("1447-01-01")).toEqual([]);
+  });
+
+  it("notifies the write notifier on create/update/delete/completeTask/reopenTask, and not on reads", async () => {
+    const { repo, writeNotifier } = await makeRepo();
+    const notified: string[] = [];
+    writeNotifier.subscribe((table) => notified.push(table));
+
+    const task = await repo.create({ name: "Buy milk", tags: [] });
+    expect(notified).toEqual(["tasks"]);
+
+    await repo.update(task.id!, { name: "Buy oat milk" });
+    expect(notified).toEqual(["tasks", "tasks"]);
+
+    await repo.completeTask(task.id!);
+    expect(notified).toEqual(["tasks", "tasks", "tasks"]);
+
+    await repo.reopenTask(task.id!);
+    expect(notified).toEqual(["tasks", "tasks", "tasks", "tasks"]);
+
+    await repo.delete(task.id!);
+    expect(notified).toEqual(["tasks", "tasks", "tasks", "tasks", "tasks"]);
+
+    notified.length = 0;
+    await repo.find();
+    await repo.findById(task.id!);
+    expect(notified).toEqual([]);
   });
 });

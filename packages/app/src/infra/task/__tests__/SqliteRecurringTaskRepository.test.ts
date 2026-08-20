@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteRecurringTaskRepository } from "../SqliteRecurringTaskRepository";
 import { SqliteTagRepository } from "@/infra/tag/SqliteTagRepository";
+import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
-  const tagRepo = new SqliteTagRepository(client);
-  return { client, repo: new SqliteRecurringTaskRepository(client, tagRepo) };
+  const writeNotifier = createWriteNotifier();
+  const tagRepo = new SqliteTagRepository(client, writeNotifier);
+  return { client, writeNotifier, repo: new SqliteRecurringTaskRepository(client, tagRepo, writeNotifier) };
 }
 
 describe("SqliteRecurringTaskRepository", () => {
@@ -85,5 +87,25 @@ describe("SqliteRecurringTaskRepository", () => {
 
     const all = await repo.find();
     expect(all.map((t) => t.id).sort()).toEqual([weekly.id, dailies[0]?.id].sort());
+  });
+
+  it("notifies the write notifier on create/update/delete, and not on reads", async () => {
+    const { repo, writeNotifier } = await makeRepo();
+    const notified: string[] = [];
+    writeNotifier.subscribe((table) => notified.push(table));
+
+    const rtask = await repo.create({ name: "Daily standup", recurringType: "daily", baseDateEpoch: 1000 });
+    expect(notified).toEqual(["recurring_tasks"]);
+
+    await repo.update(rtask.id, { name: "Renamed" });
+    expect(notified).toEqual(["recurring_tasks", "recurring_tasks"]);
+
+    await repo.delete(rtask.id);
+    expect(notified).toEqual(["recurring_tasks", "recurring_tasks", "recurring_tasks"]);
+
+    notified.length = 0;
+    await repo.find();
+    await repo.findById(rtask.id);
+    expect(notified).toEqual([]);
   });
 });

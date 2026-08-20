@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -50,6 +52,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
 
     companion object {
         private const val WORK_NAME = "sync_periodic"
+        private const val ONE_TIME_WORK_NAME = "sync_once"
         private const val INTERVAL_MINUTES = 15L
 
         /** Idempotent — safe to call on every app startup; KEEP preserves the existing schedule/backoff if already enqueued. */
@@ -67,6 +70,24 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         /** Call on sign-out — periodic sync shouldn't keep running for a signed-out user. */
         fun cancel(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
+        }
+
+        /**
+         * One-off sync request for write paths with no live SyncManager to call (e.g.
+         * MarkDoneReceiver, a short-lived BroadcastReceiver). REPLACE so a burst of quick
+         * receiver firings collapses to the latest enqueue rather than stacking; the
+         * NetworkType.CONNECTED constraint holds the job until connectivity returns, which
+         * covers "skip while offline" even if the process isn't alive when it does.
+         */
+        fun enqueueOnce(context: Context) {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+            val request = OneTimeWorkRequestBuilder<SyncWorker>()
+                .setConstraints(constraints)
+                .build()
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(ONE_TIME_WORK_NAME, ExistingWorkPolicy.REPLACE, request)
         }
     }
 }
