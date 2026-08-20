@@ -1,63 +1,77 @@
 import { Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SUPPORT_EMAIL } from "@/config";
+import { SUPPORT_EMAIL, WEB_APP_SIGNUP_URL } from "@/config";
 import { useSeo } from "@/seo/Seo";
-
-const plans = [
-  {
-    name: "Gratis",
-    price: "Gratis",
-    period: "",
-    description: "Tersedia sekarang di Android",
-    features: ["Kalender Hijriah", "Penjadwalan berbasis waktu shalat", "Tugas tak terbatas", "Dukungan offline", "Aplikasi Android tersedia sekarang"],
-    cta: "Dapatkan di Google Play",
-    href: "https://play.google.com/store/apps/details?id=com.hvsna.app",
-    highlighted: false,
-    badge: true,
-  },
-  {
-    name: "Pro",
-    price: "Segera hadir",
-    period: "",
-    description: "iOS, Web & Sync — segera hadir",
-    features: [
-      "Semua fitur Gratis",
-      "Aplikasi iOS (segera hadir)",
-      "Aplikasi Web (segera hadir)",
-      "Sinkronisasi data antar perangkat",
-      "Dukungan prioritas",
-      "Dukung pengembangan",
-    ],
-    cta: "Request Akses",
-    href: "https://recraftory.notion.site/318c304e3c0e809aaaddfadf5b543091",
-    highlighted: true,
-  },
-];
-
-const faqs = [
-  {
-    question: "Apakah ada paket gratis?",
-    answer:
-      "Ya! Paket gratis memberikan akses penuh ke fitur inti termasuk kalender Hijriah, penjadwalan berbasis waktu shalat, dan tugas tak terbatas. Pro membuka fitur tambahan untuk pengguna yang lebih serius.",
-  },
-  {
-    question: "Apakah data saya dijual?",
-    answer:
-      "Tidak pernah. Kami membiayai layanan ini melalui paket Pro, bukan dengan menjual data Anda. Data Anda tetap privat dan Anda bisa mengekspor atau menghapusnya kapan saja.",
-  },
-  {
-    question: "Apakah ada diskon pelajar?",
-    answer: `Ya! Hubungi ${SUPPORT_EMAIL} dan kami akan memberikan kode diskon untuk Anda.`,
-  },
-  {
-    question: "Platform apa saja yang didukung?",
-    answer: "Hvsna saat ini tersedia di Android — unduh melalui Google Play. iOS, Web, dan Sync akan segera hadir.",
-  },
-];
+import { usePricing, formatPrice } from "@/hooks/use-pricing";
 
 export default function PricingPageID() {
   useSeo();
+  const pricing = usePricing();
+
+  const plans = [
+    {
+      name: "Gratis",
+      price: "Gratis",
+      period: "",
+      description: "Tersedia sekarang di Android dan Web",
+      features: [
+        "Kalender Hijriah",
+        "Penjadwalan berbasis waktu shalat",
+        "Tugas tak terbatas",
+        "Dukungan offline",
+        "Aplikasi Android dan Web tersedia sekarang",
+      ],
+      cta: "Dapatkan di Google Play",
+      href: "https://play.google.com/store/apps/details?id=com.hvsna.app",
+      highlighted: false,
+      badge: true,
+      secondaryCta: "Coba di Web",
+      secondaryHref: WEB_APP_SIGNUP_URL,
+    },
+    {
+      name: "Sync",
+      price: pricing ? formatPrice(pricing) : "Harga sederhana dan transparan",
+      period: "",
+      description: "Sinkronkan tugasmu antara Android dan Web",
+      features: [
+        "Semua fitur Gratis",
+        "Sync antara Android & Web",
+        "Aplikasi iOS (segera hadir)",
+        "Dukungan prioritas",
+        "Dukung pengembangan",
+      ],
+      cta: "Aktifkan Sync",
+      href: WEB_APP_SIGNUP_URL,
+      highlighted: true,
+    },
+  ];
+
+  const faqs = [
+    {
+      question: "Apakah ada paket gratis?",
+      answer:
+        "Ya! Paket gratis memberikan akses penuh ke fitur inti di Android maupun Web, termasuk kalender Hijriah, penjadwalan berbasis waktu shalat, dan tugas tak terbatas. Sync menjaga data itu tetap sama di semua perangkat.",
+    },
+    {
+      question: "Apakah data saya dijual?",
+      answer:
+        "Tidak pernah. Kami membiayai layanan ini melalui paket Sync, bukan dengan menjual data Anda. Data Anda tetap privat dan Anda bisa mengekspor atau menghapusnya kapan saja.",
+    },
+    {
+      question: "Apakah ada diskon pelajar?",
+      answer: `Ya! Hubungi ${SUPPORT_EMAIL} dan kami akan memberikan kode diskon untuk Anda.`,
+    },
+    {
+      question: "Platform apa saja yang didukung?",
+      answer: "Hvsna tersedia sekarang di Android dan Web. Aplikasi iOS akan segera hadir.",
+    },
+    {
+      question: "Bagaimana cara mulai menggunakan Sync?",
+      answer: "Buat akun di Web atau di aplikasi Android, lalu aktifkan Sync dari Pengaturan untuk menjaga tugasmu tetap sama di semua perangkat.",
+    },
+  ];
+
   return (
     <div className="min-h-screen">
       <Header currentLang="id" />
@@ -112,9 +126,19 @@ export default function PricingPageID() {
                   </ul>
 
                   {plan.badge ? (
-                    <a href={plan.href} className="flex justify-center">
-                      <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={plan.cta} className="h-14 w-auto" />
-                    </a>
+                    <div className="space-y-3">
+                      <a href={plan.href} className="flex justify-center">
+                        <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={plan.cta} className="h-14 w-auto" />
+                      </a>
+                      {plan.secondaryHref && (
+                        <a
+                          href={plan.secondaryHref}
+                          className="block w-full text-center py-3 px-4 rounded-lg font-semibold border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
+                        >
+                          {plan.secondaryCta}
+                        </a>
+                      )}
+                    </div>
                   ) : (
                     <a
                       href={plan.href}

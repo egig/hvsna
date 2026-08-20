@@ -1,4 +1,5 @@
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Globe } from "lucide-react";
+import { WEB_APP_SIGNUP_URL } from "@/config";
 
 export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
   const content = {
@@ -7,16 +8,16 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
       subtitle:
         "Prayer-first task app with Hijri calendar awareness. Finally, a productivity tool that works with your faith first.",
       primaryCTA: "Get it on Google Play",
-      secondaryCTA: "Learn More",
-      comingSoon: "iOS, Web, and Sync are coming soon",
+      secondaryCTA: "Try it on Web",
+      comingSoon: "Free on Android and Web. iOS app is coming soon.",
     },
     id: {
       title: "Atur jadwal harian, berdasarkan waktu sholat",
       subtitle:
         "Aplikasi task berbasis sholat dengan dukungan kalender Hijriah. Akhirnya, alat produktivitas yang bekerja sesuai tujuan hidup kita.",
       primaryCTA: "Dapatkan di Google Play",
-      secondaryCTA: "Pelajari Lebih Lanjut",
-      comingSoon: "iOS, Web, dan Sync akan segera hadir",
+      secondaryCTA: "Coba di Web",
+      comingSoon: "Gratis di Android dan Web. Aplikasi iOS akan segera hadir.",
     },
   };
 
@@ -49,10 +50,10 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
               </a>
 
               <a
-                href="/about"
+                href={WEB_APP_SIGNUP_URL}
                 className="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
-                <Play className="w-5 h-5 mr-2" />
+                <Globe className="w-5 h-5 mr-2" />
                 {t.secondaryCTA}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </a>

@@ -1,22 +1,23 @@
 import { ArrowRight, Check } from "lucide-react";
+import { WEB_APP_SIGNUP_URL } from "@/config";
 
 export default function CTA({ currentLang = "en" }: { currentLang?: string }) {
   const content = {
     en: {
       title: "Get your day organized",
       subtitle: "Join other Muslims who are already organizing their days the Islamic way",
-      features: ["Free to download and use", "No ads or distractions", "Your data stays private", "Works perfectly offline"],
+      features: ["Free on Android and Web", "No ads or distractions", "Your data stays private", "Works perfectly offline"],
       primaryCTA: "Get it on Google Play",
-      secondaryCTA: "Learn More",
-      comingSoon: "iOS, Web, and Sync are coming soon",
+      secondaryCTA: "Try it on Web",
+      comingSoon: "iOS app is coming soon. Sync across devices with a Sync plan.",
     },
     id: {
       title: "Buat harimu lebih teratur",
       subtitle: "Bergabunglah dengan  Muslim lainnya yang sudah mengatur hari mereka secara Islami",
-      features: ["Gratis untuk diunduh dan digunakan", "Tanpa iklan atau gangguan", "Datamu tetap privat", "Bekerja sempurna offline"],
+      features: ["Gratis di Android dan Web", "Tanpa iklan atau gangguan", "Datamu tetap privat", "Bekerja sempurna offline"],
       primaryCTA: "Dapatkan di Google Play",
-      secondaryCTA: "Lebih Detail",
-      comingSoon: "iOS, Web, dan Sync akan segera hadir",
+      secondaryCTA: "Coba di Web",
+      comingSoon: "Aplikasi iOS akan segera hadir. Sinkronkan antar perangkat dengan paket Sync.",
     },
   };
 
@@ -56,7 +57,7 @@ export default function CTA({ currentLang = "en" }: { currentLang?: string }) {
               </a>
 
               <a
-                href="/about"
+                href={WEB_APP_SIGNUP_URL}
                 className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-primary-700 text-white font-semibold rounded-lg hover:bg-primary-800 transition-colors border border-primary-500"
               >
                 {t.secondaryCTA}

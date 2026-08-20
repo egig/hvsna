@@ -1,6 +1,6 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { SUPPORT_EMAIL } from "@/config";
+import { SUPPORT_EMAIL, WEB_APP_SIGNUP_URL } from "@/config";
 import { useSeo } from "@/seo/Seo";
 
 export default function AboutPage() {
@@ -63,7 +63,7 @@ export default function AboutPage() {
               <span className="inline-block w-2 h-2 bg-primary-500 rounded-full mt-2.5 mr-3 flex-shrink-0"></span>
               <span>
                 <strong className="text-gray-900 dark:text-white">Offline-first</strong> — Works without an internet
-                connection and syncs when you are back online.
+                connection, with optional cross-device Sync when you want it.
               </span>
             </li>
           </ul>
@@ -78,9 +78,16 @@ export default function AboutPage() {
               className="text-primary-600 dark:text-primary-400 underline hover:no-underline"
             >
               Google Play
+            </a>{" "}
+            — and on the{" "}
+            <a
+              href={WEB_APP_SIGNUP_URL}
+              className="text-primary-600 dark:text-primary-400 underline hover:no-underline"
+            >
+              Web
             </a>
-            . iOS, Web, and Sync are coming soon. We are actively building and improving — your feedback helps shape
-            what comes next.
+            . Sync keeps your tasks in step across both. iOS is coming soon. We are actively building and
+            improving — your feedback helps shape what comes next.
           </p>
 
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-12 mb-4">Get in Touch</h2>
