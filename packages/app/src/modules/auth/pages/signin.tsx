@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router";
 import { Page } from "src/modules/navigation";
 import { Navbar } from "src/modules/navigation";
 import Block from "src/modules/components/block";
+import { HvLoader2 } from "@/modules/icons";
 import { useAuth } from "../use-auth";
 import { validateEmail } from "../validation";
 
@@ -139,9 +140,13 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
-                {loading ? "Signing in..." : "Sign In"}
+                {loading ? (
+                  <HvLoader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Sign In"
+                )}
               </button>
             </form>
 

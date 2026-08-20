@@ -16,3 +16,18 @@ export class NoSessionError extends AuthError {
     super("NO_SESSION", "No active session");
   }
 }
+
+/**
+ * Thrown when /auth/refresh could not be reached or answered (network
+ * error, timeout, 5xx) as opposed to the server explicitly rejecting the
+ * refresh token. Callers must NOT clear the stored refresh token on this
+ * error — the session may still be valid, just unreachable right now.
+ */
+export class RefreshUnavailableError extends AuthError {
+  constructor() {
+    super(
+      "REFRESH_UNAVAILABLE",
+      "Could not reach the server to refresh the session"
+    );
+  }
+}

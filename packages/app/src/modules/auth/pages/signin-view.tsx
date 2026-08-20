@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
+import { HvLoader2 } from "@/modules/icons";
 import { useAuth } from "../use-auth";
 import { validateEmail } from "../validation";
 
@@ -105,9 +106,13 @@ export function SignInView() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm"
+          className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-2.5 px-4 rounded-lg transition-colors text-sm"
         >
-          {loading ? "Signing in…" : "Sign In"}
+          {loading ? (
+            <HvLoader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            "Sign In"
+          )}
         </button>
       </form>
 

@@ -49,9 +49,17 @@ httpClient.interceptors.response.use(
     };
     const responseData = error.response?.data as any;
 
+    // A 401 from /auth/refresh itself means the refresh token was rejected,
+    // not that the access token needs refreshing — retrying here would call
+    // refreshSession() again while the outer refreshSession() call is still
+    // awaiting this very request, deadlocking on its own in-flight promise.
+    const isRefreshRequest = originalRequest?.url?.includes("/auth/refresh");
+
     // Handle TOKEN_EXPIRED errors
     const isTokenExpired =
-      error.response?.status === 401 && responseData?.code === "TOKEN_EXPIRED";
+      !isRefreshRequest &&
+      error.response?.status === 401 &&
+      responseData?.code === "TOKEN_EXPIRED";
     if (isTokenExpired && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true; // Mark that we've tried to refresh
 
