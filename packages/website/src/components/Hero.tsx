@@ -8,7 +8,7 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
       subtitle:
         "Prayer-first task app with Hijri calendar awareness. Finally, a productivity tool that works with your faith first.",
       primaryCTA: "Get it on Google Play",
-      secondaryCTA: "Try it on Web",
+      secondaryCTA: "Try it free",
       comingSoon: "Free on Android and Web. iOS app is coming soon.",
     },
     id: {
@@ -16,7 +16,7 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
       subtitle:
         "Aplikasi task berbasis sholat dengan dukungan kalender Hijriah. Akhirnya, alat produktivitas yang bekerja sesuai tujuan hidup kita.",
       primaryCTA: "Dapatkan di Google Play",
-      secondaryCTA: "Coba di Web",
+      secondaryCTA: "Coba Gratis",
       comingSoon: "Gratis di Android dan Web. Aplikasi iOS akan segera hadir.",
     },
   };

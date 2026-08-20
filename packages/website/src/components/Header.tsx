@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Moon, Sun, Menu, X, Globe } from "lucide-react";
 import { useTheme } from "@/theme/theme-provider";
-import { WEB_APP_SIGNIN_URL } from "@/config";
+import { WEB_APP_SIGNUP_URL } from "@/config";
 
 export default function Header({ currentLang = "en", doc = false }: { currentLang?: string, doc?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -66,12 +66,6 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
               >
                 {t.nav.pricing}
               </Link>
-              <a
-                href={WEB_APP_SIGNIN_URL}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
-              >
-                {t.nav.webApp}
-              </a>
             </nav>
 
             {/* Language Toggle */}
@@ -92,14 +86,6 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
             >
               {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-
-            {/* Sign In (Desktop) */}
-            <a
-              href={WEB_APP_SIGNIN_URL}
-              className="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 border border-primary-600 dark:border-primary-400 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
-            >
-              {t.signIn}
-            </a>
 
             {/* Download Button (Desktop) */}
             <a href="https://play.google.com/store/apps/details?id=com.hvsna.app" target="_blank" rel="noreferrer" className="hidden md:block">
@@ -136,7 +122,7 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
                 {t.nav.pricing}
               </Link>
               <a
-                href={WEB_APP_SIGNIN_URL}
+                href={WEB_APP_SIGNUP_URL}
                 className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
                 onClick={() => setIsMenuOpen(false)}
               >
