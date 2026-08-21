@@ -256,11 +256,11 @@ private fun SyncPullToRefreshBox(
     canSync: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val isSyncing by syncManager.isSyncing.collectAsState()
+    val isManualSyncing by syncManager.isManualSyncing.collectAsState()
     val pullState = rememberPullToRefreshState()
     PullToRefreshBox(
-        isRefreshing = isSyncing,
-        onRefresh = { if (canSync) syncManager.requestSync() },
+        isRefreshing = isManualSyncing,
+        onRefresh = { if (canSync) syncManager.requestSync(manual = true) },
         state = pullState,
         modifier = Modifier.fillMaxSize(),
     ) {

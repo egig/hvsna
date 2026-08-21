@@ -44,6 +44,7 @@ fun SettingsSyncScreen(
 ) {
     val authState by authViewModel.state.collectAsState()
     val isSyncing by syncManager.isSyncing.collectAsState()
+    val isManualSyncing by syncManager.isManualSyncing.collectAsState()
     val lastSyncedAt by syncManager.lastSyncedAt.collectAsState()
     val isSignedIn = authState.user != null
     val canSync = authState.user?.emailVerified == true
@@ -71,8 +72,8 @@ fun SettingsSyncScreen(
         },
     ) { innerPadding ->
         PullToRefreshBox(
-            isRefreshing = isSyncing,
-            onRefresh = { if (canSync) syncManager.requestSync() },
+            isRefreshing = isManualSyncing,
+            onRefresh = { if (canSync) syncManager.requestSync(manual = true) },
             modifier = Modifier.fillMaxSize(),
         ) {
             Column(
@@ -107,7 +108,7 @@ fun SettingsSyncScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Button(
-                        onClick = { syncManager.requestSync() },
+                        onClick = { syncManager.requestSync(manual = true) },
                         enabled = !isSyncing,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
