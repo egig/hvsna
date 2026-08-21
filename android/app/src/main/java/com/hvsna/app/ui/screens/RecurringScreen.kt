@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,8 +16,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.hvsna.app.data.RecurringType
@@ -26,14 +23,10 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.hvsna.app.ui.components.TaskListItem
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
-
-private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
 
 private fun cadenceLabel(intervalCount: Int, recurringType: String): String {
     val unitName = when (recurringType) {
@@ -97,16 +90,19 @@ fun RecurringScreen(
             contentPadding = innerPadding,
         ) {
             items(series, key = { it.rule.id }) { entry ->
-                ListItem(
-                    headlineContent = { Text(entry.nextOccurrence.title) },
-                    supportingContent = {
-                        val nextDate = entry.nextOccurrence.scheduledTime?.let { dateFormat.format(Date(it)) }
-                        Text("${cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType)} · next $nextDate")
+                val cadence = cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType)
+                val displayTask = entry.nextOccurrence.copy(
+                    description = if (entry.nextOccurrence.description.isNotEmpty()) {
+                        "$cadence · ${entry.nextOccurrence.description}"
+                    } else {
+                        cadence
                     },
-                    leadingContent = {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null)
-                    },
-                    modifier = Modifier.clickable { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
+                )
+                TaskListItem(
+                    task = displayTask,
+                    tags = entry.tags,
+                    onToggleDone = { viewModel.toggleDone(entry.nextOccurrence) },
+                    onClick = { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
                 )
             }
         }
