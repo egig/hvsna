@@ -2,6 +2,7 @@ package com.hvsna.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
@@ -10,8 +11,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -22,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -31,6 +34,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.hvsna.app.auth.AuthApi
 import com.hvsna.app.auth.AuthService
@@ -57,6 +67,7 @@ import com.hvsna.app.sync.networkReconnectEvents
 import com.hvsna.app.ui.AuthViewModel
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.TaskBottomSheet
+import com.hvsna.app.ui.navigation.AppRoute
 import com.hvsna.app.ui.screens.BrowseScreen
 import com.hvsna.app.ui.screens.SearchScreen
 import com.hvsna.app.ui.screens.SettingsScreen
@@ -83,9 +94,6 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HvsnaApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.TODAY) }
-    var showSettings by rememberSaveable { mutableStateOf(false) }
-    var selectedTagId by rememberSaveable { mutableStateOf<String?>(null) }
     var showTaskSheet by remember { mutableStateOf(false) }
     var editingTask by remember { mutableStateOf<TaskWithTags?>(null) }
     var taskDefaultScheduledTime by remember { mutableStateOf<Long?>(null) }
@@ -152,7 +160,6 @@ fun HvsnaApp() {
     val allTags by taskViewModel.allTags.collectAsState()
     val allRecurrenceRules by taskViewModel.allRecurrenceRules.collectAsState()
     val settings by taskViewModel.settings.collectAsState()
-    val activeTag = allTags.firstOrNull { it.id == selectedTagId }
 
     val onEditTask: (TaskWithTags?, Long?) -> Unit = { task, defaultScheduledTime ->
         editingTask = task
@@ -160,62 +167,112 @@ fun HvsnaApp() {
         showTaskSheet = true
     }
 
-    if (showSettings) {
-        SettingsScreen(
-            settingsRepository = settingsRepo,
-            locationRepository = locationRepo,
-            backupFileService = backupFileService,
-            authViewModel = authViewModel,
-            syncManager = syncManager,
-            onBack = { showSettings = false },
-        )
-    } else if (activeTag != null) {
-        SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
-            TagDetailScreen(
-                viewModel = taskViewModel,
-                tag = activeTag,
-                onBack = { selectedTagId = null },
-                onEditTask = onEditTask,
-            )
+    val navController = rememberNavController()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val isTopLevelRoute = currentBackStackEntry?.destination?.let {
+        it.hasRoute(AppRoute.Today::class) ||
+            it.hasRoute(AppRoute.Upcoming::class) ||
+            it.hasRoute(AppRoute.Search::class) ||
+            it.hasRoute(AppRoute.Browse::class)
+    } ?: true
+    val onTagClick: (Tag) -> Unit = { tag -> navController.navigate(AppRoute.TagDetail(tag.id)) }
+
+    NavigationSuiteScaffold(
+        layoutType = if (isTopLevelRoute) {
+            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+        } else {
+            NavigationSuiteType.None
+        },
+        navigationSuiteColors = NavigationSuiteDefaults.colors(
+            navigationBarContainerColor = MaterialTheme.colorScheme.surface,
+            navigationRailContainerColor = MaterialTheme.colorScheme.surface,
+        ),
+        navigationSuiteItems = {
+            AppDestinations.entries.forEach {
+                val isSelected = currentBackStackEntry?.destination?.hasRoute(it.route::class) == true
+                item(
+                    icon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(
+                                id = if (isSelected) it.activeIconRes else it.iconRes
+                            ),
+                            contentDescription = it.label
+                        )
+                    },
+                    label = { Text(it.label) },
+                    selected = isSelected,
+                    onClick = {
+                        navController.navigate(it.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
         }
-    } else {
-        NavigationSuiteScaffold(
-            navigationSuiteColors = NavigationSuiteDefaults.colors(
-                navigationBarContainerColor = MaterialTheme.colorScheme.surface,
-                navigationRailContainerColor = MaterialTheme.colorScheme.surface,
-            ),
-            navigationSuiteItems = {
-                AppDestinations.entries.forEach {
-                    val isSelected = it == currentDestination
-                    item(
-                        icon = {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(
-                                    id = if (isSelected) it.activeIconRes else it.iconRes
-                                ),
-                                contentDescription = it.label
-                            )
-                        },
-                        label = { Text(it.label) },
-                        selected = isSelected,
-                        onClick = { currentDestination = it }
+    ) {
+        NavHost(navController = navController, startDestination = AppRoute.Today) {
+            composable<AppRoute.Today> {
+                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                    TodayScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
+                }
+            }
+            composable<AppRoute.Upcoming> {
+                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                    UpcomingScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
+                }
+            }
+            composable<AppRoute.Search> {
+                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                    SearchScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
+                }
+            }
+            composable<AppRoute.Browse> {
+                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                    BrowseScreen(
+                        taskViewModel,
+                        onOpenSettings = { navController.navigate(AppRoute.Settings) },
+                        onTagClick = onTagClick,
+                        onEditTask = onEditTask,
                     )
                 }
             }
-        ) {
-            val onTagClick: (Tag) -> Unit = { tag -> selectedTagId = tag.id }
-            SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
-                when (currentDestination) {
-                    AppDestinations.TODAY -> TodayScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
-                    AppDestinations.UPCOMING -> UpcomingScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
-                    AppDestinations.SEARCH -> SearchScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
-                    AppDestinations.BROWSE -> BrowseScreen(taskViewModel, onOpenSettings = { showSettings = true }, onTagClick = onTagClick, onEditTask = onEditTask)
+            composable<AppRoute.TagDetail> { backStackEntry ->
+                val route: AppRoute.TagDetail = backStackEntry.toRoute()
+                val tag = allTags.firstOrNull { it.id == route.tagId }
+                if (tag != null) {
+                    SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                        TagDetailScreen(
+                            viewModel = taskViewModel,
+                            tag = tag,
+                            onBack = { navController.popBackStack() },
+                            onEditTask = onEditTask,
+                        )
+                    }
+                } else {
+                    // Deep-linked or stale tag id (deleted, or allTags hasn't loaded yet) - bounce back
+                    // rather than render TagDetailScreen with nothing to show.
+                    LaunchedEffect(Unit) { navController.popBackStack() }
                 }
+            }
+            composable<AppRoute.Settings> {
+                SettingsScreen(
+                    settingsRepository = settingsRepo,
+                    locationRepository = locationRepo,
+                    backupFileService = backupFileService,
+                    authViewModel = authViewModel,
+                    syncManager = syncManager,
+                    onBack = { navController.popBackStack() },
+                )
             }
         }
     }
 
     if (showTaskSheet) {
+        // The sheet floats above the NavHost rather than being a back-stack entry itself (see
+        // AppRoutes.kt) - intercept back explicitly so it dismisses before the NavHost sees it.
+        BackHandler { showTaskSheet = false }
         TaskBottomSheet(
             task = editingTask?.task,
             sheetState = taskSheetState,
@@ -225,7 +282,7 @@ fun HvsnaApp() {
             hasLocation = settings.hasLocation,
             remindersGloballyEnabled = settings.remindersEnabled,
             getPrayerTimes = taskViewModel::getPrayerTimesForDate,
-            onOpenSettings = { showSettings = true },
+            onOpenSettings = { navController.navigate(AppRoute.Settings) },
             hijriMonthOffsets = settings.hijriMonthOffsets,
             allTags = allTags,
             initialTagIds = editingTask?.tags?.map { it.id }?.toSet() ?: emptySet(),
@@ -286,9 +343,10 @@ enum class AppDestinations(
     val label: String,
     val iconRes: Int,
     val activeIconRes: Int,
+    val route: AppRoute,
 ) {
-    TODAY("Today", R.drawable.ic_calendar_event, R.drawable.ic_calendar_event_filled),
-    UPCOMING("Upcoming", R.drawable.ic_calendar_month, R.drawable.ic_calendar_month_filled),
-    SEARCH("Search", R.drawable.ic_search, R.drawable.ic_search_filled),
-    BROWSE("More", R.drawable.ic_dots_circle_horizontal, R.drawable.ic_dots_circle_horizontal),
+    TODAY("Today", R.drawable.ic_calendar_event, R.drawable.ic_calendar_event_filled, AppRoute.Today),
+    UPCOMING("Upcoming", R.drawable.ic_calendar_month, R.drawable.ic_calendar_month_filled, AppRoute.Upcoming),
+    SEARCH("Search", R.drawable.ic_search, R.drawable.ic_search_filled, AppRoute.Search),
+    BROWSE("More", R.drawable.ic_dots_circle_horizontal, R.drawable.ic_dots_circle_horizontal, AppRoute.Browse),
 }
