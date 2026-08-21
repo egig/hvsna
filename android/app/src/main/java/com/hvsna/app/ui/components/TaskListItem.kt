@@ -43,6 +43,7 @@ import com.hvsna.app.R
 
 private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 private val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+private val dateFormatWithYear = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault())
 private val leadingColumnWidth = 32.dp
 
 @Composable
@@ -112,6 +113,8 @@ fun TagPill(
  * [isOverdue] tints the time label red; [inPrayerSection] suppresses the prayer-name label when a
  * prayer section header already shows it (Today screen groups tasks under prayer headers).
  * [showDate] hides the date portion of the label (Today/Upcoming screens already group by date).
+ * [showYear] switches the date portion to include the year (Upcoming's later-year groups span
+ * more than one year, so the bare "EEE, MMM d" format would be ambiguous there).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -123,10 +126,13 @@ fun TaskListItem(
     isOverdue: Boolean = false,
     inPrayerSection: Boolean = false,
     showDate: Boolean = true,
+    showYear: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val done = task.isDone == 1
-    val dateLabel = if (showDate) task.scheduledTime?.let { dateFormat.format(Date(it)) } ?: "" else ""
+    val dateLabel = if (showDate) {
+        task.scheduledTime?.let { (if (showYear) dateFormatWithYear else dateFormat).format(Date(it)) } ?: ""
+    } else ""
     val timeOnlyLabel = when {
         task.atTime == null -> ""
         isPrayerAnchored(task.atTime) && inPrayerSection -> ""

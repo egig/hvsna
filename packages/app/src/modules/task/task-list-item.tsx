@@ -114,9 +114,8 @@ export function TaskListItem({
         dayjs(task.atEpochMillis).format("dddd") + (time ? `, ${time}` : "")
       );
     }
-    return (
-      dayjs(task.atEpochMillis).format("D MMMM") + (time ? `, ${time}` : "")
-    );
+    const dateFormat = taskDay.year() === today.year() ? "D MMMM" : "D MMMM YYYY";
+    return taskDay.format(dateFormat) + (time ? `, ${time}` : "");
   };
 
   const handleStatusClick = async (e: React.MouseEvent) => {

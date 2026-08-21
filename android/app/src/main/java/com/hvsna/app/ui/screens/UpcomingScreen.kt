@@ -32,15 +32,11 @@ import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.GroupHeader
 import com.hvsna.app.ui.components.TaskListItem
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
-
-private val dateHeaderFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+import com.hvsna.app.ui.groupUpcomingTasks
 
 private const val TAB_SCHEDULED = 0
 private const val TAB_UNSCHEDULED = 1
@@ -56,8 +52,7 @@ fun UpcomingScreen(
     val upcomingTasks by viewModel.upcomingTasks.collectAsState()
     val unscheduledTasks by viewModel.unscheduledTasks.collectAsState()
 
-    val tasksByDate: Map<String, List<TaskWithTags>> = upcomingTasks
-        .groupBy { dateHeaderFormat.format(Date(it.task.scheduledTime ?: 0L)) }
+    val taskGroups = groupUpcomingTasks(upcomingTasks).filter { it.tasks.isNotEmpty() }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
@@ -73,7 +68,7 @@ fun UpcomingScreen(
     }
     val scheduledListState = rememberLazyListState()
     val unscheduledListState = rememberLazyListState()
-    val isScheduledEmpty = tasksByDate.isEmpty()
+    val isScheduledEmpty = taskGroups.isEmpty()
     val isUnscheduledEmpty = unscheduledTasks.isEmpty()
     val canScroll = when (selectedTab) {
         TAB_SCHEDULED -> !isScheduledEmpty && (scheduledListState.canScrollForward || scheduledListState.canScrollBackward)
@@ -132,23 +127,25 @@ fun UpcomingScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = innerPadding,
                 ) {
-                    tasksByDate.forEach { (dateLabel, tasks) ->
-                        val isExpanded = expandedGroups.getOrPut(dateLabel) { true }
+                    taskGroups.forEach { group ->
+                        val isExpanded = expandedGroups.getOrPut(group.key) { true }
 
-                        stickyHeader(key = "header_$dateLabel") {
+                        stickyHeader(key = "header_${group.key}") {
                             GroupHeader(
-                                title = dateLabel,
+                                title = group.label,
                                 isExpanded = isExpanded,
-                                onToggle = { expandedGroups[dateLabel] = !isExpanded },
+                                onToggle = { expandedGroups[group.key] = !isExpanded },
                             )
                         }
 
                         if (isExpanded) {
-                            items(tasks, key = { it.task.id }) { entry ->
+                            val isYearGroup = group.key.startsWith("year_")
+                            items(group.tasks, key = { it.task.id }) { entry ->
                                 TaskListItem(
                                     task = entry.task,
                                     tags = entry.tags,
-                                    showDate = false,
+                                    showDate = isYearGroup,
+                                    showYear = isYearGroup,
                                     onToggleDone = { viewModel.toggleDone(entry.task) },
                                     onClick = { onEditTask(entry, null) },
                                 )

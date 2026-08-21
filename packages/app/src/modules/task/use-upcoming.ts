@@ -29,6 +29,26 @@ export function useUpcoming(horizonDays = 30) {
 
     const laterMap = new Map<string, LaterGroup>();
 
+    // Daily/weekly recurring tasks can produce many occurrences inside a
+    // single coarse group (e.g. every day of "this month") — only surface
+    // the earliest occurrence per series within each group.
+    const seenRecurringPerGroup = new Map<string, Set<string | number>>();
+    const pushToGroup = (groupKey: string, bucket: Task[], task: Task) => {
+      if (
+        (task.recurringType === "daily" || task.recurringType === "weekly") &&
+        task.recurringTaskId != null
+      ) {
+        let seen = seenRecurringPerGroup.get(groupKey);
+        if (!seen) {
+          seen = new Set();
+          seenRecurringPerGroup.set(groupKey, seen);
+        }
+        if (seen.has(task.recurringTaskId)) return;
+        seen.add(task.recurringTaskId);
+      }
+      bucket.push(task);
+    };
+
     tasks.forEach((task) => {
       if (!task.atEpochMillis) {
         fixed.unscheduled.tasks.push(task);
@@ -38,22 +58,22 @@ export function useUpcoming(horizonDays = 30) {
       const t = task.atEpochMillis;
 
       if (t >= startOfToday && t <= endOfToday) {
-        fixed.today.tasks.push(task);
+        pushToGroup("today", fixed.today.tasks, task);
         return;
       }
 
       if (t >= startOfTomorrow && t <= endOfTomorrow) {
-        fixed.tomorrow.tasks.push(task);
+        pushToGroup("tomorrow", fixed.tomorrow.tasks, task);
         return;
       }
 
       if (t > endOfTomorrow && t <= endOfWeek) {
-        fixed.thisWeek.tasks.push(task);
+        pushToGroup("thisWeek", fixed.thisWeek.tasks, task);
         return;
       }
 
       if (t > endOfWeek && t <= endOfMonth) {
-        fixed.thisMonth.tasks.push(task);
+        pushToGroup("thisMonth", fixed.thisMonth.tasks, task);
         return;
       }
 
@@ -75,7 +95,7 @@ export function useUpcoming(horizonDays = 30) {
       if (!laterMap.has(key)) {
         laterMap.set(key, { key, label, tasks: [] });
       }
-      laterMap.get(key)!.tasks.push(task);
+      pushToGroup(key, laterMap.get(key)!.tasks, task);
     });
 
     const laterGroups = Array.from(laterMap.values()).sort((a, b) =>

@@ -45,8 +45,10 @@ import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.data.hijriDateLabel
 import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.ui.TaskViewModel
+import com.hvsna.app.ui.TodayGroupedTasks
 import com.hvsna.app.ui.components.EmptyState
 import com.hvsna.app.ui.components.TaskListItem
+import com.hvsna.app.ui.groupTodayTasks
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -59,8 +61,33 @@ private val todayHeaderFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault
 private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
 private sealed class TodayListItem {
-    data class PrayerHeader(val name: String) : TodayListItem()
+    data class PrayerHeader(val name: String, val timeLabel: String?, val dayKey: String) : TodayListItem()
     data class TaskEntry(val entry: TaskWithTags) : TodayListItem()
+    data class DayDivider(val label: String) : TodayListItem()
+}
+
+// task.scheduledTime for a prayer-pinned task holds the *deadline* (next prayer's start,
+// or midnight for Isha) so it can be flagged overdue - not the prayer's own start time.
+// Sorting the visible list by that deadline pushes late-window prayers (Isha) toward
+// midnight, ahead of unrelated tasks that fall earlier in the evening. Use the prayer's
+// actual start time from prayerTimeMap for display ordering instead.
+private fun displaySortKey(entry: TaskWithTags, prayerTimeMap: Map<String, Long>): Long {
+    val atTime = entry.task.atTime
+    return if (atTime != null && isPrayerAnchored(atTime)) prayerTimeMap[atTime] ?: entry.task.scheduledTime ?: Long.MAX_VALUE
+    else entry.task.scheduledTime ?: Long.MAX_VALUE
+}
+
+private fun buildDayItems(tasks: List<TaskWithTags>, prayerTimeMap: Map<String, Long>, dayKey: String): List<TodayListItem> = buildList {
+    val seenPrayers = mutableSetOf<String>()
+    for (entry in tasks.sortedBy { displaySortKey(it, prayerTimeMap) }) {
+        val atTime = entry.task.atTime
+        if (atTime != null && isPrayerAnchored(atTime) && atTime !in seenPrayers) {
+            val timeLabel = prayerTimeMap[atTime]?.let { timeFormat.format(Date(it)) }
+            add(TodayListItem.PrayerHeader(atTime, timeLabel, dayKey))
+            seenPrayers.add(atTime)
+        }
+        add(TodayListItem.TaskEntry(entry))
+    }
 }
 
 private fun Modifier.dashedLine(color: Color, strokeWidth: Dp = 1.dp): Modifier = drawBehind {
@@ -99,33 +126,41 @@ fun TodayScreen(
     }
 
     val now = System.currentTimeMillis()
-    val (timeOverdue, activeTodayTasks) = todayTasks.partition {
-        it.task.atTime != null && (it.task.scheduledTime ?: Long.MAX_VALUE) < now
+    val todayEndEpoch = remember(now) {
+        Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }.timeInMillis
     }
-    val allOverdueTasks = overdueTasks + timeOverdue.sortedBy { it.task.scheduledTime }
+    val isAfterMaghrib = prayerTimeMap["Maghrib"]?.let { now >= it } ?: false
 
-    // task.scheduledTime for a prayer-pinned task holds the *deadline* (next prayer's start,
-    // or midnight for Isha) so it can be flagged overdue - not the prayer's own start time.
-    // Sorting the visible list by that deadline pushes late-window prayers (Isha) toward
-    // midnight, ahead of unrelated tasks that fall earlier in the evening. Use the prayer's
-    // actual start time from prayerTimeMap for display ordering instead.
-    fun displaySortKey(entry: TaskWithTags): Long {
-        val atTime = entry.task.atTime
-        return if (atTime != null && isPrayerAnchored(atTime)) prayerTimeMap[atTime] ?: entry.task.scheduledTime ?: Long.MAX_VALUE
-        else entry.task.scheduledTime ?: Long.MAX_VALUE
-    }
-
-    val flatTodayItems = buildList {
-        val seenPrayers = mutableSetOf<String>()
-        for (entry in activeTodayTasks.sortedBy(::displaySortKey)) {
-            val atTime = entry.task.atTime
-            if (atTime != null && isPrayerAnchored(atTime) && atTime !in seenPrayers) {
-                add(TodayListItem.PrayerHeader(atTime))
-                seenPrayers.add(atTime)
-            }
-            add(TodayListItem.TaskEntry(entry))
+    // Once Maghrib has passed, viewModel.todayTasks already extends its fetch window into
+    // tomorrow (see TaskViewModel.todayTaskWindowEnd) - pull tomorrow's own prayer times so
+    // its section gets correctly-labeled headers instead of reusing today's times.
+    val tomorrowPrayerTimeMap = remember(settings, isAfterMaghrib) {
+        if (!isAfterMaghrib || !settings.hasLocation) emptyMap()
+        else Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.let {
+            viewModel.getPrayerTimesForDate(
+                it.get(Calendar.YEAR),
+                it.get(Calendar.MONTH) + 1,
+                it.get(Calendar.DAY_OF_MONTH),
+            ).toMap()
         }
     }
+    val tomorrowLabel = remember(now) {
+        todayHeaderFormat.format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.time)
+    }
+
+    val grouped: TodayGroupedTasks = groupTodayTasks(overdueTasks, todayTasks, now, todayEndEpoch)
+    val allOverdueTasks = grouped.overdue
+    val flatTodayItems = buildDayItems(grouped.today, prayerTimeMap, dayKey = "today") +
+        if (grouped.tomorrow.isNotEmpty()) {
+            listOf(TodayListItem.DayDivider(tomorrowLabel)) + buildDayItems(grouped.tomorrow, tomorrowPrayerTimeMap, dayKey = "tomorrow")
+        } else {
+            emptyList()
+        }
 
     val isEmpty = allOverdueTasks.isEmpty() && flatTodayItems.isEmpty() && completedTasks.isEmpty()
 
@@ -230,16 +265,14 @@ fun TodayScreen(
                 flatTodayItems,
                 key = { item ->
                     when (item) {
-                        is TodayListItem.PrayerHeader -> "prayer_${item.name}"
+                        is TodayListItem.PrayerHeader -> "prayer_${item.dayKey}_${item.name}"
                         is TodayListItem.TaskEntry -> item.entry.task.id
+                        is TodayListItem.DayDivider -> "day_divider_${item.label}"
                     }
                 },
             ) { item ->
                 when (item) {
-                    is TodayListItem.PrayerHeader -> {
-                        val timeLabel = prayerTimeMap[item.name]?.let { timeFormat.format(Date(it)) }
-                        PrayerSectionHeader(name = item.name, time = timeLabel)
-                    }
+                    is TodayListItem.PrayerHeader -> PrayerSectionHeader(name = item.name, time = item.timeLabel)
                     is TodayListItem.TaskEntry -> TaskListItem(
                         task = item.entry.task,
                         tags = item.entry.tags,
@@ -249,6 +282,7 @@ fun TodayScreen(
                         onToggleDone = { viewModel.toggleDone(item.entry.task) },
                         onClick = { onEditTask(item.entry, null) },
                     )
+                    is TodayListItem.DayDivider -> DayDivider(label = item.label)
                 }
             }
 
@@ -364,6 +398,34 @@ private fun PrayerSectionHeader(name: String, time: String?) {
                 modifier = Modifier.padding(bottom = 0.dp)
             )
         }
+    }
+}
+
+/** Separates today's remaining tasks from tomorrow's, shown once the Today window has
+ * rolled past Maghrib (see TaskViewModel.todayTaskWindowEnd) - mirrors the web app's
+ * TomorrowDivider in today.tsx. */
+@Composable
+private fun DayDivider(label: String) {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 8.dp),
+    ) {
+        Text(
+            label,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            letterSpacing = 1.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(
+            Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
+                .height(1.dp)
+                .dashedLine(MaterialTheme.colorScheme.outlineVariant),
+        )
     }
 }
 

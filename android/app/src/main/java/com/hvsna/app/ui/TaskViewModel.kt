@@ -15,6 +15,7 @@ import com.hvsna.app.data.TaskRepository
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.reminder.ReminderScheduler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,9 +24,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Calendar
+
+private const val MAGHRIB_RECHECK_INTERVAL_MS = 60_000L
 
 data class RecurringSeriesUiModel(val rule: RecurrenceRule, val nextOccurrence: Task, val tags: List<Tag> = emptyList())
 
@@ -59,9 +64,42 @@ class TaskViewModel(
     }
 
     private fun tomorrowStart(): Long = todayStart() + 86_400_000L
+    private fun dayAfterTomorrowStart(): Long = todayStart() + 2 * 86_400_000L
+
+    /** Maghrib epoch for the calendar day starting at [dayStart], or null without a location. */
+    private fun maghribEpochFor(dayStart: Long, appSettings: AppSettings): Long? {
+        if (!appSettings.hasLocation) return null
+        val cal = Calendar.getInstance().apply { timeInMillis = dayStart }
+        return prayerTimesRepository.getPrayerList(
+            cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
+            appSettings.lat, appSettings.lng, appSettings.calculationMethod, appSettings.madhab,
+        ).firstOrNull { it.first == "Maghrib" }?.second
+    }
+
+    private fun tickerFlow(periodMs: Long): Flow<Unit> = flow {
+        while (true) {
+            emit(Unit)
+            delay(periodMs)
+        }
+    }
 
     val settings: StateFlow<AppSettings> = settingsRepository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
+
+    /**
+     * Once today's Maghrib has passed, the Today screen's task window extends
+     * into tomorrow (up to tomorrow's end of day) the same way the web app's
+     * useToday() does — mirrors [todayStart]/[tomorrowStart] as an *exclusive*
+     * upper bound for [TaskRepository.getToday]. Re-evaluated every minute
+     * since Maghrib passing isn't otherwise a state change that recomposes.
+     */
+    private val todayTaskWindowEnd: StateFlow<Long> = combine(settings, tickerFlow(MAGHRIB_RECHECK_INTERVAL_MS)) { s, _ -> s }
+        .map { s ->
+            val maghrib = maghribEpochFor(todayStart(), s)
+            val isAfterMaghrib = maghrib != null && System.currentTimeMillis() >= maghrib
+            if (isAfterMaghrib) dayAfterTomorrowStart() else tomorrowStart()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), tomorrowStart())
 
     /** Merges real DB rows with lazily-computed virtual occurrences from every active RecurrenceRule in range — virtual rows inherit the owning rule's tags. */
     private fun withVirtualOccurrences(
@@ -87,9 +125,11 @@ class TaskViewModel(
         (real + virtual).sortedWith(compareBy(nullsLast()) { it.task.scheduledTime })
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val todayTasks: StateFlow<List<TaskWithTags>> =
-        withVirtualOccurrences(repository.getToday(todayStart(), tomorrowStart()), todayStart(), tomorrowStart() - 1)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val todayTasks: StateFlow<List<TaskWithTags>> = todayTaskWindowEnd
+        .flatMapLatest { windowEnd ->
+            withVirtualOccurrences(repository.getToday(todayStart(), windowEnd), todayStart(), windowEnd - 1)
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val completedTasks: StateFlow<List<TaskWithTags>> = repository
         .getCompleted(todayStart(), tomorrowStart())
