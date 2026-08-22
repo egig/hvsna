@@ -20,11 +20,21 @@ private val Context.authDataStore: DataStore<Preferences> by preferencesDataStor
 
 private object Keys {
     val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+    val LOGOUT_REASON = stringPreferencesKey("logout_reason")
 }
 
 private const val KEYSET_NAME = "hvsna_auth_keyset"
 private const val KEYSET_PREF_FILE = "hvsna_auth_keyset_prefs"
 private const val MASTER_KEY_URI = "android-keystore://hvsna_auth_master_key"
+
+/**
+ * Why the last session ended — recorded by [AuthService] whenever it clears the stored
+ * session, including from a background [com.hvsna.app.sync.SyncWorker] run with no UI in
+ * front of it. [AuthViewModel][com.hvsna.app.ui.AuthViewModel] consumes (reads-and-clears)
+ * this once on the next start so a background-discovered logout still gets an accurate
+ * message instead of just silently landing on the sign-in form.
+ */
+enum class LogoutReason { NONE, EXPIRED, SECURITY_REVOKED }
 
 /**
  * Persists the refresh token in DataStore, encrypted with Tink directly — androidx.security's
@@ -59,5 +69,16 @@ class SessionRepository(context: Context) {
 
     suspend fun clearRefreshToken() = withContext(Dispatchers.IO) {
         appContext.authDataStore.edit { prefs -> prefs.remove(Keys.REFRESH_TOKEN) }
+    }
+
+    suspend fun setLogoutReason(reason: LogoutReason) = withContext(Dispatchers.IO) {
+        appContext.authDataStore.edit { prefs -> prefs[Keys.LOGOUT_REASON] = reason.name }
+    }
+
+    /** Reads and clears the stored reason — each one is surfaced to the UI at most once. */
+    suspend fun consumeLogoutReason(): LogoutReason = withContext(Dispatchers.IO) {
+        val stored = appContext.authDataStore.data.first()[Keys.LOGOUT_REASON]
+        appContext.authDataStore.edit { prefs -> prefs.remove(Keys.LOGOUT_REASON) }
+        stored?.let { runCatching { LogoutReason.valueOf(it) }.getOrNull() } ?: LogoutReason.NONE
     }
 }

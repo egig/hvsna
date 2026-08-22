@@ -107,7 +107,7 @@ fun HvsnaApp() {
     val authService = remember {
         AuthService(AuthApi(okHttpClient), tokenStore, SessionRepository(context))
     }
-    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(authService))
+    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(authService, context))
     val authState by authViewModel.state.collectAsState()
     val canSync = authState.user?.emailVerified == true
 
@@ -142,11 +142,14 @@ fun HvsnaApp() {
     )
 
     // Sign-in / app-foreground trigger, plus WorkManager (de)scheduling on auth transitions.
+    // Only descheduling on a *confirmed* logout, not while merely reconnecting — otherwise
+    // opening the app offline would deschedule background sync entirely until some other
+    // trigger (e.g. a fresh sign-in) re-schedules it.
     LaunchedEffect(authState.user != null) {
         if (authState.user != null) {
             syncManager.requestSync()
             SyncWorker.schedule(context)
-        } else if (!authState.loading) {
+        } else if (!authState.loading && !authState.reconnecting) {
             SyncWorker.cancel(context)
         }
     }

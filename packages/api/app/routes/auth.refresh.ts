@@ -1,7 +1,7 @@
 import { signAccessToken } from "@/lib/jwt";
 import { readJsonBody } from "@/lib/request";
 import { ApiError, jsonOk, jsonUnexpectedError } from "@/lib/response";
-import { rotateRefreshToken } from "@/lib/tokens";
+import { rotateRefreshToken, TokenReuseDetectedError } from "@/lib/tokens";
 
 export async function action({ request }: { request: Request }) {
   try {
@@ -11,7 +11,19 @@ export async function action({ request }: { request: Request }) {
       throw new ApiError(400, "INVALID_REQUEST", "refresh_token is required");
     }
 
-    const rotated = await rotateRefreshToken(refreshToken);
+    let rotated;
+    try {
+      rotated = await rotateRefreshToken(refreshToken);
+    } catch (error) {
+      if (error instanceof TokenReuseDetectedError) {
+        throw new ApiError(
+          401,
+          "TOKEN_REUSE_DETECTED",
+          "Refresh token reuse detected; session revoked"
+        );
+      }
+      throw error;
+    }
     if (!rotated) {
       throw new ApiError(401, "TOKEN_EXPIRED", "Refresh token is invalid or expired");
     }

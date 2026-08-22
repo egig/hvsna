@@ -7,6 +7,9 @@ import kotlinx.coroutines.sync.withLock
 class NoSessionException : Exception("No active session")
 class SessionExpiredException : Exception("Session has expired")
 
+/** Thrown when the server detected a revoked refresh token being redeemed again (TOKEN_REUSE_DETECTED) and revoked the whole session family. */
+class SessionRevokedException : Exception("Session revoked for security")
+
 /**
  * Thrown when /auth/refresh could not be reached or answered (network
  * error, timeout, 5xx) as opposed to the server explicitly rejecting the
@@ -66,7 +69,11 @@ class AuthService(
         }
         tokenStore.clearAccessToken()
         sessionRepo.clearRefreshToken()
+        sessionRepo.setLogoutReason(LogoutReason.NONE)
     }
+
+    /** Reads and clears the reason the last session ended, for [ui.AuthViewModel][com.hvsna.app.ui.AuthViewModel] to show once. */
+    suspend fun consumeLogoutReason(): LogoutReason = sessionRepo.consumeLogoutReason()
 
     /** Dedupes concurrent refreshes into a single in-flight request, like the web client's refreshPromise. */
     suspend fun refreshSession(): Session {
@@ -103,6 +110,11 @@ class AuthService(
             if (error.status == 401) {
                 tokenStore.clearAccessToken()
                 sessionRepo.clearRefreshToken()
+                if (error.isReuseDetected) {
+                    sessionRepo.setLogoutReason(LogoutReason.SECURITY_REVOKED)
+                    throw SessionRevokedException()
+                }
+                sessionRepo.setLogoutReason(LogoutReason.EXPIRED)
                 throw SessionExpiredException()
             }
             throw RefreshUnavailableException()
@@ -139,7 +151,7 @@ class AuthService(
             // couldn't reach the server right now (offline, timeout) — leave
             // the token in place so a later retry can still restore the
             // session.
-            if (error is SessionExpiredException || error is NoSessionException) {
+            if (error is SessionExpiredException || error is NoSessionException || error is SessionRevokedException) {
                 sessionRepo.clearRefreshToken()
             }
         }
@@ -148,5 +160,8 @@ class AuthService(
     private suspend fun applySession(session: Session) {
         tokenStore.setAccessToken(session.access_token)
         sessionRepo.saveRefreshToken(session.refresh_token)
+        // Clears out any stale reason from a previous session ending, so it can never
+        // resurface and be misattributed to whatever ends *this* new session later.
+        sessionRepo.setLogoutReason(LogoutReason.NONE)
     }
 }

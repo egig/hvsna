@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.hvsna.app.ui.AuthLogoutReason
 import com.hvsna.app.ui.AuthViewModel
 
 private val EMAIL_REGEX = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
@@ -36,22 +37,49 @@ fun ColumnScope.AuthAccountSection(viewModel: AuthViewModel) {
     Text("Account", style = MaterialTheme.typography.titleMedium)
 
     val user = state.user
-    if (user != null) {
-        Text(
-            if (user.firstName.isNotBlank()) "${user.firstName} ${user.lastName}".trim() else user.email,
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Text(user.email, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Button(
-            onClick = { viewModel.signOut() },
-            enabled = !state.loading,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Sign out")
+    when {
+        user != null -> {
+            Text(
+                if (user.firstName.isNotBlank()) "${user.firstName} ${user.lastName}".trim() else user.email,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            Text(user.email, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Button(
+                onClick = { viewModel.signOut() },
+                enabled = !state.loading,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Sign out")
+            }
         }
-    } else {
-        SignedOutForm(viewModel = viewModel, loading = state.loading, error = state.error)
+        state.reconnecting -> ReconnectingSection(onRetry = { viewModel.retryConnection() })
+        else -> {
+            LogoutReasonBanner(state.logoutReason)
+            SignedOutForm(viewModel = viewModel, loading = state.loading, error = state.error)
+        }
     }
+}
+
+@Composable
+private fun ColumnScope.ReconnectingSection(onRetry: () -> Unit) {
+    Text(
+        "Reconnecting to check your session…",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+    TextButton(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+        Text("Retry now")
+    }
+}
+
+@Composable
+private fun ColumnScope.LogoutReasonBanner(reason: AuthLogoutReason) {
+    val message = when (reason) {
+        AuthLogoutReason.SECURITY_REVOKED -> "You were signed out for your security — please sign in again."
+        AuthLogoutReason.EXPIRED -> "Your session expired — please sign in again."
+        AuthLogoutReason.NONE -> null
+    } ?: return
+    Text(message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
 }
 
 @Composable

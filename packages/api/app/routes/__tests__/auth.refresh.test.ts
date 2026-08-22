@@ -26,9 +26,11 @@ describe("POST /auth/refresh", () => {
         {
           id: "row-1",
           userId: "user-1",
+          familyId: "fam-1",
           tokenHash: "x",
           expiresAt: new Date(Date.now() + 1_000_000),
           revokedAt: null,
+          replacedByTokenId: null,
           createdAt: new Date(),
         },
       ])
@@ -44,7 +46,7 @@ describe("POST /auth/refresh", () => {
     expect(body.data.refresh_token).toEqual(expect.any(String));
   });
 
-  it("returns 401 TOKEN_EXPIRED for an unknown/expired/revoked token", async () => {
+  it("returns 401 TOKEN_EXPIRED for an unknown or expired token", async () => {
     db.select.mockReturnValue(createChain([]));
 
     const response = await action({ request: makeRequest({ refresh_token: "unknown" }) });
@@ -52,6 +54,30 @@ describe("POST /auth/refresh", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.code).toBe("TOKEN_EXPIRED");
+  });
+
+  it("returns 401 TOKEN_REUSE_DETECTED when an already-revoked token is redeemed again", async () => {
+    db.select.mockReturnValue(
+      createChain([
+        {
+          id: "row-1",
+          userId: "user-1",
+          familyId: "fam-1",
+          tokenHash: "x",
+          expiresAt: new Date(Date.now() + 1_000_000),
+          revokedAt: new Date(),
+          replacedByTokenId: null,
+          createdAt: new Date(),
+        },
+      ])
+    );
+    db.update.mockReturnValue(createChain([]));
+
+    const response = await action({ request: makeRequest({ refresh_token: "revoked-token" }) });
+
+    expect(response.status).toBe(401);
+    const body = await response.json();
+    expect(body.code).toBe("TOKEN_REUSE_DETECTED");
   });
 
   it("returns 400 INVALID_REQUEST when refresh_token is missing", async () => {

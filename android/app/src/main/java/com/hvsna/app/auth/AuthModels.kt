@@ -21,3 +21,6 @@ data class AuthUser(
 class ApiException(val status: Int, val errorCode: String, message: String) : Exception(message)
 
 val ApiException.isTokenExpired: Boolean get() = status == 401 && errorCode == "TOKEN_EXPIRED"
+
+/** The server detected a revoked refresh token being redeemed again — the whole session family was revoked. */
+val ApiException.isReuseDetected: Boolean get() = status == 401 && errorCode == "TOKEN_REUSE_DETECTED"

@@ -25,18 +25,47 @@ export const users = pgTable("users", {
     .defaultNow(),
 });
 
+/**
+ * `familyId` groups every token descended from one login/register call (one
+ * per device session) — rotation carries it forward, so the whole chain
+ * shares it. `replacedByTokenId` points a revoked row at whatever token it
+ * was rotated into, letting a redeemed-but-already-revoked token be told
+ * apart as either a lost-response retry (successor is still live, redeemed
+ * within the reuse grace window — see rotateRefreshToken) or actual reuse
+ * (anything else), which revokes the whole family. Deliberately not a real
+ * FK — self-referencing FKs need the two-migration add-column-then-add-
+ * constraint dance in Postgres, and this is an internal bookkeeping pointer
+ * rather than data integrity that needs DB-level enforcement.
+ */
 export const refreshTokens = pgTable("refresh_tokens", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  familyId: uuid("family_id").notNull().defaultRandom(),
   tokenHash: text("token_hash").notNull().unique(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  replacedByTokenId: uuid("replaced_by_token_id"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });
+
+/**
+ * Per-email failed-login counter for /login throttling — keyed by email
+ * rather than IP (simplest thing that stops both credential stuffing and
+ * plain brute force against one account; see login-throttle.ts). One row
+ * per email; `firstFailedAt` anchors the current window and gets reset
+ * whenever a failure arrives after the window has elapsed.
+ */
+export const loginAttempts = pgTable("login_attempts", {
+  email: text("email").primaryKey(),
+  failCount: integer("fail_count").notNull().default(0),
+  firstFailedAt: timestamp("first_failed_at", { withTimezone: true }).notNull(),
+});
+
+export type LoginAttemptRow = typeof loginAttempts.$inferSelect;
 
 /**
  * One-time tokens emailed to a user to prove control of their address.

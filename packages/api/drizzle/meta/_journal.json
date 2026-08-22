@@ -43,6 +43,13 @@
       "when": 1786663220673,
       "tag": "0005_round_nightshade",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787295654635,
+      "tag": "0006_first_impossible_man",
+      "breakpoints": true
     }
   ]
 }
