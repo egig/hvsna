@@ -98,6 +98,22 @@ class RecurrenceGeneratorTest {
     }
 
     @Test
+    fun `isPrayerAnchored treats null blank and clock times as not prayer-anchored`() {
+        assertEquals(false, isPrayerAnchored(null))
+        assertEquals(false, isPrayerAnchored(""))
+        assertEquals(false, isPrayerAnchored("   "))
+        assertEquals(false, isPrayerAnchored("09:30"))
+        assertEquals(true, isPrayerAnchored("Dhuhr"))
+    }
+
+    @Test
+    fun `resolveOccurrenceEpoch treats blank atTime as end of day`() {
+        val date = LocalDate.of(2026, 1, 1)
+        assertEquals(stampEndOfDay(date), resolveOccurrenceEpoch(date, "", noPrayer))
+        assertEquals(stampEndOfDay(date), resolveOccurrenceEpoch(date, null, noPrayer))
+    }
+
+    @Test
     fun `occurrenceExceptions suppresses a matching virtual occurrence`() {
         val anchor = LocalDate.of(2026, 1, 1)
         val rule = ruleFor(anchor, RecurringType.DAILY, 1).copy(

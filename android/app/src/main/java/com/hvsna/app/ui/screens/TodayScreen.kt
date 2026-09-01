@@ -1,7 +1,5 @@
 package com.hvsna.app.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -30,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -47,6 +43,7 @@ import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.TodayGroupedTasks
 import com.hvsna.app.ui.components.EmptyState
+import com.hvsna.app.ui.components.SectionHeader
 import com.hvsna.app.ui.components.TaskListItem
 import com.hvsna.app.ui.groupTodayTasks
 import java.text.SimpleDateFormat
@@ -61,10 +58,22 @@ private val todayHeaderFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault
 private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
 private sealed class TodayListItem {
-    data class PrayerHeader(val name: String, val timeLabel: String?, val dayKey: String) : TodayListItem()
-    data class TaskEntry(val entry: TaskWithTags) : TodayListItem()
+    data class PrayerHeader(
+        val name: String,
+        val timeLabel: String?,
+        val dayKey: String,
+        val groupKey: String,
+    ) : TodayListItem()
+    /** [groupKey] is the owning prayer section's key, or null for a free-time / end-of-day task
+     * that stands on its own with no collapsible header. */
+    data class TaskEntry(val entry: TaskWithTags, val groupKey: String?) : TodayListItem()
     data class DayDivider(val label: String) : TodayListItem()
 }
+
+/** Mirrors the web app's getPrayerTimeDisplay: "Dhuhr (12:15)" when the prayer time is known,
+ * bare "Dhuhr" otherwise. */
+private fun prayerHeaderLabel(name: String, timeLabel: String?): String =
+    if (timeLabel != null) "$name ($timeLabel)" else name
 
 // task.scheduledTime for a prayer-pinned task holds the *deadline* (next prayer's start,
 // or midnight for Isha) so it can be flagged overdue - not the prayer's own start time.
@@ -81,12 +90,14 @@ private fun buildDayItems(tasks: List<TaskWithTags>, prayerTimeMap: Map<String, 
     val seenPrayers = mutableSetOf<String>()
     for (entry in tasks.sortedBy { displaySortKey(it, prayerTimeMap) }) {
         val atTime = entry.task.atTime
-        if (atTime != null && isPrayerAnchored(atTime) && atTime !in seenPrayers) {
+        val isPrayer = atTime != null && isPrayerAnchored(atTime)
+        val groupKey = if (isPrayer) "prayer_${dayKey}_$atTime" else null
+        if (isPrayer && atTime !in seenPrayers) {
             val timeLabel = prayerTimeMap[atTime]?.let { timeFormat.format(Date(it)) }
-            add(TodayListItem.PrayerHeader(atTime, timeLabel, dayKey))
+            add(TodayListItem.PrayerHeader(atTime!!, timeLabel, dayKey, groupKey!!))
             seenPrayers.add(atTime)
         }
-        add(TodayListItem.TaskEntry(entry))
+        add(TodayListItem.TaskEntry(entry, groupKey))
     }
 }
 
@@ -241,9 +252,12 @@ fun TodayScreen(
             if (allOverdueTasks.isNotEmpty()) {
                 val isExpanded = expandedGroups["Overdue"] == true
                 stickyHeader(key = "header_Overdue") {
-                    OverdueHeader(
+                    SectionHeader(
+                        label = "Overdue",
                         isExpanded = isExpanded,
                         onToggle = { expandedGroups["Overdue"] = !isExpanded },
+                        color = MaterialTheme.colorScheme.error,
+                        background = MaterialTheme.colorScheme.surface,
                     )
                 }
                 if (isExpanded) {
@@ -261,18 +275,31 @@ fun TodayScreen(
                 }
             }
 
+            val visibleTodayItems = flatTodayItems.filter { item ->
+                item !is TodayListItem.TaskEntry ||
+                    item.groupKey == null ||
+                    expandedGroups[item.groupKey] != false
+            }
             items(
-                flatTodayItems,
+                visibleTodayItems,
                 key = { item ->
                     when (item) {
-                        is TodayListItem.PrayerHeader -> "prayer_${item.dayKey}_${item.name}"
+                        is TodayListItem.PrayerHeader -> item.groupKey
                         is TodayListItem.TaskEntry -> item.entry.task.id
                         is TodayListItem.DayDivider -> "day_divider_${item.label}"
                     }
                 },
             ) { item ->
                 when (item) {
-                    is TodayListItem.PrayerHeader -> PrayerSectionHeader(name = item.name, time = item.timeLabel)
+                    is TodayListItem.PrayerHeader -> {
+                        val isExpanded = expandedGroups[item.groupKey] != false
+                        SectionHeader(
+                            label = prayerHeaderLabel(item.name, item.timeLabel),
+                            isExpanded = isExpanded,
+                            onToggle = { expandedGroups[item.groupKey] = !isExpanded },
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                     is TodayListItem.TaskEntry -> TaskListItem(
                         task = item.entry.task,
                         tags = item.entry.tags,
@@ -289,10 +316,13 @@ fun TodayScreen(
             if (completedTasks.isNotEmpty()) {
                 val isExpanded = expandedGroups["Completed"] == true
                 stickyHeader(key = "header_Completed") {
-                    CompletedHeader(
-                        count = completedTasks.size,
+                    SectionHeader(
+                        label = "Completed",
                         isExpanded = isExpanded,
                         onToggle = { expandedGroups["Completed"] = !isExpanded },
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        count = completedTasks.size,
+                        background = MaterialTheme.colorScheme.surface,
                     )
                 }
                 if (isExpanded) {
@@ -309,94 +339,6 @@ fun TodayScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun OverdueHeader(
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-) {
-    val chevronRotation by animateFloatAsState(targetValue = if (isExpanded) 0f else -90f, label = "chevron")
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onToggle() }
-            .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 8.dp),
-    ) {
-        Text(
-            "Overdue",
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 17.sp,
-            color = MaterialTheme.colorScheme.error,
-        )
-        Spacer(
-            Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp)
-                .height(1.dp)
-                .dashedLine(MaterialTheme.colorScheme.outlineVariant),
-        )
-        Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
-            contentDescription = if (isExpanded) "Collapse" else "Expand",
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier
-                .rotate(chevronRotation)
-                .size(16.dp),
-        )
-    }
-}
-
-private fun prayerIconRes(name: String): Int = when (name) {
-    "Fajr" -> R.drawable.ic_sunrise
-    "Sunrise" -> R.drawable.ic_sun_low
-    "Dhuhr" -> R.drawable.ic_sun
-    "Asr" -> R.drawable.ic_sunset
-    "Maghrib" -> R.drawable.ic_sunset_2
-    "Isha" -> R.drawable.ic_moon
-    else -> R.drawable.ic_clock
-}
-
-@Composable
-private fun PrayerSectionHeader(name: String, time: String?) {
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 40.dp, bottom = 8.dp),
-    ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(id = prayerIconRes(name)),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(end = 6.dp, bottom = 1.dp)
-                .size(16.dp),
-        )
-        Text(
-            name,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 17.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 0.dp)
-        )
-        Spacer(
-            Modifier
-                .weight(1f)
-                .height(1.dp)
-                .dashedLine(MaterialTheme.colorScheme.outlineVariant),
-        )
-        if (time != null) {
-            Text(
-                time,
-                fontSize = 11.sp,
-                letterSpacing = 0.3.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 0.dp)
-            )
         }
     }
 }
@@ -425,39 +367,6 @@ private fun DayDivider(label: String) {
                 .padding(start = 8.dp)
                 .height(1.dp)
                 .dashedLine(MaterialTheme.colorScheme.outlineVariant),
-        )
-    }
-}
-
-@Composable
-private fun CompletedHeader(
-    count: Int,
-    isExpanded: Boolean,
-    onToggle: () -> Unit,
-) {
-    val chevronRotation by animateFloatAsState(targetValue = if (isExpanded) 0f else -90f, label = "chevron")
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onToggle() }
-            .padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 10.dp),
-    ) {
-        Text(
-            "Completed ($count)",
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp,
-            letterSpacing = 1.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
-        Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
-            contentDescription = if (isExpanded) "Collapse" else "Expand",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .rotate(chevronRotation)
-                .size(18.dp),
         )
     }
 }

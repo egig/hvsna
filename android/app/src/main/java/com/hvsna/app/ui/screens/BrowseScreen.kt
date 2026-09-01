@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -128,7 +129,12 @@ fun BrowseScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         tags.forEach { tag ->
-                            TagPill(tag = tag, onClick = { onTagClick(tag) })
+                            TagPill(
+                                tag = tag,
+                                onClick = { onTagClick(tag) },
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            )
                         }
                     }
                 }

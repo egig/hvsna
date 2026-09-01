@@ -60,6 +60,30 @@ class WireMappingTest {
     }
 
     @Test
+    fun `incoming blank at_time normalizes to null`() {
+        // web persists "" and null interchangeably for "no time"; a blank prayer name
+        // would otherwise render an empty prayer-section header on the Today screen
+        val taskWire = TaskWireRow(
+            id = "t", name = "x", description = null, status = 0,
+            at_time = "", at_epoch_millis = 1L, lat = null, lng = null, timezone = null,
+            recurring_type = null, recurring_interval = null, recurring_task_id = null,
+            hijri_date_offset = null, tag_ids = emptyList(),
+            created_at = 1L, updated_at = 1L, completed_at = null, deleted_at = null,
+        )
+        assertEquals(null, taskWire.toTask().atTime)
+
+        val ruleWire = RecurringTaskWireRow(
+            id = "r", name = "x", description = null,
+            recurring_type = RecurringType.DAILY, recurring_interval = 1, base_date_epoch = 1L,
+            at_time = "  ", lat = null, lng = null, timezone = null, hijri_date_offset = null,
+            tag_ids = emptyList(), recurring_end = RecurringEnd.NEVER, recurring_end_epoch = null,
+            recurring_end_occurrences = null, use_gregorian = 0, occurrence_exceptions = null,
+            created_at = 1L, updated_at = 1L, deleted_at = null,
+        )
+        assertEquals(null, ruleWire.toRecurrenceRule().atTime)
+    }
+
+    @Test
     fun `recurrence rule round-trips and carries its tag_ids`() {
         val rule = RecurrenceRule(
             id = "rule-1",

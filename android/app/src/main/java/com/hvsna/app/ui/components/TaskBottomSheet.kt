@@ -184,7 +184,7 @@ fun TaskBottomSheet(
     var selectedPrayerName by remember(task) { mutableStateOf(task?.atTime?.takeIf { isPrayerAnchored(it) }) }
     var isAllDay by remember(task) {
         mutableStateOf(
-            if (task != null) task.scheduledTime != null && task.atTime == null
+            if (task != null) task.scheduledTime != null && task.atTime.isNullOrBlank()
             else defaultScheduledTime != null
         )
     }

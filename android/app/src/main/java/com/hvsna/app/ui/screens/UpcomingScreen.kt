@@ -30,7 +30,7 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
-import com.hvsna.app.ui.components.GroupHeader
+import com.hvsna.app.ui.components.SectionHeader
 import com.hvsna.app.ui.components.TaskListItem
 import java.util.Calendar
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -131,10 +131,11 @@ fun UpcomingScreen(
                         val isExpanded = expandedGroups.getOrPut(group.key) { true }
 
                         stickyHeader(key = "header_${group.key}") {
-                            GroupHeader(
-                                title = group.label,
+                            SectionHeader(
+                                label = group.label,
                                 isExpanded = isExpanded,
                                 onToggle = { expandedGroups[group.key] = !isExpanded },
+                                background = MaterialTheme.colorScheme.surface,
                             )
                         }
 

@@ -54,10 +54,11 @@ interface TaskDao {
 
     @Transaction
     @Query("""
-        SELECT * FROM task WHERE title LIKE '%' || :query || '%' AND deletedAt IS NULL
+        SELECT * FROM task
+        WHERE (title LIKE '%' || :query || '%' OR description LIKE '%' || :query || '%')
+        AND isDone = 0 AND deletedAt IS NULL
         AND (
-            isDone = 1
-            OR recurringTaskId IS NULL
+            recurringTaskId IS NULL
             OR id = (
                 SELECT t2.id FROM task t2 WHERE t2.recurringTaskId = task.recurringTaskId AND t2.isDone = 0 AND t2.deletedAt IS NULL
                 ORDER BY t2.scheduledTime ASC, t2.id ASC LIMIT 1
@@ -171,7 +172,7 @@ interface TaskDao {
     @Query("UPDATE task SET deletedAt = :now, updatedAt = :now, _dirty = 1 WHERE recurringTaskId = :recurringTaskId AND isDone = 0 AND deletedAt IS NULL AND id != :exceptTaskId")
     suspend fun deleteUndoneForRecurrenceExcept(recurringTaskId: String, exceptTaskId: String, now: Long = System.currentTimeMillis())
 
-    @Query("SELECT * FROM task WHERE atTime IS NOT NULL AND atTime NOT LIKE '%:%' AND isDone = 0 AND deletedAt IS NULL")
+    @Query("SELECT * FROM task WHERE atTime IS NOT NULL AND atTime != '' AND atTime NOT LIKE '%:%' AND isDone = 0 AND deletedAt IS NULL")
     suspend fun getAllUndonePrayerAnchoredTasks(): List<Task>
 
     @Query("SELECT * FROM task WHERE reminderEnabled = 1 AND isDone = 0 AND deletedAt IS NULL")

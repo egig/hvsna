@@ -42,7 +42,9 @@ fun TaskWireRow.toTask(): Task = Task(
     description = description ?: "",
     scheduledTime = at_epoch_millis,
     isDone = status,
-    atTime = at_time,
+    // web persists "" and null interchangeably for "no time"; normalize so Android's
+    // isPrayerAnchored / Today-screen grouping never sees a blank prayer name
+    atTime = at_time?.takeIf { it.isNotBlank() },
     completedTime = completed_at,
     recurringTaskId = recurring_task_id,
     recurringType = recurring_type,
@@ -86,7 +88,7 @@ fun RecurringTaskWireRow.toRecurrenceRule(): RecurrenceRule = RecurrenceRule(
     recurringType = recurring_type,
     recurringInterval = recurring_interval,
     baseDateEpoch = base_date_epoch,
-    atTime = at_time,
+    atTime = at_time?.takeIf { it.isNotBlank() },
     lat = lat,
     lng = lng,
     timezone = timezone,

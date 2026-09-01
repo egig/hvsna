@@ -33,7 +33,7 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.EmptyState
-import com.hvsna.app.ui.components.GroupHeader
+import com.hvsna.app.ui.components.SectionHeader
 import com.hvsna.app.ui.components.TagEditBottomSheet
 import com.hvsna.app.ui.components.TaskListItem
 import kotlinx.coroutines.flow.collectLatest
@@ -135,10 +135,13 @@ fun TagDetailScreen(
                 if (entries.isNotEmpty()) {
                     val isExpanded = expandedGroups[label] == true
                     stickyHeader(key = "header_$label") {
-                        GroupHeader(
-                            title = label,
+                        SectionHeader(
+                            label = label,
                             isExpanded = isExpanded,
                             onToggle = { expandedGroups[label] = !isExpanded },
+                            color = if (label == "Overdue") MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurface,
+                            background = MaterialTheme.colorScheme.surface,
                         )
                     }
                     if (isExpanded) {

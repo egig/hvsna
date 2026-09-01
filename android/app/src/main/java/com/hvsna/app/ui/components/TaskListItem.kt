@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hvsna.app.data.Tag
@@ -78,6 +80,9 @@ fun TaskCheckbox(
  * Colored tag pill shared by every screen that lists tags (task rows, Browse screen's tag list,
  * the task edit form's selected-tags row). Pass [onClick] to make the pill tappable (e.g.
  * navigating to that tag's detail screen) and [trailingContent] to append e.g. a remove icon.
+ *
+ * Defaults render the compact pill used inside dense task rows. The Browse screen's standalone
+ * tag list passes [fontSize]/[contentPadding] to render a roomier, base-size pill instead.
  */
 @Composable
 fun TagPill(
@@ -85,6 +90,8 @@ fun TagPill(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
+    fontSize: TextUnit = 10.sp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 6.dp),
 ) {
     val tagColor = Color(tag.color.toInt())
     Row(
@@ -93,11 +100,11 @@ fun TagPill(
             .clip(RoundedCornerShape(4.dp))
             .background(tagColor.copy(alpha = 0.15f))
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
-            .padding(horizontal = 6.dp, vertical = 0.dp),
+            .padding(contentPadding),
     ) {
         Text(
             "#${tag.name}",
-            fontSize = 10.sp,
+            fontSize = fontSize,
             letterSpacing = 0.5.sp,
             color = tagColor,
         )
@@ -134,7 +141,7 @@ fun TaskListItem(
         task.scheduledTime?.let { (if (showYear) dateFormatWithYear else dateFormat).format(Date(it)) } ?: ""
     } else ""
     val timeOnlyLabel = when {
-        task.atTime == null -> ""
+        task.atTime.isNullOrBlank() -> ""
         isPrayerAnchored(task.atTime) && inPrayerSection -> ""
         isPrayerAnchored(task.atTime) -> task.atTime
         else -> task.scheduledTime?.let { timeFormat.format(Date(it)) } ?: ""

@@ -122,7 +122,7 @@ fun groupTodayTasks(
     todayEndEpoch: Long,
 ): TodayGroupedTasks {
     val (timeOverdue, active) = todayWindowTasks.partition {
-        it.task.atTime != null && (it.task.scheduledTime ?: Long.MAX_VALUE) < now
+        !it.task.atTime.isNullOrBlank() && (it.task.scheduledTime ?: Long.MAX_VALUE) < now
     }
     val overdue = (baseOverdue + timeOverdue).sortedBy { it.task.scheduledTime ?: Long.MAX_VALUE }
     val (today, tomorrow) = active.partition { (it.task.scheduledTime ?: 0L) <= todayEndEpoch }

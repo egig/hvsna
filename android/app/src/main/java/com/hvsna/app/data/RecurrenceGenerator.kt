@@ -38,8 +38,13 @@ fun stampEndOfDay(date: LocalDate): Long = Calendar.getInstance().apply {
     set(Calendar.MILLISECOND, 999)
 }.timeInMillis
 
-/** True if `atTime` names a prayer rather than a literal "HH:mm" time — matches packages/app's isPrayerBased. */
-fun isPrayerAnchored(atTime: String?): Boolean = atTime != null && !atTime.contains(":")
+/**
+ * True if `atTime` names a prayer rather than a literal "HH:mm" time — matches packages/app's
+ * isPrayerBased, except blank strings count as "no time" (web relies on a `if (!task.atTime)`
+ * check running first to catch those; Android has no such ordering, so guard here). A synced
+ * `at_time = ""` would otherwise render an empty prayer-section header on the Today screen.
+ */
+fun isPrayerAnchored(atTime: String?): Boolean = !atTime.isNullOrBlank() && !atTime.contains(":")
 
 fun occurrenceDateKey(date: LocalDate): String = "%04d%02d%02d".format(date.year, date.monthValue, date.dayOfMonth)
 
@@ -60,7 +65,7 @@ fun serializeOccurrenceExceptions(dates: Set<String>): String = Json.encodeToStr
  * `atTime == null` means all-day, stamped at end of day.
  */
 fun resolveOccurrenceEpoch(date: LocalDate, atTime: String?, resolvePrayerEndTime: (String, LocalDate) -> Long?): Long {
-    if (atTime == null) return stampEndOfDay(date)
+    if (atTime.isNullOrBlank()) return stampEndOfDay(date)
     if (!atTime.contains(":")) {
         return resolvePrayerEndTime(atTime, date) ?: stampEndOfDay(date)
     }
