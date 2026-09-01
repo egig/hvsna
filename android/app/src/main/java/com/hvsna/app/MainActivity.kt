@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,6 +56,8 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskDatabase
 import com.hvsna.app.data.TaskRepository
 import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.data.ThemeMode
+import com.hvsna.app.data.themeModeFlow
 import com.hvsna.app.reminder.ReminderScheduler
 import com.hvsna.app.sync.CursorStore
 import com.hvsna.app.sync.SyncApi
@@ -84,7 +87,14 @@ class MainActivity : ComponentActivity() {
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         enableEdgeToEdge()
         setContent {
-            HvsnaTheme {
+            val context = LocalContext.current
+            val themeMode by remember { themeModeFlow(context) }.collectAsState(initial = ThemeMode.SYSTEM)
+            val darkTheme = when (themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+            HvsnaTheme(darkTheme = darkTheme) {
                 HvsnaApp()
             }
         }

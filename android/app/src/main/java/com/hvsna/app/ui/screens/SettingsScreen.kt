@@ -36,7 +36,7 @@ import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 
 private enum class SettingsSubScreen {
-    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, ABOUT
+    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, ABOUT
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +84,10 @@ fun SettingsScreen(
         }
         SettingsSubScreen.REMINDERS -> {
             SettingsRemindersScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
+            return
+        }
+        SettingsSubScreen.APPEARANCE -> {
+            SettingsAppearanceScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
         SettingsSubScreen.ABOUT -> {
@@ -159,6 +163,11 @@ fun SettingsScreen(
                 headlineContent = { Text("Reminders") },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_bell), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.REMINDERS },
+            )
+            ListItem(
+                headlineContent = { Text("Appearance") },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_sun), contentDescription = null) },
+                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.APPEARANCE },
             )
 
             HorizontalDivider()
