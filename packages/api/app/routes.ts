@@ -14,5 +14,6 @@ export default [
   route("geocode/search", "routes/geocode.search.ts"),
   route("subscription", "routes/subscription.ts"),
   route("subscription/checkout", "routes/subscription.checkout.ts"),
+  route("pricing", "routes/pricing.ts"),
   route("webhooks/lemonsqueezy", "routes/webhooks.lemonsqueezy.ts"),
 ] satisfies RouteConfig;

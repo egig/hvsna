@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createCheckout, verifyWebhookSignature } from "../lemonsqueezy";
+import { createCheckout, getVariantPricing, verifyWebhookSignature } from "../lemonsqueezy";
 
 describe("createCheckout", () => {
   beforeEach(() => {
@@ -57,6 +57,51 @@ describe("createCheckout", () => {
     await expect(
       createCheckout({ userId: "user-1", email: "person@example.com", name: "A B" })
     ).rejects.toMatchObject({ status: 502, code: "UPSTREAM_ERROR" });
+  });
+});
+
+describe("getVariantPricing", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns the variant's price from a successful response", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: { attributes: { price: 300, is_subscription: true, interval: "month", interval_count: 1 } },
+        }),
+        { status: 200 }
+      )
+    );
+
+    const pricing = await getVariantPricing();
+
+    expect(pricing).toEqual({
+      priceCents: 300,
+      currency: "USD",
+      isSubscription: true,
+      interval: "month",
+      intervalCount: 1,
+    });
+    const [calledUrl] = vi.mocked(fetch).mock.calls[0];
+    expect(String(calledUrl)).toBe("https://api.lemonsqueezy.com/v1/variants/2");
+  });
+
+  it("throws UPSTREAM_ERROR when Lemon Squeezy responds with a non-ok status", async () => {
+    vi.mocked(fetch).mockResolvedValue(new Response("nope", { status: 500 }));
+
+    await expect(getVariantPricing()).rejects.toMatchObject({ status: 502, code: "UPSTREAM_ERROR" });
+  });
+
+  it("throws UPSTREAM_ERROR when the response has no price", async () => {
+    vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ data: {} }), { status: 200 }));
+
+    await expect(getVariantPricing()).rejects.toMatchObject({ status: 502, code: "UPSTREAM_ERROR" });
   });
 });
 

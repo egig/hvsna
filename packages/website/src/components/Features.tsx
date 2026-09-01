@@ -27,8 +27,8 @@ export default function Features({ currentLang = "en" }: { currentLang?: string 
         {
           icon: Cloud,
           title: "Offline First",
-          description: "Works perfectly offline, syncs when connection is available*",
-          details: ["Full offline functionality", "Automatic cloud sync", "Data privacy protection"],
+          description: "Works perfectly offline on Android and Web, with optional cross-device Sync",
+          details: ["Full offline functionality", "Cross-device Sync (Sync plan)", "Data privacy protection"],
         },
       ],
     },
@@ -57,8 +57,8 @@ export default function Features({ currentLang = "en" }: { currentLang?: string 
         {
           icon: Cloud,
           title: "Dukungan offline",
-          description: "Bekerja sempurna tanpa internet, sinkron saat koneksi tersedia",
-          details: ["Fungsionalitas offline penuh", "Sinkronisasi cloud otomatis", "Perlindungan privasi data"],
+          description: "Bekerja sempurna tanpa internet di Android dan Web, dengan Sync antar perangkat (opsional)",
+          details: ["Fungsionalitas offline penuh", "Sync antar perangkat (paket Sync)", "Perlindungan privasi data"],
         },
       ],
     },

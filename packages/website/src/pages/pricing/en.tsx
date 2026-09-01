@@ -1,63 +1,76 @@
 import { Check } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SUPPORT_EMAIL } from "@/config";
+import { SUPPORT_EMAIL, WEB_APP_SIGNUP_URL } from "@/config";
 import { useSeo } from "@/seo/Seo";
-
-const plans = [
-  {
-    name: "Free",
-    price: "Free",
-    period: "",
-    description: "Available now on Android",
-    features: ["Hijri calendar awareness", "Prayer-anchored scheduling", "Unlimited tasks", "Offline support", "Android app available now"],
-    cta: "Get it on Google Play",
-    href: "https://play.google.com/store/apps/details?id=com.hvsna.app",
-    highlighted: false,
-    badge: true,
-  },
-  {
-    name: "Sync",
-    price: "Coming soon",
-    period: "",
-    description: "iOS, Web & Sync — coming soon",
-    features: [
-      "All Free features",
-      "iOS app (coming soon)",
-      "Web app (coming soon)",
-      "Sync data across devices",
-      "Priority support",
-      "Support the developement",
-    ],
-    cta: "Request Access",
-    href: "https://recraftory.notion.site/318c304e3c0e809aaaddfadf5b543091",
-    highlighted: true,
-  },
-];
-
-const faqs = [
-  {
-    question: "Is there a free plan?",
-    answer:
-      "Yes! The free plan gives you full access to core features including Hijri calendar awareness, prayer-anchored scheduling, and unlimited tasks. Pro unlocks sync and support the developments.",
-  },
-  {
-    question: "Do you sell my data?",
-    answer:
-      "Never. We keep the lights on by offering a Pro plan, not by selling your data. Your data stays private and you can export or delete it at any time.",
-  },
-  {
-    question: "Do you offer a student discount?",
-    answer: `Yes! Reach out to ${SUPPORT_EMAIL} and we will get you a discount code.`,
-  },
-  {
-    question: "What platforms do you support?",
-    answer: "Hvsna is currently available on Android — download it on Google Play. iOS, Web, and Sync are coming soon.",
-  },
-];
+import { usePricing, formatPrice } from "@/hooks/use-pricing";
 
 export default function PricingPage() {
   useSeo();
+  const pricing = usePricing();
+
+  const plans = [
+    {
+      name: "Free",
+      price: "Free",
+      period: "",
+      description: "Available now on Android and Web",
+      features: [
+        "Hijri calendar awareness",
+        "Prayer-anchored scheduling",
+        "Unlimited tasks",
+        "Offline support",
+        "Android and Web apps available now, iOS app (coming soon)",
+      ],
+      cta: "Get it on Google Play",
+      href: "https://play.google.com/store/apps/details?id=com.hvsna.app",
+      highlighted: false,
+      badge: true,
+      secondaryCta: "Try it on Web",
+      secondaryHref: WEB_APP_SIGNUP_URL,
+    },
+    {
+      name: "Sync",
+      price: pricing ? formatPrice(pricing) : "Simple, transparent pricing",
+      period: "",
+      description: "Sync your tasks across devices",
+      features: [
+        "All Free features",
+        "Sync across Android & Web",
+        "Priority support",
+        "Support the development",
+      ],
+      cta: "Get Sync",
+      href: WEB_APP_SIGNUP_URL,
+      highlighted: true,
+    },
+  ];
+
+  const faqs = [
+    {
+      question: "Is there a free plan?",
+      answer:
+        "Yes! The free plan gives you full access to core features on both Android and Web, including Hijri calendar awareness, prayer-anchored scheduling, and unlimited tasks. Sync unlocks keeping that data in step across devices.",
+    },
+    {
+      question: "Do you sell my data?",
+      answer:
+        "Never. We keep the lights on by offering a Sync plan, not by selling your data. Your data stays private and you can export or delete it at any time.",
+    },
+    {
+      question: "Do you offer a student discount?",
+      answer: `Yes! Reach out to ${SUPPORT_EMAIL} and we will get you a discount code.`,
+    },
+    {
+      question: "What platforms do you support?",
+      answer: "Hvsna is available now on Android and Web. iOS is coming soon.",
+    },
+    {
+      question: "How do I start syncing?",
+      answer: "Create an account on Web or in the Android app, then subscribe to Sync from Settings to keep your tasks in step across devices.",
+    },
+  ];
+
   return (
     <div className="min-h-screen">
       <Header currentLang="en" />
@@ -112,9 +125,19 @@ export default function PricingPage() {
                   </ul>
 
                   {plan.badge ? (
-                    <a href={plan.href} className="flex justify-center">
-                      <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={plan.cta} className="h-14 w-auto" />
-                    </a>
+                    <div className="space-y-3">
+                      <a href={plan.href} className="flex justify-center">
+                        <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={plan.cta} className="h-14 w-auto" />
+                      </a>
+                      {plan.secondaryHref && (
+                        <a
+                          href={plan.secondaryHref}
+                          className="block w-full text-center py-3 px-4 rounded-lg font-semibold border border-primary-600 text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
+                        >
+                          {plan.secondaryCta}
+                        </a>
+                      )}
+                    </div>
                   ) : (
                     <a
                       href={plan.href}

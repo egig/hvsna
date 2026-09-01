@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Moon, Sun, Menu, X, Globe } from "lucide-react";
 import { useTheme } from "@/theme/theme-provider";
+import { WEB_APP_SIGNUP_URL } from "@/config";
 
 export default function Header({ currentLang = "en", doc = false }: { currentLang?: string, doc?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,9 +16,11 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
         pricing: "Pricing",
         blog: "Blog",
         changelog: "Changelog",
+        webApp: "Web App",
       },
       language: "Language",
       download: "Download",
+      signIn: "Sign In",
     },
     id: {
       nav: {
@@ -26,9 +29,11 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
         pricing: "Harga",
         blog: "Blog",
         changelog: "Catatan Perubahan",
+        webApp: "Web App",
       },
       language: "Bahasa",
       download: "Unduh",
+      signIn: "Masuk",
     },
   };
 
@@ -116,6 +121,13 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
               >
                 {t.nav.pricing}
               </Link>
+              <a
+                href={WEB_APP_SIGNUP_URL}
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t.nav.webApp} — {t.signIn}
+              </a>
             </nav>
           </div>
         )}

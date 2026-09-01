@@ -114,6 +114,61 @@ export function verifyWebhookSignature(rawBody: string, signatureHeader: string 
   return timingSafeEqual(expectedBuffer, actualBuffer);
 }
 
+export interface VariantPricing {
+  priceCents: number;
+  currency: string;
+  isSubscription: boolean;
+  interval: string | null;
+  intervalCount: number | null;
+}
+
+/**
+ * Fetches the price of the app's single paid variant, so the marketing
+ * site can display a real figure instead of a hardcoded one that drifts
+ * from whatever is actually configured in Lemon Squeezy.
+ */
+export async function getVariantPricing(): Promise<VariantPricing> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/variants/${getVariantId()}`, {
+      headers: {
+        Accept: "application/vnd.api+json",
+        Authorization: `Bearer ${getApiKey()}`,
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+  } catch {
+    throw new ApiError(502, "UPSTREAM_ERROR", "Failed to reach Lemon Squeezy");
+  }
+
+  if (!response.ok) {
+    throw new ApiError(502, "UPSTREAM_ERROR", `Lemon Squeezy variant request failed (${response.status})`);
+  }
+
+  const body = (await response.json()) as {
+    data?: {
+      attributes?: {
+        price?: number;
+        is_subscription?: boolean;
+        interval?: string | null;
+        interval_count?: number | null;
+      };
+    };
+  };
+  const attributes = body.data?.attributes;
+  if (typeof attributes?.price !== "number") {
+    throw new ApiError(502, "UPSTREAM_ERROR", "Lemon Squeezy response did not include a price");
+  }
+
+  return {
+    priceCents: attributes.price,
+    currency: "USD",
+    isSubscription: attributes.is_subscription ?? true,
+    interval: attributes.interval ?? null,
+    intervalCount: attributes.interval_count ?? null,
+  };
+}
+
 export interface LemonSqueezySubscriptionAttributes {
   customer_id: number;
   order_id: number;

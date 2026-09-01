@@ -1,6 +1,6 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { SUPPORT_EMAIL } from "@/config";
+import { SUPPORT_EMAIL, WEB_APP_SIGNUP_URL } from "@/config";
 import { useSeo } from "@/seo/Seo";
 
 export default function AboutPageID() {
@@ -64,7 +64,7 @@ export default function AboutPageID() {
               <span className="inline-block w-2 h-2 bg-primary-500 rounded-full mt-2.5 mr-3 flex-shrink-0"></span>
               <span>
                 <strong className="text-gray-900 dark:text-white">Offline-first</strong> — Berfungsi tanpa koneksi
-                internet dan sinkronisasi otomatis saat Anda kembali online.
+                internet, dengan Sync antar perangkat opsional saat Anda membutuhkannya.
               </span>
             </li>
           </ul>
@@ -79,9 +79,13 @@ export default function AboutPageID() {
               className="text-primary-600 dark:text-primary-400 underline hover:no-underline"
             >
               Google Play
+            </a>{" "}
+            — dan di{" "}
+            <a href={WEB_APP_SIGNUP_URL} className="text-primary-600 dark:text-primary-400 underline hover:no-underline">
+              Web
             </a>
-            . iOS, Web, dan Sync akan segera hadir. Kami terus membangun dan memperbaiki — masukan Anda sangat
-            membantu dalam menentukan langkah selanjutnya.
+            . Sync menjaga tugas Anda tetap sama di keduanya. Aplikasi iOS akan segera hadir. Kami terus membangun
+            dan memperbaiki — masukan Anda sangat membantu dalam menentukan langkah selanjutnya.
           </p>
 
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-12 mb-4">Hubungi Kami</h2>
