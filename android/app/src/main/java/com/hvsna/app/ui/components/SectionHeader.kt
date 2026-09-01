@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 /**
  * Collapsible list-section header shared by every task list that groups its rows — the Today
@@ -62,7 +63,7 @@ fun SectionHeader(
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
-            contentDescription = if (isExpanded) "Collapse" else "Expand",
+            contentDescription = LocalStrings.current[if (isExpanded) "a11y.collapse" else "a11y.expand"],
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .rotate(chevronRotation)

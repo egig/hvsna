@@ -34,9 +34,10 @@ import com.hvsna.app.ui.AuthViewModel
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 private enum class SettingsSubScreen {
-    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, ABOUT
+    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, LANGUAGE, ABOUT
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,6 +51,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     var subScreen by remember { mutableStateOf(SettingsSubScreen.NONE) }
 
     when (subScreen) {
@@ -90,6 +92,10 @@ fun SettingsScreen(
             SettingsAppearanceScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
+        SettingsSubScreen.LANGUAGE -> {
+            SettingsLanguageScreen(settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
+            return
+        }
         SettingsSubScreen.ABOUT -> {
             SettingsAboutScreen(onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
@@ -105,7 +111,7 @@ fun SettingsScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Settings") },
+                title = { Text(strings["settings.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -113,7 +119,7 @@ fun SettingsScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -127,17 +133,17 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             ListItem(
-                headlineContent = { Text("Account") },
+                headlineContent = { Text(strings["settings.account"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_user), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.LOGIN },
             )
             ListItem(
-                headlineContent = { Text("Sync") },
+                headlineContent = { Text(strings["settings.sync"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.SYNC },
             )
             ListItem(
-                headlineContent = { Text("Backup & Restore") },
+                headlineContent = { Text(strings["settings.backup"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud_upload), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.BACKUP },
             )
@@ -145,35 +151,40 @@ fun SettingsScreen(
             HorizontalDivider()
 
             ListItem(
-                headlineContent = { Text("Location") },
+                headlineContent = { Text(strings["settings.location"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_map_pin), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.LOCATION },
             )
             ListItem(
-                headlineContent = { Text("Prayer Time") },
+                headlineContent = { Text(strings["settings.prayerTime"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.PRAYER_TIME },
             )
             ListItem(
-                headlineContent = { Text("Hijri Date") },
+                headlineContent = { Text(strings["settings.hijriDate"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_moon), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.HIJRI_MONTH_OFFSETS },
             )
             ListItem(
-                headlineContent = { Text("Reminders") },
+                headlineContent = { Text(strings["settings.reminders"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_bell), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.REMINDERS },
             )
             ListItem(
-                headlineContent = { Text("Appearance") },
+                headlineContent = { Text(strings["settings.appearance"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_sun), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.APPEARANCE },
+            )
+            ListItem(
+                headlineContent = { Text(strings["settings.language"]) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_language), contentDescription = null) },
+                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.LANGUAGE },
             )
 
             HorizontalDivider()
 
             ListItem(
-                headlineContent = { Text("About") },
+                headlineContent = { Text(strings["settings.about"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_info_circle), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.ABOUT },
             )

@@ -12,6 +12,7 @@ import com.hvsna.app.auth.NoSessionException
 import com.hvsna.app.auth.RefreshUnavailableException
 import com.hvsna.app.auth.SessionExpiredException
 import com.hvsna.app.auth.SessionRevokedException
+import com.hvsna.app.i18n.Translations
 import com.hvsna.app.sync.networkReconnectEvents
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -109,9 +110,12 @@ class AuthViewModel(
         _state.value = _state.value.copy(error = null)
     }
 
-    private fun Throwable.toUserMessage(): String = when (this) {
-        is ApiException -> message ?: "Something went wrong"
-        else -> "Couldn't reach the server. Check your connection and try again."
+    private fun Throwable.toUserMessage(): String {
+        val strings = Translations.current(context)
+        return when (this) {
+            is ApiException -> message ?: strings["auth.genericError"]
+            else -> strings["auth.networkError"]
+        }
     }
 
     class Factory(

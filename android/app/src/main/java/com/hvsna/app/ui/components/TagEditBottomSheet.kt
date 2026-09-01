@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.Tag
+import com.hvsna.app.i18n.LocalStrings
 import com.hvsna.app.ui.theme.TagPalette
 
 private fun Color.toArgbLong(): Long = toArgb().toLong() and 0xFFFFFFFFL
@@ -52,6 +53,7 @@ fun TagEditBottomSheet(
     onDelete: (Tag) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     var name by remember(tag) { mutableStateOf(tag.name) }
     var color by remember(tag) { mutableStateOf(tag.color) }
     var hexInput by remember(tag) {
@@ -84,17 +86,17 @@ fun TagEditBottomSheet(
                 .imePadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Edit tag", style = MaterialTheme.typography.titleLarge)
+            Text(strings["tagEdit.title"], style = MaterialTheme.typography.titleLarge)
 
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text(strings["tagEdit.name"]) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Text("Color", style = MaterialTheme.typography.labelLarge)
+            Text(strings["tagEdit.color"], style = MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 TagPalette.forEach { swatch ->
                     val swatchArgb = swatch.toArgbLong()
@@ -114,7 +116,7 @@ fun TagEditBottomSheet(
                 }
             }
 
-            Text("Custom Color", style = MaterialTheme.typography.labelSmall)
+            Text(strings["tagEdit.customColor"], style = MaterialTheme.typography.labelSmall)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -158,7 +160,7 @@ fun TagEditBottomSheet(
                             }
                         }
                     },
-                    label = { Text("Hex Code") },
+                    label = { Text(strings["tagEdit.hexCode"]) },
                     placeholder = { Text("RRGGBB") },
                     prefix = { Text("#") },
                     singleLine = true,
@@ -181,7 +183,7 @@ fun TagEditBottomSheet(
                 enabled = name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Save")
+                Text(strings["tagEdit.save"])
             }
 
             OutlinedButton(
@@ -196,7 +198,7 @@ fun TagEditBottomSheet(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
             ) {
-                Text("Delete")
+                Text(strings["tagEdit.delete"])
             }
         }
     }

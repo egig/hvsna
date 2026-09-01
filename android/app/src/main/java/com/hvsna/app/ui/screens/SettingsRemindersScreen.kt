@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 private fun hasNotificationPermission(context: Context): Boolean =
     NotificationManagerCompat.from(context).areNotificationsEnabled()
@@ -64,6 +65,7 @@ fun SettingsRemindersScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val settings by settingsRepository.settings.collectAsState(initial = com.hvsna.app.data.AppSettings())
 
@@ -84,7 +86,7 @@ fun SettingsRemindersScreen(
             }
         } else {
             remindersPendingEnable = false
-            remindersMessage = "Notification permission is required for reminders"
+            remindersMessage = strings["reminders.permissionRequired"]
         }
     }
 
@@ -119,7 +121,7 @@ fun SettingsRemindersScreen(
                     }
                 } else if (settings.remindersEnabled && (!notifOk || !alarmOk)) {
                     scope.launch { settingsRepository.updateRemindersEnabled(false) }
-                    remindersMessage = "Reminders permission was revoked"
+                    remindersMessage = strings["reminders.permissionRevoked"]
                 }
             }
         }
@@ -135,7 +137,7 @@ fun SettingsRemindersScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Reminders") },
+                title = { Text(strings["reminders.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -143,7 +145,7 @@ fun SettingsRemindersScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -161,7 +163,7 @@ fun SettingsRemindersScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    "Get notified before scheduled tasks are due",
+                    strings["reminders.description"],
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),

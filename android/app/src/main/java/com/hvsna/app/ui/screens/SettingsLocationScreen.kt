@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,6 +55,7 @@ fun SettingsLocationScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val settings by settingsRepository.settings.collectAsState(initial = com.hvsna.app.data.AppSettings())
 
@@ -110,7 +112,7 @@ fun SettingsLocationScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Location") },
+                title = { Text(strings["location.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -118,7 +120,7 @@ fun SettingsLocationScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -133,7 +135,7 @@ fun SettingsLocationScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                if (settings.cityName.isNotEmpty()) settings.cityName else "Location not set",
+                if (settings.cityName.isNotEmpty()) settings.cityName else strings["location.notSet"],
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -150,13 +152,13 @@ fun SettingsLocationScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
-                Text(if (isDetecting) "Detecting…" else "Use GPS")
+                Text(if (isDetecting) strings["location.detecting"] else strings["location.useGps"])
             }
 
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                label = { Text("Search city") },
+                label = { Text(strings["location.searchCity"]) },
                 singleLine = true,
                 trailingIcon = {
                     IconButton(
@@ -173,7 +175,7 @@ fun SettingsLocationScreen(
                         if (isSearching) {
                             CircularProgressIndicator(strokeWidth = 2.dp)
                         } else {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_search), contentDescription = "Search")
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_search), contentDescription = strings["a11y.search"])
                         }
                     }
                 },

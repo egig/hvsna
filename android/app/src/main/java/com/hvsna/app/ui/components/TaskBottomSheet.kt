@@ -73,13 +73,10 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
-import java.util.Locale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
-
-private val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-private val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+import com.hvsna.app.i18n.LocalStrings
 
 @Composable
 private fun UnderlineTextField(
@@ -170,6 +167,9 @@ fun TaskBottomSheet(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val strings = LocalStrings.current
+    val dateFormat = remember(strings.locale) { SimpleDateFormat("MMM d, yyyy", strings.locale) }
+    val timeFormat = remember(strings.locale) { SimpleDateFormat("h:mm a", strings.locale) }
 
     var title by remember(task) { mutableStateOf(task?.title ?: "") }
     var description by remember(task) { mutableStateOf(task?.description ?: "") }
@@ -284,9 +284,9 @@ fun TaskBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     IconButton(onClick = { showDatePicker = false }) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
-                    Text("Select date", style = MaterialTheme.typography.titleLarge)
+                    Text(strings["task.selectDate"], style = MaterialTheme.typography.titleLarge)
                 }
 
                 HijriDatePicker(
@@ -294,6 +294,7 @@ fun TaskBottomSheet(
                     hijriMonthOffsets = hijriMonthOffsets,
                     onDateSelected = { date -> applySelectedDate(date) },
                     modifier = Modifier.fillMaxWidth(),
+                    locale = strings.locale,
                 )
 
                 // bottom padding
@@ -312,15 +313,15 @@ fun TaskBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     IconButton(onClick = { showPrayerPicker = false }) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
-                    Text("Select time", style = MaterialTheme.typography.titleLarge)
+                    Text(strings["task.selectTime"], style = MaterialTheme.typography.titleLarge)
                 }
 
                 if (!hasLocation) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            "Prayer times require a location.",
+                            strings["task.prayerTimesRequireLocation"],
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -329,7 +330,7 @@ fun TaskBottomSheet(
                             onDismiss()
                             onOpenSettings()
                         }) {
-                            Text("Set location in Settings")
+                            Text(strings["task.setLocationInSettings"])
                         }
                     }
                 } else {
@@ -359,7 +360,7 @@ fun TaskBottomSheet(
                                     showCustomTimePicker()
                                 },
                             ) {
-                                Text("Custom time…", modifier = Modifier.weight(1f))
+                                Text(strings["task.customTime"], modifier = Modifier.weight(1f))
                                 if (isCustomTime && scheduledTime != null) {
                                     Text(timeFormat.format(scheduledTime!!), style = MaterialTheme.typography.labelMedium)
                                 }
@@ -405,7 +406,7 @@ fun TaskBottomSheet(
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("All day", modifier = Modifier.weight(1f))
+                    Text(strings["task.allDay"], modifier = Modifier.weight(1f))
                 }
 
                 // bottom padding
@@ -415,7 +416,7 @@ fun TaskBottomSheet(
                 UnderlineTextField(
                     value = title,
                     onValueChange = { title = it },
-                    placeholder = "Title",
+                    placeholder = strings["task.titlePlaceholder"],
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -425,7 +426,7 @@ fun TaskBottomSheet(
                 UnderlineTextField(
                     value = description,
                     onValueChange = { description = it },
-                    placeholder = "Description",
+                    placeholder = strings["task.descriptionPlaceholder"],
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -445,7 +446,7 @@ fun TaskBottomSheet(
                                 trailingContent = {
                                     Icon(
                                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                        contentDescription = "Remove ${tag.name}",
+                                        contentDescription = strings.format("a11y.removeTag", tag.name),
                                         tint = Color(tag.color.toInt()),
                                         modifier = Modifier
                                             .size(12.dp)
@@ -461,7 +462,7 @@ fun TaskBottomSheet(
                                 tagQuery = it
                                 tagMenuExpanded = it.isNotBlank()
                             },
-                            placeholder = "Add tags",
+                            placeholder = strings["task.addTags"],
                             singleLine = true,
                             modifier = Modifier
                                 .weight(1f)
@@ -503,7 +504,7 @@ fun TaskBottomSheet(
                                     }
                                     if (!hasExactMatch) {
                                         ListItem(
-                                            headlineContent = { Text("Create '$query'") },
+                                            headlineContent = { Text(strings.format("task.createTag", query)) },
                                             modifier = Modifier.clickable {
                                                 coroutineScope.launch {
                                                     val tag = onCreateTag(query)
@@ -525,7 +526,7 @@ fun TaskBottomSheet(
                         onClick = { showDatePicker = true },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("No date")
+                        Text(strings["task.noDate"])
                     }
                 } else {
                     Row(
@@ -544,7 +545,7 @@ fun TaskBottomSheet(
                         ) {
                             Text(
                                 selectedPrayerName
-                                    ?: if (isAllDay) "All day"
+                                    ?: if (isAllDay) strings["task.allDay"]
                                     else timeFormat.format(scheduledTime!!)
                             )
                         }
@@ -553,7 +554,7 @@ fun TaskBottomSheet(
                         onClick = { scheduledTime = null; selectedPrayerName = null; isAllDay = false },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Text("Remove date")
+                        Text(strings["task.removeDate"])
                     }
 
                     if (remindersGloballyEnabled && !isAllDay && selectedPrayerName == null) {
@@ -562,7 +563,7 @@ fun TaskBottomSheet(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
-                                "Reminder",
+                                strings["task.reminder"],
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f),
                             )
@@ -579,7 +580,7 @@ fun TaskBottomSheet(
                                     FilterChip(
                                         selected = reminderOffsetMinutes == preset.minutes,
                                         onClick = { reminderOffsetMinutes = preset.minutes },
-                                        label = { Text(preset.label) },
+                                        label = { Text(strings[preset.labelKey]) },
                                     )
                                 }
                             }
@@ -592,7 +593,7 @@ fun TaskBottomSheet(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null)
                         Text(
-                            "Repeat",
+                            strings["task.repeat"],
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier
                                 .weight(1f)
@@ -606,7 +607,7 @@ fun TaskBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            Text("Every", style = MaterialTheme.typography.bodyMedium)
+                            Text(strings["task.every"], style = MaterialTheme.typography.bodyMedium)
                             IconButton(onClick = { repeatIntervalCount = (repeatIntervalCount - 1).coerceAtLeast(1) }) {
                                 Text("−", style = MaterialTheme.typography.titleLarge)
                             }
@@ -619,17 +620,18 @@ fun TaskBottomSheet(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
+                            val plural = repeatIntervalCount != 1
                             val unitLabels = listOf(
-                                RecurringType.DAILY to "Day",
-                                RecurringType.WEEKLY to "Week",
-                                RecurringType.MONTHLY to "Month",
-                                RecurringType.YEARLY to "Year",
+                                RecurringType.DAILY to if (plural) "unit.days" else "unit.day",
+                                RecurringType.WEEKLY to if (plural) "unit.weeks" else "unit.week",
+                                RecurringType.MONTHLY to if (plural) "unit.months" else "unit.month",
+                                RecurringType.YEARLY to if (plural) "unit.years" else "unit.year",
                             )
-                            unitLabels.forEach { (type, noun) ->
+                            unitLabels.forEach { (type, unitKey) ->
                                 FilterChip(
                                     selected = repeatType == type,
                                     onClick = { repeatType = type },
-                                    label = { Text(noun + if (repeatIntervalCount != 1) "s" else "") },
+                                    label = { Text(strings[unitKey]) },
                                 )
                             }
                         }
@@ -676,7 +678,7 @@ fun TaskBottomSheet(
                         .fillMaxWidth()
                         .padding(bottom = if (task != null) 0.dp else 16.dp),
                 ) {
-                    Text("Save")
+                    Text(strings["task.save"])
                 }
 
                 if (task != null && onDelete != null) {
@@ -692,7 +694,7 @@ fun TaskBottomSheet(
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
                     ) {
-                        Text("Delete")
+                        Text(strings["task.delete"])
                     }
                 }
             }

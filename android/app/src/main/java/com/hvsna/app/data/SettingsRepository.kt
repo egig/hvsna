@@ -21,10 +21,14 @@ private val settingsJson = Json { ignoreUnknownKeys = true }
 private object Keys {
     val REMINDERS_ENABLED = booleanPreferencesKey("reminders_enabled")
     val THEME_MODE = stringPreferencesKey("theme_mode")
+    val LANGUAGE = stringPreferencesKey("language")
 }
 
 private fun themeModeFromPrefs(prefs: Preferences): ThemeMode =
     prefs[Keys.THEME_MODE]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() } ?: ThemeMode.SYSTEM
+
+private fun languageFromPrefs(prefs: Preferences): AppLanguage =
+    prefs[Keys.LANGUAGE]?.let { runCatching { AppLanguage.valueOf(it) }.getOrNull() } ?: AppLanguage.SYSTEM
 
 /**
  * Reads just the theme mode, independent of [SettingsRepository] — used by
@@ -34,14 +38,21 @@ private fun themeModeFromPrefs(prefs: Preferences): ThemeMode =
 fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore.data.map(::themeModeFromPrefs)
 
 /**
+ * Reads just the UI language, independent of [SettingsRepository] — used by
+ * [com.hvsna.app.MainActivity] to provide the translation table above the app,
+ * and by [com.hvsna.app.i18n.Translations] for non-Compose call sites.
+ */
+fun languageFlow(context: Context): Flow<AppLanguage> = context.settingsDataStore.data.map(::languageFromPrefs)
+
+/**
  * `location`/`calculationMethod`/`madhab`/`hijriMonthOffsets` live in Room as
  * a key-value table (see [SettingsEntry]) so they can flow through sync —
  * `location` and `hijriMonthOffsets` have web counterparts (shaped to match
  * packages/app/src/modules/settings/settings.ts's `LocationSetting` and
  * `GeneralSettings.hijriMonthOffsets` exactly), `calculationMethod`/`madhab`
  * are Android-only and excluded from push/pull (see the sync module's
- * exclusion set). remindersEnabled/themeMode stay in DataStore — they're
- * device-local preferences, not something that should sync.
+ * exclusion set). remindersEnabled/themeMode/language stay in DataStore —
+ * they're device-local preferences, not something that should sync.
  */
                                     class SettingsRepository(
     private val context: Context,
@@ -66,6 +77,7 @@ fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore
             hijriMonthOffsets = hijriMonthOffsets,
             remindersEnabled = prefs[Keys.REMINDERS_ENABLED] ?: false,
             themeMode = themeModeFromPrefs(prefs),
+            language = languageFromPrefs(prefs),
         )
     }
 
@@ -103,6 +115,12 @@ fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore
     suspend fun updateThemeMode(mode: ThemeMode) {
         context.settingsDataStore.edit { prefs ->
             prefs[Keys.THEME_MODE] = mode.name
+        }
+    }
+
+    suspend fun updateLanguage(language: AppLanguage) {
+        context.settingsDataStore.edit { prefs ->
+            prefs[Keys.LANGUAGE] = language.name
         }
     }
 }

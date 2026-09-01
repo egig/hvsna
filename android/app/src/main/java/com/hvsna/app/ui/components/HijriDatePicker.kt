@@ -41,6 +41,7 @@ import java.util.Locale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @Composable
 fun HijriDatePicker(
@@ -90,6 +91,7 @@ private fun MonthGridPane(
     locale: Locale,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val today = LocalDate.now()
     val firstDayOfWeek = WeekFields.of(locale).firstDayOfWeek
     val firstOfMonth = displayedMonth.atDay(1)
@@ -102,8 +104,8 @@ private fun MonthGridPane(
         firstDayOfWeek.plus(offset.toLong()).getDisplayName(TextStyle.SHORT, locale)
     }
 
-    val hijriRangeStart = hijriDateParts(firstOfMonth, hijriMonthOffsets)
-    val hijriRangeEnd = hijriDateParts(displayedMonth.atEndOfMonth(), hijriMonthOffsets)
+    val hijriRangeStart = hijriDateParts(firstOfMonth, hijriMonthOffsets, strings)
+    val hijriRangeEnd = hijriDateParts(displayedMonth.atEndOfMonth(), hijriMonthOffsets, strings)
     val hijriRangeLabel = "${hijriRangeStart.day} ${hijriRangeStart.monthName} – " +
         "${hijriRangeEnd.day} ${hijriRangeEnd.monthName}"
 
@@ -113,7 +115,7 @@ private fun MonthGridPane(
             modifier = Modifier.fillMaxWidth(),
         ) {
             IconButton(onClick = { onMonthChange(displayedMonth.minusMonths(1)) }) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_left), contentDescription = "Previous month")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_left), contentDescription = strings["a11y.previousMonth"])
             }
             Text(
                 displayedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", locale)),
@@ -124,7 +126,7 @@ private fun MonthGridPane(
                     .clickable { onHeaderClick() },
             )
             IconButton(onClick = { onMonthChange(displayedMonth.plusMonths(1)) }) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = "Next month")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = strings["a11y.nextMonth"])
             }
         }
 
@@ -177,13 +179,13 @@ private fun MonthGridPane(
                 onClick = { onDateSelected(today) },
                 modifier = Modifier.weight(1f),
             ) {
-                Text("Today")
+                Text(strings["group.today"])
             }
             OutlinedButton(
                 onClick = { onDateSelected(today.plusDays(1)) },
                 modifier = Modifier.weight(1f),
             ) {
-                Text("Tomorrow")
+                Text(strings["group.tomorrow"])
             }
         }
     }

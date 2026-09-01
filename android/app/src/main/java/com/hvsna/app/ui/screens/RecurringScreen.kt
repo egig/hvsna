@@ -27,16 +27,23 @@ import com.hvsna.app.ui.components.TaskListItem
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.i18n.Strings
 
-private fun cadenceLabel(intervalCount: Int, recurringType: String): String {
-    val unitName = when (recurringType) {
-        RecurringType.DAILY -> "day"
-        RecurringType.WEEKLY -> "week"
-        RecurringType.MONTHLY -> "month"
-        RecurringType.YEARLY -> "year"
-        else -> recurringType
+private fun cadenceLabel(intervalCount: Int, recurringType: String, strings: Strings): String {
+    val plural = intervalCount != 1
+    val unitKey = when (recurringType) {
+        RecurringType.DAILY -> if (plural) "unit.daysLower" else "unit.dayLower"
+        RecurringType.WEEKLY -> if (plural) "unit.weeksLower" else "unit.weekLower"
+        RecurringType.MONTHLY -> if (plural) "unit.monthsLower" else "unit.monthLower"
+        RecurringType.YEARLY -> if (plural) "unit.yearsLower" else "unit.yearLower"
+        else -> return recurringType
     }
-    return if (intervalCount == 1) "every $unitName" else "every $intervalCount ${unitName}s"
+    return if (plural) {
+        strings.format("recurring.cadenceEveryN", intervalCount, strings[unitKey])
+    } else {
+        strings.format("recurring.cadenceEvery", strings[unitKey])
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +55,7 @@ fun RecurringScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val series by viewModel.recurringSeries.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -61,7 +69,7 @@ fun RecurringScreen(
             .let { if (canScroll) it.nestedScroll(scrollBehavior.nestedScrollConnection) else it },
         topBar = {
             LargeTopAppBar(
-                title = { Text("Recurring") },
+                title = { Text(strings["recurring.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -69,7 +77,7 @@ fun RecurringScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -78,8 +86,8 @@ fun RecurringScreen(
         if (isEmpty) {
             EmptyState(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_repeat),
-                title = "No recurring tasks yet",
-                subtitle = "Enable Repeat on a task to see it here.",
+                title = strings["recurring.emptyTitle"],
+                subtitle = strings["recurring.emptySubtitle"],
                 modifier = Modifier.padding(innerPadding),
             )
             return@Scaffold
@@ -90,7 +98,7 @@ fun RecurringScreen(
             contentPadding = innerPadding,
         ) {
             items(series, key = { it.rule.id }) { entry ->
-                val cadence = cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType)
+                val cadence = cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType, strings)
                 val displayTask = entry.nextOccurrence.copy(
                     description = if (entry.nextOccurrence.description.isNotEmpty()) {
                         "$cadence · ${entry.nextOccurrence.description}"

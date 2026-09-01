@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,12 +37,13 @@ fun SettingsAboutScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
-    val versionName = remember {
+    val versionName = remember(strings) {
         try {
             context.packageManager.getPackageInfo(context.packageName, 0).versionName
         } catch (_: Exception) {
-            "Unknown"
+            strings["about.unknownVersion"]
         }
     }
 
@@ -53,7 +55,7 @@ fun SettingsAboutScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("About") },
+                title = { Text(strings["about.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -61,7 +63,7 @@ fun SettingsAboutScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -80,23 +82,23 @@ fun SettingsAboutScreen(
                 fontWeight = FontWeight.Bold,
             )
             Text(
-                "Version $versionName",
+                strings.format("about.version", versionName ?: ""),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             HorizontalDivider()
 
-            Text("Legal", style = MaterialTheme.typography.titleMedium)
+            Text(strings["about.legal"], style = MaterialTheme.typography.titleMedium)
             Column {
                 ListItem(
-                    headlineContent = { Text("Privacy Policy") },
+                    headlineContent = { Text(strings["about.privacy"]) },
                     modifier = Modifier.clickable {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.hvsna.com/privacy")))
                     },
                 )
                 ListItem(
-                    headlineContent = { Text("Terms of Service") },
+                    headlineContent = { Text(strings["about.terms"]) },
                     modifier = Modifier.clickable {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.hvsna.com/terms")))
                     },

@@ -30,12 +30,13 @@ import com.hvsna.app.R
 import com.hvsna.app.data.AppSettings
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.ThemeMode
+import com.hvsna.app.i18n.LocalStrings
 import kotlinx.coroutines.launch
 
 private val ThemeModeOptions = listOf(
-    Triple(ThemeMode.SYSTEM, R.drawable.ic_device_mobile, "System"),
-    Triple(ThemeMode.LIGHT, R.drawable.ic_sun, "Light"),
-    Triple(ThemeMode.DARK, R.drawable.ic_moon, "Dark"),
+    Triple(ThemeMode.SYSTEM, R.drawable.ic_device_mobile, "appearance.system"),
+    Triple(ThemeMode.LIGHT, R.drawable.ic_sun, "appearance.light"),
+    Triple(ThemeMode.DARK, R.drawable.ic_moon, "appearance.dark"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +46,7 @@ fun SettingsAppearanceScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val settings by settingsRepository.settings.collectAsState(initial = AppSettings())
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -55,7 +57,7 @@ fun SettingsAppearanceScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Appearance") },
+                title = { Text(strings["appearance.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -63,7 +65,7 @@ fun SettingsAppearanceScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -77,7 +79,7 @@ fun SettingsAppearanceScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                ThemeModeOptions.forEachIndexed { index, (mode, iconRes, label) ->
+                ThemeModeOptions.forEachIndexed { index, (mode, iconRes, labelKey) ->
                     SegmentedButton(
                         shape = SegmentedButtonDefaults.itemShape(index = index, count = ThemeModeOptions.size),
                         selected = settings.themeMode == mode,
@@ -90,7 +92,7 @@ fun SettingsAppearanceScreen(
                             )
                         },
                     ) {
-                        Text(label)
+                        Text(strings[labelKey])
                     }
                 }
             }

@@ -34,6 +34,7 @@ import com.hvsna.app.ui.components.TagPill
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -44,6 +45,7 @@ fun BrowseScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     var showCompleted by remember { mutableStateOf(false) }
     var showRecurring by remember { mutableStateOf(false) }
 
@@ -78,7 +80,7 @@ fun BrowseScreen(
                 title = {},
                 actions = {
                     IconButton(onClick = onOpenSettings) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_settings), contentDescription = "Settings")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_settings), contentDescription = strings["a11y.settings"])
                     }
                 },
             )
@@ -90,7 +92,7 @@ fun BrowseScreen(
         ) {
             item {
                 ListItem(
-                    headlineContent = { Text("Recurring", style = MaterialTheme.typography.bodyLarge) },
+                    headlineContent = { Text(strings["browse.recurring"], style = MaterialTheme.typography.bodyLarge) },
                     leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null) },
                     trailingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = null) },
                     modifier = Modifier
@@ -101,7 +103,7 @@ fun BrowseScreen(
 
             item {
                 ListItem(
-                    headlineContent = { Text("Completed", style = MaterialTheme.typography.bodyLarge) },
+                    headlineContent = { Text(strings["browse.completed"], style = MaterialTheme.typography.bodyLarge) },
                     leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_square_check), contentDescription = null) },
                     trailingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = null) },
                     modifier = Modifier
@@ -113,7 +115,7 @@ fun BrowseScreen(
             if (tags.isNotEmpty()) {
                 item {
                     Text(
-                        "Tags",
+                        strings["browse.tags"],
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
@@ -141,7 +143,7 @@ fun BrowseScreen(
             } else {
                 item {
                     Text(
-                        "No tags yet. Add one while creating or editing a task.",
+                        strings["browse.noTags"],
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),

@@ -27,6 +27,7 @@ import com.hvsna.app.ui.components.TaskListItem
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +38,7 @@ fun CompletedScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val tasks by viewModel.allCompletedTasks.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -50,7 +52,7 @@ fun CompletedScreen(
             .let { if (canScroll) it.nestedScroll(scrollBehavior.nestedScrollConnection) else it },
         topBar = {
             LargeTopAppBar(
-                title = { Text("Completed") },
+                title = { Text(strings["completed.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -58,7 +60,7 @@ fun CompletedScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -67,7 +69,7 @@ fun CompletedScreen(
         if (isEmpty) {
             EmptyState(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_square_check),
-                title = "No completed tasks yet",
+                title = strings["completed.emptyTitle"],
                 modifier = Modifier.padding(innerPadding),
             )
             return@Scaffold

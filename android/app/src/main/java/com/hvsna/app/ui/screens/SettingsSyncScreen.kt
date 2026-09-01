@@ -27,12 +27,10 @@ import com.hvsna.app.sync.SyncManager
 import com.hvsna.app.ui.AuthViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
-
-private val lastSyncedFormat = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +40,8 @@ fun SettingsSyncScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
+    val lastSyncedFormat = remember(strings.locale) { SimpleDateFormat("MMM d, h:mm a", strings.locale) }
     val authState by authViewModel.state.collectAsState()
     val isSyncing by syncManager.isSyncing.collectAsState()
     val isManualSyncing by syncManager.isManualSyncing.collectAsState()
@@ -57,7 +57,7 @@ fun SettingsSyncScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Sync") },
+                title = { Text(strings["sync.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -65,7 +65,7 @@ fun SettingsSyncScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -85,12 +85,12 @@ fun SettingsSyncScreen(
             ) {
                 if (!isSignedIn) {
                     Text(
-                        "Sign in to sync your tasks across devices.",
+                        strings["sync.signInPrompt"],
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 } else if (!canSync) {
                     Text(
-                        "Verify your email to sync your tasks across devices.",
+                        strings["sync.verifyEmailPrompt"],
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 } else {
@@ -101,8 +101,9 @@ fun SettingsSyncScreen(
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                     Text(
-                        remember(lastSyncedAt) {
-                            lastSyncedAt?.let { "Last synced ${lastSyncedFormat.format(Date(it))}" } ?: "Not synced yet"
+                        remember(lastSyncedAt, strings) {
+                            lastSyncedAt?.let { strings.format("sync.lastSynced", lastSyncedFormat.format(Date(it))) }
+                                ?: strings["sync.notSyncedYet"]
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -119,10 +120,10 @@ fun SettingsSyncScreen(
                                 color = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
-                        Text(if (isSyncing) "Syncing…" else "Sync now")
+                        Text(if (isSyncing) strings["sync.syncing"] else strings["sync.syncNow"])
                     }
                     Text(
-                        "Syncs automatically as you make changes, when you sign in, reconnect, or pull to refresh, and every 15 minutes in the background.",
+                        strings["sync.autoSyncNote"],
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

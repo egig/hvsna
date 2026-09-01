@@ -21,6 +21,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -56,8 +57,12 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskDatabase
 import com.hvsna.app.data.TaskRepository
 import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.data.AppLanguage
 import com.hvsna.app.data.ThemeMode
+import com.hvsna.app.data.languageFlow
 import com.hvsna.app.data.themeModeFlow
+import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.i18n.Translations
 import com.hvsna.app.reminder.ReminderScheduler
 import com.hvsna.app.sync.CursorStore
 import com.hvsna.app.sync.SyncApi
@@ -94,8 +99,13 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.DARK -> true
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
+            val language by remember { languageFlow(context) }.collectAsState(initial = AppLanguage.SYSTEM)
+            val strings = remember(language) { Translations.strings(context, language) }
+            LaunchedEffect(strings) { Translations.setActive(strings) }
             HvsnaTheme(darkTheme = darkTheme) {
-                HvsnaApp()
+                CompositionLocalProvider(LocalStrings provides strings) {
+                    HvsnaApp()
+                }
             }
         }
     }
@@ -209,10 +219,10 @@ fun HvsnaApp() {
                             imageVector = ImageVector.vectorResource(
                                 id = if (isSelected) it.activeIconRes else it.iconRes
                             ),
-                            contentDescription = it.label
+                            contentDescription = LocalStrings.current[it.labelKey]
                         )
                     },
-                    label = { Text(it.label) },
+                    label = { Text(LocalStrings.current[it.labelKey]) },
                     selected = isSelected,
                     onClick = {
                         navController.navigate(it.route) {
@@ -353,13 +363,13 @@ private fun SyncPullToRefreshBox(
 }
 
 enum class AppDestinations(
-    val label: String,
+    val labelKey: String,
     val iconRes: Int,
     val activeIconRes: Int,
     val route: AppRoute,
 ) {
-    TODAY("Today", R.drawable.ic_calendar_event, R.drawable.ic_calendar_event_filled, AppRoute.Today),
-    UPCOMING("Upcoming", R.drawable.ic_calendar_month, R.drawable.ic_calendar_month_filled, AppRoute.Upcoming),
-    SEARCH("Search", R.drawable.ic_search, R.drawable.ic_search_filled, AppRoute.Search),
-    BROWSE("More", R.drawable.ic_dots_circle_horizontal, R.drawable.ic_dots_circle_horizontal, AppRoute.Browse),
+    TODAY("nav.today", R.drawable.ic_calendar_event, R.drawable.ic_calendar_event_filled, AppRoute.Today),
+    UPCOMING("nav.upcoming", R.drawable.ic_calendar_month, R.drawable.ic_calendar_month_filled, AppRoute.Upcoming),
+    SEARCH("nav.search", R.drawable.ic_search, R.drawable.ic_search_filled, AppRoute.Search),
+    BROWSE("nav.more", R.drawable.ic_dots_circle_horizontal, R.drawable.ic_dots_circle_horizontal, AppRoute.Browse),
 }

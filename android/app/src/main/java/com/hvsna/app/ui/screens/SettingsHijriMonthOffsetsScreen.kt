@@ -30,13 +30,14 @@ import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.AppSettings
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.hijriDateParts
-import com.hvsna.app.data.hijriMonthNames
+import com.hvsna.app.data.hijriMonthName
 import java.time.LocalDate
 import kotlin.math.abs
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,13 +46,14 @@ fun SettingsHijriMonthOffsetsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val settings by settingsRepository.settings.collectAsState(initial = AppSettings())
     val monthOffsets = settings.hijriMonthOffsets
 
     val today = LocalDate.now()
-    val todayWithoutOffset = hijriDateParts(today)
-    val todayWithOffset = hijriDateParts(today, monthOffsets)
+    val todayWithoutOffset = hijriDateParts(today, strings = strings)
+    val todayWithOffset = hijriDateParts(today, monthOffsets, strings)
     val datesDiffer = todayWithoutOffset != todayWithOffset
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -62,7 +64,7 @@ fun SettingsHijriMonthOffsetsScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Hijri Date") },
+                title = { Text(strings["hijri.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -70,7 +72,7 @@ fun SettingsHijriMonthOffsetsScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -89,7 +91,7 @@ fun SettingsHijriMonthOffsetsScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    "Shift the displayed Hijri date per month if it doesn't match your local moon sighting.",
+                    strings["hijri.description"],
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -97,7 +99,7 @@ fun SettingsHijriMonthOffsetsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text("Today", style = MaterialTheme.typography.bodyMedium)
+                    Text(strings["hijri.today"], style = MaterialTheme.typography.bodyMedium)
                     Text(
                         "${todayWithoutOffset.day} ${todayWithoutOffset.monthName} ${todayWithoutOffset.year}",
                         style = MaterialTheme.typography.bodyMedium,
@@ -108,7 +110,7 @@ fun SettingsHijriMonthOffsetsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("With offset", style = MaterialTheme.typography.bodyMedium)
+                        Text(strings["hijri.withOffset"], style = MaterialTheme.typography.bodyMedium)
                         Text(
                             "${todayWithOffset.day} ${todayWithOffset.monthName} ${todayWithOffset.year}",
                             style = MaterialTheme.typography.bodyMedium,
@@ -120,8 +122,8 @@ fun SettingsHijriMonthOffsetsScreen(
 
             HorizontalDivider()
 
-            hijriMonthNames.forEachIndexed { index, monthName ->
-                val month = index + 1
+            (1..12).forEach { month ->
+                val monthName = hijriMonthName(month, strings)
                 val currentOffset = monthOffsets[month] ?: 0
                 val nextOffset = if (month < 12) monthOffsets[month + 1] ?: 0 else currentOffset
                 val showGapWarning = month < 12 && abs(currentOffset - nextOffset) > 1
@@ -146,7 +148,7 @@ fun SettingsHijriMonthOffsetsScreen(
                             },
                             enabled = currentOffset > -2,
                         ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_minus), contentDescription = "Decrease")
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_minus), contentDescription = strings["a11y.decrease"])
                         }
                         Text(
                             if (currentOffset == 0) "0" else "%+d".format(currentOffset),
@@ -161,15 +163,14 @@ fun SettingsHijriMonthOffsetsScreen(
                             },
                             enabled = currentOffset < 2,
                         ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = "Increase")
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.increase"])
                         }
                     }
                 }
 
                 if (showGapWarning) {
                     Text(
-                        "Offset jumps by more than a day from $monthName to ${hijriMonthNames[month]} — " +
-                            "moon sighting shifts are usually gradual month to month.",
+                        strings.format("hijri.gapWarning", monthName, hijriMonthName(month + 1, strings)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier

@@ -49,13 +49,10 @@ import com.hvsna.app.ui.groupTodayTasks
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
-
-private val todayHeaderFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
-private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+import com.hvsna.app.i18n.LocalStrings
 
 private sealed class TodayListItem {
     data class PrayerHeader(
@@ -86,7 +83,12 @@ private fun displaySortKey(entry: TaskWithTags, prayerTimeMap: Map<String, Long>
     else entry.task.scheduledTime ?: Long.MAX_VALUE
 }
 
-private fun buildDayItems(tasks: List<TaskWithTags>, prayerTimeMap: Map<String, Long>, dayKey: String): List<TodayListItem> = buildList {
+private fun buildDayItems(
+    tasks: List<TaskWithTags>,
+    prayerTimeMap: Map<String, Long>,
+    dayKey: String,
+    timeFormat: SimpleDateFormat,
+): List<TodayListItem> = buildList {
     val seenPrayers = mutableSetOf<String>()
     for (entry in tasks.sortedBy { displaySortKey(it, prayerTimeMap) }) {
         val atTime = entry.task.atTime
@@ -120,6 +122,9 @@ fun TodayScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
+    val todayHeaderFormat = remember(strings.locale) { SimpleDateFormat("EEE, MMM d", strings.locale) }
+    val timeFormat = remember(strings.locale) { SimpleDateFormat("HH:mm", strings.locale) }
     val overdueTasks by viewModel.overdueTasks.collectAsState()
     val todayTasks by viewModel.todayTasks.collectAsState()
     val completedTasks by viewModel.completedTasks.collectAsState()
@@ -160,15 +165,16 @@ fun TodayScreen(
             ).toMap()
         }
     }
-    val tomorrowLabel = remember(now) {
+    val tomorrowLabel = remember(now, todayHeaderFormat) {
         todayHeaderFormat.format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.time)
     }
 
     val grouped: TodayGroupedTasks = groupTodayTasks(overdueTasks, todayTasks, now, todayEndEpoch)
     val allOverdueTasks = grouped.overdue
-    val flatTodayItems = buildDayItems(grouped.today, prayerTimeMap, dayKey = "today") +
+    val flatTodayItems = buildDayItems(grouped.today, prayerTimeMap, dayKey = "today", timeFormat) +
         if (grouped.tomorrow.isNotEmpty()) {
-            listOf(TodayListItem.DayDivider(tomorrowLabel)) + buildDayItems(grouped.tomorrow, tomorrowPrayerTimeMap, dayKey = "tomorrow")
+            listOf(TodayListItem.DayDivider(tomorrowLabel)) +
+                buildDayItems(grouped.tomorrow, tomorrowPrayerTimeMap, dayKey = "tomorrow", timeFormat)
         } else {
             emptyList()
         }
@@ -204,6 +210,7 @@ fun TodayScreen(
                                 epochMillis = now,
                                 monthOffsets = settings.hijriMonthOffsets,
                                 maghribEpochMillis = prayerTimeMap["Maghrib"],
+                                strings = strings,
                             ),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
@@ -230,15 +237,15 @@ fun TodayScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = "Add task")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
             }
         },
     ) { innerPadding ->
         if (isEmpty) {
             EmptyState(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_list_check),
-                title = "Nothing scheduled today",
-                subtitle = "Tap + to add a task.",
+                title = strings["today.emptyTitle"],
+                subtitle = strings["today.emptySubtitle"],
                 modifier = Modifier.padding(innerPadding),
             )
             return@Scaffold
@@ -253,7 +260,7 @@ fun TodayScreen(
                 val isExpanded = expandedGroups["Overdue"] == true
                 stickyHeader(key = "header_Overdue") {
                     SectionHeader(
-                        label = "Overdue",
+                        label = strings["group.overdue"],
                         isExpanded = isExpanded,
                         onToggle = { expandedGroups["Overdue"] = !isExpanded },
                         color = MaterialTheme.colorScheme.error,
@@ -317,7 +324,7 @@ fun TodayScreen(
                 val isExpanded = expandedGroups["Completed"] == true
                 stickyHeader(key = "header_Completed") {
                     SectionHeader(
-                        label = "Completed",
+                        label = strings["group.completed"],
                         isExpanded = isExpanded,
                         onToggle = { expandedGroups["Completed"] = !isExpanded },
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

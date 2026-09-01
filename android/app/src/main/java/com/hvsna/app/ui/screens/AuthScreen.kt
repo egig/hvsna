@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.hvsna.app.i18n.LocalStrings
 import com.hvsna.app.ui.AuthLogoutReason
 import com.hvsna.app.ui.AuthViewModel
 
@@ -33,8 +34,9 @@ private const val MIN_PASSWORD_LENGTH = 8
 @Composable
 fun ColumnScope.AuthAccountSection(viewModel: AuthViewModel) {
     val state by viewModel.state.collectAsState()
+    val strings = LocalStrings.current
 
-    Text("Account", style = MaterialTheme.typography.titleMedium)
+    Text(strings["auth.account"], style = MaterialTheme.typography.titleMedium)
 
     val user = state.user
     when {
@@ -49,7 +51,7 @@ fun ColumnScope.AuthAccountSection(viewModel: AuthViewModel) {
                 enabled = !state.loading,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Sign out")
+                Text(strings["auth.signOut"])
             }
         }
         state.reconnecting -> ReconnectingSection(onRetry = { viewModel.retryConnection() })
@@ -62,21 +64,23 @@ fun ColumnScope.AuthAccountSection(viewModel: AuthViewModel) {
 
 @Composable
 private fun ColumnScope.ReconnectingSection(onRetry: () -> Unit) {
+    val strings = LocalStrings.current
     Text(
-        "Reconnecting to check your session…",
+        strings["auth.reconnecting"],
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
     TextButton(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
-        Text("Retry now")
+        Text(strings["auth.retryNow"])
     }
 }
 
 @Composable
 private fun ColumnScope.LogoutReasonBanner(reason: AuthLogoutReason) {
+    val strings = LocalStrings.current
     val message = when (reason) {
-        AuthLogoutReason.SECURITY_REVOKED -> "You were signed out for your security — please sign in again."
-        AuthLogoutReason.EXPIRED -> "Your session expired — please sign in again."
+        AuthLogoutReason.SECURITY_REVOKED -> strings["auth.logoutSecurity"]
+        AuthLogoutReason.EXPIRED -> strings["auth.logoutExpired"]
         AuthLogoutReason.NONE -> null
     } ?: return
     Text(message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
@@ -84,6 +88,7 @@ private fun ColumnScope.LogoutReasonBanner(reason: AuthLogoutReason) {
 
 @Composable
 private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean, error: String?) {
+    val strings = LocalStrings.current
     var isSignUp by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -93,8 +98,8 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
 
     fun submit() {
         validationError = when {
-            !EMAIL_REGEX.matches(email) -> "Enter a valid email address"
-            password.length < MIN_PASSWORD_LENGTH -> "Password must be at least $MIN_PASSWORD_LENGTH characters"
+            !EMAIL_REGEX.matches(email) -> strings["auth.invalidEmail"]
+            password.length < MIN_PASSWORD_LENGTH -> strings.format("auth.passwordTooShort", MIN_PASSWORD_LENGTH)
             else -> null
         }
         if (validationError != null) return
@@ -107,7 +112,7 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
     }
 
     Text(
-        "Sign in to sync your tasks across devices.",
+        strings["auth.signInPrompt"],
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -117,14 +122,14 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
             OutlinedTextField(
                 value = firstName,
                 onValueChange = { firstName = it },
-                label = { Text("First name") },
+                label = { Text(strings["auth.firstName"]) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = lastName,
                 onValueChange = { lastName = it },
-                label = { Text("Last name") },
+                label = { Text(strings["auth.lastName"]) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -134,7 +139,7 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
     OutlinedTextField(
         value = email,
         onValueChange = { email = it },
-        label = { Text("Email") },
+        label = { Text(strings["auth.email"]) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         modifier = Modifier.fillMaxWidth(),
@@ -143,7 +148,7 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
     OutlinedTextField(
         value = password,
         onValueChange = { password = it },
-        label = { Text("Password") },
+        label = { Text(strings["auth.password"]) },
         singleLine = true,
         visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -166,7 +171,7 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
                 color = MaterialTheme.colorScheme.onPrimary,
             )
         }
-        Text(if (isSignUp) "Create account" else "Sign in")
+        Text(if (isSignUp) strings["auth.createAccount"] else strings["auth.signIn"])
     }
 
     TextButton(
@@ -177,6 +182,6 @@ private fun ColumnScope.SignedOutForm(viewModel: AuthViewModel, loading: Boolean
         },
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(if (isSignUp) "Already have an account? Sign in" else "Need an account? Sign up")
+        Text(if (isSignUp) strings["auth.toggleToSignIn"] else strings["auth.toggleToSignUp"])
     }
 }

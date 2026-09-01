@@ -41,6 +41,7 @@ import java.util.Calendar
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -51,6 +52,7 @@ fun TagDetailScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     var tasks by remember(tag.id) { mutableStateOf<List<TaskWithTags>>(emptyList()) }
     val flow = remember(tag.id) { viewModel.tasksForTag(tag.id) }
     LaunchedEffect(flow) {
@@ -102,12 +104,12 @@ fun TagDetailScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
                 actions = {
                     IconButton(onClick = { showEditTagSheet = true }) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = "Edit tag")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = strings["a11y.editTag"])
                     }
                 },
             )
@@ -116,7 +118,7 @@ fun TagDetailScreen(
         if (isEmpty) {
             EmptyState(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_hash),
-                title = "No tasks with this tag",
+                title = strings["tagDetail.emptyTitle"],
                 modifier = Modifier.padding(innerPadding),
             )
             return@Scaffold
@@ -127,19 +129,19 @@ fun TagDetailScreen(
             contentPadding = innerPadding,
         ) {
             listOf(
-                "Overdue" to overdue,
-                "Today" to today,
-                "Upcoming" to upcoming,
-                "Unscheduled" to unscheduled,
-            ).forEach { (label, entries) ->
+                Triple("Overdue", strings["group.overdue"], overdue),
+                Triple("Today", strings["group.today"], today),
+                Triple("Upcoming", strings["group.upcoming"], upcoming),
+                Triple("Unscheduled", strings["group.unscheduled"], unscheduled),
+            ).forEach { (key, label, entries) ->
                 if (entries.isNotEmpty()) {
-                    val isExpanded = expandedGroups[label] == true
-                    stickyHeader(key = "header_$label") {
+                    val isExpanded = expandedGroups[key] == true
+                    stickyHeader(key = "header_$key") {
                         SectionHeader(
                             label = label,
                             isExpanded = isExpanded,
-                            onToggle = { expandedGroups[label] = !isExpanded },
-                            color = if (label == "Overdue") MaterialTheme.colorScheme.error
+                            onToggle = { expandedGroups[key] = !isExpanded },
+                            color = if (key == "Overdue") MaterialTheme.colorScheme.error
                             else MaterialTheme.colorScheme.onSurface,
                             background = MaterialTheme.colorScheme.surface,
                         )

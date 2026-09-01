@@ -36,6 +36,7 @@ import java.util.Calendar
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 import com.hvsna.app.ui.groupUpcomingTasks
 
 private const val TAB_SCHEDULED = 0
@@ -49,10 +50,11 @@ fun UpcomingScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val upcomingTasks by viewModel.upcomingTasks.collectAsState()
     val unscheduledTasks by viewModel.unscheduledTasks.collectAsState()
 
-    val taskGroups = groupUpcomingTasks(upcomingTasks).filter { it.tasks.isNotEmpty() }
+    val taskGroups = groupUpcomingTasks(upcomingTasks, strings).filter { it.tasks.isNotEmpty() }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
@@ -82,7 +84,7 @@ fun UpcomingScreen(
         topBar = {
             Column {
                 LargeTopAppBar(
-                    title = { Text("Upcoming") },
+                    title = { Text(strings["upcoming.title"]) },
                     scrollBehavior = scrollBehavior,
                     colors = TopAppBarDefaults.largeTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
@@ -93,12 +95,12 @@ fun UpcomingScreen(
                     Tab(
                         selected = selectedTab == TAB_SCHEDULED,
                         onClick = { selectedTab = TAB_SCHEDULED },
-                        text = { Text("Scheduled") },
+                        text = { Text(strings["upcoming.tabScheduled"]) },
                     )
                     Tab(
                         selected = selectedTab == TAB_UNSCHEDULED,
                         onClick = { selectedTab = TAB_UNSCHEDULED },
-                        text = { Text("Unscheduled") },
+                        text = { Text(strings["upcoming.tabUnscheduled"]) },
                     )
                 }
             }
@@ -109,7 +111,7 @@ fun UpcomingScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = "Add task")
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
             }
         },
     ) { innerPadding ->
@@ -117,8 +119,8 @@ fun UpcomingScreen(
             TAB_SCHEDULED -> if (isScheduledEmpty) {
                 EmptyState(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_calendar_event),
-                    title = "No upcoming tasks",
-                    subtitle = "Tasks you schedule for the future will show up here.",
+                    title = strings["upcoming.emptyScheduledTitle"],
+                    subtitle = strings["upcoming.emptyScheduledSubtitle"],
                     modifier = Modifier.padding(innerPadding),
                 )
             } else {
@@ -159,8 +161,8 @@ fun UpcomingScreen(
             TAB_UNSCHEDULED -> if (isUnscheduledEmpty) {
                 EmptyState(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_calendar_event),
-                    title = "No unscheduled tasks",
-                    subtitle = "Tasks without a date will show up here.",
+                    title = strings["upcoming.emptyUnscheduledTitle"],
+                    subtitle = strings["upcoming.emptyUnscheduledSubtitle"],
                     modifier = Modifier.padding(innerPadding),
                 )
             } else {

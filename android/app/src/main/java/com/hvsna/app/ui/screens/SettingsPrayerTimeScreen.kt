@@ -35,27 +35,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
-private val calculationMethods = listOf(
-    "Muslim World League" to "MUSLIM_WORLD_LEAGUE",
-    "Egyptian General Authority" to "EGYPTIAN",
-    "University of Islamic Sciences, Karachi" to "KARACHI",
-    "Umm al-Qura, Makkah" to "UMM_AL_QURA",
-    "Dubai" to "DUBAI",
-    "Moon Sighting Committee" to "MOON_SIGHTING_COMMITTEE",
-    "North America (ISNA)" to "NORTH_AMERICA",
-    "Kuwait" to "KUWAIT",
-    "Qatar" to "QATAR",
-    "Singapore" to "SINGAPORE",
-    "Turkey" to "TURKEY",
-    "Tehran" to "TEHRAN",
-    "Other" to "OTHER",
+private val calculationMethodValues = listOf(
+    "MUSLIM_WORLD_LEAGUE", "EGYPTIAN", "KARACHI", "UMM_AL_QURA", "DUBAI",
+    "MOON_SIGHTING_COMMITTEE", "NORTH_AMERICA", "KUWAIT", "QATAR", "SINGAPORE",
+    "TURKEY", "TEHRAN", "OTHER",
 )
 
-private val madhabOptions = listOf(
-    "Shafi, Maliki, Hanbali" to "SHAFI",
-    "Hanafi" to "HANAFI",
-)
+private val madhabValues = listOf("SHAFI", "HANAFI")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,19 +52,15 @@ fun SettingsPrayerTimeScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val settings by settingsRepository.settings.collectAsState(initial = com.hvsna.app.data.AppSettings())
 
     var methodExpanded by remember { mutableStateOf(false) }
     var madhabExpanded by remember { mutableStateOf(false) }
 
-    val currentMethodLabel = calculationMethods
-        .firstOrNull { it.second == settings.calculationMethod }?.first
-        ?: settings.calculationMethod
-
-    val currentMadhabLabel = madhabOptions
-        .firstOrNull { it.second == settings.madhab }?.first
-        ?: settings.madhab
+    val currentMethodLabel = strings["method.${settings.calculationMethod}"]
+    val currentMadhabLabel = strings["madhab.${settings.madhab}"]
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -86,7 +70,7 @@ fun SettingsPrayerTimeScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Prayer Time") },
+                title = { Text(strings["prayerTime.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -94,7 +78,7 @@ fun SettingsPrayerTimeScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -108,7 +92,7 @@ fun SettingsPrayerTimeScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Calculation Method", style = MaterialTheme.typography.titleMedium)
+            Text(strings["prayerTime.calculationMethod"], style = MaterialTheme.typography.titleMedium)
 
             ExposedDropdownMenuBox(
                 expanded = methodExpanded,
@@ -127,9 +111,9 @@ fun SettingsPrayerTimeScreen(
                     expanded = methodExpanded,
                     onDismissRequest = { methodExpanded = false },
                 ) {
-                    calculationMethods.forEach { (label, value) ->
+                    calculationMethodValues.forEach { value ->
                         DropdownMenuItem(
-                            text = { Text(label) },
+                            text = { Text(strings["method.$value"]) },
                             onClick = {
                                 scope.launch { settingsRepository.updateCalculationMethod(value) }
                                 methodExpanded = false
@@ -139,7 +123,7 @@ fun SettingsPrayerTimeScreen(
                 }
             }
 
-            Text("Madhab (Asr calculation)", style = MaterialTheme.typography.titleMedium)
+            Text(strings["prayerTime.madhab"], style = MaterialTheme.typography.titleMedium)
 
             ExposedDropdownMenuBox(
                 expanded = madhabExpanded,
@@ -158,9 +142,9 @@ fun SettingsPrayerTimeScreen(
                     expanded = madhabExpanded,
                     onDismissRequest = { madhabExpanded = false },
                 ) {
-                    madhabOptions.forEach { (label, value) ->
+                    madhabValues.forEach { value ->
                         DropdownMenuItem(
-                            text = { Text(label) },
+                            text = { Text(strings["madhab.$value"]) },
                             onClick = {
                                 scope.launch { settingsRepository.updateMadhab(value) }
                                 madhabExpanded = false

@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,14 +39,11 @@ import com.hvsna.app.data.Task
 import com.hvsna.app.data.isPrayerAnchored
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
-private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-private val dateFormat = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
-private val dateFormatWithYear = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault())
 private val leadingColumnWidth = 32.dp
 
 @Composable
@@ -136,6 +134,11 @@ fun TaskListItem(
     showYear: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
+    val timeFormat = remember(strings.locale) { SimpleDateFormat("HH:mm", strings.locale) }
+    val dateFormat = remember(strings.locale) { SimpleDateFormat("EEE, MMM d", strings.locale) }
+    val dateFormatWithYear = remember(strings.locale) { SimpleDateFormat("EEE, MMM d, yyyy", strings.locale) }
+
     val done = task.isDone == 1
     val dateLabel = if (showDate) {
         task.scheduledTime?.let { (if (showYear) dateFormatWithYear else dateFormat).format(Date(it)) } ?: ""

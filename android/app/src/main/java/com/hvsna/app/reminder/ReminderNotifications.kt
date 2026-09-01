@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.hvsna.app.MainActivity
 import com.hvsna.app.R
 import com.hvsna.app.data.Task
+import com.hvsna.app.i18n.Translations
 
 private const val CHANNEL_ID = "task_reminders"
 const val MARK_DONE_ACTION = "com.hvsna.app.action.MARK_DONE"
@@ -24,7 +25,11 @@ object ReminderNotifications {
             val manager = context.getSystemService(NotificationManager::class.java)
             if (manager.getNotificationChannel(CHANNEL_ID) == null) {
                 manager.createNotificationChannel(
-                    NotificationChannel(CHANNEL_ID, "Task reminders", NotificationManager.IMPORTANCE_HIGH),
+                    NotificationChannel(
+                        CHANNEL_ID,
+                        Translations.current(context)["notification.channelName"],
+                        NotificationManager.IMPORTANCE_HIGH,
+                    ),
                 )
             }
         }
@@ -62,7 +67,7 @@ object ReminderNotifications {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(contentIntent)
-            .addAction(0, "Mark Done", markDonePendingIntent)
+            .addAction(0, Translations.current(context)["notification.markDone"], markDonePendingIntent)
             .build()
 
         notificationManagerCompat.notify(requestCode, notification)

@@ -1,13 +1,13 @@
 package com.hvsna.app.data
 
-data class ReminderOffsetPreset(val label: String, val minutes: Int)
+data class ReminderOffsetPreset(val labelKey: String, val minutes: Int)
 
 val reminderOffsetPresets = listOf(
-    ReminderOffsetPreset("At time of", 0),
-    ReminderOffsetPreset("5 min before", 5),
-    ReminderOffsetPreset("15 min before", 15),
-    ReminderOffsetPreset("1 hour before", 60),
-    ReminderOffsetPreset("1 day before", 1_440),
+    ReminderOffsetPreset("reminderPreset.atTime", 0),
+    ReminderOffsetPreset("reminderPreset.min5", 5),
+    ReminderOffsetPreset("reminderPreset.min15", 15),
+    ReminderOffsetPreset("reminderPreset.hour1", 60),
+    ReminderOffsetPreset("reminderPreset.day1", 1_440),
 )
 
 fun reminderFireTimeOrNull(task: Task, remindersEnabled: Boolean, nowMs: Long): Long? {

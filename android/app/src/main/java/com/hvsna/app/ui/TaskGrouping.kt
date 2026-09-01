@@ -2,9 +2,9 @@ package com.hvsna.app.ui
 
 import com.hvsna.app.data.RecurringType
 import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.i18n.Strings
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 data class TaskGroup(val key: String, val label: String, val tasks: List<TaskWithTags>)
 
@@ -13,9 +13,6 @@ data class TodayGroupedTasks(
     val today: List<TaskWithTags>,
     val tomorrow: List<TaskWithTags>,
 )
-
-private val monthYearFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
-private val yearFormat = SimpleDateFormat("yyyy", Locale.getDefault())
 
 private fun startOfDay(base: Calendar): Calendar = (base.clone() as Calendar).apply {
     set(Calendar.HOUR_OF_DAY, 0)
@@ -37,7 +34,9 @@ private fun endOfDay(base: Calendar): Calendar = (base.clone() as Calendar).appl
  * by Gregorian month (same year) or year (future years), sorted ascending.
  * Empty groups are dropped by the caller.
  */
-fun groupUpcomingTasks(tasks: List<TaskWithTags>): List<TaskGroup> {
+fun groupUpcomingTasks(tasks: List<TaskWithTags>, strings: Strings): List<TaskGroup> {
+    val monthYearFormat = SimpleDateFormat("MMMM yyyy", strings.locale)
+    val yearFormat = SimpleDateFormat("yyyy", strings.locale)
     val now = Calendar.getInstance()
     val startOfToday = startOfDay(now)
     val endOfToday = endOfDay(now)
@@ -100,10 +99,10 @@ fun groupUpcomingTasks(tasks: List<TaskWithTags>): List<TaskGroup> {
         .map { (key, value) -> TaskGroup(key, value.first, value.second) }
 
     return listOf(
-        TaskGroup("today", "Today", today),
-        TaskGroup("tomorrow", "Tomorrow", tomorrow),
-        TaskGroup("thisWeek", "This Week", thisWeek),
-        TaskGroup("thisMonth", "This Month", thisMonth),
+        TaskGroup("today", strings["group.today"], today),
+        TaskGroup("tomorrow", strings["group.tomorrow"], tomorrow),
+        TaskGroup("thisWeek", strings["group.thisWeek"], thisWeek),
+        TaskGroup("thisMonth", strings["group.thisMonth"], thisMonth),
     ) + laterGroups
 }
 

@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +46,7 @@ fun SettingsBackupScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -62,8 +64,8 @@ fun SettingsBackupScreen(
             scope.launch {
                 val result = backupFileService.exportTo(uri)
                 dataMessage = result.fold(
-                    onSuccess = { "Backup exported" },
-                    onFailure = { "Export failed: ${it.localizedMessage}" },
+                    onSuccess = { strings["backup.exported"] },
+                    onFailure = { strings.format("backup.exportFailed", it.localizedMessage ?: "") },
                 )
                 isExporting = false
             }
@@ -84,8 +86,8 @@ fun SettingsBackupScreen(
         scope.launch {
             val result = mode(uri)
             dataMessage = result.fold(
-                onSuccess = { "Backup imported" },
-                onFailure = { "Import failed: ${it.localizedMessage}" },
+                onSuccess = { strings["backup.imported"] },
+                onFailure = { strings.format("backup.importFailed", it.localizedMessage ?: "") },
             )
             isImporting = false
         }
@@ -97,7 +99,7 @@ fun SettingsBackupScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Backup & Restore") },
+                title = { Text(strings["backup.title"]) },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -105,7 +107,7 @@ fun SettingsBackupScreen(
                 ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = "Back")
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
                 },
             )
@@ -120,7 +122,7 @@ fun SettingsBackupScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                "Export your tasks to a file, or restore from a previous export.",
+                strings["backup.description"],
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -139,7 +141,7 @@ fun SettingsBackupScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
-                Text(if (isExporting) "Exporting…" else "Export data")
+                Text(if (isExporting) strings["backup.exporting"] else strings["backup.export"])
             }
             Button(
                 onClick = {
@@ -156,7 +158,7 @@ fun SettingsBackupScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
-                Text(if (isImporting) "Importing…" else "Import data")
+                Text(if (isImporting) strings["backup.importing"] else strings["backup.import"])
             }
             dataMessage?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -168,13 +170,9 @@ fun SettingsBackupScreen(
                         showImportOptions = false
                         pendingImportUri = null
                     },
-                    title = { Text("Import backup") },
+                    title = { Text(strings["backup.importDialogTitle"]) },
                     text = {
-                        Text(
-                            "Replace deletes all current tasks, tags, and recurring reminders and " +
-                                "substitutes this backup's contents. Merge keeps your current data and " +
-                                "adds this backup's tasks, tags, and recurring reminders alongside it."
-                        )
+                        Text(strings["backup.importDialogBody"])
                     },
                     confirmButton = {
                         Row {
@@ -183,20 +181,20 @@ fun SettingsBackupScreen(
                                 showImportOptions = false
                                 pendingImportUri = null
                                 if (uri != null) runImport(backupFileService::importMerging, uri)
-                            }) { Text("Merge") }
+                            }) { Text(strings["backup.merge"]) }
                             TextButton(onClick = {
                                 val uri = pendingImportUri
                                 showImportOptions = false
                                 pendingImportUri = null
                                 if (uri != null) runImport(backupFileService::importReplacing, uri)
-                            }) { Text("Replace") }
+                            }) { Text(strings["backup.replace"]) }
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = {
                             showImportOptions = false
                             pendingImportUri = null
-                        }) { Text("Cancel") }
+                        }) { Text(strings["backup.cancel"]) }
                     },
                 )
             }

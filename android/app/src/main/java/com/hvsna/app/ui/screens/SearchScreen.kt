@@ -39,6 +39,7 @@ import com.hvsna.app.ui.components.TaskListItem
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.i18n.LocalStrings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +49,7 @@ fun SearchScreen(
     onEditTask: (TaskWithTags?, Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val query by viewModel.searchQuery.collectAsState()
     val results by viewModel.searchResults.collectAsState()
 
@@ -78,14 +80,14 @@ fun SearchScreen(
             if (query.isBlank()) {
                 EmptyState(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_search),
-                    title = "Search your tasks",
-                    subtitle = "Find tasks by title or description.",
+                    title = strings["search.emptyTitle"],
+                    subtitle = strings["search.emptySubtitle"],
                 )
             } else if (results.isEmpty()) {
                 EmptyState(
                     icon = ImageVector.vectorResource(id = R.drawable.ic_search),
-                    title = "No tasks found",
-                    subtitle = "Try a different search term.",
+                    title = strings["search.noResultsTitle"],
+                    subtitle = strings["search.noResultsSubtitle"],
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -109,6 +111,7 @@ private fun SearchField(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val strings = LocalStrings.current
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
         modifier = modifier,
@@ -131,14 +134,14 @@ private fun SearchField(
                     singleLine = true,
                     visualTransformation = VisualTransformation.None,
                     interactionSource = interactionSource,
-                    placeholder = { Text("Search tasks…") },
+                    placeholder = { Text(strings["search.placeholder"]) },
                     leadingIcon = {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_search), contentDescription = null)
                     },
                     trailingIcon = if (query.isNotEmpty()) {
                         {
                             IconButton(onClick = { onQueryChange("") }) {
-                                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = "Clear search")
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = strings["a11y.clearSearch"])
                             }
                         }
                     } else null,
