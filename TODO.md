@@ -1,2 +1,0 @@
-- [ ] Error: Failed to schedule recurring task reminders: Error: No modification allowed
-- [ ] wa-sqlite's `AccessHandlePoolVFS` doesn't coordinate locking across browser tabs (see comment in `packages/app/src/modules/sqlite/worker.ts`). Now that sync polls every 30s per visible tab (`packages/app/src/modules/sync/context.ts`), multiple open tabs hit the local OPFS-backed DB concurrently more often than before. Not currently a solved problem — worth a single-leader-tab (e.g. BroadcastChannel election) design if it causes real issues.

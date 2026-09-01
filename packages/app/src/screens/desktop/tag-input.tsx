@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { Popover, PopoverDisclosure, usePopoverStore } from "@ariakit/react";
 import { useTags, normalizeTag } from "@/modules/task/use-tags";
-import { HvCheck, HvSearch, HvX } from "@/modules/icons";
+import { TagPill, useTagColor } from "@/modules/task/tag-pill";
+import { HvCheck, HvSearch } from "@/modules/icons";
 
 interface TagInputDesktopProps {
   selectedTags: string[];
@@ -20,6 +21,7 @@ export function TagInputDesktop({
   const isOpen = popover.useState("open");
 
   const { tagNames, loading } = useTags();
+  const tagColor = useTagColor();
   const [search, setSearch] = useState("");
 
   const normalizedSearch = normalizeTag(search);
@@ -54,11 +56,6 @@ export function TagInputDesktop({
     setSearch("");
   };
 
-  const handleRemoveTag = (e: React.MouseEvent, tag: string) => {
-    e.stopPropagation();
-    onTagsChange(selectedTags.filter((t) => t !== tag));
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -89,21 +86,14 @@ export function TagInputDesktop({
       ) : (
         <>
           {selectedTags.slice(0, 2).map((tag) => (
-            <span
+            <TagPill
               key={tag}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded text-xs"
-            >
-              {tag}
-              <span
-                role="button"
-                tabIndex={-1}
-                aria-label={`Remove ${tag}`}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer rounded-sm"
-                onClick={(e) => handleRemoveTag(e, tag)}
-              >
-                <HvX size={8} />
-              </span>
-            </span>
+              name={tag}
+              color={tagColor(tag)}
+              onRemove={() =>
+                onTagsChange(selectedTags.filter((t) => t !== tag))
+              }
+            />
           ))}
           {selectedTags.length > 2 && (
             <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -189,7 +179,14 @@ export function TagInputDesktop({
                       : "text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  <span className="truncate">{tag}</span>
+                  <span className="flex items-center gap-2 truncate">
+                    <span
+                      aria-hidden
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: tagColor(tag) }}
+                    />
+                    <span className="truncate">{tag}</span>
+                  </span>
                   {isSelected && (
                     <HvCheck className="w-3.5 h-3.5 shrink-0 text-[var(--hvsna-primary-color)]" />
                   )}

@@ -1,11 +1,6 @@
-import React, { useCallback, useRef, useState } from "react";
-import {
-  motion,
-  useMotionValue,
-  useAnimation,
-  type PanInfo,
-} from "framer-motion";
-import { HvSquare, HvSquareCheckFilled, HvCalendar, HvCheck } from "@/modules/icons";
+import React, { useCallback } from "react";
+import { motion } from "framer-motion";
+import { HvSquare, HvSquareCheckFilled } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
@@ -13,10 +8,7 @@ import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
 import { useTaskFormContext } from "./task-form-context";
-import { TagList } from "../../screens/mobile/tag-input";
-import { CalendarModal } from "../calendar/hijri-date-input/calendar-modal";
-import { useTaskEpoch } from "./task-form-helpers";
-import { useScreenSize } from "../components/screen-size-wrapper";
+import { TagList } from "./tag-pill";
 import dayjs from "dayjs";
 
 interface TaskListItemProps {
@@ -26,7 +18,6 @@ interface TaskListItemProps {
   showGoalInfo?: boolean;
   className?: string;
   formatDate?: (task: Task) => string;
-  disableSwipe?: boolean;
 }
 
 export function TaskListItem({
@@ -36,31 +27,13 @@ export function TaskListItem({
   showGoalInfo: _showGoalInfo = false,
   className = "",
   formatDate,
-  disableSwipe = false,
 }: TaskListItemProps) {
   const { completeTask, reopenTask } = useTaskListItem();
-  const { updateTask, materializeVirtualTask } = useTaskContext();
+  const { materializeVirtualTask } = useTaskContext();
   const { openEditTaskForm } = useTaskFormContext();
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
-  const getTaskEpoch = useTaskEpoch();
-  const { isDesktop } = useScreenSize();
-  const shouldDisableSwipe = disableSwipe || isDesktop;
-
-  const x = useMotionValue(0);
-  const controls = useAnimation();
-  const isDraggingRef = useRef(false);
-  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-
-  const SWIPE_THRESHOLD = 60;
-  const SWIPE_VELOCITY = 300;
-
-  const snapBack = () =>
-    controls.start({
-      x: 0,
-      transition: { type: "spring", stiffness: 400, damping: 40 },
-    });
 
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
@@ -184,55 +157,12 @@ export function TaskListItem({
     );
   };
 
-  const handleDragStart = () => {
-    isDraggingRef.current = true;
-  };
-
-  const handleDragEnd = async (_: PointerEvent, info: PanInfo) => {
-    const isRightSwipe =
-      info.offset.x > SWIPE_THRESHOLD || info.velocity.x > SWIPE_VELOCITY;
-    const isLeftSwipe =
-      info.offset.x < -SWIPE_THRESHOLD || info.velocity.x < -SWIPE_VELOCITY;
-
-    if (isRightSwipe) {
-      await snapBack();
-      await handleStatusAction();
-    } else if (isLeftSwipe) {
-      await snapBack();
-      setIsScheduleModalOpen(true);
-    } else {
-      snapBack();
-    }
-
-    setTimeout(() => {
-      isDraggingRef.current = false;
-    }, 100);
-  };
-
   const handleItemClick = async () => {
-    if (isDraggingRef.current) return;
     if (onEdit) {
       onEdit(task);
     } else {
       handleEditTask();
     }
-  };
-
-  const handleScheduleConfirm = (
-    date: Date | null,
-    recurringType: "none" | "daily" | "weekly" | "monthly" | "yearly",
-    recurringInterval: number
-  ) => {
-    let atEpochMillis: number | null = null;
-    if (date) {
-      atEpochMillis = getTaskEpoch(date, (task.atTime as string) || "");
-    }
-    updateTask(task.id as string, {
-      atEpochMillis,
-      recurringType: recurringType ?? "none",
-      recurringInterval: recurringInterval ?? 1,
-    });
-    setIsScheduleModalOpen(false);
   };
 
   const handleEditTask = useCallback(() => {
@@ -252,35 +182,8 @@ export function TaskListItem({
       transition={{ duration: 0.2, ease: "easeOut" }}
       layout
     >
-      {!shouldDisableSwipe && (
-        <>
-          <div className="absolute left-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center bg-[var(--hvsna-success-color)] text-white select-none">
-            <HvCheck size={22} strokeWidth={2} />
-            <span className="text-xs mt-1 font-medium">
-              {task.status === 0
-                ? t("complete") || "Done"
-                : t("reopen") || "Reopen"}
-            </span>
-          </div>
-          <div className="absolute right-0 top-0 bottom-0 w-24 flex flex-col items-center justify-center bg-[var(--hvsna-primary-color)] text-white select-none">
-            <HvCalendar size={22} strokeWidth={2} />
-            <span className="text-xs mt-1 font-medium">
-              {t("schedule") || "Schedule"}
-            </span>
-          </div>
-        </>
-      )}
-
-      <motion.div
+      <div
         className={`relative z-10 w-full px-4 py-2 transition-colors cursor-pointer ${contentBg}`}
-        drag={shouldDisableSwipe ? false : "x"}
-        dragConstraints={{ left: -120, right: 120 }}
-        dragElastic={0.5}
-        dragDirectionLock
-        style={{ x }}
-        animate={controls}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
         onClick={handleItemClick}
       >
         <div className="flex items-start gap-2">
@@ -326,14 +229,7 @@ export function TaskListItem({
             )}
           </div>
         </div>
-      </motion.div>
-
-      <CalendarModal
-        isOpen={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
-        selectedDate={null}
-        onConfirm={handleScheduleConfirm as any}
-      />
+      </div>
     </motion.div>
   );
 }

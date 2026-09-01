@@ -92,9 +92,11 @@ export function LocationPickerModal({
       dismissable={dismissable}
     >
       <div className="flex flex-col h-full">
-        <div className="px-4 py-3 bg-warning-50 border-b border-warning-100 text-warning-700 text-sm">
-          {t("location_not_detected")}
-        </div>
+        {!value && (
+          <div className="px-4 py-3 bg-warning-50 border-b border-warning-100 text-warning-700 text-sm">
+            {t("location_not_detected")}
+          </div>
+        )}
         <div className="px-4 py-3 border-b border-gray-100">
           <div className="relative">
             <HvSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

@@ -11,10 +11,9 @@ import {
 import type { Task, PrayerTime } from "@/domain/task";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
-import { HvCheck, HvMapPin, HvMaghrib } from "@/modules/icons";
+import { HvCheck, HvMaghrib } from "@/modules/icons";
 import { Page } from "../navigation";
 import { LargeNavbar } from "../navigation/navbar";
-import { useLocationContext } from "../location/context";
 import { usePrayerTimes } from "../prayer";
 import type { PrayerTimes } from "adhan";
 import { groupTasksByPrayerTimes } from "../prayer-time-utils";
@@ -30,7 +29,6 @@ export function Today() {
 
 function TodayInner() {
   const { pageTitle, subTitle } = useToday();
-  const { location, ensureLocation, loading } = useLocationContext();
 
   return (
     <>
@@ -40,16 +38,6 @@ function TodayInner() {
             showBackButton={false}
             title={pageTitle}
             subtitle={subTitle}
-            leftAction={
-              <button
-                onClick={async () => {
-                  await ensureLocation();
-                }}
-                className="flex gap-1 w-max px-4 text-sm cursor-pointer hover:bg-gray-100 py-2 text-gray-600 rounded-lg"
-              >
-                <HvMapPin size={20} /> {loading ? "Loading..." : location.name}
-              </button>
-            }
           />
         }
       >

@@ -46,6 +46,8 @@ interface LocationContextType {
   error: string;
   requestLocationPermission: Function;
   ensureLocation: Function;
+  /** Opens the location search/picker modal — used by the Settings > Location row. */
+  openLocationPicker: () => void;
 }
 
 const LacationContext = createContext<LocationContextType | undefined>(
@@ -201,6 +203,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         error,
         requestLocationPermission,
         ensureLocation,
+        openLocationPicker: () => setIsLocationModalOpen(true),
       }}
     >
       {children}
@@ -212,7 +215,7 @@ export const LocationProvider: React.FC<LocationProviderProps> = ({
         onSelect={handlePickLocation}
         title={"Select Location"}
         data-testid="location-picker-modal"
-        dismissable={false}
+        dismissable={!!settings.location?.name}
       />
     </LacationContext.Provider>
   );

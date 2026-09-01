@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { DndContext } from "@dnd-kit/core";
 import { Allotment, LayoutPriority, type AllotmentHandle } from "allotment";
+import type { Task } from "@/domain/task";
 import {
   HvLayoutList,
   HvCalendarMonth,
@@ -105,7 +106,8 @@ export default function UpcomingDesktop() {
       onDragStart={(e) => {
         const task =
           unscheduledTasks.find((t) => t.id === e.active.id) ??
-          upcomingTasks.find((t) => t.id === e.active.id);
+          upcomingTasks.find((t) => t.id === e.active.id) ??
+          (e.active.data.current?.task as Task | undefined);
         setActiveTask(task ?? null);
       }}
       onDragEnd={handleDragEnd}

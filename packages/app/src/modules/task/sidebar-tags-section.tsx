@@ -1,6 +1,6 @@
 import { useTags } from "./use-tags";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import { Link } from "react-router";
+import { NavLink } from "react-router";
 import { HvHash } from "@/modules/icons";
 
 interface SidebarTagsSectionProps {
@@ -24,10 +24,16 @@ export function SidebarTagsSection({
       </div>
       <div className="space-y-0.5">
         {tags.map((tag) => (
-          <Link
+          <NavLink
             key={tag.id}
             to={`/tags/${encodeURIComponent(tag.name)}`}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className={({ isActive }) =>
+              `flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 dark:text-gray-400 transition-colors ${
+                isActive
+                  ? "bg-gray-200 dark:bg-gray-800"
+                  : "hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`
+            }
           >
             <span
               style={{color: tag.color }}
@@ -35,7 +41,7 @@ export function SidebarTagsSection({
             ><HvHash size={14}/></span>
             <span className="text-sm truncate flex-1">{tag.name}</span>
             <span className="text-xs text-gray-400">{tag.count}</span>
-          </Link>
+          </NavLink>
         ))}
       </div>
     </div>

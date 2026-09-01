@@ -258,7 +258,6 @@ function DraggableTaskItem({
           task={task}
           showGoalInfo={showGoalInfo}
           className={className}
-          disableSwipe
         />
       </div>
     </div>
@@ -357,16 +356,22 @@ export function useUpcomingData() {
     if (!over) return;
     const task =
       unscheduledTasks.find((t) => t.id === active.id) ??
-      upcomingTasks.find((t) => t.id === active.id);
-    if (!task) return;
+      upcomingTasks.find((t) => t.id === active.id) ??
+      (active.data.current?.task as Task | undefined);
+    // Week view can show tasks outside the loaded horizon (past weeks, weeks
+    // beyond the horizon) that aren't in `upcomingTasks` — fall back to the
+    // drag id, which is the task id. Virtual recurring occurrences (`vtask_*`)
+    // have no persisted row and can't be rescheduled this way.
+    const taskId = task?.id ?? active.id;
+    if (typeof taskId === "string" && taskId.startsWith("vtask_")) return;
     if (over.id === "inbox") {
-      updateTask(task.id!, { atEpochMillis: null, atTime: "" });
+      updateTask(taskId, { atEpochMillis: null, atTime: "" });
     } else {
       const [y, m, d] = (over.id as string).split("-").map(Number);
       const atEpochMillis = dayjs(new Date(y, m - 1, d))
         .endOf("day")
         .valueOf();
-      updateTask(task.id!, { atEpochMillis, atTime: "" });
+      updateTask(taskId, { atEpochMillis, atTime: "" });
     }
   };
 

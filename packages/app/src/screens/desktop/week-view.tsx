@@ -4,6 +4,8 @@ import { useDroppable, useDraggable } from "@dnd-kit/core";
 import { HvArrowLeft, HvArrowRight, HvGripVertical } from "@/modules/icons";
 import { useHijriDate } from "../../modules/calendar/hijri/use-hijri-date";
 import TaskListItem from "../../modules/task/task-list-item";
+import { usePendingTasksInRange } from "../../modules/task/use-pending-tasks-in-range";
+import { useVirtualTasks } from "../../modules/task/use-virtual-tasks";
 import type { Task } from "@/domain/task";
 
 function toLocalDateStr(d: Date) {
@@ -37,6 +39,7 @@ function DraggableTaskCard({
 }) {
   const { setNodeRef, listeners, attributes, isDragging } = useDraggable({
     id: task.id!,
+    data: { task },
   });
 
   return (
@@ -167,6 +170,50 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
     return Array.from({ length: 7 }, (_, i) => sunday.add(i, "day").toDate());
   }, [weekOffset]);
 
+  // The `upcomingTasks` prop is filtered to [today, today + horizon], so it
+  // can't cover past weeks or weeks beyond the horizon. Query the visible
+  // week's range directly instead and merge in whatever the prop provides.
+  const weekStartEpoch = useMemo(
+    () => dayjs(days[0]).startOf("day").valueOf(),
+    [days]
+  );
+  const weekEndEpoch = useMemo(
+    () => dayjs(days[6]).endOf("day").valueOf(),
+    [days]
+  );
+
+  const weekPendingQuery = usePendingTasksInRange(weekStartEpoch, weekEndEpoch);
+  const weekVirtualQuery = useVirtualTasks(weekStartEpoch, weekEndEpoch);
+
+  const weekTasks = useMemo(() => {
+    const inWeek = (task: Task) =>
+      task.atEpochMillis != null &&
+      task.atEpochMillis >= weekStartEpoch &&
+      task.atEpochMillis <= weekEndEpoch;
+
+    // Both persisted tasks and virtual recurring occurrences carry a stable
+    // id (virtual ones are `vtask_<template>_<epoch>`), so dedupe by id. The
+    // week-scoped queries are the source of truth; the prop only backfills
+    // anything already loaded for the current week.
+    const byId = new Map<string | number, Task>();
+    for (const task of upcomingTasks) {
+      if (task.id != null && inWeek(task)) byId.set(task.id, task);
+    }
+    for (const task of weekPendingQuery.data ?? []) {
+      if (task.id != null) byId.set(task.id, task);
+    }
+    for (const task of weekVirtualQuery.data ?? []) {
+      if (task.id != null) byId.set(task.id, task);
+    }
+    return Array.from(byId.values());
+  }, [
+    weekPendingQuery.data,
+    weekVirtualQuery.data,
+    upcomingTasks,
+    weekStartEpoch,
+    weekEndEpoch,
+  ]);
+
   const todayStr = useMemo(() => toLocalDateStr(new Date()), []);
 
   const weekLabel = useMemo(() => {
@@ -180,13 +227,13 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
 
   const tasksForDay = useCallback(
     (day: Date) =>
-      upcomingTasks.filter((task) => {
+      weekTasks.filter((task) => {
         if (!task.atEpochMillis) return false;
         return (
           toLocalDateStr(new Date(task.atEpochMillis)) === toLocalDateStr(day)
         );
       }),
-    [upcomingTasks]
+    [weekTasks]
   );
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useTags, normalizeTag } from "../../modules/task/use-tags";
-import { HvCheck, HvSearch, HvX } from "../../modules/icons";
+import { TagPill, useTagColor } from "../../modules/task/tag-pill";
+import { HvCheck, HvSearch } from "../../modules/icons";
 import { Modal, ModalNavbar } from "../../modules/navigation";
 import { NavActionButton } from "../../modules/components/nav-action-button";
 
@@ -18,6 +19,7 @@ function TagPickerModal({
   onConfirm,
 }: TagPickerModalProps) {
   const { tagNames, loading } = useTags();
+  const tagColor = useTagColor();
   const [search, setSearch] = useState("");
   const [pendingTags, setPendingTags] = useState<string[]>(selectedTags);
 
@@ -144,7 +146,14 @@ function TagPickerModal({
                       : "text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`}
                 >
-                  <span>{tag}</span>
+                  <span className="flex items-center gap-2">
+                    <span
+                      aria-hidden
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: tagColor(tag) }}
+                    />
+                    {tag}
+                  </span>
                   {isSelected && (
                     <svg
                       width="16"
@@ -180,14 +189,10 @@ export function TagInput({
   placeholder = "Add tags...",
 }: TagInputProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const tagColor = useTagColor();
 
   const handleConfirm = (tags: string[]) => {
     onTagsChange(tags);
-  };
-
-  const handleRemoveTag = (e: React.MouseEvent, tag: string) => {
-    e.stopPropagation();
-    onTagsChange(selectedTags.filter((t) => t !== tag));
   };
 
   return (
@@ -202,27 +207,14 @@ export function TagInput({
           <span className="text-sm text-gray-400">{placeholder}</span>
         ) : (
           selectedTags.map((tag) => (
-            <span
+            <TagPill
               key={tag}
-              className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm"
-            >
-              {tag}
-              <span
-                role="button"
-                tabIndex={0}
-                aria-label={`Remove ${tag}`}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer p-0.5 rounded-sm hover:bg-gray-200 dark:hover:bg-gray-600"
-                onClick={(e) => handleRemoveTag(e, tag)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.stopPropagation();
-                    onTagsChange(selectedTags.filter((t) => t !== tag));
-                  }
-                }}
-              >
-                <HvX size={10} />
-              </span>
-            </span>
+              name={tag}
+              color={tagColor(tag)}
+              onRemove={() =>
+                onTagsChange(selectedTags.filter((t) => t !== tag))
+              }
+            />
           ))
         )}
       </button>
@@ -242,32 +234,4 @@ interface TagInputProps {
   onTagsChange: (tags: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
-}
-
-interface TagListProps {
-  tags: string[];
-  onTagClick?: (tag: string) => void;
-  className?: string;
-}
-
-export function TagList({ tags, onTagClick, className = "" }: TagListProps) {
-  if (!tags || tags.length === 0) return null;
-
-  return (
-    <div className={`flex flex-wrap gap-1 ${className}`}>
-      {tags.map((tag) => (
-        <span
-          key={tag}
-          onClick={() => onTagClick?.(tag)}
-          className={`inline-block px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs ${
-            onTagClick
-              ? "cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-              : ""
-          }`}
-        >
-          {tag}
-        </span>
-      ))}
-    </div>
-  );
 }

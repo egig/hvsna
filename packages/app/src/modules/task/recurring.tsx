@@ -36,7 +36,6 @@ export function Recurring() {
                   key={task.id}
                   task={task}
                   showGoalInfo={false}
-                  disableSwipe={true}
                 />
               ))}
             </div>
