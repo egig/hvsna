@@ -39,18 +39,28 @@ export default function UpcomingDesktop() {
   });
 
   const allotmentRef = useRef<AllotmentHandle>(null);
-  const [inboxCollapsed, setInboxCollapsed] = useState(false);
+  // Inbox sidebar defaults to collapsed; expand state persists to localStorage.
+  const [inboxCollapsed, setInboxCollapsed] = useState(
+    () => localStorage.getItem("upcoming-inbox-collapsed") !== "false",
+  );
+
+  const persistInboxCollapsed = (collapsed: boolean) => {
+    localStorage.setItem("upcoming-inbox-collapsed", String(collapsed));
+  };
 
   const handleToggleInbox = useCallback(() => {
     const newCollapsed = !inboxCollapsed;
     setInboxCollapsed(newCollapsed);
+    persistInboxCollapsed(newCollapsed);
     const newSize = newCollapsed ? 0 : 288;
     const mainSize = window.innerWidth - newSize;
     allotmentRef.current?.resize([mainSize, newSize]);
   }, [inboxCollapsed]);
 
   const handleAllotmentChange = useCallback((sizes: number[]) => {
-    setInboxCollapsed(sizes[1] < 40);
+    const collapsed = sizes[1] < 40;
+    setInboxCollapsed(collapsed);
+    persistInboxCollapsed(collapsed);
   }, []);
 
   const effectiveMode: ViewMode = viewMode;
@@ -116,7 +126,7 @@ export default function UpcomingDesktop() {
         ref={allotmentRef}
         className="h-full"
         proportionalLayout={false}
-        defaultSizes={[window.innerWidth, 288]}
+        defaultSizes={[window.innerWidth, inboxCollapsed ? 0 : 288]}
         onChange={handleAllotmentChange}
       >
         {/* Main pane */}

@@ -5,19 +5,30 @@ import { DesktopSidebar } from "@/screens/desktop/desktop-sidebar";
 
 import "allotment/dist/style.css";
 
+const SIDEBAR_COLLAPSED_KEY = "desktop-sidebar-collapsed";
+
 export default function Layout() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true",
+  );
   const allotmentRef = useRef<AllotmentHandle>(null);
+
+  const persistSidebarCollapsed = (collapsed: boolean) => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+  };
 
   const handleToggleSidebar = useCallback(() => {
     const newCollapsed = !sidebarCollapsed;
     setSidebarCollapsed(newCollapsed);
+    persistSidebarCollapsed(newCollapsed);
     const newSize = newCollapsed ? 56 : 192;
     allotmentRef.current?.resize([newSize, window.innerWidth - newSize]);
   }, [sidebarCollapsed]);
 
   const handleSidebarChange = useCallback((sizes: number[]) => {
-    setSidebarCollapsed(sizes[0] < 120);
+    const collapsed = sizes[0] < 120;
+    setSidebarCollapsed(collapsed);
+    persistSidebarCollapsed(collapsed);
   }, []);
 
   // Desktop Layout with side navigation
@@ -26,7 +37,7 @@ export default function Layout() {
       ref={allotmentRef}
       className="h-full"
       proportionalLayout={false}
-      defaultSizes={[192, window.innerWidth]}
+      defaultSizes={[sidebarCollapsed ? 56 : 192, window.innerWidth]}
       onChange={handleSidebarChange}
     >
       {/* Sidebar pane */}

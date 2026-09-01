@@ -62,7 +62,7 @@ function SidebarNavLink({
     >
       {({ isActive }) => (
         <>
-          <span className="text-xl">
+          <span className="[&_svg]:size-4">
             {isActive ? tab.activeIcon : tab.icon}
           </span>
           {!collapsed && <span className="text-sm">{tab.label}</span>}
@@ -182,9 +182,9 @@ export function DesktopSidebar({
           aria-label={collapsed ? t("expand_sidebar") : t("collapse_sidebar")}
         >
           {collapsed ? (
-            <HvPanelLeft size={18} />
+            <HvPanelLeft className="size-4" />
           ) : (
-            <HvPanelLeftClose size={18} />
+            <HvPanelLeftClose className="size-4" />
           )}
         </button>
       </div>
@@ -198,7 +198,7 @@ export function DesktopSidebar({
           }`}
           aria-label={t("add_new_task") || "Add new task"}
         >
-          <span className="text-xl">
+          <span className="[&_svg]:size-4">
             <HvSquareRoundedPlusFilled />
           </span>
           {!collapsed && (
