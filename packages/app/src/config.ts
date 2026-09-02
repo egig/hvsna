@@ -134,33 +134,3 @@ export function getCoordinateFromTimezone(timezone: string): {
 } {
   return TIMEZONE_COORDINATES[timezone] ?? TIMEZONE_COORDINATES["Asia/Jakarta"];
 }
-
-/**
- * Prayer times API configuration
- * Based on Aladhan API (https://aladhan.com/prayer-times-api)
- */
-export const PRAYER_TIMES_CONFIG = {
-  /**
-   * Calculation method
-   * 20 = Institute of Geophysics, University of Tehran
-   */
-  method: 20,
-
-  /**
-   * Shafaq parameter for Isha time
-   * 'general' uses a general approach
-   */
-  shafaq: "general",
-
-  /**
-   * Tune parameter for adjusting prayer times (in minutes)
-   * Format: Imsak,Fajr,Sunrise,Dhuhr,Asr,Sunset,Maghrib,Isha,Midnight
-   */
-  tune: "5,3,5,7,9,-1,0,8,-6",
-
-  /**
-   * Calendar method for Hijri date calculation
-   * UAQ = Umm al-Qura University, Makkah
-   */
-  calendarMethod: "UAQ",
-} as const;

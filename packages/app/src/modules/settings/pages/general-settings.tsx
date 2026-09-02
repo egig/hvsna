@@ -6,6 +6,14 @@ import { useSettings } from "..";
 import { useLanguageContext } from "../../i18n/LanguageContext";
 import { ListInputSelect } from "../../components/list-input-select";
 import { useLocationContext } from "../../location/context";
+import {
+  PRAYER_CALCULATION_METHODS,
+  PRAYER_MADHABS,
+  DEFAULT_CALCULATION_METHOD,
+  DEFAULT_MADHAB,
+  type PrayerCalculationMethod,
+  type PrayerMadhab,
+} from "../../prayer-calculation";
 
 export default function GeneralSettings() {
   const { settings, loading, updateSettings } = useSettings();
@@ -27,6 +35,16 @@ export default function GeneralSettings() {
 
   const handleTimezoneChange = async (newTimezone: string) => {
     await updateSettings({ timezone: newTimezone });
+  };
+
+  const handleCalculationMethodChange = async (value: string) => {
+    await updateSettings({
+      calculationMethod: value as PrayerCalculationMethod,
+    });
+  };
+
+  const handleMadhabChange = async (value: string) => {
+    await updateSettings({ madhab: value as PrayerMadhab });
   };
 
   return (
@@ -105,6 +123,28 @@ export default function GeneralSettings() {
           onSelect={handleTimezoneChange}
           title={t("timezone")}
           dismissable={true}
+        />
+
+        <ListInputSelect
+          label={t("calculation_method")}
+          value={settings.calculationMethod ?? DEFAULT_CALCULATION_METHOD}
+          onValueChange={handleCalculationMethodChange}
+          disabled={loading}
+          options={PRAYER_CALCULATION_METHODS.map((m) => ({
+            value: m,
+            label: t(`method.${m}`),
+          }))}
+        />
+
+        <ListInputSelect
+          label={t("madhab")}
+          value={settings.madhab ?? DEFAULT_MADHAB}
+          onValueChange={handleMadhabChange}
+          disabled={loading}
+          options={PRAYER_MADHABS.map((m) => ({
+            value: m,
+            label: t(`madhab.${m}`),
+          }))}
         />
       </div>
     </Page>

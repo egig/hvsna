@@ -1,13 +1,8 @@
 import type { Language } from "../i18n/language";
-
-export interface PrayerTimesFallback {
-  fajr: string;
-  sunrise: string;
-  dzuhr: string;
-  asr: string;
-  maghrib: string;
-  isha: string;
-}
+import type {
+  PrayerCalculationMethod,
+  PrayerMadhab,
+} from "../prayer-calculation";
 
 export interface LocationSetting {
   source: "auto" | "manual";
@@ -25,8 +20,11 @@ export interface GeneralSettings {
   notifications?: boolean;
   reminderMinutesBefore?: number;
   onboardedAt?: number;
-  prayerTimesFallback?: PrayerTimesFallback;
   location?: LocationSetting;
+  /** Prayer-time calculation method — kept string-identical to the Android app. */
+  calculationMethod?: PrayerCalculationMethod;
+  /** Madhab for Asr calculation (Hanafi = longer shadow). */
+  madhab?: PrayerMadhab;
 }
 
 export interface SettingsState {

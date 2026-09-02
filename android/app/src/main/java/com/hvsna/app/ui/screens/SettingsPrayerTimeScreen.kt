@@ -38,7 +38,7 @@ import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
 
 private val calculationMethodValues = listOf(
-    "MUSLIM_WORLD_LEAGUE", "EGYPTIAN", "KARACHI", "UMM_AL_QURA", "DUBAI",
+    "KEMENAG", "MUSLIM_WORLD_LEAGUE", "EGYPTIAN", "KARACHI", "UMM_AL_QURA", "DUBAI",
     "MOON_SIGHTING_COMMITTEE", "NORTH_AMERICA", "KUWAIT", "QATAR", "SINGAPORE",
     "TURKEY", "TEHRAN", "OTHER",
 )

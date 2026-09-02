@@ -1,13 +1,8 @@
-import type { GeneralSettings, PrayerTimesFallback } from "./settings";
-
-export const DEFAULT_PRAYER_TIMES: PrayerTimesFallback = {
-  fajr: "05:00",
-  sunrise: "06:00",
-  dzuhr: "12:00",
-  asr: "15:00",
-  maghrib: "18:00",
-  isha: "19:00",
-};
+import type { GeneralSettings } from "./settings";
+import {
+  DEFAULT_CALCULATION_METHOD,
+  DEFAULT_MADHAB,
+} from "../prayer-calculation";
 
 export const DEFAULT_SETTINGS: GeneralSettings = {
   language: "en",
@@ -15,7 +10,8 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
   theme: "system",
   notifications: true,
   reminderMinutesBefore: 15,
-  prayerTimesFallback: DEFAULT_PRAYER_TIMES,
+  calculationMethod: DEFAULT_CALCULATION_METHOD,
+  madhab: DEFAULT_MADHAB,
 };
 
 /** Merge persisted settings over the defaults, falling back to defaults when absent. */

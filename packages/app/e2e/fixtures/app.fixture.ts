@@ -1,11 +1,10 @@
 import { test as base, type Page } from "@playwright/test";
 import { resetLocalData } from "../helpers/db-reset";
-import { mockAladhanAPI } from "../helpers/api-mocks";
 
 type AppFixtures = {
-  /** Page with Aladhan mocked. No onboarding bypass — use for settings routes. */
+  /** No onboarding bypass — use for settings routes. */
   appPage: Page;
-  /** Page with Aladhan mocked + onboarding completed. Use for task routes. */
+  /** Onboarding completed. Use for task routes. */
   taskPage: Page;
 };
 
@@ -29,11 +28,10 @@ async function completeOnboarding(page: Page): Promise<void> {
 
 export const test = base.extend<AppFixtures>({
   /**
-   * For settings pages (/settings/general, /settings/prayer-time-fallback).
+   * For settings pages (/settings/general, etc.).
    * These routes are NOT wrapped by OnboardingGuard, so no onboarding needed.
    */
   appPage: async ({ page }, use) => {
-    await mockAladhanAPI(page);
     await use(page);
     // Cleanup: wipe local data after each test
     await resetLocalData(page);
@@ -44,7 +42,6 @@ export const test = base.extend<AppFixtures>({
    * These are wrapped by OnboardingGuard — completes onboarding on fresh DB.
    */
   taskPage: async ({ page }, use) => {
-    await mockAladhanAPI(page);
     // Navigate first so the SQLite Worker/OPFS storage is accessible, then wipe any leftover state
     await page.goto("/");
     await resetLocalData(page);

@@ -86,7 +86,7 @@ React Router v8 in framework mode, used purely as a backend — every route unde
 
 - **TypeScript strict mode** with `verbatimModuleSyntax: true` — use `import type` for type-only imports
 - **Hijri months are 1-indexed** (not 0-based)
-- **Prayer time tuning** in `packages/app/src/config.ts` (`PRAYER_TIMES_CONFIG.tune`), comma-separated format: `Imsak,Fajr,Sunrise,Dhuhr,Asr,Sunset,Maghrib,Isha,Midnight`
+- **Prayer times** are computed locally with the `adhan` package (`packages/app/src/modules/prayer.ts`), never fetched — calculation method + madhab come from `GeneralSettings` and map to `adhan` via `packages/app/src/modules/prayer-calculation.ts`, kept string-identical to the Android app's `PrayerTimesRepository`. `KEMENAG` (Indonesia) isn't in `adhan` on either platform: it's synthesized as Fajr 20° / Isha 18° + a +2min / −2min-sunrise ihtiyati margin, and both platforms must stay in lockstep
 - **Location failure must fallback** to Jakarta area (6.2001514, 106.829547)
 - **Infra never imported in modules** — always through context/hooks
 - **Feature flags** driven by `MODE` env var (`development`|`staging`|`production`), prefixed `VITE_` in env vars
@@ -101,7 +101,7 @@ React Router v8 in framework mode, used purely as a backend — every route unde
 
 ## Key files
 
-- `packages/app/src/config.ts` — prayer tuning, timezone→coordinate map
+- `packages/app/src/config.ts` — timezone→coordinate map; `packages/app/src/modules/prayer-calculation.ts` — prayer calc method/madhab ↔ `adhan` mapping
 - `packages/app/src/app.tsx` — root provider tree (AuthProvider → SettingsProvider → LocationProvider → TaskProvider)
 - `packages/app/src/modules/calendar/hijri/` — HijriDate/HijriMonth classes using `@tabby_ai/hijri-converter`
 - `packages/app/src/modules/sync/` — sync UI/context; live push/pull against `packages/api` (see Database section), gated behind a verified email and a paid Sync plan

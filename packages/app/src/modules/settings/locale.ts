@@ -268,59 +268,60 @@ export const settingsTranslations = {
     id: "Silakan masuk untuk melihat informasi profil Anda",
   },
 
-  // Prayer Time Fallback Settings
-  prayer_time_fallback: {
-    en: "Prayer Times",
-    id: "Waktu Sholat",
+  // Prayer time calculation settings
+  prayer_time: {
+    en: "Prayer Time",
+    id: "Waktu Salat",
   },
-  offline_mode: {
-    en: "Offline Mode",
-    id: "Mode Offline",
+  calculation_method: {
+    en: "Calculation Method",
+    id: "Metode Perhitungan",
   },
-  prayer_fallback_description: {
-    en: "These prayer times will be used when the app is offline and cannot fetch real-time prayer schedules.",
-    id: "Waktu sholat ini akan digunakan ketika aplikasi offline dan tidak dapat mengambil jadwal sholat real-time.",
+  madhab: {
+    en: "Madhab (Asr calculation)",
+    id: "Mazhab (perhitungan Asar)",
   },
-  prayer_times: {
-    en: "Prayer Times",
-    id: "Waktu Sholat",
+  "method.KEMENAG": {
+    en: "Kemenag (Indonesia)",
+    id: "Kemenag (Indonesia)",
   },
-  set_fallback_times: {
-    en: "Set fallback times for each prayer. You can fetch automatically or manually edit.",
-    id: "Atur waktu untuk setiap sholat. Anda bisa ambil otomatis pada saat online atau edit manual.",
+  "method.MUSLIM_WORLD_LEAGUE": {
+    en: "Muslim World League",
+    id: "Liga Dunia Muslim",
   },
-  how_it_works: {
-    en: "How it works",
-    id: "Cara kerja",
+  "method.EGYPTIAN": {
+    en: "Egyptian General Authority",
+    id: "Otoritas Umum Mesir",
   },
-  prayer_fallback_explanation: {
-    en: "When your device is offline, the app will automatically use these saved prayer times to manage today's timeline instead of trying to fetch them from the internet.",
-    id: "Ketika perangkat Anda offline, aplikasi akan secara otomatis menggunakan waktu sholat yang tersimpan ini untuk mengatur timeline hari ini alih-alih mencoba mengambilnya dari internet.",
+  "method.KARACHI": {
+    en: "University of Islamic Sciences, Karachi",
+    id: "Universitas Ilmu Islam, Karachi",
   },
-  fetch_updated_prayer_times: {
-    en: "Fetch Updated Prayer Times",
-    id: "Ambil Waktu Sholat Terbaru",
+  "method.UMM_AL_QURA": {
+    en: "Umm al-Qura, Makkah",
+    id: "Umm al-Qura, Makkah",
   },
-  fetching: {
-    en: "Fetching...",
-    id: "Mengambil...",
+  "method.DUBAI": { en: "Dubai", id: "Dubai" },
+  "method.MOON_SIGHTING_COMMITTEE": {
+    en: "Moon Sighting Committee",
+    id: "Komite Rukyat Hilal",
   },
-  location_required: {
-    en: "Location coordinates are required to fetch prayer times",
-    id: "Koordinat lokasi diperlukan untuk mengambil waktu sholat",
+  "method.NORTH_AMERICA": {
+    en: "North America (ISNA)",
+    id: "Amerika Utara (ISNA)",
   },
-  location_required_for_fetch: {
-    en: "Location coordinates must be set in settings to fetch prayer times",
-    id: "Koordinat lokasi harus diatur di pengaturan untuk mengambil waktu sholat",
+  "method.KUWAIT": { en: "Kuwait", id: "Kuwait" },
+  "method.QATAR": { en: "Qatar", id: "Qatar" },
+  "method.SINGAPORE": { en: "Singapore", id: "Singapura" },
+  "method.TURKEY": { en: "Turkey", id: "Turki" },
+  "method.TEHRAN": { en: "Tehran", id: "Teheran" },
+  "method.OTHER": { en: "Other", id: "Lainnya" },
+  "madhab.SHAFI": {
+    en: "Shafi, Maliki, Hanbali",
+    id: "Syafi'i, Maliki, Hanbali",
   },
-  fetch_prayer_times_error: {
-    en: "Failed to fetch updated prayer times",
-    id: "Gagal mengambil waktu sholat terbaru",
-  },
-  prayer_times_updated: {
-    en: "Prayer times updated successfully",
-    id: "Waktu sholat berhasil diperbarui",
-  },
+  "madhab.HANAFI": { en: "Hanafi", id: "Hanafi" },
+
   notifications: { en: "Notifications", id: "Notifikasi" },
   notification_settings_subtitle: {
     en: "Manage notification permissions",

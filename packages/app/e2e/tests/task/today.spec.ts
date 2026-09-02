@@ -11,9 +11,8 @@ import { TaskListPage } from "../../page-objects/TaskListPage";
  *   src/modules/task/today.tsx
  *   src/modules/prayer-time-utils.ts — groupTasksByPrayerTimes()
  *
- * Prayer times are mocked (api-mocks.ts):
- *   Fajr 05:15 · Sunrise 06:30 · Dhuhr 12:00 · Asr 15:30
- *   Maghrib 18:15 · Isha 19:30
+ * Prayer times are computed locally by `adhan` (src/modules/prayer.ts) from the
+ * mocked geolocation (21.3891, 39.8579) — no network call.
  *
  * Islamic day order (Maghrib-first):
  *   Maghrib → Isha → Fajr → Sunrise → Dhuhr → Asr

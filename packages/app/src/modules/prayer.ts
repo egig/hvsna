@@ -1,6 +1,7 @@
-import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
+import { Coordinates, PrayerTimes } from "adhan";
 import dayjs from "dayjs";
 import { useSettings } from "./settings";
+import { buildCalculationParameters } from "./prayer-calculation";
 import { useCallback } from "react";
 import { useHijriDate } from "./calendar/hijri";
 
@@ -14,7 +15,10 @@ export function usePrayerTimes() {
         settings.location?.lat as number,
         settings.location?.lng as number
       );
-      const params = CalculationMethod.UmmAlQura();
+      const params = buildCalculationParameters(
+        settings.calculationMethod,
+        settings.madhab
+      );
       const prayerTimes = new PrayerTimes(coordinates, da, params);
       return prayerTimes;
     },
