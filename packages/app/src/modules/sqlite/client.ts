@@ -40,6 +40,7 @@ export class SqliteClient implements SqliteExecutor {
     }
   >();
   private lockListeners = new Set<(state: SqliteLockState) => void>();
+  private lockState: SqliteLockState | null = null;
 
   constructor() {
     this.worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -48,6 +49,7 @@ export class SqliteClient implements SqliteExecutor {
     this.worker.onmessage = (event: MessageEvent<SqliteWorkerMessage>) => {
       const message = event.data;
       if ("kind" in message) {
+        this.lockState = message.state;
         this.lockListeners.forEach((listener) => listener(message.state));
         return;
       }
@@ -66,10 +68,13 @@ export class SqliteClient implements SqliteExecutor {
   /**
    * Subscribes to cross-tab DB lock status changes (fired when this tab is
    * blocked behind another tab's open database, and again once it's no
-   * longer blocked). Returns an unsubscribe function.
+   * longer blocked). If a lock state has already been reported, the listener
+   * is invoked with it synchronously so late subscribers aren't left stale.
+   * Returns an unsubscribe function.
    */
   onLockStateChange(listener: (state: SqliteLockState) => void): () => void {
     this.lockListeners.add(listener);
+    if (this.lockState !== null) listener(this.lockState);
     return () => this.lockListeners.delete(listener);
   }
 

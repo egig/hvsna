@@ -10,6 +10,7 @@ import { BrowserRouter } from "react-router";
 import { ResponsiveRoutes } from "@/routes";
 import { bootstrapApp } from "@/modules/bootstrap";
 import { BootScreen } from "@/modules/components/boot-screen";
+import { DatabaseLockedOverlay } from "@/modules/sqlite/database-locked-overlay";
 
 registerWebImplementations();
 
@@ -35,8 +36,30 @@ configureLogger();
 // state that a moment-later sync overwrites.
 root.render(<BootScreen />);
 
+// When another tab already holds the exclusive SQLite lock, the worker can't
+// open the database and bootstrapApp()'s queries below block indefinitely —
+// leaving this tab stuck on the "Initiating…" screen. Surface the multi-tab
+// prompt in its place until this tab acquires the lock, at which point
+// bootstrap resumes on its own and renders <App />.
+let appMounted = false;
+const stopWatchingLock = sqliteClient.onLockStateChange((state) => {
+  if (appMounted) return;
+  root.render(
+    state === "locked" ? (
+      <>
+        <BootScreen />
+        <DatabaseLockedOverlay />
+      </>
+    ) : (
+      <BootScreen />
+    )
+  );
+});
+
 (async () => {
   const bootstrap = await bootstrapApp(sqliteClient);
+  appMounted = true;
+  stopWatchingLock();
 
   root.render(
     <App
