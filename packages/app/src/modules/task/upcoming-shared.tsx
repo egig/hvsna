@@ -9,7 +9,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
-import { HvOutlineInbox, HvGripVertical } from "@/modules/icons";
+import { HvOutlineInbox } from "@/modules/icons";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { TaskGroupCollapsible } from "./task-group-collapsible";
@@ -246,20 +246,15 @@ function DraggableTaskItem({
       {...listeners}
       {...attributes}
       className={[
-        "group relative flex items-stretch rounded bg-white border-b border-gray-200 dark:bg-gray-900 overflow-hidden cursor-grab active:cursor-grabbing transition-all hover:shadow-sm",
+        "group relative rounded bg-white border-b border-gray-200 dark:bg-gray-900 overflow-hidden cursor-grab transition-all hover:shadow-sm",
         isDragging ? "opacity-40" : "",
       ].join(" ")}
     >
-      <div className="absolute left-0 top-0 bottom-0 z-50 flex items-center px-1 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 dark:group-hover:text-gray-500 shrink-0 touch-none opacity-0 group-hover:opacity-100 transition-opacity">
-        <HvGripVertical className="size-3" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <TaskListItem
-          task={task}
-          showGoalInfo={showGoalInfo}
-          className={className}
-        />
-      </div>
+      <TaskListItem
+        task={task}
+        showGoalInfo={showGoalInfo}
+        className={className}
+      />
     </div>
   );
 }
@@ -416,6 +411,18 @@ export function DragOverlayContent({
 }: {
   activeTask: Task | null;
 }) {
+  // Force the grabbing cursor everywhere while a drag is in progress — child
+  // elements set their own `cursor-pointer`, so a body-level style isn't enough.
+  useEffect(() => {
+    if (!activeTask) return;
+    const style = document.createElement("style");
+    style.textContent = "*{cursor:grabbing !important;}";
+    document.head.appendChild(style);
+    return () => {
+      style.remove();
+    };
+  }, [activeTask]);
+
   return (
     <DragOverlay dropAnimation={null}>
       {activeTask && (

@@ -87,9 +87,9 @@ export function useToday() {
     hijriMonthNames[displayHijriDate.month - 1]
   } ${displayHijriDate.year}`;
 
-  const pageTitle = `${gregDate.format("ddd")}, ${gregDate.date()} ${
-    gregorianMonthNames[gregDate.month()]
-  } ${gregDate.year()}`;
+  const pageTitle = `${gregDate.format("dddd")}, ${gregDate.date()} ${gregorianMonthNames[
+    gregDate.month()
+  ].substring(0, 3)}`;
 
   // Label for the sunset hairline: next Hijri day that begins at Maghrib
   const nextHijriDate = getTomorrow();

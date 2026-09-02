@@ -36,8 +36,8 @@ function TodayInner() {
         navbarLarge={
           <LargeNavbar
             showBackButton={false}
+            eyebrow={subTitle}
             title={pageTitle}
-            subtitle={subTitle}
           />
         }
       >

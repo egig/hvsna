@@ -123,7 +123,8 @@ fun TodayScreen(
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
-    val todayHeaderFormat = remember(strings.locale) { SimpleDateFormat("EEE, MMM d", strings.locale) }
+    val todayHeaderFormat = remember(strings.locale) { SimpleDateFormat("EEEE, d MMM", strings.locale) }
+    val dayDividerFormat = remember(strings.locale) { SimpleDateFormat("EEE, d MMM", strings.locale) }
     val timeFormat = remember(strings.locale) { SimpleDateFormat("HH:mm", strings.locale) }
     val overdueTasks by viewModel.overdueTasks.collectAsState()
     val todayTasks by viewModel.todayTasks.collectAsState()
@@ -165,8 +166,8 @@ fun TodayScreen(
             ).toMap()
         }
     }
-    val tomorrowLabel = remember(now, todayHeaderFormat) {
-        todayHeaderFormat.format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.time)
+    val tomorrowLabel = remember(now, dayDividerFormat) {
+        dayDividerFormat.format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.time)
     }
 
     val grouped: TodayGroupedTasks = groupTodayTasks(overdueTasks, todayTasks, now, todayEndEpoch)

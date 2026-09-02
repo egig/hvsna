@@ -6,6 +6,8 @@ import { useScreenSize } from "@/modules/components/screen-size-wrapper";
 
 interface NavbarProps {
   title?: string | React.ReactNode;
+  /** Small kicker line rendered above the title (e.g. the Hijri date). */
+  eyebrow?: string | React.ReactNode;
   showBackButton?: boolean;
   customBackAction?: () => void;
   leftAction?: React.ReactNode;
@@ -143,6 +145,7 @@ export function Navbar({
 
 export function LargeNavbar({
   title,
+  eyebrow,
   showBackButton: propShowBackButton,
   customBackAction,
   leftAction,
@@ -264,6 +267,11 @@ export function LargeNavbar({
                 </div>
               ) : (
                 <>
+                  {eyebrow && (
+                    <div className="text-[10px] font-extrabold tracking-wide text-primary-500 dark:text-primary-300 truncate">
+                      {eyebrow}
+                    </div>
+                  )}
                   {title && (
                     <h1
                       className={`text-lg font-semibold text-gray-900 truncate`}
@@ -318,6 +326,11 @@ export function LargeNavbar({
             </div>
           ) : (
             <>
+              {eyebrow && (
+                <div className="text-xs font-extrabold tracking-wide text-primary-500 dark:text-primary-300 truncate">
+                  {eyebrow}
+                </div>
+              )}
               {title && (
                 <h1 className="text-2xl font-semibold text-gray-900 truncate">
                   {title}

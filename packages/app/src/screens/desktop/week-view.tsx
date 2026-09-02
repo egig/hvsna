@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import dayjs from "dayjs";
 import { useDroppable, useDraggable } from "@dnd-kit/core";
-import { HvArrowLeft, HvArrowRight, HvGripVertical } from "@/modules/icons";
+import { HvArrowLeft, HvArrowRight } from "@/modules/icons";
 import { useHijriDate } from "../../modules/calendar/hijri/use-hijri-date";
 import TaskListItem from "../../modules/task/task-list-item";
 import { usePendingTasksInRange } from "../../modules/task/use-pending-tasks-in-range";
@@ -48,7 +48,7 @@ function DraggableTaskCard({
       {...attributes}
       ref={setNodeRef}
       className={[
-        "rounded-sm border bg-white dark:bg-gray-900 flex items-stretch",
+        "rounded-sm border bg-white dark:bg-gray-900 cursor-grab",
         "shadow-xs hover:shadow-md transition-shadow overflow-hidden",
         isDragging ? "opacity-40" : "",
         isCompleted
@@ -58,16 +58,7 @@ function DraggableTaskCard({
           : "border-gray-200 dark:border-gray-700",
       ].join(" ")}
     >
-      <div className="flex items-center px-1 cursor-grab active:cursor-grabbing text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500 shrink-0 touch-none">
-        <HvGripVertical className="size-3" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <TaskListItem
-          task={task}
-          showGoalInfo={false}
-          className="!border-b-0"
-        />
-      </div>
+      <TaskListItem task={task} showGoalInfo={false} className="!border-b-0" />
     </div>
   );
 }
