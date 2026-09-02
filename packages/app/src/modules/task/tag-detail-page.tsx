@@ -5,7 +5,9 @@ import { Navbar } from "../navigation/navbar";
 import { Modal, Page } from "../navigation";
 import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
+import { TaskGroupCollapsible } from "./task-group-collapsible";
 import { useAllTasks } from "./use-all-tasks";
+import dayjs from "dayjs";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTags } from "./use-tags";
 import { Menu } from "@base-ui/react/menu";
@@ -42,6 +44,41 @@ export default function TagDetailPage() {
       (task) => task.tags?.includes(decodedTag) && task.status === 1
     );
   }, [allTasksQuery.data, decodedTag]);
+
+  // Group the active tasks by schedule, matching the Android tag detail screen.
+  const taskGroups = useMemo(() => {
+    const startOfToday = dayjs().startOf("day").valueOf();
+    const startOfTomorrow = dayjs().add(1, "day").startOf("day").valueOf();
+    const overdue: Task[] = [];
+    const todayTasks: Task[] = [];
+    const upcoming: Task[] = [];
+    const unscheduled: Task[] = [];
+    for (const task of tasks) {
+      if (task.atEpochMillis == null) unscheduled.push(task);
+      else if (task.atEpochMillis < startOfToday) overdue.push(task);
+      else if (task.atEpochMillis < startOfTomorrow) todayTasks.push(task);
+      else upcoming.push(task);
+    }
+    const byTime = (a: Task, b: Task) =>
+      (a.atEpochMillis ?? 0) - (b.atEpochMillis ?? 0);
+    const byTitle = (a: Task, b: Task) =>
+      (a.name ?? "").localeCompare(b.name ?? "");
+    overdue.sort(byTime);
+    todayTasks.sort(byTime);
+    upcoming.sort(byTime);
+    unscheduled.sort(byTitle);
+    return [
+      { key: "overdue", label: t("overdue"), tasks: overdue, danger: true },
+      { key: "today", label: t("today"), tasks: todayTasks, danger: false },
+      { key: "upcoming", label: t("upcoming"), tasks: upcoming, danger: false },
+      {
+        key: "unscheduled",
+        label: t("unscheduled"),
+        tasks: unscheduled,
+        danger: false,
+      },
+    ].filter((group) => group.tasks.length > 0);
+  }, [tasks, t]);
 
   const openEdit = () => {
     setNewTagName(decodedTag);
@@ -154,22 +191,46 @@ export default function TagDetailPage() {
           />
         )}
 
-      {tasks.length > 0 && (
-        <div>
-          {tasks.map((task) => (
-            <TaskListItem key={task.id} task={task} />
+      {taskGroups.length > 0 && (
+        <div className="space-y-2 py-2">
+          {taskGroups.map((group) => (
+            <TaskGroupCollapsible
+              key={group.key}
+              label={
+                <span
+                  className={`text-sm font-bold ${
+                    group.danger
+                      ? "text-danger-700"
+                      : "text-gray-700 dark:text-gray-300"
+                  }`}
+                >
+                  {group.label}
+                </span>
+              }
+            >
+              {group.tasks.map((task) => (
+                <TaskListItem key={task.id} task={task} />
+              ))}
+            </TaskGroupCollapsible>
           ))}
         </div>
       )}
 
       {completedTasks.length > 0 && (
-        <div>
-          <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider px-4 py-3">
-            {t("completed") || "Completed"}
-          </h3>
-          {completedTasks.map((task) => (
-            <TaskListItem key={task.id} task={task} />
-          ))}
+        <div className="py-2">
+          <TaskGroupCollapsible
+            defaultOpen={false}
+            count={completedTasks.length}
+            label={
+              <span className="text-sm font-bold text-gray-500">
+                {t("completed") || "Completed"}
+              </span>
+            }
+          >
+            {completedTasks.map((task) => (
+              <TaskListItem key={task.id} task={task} />
+            ))}
+          </TaskGroupCollapsible>
         </div>
       )}
 

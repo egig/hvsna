@@ -60,7 +60,7 @@ export class SqliteTagRepository implements ITagRepository {
         tags.*,
         (
           SELECT COUNT(*) FROM task_tags tt
-          JOIN tasks t ON t.id = tt.task_id AND t.deleted_at IS NULL
+          JOIN tasks t ON t.id = tt.task_id AND t.deleted_at IS NULL AND t.status = 0
           WHERE tt.tag_id = tags.id
         ) AS count
       FROM tags

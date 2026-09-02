@@ -40,7 +40,7 @@ export function SidebarTagsSection({
               aria-hidden
             ><HvHash size={14}/></span>
             <span className="text-sm truncate flex-1">{tag.name}</span>
-            <span className="text-xs text-gray-400">{tag.count}</span>
+            {tag.count > 0 && <span className="text-xs text-gray-400">{tag.count }</span> }
           </NavLink>
         ))}
       </div>

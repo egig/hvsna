@@ -117,6 +117,7 @@ fun HvsnaApp() {
     var showTaskSheet by remember { mutableStateOf(false) }
     var editingTask by remember { mutableStateOf<TaskWithTags?>(null) }
     var taskDefaultScheduledTime by remember { mutableStateOf<Long?>(null) }
+    var taskInitialTagIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     val taskSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val context = LocalContext.current
@@ -187,6 +188,13 @@ fun HvsnaApp() {
     val onEditTask: (TaskWithTags?, Long?) -> Unit = { task, defaultScheduledTime ->
         editingTask = task
         taskDefaultScheduledTime = defaultScheduledTime
+        taskInitialTagIds = emptySet()
+        showTaskSheet = true
+    }
+    val onAddTaskWithTag: (String) -> Unit = { tagId ->
+        editingTask = null
+        taskDefaultScheduledTime = null
+        taskInitialTagIds = setOf(tagId)
         showTaskSheet = true
     }
 
@@ -271,6 +279,7 @@ fun HvsnaApp() {
                             tag = tag,
                             onBack = { navController.popBackStack() },
                             onEditTask = onEditTask,
+                            onAddTaskWithTag = onAddTaskWithTag,
                         )
                     }
                 } else {
@@ -308,7 +317,7 @@ fun HvsnaApp() {
             onOpenSettings = { navController.navigate(AppRoute.Settings) },
             hijriMonthOffsets = settings.hijriMonthOffsets,
             allTags = allTags,
-            initialTagIds = editingTask?.tags?.map { it.id }?.toSet() ?: emptySet(),
+            initialTagIds = editingTask?.tags?.map { it.id }?.toSet() ?: taskInitialTagIds,
             onCreateTag = { taskViewModel.createTag(it) },
             defaultScheduledTime = taskDefaultScheduledTime,
             recurrenceRule = editingTask?.task?.recurringTaskId?.let { id -> allRecurrenceRules.firstOrNull { it.id == id } },

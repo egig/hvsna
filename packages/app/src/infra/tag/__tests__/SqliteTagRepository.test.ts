@@ -44,6 +44,18 @@ describe("SqliteTagRepository", () => {
     expect(work.count).toBe(2);
   });
 
+  it("counts only uncompleted (status = 0) tasks", async () => {
+    const { client, repo } = await makeRepo();
+    await client.run(
+      `INSERT INTO tasks (id, name, status, created_at, updated_at) VALUES ('task_1','A',0,1,1), ('task_2','B',1,1,1)`
+    );
+    await repo.setTaskTags("task_1", ["work"]);
+    await repo.setTaskTags("task_2", ["work"]);
+
+    const [work] = await repo.findAll();
+    expect(work.count).toBe(1);
+  });
+
   it("setTaskTags replaces the full tag set on repeated calls", async () => {
     const { repo } = await makeRepo();
 
