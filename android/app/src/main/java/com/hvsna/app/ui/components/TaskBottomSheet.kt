@@ -347,7 +347,7 @@ fun TaskBottomSheet(
                                         showPrayerPicker = false
                                     },
                                 ) {
-                                    Text(name, modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
+                                    Text(strings["prayer.$name"], modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
                                     Text(timeFormat.format(epochMs), style = MaterialTheme.typography.labelMedium)
                                 },
                             )
@@ -544,7 +544,7 @@ fun TaskBottomSheet(
                             modifier = Modifier.weight(1f),
                         ) {
                             Text(
-                                selectedPrayerName
+                                selectedPrayerName?.let { strings["prayer.$it"] }
                                     ?: if (isAllDay) strings["task.allDay"]
                                     else timeFormat.format(scheduledTime!!)
                             )

@@ -204,6 +204,11 @@
   "method.OTHER": "Lainnya",
   "madhab.SHAFI": "Syafi'i, Maliki, Hanbali",
   "madhab.HANAFI": "Hanafi",
+  "prayer.Fajr": "Subuh",
+  "prayer.Dhuhr": "Zuhur",
+  "prayer.Asr": "Asar",
+  "prayer.Maghrib": "Magrib",
+  "prayer.Isha": "Isya",
 
   "hijri.title": "Tanggal Hijriah",
   "hijri.description": "Geser tanggal Hijriah yang ditampilkan per bulan jika tidak sesuai dengan rukyat hilal setempat.",

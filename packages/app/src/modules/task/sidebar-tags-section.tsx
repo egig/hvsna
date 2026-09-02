@@ -16,7 +16,7 @@ export function SidebarTagsSection({
   if (collapsed || tags.length === 0) return null;
 
   return (
-    <div className="px-2 pt-3 pb-1">
+    <div className="pt-3 pb-1">
       <div className="px-3 pb-1">
         <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
           {t("tags") || "Tags"}

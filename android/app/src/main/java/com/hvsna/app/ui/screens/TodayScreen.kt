@@ -68,7 +68,7 @@ private sealed class TodayListItem {
 }
 
 /** Mirrors the web app's getPrayerTimeDisplay: "Dhuhr (12:15)" when the prayer time is known,
- * bare "Dhuhr" otherwise. */
+ * bare "Dhuhr" otherwise. [name] is already localized by the caller. */
 private fun prayerHeaderLabel(name: String, timeLabel: String?): String =
     if (timeLabel != null) "$name ($timeLabel)" else name
 
@@ -302,7 +302,7 @@ fun TodayScreen(
                     is TodayListItem.PrayerHeader -> {
                         val isExpanded = expandedGroups[item.groupKey] != false
                         SectionHeader(
-                            label = prayerHeaderLabel(item.name, item.timeLabel),
+                            label = prayerHeaderLabel(strings["prayer.${item.name}"], item.timeLabel),
                             isExpanded = isExpanded,
                             onToggle = { expandedGroups[item.groupKey] = !isExpanded },
                             color = MaterialTheme.colorScheme.onSurface,

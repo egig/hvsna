@@ -146,7 +146,7 @@ fun TaskListItem(
     val timeOnlyLabel = when {
         task.atTime.isNullOrBlank() -> ""
         isPrayerAnchored(task.atTime) && inPrayerSection -> ""
-        isPrayerAnchored(task.atTime) -> task.atTime
+        isPrayerAnchored(task.atTime) -> strings["prayer.${task.atTime}"]
         else -> task.scheduledTime?.let { timeFormat.format(Date(it)) } ?: ""
     }
     val timeLabel = when {

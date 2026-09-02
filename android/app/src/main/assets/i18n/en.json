@@ -204,6 +204,11 @@
   "method.OTHER": "Other",
   "madhab.SHAFI": "Shafi, Maliki, Hanbali",
   "madhab.HANAFI": "Hanafi",
+  "prayer.Fajr": "Fajr",
+  "prayer.Dhuhr": "Dhuhr",
+  "prayer.Asr": "Asr",
+  "prayer.Maghrib": "Maghrib",
+  "prayer.Isha": "Isha",
 
   "hijri.title": "Hijri Date",
   "hijri.description": "Shift the displayed Hijri date per month if it doesn't match your local moon sighting.",
