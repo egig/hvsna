@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.ui.theme.accessibleColor
 
 private val leadingColumnWidth = 32.dp
 
@@ -91,7 +92,7 @@ fun TagPill(
     fontSize: TextUnit = 10.sp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 6.dp),
 ) {
-    val tagColor = Color(tag.color.toInt())
+    val tagColor = tag.accessibleColor()
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier

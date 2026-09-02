@@ -28,7 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.Tag
@@ -44,6 +43,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.ui.theme.accessibleColor
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -98,7 +98,7 @@ fun TagDetailScreen(
         topBar = {
             LargeTopAppBar(
                 title = {
-                    Text("#" + tag.name, modifier = Modifier.padding(start = 8.dp), color = Color(tag.color.toInt()))
+                    Text("#" + tag.name, modifier = Modifier.padding(start = 8.dp), color = tag.accessibleColor())
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(

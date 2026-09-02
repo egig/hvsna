@@ -77,6 +77,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.ui.theme.accessibleColor
 
 @Composable
 private fun UnderlineTextField(
@@ -447,7 +448,7 @@ fun TaskBottomSheet(
                                     Icon(
                                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
                                         contentDescription = strings.format("a11y.removeTag", tag.name),
-                                        tint = Color(tag.color.toInt()),
+                                        tint = tag.accessibleColor(),
                                         modifier = Modifier
                                             .size(12.dp)
                                             .clickable { selectedTagIds = selectedTagIds - tag.id },
