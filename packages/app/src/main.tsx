@@ -8,6 +8,8 @@ import { registerWebImplementations } from "./register";
 import log from "@/modules/logger";
 import { BrowserRouter } from "react-router";
 import { ResponsiveRoutes } from "@/routes";
+import { bootstrapApp } from "@/modules/bootstrap";
+import { BootScreen } from "@/modules/components/boot-screen";
 
 registerWebImplementations();
 
@@ -27,7 +29,15 @@ const sqliteClient = getSqliteClient();
 
 configureLogger();
 
+// Paint a placeholder immediately, then gate the real render on bootstrapApp:
+// restore the session and (if signed in) run the initial sync first, so the
+// app mounts against already-reconciled data instead of flashing empty local
+// state that a moment-later sync overwrites.
+root.render(<BootScreen />);
+
 (async () => {
+  const bootstrap = await bootstrapApp(sqliteClient);
+
   root.render(
     <App
       config={config}
@@ -35,6 +45,7 @@ configureLogger();
       platform="web"
       Router={BrowserRouter}
       Routes={ResponsiveRoutes}
+      bootstrap={bootstrap}
     />
   );
   // @ts-ignore

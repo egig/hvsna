@@ -19,6 +19,7 @@ import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
 import { LocationProvider } from "./modules/location/context";
 import { NetworkProvider } from "./modules/network/context";
+import type { BootstrapResult } from "@/modules/bootstrap";
 import {
   RepositoriesProvider,
   createWebRepositories,
@@ -53,12 +54,16 @@ export default function App({
   platform,
   Router,
   Routes,
+  bootstrap,
 }: {
   platform: "web";
   config: AppConfig;
   sqliteClient: SqliteClient;
   Router: typeof BrowserRouter;
   Routes: React.FC;
+  /** Session + initial-sync results from modules/bootstrap.ts, resolved
+   *  before this component ever renders. Optional so tests can skip it. */
+  bootstrap?: BootstrapResult;
 }) {
   const repositories = createWebRepositories(sqliteClient);
 
@@ -93,12 +98,18 @@ export default function App({
                 <ScreenSizeProvider>
                   <SqliteProvider client={sqliteClient}>
                     <RepositoriesProvider repositories={repositories}>
-                      <AuthProvider>
+                      <AuthProvider initialUser={bootstrap?.user ?? null}>
                         <SettingsProvider>
                           <LanguageProviderWrapper>
                             <LocationProvider>
                               <DroppableContext>
-                                <SyncProvider>
+                                <SyncProvider
+                                  initialSync={{
+                                    performed:
+                                      bootstrap?.initialSyncPerformed ?? false,
+                                    lastSyncAt: bootstrap?.lastSyncAt ?? null,
+                                  }}
+                                >
                                   {/* Sized to the viewport here (not in Layout/LayoutMobile)
                                       so VerifyEmailBanner can occupy normal flow above the
                                       routed content and have it shrink to fit, instead of

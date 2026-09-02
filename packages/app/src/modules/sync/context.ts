@@ -43,10 +43,12 @@ export const SyncContext = createContext<SyncContextType | undefined>(
  * provider just triggers and reports the status of.
  *
  * Sync runs on five triggers: the manual "Sync now" button, the network
- * coming back online while signed in, signing in / reloading with a
- * still-valid session (so a fresh device actually pulls its data without
- * the user having to notice and click the button), a 30s poll while the
- * tab is visible and signed in (mirrors Android's periodic WorkManager sync,
+ * coming back online while signed in, being able to sync without an initial
+ * sync yet on the clock (sign-in, or a reload where the pre-render
+ * bootstrap in modules/bootstrap.ts couldn't complete the sync itself — so
+ * a fresh device still pulls its data without the user clicking anything), a
+ * 30s poll while the tab is visible and signed in (mirrors Android's periodic
+ * WorkManager sync,
  * but on a much tighter interval since the web app has no OS-level floor),
  * and a local write anywhere in the app — debounced ~1.5s so a burst of
  * edits (typing a task name, reordering several tasks) collapses into one
@@ -55,7 +57,16 @@ export const SyncContext = createContext<SyncContextType | undefined>(
  * tick; they only surface via lastSyncTime / query invalidation when a pull
  * actually applies something.
  */
-export const SyncProvider = ({ children }: { children: ReactNode }) => {
+export const SyncProvider = ({
+  children,
+  initialSync,
+}: {
+  children: ReactNode;
+  /** Seeded from modules/bootstrap.ts: whether the pre-render initial sync
+   *  actually completed, and the last-success timestamp read from local
+   *  state. Lets the provider skip re-running a sync bootstrap already did. */
+  initialSync?: { performed: boolean; lastSyncAt: Date | null };
+}) => {
   const { client } = useSqliteClient();
   const { isOnline } = useNetworkContext();
   const { isAuthenticated, user } = useAuth();
@@ -76,8 +87,12 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [isManualSyncing, setIsManualSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
-  const [initialSyncPerformed, setInitialSyncPerformed] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(
+    initialSync?.lastSyncAt ?? null
+  );
+  const [initialSyncPerformed, setInitialSyncPerformed] = useState(
+    initialSync?.performed ?? false
+  );
 
   // Coalesces overlapping trigger calls: a sync already in flight schedules
   // one more pass instead of running concurrently or being dropped.
@@ -148,16 +163,16 @@ export const SyncProvider = ({ children }: { children: ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOnline, canSync]);
 
-  // Trigger: sign-in, or app reload with a still-valid session (only once
-  // the account is verified — a freshly-registered, unverified user has
-  // nothing to pull yet anyway).
-  const wasAbleToSyncRef = useRef(canSync);
+  // Trigger: able to sync but no initial sync has happened yet. Covers
+  // sign-in mid-session, verifying the email, and a reload where the
+  // pre-render bootstrap (modules/bootstrap.ts) couldn't finish the sync
+  // itself (offline, timed out, session not yet restorable). When bootstrap
+  // did complete it, initialSyncPerformed starts true and this is a no-op.
+  // Gated on a verified account — an unverified user has nothing to pull.
   useEffect(() => {
-    const justAbleToSync = !wasAbleToSyncRef.current && canSync;
-    wasAbleToSyncRef.current = canSync;
-    if (justAbleToSync) backgroundSync();
+    if (canSync && !initialSyncPerformed) backgroundSync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSync]);
+  }, [canSync, initialSyncPerformed]);
 
   // Trigger: 30s poll while the tab is visible, once the initial sync has
   // run. Silent (doesn't flip isSyncing) — see the block comment above.

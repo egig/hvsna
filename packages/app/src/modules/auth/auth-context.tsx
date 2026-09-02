@@ -23,9 +23,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
+  /** User resolved by modules/bootstrap.ts before render. When present the
+   *  provider starts already-authenticated with no loading flash and skips
+   *  the mount-time session restore (bootstrap already did it). */
+  initialUser?: User | null;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({
+  children,
+  initialUser = null,
+}) => {
   const queryClient = useQueryClient();
 
   // Query for user data
@@ -35,10 +42,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     enabled: false, // Disabled by default, will be enabled when authenticated
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    initialData: initialUser ?? undefined,
   });
 
-  // Initialize auth state on mount
+  // Initialize auth state on mount. Skipped when bootstrap already restored
+  // the session and handed us a user — re-running it would just fire a
+  // redundant /me refetch on every load.
   useEffect(() => {
+    if (initialUser) return;
+
     const initializeAuth = async () => {
       try {
         await authService.initialize();
@@ -52,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initializeAuth();
-  }, [userQuery]);
+  }, [userQuery, initialUser]);
 
   // Login mutation
   const loginMutation = useMutation({
