@@ -1,7 +1,7 @@
 CREATE TABLE `tags` (
 	`id` text PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`color` text NOT NULL DEFAULT '#64748B',
+	`color` text NOT NULL DEFAULT '#4B4953',
 	`created_at` integer NOT NULL,
 	`updated_at` integer NOT NULL,
 	`deleted_at` integer,
@@ -36,7 +36,7 @@ INSERT INTO tags (id, name, color, created_at, updated_at)
 SELECT
 	'tag_' || lower(hex(randomblob(16))),
 	name,
-	'#64748B',
+	'#4B4953',
 	CAST(strftime('%s', 'now') AS INTEGER) * 1000,
 	CAST(strftime('%s', 'now') AS INTEGER) * 1000
 FROM (

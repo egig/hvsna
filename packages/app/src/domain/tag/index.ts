@@ -16,7 +16,8 @@ export interface TagUpdateInput {
   color?: string;
 }
 
-export const DEFAULT_TAG_COLOR = "#90A4AE";
+/** Color every newly created tag gets — kept identical to android's `TaskViewModel.createTag`. */
+export const DEFAULT_TAG_COLOR = "#4B4953";
 
 /** Small rotating palette assigned to newly created tags — mirrors android's TagPalette (Color.kt). */
 export const TAG_COLOR_PALETTE = [

@@ -1,7 +1,6 @@
 import type { ITagRepository } from "@/domain/tag/ITagRepository";
 import {
   DEFAULT_TAG_COLOR,
-  TAG_COLOR_PALETTE,
   normalizeTagName,
   type Tag,
   type TagUpdateInput,
@@ -21,15 +20,6 @@ function rowToTag(row: TagRow): Tag {
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
   };
-}
-
-/** Deterministic-ish pick so the same not-yet-seen name tends to land on the same swatch across a session. */
-function pickPaletteColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) | 0;
-  }
-  return TAG_COLOR_PALETTE[Math.abs(hash) % TAG_COLOR_PALETTE.length] ?? DEFAULT_TAG_COLOR;
 }
 
 function dedupeNormalized(names: string[]): string[] {
@@ -113,7 +103,7 @@ export class SqliteTagRepository implements ITagRepository {
     const rows = await this.client.run(FIND_OR_CREATE_SQL, [
       generatePrefixedUUID("tag_"),
       name,
-      pickPaletteColor(name),
+      DEFAULT_TAG_COLOR,
       Date.now(),
       Date.now(),
     ]);
