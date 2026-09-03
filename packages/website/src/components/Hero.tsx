@@ -63,9 +63,9 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
           </div>
 
           <img
-            src="/android-today.png"
+            src="/images/hvsna-hero.webp"
             alt="Hvsna app showing today's prayer-anchored tasks"
-            className="mx-auto w-full max-w-xs sm:max-w-sm"
+            className="mx-auto w-full"
           />
         </div>
       </div>

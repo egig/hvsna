@@ -43,7 +43,7 @@ function TodayInner() {
       >
         <TodayContent />
       </Page>
-      <MockTimeControl />
+      {/* <MockTimeControl /> */}
     </>
   );
 }

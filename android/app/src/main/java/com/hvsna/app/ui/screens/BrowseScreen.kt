@@ -126,7 +126,7 @@ fun BrowseScreen(
                     FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                            .padding(horizontal = 12.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -134,8 +134,8 @@ fun BrowseScreen(
                             TagPill(
                                 tag = tag,
                                 onClick = { onTagClick(tag) },
-                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
                     }
