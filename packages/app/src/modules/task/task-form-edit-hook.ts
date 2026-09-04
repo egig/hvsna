@@ -373,6 +373,7 @@ export const useTaskFormEdit = (
             updateTask,
             updateRecurringTask,
             taskRepository: taskRepo,
+            recurringTaskRepository: recurringRepo,
           }
         );
       }

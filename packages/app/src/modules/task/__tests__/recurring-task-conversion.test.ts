@@ -3,7 +3,9 @@ import {
   promoteTaskToRecurring,
   demoteTaskFromRecurring,
   demoteTaskFromRecurringAndDeleteFuture,
+  updateRecurringSeries,
 } from "../recurring-task-conversion";
+import dayjs from "dayjs";
 import { Task } from "@/domain/task";
 import type { TaskUpdateInput } from "@/domain/task";
 import type { RecurringTask } from "../recurring-task";
@@ -478,5 +480,79 @@ describe("demoteTaskFromRecurringAndDeleteFuture", () => {
     );
 
     expect(result).toBe(expected);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// updateRecurringSeries
+// ---------------------------------------------------------------------------
+
+describe("updateRecurringSeries", () => {
+  const ANCHOR_EPOCH = new Date("2025-06-15T09:00:00Z").getTime();
+  const ANCHOR_DAY = dayjs(ANCHOR_EPOCH).format("YYYYMMDD");
+
+  function makeDeps(existingTemplate: Partial<RecurringTask> = {}) {
+    const updateTask = makeUpdateTask();
+    const updateRecurringTask = vi.fn(async (_id, input) => input as RecurringTask);
+    const repo = makeRepo();
+    const recurringTaskRepository = {
+      findById: vi.fn(async () => ({
+        id: "rtask_abc",
+        name: "Standup",
+        recurringType: "daily",
+        recurringInterval: 1,
+        baseDateEpoch: 0,
+        occurrenceExceptions: [],
+        ...existingTemplate,
+      })),
+    } as any;
+    return { updateTask, updateRecurringTask, repo, recurringTaskRepository };
+  }
+
+  it("keeps an occurrence exception for the anchored instance so it is not also emitted as a virtual", async () => {
+    const { updateTask, updateRecurringTask, repo, recurringTaskRepository } =
+      makeDeps();
+    const task = new Task({
+      id: "task_1",
+      atEpochMillis: ANCHOR_EPOCH,
+      recurringTaskId: "rtask_abc",
+    });
+
+    await updateRecurringSeries(
+      "task_1",
+      { name: "Standup renamed", atEpochMillis: ANCHOR_EPOCH },
+      task,
+      { name: "Standup renamed", recurringType: "daily", recurringInterval: 1 },
+      { updateTask, updateRecurringTask, taskRepository: repo, recurringTaskRepository }
+    );
+
+    const [, templateInput] = updateRecurringTask.mock.calls[0];
+    expect(templateInput.occurrenceExceptions).toEqual([ANCHOR_DAY]);
+    expect(templateInput.baseDateEpoch).toBe(ANCHOR_EPOCH);
+  });
+
+  it("preserves past exceptions but drops ones at/after the anchor day", async () => {
+    const pastDay = dayjs(ANCHOR_EPOCH).subtract(5, "day").format("YYYYMMDD");
+    const futureDay = dayjs(ANCHOR_EPOCH).add(5, "day").format("YYYYMMDD");
+    const { updateTask, updateRecurringTask, repo, recurringTaskRepository } =
+      makeDeps({ occurrenceExceptions: [pastDay, ANCHOR_DAY, futureDay] });
+    const task = new Task({
+      id: "task_1",
+      atEpochMillis: ANCHOR_EPOCH,
+      recurringTaskId: "rtask_abc",
+    });
+
+    await updateRecurringSeries(
+      "task_1",
+      { name: "x", atEpochMillis: ANCHOR_EPOCH },
+      task,
+      { recurringType: "daily", recurringInterval: 1 },
+      { updateTask, updateRecurringTask, taskRepository: repo, recurringTaskRepository }
+    );
+
+    const [, templateInput] = updateRecurringTask.mock.calls[0];
+    expect(templateInput.occurrenceExceptions.sort()).toEqual(
+      [pastDay, ANCHOR_DAY].sort()
+    );
   });
 });

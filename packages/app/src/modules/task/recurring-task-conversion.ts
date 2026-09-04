@@ -1,4 +1,6 @@
+import dayjs from "dayjs";
 import type { ITaskRepository } from "@/domain/task/ITaskRepository";
+import type { IRecurringTaskRepository } from "@/domain/task/IRecurringTaskRepository";
 import type { Task, TaskRecurringType, TaskUpdateInput } from "@/domain/task";
 import type {
   RecurringTask,
@@ -12,6 +14,7 @@ export interface UpdateRecurringSeriesDeps {
     input: RecurringTaskUpdateInput
   ) => Promise<RecurringTask>;
   taskRepository: ITaskRepository;
+  recurringTaskRepository: IRecurringTaskRepository;
 }
 
 export interface DemoteAndDeleteFutureDeps {
@@ -45,7 +48,8 @@ export async function updateRecurringSeries(
   templateInput: RecurringTaskUpdateInput,
   deps: UpdateRecurringSeriesDeps
 ): Promise<Task> {
-  const { updateTask, updateRecurringTask, taskRepository } = deps;
+  const { updateTask, updateRecurringTask, taskRepository, recurringTaskRepository } =
+    deps;
 
   // Delete all future pending instances except this one (virtuals need no cleanup,
   // but materialized real tasks must be removed so they don't appear as stale exceptions)
@@ -58,11 +62,30 @@ export async function updateRecurringSeries(
   );
   await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
 
+  // The instance being edited stays as a real (materialized) task at its own
+  // date, so the generator must not also emit a virtual occurrence for that
+  // day — keep an occurrence exception for it. Drop exceptions for the future
+  // instances we just deleted (>= the anchor day); keep past ones so the
+  // 60-day overdue lookback doesn't resurface already-completed occurrences.
+  const existing = await recurringTaskRepository.findById(task.recurringTaskId!);
+  const anchorDay =
+    task.atEpochMillis != null
+      ? dayjs(task.atEpochMillis).format("YYYYMMDD")
+      : null;
+  const nextExceptions = anchorDay
+    ? [
+        ...new Set([
+          ...(existing?.occurrenceExceptions ?? []).filter((d) => d < anchorDay),
+          anchorDay,
+        ]),
+      ]
+    : [];
+
   // Anchor baseDateEpoch to this task's date so future virtuals start fresh
   await updateRecurringTask(task.recurringTaskId!, {
     ...templateInput,
     baseDateEpoch: task.atEpochMillis ?? undefined,
-    occurrenceExceptions: [],
+    occurrenceExceptions: nextExceptions,
   });
 
   return updateTask(taskId, taskInput);
