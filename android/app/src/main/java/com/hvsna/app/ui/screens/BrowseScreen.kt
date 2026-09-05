@@ -134,7 +134,7 @@ fun BrowseScreen(
                             TagPill(
                                 tag = tag,
                                 onClick = { onTagClick(tag) },
-                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                                fontSize = MaterialTheme.typography.bodyMedium.fontSize,
                                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
                             )
                         }
