@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import type { Task } from "@/domain/task";
 import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { useTaskRepository } from "./use-task-repository";
@@ -64,11 +65,31 @@ export function useToday() {
     tomorrowEndEpoch ?? tomorrowStartEpoch
   );
 
-  const allTasks = [
-    ...(pendingTasksQuery.data ?? []),
+  // The two virtual-task queries overlap: after Maghrib, the "tomorrow" query's
+  // overdue-lookback re-emits today's occurrence that the main query already
+  // returned in range. And a materialized real task can coincide with a virtual
+  // if its occurrence exception failed to persist. Dedupe by task id first, then
+  // drop any virtual whose (series, time) slot is already covered by a real task.
+  const realTasks = pendingTasksQuery.data ?? [];
+  const virtualTasks = [
     ...(virtualTaskQuery.data ?? []),
     ...(isAfterMaghrib ? tomorrowVirtualTaskQuery.data ?? [] : []),
   ];
+
+  const realSlots = new Set(
+    realTasks
+      .filter((t) => t.recurringTaskId != null && t.atEpochMillis != null)
+      .map((t) => `${t.recurringTaskId}_${t.atEpochMillis}`)
+  );
+
+  const seenIds = new Set<Task["id"]>(realTasks.map((t) => t.id));
+  const allTasks = [...realTasks];
+  for (const vt of virtualTasks) {
+    if (seenIds.has(vt.id)) continue;
+    if (realSlots.has(`${vt.recurringTaskId}_${vt.atEpochMillis}`)) continue;
+    seenIds.add(vt.id);
+    allTasks.push(vt);
+  }
 
   const todayCompletedTasksQuery = useQuery({
     queryKey: queryKeys.todayCompletedTasks(todayString),

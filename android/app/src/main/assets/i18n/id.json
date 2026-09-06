@@ -63,6 +63,8 @@
 
   "today.emptyTitle": "Tidak ada jadwal hari ini",
   "today.emptySubtitle": "Ketuk + untuk menambah tugas.",
+  "today.noTasksUntilSunset": "Tidak ada tugas lagi hingga magrib",
+  "today.noTasksUntilTomorrow": "Tidak ada tugas lagi hingga besok",
 
   "upcoming.title": "Akan Datang",
   "upcoming.tabScheduled": "Terjadwal",

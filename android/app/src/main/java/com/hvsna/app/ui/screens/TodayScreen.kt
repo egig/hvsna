@@ -1,5 +1,6 @@
 package com.hvsna.app.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,6 +49,7 @@ import com.hvsna.app.ui.components.SectionHeader
 import com.hvsna.app.ui.components.TaskListItem
 import com.hvsna.app.ui.groupTodayTasks
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.Calendar
 import java.util.Date
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -64,7 +67,12 @@ private sealed class TodayListItem {
     /** [groupKey] is the owning prayer section's key, or null for a free-time / end-of-day task
      * that stands on its own with no collapsible header. */
     data class TaskEntry(val entry: TaskWithTags, val groupKey: String?) : TodayListItem()
-    data class DayDivider(val label: String) : TodayListItem()
+    data class DayDivider(val label: String, val leadingNote: String? = null) : TodayListItem()
+    /** The Hijri-day rollover marker inserted just before the Maghrib section, mirroring
+     * the web app's SunsetHairline in today.tsx. [label] is the next Hijri day (the one
+     * that begins at Maghrib); [leadingNote] is shown above the line only when nothing is
+     * scheduled before sunset. */
+    data class SunsetHairline(val label: String, val leadingNote: String?) : TodayListItem()
 }
 
 /** Mirrors the web app's getPrayerTimeDisplay: "Dhuhr (12:15)" when the prayer time is known,
@@ -169,12 +177,33 @@ fun TodayScreen(
     val tomorrowLabel = remember(now, dayDividerFormat) {
         dayDividerFormat.format(Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 1) }.time)
     }
+    // The Hijri day that begins at tonight's Maghrib — labels the sunset hairline.
+    // Mirrors use-today.ts's nextHijriLabel (getTomorrow()).
+    val nextHijriLabel = remember(settings.hijriMonthOffsets, strings) {
+        hijriDateLabel(LocalDate.now().plusDays(1), settings.hijriMonthOffsets, strings)
+    }
 
     val grouped: TodayGroupedTasks = groupTodayTasks(overdueTasks, todayTasks, now, todayEndEpoch)
     val allOverdueTasks = grouped.overdue
-    val flatTodayItems = buildDayItems(grouped.today, prayerTimeMap, dayKey = "today", timeFormat) +
+
+    // Today's items, with the sunset hairline spliced in just before the first Maghrib
+    // section (only while sunset is still ahead — once it's passed, the DayDivider takes over).
+    val todayDayItems = run {
+        val items = buildDayItems(grouped.today, prayerTimeMap, dayKey = "today", timeFormat)
+        val maghribIdx = if (isAfterMaghrib) -1
+        else items.indexOfFirst { it is TodayListItem.PrayerHeader && it.name == "Maghrib" }
+        if (maghribIdx < 0) return@run items
+        val leadingNote =
+            if (maghribIdx == 0 && allOverdueTasks.isEmpty()) strings["today.noTasksUntilSunset"] else null
+        items.take(maghribIdx) +
+            TodayListItem.SunsetHairline(nextHijriLabel, leadingNote) +
+            items.drop(maghribIdx)
+    }
+
+    val flatTodayItems = todayDayItems +
         if (grouped.tomorrow.isNotEmpty()) {
-            listOf(TodayListItem.DayDivider(tomorrowLabel)) +
+            val note = if (todayDayItems.isEmpty()) strings["today.noTasksUntilTomorrow"] else null
+            listOf(TodayListItem.DayDivider(tomorrowLabel, note)) +
                 buildDayItems(grouped.tomorrow, tomorrowPrayerTimeMap, dayKey = "tomorrow", timeFormat)
         } else {
             emptyList()
@@ -295,6 +324,7 @@ fun TodayScreen(
                         is TodayListItem.PrayerHeader -> item.groupKey
                         is TodayListItem.TaskEntry -> item.entry.task.id
                         is TodayListItem.DayDivider -> "day_divider_${item.label}"
+                        is TodayListItem.SunsetHairline -> "sunset_hairline"
                     }
                 },
             ) { item ->
@@ -317,7 +347,14 @@ fun TodayScreen(
                         onToggleDone = { viewModel.toggleDone(item.entry.task) },
                         onClick = { onEditTask(item.entry, null) },
                     )
-                    is TodayListItem.DayDivider -> DayDivider(label = item.label)
+                    is TodayListItem.DayDivider -> DayDivider(
+                        label = item.label,
+                        leadingNote = item.leadingNote,
+                    )
+                    is TodayListItem.SunsetHairline -> SunsetHairline(
+                        label = item.label,
+                        leadingNote = item.leadingNote,
+                    )
                 }
             }
 
@@ -351,11 +388,27 @@ fun TodayScreen(
     }
 }
 
+// Warm dusk accent for the sunset hairline (web today.tsx uses #dd7d5f, same in both themes).
+private val SunsetAccent = Color(0xFFDD7D5F)
+
+/** The "No more tasks until …" line the web app shows above a divider when nothing at all
+ * precedes it (today.tsx). */
+@Composable
+private fun DividerLeadingNote(text: String) {
+    Text(
+        "$text.",
+        fontSize = 15.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+    )
+}
+
 /** Separates today's remaining tasks from tomorrow's, shown once the Today window has
  * rolled past Maghrib (see TaskViewModel.todayTaskWindowEnd) - mirrors the web app's
  * TomorrowDivider in today.tsx. */
 @Composable
-private fun DayDivider(label: String) {
+private fun DayDivider(label: String, leadingNote: String? = null) {
+    if (leadingNote != null) DividerLeadingNote(leadingNote)
     Row(
         verticalAlignment = Alignment.Bottom,
         modifier = Modifier
@@ -373,6 +426,51 @@ private fun DayDivider(label: String) {
             Modifier
                 .weight(1f)
                 .padding(start = 8.dp)
+                .height(1.dp)
+                .dashedLine(MaterialTheme.colorScheme.outlineVariant),
+        )
+    }
+}
+
+/** The Hijri-day rollover marker shown just before the Maghrib section while sunset is
+ * still ahead - mirrors the web app's SunsetHairline in today.tsx. */
+@Composable
+private fun SunsetHairline(label: String, leadingNote: String?) {
+    if (leadingNote != null) DividerLeadingNote(leadingNote)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 14.dp),
+    ) {
+        Spacer(
+            Modifier
+                .weight(1f)
+                .height(1.dp)
+                .dashedLine(MaterialTheme.colorScheme.outlineVariant),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Icon(
+                ImageVector.vectorResource(id = R.drawable.ic_sunset_2),
+                contentDescription = null,
+                tint = SunsetAccent,
+                modifier = Modifier.size(20.dp),
+            )
+            Text(
+                label,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp,
+                letterSpacing = 1.sp,
+                color = SunsetAccent,
+            )
+        }
+        Spacer(
+            Modifier
+                .weight(1f)
                 .height(1.dp)
                 .dashedLine(MaterialTheme.colorScheme.outlineVariant),
         )

@@ -63,6 +63,8 @@
 
   "today.emptyTitle": "Nothing scheduled today",
   "today.emptySubtitle": "Tap + to add a task.",
+  "today.noTasksUntilSunset": "No more tasks until sunset",
+  "today.noTasksUntilTomorrow": "No more tasks until tomorrow",
 
   "upcoming.title": "Upcoming",
   "upcoming.tabScheduled": "Scheduled",
