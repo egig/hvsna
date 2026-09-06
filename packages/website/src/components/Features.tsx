@@ -79,7 +79,7 @@ export default function Features({ currentLang = "en" }: { currentLang?: string 
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {t.features.map((feature, index) => (
             <div key={index} className="group">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 sm:p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-lg">
+              <div className="dark:bg-gray-800 rounded-2xl p-6 sm:p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-lg">
                 {/* Icon & Title */}
                 <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <div className="w-12 h-12 sm:w-12 sm:h-12 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
