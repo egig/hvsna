@@ -1,4 +1,5 @@
-import { Check } from "lucide-react";
+import { Link } from "react-router";
+import { Check, Download } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { SUPPORT_EMAIL, WEB_APP_SIGNUP_URL } from "@/config";
@@ -22,8 +23,8 @@ export default function PricingPageID() {
         "Dukungan offline",
         "Aplikasi Android dan Web tersedia sekarang",
       ],
-      cta: "Dapatkan di Google Play",
-      href: "https://play.google.com/store/apps/details?id=com.hvsna.app",
+      cta: "Unduh",
+      href: "/id/download",
       highlighted: false,
       badge: true,
       secondaryCta: "Coba di Web",
@@ -93,7 +94,7 @@ export default function PricingPageID() {
                   key={index}
                   className={`rounded-2xl p-6 flex flex-col ${
                     plan.highlighted
-                      ? "bg-primary-600 text-white ring-2 ring-primary-600 shadow-xl scale-[1.02]"
+                      ? "bg-primary-600 text-white ring-2 ring-primary-600 shadow-xl md:scale-[1.02]"
                       : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                   }`}
                 >
@@ -127,9 +128,13 @@ export default function PricingPageID() {
 
                   {plan.badge ? (
                     <div className="space-y-3">
-                      <a href={plan.href} className="flex justify-center">
-                        <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={plan.cta} className="h-14 w-auto" />
-                      </a>
+                      <Link
+                        to={plan.href}
+                        className="flex w-full items-center justify-center gap-2 py-3 px-4 rounded-lg font-semibold bg-primary-600 text-white hover:bg-primary-700 transition-colors"
+                      >
+                        <Download className="w-5 h-5" />
+                        {plan.cta}
+                      </Link>
                       {plan.secondaryHref && (
                         <a
                           href={plan.secondaryHref}

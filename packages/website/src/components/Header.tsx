@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Moon, Sun, Menu, X, Globe } from "lucide-react";
-import { useTheme } from "@/theme/theme-provider";
+import { Menu, X, Globe, Download } from "lucide-react";
 import { WEB_APP_SIGNUP_URL } from "@/config";
 
 export default function Header({ currentLang = "en", doc = false }: { currentLang?: string, doc?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useTheme();
 
   const content = {
     en: {
@@ -38,9 +36,10 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
   };
 
   const t = content[currentLang as keyof typeof content];
+  const downloadHref = currentLang === "id" ? "/id/download" : "/download";
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+    <header className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md font-bold">
       <div className={`${doc ? "max-w-6xl" : "max-w-3xl"} mx-auto px-4 sm:px-6`}>
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -51,7 +50,7 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
           </Link>
 
           {/* Right side controls */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-8">
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-4">
               <Link
@@ -78,19 +77,14 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
               <span className="text-sm font-medium">{currentLang === "id" ? "EN" : "ID"}</span>
             </Link>
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              aria-label="Toggle theme"
+            {/* Download CTA */}
+            <Link
+              to={downloadHref}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-primary-600 px-4 py-2 text-sm font-semibold text-primary-600 dark:text-primary-400 dark:border-primary-400 transition-colors hover:bg-primary-50 dark:hover:bg-primary-900/30"
             >
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
-            {/* Download Button (Desktop) */}
-            <a href="https://play.google.com/store/apps/details?id=com.hvsna.app" target="_blank" rel="noreferrer" className="hidden md:block">
-              <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt={t.download} className="h-10 w-auto" />
-            </a>
+              <Download className="w-4 h-4" />
+              {t.download}
+            </Link>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -128,6 +122,14 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
               >
                 {t.nav.webApp} — {t.signIn}
               </a>
+              <Link
+                to={downloadHref}
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Download className="w-4 h-4" />
+                {t.download}
+              </Link>
             </nav>
           </div>
         )}

@@ -67,27 +67,29 @@ export default function Features({ currentLang = "en" }: { currentLang?: string 
   const t = content[currentLang as keyof typeof content];
 
   return (
-    <section id={currentLang === "id" ? "fitur" : "features"} className="py-20 bg-white dark:bg-gray-900">
+    <section id={currentLang === "id" ? "fitur" : "features"} className="py-14 sm:py-20 bg-white dark:bg-gray-900">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">{t.title}</h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">{t.subtitle}</p>
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">{t.title}</h2>
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto text-pretty">{t.subtitle}</p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid sm:grid-cols-2 gap-6">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {t.features.map((feature, index) => (
             <div key={index} className="group">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-lg">
-                {/* Icon */}
-                <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <feature.icon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 sm:p-8 h-full border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-lg">
+                {/* Icon & Title */}
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="w-12 h-12 sm:w-12 sm:h-12 bg-primary-100 dark:bg-primary-900 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <feature.icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600 dark:text-primary-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">{feature.title}</h3>
                 </div>
 
-                {/* Title & Description */}
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{feature.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">{feature.description}</p>
+                {/* Description */}
+                <p className="text-gray-600 dark:text-gray-300 mb-4 sm:mb-6">{feature.description}</p>
 
                 {/* Details List */}
                 <ul className="space-y-2">

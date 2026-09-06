@@ -10,6 +10,7 @@ import { docsPages } from "@/pages/docs/registry";
 export const routes: string[] = [
   "/",
   "/about",
+  "/download",
   "/features",
   "/pricing",
   "/privacy",
@@ -18,6 +19,7 @@ export const routes: string[] = [
   "/opt-out",
   "/id",
   "/id/about",
+  "/id/download",
   "/id/features",
   "/id/pricing",
   "/id/privacy",

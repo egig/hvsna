@@ -133,8 +133,8 @@ export default function ChangelogsPage() {
     <div className="min-h-screen">
       <Header currentLang="en" />
       <main>
-        <article className="max-w-3xl mx-auto px-4 sm:px-6 py-16 lg:py-32">
-          <h1 className="text-4xl sm:text-5xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-6">Changelog</h1>
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">Changelog</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 leading-relaxed">Track the latest updates and improvements to Hvsna.</p>
 
           <div className="space-y-16">

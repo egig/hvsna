@@ -8,6 +8,7 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
       quickLinks: {
         title: "Quick Links",
         links: [
+          { name: "Download", href: "/download" },
           { name: "About", href: "/about" },
           { name: "Pricing", href: "/pricing" },
           { name: "Features", href: "/features" },
@@ -35,6 +36,7 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
       quickLinks: {
         title: "Tautan Cepat",
         links: [
+          { name: "Unduh", href: "/id/download" },
           { name: "Tentang", href: "/id/about" },
           { name: "Harga", href: "/id/pricing" },
           { name: "Fitur", href: "/id/features" },
@@ -66,21 +68,21 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
   };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-        <div className="grid sm:grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="sm:col-span-2">
+          <div className="col-span-2 sm:col-span-4">
             <div className="flex items-center space-x-2 mb-4">
               <img src="/icon-192.png" alt="Hvsna logo" width={32} height={32} className="rounded-lg" />
               <span className="text-xl font-bold">Hvsna</span>
             </div>
-            <p className="text-gray-400 text-sm mb-4">{t.description}</p>
+            <p className="text-sm mb-4">{t.description}</p>
             <div className="flex space-x-4">
-              <a href="https://www.instagram.com/hvsna.app/" className="text-gray-400 hover:text-primary-400 transition-colors" aria-label="Instagram">
+              <a href="https://www.instagram.com/hvsna.app/" className="text-gray-600 hover:text-primary-400 transition-colors" aria-label="Instagram">
                 <Camera className="w-5 h-5" />
               </a>
-              <a href={`mailto:${t.contact.email}`} className="text-gray-400 hover:text-primary-400 transition-colors" aria-label="Email">
+              <a href={`mailto:${t.contact.email}`} className="hover:text-primary-400 transition-colors" aria-label="Email">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
@@ -88,11 +90,11 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-white mb-4">{t.quickLinks.title}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t.quickLinks.title}</h3>
             <ul className="space-y-2">
               {t.quickLinks.links.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="text-gray-400 hover:text-primary-400 transition-colors text-sm">
+                  <a href={link.href} className="hover:text-primary-400 transition-colors text-sm">
                     {link.name}
                   </a>
                 </li>
@@ -102,11 +104,11 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold text-white mb-4">{t.legal.title}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t.legal.title}</h3>
             <ul className="space-y-2">
               {t.legal.links.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="text-gray-400 hover:text-primary-400 transition-colors text-sm">
+                  <a href={link.href} className="hover:text-primary-400 transition-colors text-sm">
                     {link.name}
                   </a>
                 </li>
@@ -115,9 +117,9 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
           </div>
 
           {/* Contact */}
-          <div>
-            <h3 className="font-semibold text-white mb-4">{t.contact.title}</h3>
-            <p className="text-gray-400 text-sm mb-4">{t.contact.description}</p>
+          <div className="col-span-2 sm:col-span-2">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">{t.contact.title}</h3>
+            <p className="text-sm mb-4">{t.contact.description}</p>
             <a href={`mailto:${t.contact.email}`} className="text-primary-400 hover:text-primary-300 transition-colors text-sm font-medium">
               {t.contact.email}
             </a>
@@ -125,12 +127,12 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm mb-4 sm:mb-0">{t.copyright}</p>
+        <div className="border-t border-gray-200 dark:border-gray-800 mt-8 pt-8 flex flex-col sm:flex-row gap-4 justify-between items-center text-center">
+          <p className="text-sm">{t.copyright}</p>
 
           <button
             onClick={scrollToTop}
-            className="flex items-center space-x-2 text-gray-400 hover:text-primary-400 transition-colors text-sm"
+            className="flex items-center space-x-2 hover:text-primary-400 transition-colors text-sm"
             aria-label={t.backToTop}
           >
             <span>{t.backToTop}</span>

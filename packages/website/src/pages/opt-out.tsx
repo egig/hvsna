@@ -9,8 +9,8 @@ export default function OptOutPage() {
     <div className="min-h-screen">
       <Header currentLang="en" />
       <main>
-        <article className="max-w-3xl mx-auto px-4 sm:px-6 py-16 lg:py-32">
-          <h1 className="text-4xl sm:text-5xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">Delete Your Account</h1>
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-16 lg:py-24">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">Delete Your Account</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-12">Account deletion is permanent and cannot be undone.</p>
 
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">

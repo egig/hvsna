@@ -30,6 +30,29 @@ export const ROUTE_META: Record<string, RouteMeta> = {
     canonical: `${SITE_URL}/`,
     hreflang: { en: "/", id: "/id" },
   },
+  "/download": {
+    ...DEFAULT_META,
+    title: "Download Hvsna - Islamic Todo App for Android & Web",
+    description:
+      "Download Hvsna free on Android from Google Play or use it in your browser. Prayer-first task app with Hijri calendar awareness. iOS coming soon.",
+    ogTitle: "Download Hvsna",
+    ogDescription: "Free on Android and the web. Prayer-first task app with Hijri calendar awareness.",
+    canonical: `${SITE_URL}/download`,
+    hreflang: { en: "/download", id: "/id/download" },
+  },
+  "/id/download": {
+    ...DEFAULT_META,
+    title: "Unduh Hvsna - Aplikasi Todo Islam untuk Android & Web",
+    description:
+      "Unduh Hvsna gratis di Android melalui Google Play atau gunakan langsung di browser. Aplikasi task berbasis sholat dengan kalender Hijriah. iOS segera hadir.",
+    keywords: "aplikasi todo Islam, kalender Hijri, waktu sholat, produktivitas Muslim, manajemen tugas, aplikasi offline",
+    ogTitle: "Unduh Hvsna",
+    ogDescription: "Gratis di Android dan web. Aplikasi task berbasis sholat dengan kalender Hijriah.",
+    ogImage: `${SITE_URL}/og-image-id.jpg`,
+    twitterImage: `${SITE_URL}/twitter-image-id.jpg`,
+    canonical: `${SITE_URL}/id/download`,
+    hreflang: { en: "/download", id: "/id/download" },
+  },
   "/id": {
     title: "Hvsna - Aplikasi Todo Islam | Atur Harimu, Cara Islami",
     description:

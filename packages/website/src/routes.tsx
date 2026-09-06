@@ -6,6 +6,8 @@ import AboutEn from "@/pages/about/en";
 import AboutId from "@/pages/about/id";
 import FeaturesEn from "@/pages/features/en";
 import FeaturesId from "@/pages/features/id";
+import DownloadEn from "@/pages/download/en";
+import DownloadId from "@/pages/download/id";
 import PricingEn from "@/pages/pricing/en";
 import PricingId from "@/pages/pricing/id";
 import PrivacyEn from "@/pages/privacy/en";
@@ -22,6 +24,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomeEn />} />
       <Route path="/about" element={<AboutEn />} />
+      <Route path="/download" element={<DownloadEn />} />
       <Route path="/features" element={<FeaturesEn />} />
       <Route path="/pricing" element={<PricingEn />} />
       <Route path="/privacy" element={<PrivacyEn />} />
@@ -31,6 +34,7 @@ export function AppRoutes() {
 
       <Route path="/id" element={<HomeId />} />
       <Route path="/id/about" element={<AboutId />} />
+      <Route path="/id/download" element={<DownloadId />} />
       <Route path="/id/features" element={<FeaturesId />} />
       <Route path="/id/pricing" element={<PricingId />} />
       <Route path="/id/privacy" element={<PrivacyId />} />

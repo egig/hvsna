@@ -198,7 +198,7 @@ fun TaskListItem(
                     if (timeLabel.isNotEmpty()) {
                         Text(
                             timeLabel,
-                            fontSize = 11.sp,
+                            fontSize = 12.sp,
                             color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 2.dp),
                         )

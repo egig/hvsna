@@ -1,5 +1,8 @@
 export const SUPPORT_EMAIL = "support@hvsna.com";
 
+// Native app store listings.
+export const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.hvsna.app";
+
 // The live @hvsna/app deployment (sign in/up, tasks, sync, subscription checkout).
 export const WEB_APP_URL = "https://app.hvsna.com";
 export const WEB_APP_SIGNUP_URL = `${WEB_APP_URL}`;
