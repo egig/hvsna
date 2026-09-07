@@ -123,4 +123,54 @@ class RecurrenceGeneratorTest {
         val dates = occurrencesInRange(rule, rule.baseDateEpoch, horizon, noPrayer).map { epochMillisToLocalDate(it.scheduledTime!!) }
         assertEquals(listOf(anchor, anchor.plusDays(2)), dates)
     }
+
+    @Test
+    fun `seriesEditExceptions keeps past keys, drops at-or-after the anchor, always adds the anchor`() {
+        val past = "20260101"
+        val anchor = "20260110"
+        val future = "20260115"
+        assertEquals(
+            setOf(past, anchor),
+            seriesEditExceptions(setOf(past, anchor, future), anchor),
+        )
+        assertEquals(setOf(anchor), seriesEditExceptions(emptySet(), anchor))
+    }
+
+    private fun taskFor(
+        title: String = "T",
+        description: String = "",
+        scheduledTime: Long? = 1_000L,
+        atTime: String? = "09:00",
+        recurringTaskId: String? = "rule_1",
+        reminderEnabled: Boolean = false,
+        reminderOffsetMinutes: Int = 0,
+    ) = Task(
+        title = title, description = description, scheduledTime = scheduledTime, atTime = atTime,
+        recurringTaskId = recurringTaskId, reminderEnabled = reminderEnabled, reminderOffsetMinutes = reminderOffsetMinutes,
+    )
+
+    private val ruleOn = RecurrenceRule(
+        id = "rule_1", title = "T", description = "", recurringType = RecurringType.DAILY,
+        recurringInterval = 1, baseDateEpoch = 0L,
+    )
+    private val recurrenceOn = RecurrenceInput(enabled = true, recurringType = RecurringType.DAILY, recurringInterval = 1)
+
+    @Test
+    fun `recurringEditChangedAnything is false for an identical save`() {
+        val t = taskFor()
+        assertEquals(
+            false,
+            recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a"), recurrenceOn),
+        )
+    }
+
+    @Test
+    fun `recurringEditChangedAnything is true when a tracked field, tag set, or repeat setting differs`() {
+        val t = taskFor()
+        assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(title = "T2"), setOf("a"), recurrenceOn))
+        assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(scheduledTime = 2_000L), setOf("a"), recurrenceOn))
+        assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a", "b"), recurrenceOn))
+        assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a"), recurrenceOn.copy(recurringInterval = 2)))
+        assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a"), RecurrenceInput.None))
+    }
 }

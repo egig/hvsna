@@ -54,9 +54,11 @@ import com.hvsna.app.data.PrayerTimesRepository
 import com.hvsna.app.data.RecurrenceManager
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.Tag
+import com.hvsna.app.data.Task
 import com.hvsna.app.data.TaskDatabase
 import com.hvsna.app.data.TaskRepository
 import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.data.recurringEditChangedAnything
 import com.hvsna.app.data.AppLanguage
 import com.hvsna.app.data.ThemeMode
 import com.hvsna.app.data.languageFlow
@@ -73,7 +75,10 @@ import com.hvsna.app.sync.SyncWorker
 import com.hvsna.app.sync.isOnline
 import com.hvsna.app.sync.networkReconnectEvents
 import com.hvsna.app.ui.AuthViewModel
+import com.hvsna.app.ui.PendingRecurringEdit
+import com.hvsna.app.ui.RecurringScope
 import com.hvsna.app.ui.TaskViewModel
+import com.hvsna.app.ui.components.RecurringScopeDialog
 import com.hvsna.app.ui.components.TaskBottomSheet
 import com.hvsna.app.ui.navigation.AppRoute
 import com.hvsna.app.ui.screens.BrowseScreen
@@ -118,6 +123,8 @@ fun HvsnaApp() {
     var editingTask by remember { mutableStateOf<TaskWithTags?>(null) }
     var taskDefaultScheduledTime by remember { mutableStateOf<Long?>(null) }
     var taskInitialTagIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var pendingRecurringEdit by remember { mutableStateOf<PendingRecurringEdit?>(null) }
+    var pendingRecurringDelete by remember { mutableStateOf<Task?>(null) }
     val taskSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val context = LocalContext.current
@@ -184,6 +191,7 @@ fun HvsnaApp() {
     val allTags by taskViewModel.allTags.collectAsState()
     val allRecurrenceRules by taskViewModel.allRecurrenceRules.collectAsState()
     val settings by taskViewModel.settings.collectAsState()
+    val strings = LocalStrings.current
 
     val onEditTask: (TaskWithTags?, Long?) -> Unit = { task, defaultScheduledTime ->
         editingTask = task
@@ -309,8 +317,29 @@ fun HvsnaApp() {
             task = editingTask?.task,
             sheetState = taskSheetState,
             onDismiss = { showTaskSheet = false },
-            onSave = { task, tagIds, recurrence -> taskViewModel.upsert(editingTask?.task, task, tagIds, recurrence) },
-            onDelete = { taskViewModel.delete(it) },
+            onSave = { task, tagIds, recurrence ->
+                val original = editingTask?.task
+                if (original?.recurringTaskId != null) {
+                    val rule = allRecurrenceRules.firstOrNull { it.id == original.recurringTaskId }
+                    val changed = recurringEditChangedAnything(
+                        original = original,
+                        originalTagIds = editingTask?.tags?.map { it.id }?.toSet() ?: emptySet(),
+                        originalRule = rule,
+                        edited = task,
+                        editedTagIds = tagIds.toSet(),
+                        recurrence = recurrence,
+                    )
+                    if (changed) {
+                        pendingRecurringEdit = PendingRecurringEdit(original, task, tagIds, recurrence)
+                    }
+                } else {
+                    taskViewModel.upsert(original, task, tagIds, recurrence)
+                }
+            },
+            onDelete = { task ->
+                if (task.recurringTaskId != null) pendingRecurringDelete = task
+                else taskViewModel.delete(task)
+            },
             hasLocation = settings.hasLocation,
             remindersGloballyEnabled = settings.remindersEnabled,
             getPrayerTimes = taskViewModel::getPrayerTimesForDate,
@@ -321,6 +350,47 @@ fun HvsnaApp() {
             onCreateTag = { taskViewModel.createTag(it) },
             defaultScheduledTime = taskDefaultScheduledTime,
             recurrenceRule = editingTask?.task?.recurringTaskId?.let { id -> allRecurrenceRules.firstOrNull { it.id == id } },
+        )
+    }
+
+    pendingRecurringEdit?.let { req ->
+        RecurringScopeDialog(
+            title = strings["task.recurringScope.title"],
+            thisOnlyLabel = strings["task.recurringScope.thisOnly"],
+            thisOnlyDesc = strings["task.recurringScope.thisOnlyDesc"],
+            allFutureLabel = strings["task.recurringScope.allFuture"],
+            allFutureDesc = strings["task.recurringScope.allFutureDesc"],
+            cancelLabel = strings["common.cancel"],
+            onThisOnly = {
+                taskViewModel.editRecurring(req.original, req.edited, req.tagIds, req.recurrence, RecurringScope.THIS_ONLY)
+                pendingRecurringEdit = null
+            },
+            onAllFuture = {
+                taskViewModel.editRecurring(req.original, req.edited, req.tagIds, req.recurrence, RecurringScope.ALL_FUTURE)
+                pendingRecurringEdit = null
+            },
+            onDismiss = { pendingRecurringEdit = null },
+        )
+    }
+
+    pendingRecurringDelete?.let { task ->
+        RecurringScopeDialog(
+            title = strings["task.delete"],
+            message = strings["task.recurringDelete.prompt"],
+            thisOnlyLabel = strings["task.recurringDelete.thisOnly"],
+            thisOnlyDesc = strings["task.recurringDelete.thisOnlyDesc"],
+            allFutureLabel = strings["task.recurringDelete.all"],
+            allFutureDesc = strings["task.recurringDelete.allDesc"],
+            cancelLabel = strings["common.cancel"],
+            onThisOnly = {
+                taskViewModel.deleteRecurring(task, RecurringScope.THIS_ONLY)
+                pendingRecurringDelete = null
+            },
+            onAllFuture = {
+                taskViewModel.deleteRecurring(task, RecurringScope.ALL_FUTURE)
+                pendingRecurringDelete = null
+            },
+            onDismiss = { pendingRecurringDelete = null },
         )
     }
 }

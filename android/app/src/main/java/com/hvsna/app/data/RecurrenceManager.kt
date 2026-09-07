@@ -50,36 +50,129 @@ class RecurrenceManager(
     }
 
     /**
-     * "This and all future occurrences" edit scope: deletes every other
-     * pending (undone) materialized row for the series, then rebases the
-     * template on [editedTask] so the generator's virtual stream restarts
-     * cleanly from here — mirrors updateRecurringSeries in packages/app.
-     * Completed past instances are left untouched.
+     * "This task only" edit scope (repeat still on): the edited occurrence
+     * becomes / stays a single real row diverging from the series; the template
+     * and every sibling occurrence are left untouched. Mirrors web's
+     * handleScopeThisOnly (`type === "edit"`). Repeat type/interval are NOT
+     * applied to a lone instance.
      */
-    suspend fun updateSeries(recurringTaskId: String, editedTask: Task, recurrence: RecurrenceInput, tagIds: List<String> = emptyList()) {
-        val existingRule = repository.getRecurrenceRule(recurringTaskId) ?: return
-        repository.deleteUndoneForRecurrenceExcept(recurringTaskId, exceptTaskId = editedTask.id)
-        val anchorDate = epochMillisToLocalDate(editedTask.scheduledTime!!)
+    suspend fun editSeriesThisOnly(original: Task, edited: Task, tagIds: List<String> = emptyList()): Task {
+        val linked = edited.copy(
+            recurringTaskId = original.recurringTaskId,
+            recurringType = original.recurringType,
+            recurringInterval = original.recurringInterval,
+        )
+        val saved = if (original.isVirtual()) materialize(original, linked) else { repository.update(linked); linked }
+        repository.setTagsForTask(saved.id, tagIds)
+        return saved
+    }
+
+    /**
+     * "This and all future events" edit scope: deletes only the *future*
+     * pending rows of the series (past/overdue and completed rows survive),
+     * then rebases the template on the edited occurrence. The template's end
+     * condition (recurringEnd / *Epoch / *Occurrences) is preserved, not reset.
+     * Mirrors updateRecurringSeries in packages/app.
+     */
+    suspend fun editSeriesAllFuture(
+        recurringTaskId: String,
+        original: Task,
+        edited: Task,
+        recurrence: RecurrenceInput,
+        tagIds: List<String> = emptyList(),
+    ): Task {
+        val existingRule = repository.getRecurrenceRule(recurringTaskId) ?: return original
+        // Anchor everything (future-sibling cutoff, template rebase, exception)
+        // on the *original* occurrence's day — matching web's updateRecurringSeries,
+        // which passes the un-edited `task` as the anchor even when the row's own
+        // date is being changed.
+        val anchorEpoch = original.scheduledTime ?: edited.scheduledTime ?: 0L
+        val anchorDate = epochMillisToLocalDate(anchorEpoch)
+
+        val target = edited.copy(
+            id = if (original.isVirtual()) java.util.UUID.randomUUID().toString() else original.id,
+            recurringTaskId = recurringTaskId,
+            recurringType = recurrence.recurringType,
+            recurringInterval = recurrence.recurringInterval,
+        )
+        if (original.isVirtual()) repository.insert(target) else repository.update(target)
+        repository.setTagsForTask(target.id, tagIds)
+
+        repository.deleteFuturePendingForRecurrenceExcept(recurringTaskId, target.id, anchorEpoch)
+
+        val newExceptions = seriesEditExceptions(
+            parseOccurrenceExceptions(existingRule.occurrenceExceptions),
+            occurrenceDateKey(anchorDate),
+        )
         val updatedRule = existingRule.copy(
-            title = editedTask.title,
-            description = editedTask.description,
+            title = target.title,
+            description = target.description,
             recurringType = recurrence.recurringType,
             recurringInterval = recurrence.recurringInterval,
             baseDateEpoch = stampMidnight(anchorDate),
-            atTime = editedTask.atTime,
-            lat = editedTask.lat,
-            lng = editedTask.lng,
-            timezone = editedTask.timezone,
-            hijriDateOffset = editedTask.hijriDateOffset,
-            recurringEnd = recurrence.recurringEnd,
-            recurringEndEpoch = recurrence.recurringEndEpoch,
-            recurringEndOccurrences = recurrence.recurringEndOccurrences,
-            occurrenceExceptions = serializeOccurrenceExceptions(setOf(occurrenceDateKey(anchorDate))),
-            reminderEnabled = editedTask.reminderEnabled,
-            reminderOffsetMinutes = editedTask.reminderOffsetMinutes,
+            atTime = target.atTime,
+            lat = target.lat,
+            lng = target.lng,
+            timezone = target.timezone,
+            hijriDateOffset = target.hijriDateOffset,
+            occurrenceExceptions = serializeOccurrenceExceptions(newExceptions),
+            reminderEnabled = target.reminderEnabled,
+            reminderOffsetMinutes = target.reminderOffsetMinutes,
+            updatedAt = System.currentTimeMillis(),
+            _dirty = 1,
+            // recurringEnd / recurringEndEpoch / recurringEndOccurrences: intentionally
+            // carried over from existingRule unchanged (web sends a partial template update).
         )
         repository.updateRecurrenceRule(updatedRule)
-        repository.setTagsForRule(updatedRule.id, tagIds)
+        repository.setTagsForRule(recurringTaskId, tagIds)
+        return target
+    }
+
+    /**
+     * "This task only" demote: detach a single occurrence into a standalone
+     * one-off task; the series and its other occurrences continue. Mirrors
+     * web's demoteTaskFromRecurring.
+     */
+    suspend fun demoteThisOnly(original: Task, edited: Task, tagIds: List<String> = emptyList()): Task {
+        val standalone = edited.copy(
+            id = if (original.isVirtual()) java.util.UUID.randomUUID().toString() else original.id,
+            recurringTaskId = null,
+            recurringType = null,
+            recurringInterval = null,
+        )
+        if (original.isVirtual()) {
+            original.recurringTaskId?.let { ruleId ->
+                repository.getRecurrenceRule(ruleId)?.let {
+                    repository.updateRecurrenceRule(addOccurrenceException(it, original.scheduledTime!!))
+                }
+            }
+            repository.insert(standalone)
+        } else {
+            repository.update(standalone)
+        }
+        repository.setTagsForTask(standalone.id, tagIds)
+        return standalone
+    }
+
+    /**
+     * "This and all future events" demote: detach this occurrence, delete the
+     * future pending siblings, and soft-delete the template so the series ends.
+     * Past/completed rows survive. Mirrors demoteTaskFromRecurringAndDeleteFuture.
+     */
+    suspend fun demoteAllFuture(recurringTaskId: String, original: Task, edited: Task, tagIds: List<String> = emptyList()): Task {
+        val standalone = edited.copy(
+            id = if (original.isVirtual()) java.util.UUID.randomUUID().toString() else original.id,
+            recurringTaskId = null,
+            recurringType = null,
+            recurringInterval = null,
+        )
+        if (original.isVirtual()) repository.insert(standalone) else repository.update(standalone)
+        repository.setTagsForTask(standalone.id, tagIds)
+        // Future-sibling cutoff measured from the original occurrence's day (web parity).
+        val anchorEpoch = original.scheduledTime ?: edited.scheduledTime ?: 0L
+        repository.deleteFuturePendingForRecurrenceExcept(recurringTaskId, standalone.id, anchorEpoch)
+        repository.getRecurrenceRule(recurringTaskId)?.let { repository.deleteRecurrenceRule(it) }
+        return standalone
     }
 
     /** Ends a series: removes every other pending row and soft-deletes the template itself. */

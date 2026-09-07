@@ -172,6 +172,15 @@ interface TaskDao {
     @Query("UPDATE task SET deletedAt = :now, updatedAt = :now, _dirty = 1 WHERE recurringTaskId = :recurringTaskId AND isDone = 0 AND deletedAt IS NULL AND id != :exceptTaskId")
     suspend fun deleteUndoneForRecurrenceExcept(recurringTaskId: String, exceptTaskId: String, now: Long = System.currentTimeMillis())
 
+    /**
+     * Soft-deletes only the *future* pending occurrences of a series
+     * (scheduledTime >= :fromEpoch), leaving past/overdue and completed rows
+     * alone — mirrors the `epoch >= task epoch` filter in packages/app's
+     * updateRecurringSeries / demoteTaskFromRecurringAndDeleteFuture.
+     */
+    @Query("UPDATE task SET deletedAt = :now, updatedAt = :now, _dirty = 1 WHERE recurringTaskId = :recurringTaskId AND isDone = 0 AND deletedAt IS NULL AND id != :exceptTaskId AND (scheduledTime IS NULL OR scheduledTime >= :fromEpoch)")
+    suspend fun deleteFuturePendingForRecurrenceExcept(recurringTaskId: String, exceptTaskId: String, fromEpoch: Long, now: Long = System.currentTimeMillis())
+
     @Query("SELECT * FROM task WHERE atTime IS NOT NULL AND atTime != '' AND atTime NOT LIKE '%:%' AND isDone = 0 AND deletedAt IS NULL")
     suspend fun getAllUndonePrayerAnchoredTasks(): List<Task>
 

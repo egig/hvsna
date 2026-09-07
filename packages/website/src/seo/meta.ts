@@ -13,7 +13,7 @@ export interface RouteMeta {
 const SITE_URL = "https://hvsna.com";
 
 export const DEFAULT_META: RouteMeta = {
-  title: "Hvsna - Islamic Todo App | Organize Your Day, the Islamic Way",
+  title: "Hvsna - Organize Your Day Around Prayers",
   description:
     "Prayer-first task app with Hijri calendar awareness. Features offline-first design, focused UI, and supports both mobile and desktop for Muslim productivity.",
   keywords: "Islamic todo app, Hijri calendar, prayer times, Muslim productivity, task management, offline app",
@@ -25,7 +25,7 @@ export const DEFAULT_META: RouteMeta = {
 export const ROUTE_META: Record<string, RouteMeta> = {
   "/": {
     ...DEFAULT_META,
-    ogTitle: "Hvsna - Islamic Todo App",
+    ogTitle: "Hvsna - Organize Your Day Around Prayers",
     ogDescription: "Organize Your Day, the Islamic Way. Prayer-first task app with Hijri calendar awareness.",
     canonical: `${SITE_URL}/`,
     hreflang: { en: "/", id: "/id" },

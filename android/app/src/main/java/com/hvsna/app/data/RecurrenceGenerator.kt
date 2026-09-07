@@ -20,6 +20,12 @@ data class TaskOccurrence(val task: Task, val isVirtual: Boolean)
 private const val MAX_ITERATIONS = 400
 private const val OVERDUE_LOOKBACK_DAYS = 60L
 
+/** Id prefix of a lazily-computed occurrence that has no persisted row yet. */
+const val VIRTUAL_TASK_ID_PREFIX = "vtask_"
+
+/** True for a lazily-computed occurrence (id `vtask_<ruleId>_<epoch>`) with no DB row. */
+fun Task.isVirtual(): Boolean = id.startsWith(VIRTUAL_TASK_ID_PREFIX)
+
 fun epochMillisToLocalDate(epochMillis: Long): LocalDate =
     Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate()
 
@@ -135,7 +141,7 @@ fun computeOccurrencesInRange(
 }
 
 private fun toVirtualTask(rule: RecurrenceRule, epoch: Long): Task = Task(
-    id = "vtask_${rule.id}_$epoch",
+    id = "$VIRTUAL_TASK_ID_PREFIX${rule.id}_$epoch",
     title = rule.title,
     description = rule.description,
     scheduledTime = epoch,
@@ -213,5 +219,50 @@ fun addOccurrenceException(rule: RecurrenceRule, epoch: Long, now: Long = System
     val updated = (parseOccurrenceExceptions(rule.occurrenceExceptions) + occurrenceDateKey(epochMillisToLocalDate(epoch)))
         .filter { it >= cutoff }
         .toSet()
-    return rule.copy(occurrenceExceptions = serializeOccurrenceExceptions(updated))
+    return rule.copy(
+        occurrenceExceptions = serializeOccurrenceExceptions(updated),
+        updatedAt = now,
+        _dirty = 1,
+    )
+}
+
+/**
+ * Exceptions to keep on a template after a "this and all future" series edit:
+ * every past exception (date key strictly before [anchorKey]) plus [anchorKey]
+ * itself — the anchor instance stays a real row, so the generator must not also
+ * emit a virtual for that day. Ones at/after the anchor are dropped because the
+ * future rows they excepted have just been deleted and will be regenerated.
+ * Mirrors `nextExceptions` in packages/app's updateRecurringSeries.
+ */
+fun seriesEditExceptions(existing: Set<String>, anchorKey: String): Set<String> =
+    existing.filter { it < anchorKey }.toSet() + anchorKey
+
+/**
+ * True when saving [edited] (+ [editedTagIds] / [recurrence]) would actually
+ * change anything the task edit form can touch, relative to [original]
+ * (+ [originalTagIds] / [originalRule]). Used to skip the instance-vs-series
+ * scope prompt on a no-op save — parity with the web edit hook, which does the
+ * same field-by-field comparison before opening its scope modal.
+ */
+fun recurringEditChangedAnything(
+    original: Task,
+    originalTagIds: Set<String>,
+    originalRule: RecurrenceRule?,
+    edited: Task,
+    editedTagIds: Set<String>,
+    recurrence: RecurrenceInput,
+): Boolean {
+    if (edited.title != original.title) return true
+    if (edited.description != original.description) return true
+    if (edited.scheduledTime != original.scheduledTime) return true
+    if (edited.atTime != original.atTime) return true
+    if (edited.reminderEnabled != original.reminderEnabled) return true
+    if (edited.reminderOffsetMinutes != original.reminderOffsetMinutes) return true
+    if (editedTagIds != originalTagIds) return true
+    if (recurrence.enabled != (original.recurringTaskId != null)) return true
+    if (recurrence.enabled) {
+        if (recurrence.recurringType != originalRule?.recurringType) return true
+        if (recurrence.recurringInterval != originalRule.recurringInterval) return true
+    }
+    return false
 }

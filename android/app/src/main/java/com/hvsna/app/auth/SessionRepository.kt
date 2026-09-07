@@ -15,6 +15,8 @@ import com.google.crypto.tink.integration.android.AndroidKeysetManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.security.GeneralSecurityException
 
 private val Context.authDataStore: DataStore<Preferences> by preferencesDataStore(name = "auth_session")
 
@@ -44,9 +46,12 @@ enum class LogoutReason { NONE, EXPIRED, SECURITY_REVOKED }
 class SessionRepository(context: Context) {
     private val appContext = context.applicationContext
 
-    private val aead: Aead by lazy {
+    @Volatile
+    private var cachedAead: Aead? = null
+
+    private fun buildAead(): Aead {
         AeadConfig.register()
-        AndroidKeysetManager.Builder()
+        return AndroidKeysetManager.Builder()
             .withSharedPref(appContext, KEYSET_NAME, KEYSET_PREF_FILE)
             .withKeyTemplate(KeyTemplates.get("AES256_GCM"))
             .withMasterKeyUri(MASTER_KEY_URI)
@@ -55,14 +60,52 @@ class SessionRepository(context: Context) {
             .getPrimitive(RegistryConfiguration.get(), Aead::class.java)
     }
 
-    suspend fun getRefreshToken(): String? = withContext(Dispatchers.IO) {
-        val encoded = appContext.authDataStore.data.first()[Keys.REFRESH_TOKEN] ?: return@withContext null
-        val plaintext = aead.decrypt(Base64.decode(encoded, Base64.NO_WRAP), null)
-        plaintext.toString(Charsets.UTF_8)
+    /**
+     * Tink AEAD over the Keystore-wrapped keyset. If the keyset can't be loaded
+     * — the Keystore master key vanished after an app re-sign, an OS update, or
+     * vendor key eviction (the `InvalidKeyException: Keystore cannot load the
+     * key` crash this guards against) — the stored keyset and every ciphertext
+     * that depended on it are unrecoverable. Wipe the keyset prefs and retry
+     * once with a fresh keyset; the stale refresh token is dropped on the next
+     * decrypt failure, silently signing the user out (the only safe outcome).
+     * Returns null only if even a fresh keyset can't be built.
+     */
+    @Synchronized
+    private fun aead(): Aead? {
+        cachedAead?.let { return it }
+        return try {
+            buildAead().also { cachedAead = it }
+        } catch (e: GeneralSecurityException) {
+            recoverKeyset()
+        } catch (e: IOException) {
+            recoverKeyset()
+        }
     }
 
-    suspend fun saveRefreshToken(token: String) = withContext(Dispatchers.IO) {
-        val ciphertext = aead.encrypt(token.toByteArray(Charsets.UTF_8), null)
+    private fun recoverKeyset(): Aead? {
+        runCatching { appContext.deleteSharedPreferences(KEYSET_PREF_FILE) }
+        return runCatching { buildAead().also { cachedAead = it } }.getOrNull()
+    }
+
+    suspend fun getRefreshToken(): String? = withContext(Dispatchers.IO) {
+        val encoded = appContext.authDataStore.data.first()[Keys.REFRESH_TOKEN] ?: return@withContext null
+        val cipher = aead() ?: return@withContext null
+        try {
+            cipher.decrypt(Base64.decode(encoded, Base64.NO_WRAP), null).toString(Charsets.UTF_8)
+        } catch (e: GeneralSecurityException) {
+            // Keyset was reset, or the ciphertext is stale/corrupt — drop it and force a fresh sign-in.
+            appContext.authDataStore.edit { prefs -> prefs.remove(Keys.REFRESH_TOKEN) }
+            null
+        } catch (e: IllegalArgumentException) {
+            // Malformed Base64.
+            appContext.authDataStore.edit { prefs -> prefs.remove(Keys.REFRESH_TOKEN) }
+            null
+        }
+    }
+
+    suspend fun saveRefreshToken(token: String): Unit = withContext(Dispatchers.IO) {
+        val cipher = aead() ?: return@withContext
+        val ciphertext = cipher.encrypt(token.toByteArray(Charsets.UTF_8), null)
         val encoded = Base64.encodeToString(ciphertext, Base64.NO_WRAP)
         appContext.authDataStore.edit { prefs -> prefs[Keys.REFRESH_TOKEN] = encoded }
     }

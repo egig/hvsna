@@ -54,6 +54,10 @@ class TaskRepository(
         dao.deleteUndoneForRecurrenceExcept(recurringTaskId, exceptTaskId)
         notifyBackupDataChanged()
     }
+    suspend fun deleteFuturePendingForRecurrenceExcept(recurringTaskId: String, exceptTaskId: String, fromEpoch: Long) {
+        dao.deleteFuturePendingForRecurrenceExcept(recurringTaskId, exceptTaskId, fromEpoch)
+        notifyBackupDataChanged()
+    }
     suspend fun getAllUndonePrayerAnchoredTasks(): List<Task> = dao.getAllUndonePrayerAnchoredTasks()
     suspend fun getAllUndoneReminderEnabledTasks(): List<Task> = dao.getAllUndoneReminderEnabledTasks()
     suspend fun getTaskById(taskId: String): Task? = dao.getTaskById(taskId)

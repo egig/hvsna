@@ -13,6 +13,7 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 import com.hvsna.app.data.TaskRepository
 import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.data.isVirtual
 import com.hvsna.app.reminder.ReminderScheduler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -34,10 +35,18 @@ private const val MAGHRIB_RECHECK_INTERVAL_MS = 60_000L
 
 data class RecurringSeriesUiModel(val rule: RecurrenceRule, val nextOccurrence: Task, val tags: List<Tag> = emptyList())
 
-private const val UPCOMING_HORIZON_DAYS = 365L
-private const val VIRTUAL_TASK_ID_PREFIX = "vtask_"
+/** Which occurrences a recurring-task edit or delete applies to. */
+enum class RecurringScope { THIS_ONLY, ALL_FUTURE }
 
-fun Task.isVirtual(): Boolean = id.startsWith(VIRTUAL_TASK_ID_PREFIX)
+/** A recurring-task edit captured from the form, awaiting the user's scope choice. */
+data class PendingRecurringEdit(
+    val original: Task,
+    val edited: Task,
+    val tagIds: List<String>,
+    val recurrence: RecurrenceInput,
+)
+
+private const val UPCOMING_HORIZON_DAYS = 365L
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskViewModel(
@@ -191,19 +200,15 @@ class TaskViewModel(
     fun tasksForTag(tagId: String): Flow<List<TaskWithTags>> = repository.getTasksForTag(tagId)
 
     /**
-     * [original] is the task being edited (null when creating brand new) —
-     * `null` vs. non-null decides insert-vs-update, and `original.isVirtual()`
-     * decides whether [edited] needs materializing first, since a virtual
-     * occurrence has no existing DB row for `update` to target.
+     * Save path for **non-recurring-original** edits only: brand-new tasks
+     * (`original == null`), plain updates, and promoting a regular task into a
+     * new series (`recurrence.enabled && original.recurringTaskId == null`).
+     * Editing an existing series goes through [editRecurring] after the user
+     * picks a scope in the dialog — matching web's task-form-edit-hook.
      */
     fun upsert(original: Task?, edited: Task, tagIds: List<String>, recurrence: RecurrenceInput = RecurrenceInput.None) = viewModelScope.launch {
         val now = System.currentTimeMillis()
         var taskToSave = edited.copy(updatedAt = now, _dirty = 1)
-
-        if (original?.recurringTaskId != null && !recurrence.enabled) {
-            recurrenceManager.stopSeries(original.recurringTaskId, exceptTaskId = original.id)
-            taskToSave = taskToSave.copy(recurringTaskId = null)
-        }
 
         taskToSave = when {
             original == null -> { repository.insert(taskToSave); taskToSave }
@@ -216,20 +221,64 @@ class TaskViewModel(
 
         if (recurrence.enabled && original?.recurringTaskId == null) {
             recurrenceManager.createSeries(taskToSave, recurrence, tagIds)
-        } else if (recurrence.enabled && original?.recurringTaskId != null) {
-            recurrenceManager.updateSeries(original.recurringTaskId, taskToSave, recurrence, tagIds)
         }
     }
 
-    fun delete(task: Task) = viewModelScope.launch {
-        if (task.recurringTaskId != null && task.isDone == 0) {
-            // Deleting any pending instance of a series stops the whole series —
-            // matches the pre-existing behavior this app already had.
-            recurrenceManager.stopSeries(task.recurringTaskId, exceptTaskId = task.id)
+    /**
+     * Applies an edit to an occurrence of an existing series at the chosen
+     * [scope]. [recurrence] still-enabled → edit; toggled off → demote.
+     * Mirrors web's handleScopeThisOnly / handleScopeAllFuture.
+     */
+    fun editRecurring(
+        original: Task,
+        edited: Task,
+        tagIds: List<String>,
+        recurrence: RecurrenceInput,
+        scope: RecurringScope,
+    ) = viewModelScope.launch {
+        val recurringTaskId = original.recurringTaskId ?: return@launch
+        val now = System.currentTimeMillis()
+        val stamped = edited.copy(updatedAt = now, _dirty = 1)
+        val result = when {
+            recurrence.enabled && scope == RecurringScope.THIS_ONLY ->
+                recurrenceManager.editSeriesThisOnly(original, stamped, tagIds)
+            recurrence.enabled ->
+                recurrenceManager.editSeriesAllFuture(recurringTaskId, original, stamped, recurrence, tagIds)
+            scope == RecurringScope.THIS_ONLY ->
+                recurrenceManager.demoteThisOnly(original, stamped, tagIds)
+            else ->
+                recurrenceManager.demoteAllFuture(recurringTaskId, original, stamped, tagIds)
         }
+        if (original.isVirtual()) reminderScheduler.cancel(original.id)
+        reminderScheduler.sync(result, settings.value.remindersEnabled)
+    }
+
+    fun delete(task: Task) = viewModelScope.launch {
         if (!task.isVirtual()) {
             repository.delete(task.id)
             reminderScheduler.cancel(task.id)
+        }
+    }
+
+    /**
+     * Deletes an occurrence of a series at the chosen [scope] — "this task only"
+     * removes just this occurrence (materializing a virtual first so the slot is
+     * recorded as an exception), "all future" stops the whole series.
+     * Mirrors web's handleDeleteSingle / handleDeleteAll.
+     */
+    fun deleteRecurring(task: Task, scope: RecurringScope) = viewModelScope.launch {
+        val recurringTaskId = task.recurringTaskId ?: return@launch
+        when (scope) {
+            RecurringScope.THIS_ONLY -> {
+                val real = if (task.isVirtual()) recurrenceManager.materialize(task) else task
+                repository.delete(real.id)
+                reminderScheduler.cancel(real.id)
+                if (task.isVirtual()) reminderScheduler.cancel(task.id)
+            }
+            RecurringScope.ALL_FUTURE -> {
+                recurrenceManager.stopSeries(recurringTaskId, exceptTaskId = "")
+                reminderScheduler.cancel(task.id)
+            }
         }
     }
 
