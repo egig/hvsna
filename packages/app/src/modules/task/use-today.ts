@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Task } from "@/domain/task";
+import { useCompletionGrace } from "./completion-grace-context";
 import { useDateTranslationHelper } from "../calendar/use-date-translation-helper";
 import { useHijriDate } from "../calendar/hijri/use-hijri-date";
 import { useTaskRepository } from "./use-task-repository";
@@ -124,13 +126,22 @@ export function useToday() {
     "ddd"
   )}, ${tomorrowGreg.date()} ${gregorianMonthNames[tomorrowGreg.month()]}`;
 
+  // Keep a just-checked-off task in its prayer group (rendered as done) for the
+  // completion grace instead of letting it jump straight into "Completed".
+  const { suppress, snapshot } = useCompletionGrace();
+  const todayCompletedTasks = useMemo(
+    () => suppress(todayCompletedTasksQuery.data || []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [todayCompletedTasksQuery.data, snapshot]
+  );
+
   const isLoading =
     pendingTasksQuery.isPending || todayCompletedTasksQuery.isPending;
   const error = pendingTasksQuery.error || todayCompletedTasksQuery.error;
 
   return {
     todayTasks,
-    todayCompletedTasks: todayCompletedTasksQuery.data || [],
+    todayCompletedTasks,
     initiated: !isLoading && hijriCalInititated,
     error: error
       ? error instanceof Error

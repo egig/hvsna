@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/modules/components/error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/modules/query-client";
 import { TaskProvider } from "@/modules/task/task-context";
+import { CompletionGraceProvider } from "@/modules/task/completion-grace-context";
 import { AuthProvider, VerifyEmailBanner } from "@/modules/auth";
 import { SettingsProvider } from "@/modules/settings";
 import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker";
@@ -119,10 +120,12 @@ export default function App({
                                     <div className="flex-1 min-h-0">
                                       <Router>
                                         <TaskProvider>
-                                          <PostHogSessionTracker
-                                            platform={platform}
-                                          />
-                                          <Routes />
+                                          <CompletionGraceProvider>
+                                            <PostHogSessionTracker
+                                              platform={platform}
+                                            />
+                                            <Routes />
+                                          </CompletionGraceProvider>
                                         </TaskProvider>
                                       </Router>
                                     </div>

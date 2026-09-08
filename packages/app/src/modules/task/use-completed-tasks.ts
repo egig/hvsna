@@ -1,7 +1,8 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useTaskRepository } from "./use-task-repository";
 import { queryKeys } from "../query-keys";
+import { useCompletionGrace } from "./completion-grace-context";
 
 const PAGE_SIZE = 10;
 
@@ -21,8 +22,15 @@ export function useCompletedTasks() {
     staleTime: 1000 * 60 * 2,
   });
 
-  // Flatten all pages into single array
-  const tasks = query.data?.pages.flat() ?? [];
+  const { suppress, snapshot } = useCompletionGrace();
+
+  // Flatten all pages into single array; hide rows still lingering in their
+  // pending list under the completion grace so they don't render twice.
+  const tasks = useMemo(
+    () => suppress(query.data?.pages.flat() ?? []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [query.data, snapshot]
+  );
 
   const loadMore = useCallback(() => {
     if (query.hasNextPage && !query.isFetchingNextPage) {

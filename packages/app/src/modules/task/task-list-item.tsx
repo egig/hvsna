@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { HvSquare, HvSquareCheckFilled } from "@/modules/icons";
 import { useLocation } from "react-router";
@@ -8,6 +8,7 @@ import type { Task, TaskStatus } from "@/domain/task";
 import { useTaskListItem } from "./task-list-item-hook";
 import { useTaskContext } from "./task-context";
 import { useTaskFormContext } from "./task-form-context";
+import { useCompletionGrace } from "./completion-grace-context";
 import { TagList } from "./tag-pill";
 import dayjs from "dayjs";
 
@@ -18,6 +19,27 @@ interface TaskListItemProps {
   showGoalInfo?: boolean;
   className?: string;
   formatDate?: (task: Task) => string;
+}
+
+/**
+ * The checkbox: a small "pop" when it flips to done, a straight settle back on
+ * undo. Mirrors the Android `TaskCheckbox` micro-interaction.
+ */
+function TaskCheckbox({ done }: { done: boolean }) {
+  return (
+    <motion.span
+      className="inline-flex leading-none"
+      initial={false}
+      animate={done ? { scale: [1, 1.28, 1] } : { scale: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut", times: [0, 0.45, 1] }}
+    >
+      {done ? (
+        <HvSquareCheckFilled size={24} className="text-gray-400" />
+      ) : (
+        <HvSquare strokeWidth={1} size={24} className="text-gray-500" />
+      )}
+    </motion.span>
+  );
 }
 
 export function TaskListItem({
@@ -34,28 +56,25 @@ export function TaskListItem({
   const location = useLocation();
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
+  const grace = useCompletionGrace();
 
-  const getStatusIcon = (status: TaskStatus) => {
-    switch (status) {
-      case 1:
-        return <HvSquareCheckFilled size={24} className="text-gray-400" />;
-      case 0:
-        return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
-      default:
-        return <HvSquare strokeWidth={1} size={24} className="text-gray-500" />;
-    }
-  };
+  const gracePhase = grace.phase(task.id ?? "");
+  // Treat a held row as done straight away so the pop + strike fire on click,
+  // before the DB write / query refetch swaps in the completed snapshot.
+  const done = task.status === 1 || gracePhase !== null;
+  const leaving = gracePhase === "leaving";
 
-  const getStatusColor = (status: TaskStatus) => {
-    switch (status) {
-      case 1:
-        return "line-through text-gray-400";
-      case 0:
-        return "text-gray-800";
-      default:
-        return "text-gray-800";
-    }
-  };
+  // Strike-through / pop should sweep on the transition to done, but snap
+  // straight to full when a row simply mounts already-done (Completed section).
+  // A grace-held row that replaces a just-materialized virtual task mounts
+  // "done" too, yet should still animate — hence the phase check.
+  const [showDone, setShowDone] = useState(() => done && gracePhase !== "held");
+  useEffect(() => {
+    setShowDone(done);
+  }, [done]);
+
+  const getStatusColor = (isDone: boolean) =>
+    isDone ? "text-gray-400" : "text-gray-800";
 
   const formatScheduledDate = (
     task: Task,
@@ -105,9 +124,12 @@ export function TaskListItem({
       : task;
 
     if (activeTask.status === 0) {
+      // Persist now, defer the visual removal (checkbox pop + strike sweep).
+      grace.hold(activeTask);
       updatePromise = completeTask(activeTask.id as string);
       nextStatus = 1;
     } else {
+      grace.release(activeTask.id as string);
       updatePromise = reopenTask(activeTask.id as string);
       nextStatus = 0;
     }
@@ -126,10 +148,12 @@ export function TaskListItem({
         <button
           onClick={() => {
             if (activeTask.status === 0) {
+              grace.release(activeTask.id as string);
               reopenTask(activeTask.id as string).then(() => {
                 hideSnackbar(snackbarId);
               });
             } else {
+              grace.hold(activeTask);
               completeTask(activeTask.id as string).then(() => {
                 hideSnackbar(snackbarId);
               });
@@ -177,9 +201,9 @@ export function TaskListItem({
   return (
     <motion.div
       className={`relative overflow-hidden w-full border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${className}`}
-      initial={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+      initial={false}
+      animate={leaving ? { opacity: 0, y: -8 } : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
       layout
     >
       <div
@@ -194,15 +218,15 @@ export function TaskListItem({
             aria-label={`Change status from ${task.status}`}
             data-testid="status-toggle"
           >
-            {getStatusIcon(task?.status || 0)}
+            <TaskCheckbox done={showDone} />
           </button>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3
-                className={`leading-6 ${getStatusColor(
-                  task.status as TaskStatus
-                )}`}
+                className={`leading-6 transition-colors duration-200 ${getStatusColor(
+                  showDone
+                )} ${showDone ? "line-through" : ""}`}
               >
                 {task.name}
               </h3>

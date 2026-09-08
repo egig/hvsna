@@ -7,6 +7,7 @@ import { EmptyState } from "../components/empty-state";
 import TaskListItem from "./task-list-item";
 import { TaskGroupCollapsible } from "./task-group-collapsible";
 import { useAllTasks } from "./use-all-tasks";
+import { useCompletionGrace } from "./completion-grace-context";
 import dayjs from "dayjs";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useTags } from "./use-tags";
@@ -20,6 +21,7 @@ export default function TagDetailPage() {
   const { t } = useLanguageContext();
   const allTasksQuery = useAllTasks();
   const { tags, renameTag, setTagColor, deleteTag } = useTags();
+  const { phase: gracePhase } = useCompletionGrace();
 
   const decodedTag = tagName ? decodeURIComponent(tagName) : "";
   const tagColor = tags.find((t) => t.name === decodedTag)?.color ?? DEFAULT_TAG_COLOR;
@@ -31,18 +33,26 @@ export default function TagDetailPage() {
 
   const isCustomColor = !(TAG_COLOR_PALETTE as readonly string[]).includes(editColor);
 
+  // A task checked off under the completion grace carries status 1 in a held
+  // snapshot but should stay in its active group (rendered as done) until the
+  // grace ends, not jump straight to "Completed".
+  const isActive = (task: Task) =>
+    task.status !== 1 || gracePhase(task.id ?? "") !== null;
+
   const tasks = useMemo<Task[]>(() => {
     if (!allTasksQuery.data || !decodedTag) return [];
     return allTasksQuery.data.filter(
-      (task) => task.tags?.includes(decodedTag) && task.status !== 1
+      (task) => task.tags?.includes(decodedTag) && isActive(task)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTasksQuery.data, decodedTag]);
 
   const completedTasks = useMemo<Task[]>(() => {
     if (!allTasksQuery.data || !decodedTag) return [];
     return allTasksQuery.data.filter(
-      (task) => task.tags?.includes(decodedTag) && task.status === 1
+      (task) => task.tags?.includes(decodedTag) && !isActive(task)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allTasksQuery.data, decodedTag]);
 
   // Group the active tasks by schedule, matching the Android tag detail screen.
