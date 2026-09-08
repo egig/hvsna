@@ -8,6 +8,11 @@
   "common.save": "Simpan",
   "common.delete": "Hapus",
   "common.cancel": "Batal",
+  "common.undo": "Batal",
+
+  "status.complete": "Selesai",
+  "status.pending": "To Do",
+  "task.statusChangedTo": "Status diubah menjadi %s",
 
   "a11y.settings": "Pengaturan",
   "a11y.clearSearch": "Hapus pencarian",

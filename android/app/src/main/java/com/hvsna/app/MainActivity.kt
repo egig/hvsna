@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -17,6 +19,10 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaul
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -29,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
@@ -44,6 +51,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import kotlinx.coroutines.flow.collectLatest
 import com.hvsna.app.auth.AuthApi
 import com.hvsna.app.auth.AuthService
 import com.hvsna.app.auth.SessionRepository
@@ -193,6 +201,24 @@ fun HvsnaApp() {
     val settings by taskViewModel.settings.collectAsState()
     val strings = LocalStrings.current
 
+    // "Status changed to …" + Undo snackbar on every task-done toggle (mirrors web's
+    // task-list-item.tsx). Undo restores the task to its prior state.
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(taskViewModel, strings) {
+        taskViewModel.doneToggleEvents.collectLatest { event ->
+            val statusText =
+                if (event.nowDone) strings["status.complete"] else strings["status.pending"]
+            val result = snackbarHostState.showSnackbar(
+                message = strings.format("task.statusChangedTo", statusText),
+                actionLabel = strings["common.undo"],
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                taskViewModel.undoToggleDone(event.taskId, restoreDone = !event.nowDone)
+            }
+        }
+    }
+
     val onEditTask: (TaskWithTags?, Long?) -> Unit = { task, defaultScheduledTime ->
         editingTask = task
         taskDefaultScheduledTime = defaultScheduledTime
@@ -216,6 +242,7 @@ fun HvsnaApp() {
     } ?: true
     val onTagClick: (Tag) -> Unit = { tag -> navController.navigate(AppRoute.TagDetail(tag.id)) }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     NavigationSuiteScaffold(
         layoutType = if (isTopLevelRoute) {
             NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
@@ -307,6 +334,15 @@ fun HvsnaApp() {
                 )
             }
         }
+    }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(bottom = 72.dp),
+        )
     }
 
     if (showTaskSheet) {

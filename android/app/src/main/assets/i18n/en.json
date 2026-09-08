@@ -8,6 +8,11 @@
   "common.save": "Save",
   "common.delete": "Delete",
   "common.cancel": "Cancel",
+  "common.undo": "Undo",
+
+  "status.complete": "Complete",
+  "status.pending": "To Do",
+  "task.statusChangedTo": "Status changed to %s",
 
   "a11y.settings": "Settings",
   "a11y.clearSearch": "Clear search",

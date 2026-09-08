@@ -18,9 +18,12 @@ import com.hvsna.app.reminder.ReminderScheduler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
@@ -48,6 +51,13 @@ data class PendingRecurringEdit(
 
 private const val UPCOMING_HORIZON_DAYS = 365L
 
+/**
+ * Emitted after a task's done state is flipped via [TaskViewModel.toggleDone], so the UI
+ * can surface an "Undo" snackbar (mirrors the web app's task-list-item.tsx behavior).
+ * [taskId] is the real (materialized) task id; [nowDone] is the state it was just set to.
+ */
+data class TaskDoneToggled(val taskId: String, val nowDone: Boolean)
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class TaskViewModel(
     private val repository: TaskRepository,
@@ -62,6 +72,10 @@ class TaskViewModel(
             settingsRepository.settings.drop(1).collectLatest { recurrenceManager.recomputeAllPrayerAnchoredTasks(it) }
         }
     }
+
+    private val _doneToggleEvents = MutableSharedFlow<TaskDoneToggled>(extraBufferCapacity = 4)
+    /** Fires each time [toggleDone] flips a task; the UI listens to show an Undo snackbar. */
+    val doneToggleEvents: SharedFlow<TaskDoneToggled> = _doneToggleEvents.asSharedFlow()
 
     private fun todayStart(): Long {
         return Calendar.getInstance().apply {
@@ -284,11 +298,25 @@ class TaskViewModel(
 
     fun toggleDone(task: Task) = viewModelScope.launch {
         val nowDone = task.isDone == 0
-        val now = System.currentTimeMillis()
         val target = if (task.isVirtual()) recurrenceManager.materialize(task) else task
-        val updated = target.copy(
-            isDone = if (nowDone) 1 else 0,
-            completedTime = if (nowDone) now else null,
+        applyDone(target, nowDone)
+        _doneToggleEvents.tryEmit(TaskDoneToggled(target.id, nowDone))
+    }
+
+    /**
+     * Restores a task to [restoreDone] after the user taps Undo on the toggle snackbar.
+     * Looks the task up fresh so it works even after the toggle wrote to the DB.
+     */
+    fun undoToggleDone(taskId: String, restoreDone: Boolean) = viewModelScope.launch {
+        val task = repository.getTaskById(taskId) ?: return@launch
+        applyDone(task, restoreDone)
+    }
+
+    private suspend fun applyDone(task: Task, done: Boolean) {
+        val now = System.currentTimeMillis()
+        val updated = task.copy(
+            isDone = if (done) 1 else 0,
+            completedTime = if (done) now else null,
             updatedAt = now,
             _dirty = 1,
         )
