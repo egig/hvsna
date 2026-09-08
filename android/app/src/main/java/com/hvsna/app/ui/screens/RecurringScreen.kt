@@ -109,8 +109,9 @@ fun RecurringScreen(
                 TaskListItem(
                     task = displayTask,
                     tags = entry.tags,
-                    onToggleDone = { viewModel.toggleDone(entry.nextOccurrence) },
+                    onToggleDone = { viewModel.toggleDone(TaskWithTags(entry.nextOccurrence, entry.tags)) },
                     onClick = { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
+                    modifier = Modifier.animateItem(),
                 )
             }
         }

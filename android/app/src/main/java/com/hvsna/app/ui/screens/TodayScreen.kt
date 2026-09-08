@@ -305,8 +305,9 @@ fun TodayScreen(
                             isOverdue = true,
                             inPrayerSection = false,
                             showDate = false,
-                            onToggleDone = { viewModel.toggleDone(entry.task) },
+                            onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -328,6 +329,7 @@ fun TodayScreen(
                     }
                 },
             ) { item ->
+                val itemModifier = Modifier.animateItem()
                 when (item) {
                     is TodayListItem.PrayerHeader -> {
                         val isExpanded = expandedGroups[item.groupKey] != false
@@ -336,6 +338,7 @@ fun TodayScreen(
                             isExpanded = isExpanded,
                             onToggle = { expandedGroups[item.groupKey] = !isExpanded },
                             color = MaterialTheme.colorScheme.onSurface,
+                            modifier = itemModifier,
                         )
                     }
                     is TodayListItem.TaskEntry -> TaskListItem(
@@ -344,16 +347,19 @@ fun TodayScreen(
                         isOverdue = false,
                         inPrayerSection = true,
                         showDate = false,
-                        onToggleDone = { viewModel.toggleDone(item.entry.task) },
+                        onToggleDone = { viewModel.toggleDone(item.entry) },
                         onClick = { onEditTask(item.entry, null) },
+                        modifier = itemModifier,
                     )
                     is TodayListItem.DayDivider -> DayDivider(
                         label = item.label,
                         leadingNote = item.leadingNote,
+                        modifier = itemModifier,
                     )
                     is TodayListItem.SunsetHairline -> SunsetHairline(
                         label = item.label,
                         leadingNote = item.leadingNote,
+                        modifier = itemModifier,
                     )
                 }
             }
@@ -378,8 +384,9 @@ fun TodayScreen(
                             isOverdue = false,
                             inPrayerSection = false,
                             showDate = false,
-                            onToggleDone = { viewModel.toggleDone(entry.task) },
+                            onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }
@@ -407,7 +414,8 @@ private fun DividerLeadingNote(text: String) {
  * rolled past Maghrib (see TaskViewModel.todayTaskWindowEnd) - mirrors the web app's
  * TomorrowDivider in today.tsx. */
 @Composable
-private fun DayDivider(label: String, leadingNote: String? = null) {
+private fun DayDivider(label: String, leadingNote: String? = null, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
     if (leadingNote != null) DividerLeadingNote(leadingNote)
     Row(
         verticalAlignment = Alignment.Bottom,
@@ -430,12 +438,14 @@ private fun DayDivider(label: String, leadingNote: String? = null) {
                 .dashedLine(MaterialTheme.colorScheme.outlineVariant),
         )
     }
+    }
 }
 
 /** The Hijri-day rollover marker shown just before the Maghrib section while sunset is
  * still ahead - mirrors the web app's SunsetHairline in today.tsx. */
 @Composable
-private fun SunsetHairline(label: String, leadingNote: String?) {
+private fun SunsetHairline(label: String, leadingNote: String?, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
     if (leadingNote != null) DividerLeadingNote(leadingNote)
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -474,6 +484,7 @@ private fun SunsetHairline(label: String, leadingNote: String?) {
                 .height(1.dp)
                 .dashedLine(MaterialTheme.colorScheme.outlineVariant),
         )
+    }
     }
 }
 

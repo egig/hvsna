@@ -149,8 +149,9 @@ fun UpcomingScreen(
                                     tags = entry.tags,
                                     showDate = isYearGroup,
                                     showYear = isYearGroup,
-                                    onToggleDone = { viewModel.toggleDone(entry.task) },
+                                    onToggleDone = { viewModel.toggleDone(entry) },
                                     onClick = { onEditTask(entry, null) },
+                                    modifier = Modifier.animateItem(),
                                 )
                             }
                         }
@@ -176,8 +177,9 @@ fun UpcomingScreen(
                             task = entry.task,
                             tags = entry.tags,
                             showDate = false,
-                            onToggleDone = { viewModel.toggleDone(entry.task) },
+                            onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }

@@ -86,6 +86,7 @@ import com.hvsna.app.ui.AuthViewModel
 import com.hvsna.app.ui.PendingRecurringEdit
 import com.hvsna.app.ui.RecurringScope
 import com.hvsna.app.ui.TaskViewModel
+import com.hvsna.app.ui.rememberCompletionFeedback
 import com.hvsna.app.ui.components.RecurringScopeDialog
 import com.hvsna.app.ui.components.TaskBottomSheet
 import com.hvsna.app.ui.navigation.AppRoute
@@ -204,8 +205,10 @@ fun HvsnaApp() {
     // "Status changed to …" + Undo snackbar on every task-done toggle (mirrors web's
     // task-list-item.tsx). Undo restores the task to its prior state.
     val snackbarHostState = remember { SnackbarHostState() }
+    val fireCompletionFeedback = rememberCompletionFeedback()
     LaunchedEffect(taskViewModel, strings) {
         taskViewModel.doneToggleEvents.collectLatest { event ->
+            if (event.nowDone) fireCompletionFeedback()
             val statusText =
                 if (event.nowDone) strings["status.complete"] else strings["status.pending"]
             val result = snackbarHostState.showSnackbar(

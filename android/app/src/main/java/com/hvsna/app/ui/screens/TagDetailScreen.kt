@@ -164,8 +164,9 @@ fun TagDetailScreen(
                             TaskListItem(
                                 task = entry.task,
                                 tags = entry.tags,
-                                onToggleDone = { viewModel.toggleDone(entry.task) },
+                                onToggleDone = { viewModel.toggleDone(entry) },
                                 onClick = { onEditTask(entry, null) },
+                                modifier = Modifier.animateItem(),
                             )
                         }
                     }

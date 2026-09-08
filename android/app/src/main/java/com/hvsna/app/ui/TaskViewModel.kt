@@ -77,6 +77,12 @@ class TaskViewModel(
     /** Fires each time [toggleDone] flips a task; the UI listens to show an Undo snackbar. */
     val doneToggleEvents: SharedFlow<TaskDoneToggled> = _doneToggleEvents.asSharedFlow()
 
+    /** Holds a just-completed task in its list for a beat so the tick/strike land before it animates out. */
+    private val completionGrace = CompletionGraceTracker(viewModelScope)
+
+    private val byScheduledTime: Comparator<TaskWithTags> = compareBy(nullsLast()) { it.task.scheduledTime }
+    private val byTitle: Comparator<TaskWithTags> = compareBy { it.task.title.lowercase() }
+
     private fun todayStart(): Long {
         return Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, 0)
@@ -146,39 +152,43 @@ class TaskViewModel(
             recurrenceManager.overdueOccurrenceFor(entry.rule, todayStart(), appSettings)?.let { TaskWithTags(it, entry.tags) }
         }.filter { it.task.isDone == 0 }
         (real + virtual).sortedWith(compareBy(nullsLast()) { it.task.scheduledTime })
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }.let { completionGrace.retain(it, byScheduledTime) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val todayTasks: StateFlow<List<TaskWithTags>> = todayTaskWindowEnd
         .flatMapLatest { windowEnd ->
             withVirtualOccurrences(repository.getToday(todayStart(), windowEnd), todayStart(), windowEnd - 1)
         }
+        .let { completionGrace.retain(it, byScheduledTime) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val completedTasks: StateFlow<List<TaskWithTags>> = repository
-        .getCompleted(todayStart(), tomorrowStart())
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val completedTasks: StateFlow<List<TaskWithTags>> =
+        completionGrace.suppressHeld(repository.getCompleted(todayStart(), tomorrowStart()))
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val upcomingTasks: StateFlow<List<TaskWithTags>> =
         withVirtualOccurrences(
             repository.getUpcoming(tomorrowStart()),
             tomorrowStart(),
             tomorrowStart() + UPCOMING_HORIZON_DAYS * 86_400_000L,
-        ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        ).let { completionGrace.retain(it, byScheduledTime) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val unscheduledTasks: StateFlow<List<TaskWithTags>> = repository
-        .getUnscheduled()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val unscheduledTasks: StateFlow<List<TaskWithTags>> =
+        completionGrace.retain(repository.getUnscheduled(), byTitle)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val browseTasks: StateFlow<List<TaskWithTags>> =
         withVirtualOccurrences(
             repository.getBrowse(),
             todayStart(),
             todayStart() + UPCOMING_HORIZON_DAYS * 86_400_000L,
-        ).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        ).let { completionGrace.retain(it, byScheduledTime) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val allCompletedTasks: StateFlow<List<TaskWithTags>> = repository
-        .getAllCompleted()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val allCompletedTasks: StateFlow<List<TaskWithTags>> =
+        completionGrace.suppressHeld(repository.getAllCompleted())
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val allTags: StateFlow<List<Tag>> = repository
         .getAllTags()
@@ -205,13 +215,15 @@ class TaskViewModel(
 
     val searchResults: StateFlow<List<TaskWithTags>> = _searchQuery
         .flatMapLatest { query -> repository.search(query) }
+        .let { completionGrace.retain(it, byScheduledTime) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun search(query: String) {
         _searchQuery.value = query
     }
 
-    fun tasksForTag(tagId: String): Flow<List<TaskWithTags>> = repository.getTasksForTag(tagId)
+    fun tasksForTag(tagId: String): Flow<List<TaskWithTags>> =
+        completionGrace.retain(repository.getTasksForTag(tagId), byScheduledTime)
 
     /**
      * Save path for **non-recurring-original** edits only: brand-new tasks
@@ -296,32 +308,44 @@ class TaskViewModel(
         }
     }
 
-    fun toggleDone(task: Task) = viewModelScope.launch {
-        val nowDone = task.isDone == 0
-        val target = if (task.isVirtual()) recurrenceManager.materialize(task) else task
-        applyDone(target, nowDone)
-        _doneToggleEvents.tryEmit(TaskDoneToggled(target.id, nowDone))
+    fun toggleDone(entry: TaskWithTags) = viewModelScope.launch {
+        val nowDone = entry.task.isDone == 0
+        val target = if (entry.task.isVirtual()) recurrenceManager.materialize(entry.task) else entry.task
+        val updated = doneCopy(target, nowDone)
+        if (nowDone) {
+            // Hold the row in its list for a beat *before* the DB write lands so the tick and
+            // strike-through register in place, then it animates out — see CompletionGraceTracker.
+            completionGrace.markCompleted(TaskWithTags(updated, entry.tags))
+        } else {
+            completionGrace.release(updated.id)
+        }
+        persistDone(updated)
+        _doneToggleEvents.tryEmit(TaskDoneToggled(updated.id, nowDone))
     }
 
     /**
-     * Restores a task to [restoreDone] after the user taps Undo on the toggle snackbar.
-     * Looks the task up fresh so it works even after the toggle wrote to the DB.
+     * Restores a task to [restoreDone] after the user taps Undo on the toggle snackbar. Clears
+     * any in-flight grace hold first, then looks the task up fresh (the toggle already wrote).
      */
     fun undoToggleDone(taskId: String, restoreDone: Boolean) = viewModelScope.launch {
+        completionGrace.release(taskId)
         val task = repository.getTaskById(taskId) ?: return@launch
-        applyDone(task, restoreDone)
+        persistDone(doneCopy(task, restoreDone))
     }
 
-    private suspend fun applyDone(task: Task, done: Boolean) {
+    private fun doneCopy(task: Task, done: Boolean): Task {
         val now = System.currentTimeMillis()
-        val updated = task.copy(
+        return task.copy(
             isDone = if (done) 1 else 0,
             completedTime = if (done) now else null,
             updatedAt = now,
             _dirty = 1,
         )
-        repository.update(updated)
-        reminderScheduler.sync(updated, settings.value.remindersEnabled)
+    }
+
+    private suspend fun persistDone(task: Task) {
+        repository.update(task)
+        reminderScheduler.sync(task, settings.value.remindersEnabled)
     }
 
     suspend fun createTag(name: String): Tag {

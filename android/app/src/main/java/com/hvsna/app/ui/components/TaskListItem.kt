@@ -1,5 +1,11 @@
 package com.hvsna.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,14 +28,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -54,24 +66,48 @@ fun TaskCheckbox(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(4.dp)
-    val borderColor = if (checked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+    val primary = MaterialTheme.colorScheme.primary
+    val fill by animateColorAsState(
+        targetValue = if (checked) primary else Color.Transparent,
+        animationSpec = tween(150),
+        label = "checkboxFill",
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (checked) primary else MaterialTheme.colorScheme.outline,
+        animationSpec = tween(150),
+        label = "checkboxBorder",
+    )
+    // Springs past 1 on check for a small "pop"; eases straight back down on uncheck.
+    val tick by animateFloatAsState(
+        targetValue = if (checked) 1f else 0f,
+        animationSpec = if (checked) {
+            spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMedium)
+        } else {
+            tween(120)
+        },
+        label = "checkboxTick",
+    )
     Box(
         modifier = modifier
             .size(20.dp)
             .clip(shape)
-            .background(if (checked) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .background(fill)
             .border(width = 1.dp, color = borderColor, shape = shape)
             .clickable { onCheckedChange() },
         contentAlignment = Alignment.Center,
     ) {
-        if (checked) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(13.dp),
-            )
-        }
+        Icon(
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .size(13.dp)
+                .graphicsLayer {
+                    scaleX = tick
+                    scaleY = tick
+                    alpha = tick.coerceIn(0f, 1f)
+                },
+        )
     }
 }
 
@@ -155,7 +191,20 @@ fun TaskListItem(
         dateLabel.isNotEmpty() -> dateLabel
         else -> timeOnlyLabel
     }
-    val textColor = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+    val textColor by animateColorAsState(
+        targetValue = if (done) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+        animationSpec = tween(220),
+        label = "taskTitleColor",
+    )
+    // Strike-through is drawn by hand (per text line) so it sweeps across the title instead of
+    // snapping on; snaps straight to full when a row mounts already-done.
+    val strike by animateFloatAsState(
+        targetValue = if (done) 1f else 0f,
+        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        label = "taskTitleStrike",
+    )
+    val strikeColor = MaterialTheme.colorScheme.onSurfaceVariant
+    var titleLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     Column(modifier = modifier) {
         Column(
@@ -175,8 +224,34 @@ fun TaskListItem(
                     task.title,
                     fontSize = 16.sp,
                     color = textColor,
-                    textDecoration = if (done) TextDecoration.LineThrough else null,
-                    modifier = Modifier.weight(1f),
+                    onTextLayout = { titleLayout = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .drawWithContent {
+                            drawContent()
+                            val layout = titleLayout
+                            if (strike <= 0f || layout == null) return@drawWithContent
+                            val lineWidths = (0 until layout.lineCount).map {
+                                layout.getLineRight(it) - layout.getLineLeft(it)
+                            }
+                            val total = lineWidths.sum()
+                            if (total <= 0f) return@drawWithContent
+                            var budget = total * strike
+                            val stroke = 1.5.dp.toPx()
+                            for (line in 0 until layout.lineCount) {
+                                if (budget <= 0f) break
+                                val seg = minOf(budget, lineWidths[line])
+                                val left = layout.getLineLeft(line)
+                                val y = (layout.getLineTop(line) + layout.getLineBottom(line)) / 2f
+                                drawLine(
+                                    color = strikeColor,
+                                    start = Offset(left, y),
+                                    end = Offset(left + seg, y),
+                                    strokeWidth = stroke,
+                                )
+                                budget -= lineWidths[line]
+                            }
+                        },
                 )
             }
 
