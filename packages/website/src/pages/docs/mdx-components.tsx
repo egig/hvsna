@@ -1,6 +1,10 @@
 import type { ComponentPropsWithoutRef } from "react";
+import { PlatformTabs, Web, Android } from "./platform-tabs";
 
 export const mdxComponents = {
+  PlatformTabs,
+  Web,
+  Android,
   h1: (props: ComponentPropsWithoutRef<"h1">) => <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-10 mb-4" {...props} />,
   h2: (props: ComponentPropsWithoutRef<"h2">) => <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-10 mb-4" {...props} />,
   h3: (props: ComponentPropsWithoutRef<"h3">) => <h3 className="text-xl font-semibold text-gray-900 dark:text-white mt-8 mb-3" {...props} />,

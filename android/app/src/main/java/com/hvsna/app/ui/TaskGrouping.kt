@@ -29,10 +29,11 @@ private fun endOfDay(base: Calendar): Calendar = (base.clone() as Calendar).appl
 }
 
 /**
- * Buckets tasks the same way the web app's upcoming screen does: fixed
- * today/tomorrow/thisWeek/thisMonth groups, then anything further out grouped
- * by Gregorian month (same year) or year (future years), sorted ascending.
- * Empty groups are dropped by the caller.
+ * Buckets tasks the same way the web app's upcoming screen does: the upcoming
+ * list is "tomorrow onward" (today's tasks live on the Today screen), so the
+ * fixed groups are tomorrow/thisWeek/thisMonth, then anything further out
+ * grouped by Gregorian month (same year) or year (future years), sorted
+ * ascending. Empty groups are dropped by the caller.
  */
 fun groupUpcomingTasks(tasks: List<TaskWithTags>, strings: Strings): List<TaskGroup> {
     val monthYearFormat = SimpleDateFormat("MMMM yyyy", strings.locale)
@@ -49,7 +50,6 @@ fun groupUpcomingTasks(tasks: List<TaskWithTags>, strings: Strings): List<TaskGr
         set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
     })
 
-    val today = mutableListOf<TaskWithTags>()
     val tomorrow = mutableListOf<TaskWithTags>()
     val thisWeek = mutableListOf<TaskWithTags>()
     val thisMonth = mutableListOf<TaskWithTags>()
@@ -71,9 +71,10 @@ fun groupUpcomingTasks(tasks: List<TaskWithTags>, strings: Strings): List<TaskGr
 
     tasks.forEach { entry ->
         val t = entry.task.scheduledTime ?: return@forEach
+        // The upcoming list starts at tomorrow — ignore anything today or earlier.
+        if (t < startOfTomorrow.timeInMillis) return@forEach
         when {
-            t in startOfToday.timeInMillis..endOfToday.timeInMillis -> pushToGroup("today", today, entry)
-            t in startOfTomorrow.timeInMillis..endOfTomorrow.timeInMillis -> pushToGroup("tomorrow", tomorrow, entry)
+            t <= endOfTomorrow.timeInMillis -> pushToGroup("tomorrow", tomorrow, entry)
             t > endOfTomorrow.timeInMillis && t <= endOfWeek.timeInMillis -> pushToGroup("thisWeek", thisWeek, entry)
             t > endOfWeek.timeInMillis && t <= endOfMonth.timeInMillis -> pushToGroup("thisMonth", thisMonth, entry)
             else -> {
@@ -99,7 +100,6 @@ fun groupUpcomingTasks(tasks: List<TaskWithTags>, strings: Strings): List<TaskGr
         .map { (key, value) -> TaskGroup(key, value.first, value.second) }
 
     return listOf(
-        TaskGroup("today", strings["group.today"], today),
         TaskGroup("tomorrow", strings["group.tomorrow"], tomorrow),
         TaskGroup("thisWeek", strings["group.thisWeek"], thisWeek),
         TaskGroup("thisMonth", strings["group.thisMonth"], thisMonth),

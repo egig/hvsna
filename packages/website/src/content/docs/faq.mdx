@@ -3,178 +3,97 @@ title: FAQ & Troubleshooting
 description: Common questions and solutions for Hvsna.
 ---
 
-## Frequently Asked Questions
+## General
 
-### General Questions
+**Is Hvsna free?**
 
-**Q: Is Hvsna free?**
+Yes — the free version has unlimited tasks, prayer-anchored scheduling, Hijri
+awareness, and full offline use on Android and Web. The paid **Sync** plan adds
+cross-device sync.
 
-A: Yes, Hvsna has a free version with unlimited tasks   
+**Which platforms?**
 
-**Q: Which platforms is Hvsna available on?**
+Android and Web ([app.hvsna.com](https://app.hvsna.com)).
 
-A: Android and Web (at [app.hvsna.com](https://app.hvsna.com)). An iOS version is coming soon.
+**Do I need an account?**
 
-**Q: Do I need an account to use Hvsna?**
+No. An account (with a verified email and a Sync plan) is only needed to sync
+across devices.
 
-A: No, you can use Hvsna without an account on Android or Web. An account, with an email-verified Sync subscription, is only needed for syncing across devices.
+**Is my data private?**
 
-**Q: Is my data private?**
+Your tasks are stored on your device. With a Sync plan they're also stored on our
+server so you can restore them on another device. We don't sell or share your
+data.
 
-A: Yes. Your task data is stored locally on your device. With an account, it's encrypted in the cloud. We never sell or share your data.
+## Prayer Times
 
-### Prayer Times
+**Why are my times a few minutes off from my masjid?**
 
-**Q: Why are my prayer times different from my local masjid?**
+Different calculation methods, slightly different coordinates, or a masjid using
+local sighting. Set the [calculation method](/help/general-settings) your local
+authority uses.
 
-A: Small variations (1-5 minutes) are normal due to:
-- Different calculation methods
-- Slight differences in coordinates
-- Masjid may use local sighting vs. calculation
+**My prayer times look completely wrong.**
 
+1. Check your location in **Settings → General → Location**
+2. Check your device timezone
+3. Check the calculation method suits your region
 
-**Q: Prayer times seem completely wrong?**
+**Can I set custom prayer times?**
 
-A: Check these in order:
-1. **Location**: Verify correct in Settings
-2. **Time Zone**: Ensure your phone's timezone is correct
+Not directly — Hvsna calculates them from your location, method, and madhab. For
+masjid-specific times, add them as timed tasks.
 
-If still wrong, contact support with your location and expected times.
+## Tasks & Reminders
 
-**Q: Can I set custom prayer times?**
+**Can I have tasks that aren't tied to a prayer?**
 
-A: Not directly. Hvsna calculates times based on your location and chosen method. For masjid-specific times, note them manually in tasks.
+Yes — give a task a clock time, or no time at all (it waits in your Inbox).
 
-### Tasks & Reminders
+**How do recurring tasks work?**
 
-**Q: Can I set tasks without linking to prayer times?**
+Daily / weekly / monthly / yearly, with an optional interval and end condition,
+on the civil calendar. See [Recurring Tasks](/help/recurring-tasks).
 
-A: Yes! When creating a task, simply don't select a prayer association. You can set specific clock times instead.
+**Why am I not getting notifications?**
 
-**Q: How do recurring tasks work?**
+Only tasks with a specific clock time get a reminder. Then check the system
+notification permission, Do Not Disturb, and (Android) battery optimization. On
+the web app the tab must stay open. See [Notifications](/help/notifications).
 
-A: Set a task to repeat daily, weekly, monthly, or custom. See **Recurring Tasks** in docs for details.
+## Sync & Account
 
-**Q: Why am I not getting notifications?**
+**How do I sync between devices?**
 
-A: Check these:
-1. **App permissions**: Hvsna needs notification permission in system settings
-2. **Do Not Disturb**: May be silencing alerts
-3. **Battery optimization**: Some phones restrict background apps
-4. **In-app settings**: Verify notifications enabled in **Settings → Notifications**
+Verify your email, subscribe to Sync, then sign into the same account on each
+device. See [Syncing Across Devices](/help/sync).
 
-See **Notification Settings** guide for detailed troubleshooting.
+**I lost my phone — can I get my data back?**
 
+If you had a Sync plan, sign in on the new device. Without sync, the data was
+only on that phone.
 
-### Sync & Account
+**I forgot my password / I want to delete my account.**
 
-**Q: How do I sync between my phone and tablet?**
-
-A: Sign in to the same account on both devices. Data syncs automatically. See **Syncing Across Devices** guide.
-
-**Q: I lost my phone. Can I recover my data?**
-
-A: If you had an account and sync enabled, simply sign in on your new device. Without an account, data was stored only on the lost phone.
-
-
-**Q: Can I use Hvsna on multiple devices without syncing?**
-
-A: Yes, but they'll have separate data. Install and use independently without signing in.
-
+Email **support@hvsna.com** — these aren't self-serve in the app yet.
 
 ## Troubleshooting
 
-### App Won't Open
+**The app won't open or is misbehaving**
 
-**Problem**: Hvsna crashes or won't start.
+1. Close and reopen it
+2. Update to the latest version
+3. As a last resort, **Settings → Reset Device Data** (erases local data; if you
+   sync, signing back in restores it)
+4. Contact support if it persists
 
-**Solutions**:
-1. Force close and reopen
-2. Restart your phone
-3. Update to latest app version
-4. Reinstall app (data will restore if you have an account)
-5. Contact support if persists
+**Wrong city / wrong prayer times**
 
-### Incorrect Location
-
-**Problem**: App shows wrong city or prayer times are off.
-
-**Solutions**:
-1. **Settings → Location → Detect Automatically**
-2. If wrong, tap location and search for correct city
-3. Verify coordinates if using manual entry
-4. Check that timezone matches your location
-
-### Notifications Not Working
-
-**Problem**: Not getting prayer or task alerts.
-
-**Checklist**:
-- [ ] Notifications enabled in Hvsna (**Settings → Notifications**)
-- [ ] System notification permission granted
-- [ ] Do Not Disturb is off (or Hvsna is whitelisted)
-- [ ] Battery optimization disabled for Hvsna
-- [ ] Phone volume is up
-- [ ] Correct notification sound selected
-
-**iOS-specific**: Check **Settings → Notifications → Hvsna**
-**Android-specific**: Check **Settings → Apps → Hvsna → Notifications**
-
-### Sync Issues
-
-**Problem**: Changes not appearing on other devices.
-
-**Solutions**:
-1. Ensure both devices are online
-2. Pull down to refresh (force sync)
-3. Verify signed into same account
-4. Check **Settings → Sync** for errors
-5. Sign out and back in on problematic device
-6. Contact support if data appears lost
-
-### Prayer Time Calculation Errors
-
-**Problem**: Times are impossible (e.g., Fajr after sunrise).
-
-**Solutions**:
-1. Check location is correct (not default/test location)
-2. Verify calculation method is appropriate for your region
-3. Check for extreme latitudes (near poles have special cases)
-4. Report to support with location and screenshot
-
-### Battery Drain
-
-**Problem**: Hvsna using too much battery.
-
-**Solutions**:
-1. Disable background app refresh (iOS) or background activity (Android)
-2. Reduce notification frequency
-3. Ensure location is set manually (GPS uses more battery)
-4. Check for app updates that may optimize performance
+**Settings → General → Location** → search for the correct place, or
+**Use current location**. Check your timezone matches.
 
 ## Getting Help
 
-### Contact Support
-
-Still having issues? Contact us:
-
-- **Email**: support@hvsna.com
-- **Response time**: Usually within 24 hours
-- **Include**: Your device type, app version, and detailed description
-
-### Report a Bug
-
-Help us improve:
-
-1. **Settings → Help & Feedback → Report Bug**
-2. Describe what happened
-3. Include steps to reproduce
-4. Attach screenshots if helpful
-
-### Feature Requests
-
-Have an idea?
-
-- Email support@hvsna.com with subject "Feature Request"
-- Describe the feature and why it would help
-- We review all suggestions
+Email **support@hvsna.com** with your platform, app version (**Settings →
+About**), and what happened. Feature ideas are welcome at the same address.

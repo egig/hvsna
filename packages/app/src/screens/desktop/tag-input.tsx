@@ -1,22 +1,22 @@
 import { useState, useMemo } from "react";
 import { Popover, PopoverDisclosure, usePopoverStore } from "@ariakit/react";
 import { useTags, normalizeTag } from "@/modules/task/use-tags";
-import { TagPill, useTagColor } from "@/modules/task/tag-pill";
-import { HvCheck, HvSearch } from "@/modules/icons";
+import { useTagColor } from "@/modules/task/tag-pill";
+import { HvCheck, HvSearch, HvTag } from "@/modules/icons";
+import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 
 interface TagInputDesktopProps {
   selectedTags: string[];
   onTagsChange: (tags: string[]) => void;
   disabled?: boolean;
-  placeholder?: string;
 }
 
 export function TagInputDesktop({
   selectedTags,
   onTagsChange,
   disabled = false,
-  placeholder = "Add tags...",
 }: TagInputDesktopProps) {
+  const { t } = useLanguageContext();
   const popover = usePopoverStore({ placement: "bottom-start" });
   const isOpen = popover.useState("open");
 
@@ -69,39 +69,27 @@ export function TagInputDesktop({
     }
   };
 
+  const count = selectedTags.length;
   const triggerButton = (
     <button
       type="button"
       disabled={disabled}
-      className={`h-[38px] min-w-[120px] px-3 flex items-center gap-1.5 text-sm transition-colors border-gray-300 dark:border-gray-600 flex-wrap ${
+      className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors border-gray-300 dark:border-gray-600 ${
+        count > 0
+          ? "text-gray-900 dark:text-white"
+          : "text-gray-500 dark:text-gray-400"
+      } ${
         disabled
           ? "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600"
           : "bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 cursor-pointer"
       }`}
     >
-      {selectedTags.length === 0 ? (
-        <span className="text-gray-400 dark:text-gray-500 text-sm">
-          {placeholder}
-        </span>
-      ) : (
-        <>
-          {selectedTags.slice(0, 2).map((tag) => (
-            <TagPill
-              key={tag}
-              name={tag}
-              color={tagColor(tag)}
-              onRemove={() =>
-                onTagsChange(selectedTags.filter((t) => t !== tag))
-              }
-            />
-          ))}
-          {selectedTags.length > 2 && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              +{selectedTags.length - 2}
-            </span>
-          )}
-        </>
-      )}
+      <HvTag className="w-4 h-4 text-gray-400 flex-shrink-0" />
+      <span>
+        {count === 0
+          ? t("tags")
+          : t(count === 1 ? "tags_count_one" : "tags_count_other", { count })}
+      </span>
     </button>
   );
 

@@ -3,74 +3,91 @@ title: Syncing Across Devices
 description: Keep your tasks and settings synchronized on all your devices.
 ---
 
-## Why Sync?
+## What Sync Does
 
-Syncing your Hvsna data across devices ensures:
+Sync keeps the same tasks, recurring tasks, tags, and app settings on every
+device you sign in on — Android and Web. Your data is also stored on our server,
+so you can recover it on a new device.
 
-- **Consistency**: Same tasks on Android and Web
-- **Backup**: Data is safely stored in the cloud
-- **Recovery**: Restore data if you lose your device
-- **Multi-device workflow**: Plan on Web, execute on Android (or the other way around)
+Sync is a **paid feature** and requires a **verified email address**.
 
-## Setting Up Sync
+## Turning Sync On
 
-Sync is a paid feature, available on both Android and Web.
+1. Create an account and verify your email — sync stays off until it's confirmed.
+   You can resend the verification email from **Settings → Sync**.
+2. Subscribe to the **Sync** plan:
 
-1. Create an account (or sign in) and verify your email — sync stays off until your email is confirmed
-2. Go to **Settings → Subscription** and tap **Upgrade to Sync**
-3. Complete checkout — you're redirected back to the app once it's done
-4. Sync turns on automatically
+   <PlatformTabs>
+   <Web>
 
-### Sign In on Other Devices
+   Go to **Settings → Subscription**, tap **Upgrade to Sync**, and complete
+   checkout (hosted by Lemon Squeezy). You're returned to the app and sync
+   turns on automatically.
 
-1. Open Hvsna on your other device (Android app or [app.hvsna.com](https://app.hvsna.com))
-2. Sign in with the same email and password
-3. Your data syncs automatically
+   </Web>
+   <Android>
 
-## What Gets Synced?
+   Subscribe from the web app at [app.hvsna.com](https://app.hvsna.com) using
+   the same account (**Settings → Subscription → Upgrade to Sync**).
 
-### Synchronized Data
+   </Android>
+   </PlatformTabs>
 
-- ✅ Tasks (all states: active, completed)
-- ✅ Recurring tasks
-- ✅ Tags
-- ✅ App settings (language)
+3. Sign in with the same email and password on your other devices — your data
+   downloads automatically.
 
-## How Sync Works
+## What Gets Synced
 
-### Automatic Sync
+- Tasks (active and completed)
+- Recurring task templates
+- Tags
+- App settings (language, location, prayer calculation method and madhab, Hijri
+  date offsets, notification preferences; timezone on web)
 
-Changes sync automatically when:
+Prayer times themselves aren't synced — each device computes them locally from
+the synced location and settings.
 
-- You create, complete, or edit a task
-- You modify settings
-- You open the app (catches up on missed changes)
+## How It Works
 
-### Manual Sync
+Changes sync automatically as you make them. You can also force a sync and see
+the last sync time and status from the Sync screen.
 
-Force a sync if needed:
+<PlatformTabs>
+<Web>
 
-1. Go to **Settings → Sync**
-2. Tap **Sync Now**
+Also syncs when you open the app and when you reconnect. Force one from
+**Settings → Sync → Sync Now**.
 
-## Sync Troubleshooting
+</Web>
+<Android>
 
-**Sync not working?**
+Also syncs when you sign in, when you reconnect, when you pull to refresh, and
+every 15 minutes in the background. Force one from **Settings → Sync** (pull to
+refresh or **Sync now**).
 
-1. Check internet connection on all devices
-2. Verify your email is confirmed (check for a verification banner in Settings → Sync)
-3. Verify you're signed into the same account on both devices
-4. Try a manual sync (**Settings → Sync → Sync Now**)
-5. Contact support if issues persist
+</Android>
+</PlatformTabs>
 
-**Data looks different on devices?**
+If the same item was changed on two devices, the most recent change wins. There's
+no conflict prompt.
 
-- Wait a moment for sync to complete
-- Trigger a manual sync
-- Check if one device is offline
+## Troubleshooting
 
-**Want to stop syncing?**
+**Sync not working**
 
-1. Go to **Settings → Subscription → Manage Subscription** to cancel
-2. Your local data on each device remains
-3. Cloud copy is retained (can be deleted from account settings)
+1. Check each device is online
+2. Confirm your email is verified (look for the prompt on the Sync screen)
+3. Confirm you're signed into the same account everywhere
+4. Run a manual sync and read the status message
+
+**Data looks different between devices**
+
+- Run a manual sync on both and give it a moment
+- Check neither device is offline
+
+**Stopping sync**
+
+1. Cancel the plan from **Settings → Subscription → Manage Subscription** (web) —
+   this opens your Lemon Squeezy portal
+2. Local data stays on each device; sync stops at the end of the billing period
+3. To remove the server copy, contact **support@hvsna.com**

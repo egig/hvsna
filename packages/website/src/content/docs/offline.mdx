@@ -5,97 +5,63 @@ description: Use Hvsna without an internet connection.
 
 ## Working Offline
 
-Hvsna is designed to work fully offline. Whether you're in airplane mode, traveling, or in an area with poor connectivity, all features remain available.
+Hvsna stores everything on your device, so it keeps working with no connection.
 
 ## What Works Offline
 
-### Fully Functional Offline
+- Create, edit, complete, and delete tasks
+- View all of your task history
+- View prayer times for your saved location — today, and any date, since they're
+  computed on the device
+- Change settings
 
-**Tasks:**
-- ✅ Create new tasks
-- ✅ Edit existing tasks
-- ✅ Mark tasks complete
-- ✅ Delete tasks
-- ✅ View all task history
+## What Needs a Connection
 
-**Prayer Times:**
-- ✅ View today's prayer times
-- ✅ Calculate times for your saved location
+- Detecting or searching for a **new** location (prayer times for a location you
+  haven't used before)
+- Cross-device sync
+- Signing in, signing up, and email verification
+- Subscription checkout and management
 
+## Sync While Offline
 
-## What Requires Internet
+If you use Sync, changes you make offline are saved locally right away and sent
+up once you're back online. See [Syncing Across Devices](/help/sync).
 
-### Online-Only Features
+## Keeping Your Own Backup
 
-These features need a connection:
+<PlatformTabs>
+<Web>
 
-- 🌐 Initial prayer time calculation for new locations
-- 🌐 Cross-device sync
-- 🌐 Account sign-in/sign-up
-- 🌐 App updates
-- 🌐 Contacting support
-- 🌐 Data export to cloud storage
+The web app has no file export. To keep your data safe, use Sync (a cloud copy)
+or a browser that you won't clear site data for.
 
-## Offline Prayer Times
+</Web>
+<Android>
 
-### Pre-calculation
+**Settings → Backup & Restore → Export data** saves everything to a file you can
+store yourself. **Import data** restores it later. This works fully offline.
 
-Prayer times for your location are pre-calculated:
+</Android>
+</PlatformTabs>
 
-- Today's times: Always available offline
-- This month: Calculated and stored
-- Full year: Stored for your set location
+## Erasing Data From a Device
 
-### New Locations Offline
+<PlatformTabs>
+<Web>
 
-If you need prayer times for a new location while offline:
+**Settings → Reset Device Data** erases all Hvsna data in this browser — tasks,
+settings, and location.
 
-- Use the last saved location
-- Or manually enter coordinates (if known)
-- Times update once you're back online
+</Web>
+<Android>
 
-## Sync Queue
+**Settings → Backup & Restore → Import data → Replace** swaps in a backup and
+clears what was there. To wipe the app entirely, clear its storage in Android
+system settings.
 
-### Pending Changes
+</Android>
+</PlatformTabs>
 
-When you make changes offline, they're queued:
-
-1. Create or edit a task while offline
-2. A "pending sync" indicator appears
-3. Changes are saved locally immediately
-4. Once online, automatic sync occurs
-
-
-## Preparing for Offline Use
-
-### Before Going Offline
-
-If you know you'll be offline:
-
-1. **Sync Everything**: Pull down to refresh and ensure latest data
-2. **Check Location**: Verify prayer times show for correct location
-3. **Test**: Put phone in airplane mode briefly to confirm functionality
-
-
-## Back Online
-
-### Reconnecting
-
-When you regain internet:
-
-1. All changes sync automatically
-2. Check **Settings → Sync** to confirm
-3. Green checkmark = all caught up
-4. Review any conflict notifications
-
-
-## Limitations
-
-### Be Aware
-
-When offline, you cannot:
-
-- Calculate prayer times for brand new locations
-- Sync with other devices
-
-Plan accordingly for extended offline periods.
+This doesn't touch your account or, if you use Sync, the server copy — signing
+back in re-downloads your data. It can't be undone.

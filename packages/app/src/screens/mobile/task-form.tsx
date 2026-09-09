@@ -86,12 +86,6 @@ export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
         style={{ resize: "none" }}
       />
 
-      <TagInput
-        selectedTags={formData.tags}
-        onTagsChange={titleField.setPickerTags}
-        disabled={isSubmitting}
-      />
-
       <div className="flex flex-wrap gap-2 px-4 py-2">
         <DatePrayerInput
           selectedDate={formData.scheduleAt.date}
@@ -137,6 +131,11 @@ export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
             }}
           />
         )}
+        <TagInput
+          selectedTags={formData.tags}
+          onTagsChange={titleField.setPickerTags}
+          disabled={isSubmitting}
+        />
       </div>
 
       <div className="flex justify-end p-4">

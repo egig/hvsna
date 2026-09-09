@@ -45,14 +45,14 @@ export default function Features({ currentLang = "en" }: { currentLang?: string 
         {
           icon: Clock,
           title: "Berbasis Waktu Sholat",
-          description: "Tugas diatur sekitar waktu sholat untuk menjaga fokus spiritual",
-          details: ["Pengingat waktu sholat", "Penjadwalan tugas antara sholat", "Pelacakan produktivitas spiritual"],
+          description: "Tugas diatur di sekitar waktu sholat",
+          details: ["Penjadwalan tugas antara sholat", "Terurut otomatis per waktu sholat", "Lihat yang selesai hari ini"],
         },
         {
           icon: Smartphone,
           title: "UI yang memudahkan",
           description: "Antarmuka bersih dan sederhana menampilkan tugas hari ini dan mendatang",
-          details: ["Minimal gangguan", "Tampilan fokus hari ini", "Pratinjau tugas mendatang"],
+          details: ["Minimal gangguan", "Fokus hari ini, mendatang untuk perencanaan", "Dukungan layar ponsel dan besar"],
         },
         {
           icon: Cloud,

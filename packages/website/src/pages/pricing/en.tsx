@@ -56,7 +56,7 @@ export default function PricingPage() {
     {
       question: "Do you sell my data?",
       answer:
-        "Never. We keep the lights on by offering a Sync plan, not by selling your data. Your data stays private and you can export or delete it at any time.",
+        "Never. We keep the lights on by offering a Sync plan, not by selling your data. Your data stays on your device unless you turn on Sync, and you can wipe it from any device at any time.",
     },
     {
       question: "Do you offer a student discount?",

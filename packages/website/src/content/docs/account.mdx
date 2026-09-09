@@ -1,209 +1,97 @@
 ---
 title: Managing Your Account
-description: Account settings, security, and data management.
+description: What a Hvsna account is for, and how to manage it.
 ---
 
-## Account Overview
+## Do I Need an Account?
 
-Your Hvsna account centralizes:
+No. Hvsna works fully without an account on both Android and Web — your tasks,
+settings, and prayer times are stored on your device.
 
-- Login credentials (email/password)
-- Synced data across devices
-- Subscription status (if applicable)
-- Security settings
-- Data export and deletion options
+An account exists for one reason: **syncing your data across devices**, which
+also requires a paid Sync plan and a verified email address. See
+[Syncing Across Devices](/help/sync).
 
-## Account Settings
+## Creating an Account
 
-### Profile Information
+1. Open **Settings → Sign In** (or **Settings → Account**)
+2. Choose **Sign Up**
+3. Enter your email and a password
+4. Check your inbox for a verification link and open it
 
-Update your basic info:
+New accounts are **unverified** until you open that link. A banner in the app
+reminds you, and you can resend the email from **Settings → Sync**.
 
-1. Go to **Settings → Account → Profile**
-2. Edit:
-   - Display name (shown in shared tasks)
-   - Profile picture (optional)
-   - Time zone (auto-detected or manual)
-3. Tap **Save**
+## Signing In on Another Device
 
-### Email Address
+1. Open Hvsna on the other device (Android app or [app.hvsna.com](https://app.hvsna.com))
+2. Open **Settings → Sign In**
+3. Enter the same email and password
 
-Change your login email:
+If you have an active Sync plan, your data downloads automatically.
 
-1. Go to **Settings → Account → Email**
-2. Enter new email address
-3. Verify with current password
-4. Check new email for verification link
-5. Click link to confirm change
+## Your Profile
 
-**Note:** You must verify the new email before it becomes active.
+**Settings → Account** shows your email, account ID, and the date you joined.
+This screen is currently read-only.
 
-### Password
+## Signing Out
 
-Change your password:
+**Settings → Sign Out**. Your local data stays on the device; signing back in
+reconnects it to sync.
 
-1. Go to **Settings → Account → Password**
-2. Enter current password
-3. Enter new password (8+ characters recommended)
-4. Confirm new password
-5. Tap **Update**
+## Subscription
 
-**Password Tips:**
-- Use a mix of letters, numbers, symbols
-- Don't reuse passwords from other sites
-- Consider using a password manager
+The **Sync** plan is managed from the web app.
 
-## Security Settings
+<PlatformTabs>
+<Web>
 
-### Two-Factor Authentication (2FA)
+**Settings → Subscription** shows your current plan (Free or Sync), status, and
+renewal or end date.
 
-Add an extra layer of security:
+- **Upgrade** — tap **Upgrade to Sync**. Checkout is hosted by Lemon Squeezy;
+  you're returned to the app and Sync turns on automatically.
+- **Cancel or update payment** — tap **Manage Subscription** or **Update Payment
+  Method** to open your Lemon Squeezy customer portal. If you cancel, Sync keeps
+  working until the end of the current billing period.
 
-1. Go to **Settings → Account → Security → 2FA**
-2. Tap **Enable**
-3. Scan QR code with authenticator app (Google Authenticator, Authy, etc.)
-4. Enter the 6-digit code from app
-5. Save backup codes securely
+</Web>
+<Android>
 
-**Using 2FA:**
-- Enter email and password normally
-- Then enter code from authenticator app
-- Or use a backup code if phone unavailable
+The Android app doesn't have a subscription screen. Sign in at
+[app.hvsna.com](https://app.hvsna.com) with the same account to subscribe,
+change, or cancel your plan. Once subscribed, sync works on Android automatically.
 
-### Active Sessions
+</Android>
+</PlatformTabs>
 
-View and manage where you're signed in:
+## Password Reset & Account Deletion
 
-1. Go to **Settings → Account → Security → Active Sessions**
-2. See:
-   - Device name and type
-   - Location (approximate)
-   - Last active time
-3. Sign out any suspicious sessions
-4. Sign out all devices if needed
+These aren't available in the app yet. Email **support@hvsna.com** and we'll
+help:
 
-### Sign Out Everywhere
+- **Forgot your password** — we'll send you a reset link
+- **Delete your account** — we'll remove your account and its synced copy
 
-Secure your account by signing out all devices:
+To clear data from a single device without deleting your account:
 
-1. Go to **Settings → Account → Security**
-2. Tap **Sign Out All Devices**
-3. Re-authenticate on devices you still use
+<PlatformTabs>
+<Web>
 
-## Subscription Management
+Use **Settings → Reset Device Data** (see [Offline Use](/help/offline)).
 
-### Free vs. Sync
+</Web>
+<Android>
 
-**Free Plan:**
-- Unlimited tasks
-- Prayer-anchored scheduling
-- Local storage, works offline
-- Android and Web
+Use **Settings → Backup & Restore** to export a copy first if you want one, then
+clear the app's storage in Android system settings.
 
-**Sync Plan:**
-- Cross-device sync (Android ↔ Web)
-- Priority support
-- Support the development
-
-### Managing Subscription
-
-**View Status:**
-1. Go to **Settings → Subscription**
-2. See current plan, status, and renewal date
-
-**Upgrade:**
-1. Go to **Settings → Subscription**
-2. Tap **Upgrade to Sync**
-3. Complete checkout (hosted by Lemon Squeezy)
-4. Sync turns on automatically once checkout finishes
-
-**Cancel or update payment:**
-1. Go to **Settings → Subscription**
-2. Tap **Manage Subscription** (or **Update Payment Method**) — this opens your Lemon Squeezy customer portal
-3. Cancel or change your plan there
-4. Sync remains available until the end of the current billing period
-
-## Data Management
-
-### Export Your Data
-
-Download a copy of everything:
-
-1. Go to **Settings → Data → Export Data**
-2. Choose format:
-   - **JSON**: Complete data (tasks, settings, history)
-   - **CSV**: Tasks only (spreadsheet compatible)
-3. Tap **Export**
-4. Save file to secure location
-
-### Delete Account
-
-Permanently remove your account and all data:
-
-1. Go to **Settings → Account → Delete Account**
-2. Read warnings carefully
-3. Enter password to confirm
-4. Type "DELETE" to finalize
-5. Tap **Permanently Delete**
-
-**What gets deleted:**
-- ✅ All tasks and history
-- ✅ Account information
-- ✅ Synced data from all devices
-- ✅ Subscription records
-
-**What remains:**
-- Local app data on devices (until app uninstalled)
-- Analytics data (anonymized, no PII)
+</Android>
+</PlatformTabs>
 
 ## Account Recovery
 
-### Forgot Password
-
-Reset via email:
-
-1. On sign-in screen, tap **Forgot Password**
-2. Enter your email
-3. Check email for reset link
-4. Click link and create new password
-5. Sign in with new password
-
-### Lost Access to Email
-
-If you can't access your email:
-
-1. Contact support@hvsna.com
-2. Provide proof of account ownership:
-   - Approximate account creation date
-   - Devices used
-   - Recent task content
-3. Support will verify and help recover
-
-## Privacy Settings
-
-### Data Collection
-
-Control what data is collected:
-
-1. Go to **Settings → Privacy**
-2. Toggle:
-   - Analytics (usage statistics)
-   - Crash reports
-   - Marketing emails (if any)
-
-### Third-Party Access
-
-Review connected services:
-
-1. Go to **Settings → Privacy → Connected Apps**
-2. See any integrations
-3. Revoke access if needed
-
-## Account Tips
-
-**Best Practices:**
-- Enable 2FA for security
-- Use a strong, unique password
-- Regularly review active sessions
-- Export data backups periodically
-- Keep recovery email up-to-date
+If you can't access your email, contact **support@hvsna.com** with what you can
+recall about the account (approximate sign-up date, devices used, recent task
+content) so we can verify ownership.

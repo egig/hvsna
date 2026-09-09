@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { HvTrash2, HvInfo, HvMoreVertical } from "@/modules/icons";
+import { HvTrash2, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import DatePrayerInputDesktop from "@/screens/desktop/date-prayer-input";
 import { TitleTagInput } from "@/modules/task/title-tag-input";
 import { useTitleTagField } from "@/modules/task/use-title-tag-field";
 import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
-import TaskPreview from "@/modules/task/task-preview";
 import type { Task } from "@/domain/task";
 import { Modal } from "./modal";
 import TimeInputDesktop from "./time-input";
@@ -28,7 +27,6 @@ export default function TaskFormEditDesktop({
   onDelete,
 }: TaskFormEditProps) {
   const { t } = useLanguageContext();
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const {
     error,
@@ -77,14 +75,6 @@ export default function TaskFormEditDesktop({
         <Menu.Positioner className="z-[9999]">
           <Menu.Popup className="z-[9999] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 pointer-events-auto">
             <Menu.Item
-              onClick={() => setShowDetailsModal(true)}
-              disabled={isSubmitting}
-              className="px-4 py-3 text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer pointer-events-auto"
-            >
-              <HvInfo size={18} />
-              {t("view_details")}
-            </Menu.Item>
-            <Menu.Item
               onClick={handleDelete}
               disabled={isSubmitting}
               closeOnClick={true}
@@ -101,14 +91,6 @@ export default function TaskFormEditDesktop({
 
   const modals = (
     <>
-      <Modal
-        isOpen={showDetailsModal}
-        onClose={() => setShowDetailsModal(false)}
-        title={t("task_details")}
-      >
-        {task && <TaskPreview task={task} />}
-      </Modal>
-
       <Modal
         isOpen={showDeleteOptions}
         onClose={() => setShowDeleteOptions(false)}
@@ -188,14 +170,6 @@ export default function TaskFormEditDesktop({
         style={{ resize: "none" }}
         onChange={() => setIsFormDirty(true)}
       />
-      <TagInputDesktop
-        selectedTags={formData.tags}
-        onTagsChange={(tags) => {
-          titleField.setPickerTags(tags);
-          setIsFormDirty(true);
-        }}
-        disabled={isSubmitting}
-      />
 
       <div className="flex flex-wrap gap-2 px-4">
         <DatePrayerInputDesktop
@@ -249,6 +223,14 @@ export default function TaskFormEditDesktop({
             }}
           />
         )}
+        <TagInputDesktop
+          selectedTags={formData.tags}
+          onTagsChange={(tags) => {
+            titleField.setPickerTags(tags);
+            setIsFormDirty(true);
+          }}
+          disabled={isSubmitting}
+        />
       </div>
     </>
   );

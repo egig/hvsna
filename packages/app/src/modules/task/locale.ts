@@ -241,14 +241,6 @@ export const taskTranslations = {
     en: "Delete Task",
     id: "Hapus Tugas",
   },
-  view_details: {
-    en: "View Details",
-    id: "Lihat Detail",
-  },
-  task_details: {
-    en: "Task Details",
-    id: "Detail Tugas",
-  },
   edit_task: {
     en: "Edit Task",
     id: "Edit Tugas",
@@ -297,11 +289,6 @@ export const taskTranslations = {
     en: "Status",
     id: "Status",
   },
-  // Task details modal
-  basic_information: {
-    en: "Basic Information",
-    id: "Informasi Dasar",
-  },
   description: {
     en: "Description",
     id: "Deskripsi",
@@ -309,18 +296,6 @@ export const taskTranslations = {
   pending: {
     en: "Pending",
     id: "Tertunda",
-  },
-  date_information: {
-    en: "Date Information",
-    id: "Informasi Tanggal",
-  },
-  epoch_millis: {
-    en: "Epoch Milliseconds",
-    id: "Epoch Milidetik",
-  },
-  gregorian_date: {
-    en: "Gregorian Date",
-    id: "Tanggal Gregorian",
   },
   hijri: {
     en: "Hijri",
@@ -334,21 +309,9 @@ export const taskTranslations = {
     en: "Hijri Date",
     id: "Tanggal Hijri",
   },
-  scheduled_hijri_date: {
-    en: "Scheduled Hijri Date",
-    id: "Tanggal Hijri Terjadwal",
-  },
-  scheduled_time: {
-    en: "Scheduled Time",
-    id: "Waktu Terjadwal",
-  },
   prayer_time: {
     en: "Prayer Time",
     id: "Waktu Sholat",
-  },
-  location_information: {
-    en: "Location Information",
-    id: "Informasi Lokasi",
   },
   latitude: {
     en: "Latitude",
@@ -362,22 +325,6 @@ export const taskTranslations = {
     en: "Timezone",
     id: "Zona Waktu",
   },
-  goal_information: {
-    en: "Goal Information",
-    id: "Informasi Target",
-  },
-  goal: {
-    en: "Goal",
-    id: "Target",
-  },
-  target_value: {
-    en: "Target Value",
-    id: "Nilai Target",
-  },
-  timestamps: {
-    en: "Timestamps",
-    id: "Stempel Waktu",
-  },
   created_at: {
     en: "Created At",
     id: "Dibuat Pada",
@@ -389,10 +336,6 @@ export const taskTranslations = {
   completed_at: {
     en: "Completed At",
     id: "Diselesaikan Pada",
-  },
-  repeat_information: {
-    en: "Repeat Information",
-    id: "Informasi Pengulangan",
   },
   delete_recurring_task_prompt: {
     en: "This is a recurring task. What would you like to delete?",
@@ -529,6 +472,14 @@ export const taskTranslations = {
   tags: {
     en: "Tags",
     id: "Tag",
+  },
+  tags_count_one: {
+    en: "{count} tag",
+    id: "{count} tag",
+  },
+  tags_count_other: {
+    en: "{count} tags",
+    id: "{count} tag",
   },
   manage_tags: {
     en: "Manage Tags",

@@ -7,20 +7,19 @@ export type LaterGroup = { key: string; label: string; tasks: Task[] };
 
 export function useUpcoming(horizonDays = 30) {
   const now = dayjs();
-  const startOfToday = now.startOf("day").valueOf();
-  const endOfToday = now.endOf("day").valueOf();
+  // The upcoming list is "tomorrow onward" — today's tasks live on their own
+  // screen, so the query window and every group here start at tomorrow.
   const startOfTomorrow = now.add(1, "day").startOf("day").valueOf();
   const endOfTomorrow = now.add(1, "day").endOf("day").valueOf();
   const endOfWeek = now.endOf("week").valueOf();
   const endOfMonth = now.endOf("month").valueOf();
-  const endEpoch = startOfToday + horizonDays * 24 * 60 * 60 * 1000;
+  const endEpoch = startOfTomorrow + horizonDays * 24 * 60 * 60 * 1000;
 
-  const pendingTasksQuery = usePendingTasksInRange(startOfToday, endEpoch);
-  const virtualTaskQuery = useVirtualTasks(startOfToday, endEpoch);
+  const pendingTasksQuery = usePendingTasksInRange(startOfTomorrow, endEpoch);
+  const virtualTaskQuery = useVirtualTasks(startOfTomorrow, endEpoch);
 
   const groupTasksByTimePeriod = (tasks: Task[]) => {
     const fixed = {
-      today: { tasks: [] as Task[], label: "" },
       tomorrow: { tasks: [] as Task[], label: "" },
       thisWeek: { tasks: [] as Task[], label: "" },
       thisMonth: { tasks: [] as Task[], label: "" },
@@ -56,11 +55,6 @@ export function useUpcoming(horizonDays = 30) {
       }
 
       const t = task.atEpochMillis;
-
-      if (t >= startOfToday && t <= endOfToday) {
-        pushToGroup("today", fixed.today.tasks, task);
-        return;
-      }
 
       if (t >= startOfTomorrow && t <= endOfTomorrow) {
         pushToGroup("tomorrow", fixed.tomorrow.tasks, task);

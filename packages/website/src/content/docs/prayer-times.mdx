@@ -3,21 +3,46 @@ title: Prayer Times
 description: Understanding prayer times and how they're calculated in Hvsna.
 ---
 
-## How Location Affects Prayer Times
+## How Times Are Calculated
 
-Prayer times are determined by the position of the sun relative to your location on Earth. Hvsna calculates precise times based on:
+Hvsna computes prayer times **on your device** from:
 
-- **Latitude & Longitude**: Your exact position on the globe
+- Your **location** (latitude and longitude)
+- The **calculation method** and **madhab** in [Settings](/help/general-settings)
 
+Times are never fetched from a server, so they work offline.
 
 ## The Five Daily Prayers
 
-Hvsna displays the times for each of the five obligatory prayers:
+| Prayer | Time |
+|--------|------|
+| **Fajr** | Dawn — ends at sunrise |
+| **Dhuhr** | Just after the sun passes its zenith |
+| **Asr** | Afternoon — depends on your madhab |
+| **Maghrib** | Sunset |
+| **Isha** | Nightfall |
 
-| Prayer | Time | Description |
-|--------|------|-------------|
-| **Fajr** | Dawn | Begins at true dawn (twilight), ends at sunrise |
-| **Dhuhr** | Noon | Begins when sun passes zenith, ends when shadow equals object height |
-| **Asr** | Afternoon | Begins when shadow equals object height + noon shadow |
-| **Maghrib** | Sunset | Begins at sunset, ends at twilight disappearance |
-| **Isha** | Night | Begins at twilight disappearance, ends at true dawn |
+Sunrise is also shown, as a marker between Fajr and Dhuhr.
+
+## Calculation Method
+
+The method sets the sun-below-horizon angles used for Fajr and Isha. Different
+regions and organizations use different conventions, which is the main reason two
+apps can disagree by a few minutes. Pick the one your local authority uses.
+
+**KEMENAG** is the Indonesian Ministry of Religious Affairs method. Hvsna builds
+it from 20° / 18° angles plus the Kemenag *ihtiyati* safety margin (+2 minutes on
+each prayer, −2 minutes on sunrise) so it matches the printed Bimas Islam
+schedules.
+
+## Madhab
+
+The madhab (Shafi or Hanafi) only affects **Asr**: Hanafi begins Asr later, when
+an object's shadow is twice its length plus the noon shadow.
+
+## Why Don't These Match My Masjid Exactly?
+
+Small differences (1–5 minutes) are normal — different calculation methods,
+slightly different coordinates, or a masjid that goes by local sighting rather
+than calculation. If times are wildly off, check your location and your device
+timezone.

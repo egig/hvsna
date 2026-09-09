@@ -30,7 +30,6 @@ export const HORIZON_INCREMENT = 30;
 export const HORIZON_MAX = 365;
 
 function dropIdForGroup(key: string): string {
-  if (key === "today") return dayjs().format("YYYY-MM-DD");
   if (key === "tomorrow") return dayjs().add(1, "day").format("YYYY-MM-DD");
   if (key === "thisWeek") return dayjs().endOf("week").format("YYYY-MM-DD");
   if (key === "thisMonth") return dayjs().endOf("month").format("YYYY-MM-DD");
@@ -120,7 +119,6 @@ export function ScheduledContent({
       ) : (
         <div className="space-y-6">
           {[
-            { key: "today", label: t("today") },
             { key: "tomorrow", label: t("tomorrow") },
             { key: "thisWeek", label: t("this_week") },
             { key: "thisMonth", label: t("this_month") },
@@ -328,7 +326,6 @@ export function useUpcomingData() {
     useUnscheduled();
 
   const taskGroupsWithLabels = {
-    today: { ...taskGroups.today, label: t("today") },
     tomorrow: { ...taskGroups.tomorrow, label: t("tomorrow") },
     thisWeek: { ...taskGroups.thisWeek, label: t("this_week") },
     thisMonth: { ...taskGroups.thisMonth, label: t("this_month") },

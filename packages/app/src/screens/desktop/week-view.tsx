@@ -25,6 +25,7 @@ interface WeekViewColumnProps {
   day: Date;
   tasks: Task[];
   isToday: boolean;
+  isPast?: boolean;
   droppable?: boolean;
 }
 
@@ -67,6 +68,7 @@ function WeekViewColumn({
   day,
   tasks,
   isToday,
+  isPast,
   droppable,
 }: WeekViewColumnProps) {
   const { toHijriDate, formatDate } = useHijriDate();
@@ -95,6 +97,9 @@ function WeekViewColumn({
       data-date={dateStr}
       className={[
         "flex flex-col min-w-[200px] flex-1 transition-colors border-r border-gray-100 dark:border-gray-800",
+        isPast && !(isOver && droppable)
+          ? "bg-gray-50/60 dark:bg-gray-900/40"
+          : "",
         isOver && droppable
           ? "bg-blue-50 dark:bg-blue-950/20 ring-1 ring-inset ring-blue-200 dark:ring-blue-800 rounded"
           : "",
@@ -106,6 +111,8 @@ function WeekViewColumn({
           "px-3 py-2.5 border-b-2 mb-2",
           isToday
             ? "border-[var(--hvsna-primary-color)]"
+            : isPast
+            ? "border-gray-100 dark:border-gray-800"
             : "border-gray-200 dark:border-gray-700",
         ].join(" ")}
       >
@@ -114,18 +121,32 @@ function WeekViewColumn({
             "text-sm font-bold leading-tight",
             isToday
               ? "text-[var(--hvsna-primary-color)] dark:text-primary-300"
+              : isPast
+              ? "text-gray-400 dark:text-gray-600"
               : "text-gray-800 dark:text-gray-100",
           ].join(" ")}
         >
           {gregorianMainLabel}
         </div>
-        <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+        <div
+          className={[
+            "text-xs mt-0.5",
+            isPast
+              ? "text-gray-300 dark:text-gray-700"
+              : "text-gray-400 dark:text-gray-500",
+          ].join(" ")}
+        >
           {hijriSubLabel}
         </div>
       </div>
 
       {/* Tasks */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4">
+      <div
+        className={[
+          "flex-1 overflow-y-auto px-2 pb-4",
+          isPast ? "opacity-55" : "",
+        ].join(" ")}
+      >
         {sortedTasks.length === 0 ? (
           <div className="text-xs text-gray-300 dark:text-gray-600 text-center py-6">
             —
@@ -273,6 +294,7 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
                 day={day}
                 tasks={tasksForDay(day)}
                 isToday={dateStr === todayStr}
+                isPast={dateStr < todayStr}
                 droppable={droppable}
               />
             );

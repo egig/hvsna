@@ -85,12 +85,6 @@ export default function TaskFormDesktop({ onSuccess, onError }: TaskFormProps) {
         style={{ resize: "none" }}
       />
 
-      <TagInputDesktop
-        selectedTags={formData.tags}
-        onTagsChange={titleField.setPickerTags}
-        disabled={isSubmitting}
-      />
-
       <div className="flex flex-wrap gap-2 px-4 py-2">
         <DatePrayerInputDesktop
           selectedDate={formData.scheduleAt.date}
@@ -136,6 +130,11 @@ export default function TaskFormDesktop({ onSuccess, onError }: TaskFormProps) {
             }}
           />
         )}
+        <TagInputDesktop
+          selectedTags={formData.tags}
+          onTagsChange={titleField.setPickerTags}
+          disabled={isSubmitting}
+        />
       </div>
 
       <div className="flex justify-end p-4">

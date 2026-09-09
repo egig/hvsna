@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useTags, normalizeTag } from "../../modules/task/use-tags";
-import { TagPill, useTagColor } from "../../modules/task/tag-pill";
-import { HvCheck, HvSearch } from "../../modules/icons";
+import { useTagColor } from "../../modules/task/tag-pill";
+import { HvCheck, HvSearch, HvTag } from "../../modules/icons";
 import { Modal, ModalNavbar } from "../../modules/navigation";
 import { NavActionButton } from "../../modules/components/nav-action-button";
+import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 
 interface TagPickerModalProps {
   isOpen: boolean;
@@ -186,14 +187,15 @@ export function TagInput({
   selectedTags,
   onTagsChange,
   disabled = false,
-  placeholder = "Add tags...",
 }: TagInputProps) {
+  const { t } = useLanguageContext();
   const [isOpen, setIsOpen] = useState(false);
-  const tagColor = useTagColor();
 
   const handleConfirm = (tags: string[]) => {
     onTagsChange(tags);
   };
+
+  const count = selectedTags.length;
 
   return (
     <>
@@ -201,22 +203,22 @@ export function TagInput({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(true)}
-        className="flex flex-wrap gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 min-h-[42px] w-full text-left items-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className={`h-[38px] px-3 border rounded-md flex items-center gap-2 text-sm transition-colors border-gray-300 dark:border-gray-600 ${
+          count > 0
+            ? "text-gray-900 dark:text-white"
+            : "text-gray-500 dark:text-gray-400"
+        } ${
+          disabled
+            ? "opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600"
+            : "bg-white dark:bg-gray-700 cursor-pointer"
+        }`}
       >
-        {selectedTags.length === 0 ? (
-          <span className="text-sm text-gray-400">{placeholder}</span>
-        ) : (
-          selectedTags.map((tag) => (
-            <TagPill
-              key={tag}
-              name={tag}
-              color={tagColor(tag)}
-              onRemove={() =>
-                onTagsChange(selectedTags.filter((t) => t !== tag))
-              }
-            />
-          ))
-        )}
+        <HvTag className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        <span>
+          {count === 0
+            ? t("tags")
+            : t(count === 1 ? "tags_count_one" : "tags_count_other", { count })}
+        </span>
       </button>
 
       <TagPickerModal
@@ -233,5 +235,4 @@ interface TagInputProps {
   selectedTags: string[];
   onTagsChange: (tags: string[]) => void;
   disabled?: boolean;
-  placeholder?: string;
 }

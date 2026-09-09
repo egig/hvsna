@@ -57,7 +57,7 @@ export default function PricingPageID() {
     {
       question: "Apakah data saya dijual?",
       answer:
-        "Tidak pernah. Kami membiayai layanan ini melalui paket Sync, bukan dengan menjual data Anda. Data Anda tetap privat dan Anda bisa mengekspor atau menghapusnya kapan saja.",
+        "Tidak pernah. Kami membiayai layanan ini melalui paket Sync, bukan dengan menjual data Anda. Data Anda tersimpan di perangkat kecuali Anda mengaktifkan Sync, dan bisa Anda hapus dari perangkat mana pun kapan saja.",
     },
     {
       question: "Apakah ada diskon pelajar?",

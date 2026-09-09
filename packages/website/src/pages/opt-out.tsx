@@ -21,25 +21,17 @@ export default function OptOutPage() {
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">How to Delete Your Account</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            Follow these steps to permanently delete your Hvsna account from within the app:
+            To permanently delete your Hvsna account and its synced data, email us at{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}?subject=Account%20deletion%20request`} className="text-primary-600 dark:text-primary-400 underline hover:no-underline">
+              {SUPPORT_EMAIL}
+            </a>{" "}
+            from the address on your account, with the subject "Account deletion request". We process
+            deletion requests within 30 days and email you when it's done.
           </p>
-          <ol className="list-decimal list-inside text-lg text-gray-600 dark:text-gray-300 mb-8 space-y-3 pl-4">
-            <li>
-              Open the <strong className="text-gray-900 dark:text-white">Hvsna</strong> app on your device.
-            </li>
-            <li>
-              Tap your profile icon or go to <strong className="text-gray-900 dark:text-white">Settings</strong>.
-            </li>
-            <li>
-              Scroll down and tap <strong className="text-gray-900 dark:text-white">Account</strong>.
-            </li>
-            <li>
-              Tap <strong className="text-gray-900 dark:text-white">Delete Account</strong>.
-            </li>
-            <li>
-              Read the confirmation message and tap <strong className="text-gray-900 dark:text-white">Confirm Delete</strong> to proceed.
-            </li>
-          </ol>
+          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+            To remove Hvsna's data from a single device without deleting your account, open{" "}
+            <strong className="text-gray-900 dark:text-white">Settings → Reset Device Data</strong> in the app.
+          </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">What Gets Deleted</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-2 leading-relaxed">
@@ -60,9 +52,9 @@ export default function OptOutPage() {
               recover your account or data afterwards.
             </li>
             <li>
-              If you have an active subscription, deleting your account will not automatically cancel your
-              subscription. Please cancel your subscription through the App Store or Google Play before deleting
-              your account.
+              If you have an active Sync subscription, cancel it first from{" "}
+              <strong className="text-gray-900 dark:text-white">Settings → Subscription → Manage Subscription</strong>{" "}
+              (the Lemon Squeezy customer portal). Deleting your account does not automatically cancel billing.
             </li>
             <li>
               Data may be retained for a limited period as required by law or for legitimate business purposes as
