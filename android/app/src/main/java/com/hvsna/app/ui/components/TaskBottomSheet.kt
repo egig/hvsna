@@ -2,6 +2,7 @@ package com.hvsna.app.ui.components
 
 import android.app.TimePickerDialog
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -13,11 +14,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,16 +46,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
@@ -77,6 +91,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.ui.TitleTagFieldState
 import com.hvsna.app.ui.theme.accessibleColor
 
 @Composable
@@ -113,6 +128,137 @@ private fun UnderlineTextField(
             )
         },
     )
+}
+
+/**
+ * Task title field that doubles as a fast tag-entry path. Typing `#name` opens an autosuggest
+ * popup; picking a suggestion commits a colored inline token (see [TitleTagFieldState]). All the
+ * text/token/tag reconciliation lives in the pure [TitleTagFieldState]; this composable is just
+ * the `BasicTextField` + popup shell.
+ */
+@Composable
+private fun TitleTagInput(
+    state: TitleTagFieldState,
+    onStateChange: (TitleTagFieldState) -> Unit,
+    allTags: List<Tag>,
+    onCreateTag: suspend (String) -> Tag,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
+) {
+    val scope = rememberCoroutineScope()
+    val strings = LocalStrings.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val textColor = MaterialTheme.colorScheme.onSurface
+    val latestState by rememberUpdatedState(state)
+    var fieldSize by remember { mutableStateOf(IntSize.Zero) }
+    var focused by remember { mutableStateOf(false) }
+
+    val tokenColors = allTags.associate { it.id to it.accessibleColor() }
+    val transformation = VisualTransformation { annotated ->
+        val builder = AnnotatedString.Builder(annotated.text)
+        state.tokens.forEach { tok ->
+            val color = tokenColors[tok.tagId]
+            if (color != null && tok.end <= annotated.text.length) {
+                builder.addStyle(SpanStyle(color = color, fontWeight = FontWeight.Medium), tok.start, tok.end)
+            }
+        }
+        TransformedText(builder.toAnnotatedString(), OffsetMapping.Identity)
+    }
+
+    val value = TextFieldValue(
+        text = state.text,
+        selection = androidx.compose.ui.text.TextRange(state.selectionStart, state.selectionEnd),
+    )
+
+    Box(modifier = modifier) {
+        BasicTextField(
+            value = value,
+            onValueChange = { v ->
+                onStateChange(latestState.onTextChanged(v.text, v.selection.start, v.selection.end))
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onSizeChanged { fieldSize = it }
+                .onFocusChanged { focused = it.isFocused }
+                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
+            textStyle = LocalTextStyle.current.copy(color = textColor),
+            singleLine = false,
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            interactionSource = interactionSource,
+            visualTransformation = transformation,
+            decorationBox = { innerTextField ->
+                OutlinedTextFieldDefaults.DecorationBox(
+                    value = state.text,
+                    innerTextField = innerTextField,
+                    enabled = true,
+                    singleLine = false,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = interactionSource,
+                    placeholder = { Text(placeholder) },
+                    contentPadding = PaddingValues(0.dp),
+                    container = {},
+                )
+            },
+        )
+
+        val active = state.activeQuery()
+        val query = active?.query?.trim().orEmpty()
+        val committedIds = state.effectiveTagIds.toSet()
+        val matching = allTags
+            .filter { it.id !in committedIds && it.name.contains(query, ignoreCase = true) }
+            .take(3)
+        val hasExactMatch = allTags.any { it.name.equals(query, ignoreCase = true) }
+
+        if (focused && active != null && query.isNotEmpty() && (matching.isNotEmpty() || !hasExactMatch)) {
+            val density = LocalDensity.current
+            Popup(
+                alignment = Alignment.TopStart,
+                offset = IntOffset(0, fieldSize.height),
+                onDismissRequest = { },
+                properties = PopupProperties(focusable = false),
+            ) {
+                Surface(
+                    modifier = Modifier.width(with(density) { fieldSize.width.toDp() }),
+                    shape = MaterialTheme.shapes.extraSmall,
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shadowElevation = 3.dp,
+                ) {
+                    Column {
+                        matching.forEach { tag ->
+                            ListItem(
+                                headlineContent = { Text("#${tag.name}") },
+                                modifier = Modifier.clickable {
+                                    onStateChange(latestState.commitSuggestion(tag.id, tag.name))
+                                },
+                            )
+                        }
+                        if (!hasExactMatch) {
+                            ListItem(
+                                headlineContent = { Text(strings.format("task.createTag", query)) },
+                                modifier = Modifier.clickable {
+                                    scope.launch {
+                                        val tag = onCreateTag(query)
+                                        val cur = latestState
+                                        val stillActive = cur.activeQuery()
+                                        onStateChange(
+                                            if (stillActive != null &&
+                                                stillActive.query.trim().equals(query, ignoreCase = true)
+                                            ) {
+                                                cur.commitSuggestion(tag.id, tag.name)
+                                            } else {
+                                                cur.addPickerTag(tag.id)
+                                            }
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 private class PrayerButtonSpec(
@@ -172,7 +318,9 @@ fun TaskBottomSheet(
     val dateFormat = remember(strings.locale) { SimpleDateFormat("MMM d, yyyy", strings.locale) }
     val timeFormat = remember(strings.locale) { SimpleDateFormat("h:mm a", strings.locale) }
 
-    var title by remember(task) { mutableStateOf(task?.title ?: "") }
+    var titleTagState by remember(task) {
+        mutableStateOf(TitleTagFieldState.initial(task?.title ?: "", initialTagIds.toList()))
+    }
     var description by remember(task) { mutableStateOf(task?.description ?: "") }
     var scheduledTime by remember(task) {
         mutableStateOf<Long?>(if (task != null) task.scheduledTime else defaultScheduledTime)
@@ -191,12 +339,10 @@ fun TaskBottomSheet(
     }
     var reminderEnabled by remember(task) { mutableStateOf(task?.reminderEnabled ?: false) }
     var reminderOffsetMinutes by remember(task) { mutableStateOf(task?.reminderOffsetMinutes ?: 0) }
-    var selectedTagIds by remember(task) { mutableStateOf(initialTagIds) }
-    var tagQuery by remember(task) { mutableStateOf("") }
-    var tagMenuExpanded by remember(task) { mutableStateOf(false) }
-    var tagRowSize by remember(task) { mutableStateOf(IntSize.Zero) }
+    var tagPickerQuery by remember(task) { mutableStateOf("") }
     var showPrayerPicker by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showTagPicker by remember { mutableStateOf(false) }
     val titleFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
@@ -412,16 +558,113 @@ fun TaskBottomSheet(
 
                 // bottom padding
                 Text("", modifier = Modifier.padding(bottom = 4.dp))
-            } else {
+            } else if (showTagPicker) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    IconButton(onClick = { showTagPicker = false }) {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
+                    }
+                    Text(strings["task.selectTags"], style = MaterialTheme.typography.titleLarge)
+                }
 
                 UnderlineTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    placeholder = strings["task.titlePlaceholder"],
+                    value = tagPickerQuery,
+                    onValueChange = { tagPickerQuery = it },
+                    placeholder = strings["task.addTags"],
                     singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                val pickerQuery = tagPickerQuery.trim()
+                val selectedIds = titleTagState.effectiveTagIds.toSet()
+                val pickerHasExact = allTags.any { it.name.equals(pickerQuery, ignoreCase = true) }
+                val sortedTags = allTags
+                    .filter { it.name.contains(pickerQuery, ignoreCase = true) }
+                    .sortedWith(
+                        compareByDescending<Tag> { it.id in selectedIds }
+                            .thenBy { it.name.lowercase(strings.locale) },
+                    )
+
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(titleFocusRequester),
+                        .heightIn(max = 360.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    sortedTags.forEach { tag ->
+                        val selected = tag.id in selectedIds
+                        val tagColor = tag.accessibleColor()
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(tagColor.copy(alpha = if (selected) 0.22f else 0.10f))
+                                .clickable {
+                                    titleTagState = if (selected) {
+                                        titleTagState.removeTag(tag.id)
+                                    } else {
+                                        titleTagState.addPickerTag(tag.id)
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                        ) {
+                            Text(
+                                "#${tag.name}",
+                                color = tagColor,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f),
+                            )
+                            if (selected) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
+                                    contentDescription = null,
+                                    tint = tagColor,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                            }
+                        }
+                    }
+                    if (pickerQuery.isNotEmpty() && !pickerHasExact) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                                .clickable {
+                                    coroutineScope.launch {
+                                        val tag = onCreateTag(pickerQuery)
+                                        titleTagState = titleTagState.addPickerTag(tag.id)
+                                    }
+                                    tagPickerQuery = ""
+                                }
+                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                        ) {
+                            Text(
+                                strings.format("task.createTag", pickerQuery),
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                }
+
+                // bottom padding
+                Text("", modifier = Modifier.padding(bottom = 4.dp))
+            } else {
+
+                TitleTagInput(
+                    state = titleTagState,
+                    onStateChange = { titleTagState = it },
+                    allTags = allTags,
+                    onCreateTag = onCreateTag,
+                    placeholder = strings["task.titlePlaceholder"],
+                    modifier = Modifier.fillMaxWidth(),
+                    focusRequester = titleFocusRequester,
                 )
 
                 UnderlineTextField(
@@ -432,118 +675,20 @@ fun TaskBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                 )
 
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .onSizeChanged { tagRowSize = it },
-                    ) {
-                        allTags.filter { it.id in selectedTagIds }.forEach { tag ->
-                            TagPill(
-                                tag = tag,
-                                modifier = Modifier.align(Alignment.CenterVertically),
-                                trailingContent = {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                        contentDescription = strings.format("a11y.removeTag", tag.name),
-                                        tint = tag.accessibleColor(),
-                                        modifier = Modifier
-                                            .size(12.dp)
-                                            .clickable { selectedTagIds = selectedTagIds - tag.id },
-                                    )
-                                },
-                            )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    if (scheduledTime == null) {
+                        OutlinedButton(onClick = { showDatePicker = true }) {
+                            Text(strings["task.noDate"])
                         }
-
-                        UnderlineTextField(
-                            value = tagQuery,
-                            onValueChange = {
-                                tagQuery = it
-                                tagMenuExpanded = it.isNotBlank()
-                            },
-                            placeholder = strings["task.addTags"],
-                            singleLine = true,
-                            modifier = Modifier
-                                .weight(1f)
-                                .align(Alignment.CenterVertically),
-                        )
-                    }
-
-                    val query = tagQuery.trim()
-                    val matchingTags = allTags
-                        .filter { it.id !in selectedTagIds }
-                        .filter { it.name.contains(query, ignoreCase = true) }
-                        .take(3)
-                    val hasExactMatch = allTags.any { it.name.equals(query, ignoreCase = true) }
-
-                    if (tagMenuExpanded && query.isNotEmpty() && (matchingTags.isNotEmpty() || !hasExactMatch)) {
-                        val density = LocalDensity.current
-                        Popup(
-                            alignment = Alignment.TopStart,
-                            offset = IntOffset(0, tagRowSize.height),
-                            onDismissRequest = { tagMenuExpanded = false },
-                            properties = PopupProperties(focusable = false),
-                        ) {
-                            Surface(
-                                modifier = Modifier.width(with(density) { tagRowSize.width.toDp() }),
-                                shape = MaterialTheme.shapes.extraSmall,
-                                color = MaterialTheme.colorScheme.surfaceContainer,
-                                shadowElevation = 3.dp,
-                            ) {
-                                Column {
-                                    matchingTags.forEach { tag ->
-                                        ListItem(
-                                            headlineContent = { Text(tag.name) },
-                                            modifier = Modifier.clickable {
-                                                selectedTagIds = selectedTagIds + tag.id
-                                                tagQuery = ""
-                                                tagMenuExpanded = false
-                                            },
-                                        )
-                                    }
-                                    if (!hasExactMatch) {
-                                        ListItem(
-                                            headlineContent = { Text(strings.format("task.createTag", query)) },
-                                            modifier = Modifier.clickable {
-                                                coroutineScope.launch {
-                                                    val tag = onCreateTag(query)
-                                                    selectedTagIds = selectedTagIds + tag.id
-                                                }
-                                                tagQuery = ""
-                                                tagMenuExpanded = false
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (scheduledTime == null) {
-                    OutlinedButton(
-                        onClick = { showDatePicker = true },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(strings["task.noDate"])
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        OutlinedButton(
-                            onClick = { showDatePicker = true },
-                            modifier = Modifier.weight(1f),
-                        ) {
+                    } else {
+                        OutlinedButton(onClick = { showDatePicker = true }) {
                             Text(dateFormat.format(scheduledTime))
                         }
-                        OutlinedButton(
-                            onClick = { showPrayerPicker = true },
-                            modifier = Modifier.weight(1f),
-                        ) {
+                        OutlinedButton(onClick = { showPrayerPicker = true }) {
                             Text(
                                 selectedPrayerName?.let { strings["prayer.$it"] }
                                     ?: if (isAllDay) strings["task.allDay"]
@@ -551,6 +696,19 @@ fun TaskBottomSheet(
                             )
                         }
                     }
+                    OutlinedButton(onClick = { showTagPicker = true }) {
+                        val tagCount = titleTagState.effectiveTagIds.size
+                        Text(
+                            if (tagCount == 0) strings["task.tags"]
+                            else strings.format(
+                                if (tagCount == 1) "task.tagCount.one" else "task.tagCount.other",
+                                tagCount,
+                            )
+                        )
+                    }
+                }
+
+                if (scheduledTime != null) {
                     TextButton(
                         onClick = { scheduledTime = null; selectedPrayerName = null; isAllDay = false },
                         modifier = Modifier.fillMaxWidth(),
@@ -652,7 +810,7 @@ fun TaskBottomSheet(
                         onSave(
                             Task(
                                 id = task?.id ?: java.util.UUID.randomUUID().toString(),
-                                title = title.trim(),
+                                title = titleTagState.strippedTitle,
                                 description = description.trim(),
                                 scheduledTime = scheduledTime,
                                 isDone = task?.isDone ?: 0,
@@ -665,7 +823,7 @@ fun TaskBottomSheet(
                                 reminderEnabled = reminderEnabled && !isAllDay && selectedPrayerName == null,
                                 reminderOffsetMinutes = reminderOffsetMinutes,
                             ),
-                            selectedTagIds.toList(),
+                            titleTagState.effectiveTagIds,
                             if (scheduledTime != null && repeatEnabled) {
                                 RecurrenceInput(enabled = true, recurringType = repeatType, recurringInterval = repeatIntervalCount, recurringEnd = RecurringEnd.NEVER)
                             } else {
@@ -674,7 +832,7 @@ fun TaskBottomSheet(
                         )
                         onDismiss()
                     },
-                    enabled = title.isNotBlank(),
+                    enabled = titleTagState.hasTitle,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = if (task != null) 0.dp else 16.dp),
