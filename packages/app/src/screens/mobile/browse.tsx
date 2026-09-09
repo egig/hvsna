@@ -4,7 +4,7 @@ import {
   HvSquareCheck,
   HvReplayCircle,
 } from "@/modules/icons";
-import { Navbar } from "../../modules/navigation/navbar";
+import { NavbarMobile as Navbar } from "../../modules/navigation/navbar-mobile";
 import { Button } from "../../modules/navigation";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 import { MenuItem } from "../../modules/components/menu-item";

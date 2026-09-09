@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LargeNavbar } from "@/modules/navigation/navbar";
+import { LargeNavbarMobile as LargeNavbar } from "@/modules/navigation/navbar-mobile";
 import {
   useUpcomingData,
   ScheduledContent,
