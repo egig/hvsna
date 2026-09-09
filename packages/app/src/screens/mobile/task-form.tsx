@@ -1,6 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { HvArrowUp } from "@/modules/icons";
 import { DatePrayerInput } from "@/modules/task/date-prayer-input";
+import { TitleTagInput } from "@/modules/task/title-tag-input";
+import { useTitleTagField } from "@/modules/task/use-title-tag-field";
 import { useTaskForm } from "@/modules/task/task-form-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { usePageContext } from "@/modules/task/use-page-context";
@@ -29,13 +31,11 @@ export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
   } = useTaskForm(onSuccess, onError);
   const { page, params } = usePageContext();
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    // Focus the name input when the form opens
-    if (nameInputRef.current) {
-      nameInputRef.current.focus();
-    }
-  }, []);
+  const titleField = useTitleTagField({
+    seedText: "",
+    seedTags: formData.tags,
+    onEffectiveTagsChange: (tags) => updateFormData({ tags }),
+  });
 
   // Date prefill
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
   // Tag prefill
   useEffect(() => {
     if (page === "tag" && params.tagName) {
-      updateFormData({ tags: [params.tagName] });
+      titleField.setPickerTags([params.tagName]);
     }
   }, []);
 
@@ -69,18 +69,13 @@ export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
         await handleSubmit(formData);
       }}
     >
-      <input
-        ref={nameInputRef}
-        name="taskName"
-        defaultValue={""}
+      <TitleTagInput
+        state={titleField.state}
+        onStateChange={titleField.onStateChange}
         placeholder={t("task_name")}
+        ariaLabel={t("task_name")}
         disabled={isSubmitting}
-        required={true}
-        className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        aria-label={t("task_name")}
+        autoFocus
       />
       <textarea
         name="taskDescription"
@@ -93,7 +88,7 @@ export default function TaskFormMobile({ onSuccess, onError }: TaskFormProps) {
 
       <TagInput
         selectedTags={formData.tags}
-        onTagsChange={(tags) => updateFormData({ tags })}
+        onTagsChange={titleField.setPickerTags}
         disabled={isSubmitting}
       />
 

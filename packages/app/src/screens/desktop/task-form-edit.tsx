@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HvTrash2, HvInfo, HvMoreVertical } from "@/modules/icons";
 import { Menu } from "@base-ui/react/menu";
 import DatePrayerInputDesktop from "@/screens/desktop/date-prayer-input";
+import { TitleTagInput } from "@/modules/task/title-tag-input";
+import { useTitleTagField } from "@/modules/task/use-title-tag-field";
 import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import TaskPreview from "@/modules/task/task-preview";
@@ -49,13 +51,12 @@ export default function TaskFormEditDesktop({
     updateRepeatConfig,
   } = useTaskFormEdit(taskId, onSuccess, onError, onDelete, initialTask);
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (nameInputRef.current) {
-      nameInputRef.current.focus();
-    }
-  }, []);
+  const titleField = useTitleTagField({
+    seedText: task?.name ?? "",
+    seedTags: task?.tags ?? [],
+    resetKey: task?.id,
+    onEffectiveTagsChange: (tags) => updateFormData({ tags }),
+  });
 
   useEffect(() => {
     if (error && onError) {
@@ -169,19 +170,14 @@ export default function TaskFormEditDesktop({
 
   const fields = (
     <>
-      <input
-        ref={nameInputRef}
-        name="taskName"
-        defaultValue={task ? task.name : ""}
+      <TitleTagInput
+        state={titleField.state}
+        onStateChange={titleField.onStateChange}
         placeholder={t("task_name")}
+        ariaLabel={t("task_name")}
         disabled={isSubmitting}
-        required={true}
-        className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        aria-label={t("task_name")}
-        onChange={() => setIsFormDirty(true)}
+        autoFocus
+        onUserEdit={() => setIsFormDirty(true)}
       />
       <textarea
         name="taskDescription"
@@ -195,7 +191,7 @@ export default function TaskFormEditDesktop({
       <TagInputDesktop
         selectedTags={formData.tags}
         onTagsChange={(tags) => {
-          updateFormData({ tags });
+          titleField.setPickerTags(tags);
           setIsFormDirty(true);
         }}
         disabled={isSubmitting}

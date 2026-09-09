@@ -1,8 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HvTrash2, HvInfo, HvMoreVertical, HvCheck } from "@/modules/icons";
 import { NavActionButton } from "@/modules/components/nav-action-button";
 import { Menu } from "@base-ui/react/menu";
 import { DatePrayerInput } from "@/modules/task/date-prayer-input";
+import { TitleTagInput } from "@/modules/task/title-tag-input";
+import { useTitleTagField } from "@/modules/task/use-title-tag-field";
 import { useTaskFormEdit } from "@/modules/task/task-form-edit-hook";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { ModalNavbar } from "@/modules/navigation/modal-navbar";
@@ -52,7 +54,12 @@ export default function TaskFormEditMobile({
     updateRepeatConfig,
   } = useTaskFormEdit(taskId, onSuccess, onError, onDelete, initialTask);
 
-  const nameInputRef = useRef<HTMLInputElement>(null);
+  const titleField = useTitleTagField({
+    seedText: task?.name ?? "",
+    seedTags: task?.tags ?? [],
+    resetKey: task?.id,
+    onEffectiveTagsChange: (tags) => updateFormData({ tags }),
+  });
 
   useEffect(() => {
     if (error && onError) {
@@ -166,21 +173,14 @@ export default function TaskFormEditMobile({
 
   const fields = (
     <>
-      <input
-        ref={nameInputRef}
-        name="taskName"
-        defaultValue={task ? task.name : ""}
+      <TitleTagInput
+        state={titleField.state}
+        onStateChange={titleField.onStateChange}
         placeholder={t("task_name")}
+        ariaLabel={t("task_name")}
         disabled={isSubmitting}
-        required={true}
-        className="text-base font-medium outline-none px-4 py-2 text-lg w-[100%]"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        aria-label={t("task_name")}
-        onChange={() => setIsFormDirty(true)}
-        onFocus={() => setIsFormFocused(true)}
-        onBlur={() => setIsFormFocused(false)}
+        onUserEdit={() => setIsFormDirty(true)}
+        onFocusChange={setIsFormFocused}
       />
       <textarea
         name="taskDescription"
@@ -196,7 +196,7 @@ export default function TaskFormEditMobile({
       <TagInput
         selectedTags={formData.tags}
         onTagsChange={(tags) => {
-          updateFormData({ tags });
+          titleField.setPickerTags(tags);
           setIsFormDirty(true);
         }}
         disabled={isSubmitting}
