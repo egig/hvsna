@@ -40,12 +40,13 @@ export function NavbarDesktop({
 }: NavbarDesktopProps) {
   return (
     <header
-      className={`sticky top-0 z-10 bg-white/80 backdrop-blur-sm safe-top ${className}`}
+      className={`sticky top-0 z-10 bg-white/80 backdrop-blur-sm ${className}`}
     >
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* Pin to the top-left so it lands exactly where the sidebar's own
-            toggle sits — a taller navbar (eyebrow + subtitle) must not shift it. */}
-        <SidebarToggleButton className="flex-shrink-0 self-start -ml-1" />
+      {/* Items align to the top, not centered — a taller navbar (eyebrow +
+          subtitle) keeps the toggle and edge actions pinned where the
+          sidebar's own toggle sits rather than drifting down. */}
+      <div className="flex items-start gap-3 px-4 py-3">
+        <SidebarToggleButton className="flex-shrink-0 -ml-1" />
 
         {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
 
