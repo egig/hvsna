@@ -12,7 +12,7 @@ import {
   HvClock,
   HvCreditCard,
 } from "@/modules/icons";
-import { Modal } from "../../modules/navigation/modal";
+import { Modal } from "./modal";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 import { useAuth } from "../../modules/auth/use-auth";
 import { useState } from "react";

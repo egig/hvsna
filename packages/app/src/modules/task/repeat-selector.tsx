@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HvRepeat } from "@/modules/icons";
-import { Modal } from "src/modules/navigation";
+import { useModal } from "src/modules/navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import type { TaskRepeat } from "./types";
 import { RepeatSelectorModal } from "./repeat-selector-modal";
@@ -40,6 +40,7 @@ export function RepeatSelector({
   disabled = false,
   className = "",
 }: RepeatSelectorProps) {
+  const Modal = useModal();
   const { t } = useLanguageContext();
   const [isOpen, setIsOpen] = useState(false);
 

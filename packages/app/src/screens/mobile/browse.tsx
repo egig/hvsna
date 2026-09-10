@@ -4,13 +4,13 @@ import {
   HvSquareCheck,
   HvReplayCircle,
 } from "@/modules/icons";
-import { NavbarMobile as Navbar } from "../../modules/navigation/navbar-mobile";
+import { NavbarMobile as Navbar } from "./navbar-mobile";
 import { Button } from "../../modules/navigation";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 import { MenuItem } from "../../modules/components/menu-item";
 import { useTags } from "../../modules/task/use-tags";
 import BlockTitle from "../../modules/components/block-title";
-import { Page } from "./page";
+import { PageMobile as Page } from "./page";
 
 export default function Browse() {
   const { t } = useLanguageContext();

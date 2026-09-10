@@ -2,7 +2,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useTags, normalizeTag } from "../../modules/task/use-tags";
 import { useTagColor } from "../../modules/task/tag-pill";
 import { HvCheck, HvSearch, HvTag } from "../../modules/icons";
-import { Modal, ModalNavbar } from "../../modules/navigation";
+import { ModalNavbar } from "../../modules/navigation";
+import { Modal } from "./modal";
 import { NavActionButton } from "../../modules/components/nav-action-button";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 

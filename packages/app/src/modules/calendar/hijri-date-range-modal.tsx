@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
-import { Modal, ModalNavbar } from "src/modules/navigation";
+import { ModalNavbar, useModal } from "src/modules/navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { HijriRangeCalendarGrid } from "./hijri-date-range-grid";
 import dayjs, { type Dayjs } from "dayjs";
@@ -24,6 +24,7 @@ export function HijriDateRangeModal({
   selectedRange,
   onRangeSelect,
 }: HijriDateRangeModalProps) {
+  const Modal = useModal();
   const { t } = useLanguageContext();
 
   const initial = selectedRange?.startDate

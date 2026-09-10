@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { LargeNavbarMobile as LargeNavbar } from "@/modules/navigation/navbar-mobile";
+import { LargeNavbarMobile as LargeNavbar } from "./navbar-mobile";
 import {
   useUpcomingData,
   ScheduledContent,
   UnscheduledContent,
 } from "@/modules/task/upcoming-shared";
-import { Page } from "./page";
+import { PageMobile as Page } from "./page";
 
 export default function UpcomingMobile() {
   const {

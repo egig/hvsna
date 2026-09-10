@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { HvSearch } from "@/modules/icons";
-import { Modal } from "../navigation";
+import { useModal } from "../navigation";
 import { ALL_TIMEZONES } from "../timezones";
 
 interface TimezonePickerModalProps {
@@ -20,6 +20,7 @@ export function TimezonePickerModal({
   title = "Select Timezone",
   dismissable,
 }: TimezonePickerModalProps) {
+  const Modal = useModal();
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {

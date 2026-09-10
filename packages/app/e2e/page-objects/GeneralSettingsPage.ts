@@ -4,7 +4,7 @@ import { BasePage } from "./BasePage";
 /**
  * Page Object for /settings/general
  *
- * Source: src/modules/settings/pages/general-settings.tsx
+ * Source: src/screens/{desktop,mobile}/general-settings.tsx
  *
  * Layout:
  * - Language: ProjectInputSelect → native <select> (first combobox on page)
@@ -73,7 +73,11 @@ export class GeneralSettingsPage extends BasePage {
     return this.page
       .locator("button")
       .filter({ has: this.page.locator("svg") })
-      .filter({ hasNot: this.page.getByRole("button", { name: /location|clear|enable|get/i }) })
+      .filter({
+        hasNot: this.page.getByRole("button", {
+          name: /location|clear|enable|get/i,
+        }),
+      })
       .last();
   }
 

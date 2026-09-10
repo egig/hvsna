@@ -3,7 +3,7 @@ import { BasePage } from "./BasePage";
 
 /**
  * Page Object for the Today view (/).
- * Source: src/modules/task/today.tsx
+ * Source: src/screens/{desktop,mobile}/today.tsx
  */
 export class TodayPage extends BasePage {
   async goto(): Promise<void> {
@@ -41,7 +41,8 @@ export class TodayPage extends BasePage {
    */
   async getPrayerGroupTop(prayer: string): Promise<number> {
     const box = await this.getPrayerGroupHeader(prayer).boundingBox();
-    if (!box) throw new Error(`Prayer group "${prayer}" not found or not visible`);
+    if (!box)
+      throw new Error(`Prayer group "${prayer}" not found or not visible`);
     return box.y;
   }
 }

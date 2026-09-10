@@ -6,32 +6,32 @@ import {
   useNavigate,
 } from "react-router";
 import Layout from "./layout";
-import About from "../../modules/settings/about";
+import About from "./about";
 import {
   SettingsModal,
   defaultSettingsSections,
   type SettingsSection,
 } from "./settings-layout";
-import GeneralSettings from "../../modules/settings/pages/general-settings";
-import NotificationSettings from "../../modules/settings/pages/notifications";
-import HijriDateSettings from "../../modules/settings/pages/hijri-date-settings";
-import Search from "../../modules/task/search";
+import GeneralSettings from "./general-settings";
+import NotificationSettings from "./notifications";
+import HijriDateSettings from "./hijri-date-settings";
+import Search from "./search";
 import { NotFound } from "../../modules/components/not-found";
-import { Today } from "../../modules/task/today";
-import WipeData from "../../modules/settings/wipe-data";
-import SyncPage from "../../modules/sync/sync";
-import { Inbox } from "../../modules/task/inbox";
-import { Completed } from "../../modules/task/completed";
-import { Recurring } from "../../modules/task/recurring";
-import SignInPage from "../../modules/auth/pages/signin";
+import { Today } from "./today";
+import WipeData from "./wipe-data";
+import SyncPage from "./sync";
+import { Inbox } from "./inbox";
+import { Completed } from "./completed";
+import { Recurring } from "./recurring";
+import SignInPage from "./signin";
 import { SignInView } from "../../modules/auth/pages/signin-view";
-import SignUpPage from "../../modules/auth/pages/signup";
-import VerifyEmailPage from "../../modules/auth/pages/verify-email";
-import { HijriCalendar } from "../../modules/calendar/hijri-calendar";
-import Profile from "../../modules/settings/pages/profile";
-import TagDetailPage from "../../modules/task/tag-detail-page";
-import Sync from "../../modules/sync/sync";
-import Subscription from "../../modules/subscription/subscription";
+import SignUpPage from "./signup";
+import VerifyEmailPage from "./verify-email";
+import { HijriCalendar } from "./hijri-calendar";
+import Profile from "./profile";
+import TagDetailPage from "./tag-detail-page";
+import Sync from "./sync";
+import Subscription from "./subscription";
 import UpcomingDesktop from "./upcoming";
 import DesktopTaskFormProvider from "./task-form-provider";
 

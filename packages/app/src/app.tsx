@@ -19,6 +19,7 @@ import { SettingsProvider } from "@/modules/settings";
 import { PostHogSessionTracker } from "@/modules/posthog/posthog-session-tracker";
 import { EnsureRequiredParams } from "@/modules/components/ensure-required-params";
 import { LocationProvider } from "./modules/location/context";
+import { PlatformProvider } from "./screens/platform";
 import { NetworkProvider } from "./modules/network/context";
 import type { BootstrapResult } from "@/modules/bootstrap";
 import {
@@ -97,47 +98,50 @@ export default function App({
             <NetworkProvider>
               <SnackbarProvider>
                 <ScreenSizeProvider>
-                  <SqliteProvider client={sqliteClient}>
-                    <RepositoriesProvider repositories={repositories}>
-                      <AuthProvider initialUser={bootstrap?.user ?? null}>
-                        <SettingsProvider>
-                          <LanguageProviderWrapper>
-                            <LocationProvider>
-                              <DroppableContext>
-                                <SyncProvider
-                                  initialSync={{
-                                    performed:
-                                      bootstrap?.initialSyncPerformed ?? false,
-                                    lastSyncAt: bootstrap?.lastSyncAt ?? null,
-                                  }}
-                                >
-                                  {/* Sized to the viewport here (not in Layout/LayoutMobile)
+                  <PlatformProvider>
+                    <SqliteProvider client={sqliteClient}>
+                      <RepositoriesProvider repositories={repositories}>
+                        <AuthProvider initialUser={bootstrap?.user ?? null}>
+                          <SettingsProvider>
+                            <LanguageProviderWrapper>
+                              <LocationProvider>
+                                <DroppableContext>
+                                  <SyncProvider
+                                    initialSync={{
+                                      performed:
+                                        bootstrap?.initialSyncPerformed ??
+                                        false,
+                                      lastSyncAt: bootstrap?.lastSyncAt ?? null,
+                                    }}
+                                  >
+                                    {/* Sized to the viewport here (not in Layout/LayoutMobile)
                                       so VerifyEmailBanner can occupy normal flow above the
                                       routed content and have it shrink to fit, instead of
                                       overlapping it. */}
-                                  <div className="h-[100dvh] flex flex-col">
-                                    <VerifyEmailBanner />
-                                    <div className="flex-1 min-h-0">
-                                      <Router>
-                                        <TaskProvider>
-                                          <CompletionGraceProvider>
-                                            <PostHogSessionTracker
-                                              platform={platform}
-                                            />
-                                            <Routes />
-                                          </CompletionGraceProvider>
-                                        </TaskProvider>
-                                      </Router>
+                                    <div className="h-[100dvh] flex flex-col">
+                                      <VerifyEmailBanner />
+                                      <div className="flex-1 min-h-0">
+                                        <Router>
+                                          <TaskProvider>
+                                            <CompletionGraceProvider>
+                                              <PostHogSessionTracker
+                                                platform={platform}
+                                              />
+                                              <Routes />
+                                            </CompletionGraceProvider>
+                                          </TaskProvider>
+                                        </Router>
+                                      </div>
                                     </div>
-                                  </div>
-                                </SyncProvider>
-                              </DroppableContext>
-                            </LocationProvider>
-                          </LanguageProviderWrapper>
-                        </SettingsProvider>
-                      </AuthProvider>
-                    </RepositoriesProvider>
-                  </SqliteProvider>
+                                  </SyncProvider>
+                                </DroppableContext>
+                              </LocationProvider>
+                            </LanguageProviderWrapper>
+                          </SettingsProvider>
+                        </AuthProvider>
+                      </RepositoriesProvider>
+                    </SqliteProvider>
+                  </PlatformProvider>
                 </ScreenSizeProvider>
               </SnackbarProvider>
             </NetworkProvider>

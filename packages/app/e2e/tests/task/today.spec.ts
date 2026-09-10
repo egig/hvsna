@@ -8,7 +8,7 @@ import { TaskListPage } from "../../page-objects/TaskListPage";
  * Today Page tests
  *
  * Covers the grouping and ordering logic in:
- *   src/modules/task/today.tsx
+ *   src/screens/{desktop,mobile}/today.tsx
  *   src/modules/prayer-time-utils.ts — groupTasksByPrayerTimes()
  *
  * Prayer times are computed locally by `adhan` (src/modules/prayer.ts) from the
@@ -53,7 +53,6 @@ test.describe("Today Page", () => {
     await expect(list.getTaskHeading("Inbox only task")).not.toBeVisible();
   });
 
-
   test("completed section appears at the bottom after completing a task", async () => {
     await form.openButton.click();
     await form.createTaskForToday("Task to complete");
@@ -73,7 +72,9 @@ test.describe("Today Page", () => {
     await list.completeTask("Hidden completed task");
 
     // The task heading should not be visible (collapsed inside the panel)
-    await expect(list.getTaskHeading("Hidden completed task")).not.toBeVisible();
+    await expect(
+      list.getTaskHeading("Hidden completed task"),
+    ).not.toBeVisible();
     // But the header trigger is visible
     await expect(today.completedGroupHeader).toBeVisible();
   });
@@ -91,7 +92,6 @@ test.describe("Today Page", () => {
     await expect(list.getTaskHeading("Expandable task")).toBeVisible();
   });
 
-
   test("prayer group is expanded by default", async () => {
     await form.openButton.click();
     await form.createTaskWithPrayer("Dhuhr task", "Dhuhr");
@@ -101,5 +101,4 @@ test.describe("Today Page", () => {
     // Task is visible (panel open by default)
     await expect(list.getTaskHeading("Dhuhr task")).toBeVisible();
   });
-
 });

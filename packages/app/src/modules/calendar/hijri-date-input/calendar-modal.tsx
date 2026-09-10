@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Activity } from "react";
 import { HvCheck, HvChevronLeft, HvRepeat } from "@/modules/icons";
-import { Modal, ModalNavbar } from "src/modules/navigation";
+import { ModalNavbar, useModal } from "src/modules/navigation";
 import { NavActionButton } from "../../components/nav-action-button";
 import { ListInput } from "src/modules/components/list-input";
 import { useLanguageContext } from "../../i18n/LanguageContext";
@@ -64,6 +64,7 @@ export function CalendarModal({
   forceRecurring: forceRecurring = false,
   onConfirm,
 }: CalendarModalProps) {
+  const Modal = useModal();
   const { t } = useLanguageContext();
 
   // Which sub-view is active inside the modal

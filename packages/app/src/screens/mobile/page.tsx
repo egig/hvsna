@@ -1,13 +1,12 @@
 import { PageTransition } from "@/modules/navigation";
 
-type PageProps = {
+type PageMobileProps = {
   children: React.ReactNode;
   navbar?: React.ReactNode;
   navbarLarge?: React.ReactNode;
-  fluid?: boolean;
 };
 
-export function Page({ children, navbar, navbarLarge }: PageProps) {
+export function PageMobile({ children, navbar, navbarLarge }: PageMobileProps) {
   return (
     <PageTransition>
       <div className="flex flex-col h-full">

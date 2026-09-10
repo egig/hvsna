@@ -62,8 +62,13 @@ Auth is the pre-existing hand-rolled system: `AuthService`/`AuthServiceFactory` 
 ### Routing
 Client-side React Router 7. Routes split by screen size (under `packages/app/src/`):
 - `screens/desktop/routes-desktop.tsx`
-- `screens/mobile/routes.ts`
-- `routes.tsx` — responsive wrapper that selects between them
+- `screens/mobile/routes.tsx`
+- `screens/platform.tsx` — `PlatformProvider` / `usePlatform()`. **This holds the app's single `isDesktop` decision** (`const platform = isDesktop ? desktop : mobile`, one read of `useScreenSize()`), exposing `{ isDesktop, Routes, Modal }` and feeding `Modal` into a `ModalProvider`. Seeded high in `app.tsx` (just inside `ScreenSizeProvider`) so providers above the router — e.g. `LocationProvider`, which renders `LocationPickerModal` — are still inside `ModalProvider`. Don't reintroduce runtime `isDesktop` / `useScreenSize` branches anywhere else.
+- `routes.tsx` — `ResponsiveRoutes` just renders `usePlatform().Routes` (no branch of its own); passed as the `Routes` prop from `main.tsx` and rendered deep inside the router.
+
+**Every route screen is fully duplicated per platform** — `screens/desktop/<name>.tsx` and `screens/mobile/<name>.tsx` are independent copies (today, inbox, completed, recurring, search, tag-detail-page, sync, subscription, general-settings, notifications, hijri-date-settings, profile, hijri-calendar, wipe-data, about, signin, signup, verify-email; plus mobile-only `settings`/`browse` and the already-divergent `upcoming`). The desktop copy imports `PageDesktop` (`screens/desktop/page.tsx`) + `NavbarDesktop`/`LargeNavbarDesktop` from `screens/desktop/navbar-desktop.tsx`; the mobile copy imports `PageMobile` (`screens/mobile/page.tsx`) + `NavbarMobile`/`LargeNavbarMobile` from `screens/mobile/navbar-mobile.tsx` — each aliased to a bare `Page`/`Navbar`/`LargeNavbar` local name so the rest of the file stays byte-identical between platforms. Both navbar files were moved out of `modules/navigation/`. There is no shared `Page`, `Navbar`, or `LargeNavbar` dispatcher anymore — `modules/navigation/page.tsx` and `modules/navigation/navbar.tsx` are deleted, and the `modules/navigation` barrel no longer re-exports `Navbar*Desktop`/`Navbar*Mobile` (only `NavbarProps` as a type). `modules/components/base-form.tsx` was deleted (it was unused and the last consumer of the `Navbar` dispatcher). `PageDesktop` (`screens/desktop/page.tsx`, `max-w-2xl` unless `fluid`) and `PageMobile` (`screens/mobile/page.tsx`, full-width) both wrap `PageTransition`. **Screen bodies are byte-identical copies** — a body-level fix must be applied to both files. Cross-cutting hooks/sub-components (`use-today`, `use-unscheduled`, `task-list-item`, …) stay single-source in `modules/`.
+
+`Modal` is also split into `screens/desktop/modal.tsx` (centered Base UI dialog) and `screens/mobile/modal.tsx` (vaul bottom drawer), both typed by `ModalProps` from `modules/navigation/modal-context.tsx`. Platform-split screens import their local `./modal`; cross-cutting `modules/` components that render a modal (`repeat-selector`, `simple-time-picker`, `location-picker-modal`, `timezone-picker-modal`, `calendar-modal`, `hijri-date-range-modal`) can't import from `screens/`, so they call `const Modal = useModal()` — the component comes from the `ModalProvider` that `PlatformProvider` (`screens/platform.tsx`) wraps around the whole app. `ModalNavbar` (`modules/navigation/modal-navbar.tsx`) is a single shared component — no platform split, no branch.
 
 ### State
 React Context + TanStack Query v5.
@@ -101,7 +106,7 @@ React Router v8 in framework mode, used purely as a backend — every route unde
 ## Key files
 
 - `packages/app/src/config.ts` — timezone→coordinate map; `packages/app/src/modules/prayer-calculation.ts` — prayer calc method/madhab ↔ `adhan` mapping
-- `packages/app/src/app.tsx` — root provider tree (AuthProvider → SettingsProvider → LocationProvider → TaskProvider)
+- `packages/app/src/app.tsx` — root provider tree (ScreenSizeProvider → PlatformProvider → … → AuthProvider → SettingsProvider → LocationProvider → TaskProvider)
 - `packages/app/src/modules/calendar/hijri/` — HijriDate/HijriMonth classes using `@tabby_ai/hijri-converter`
 - `packages/app/src/modules/sync/` — sync UI/context; live push/pull against `packages/api` (see Database section), gated behind a verified email and a paid Sync plan
 - `packages/api/src/db/schema.ts` — Drizzle schema covering auth, billing, and sync (see Database section); `packages/api/app/routes/` — auth, sync, subscription/billing, geocode, and pricing resource routes

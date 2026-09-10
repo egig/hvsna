@@ -1,7 +1,4 @@
-import { HvChevronLeft, HvX, HvSearch } from "@/modules/icons";
-import { useAppNavigation } from "./use-app-navigation";
-import { useLocation } from "react-router";
-import { useScreenSize } from "@/modules/components/screen-size-wrapper";
+import { HvX } from "@/modules/icons";
 
 interface ModalNavbarProps {
   title?: string | React.ReactNode;
@@ -11,8 +8,6 @@ interface ModalNavbarProps {
   className?: string;
   onModalClose?: () => void;
 }
-
-const ROOT_PATHS = ["/"];
 
 export function ModalNavbar({
   title,

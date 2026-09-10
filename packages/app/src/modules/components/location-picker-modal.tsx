@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { HvSearch } from "@/modules/icons";
-import { Modal } from "../navigation";
+import { useModal } from "../navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { searchLocations } from "@/infra/location/nominatim";
 
@@ -36,6 +36,7 @@ export function LocationPickerModal({
   title = "Select Location",
   dismissable,
 }: LocationPickerModalProps) {
+  const Modal = useModal();
   const { t } = useLanguageContext();
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Location[]>([]);

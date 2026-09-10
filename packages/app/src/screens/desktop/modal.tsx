@@ -1,16 +1,5 @@
 import { Dialog } from "@base-ui/react/dialog";
-import { type ReactNode } from "react";
-
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: ReactNode;
-  title?: string;
-  className?: string;
-  noPadding?: boolean;
-  "data-testid"?: string;
-  dismissable?: boolean;
-}
+import type { ModalProps } from "@/modules/navigation/modal-context";
 
 export function Modal({
   isOpen,

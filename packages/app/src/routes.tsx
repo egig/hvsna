@@ -1,9 +1,6 @@
-import { useScreenSize } from "./modules/components/screen-size-wrapper";
-import { RoutesDesktop } from "./screens/desktop/routes-desktop";
-import { RoutesMobile } from "./screens/mobile/routes";
+import { usePlatform } from "./screens/platform";
 
 export const ResponsiveRoutes = () => {
-  const { isDesktop } = useScreenSize();
-  if (isDesktop) return <RoutesDesktop />;
-  return <RoutesMobile />;
+  const { Routes } = usePlatform();
+  return <Routes />;
 };

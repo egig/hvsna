@@ -19,7 +19,7 @@ import {
 import { NavLink, useLocation } from "react-router";
 import type { ReactNode } from "react";
 import { SidebarTagsSection } from "../../modules/task/sidebar-tags-section";
-import { Modal } from "../../modules/navigation/modal";
+import { Modal } from "./modal";
 import { useLanguageContext } from "../../modules/i18n/LanguageContext";
 import { useTaskContext } from "../../modules/task/task-context";
 import { useTaskFormContext } from "../../modules/task/task-form-context";

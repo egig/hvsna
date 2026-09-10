@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { HvClock, HvChevronDown } from "@/modules/icons";
-import { Modal } from "../navigation";
+import { useModal } from "../navigation";
 
 interface SimpleTimePickerProps {
   value: string;
@@ -19,6 +19,7 @@ export function SimpleTimePicker({
   className = "",
   testId,
 }: SimpleTimePickerProps) {
+  const Modal = useModal();
   const [isOpen, setIsOpen] = useState(false);
   const [hour, setHour] = useState(0);
   const [minute, setMinute] = useState(0);
