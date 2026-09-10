@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { PageDesktop as Page } from "./page";
-import { NavbarDesktop as Navbar } from "./navbar-desktop";
+import { SettingsHeader } from "./settings-header";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { createNotificationsDriver } from "@/infra";
 import { useSettings } from "@/modules/settings/context";
@@ -69,8 +68,8 @@ export default function NotificationSettings() {
   const canShowTest = notificationsEnabled && permState?.state === "granted";
 
   return (
-    <Page>
-      <Navbar title={t("notifications")} showBackButton={true} />
+    <>
+      <SettingsHeader title={t("notifications")} />
 
       <div className="bg-white">
         {/* Enable Notifications Toggle */}
@@ -134,6 +133,6 @@ export default function NotificationSettings() {
           </div>
         )}
       </div>
-    </Page>
+    </>
   );
 }

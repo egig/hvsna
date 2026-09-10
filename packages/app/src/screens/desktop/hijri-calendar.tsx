@@ -1,4 +1,4 @@
-import { PageDesktop as Page } from "./page";
+import { SettingsHeader } from "./settings-header";
 import { useHijriDate } from "@/modules/calendar/hijri/use-hijri-date";
 import dayjs from "dayjs";
 
@@ -68,31 +68,26 @@ export function HijriCalendar() {
 
   if (loading) {
     return (
-      <Page>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Loading calendar...</div>
-        </div>
-      </Page>
+      <>
+        <SettingsHeader title="Hijri Calendar" />
+        <div className="text-lg">Loading calendar...</div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <Page>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-red-500">Error: {error}</div>
-        </div>
-      </Page>
+      <>
+        <SettingsHeader title="Hijri Calendar" />
+        <div className="text-lg text-red-500">Error: {error}</div>
+      </>
     );
   }
 
   return (
-    <Page>
-      <div className="p-4 max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-center mb-6 text-[var(--hvsna-primary-color)]">
-          Hijri Calendar
-        </h1>
-
+    <>
+      <SettingsHeader title="Hijri Calendar" />
+      <div>
         <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
           <table className="w-full">
             <thead>
@@ -123,6 +118,6 @@ export function HijriCalendar() {
           </table>
         </div>
       </div>
-    </Page>
+    </>
   );
 }

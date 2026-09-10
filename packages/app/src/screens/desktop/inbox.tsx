@@ -3,23 +3,20 @@ import TaskListItem from "@/modules/task/task-list-item";
 import { ErrorDisplay } from "@/modules/components/error-display";
 import { EmptyState } from "@/modules/components/empty-state";
 import { useUnscheduled } from "@/modules/task/use-unscheduled";
-import { LargeNavbarDesktop as LargeNavbar } from "./navbar-desktop";
+import { NavbarDesktop as Navbar } from "./navbar-desktop";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { HvOutlineInbox } from "@/modules/icons";
 
 export function Inbox() {
   const { t } = useLanguageContext();
-  const { inboxTasks, error, pageTitle, subTitle, initiated, refetch } =
-    useUnscheduled();
+  const { inboxTasks, error, pageTitle, initiated } = useUnscheduled();
 
   if (initiated && error) {
     return <ErrorDisplay error={error} />;
   }
 
   return (
-    <Page
-      navbarLarge={<LargeNavbar title={pageTitle} showBackButton={false} />}
-    >
+    <Page navbar={<Navbar title={pageTitle} />}>
       <div className={initiated ? "visible" : "invisible"}>
         {inboxTasks.length === 0 ? (
           <EmptyState

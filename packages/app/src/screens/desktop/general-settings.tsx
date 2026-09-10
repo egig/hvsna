@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { HvChevronsUpDown, HvMapPin } from "@/modules/icons";
-import { PageDesktop as Page } from "./page";
-import { NavbarDesktop as Navbar } from "./navbar-desktop";
+import { SettingsHeader } from "./settings-header";
 import { TimezonePickerModal } from "@/modules/components/timezone-picker-modal";
 import { useSettings } from "@/modules/settings";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
@@ -49,8 +48,8 @@ export default function GeneralSettings() {
   };
 
   return (
-    <Page>
-      <Navbar title={t("general")} showBackButton={true} />
+    <>
+      <SettingsHeader title={t("general")} />
 
       <ListInputSelect
         label={t("language")}
@@ -77,9 +76,7 @@ export default function GeneralSettings() {
             >
               <HvMapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
               <span className="truncate">
-                {locationLoading
-                  ? t("loading")
-                  : location.name || t("not_set")}
+                {locationLoading ? t("loading") : location.name || t("not_set")}
               </span>
             </button>
           </div>
@@ -148,6 +145,6 @@ export default function GeneralSettings() {
           }))}
         />
       </div>
-    </Page>
+    </>
   );
 }

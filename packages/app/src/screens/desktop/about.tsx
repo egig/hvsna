@@ -1,7 +1,6 @@
 import { HvRefreshCw } from "@/modules/icons";
-import { PageDesktop as Page } from "./page";
 import packageInfo from "../../../package.json";
-import { LargeNavbarDesktop as LargeNavbar } from "./navbar-desktop";
+import { SettingsHeader } from "./settings-header";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { usePWARefresh } from "@/usePWARefresh";
 
@@ -10,9 +9,9 @@ export default function About() {
   const { needRefresh, updateServiceWorker } = usePWARefresh();
 
   return (
-    <Page>
-      <LargeNavbar title={t("about")} showBackButton={true} />
-      <div className="prose prose-sm p-6">
+    <>
+      <SettingsHeader title={t("about")} />
+      <div className="prose prose-sm">
         <p className="text-gray-600 dark:text-gray-400 mb-4 text-center">
           Hvsna v{packageInfo.version}
         </p>
@@ -136,6 +135,6 @@ export default function About() {
           </div>
         )}
       </div>
-    </Page>
+    </>
   );
 }

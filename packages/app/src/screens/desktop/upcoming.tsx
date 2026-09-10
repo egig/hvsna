@@ -15,6 +15,7 @@ import {
   DragOverlayPortal,
   type ViewMode,
 } from "@/modules/task/upcoming-shared";
+import { SidebarToggleButton } from "./sidebar-context";
 
 export default function UpcomingDesktop() {
   const {
@@ -133,9 +134,12 @@ export default function UpcomingDesktop() {
         <Allotment.Pane minSize={400} priority={LayoutPriority.High}>
           <div className="flex flex-col h-full">
             <div className="shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 py-3">
-              <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
-                {t("upcoming")}
-              </h1>
+              <div className="flex items-center gap-2 min-w-0">
+                <SidebarToggleButton className="flex-shrink-0 self-start -ml-1" />
+                <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                  {t("upcoming")}
+                </h1>
+              </div>
               {navbarActions}
             </div>
             <div

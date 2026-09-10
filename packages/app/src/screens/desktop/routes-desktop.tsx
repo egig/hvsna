@@ -7,24 +7,19 @@ import {
 } from "react-router";
 import Layout from "./layout";
 import About from "./about";
-import {
-  SettingsModal,
-  defaultSettingsSections,
-  type SettingsSection,
-} from "./settings-layout";
+import { SettingsModal, defaultSettingsSections } from "./settings-layout";
 import GeneralSettings from "./general-settings";
 import NotificationSettings from "./notifications";
 import HijriDateSettings from "./hijri-date-settings";
 import Search from "./search";
-import { NotFound } from "../../modules/components/not-found";
+import { NotFound } from "@/modules/components/not-found";
 import { Today } from "./today";
 import WipeData from "./wipe-data";
-import SyncPage from "./sync";
 import { Inbox } from "./inbox";
 import { Completed } from "./completed";
 import { Recurring } from "./recurring";
 import SignInPage from "./signin";
-import { SignInView } from "../../modules/auth/pages/signin-view";
+import { SignInView } from "@/modules/auth/pages/signin-view";
 import SignUpPage from "./signup";
 import VerifyEmailPage from "./verify-email";
 import { HijriCalendar } from "./hijri-calendar";
@@ -35,16 +30,40 @@ import Subscription from "./subscription";
 import UpcomingDesktop from "./upcoming";
 import DesktopTaskFormProvider from "./task-form-provider";
 
+/**
+ * Settings lives in a modal layered over the app. Sidebar links carry the
+ * current location as `settingsBackgroundLocation` state; a direct hit or a
+ * reload has no such state, so we fall back to `/today` as the backdrop and
+ * still open the modal.
+ */
+const SETTINGS_PATHS = [
+  "/settings/general",
+  "/settings/notifications",
+  "/settings/hijri-date",
+  "/settings/subscription",
+  "/profile",
+  "/sync",
+  "/hijri-calendar",
+  "/wipe-local",
+  "/about",
+];
+
+const isSettingsPath = (pathname: string) =>
+  SETTINGS_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
 export const RoutesDesktop = () => {
-  // https://blog.logrocket.com/building-react-modal-module-with-react-router/
   const location = useLocation();
   const navigate = useNavigate();
-  const settingsBackgroundLocation = location.state?.settingsBackgroundLocation;
-  const isSettingsOpen = !!settingsBackgroundLocation;
+
+  const backgroundLocation =
+    location.state?.settingsBackgroundLocation ??
+    (isSettingsPath(location.pathname) ? { pathname: "/today" } : null);
+  const isSettingsOpen = !!backgroundLocation;
+
   return (
     <DesktopTaskFormProvider>
-      {/* Note that animate present depends to the useLocation hook so it should be here */}
-      <Routes location={settingsBackgroundLocation || location}>
+      {/* AnimatePresence depends on useLocation, so the router lives here. */}
+      <Routes location={backgroundLocation || location}>
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/today" replace />} />
           <Route path="search" element={<Search />} />
@@ -60,16 +79,15 @@ export const RoutesDesktop = () => {
         <Route path="signup" element={<SignUpPage />} />
         <Route path="signup/:action" element={<SignUpPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
-        <Route path="sync" element={<SyncPage />} />
-        <Route path="settings/subscription" element={<Subscription />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+
       {isSettingsOpen && (
         <SettingsModal
           sections={defaultSettingsSections}
           isOpen={true}
           onClose={() =>
-            navigate(settingsBackgroundLocation.pathname, { replace: true })
+            navigate(backgroundLocation.pathname, { replace: true })
           }
         >
           <Routes>

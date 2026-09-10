@@ -1,269 +1,124 @@
 import { HvX, HvSearch } from "@/modules/icons";
-import { useState, useEffect } from "react";
-import type { NavbarProps } from "@/modules/navigation/navbar-props";
+import type { ReactNode } from "react";
+import { SidebarToggleButton } from "./sidebar-context";
+import { DESKTOP_INSET } from "./page";
 
-export function NavbarDesktop({
-  title,
-  leftAction,
-  rightAction,
-  className = "",
-  modal,
-  onModalClose,
-  subtitle,
-  showSearch,
-  searchPlaceholder = "Search...",
-  searchValue = "",
-  onSearchChange,
-  onSearchSubmit,
-}: NavbarProps) {
-  return (
-    <header
-      className={`sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80  backdrop-blur-sm ${
-        !modal ? "safe-top" : ""
-      } ${className}`}
-      style={{
-        position: "-webkit-sticky",
-        scrollMarginTop: "64px",
-      }}
-    >
-      {/* Left: Modal close, or leftAction — desktop never shows a back button, navigation happens via the sidebar */}
-      <div className="flex justify-start">
-        {modal && onModalClose ? (
-          <button
-            onClick={onModalClose}
-            className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
-            aria-label="Close"
-          >
-            <HvX />
-          </button>
-        ) : (
-          leftAction
-        )}
-      </div>
-
-      {/* Center: Title or Search */}
-      <div className="flex-1 text-center">
-        {showSearch ? (
-          <div className="relative max-w-md mx-auto">
-            <HvSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              value={searchValue}
-              onChange={(e) => onSearchChange?.(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  onSearchSubmit?.(searchValue);
-                }
-              }}
-              placeholder={searchPlaceholder}
-              className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            {searchValue && (
-              <button
-                onClick={() => onSearchChange?.("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label="Clear search"
-              >
-                <HvX className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            {title && (
-              <h1
-                className="text-lg font-semibold text-gray-900 truncate"
-                data-testid="navbar-title"
-              >
-                {title}
-              </h1>
-            )}
-            {/* Subtitle */}
-            {subtitle && (
-              <div className="text-xs text-gray-500">{subtitle}</div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Right: Action */}
-      <div className="flex justify-end">{rightAction}</div>
-    </header>
-  );
+export interface NavbarDesktopProps {
+  title?: ReactNode;
+  /** Small kicker line rendered above the title (e.g. the Hijri date). */
+  eyebrow?: ReactNode;
+  subtitle?: ReactNode;
+  leftAction?: ReactNode;
+  rightAction?: ReactNode;
+  className?: string;
+  /** Match a `fluid` PageDesktop — drop the centered inset and span full width. */
+  fluid?: boolean;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  onSearchSubmit?: (value: string) => void;
 }
 
-export function LargeNavbarDesktop({
+/**
+ * Desktop page header. A single sticky bar — there is no "large" variant.
+ * Navigation happens through the sidebar, so it never renders a back button.
+ */
+export function NavbarDesktop({
   title,
   eyebrow,
+  subtitle,
   leftAction,
   rightAction,
   className = "",
-  modal,
-  onModalClose,
-  subtitle,
+  fluid = false,
   showSearch,
   searchPlaceholder = "Search...",
   searchValue = "",
   onSearchChange,
   onSearchSubmit,
-}: NavbarProps) {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      setIsScrolled(target.scrollTop > 20);
-    };
-
-    // Find the scrollable parent container
-    const scrollContainer = document.querySelector(".overflow-y-auto");
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll);
-      return () => scrollContainer.removeEventListener("scroll", handleScroll);
-    }
-
-    // Fallback to window scroll if no container found
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
+}: NavbarDesktopProps) {
   return (
-    <>
-      <header
-        className={`sticky top-0 z-100 px-2 py-2 bg-white/80 backdrop-blur-sm ${
-          !modal ? "safe-top" : ""
-        } ${className}`}
-        style={{
-          position: "-webkit-sticky",
-          scrollMarginTop: "62px",
-        }}
-      >
-        <div className="flex items-center justify-between">
-          {/* Left: Modal close, or leftAction — desktop never shows a back button */}
-          <div className="flex justify-start">
-            {modal && onModalClose ? (
-              <button
-                onClick={onModalClose}
-                className="flex items-center justify-center w-10 h-10 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg transition-opacity no-select active:scale-95 transition-transform"
-                aria-label="Close"
-              >
-                <HvX />
-              </button>
-            ) : (
-              !isScrolled && leftAction
-            )}
-          </div>
+    <header
+      className={`sticky top-0 z-10 bg-white/80 backdrop-blur-sm safe-top ${className}`}
+    >
+      <div className="flex items-center gap-3 px-4 py-3">
+        {/* Pin to the top-left so it lands exactly where the sidebar's own
+            toggle sits — a taller navbar (eyebrow + subtitle) must not shift it. */}
+        <SidebarToggleButton className="flex-shrink-0 self-start -ml-1" />
 
-          {/* Center: Title or Search */}
-          {(title || showSearch) && isScrolled && (
-            <div
-              className={`flex-1 text-center transition-opacity duration-800 ${
-                isScrolled ? "opacity-100" : "opacity-0"
-              }`}
-            >
-              {showSearch ? (
-                <div className="relative max-w-md mx-auto">
-                  <HvSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    value={searchValue}
-                    onChange={(e) => onSearchChange?.(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        onSearchSubmit?.(searchValue);
-                      }
-                    }}
-                    placeholder={searchPlaceholder}
-                    className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  {searchValue && (
-                    <button
-                      onClick={() => onSearchChange?.("")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label="Clear search"
-                    >
-                      <HvX className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <>
-                  {eyebrow && (
-                    <div className="text-[10px] font-extrabold tracking-wide text-primary-500 dark:text-primary-300 truncate">
-                      {eyebrow}
-                    </div>
-                  )}
-                  {title && (
-                    <h1
-                      className={`text-lg font-semibold text-gray-900 truncate`}
-                    >
-                      {title}
-                    </h1>
-                  )}
-                  {/* Subtitle */}
-                  {subtitle && (
-                    <div className={`text-xs text-gray-500`}>{subtitle}</div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+        {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
 
-          {/* Right: Action */}
-          {rightAction && <div className="flex justify-end">{rightAction}</div>}
-        </div>
-      </header>
-
-      <div className={`bg-white/80 backdrop-blur-sm px-6 h-20`}>
-        <div
-          className={`h-full flex flex-col justify-end pb-4 transition-all duration-1000 ${
-            isScrolled ? "opacity-0" : "opacity-100"
-          }`}
-        >
+        {/* Only the title/search block honours the inset — edge actions stay put. */}
+        <div className={`flex-1 min-w-0 ${fluid ? "" : DESKTOP_INSET}`}>
           {showSearch ? (
-            <div className="relative max-w-lg mx-auto">
-              <HvSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                value={searchValue}
-                onChange={(e) => onSearchChange?.(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    onSearchSubmit?.(searchValue);
-                  }
-                }}
-                placeholder={searchPlaceholder}
-                className="w-full pl-12 pr-12 py-3 bg-gray-100 border border-gray-200 rounded-full text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              {searchValue && (
-                <button
-                  onClick={() => onSearchChange?.("")}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Clear search"
-                >
-                  <HvX className="w-5 h-5" />
-                </button>
-              )}
-            </div>
+            <SearchInput
+              value={searchValue}
+              placeholder={searchPlaceholder}
+              onChange={onSearchChange}
+              onSubmit={onSearchSubmit}
+            />
           ) : (
             <>
               {eyebrow && (
-                <div className="text-xs font-extrabold tracking-wide text-primary-500 dark:text-primary-300 truncate">
+                <div className="text-[10px] font-extrabold tracking-wide uppercase text-primary-500 dark:text-primary-300 truncate">
                   {eyebrow}
                 </div>
               )}
               {title && (
-                <h1 className="text-2xl font-semibold text-gray-900 truncate">
+                <h1
+                  className="text-lg font-semibold text-gray-900 truncate"
+                  data-testid="navbar-title"
+                >
                   {title}
                 </h1>
               )}
               {subtitle && (
-                <div className="text-sm text-gray-500 truncate">{subtitle}</div>
+                <div className="text-xs text-gray-500 truncate">{subtitle}</div>
               )}
             </>
           )}
         </div>
+
+        {rightAction && <div className="flex-shrink-0">{rightAction}</div>}
       </div>
-    </>
+    </header>
+  );
+}
+
+function SearchInput({
+  value,
+  placeholder,
+  onChange,
+  onSubmit,
+}: {
+  value: string;
+  placeholder: string;
+  onChange?: (value: string) => void;
+  onSubmit?: (value: string) => void;
+}) {
+  return (
+    <div className="relative max-w-md">
+      <HvSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onSubmit?.(value);
+        }}
+        placeholder={placeholder}
+        className="w-full pl-10 pr-10 py-2 bg-gray-100 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+      {value && (
+        <button
+          onClick={() => onChange?.("")}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Clear search"
+        >
+          <HvX className="w-4 h-4" />
+        </button>
+      )}
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 import {
   HvPanelLeftClose,
   HvUserRound,
-  HvPanelLeft,
   HvCalendarMonth,
   HvCalendarMonthFilled,
   HvSettings,
@@ -27,6 +26,7 @@ import { useState } from "react";
 import { useAuth } from "../../modules/auth/use-auth";
 
 interface DesktopSidebarProps {
+  /** Retained for call-site compat; the sidebar no longer renders a rail. */
   collapsed?: boolean;
   onToggleCollapse?: () => void;
 }
@@ -173,19 +173,14 @@ export function DesktopSidebar({
     <div
       className={`${"w-full h-full"} bg-gray-50 border-gray-400 flex flex-col overflow-hidden`}
     >
-      <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
+      <div className="flex items-center px-3 py-3 border-b border-gray-100">
         <button
           onClick={onToggleCollapse}
-          className={`p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors ${
-            collapsed ? "mx-auto" : "ml-auto"
-          }`}
-          aria-label={collapsed ? t("expand_sidebar") : t("collapse_sidebar")}
+          className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors mr-auto"
+          aria-label={t("collapse_sidebar")}
+          title={t("collapse_sidebar")}
         >
-          {collapsed ? (
-            <HvPanelLeft className="size-4" />
-          ) : (
-            <HvPanelLeftClose className="size-4" />
-          )}
+          <HvPanelLeftClose className="size-4" />
         </button>
       </div>
 

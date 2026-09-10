@@ -5,7 +5,6 @@ import { EmptyState } from "@/modules/components/empty-state";
 import { useToday } from "@/modules/task/use-today";
 import {
   MockTimeProvider,
-  MockTimeControl,
   useMockTime,
 } from "@/modules/task/mock-time-context";
 import type { Task, PrayerTime } from "@/domain/task";
@@ -13,7 +12,7 @@ import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { useMemo, useCallback } from "react";
 import { HvCheck, HvMaghrib } from "@/modules/icons";
 import { PageDesktop as Page } from "./page";
-import { LargeNavbarDesktop as LargeNavbar } from "./navbar-desktop";
+import { NavbarDesktop as Navbar } from "./navbar-desktop";
 import { usePrayerTimes } from "@/modules/prayer";
 import type { PrayerTimes } from "adhan";
 import { groupTasksByPrayerTimes } from "@/modules/prayer-time-utils";
@@ -31,20 +30,9 @@ function TodayInner() {
   const { pageTitle, subTitle } = useToday();
 
   return (
-    <>
-      <Page
-        navbarLarge={
-          <LargeNavbar
-            showBackButton={false}
-            eyebrow={subTitle}
-            title={pageTitle}
-          />
-        }
-      >
-        <TodayContent />
-      </Page>
-      {/* <MockTimeControl /> */}
-    </>
+    <Page navbar={<Navbar eyebrow={subTitle} title={pageTitle} />}>
+      <TodayContent />
+    </Page>
   );
 }
 
@@ -103,7 +91,7 @@ export function TodayContent() {
       }
       return prayerName;
     },
-    [t, prayerTimings]
+    [t, prayerTimings],
   );
 
   if (initiated && error) return <ErrorDisplay error={error} />;
@@ -154,18 +142,18 @@ function TaskGroupLabel({ group, getPrayerTimeDisplay }: TaskGroupLabelProps) {
   const label = group.isOverdue
     ? t("overdue")
     : group.isCompleted
-    ? t("completed")
-    : group.isEndOfDay
-    ? t("end_of_day")
-    : getPrayerTimeDisplay(group.prayer!);
+      ? t("completed")
+      : group.isEndOfDay
+        ? t("end_of_day")
+        : getPrayerTimeDisplay(group.prayer!);
 
   const colorClass = group.isOverdue
     ? "text-danger-700"
     : group.isCompleted
-    ? "text-gray-500"
-    : group.isEndOfDay
-    ? "text-gray-500"
-    : "text-gray-700 dark:text-gray-300";
+      ? "text-gray-500"
+      : group.isEndOfDay
+        ? "text-gray-500"
+        : "text-gray-700 dark:text-gray-300";
 
   return <span className={`text-sm font-bold ${colorClass}`}>{label}</span>;
 }
@@ -203,10 +191,10 @@ function TodayTasks({
           (group.isOverdue
             ? "overdue"
             : group.isCompleted
-            ? "completed"
-            : group.isTimeBased
-            ? `time-${group.atTime}`
-            : `regular-${groupIndex}`);
+              ? "completed"
+              : group.isTimeBased
+                ? `time-${group.atTime}`
+                : `regular-${groupIndex}`);
 
         return (
           <div key={groupKey} className="mb-2">

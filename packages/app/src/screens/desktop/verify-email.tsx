@@ -23,8 +23,7 @@ export default function VerifyEmailPage() {
   }, [token, verifyEmail]);
 
   return (
-    <Page>
-      <Navbar title="Verify Email" />
+    <Page navbar={<Navbar title="Verify Email" />}>
       <Block>
         <div className="mx-auto w-full max-w-md text-center">
           {status === "verifying" && (

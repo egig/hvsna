@@ -79,8 +79,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <Page>
-      <Navbar title="Sign Up" />
+    <Page navbar={<Navbar title="Sign Up" />}>
       <Block>
         <div className="mx-auto w-full max-w-md">
           <div className="">

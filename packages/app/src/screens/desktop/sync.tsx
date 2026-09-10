@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
-import { PageDesktop as Page } from "./page";
-import { NavbarDesktop as Navbar } from "./navbar-desktop";
-import Block from "@/modules/components/block";
+import { useState } from "react";
+import { SettingsHeader } from "./settings-header";
 import {
   HvRefreshCw,
   HvCheckCircle,
   HvAlertCircle,
   HvClock,
-  HvInfo,
 } from "@/modules/icons";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { useSync } from "@/modules/sync/context";
@@ -99,99 +96,93 @@ export default function Sync() {
   };
 
   return (
-    <Page>
-      <Navbar title={t("sync")} />
-      <Block>
-        <div className="space-y-6">
-          {/* Error Message Section */}
-          {manualSyncStatus === "error" && errorMessage && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-              <div className="flex items-start gap-3">
-                <HvAlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-medium text-red-800 mb-1">
-                    {t("sync_failed")}
-                  </h3>
-                  <p className="text-sm text-red-700">{errorMessage}</p>
-                </div>
+    <>
+      <SettingsHeader title={t("sync")} description={t("sync_description")} />
+      <div className="space-y-6">
+        {/* Error Message Section */}
+        {manualSyncStatus === "error" && errorMessage && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+            <div className="flex items-start gap-3">
+              <HvAlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-800 mb-1">
+                  {t("sync_failed")}
+                </h3>
+                <p className="text-sm text-red-700">{errorMessage}</p>
               </div>
             </div>
-          )}
-
-          <div className="rounded-lg p-4 bg-gray-200">
-            <p className="text-sm text-gray-600">{t("sync_description")}</p>
           </div>
+        )}
 
-          {/* Sync Status Card */}
-          <div className="rounded-lg border-gray-200 border p-6 bg-white">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t("last_sync")}:</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {formatLastSyncTime(lastSyncTime)}
-                </span>
-              </div>
+        {/* Sync Status Card */}
+        <div className="rounded-lg border-gray-200 border p-6 bg-white">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">{t("last_sync")}:</span>
+              <span className="text-sm font-medium text-gray-900">
+                {formatLastSyncTime(lastSyncTime)}
+              </span>
+            </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t("status")}:</span>
-                <span
-                  className={`flex items-center gap-1.5 text-sm font-medium ${
-                    isSyncing
-                      ? ""
-                      : manualSyncStatus === "success" ||
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">{t("status")}:</span>
+              <span
+                className={`flex items-center gap-1.5 text-sm font-medium ${
+                  isSyncing
+                    ? ""
+                    : manualSyncStatus === "success" ||
                         (lastSyncTime && manualSyncStatus === "idle")
                       ? "text-green-600"
                       : manualSyncStatus === "error"
-                      ? "text-red-600"
-                      : "text-gray-600"
-                  }`}
-                  style={
-                    isSyncing
-                      ? { color: "var(--hvsna-primary-color)" }
-                      : undefined
-                  }
-                >
-                  {getStatusIcon()}
-                  {getStatusText()}
-                </span>
-              </div>
+                        ? "text-red-600"
+                        : "text-gray-600"
+                }`}
+                style={
+                  isSyncing
+                    ? { color: "var(--hvsna-primary-color)" }
+                    : undefined
+                }
+              >
+                {getStatusIcon()}
+                {getStatusText()}
+              </span>
             </div>
           </div>
-
-          {/* Manual Sync Button */}
-          <button
-            onClick={handleManualSync}
-            disabled={isManualSyncing || !canSync}
-            className={`text-sm w-full md:w-fit px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 border ${
-              isManualSyncing || !canSync
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
-                : "text-white hover:opacity-90"
-            }`}
-            style={{
-              backgroundColor:
-                isManualSyncing || !canSync
-                  ? undefined
-                  : "var(--hvsna-primary-color)",
-              borderColor:
-                isManualSyncing || !canSync
-                  ? undefined
-                  : "var(--hvsna-primary-color)",
-            }}
-          >
-            {isManualSyncing ? (
-              <>
-                <HvRefreshCw className="h-4 w-4 animate-spin" />
-                {t("syncing")}
-              </>
-            ) : (
-              <>
-                <HvRefreshCw className="h-4 w-4" />
-                {t("sync_now")}
-              </>
-            )}
-          </button>
         </div>
-      </Block>
-    </Page>
+
+        {/* Manual Sync Button */}
+        <button
+          onClick={handleManualSync}
+          disabled={isManualSyncing || !canSync}
+          className={`text-sm w-full md:w-fit px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 border ${
+            isManualSyncing || !canSync
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300"
+              : "text-white hover:opacity-90"
+          }`}
+          style={{
+            backgroundColor:
+              isManualSyncing || !canSync
+                ? undefined
+                : "var(--hvsna-primary-color)",
+            borderColor:
+              isManualSyncing || !canSync
+                ? undefined
+                : "var(--hvsna-primary-color)",
+          }}
+        >
+          {isManualSyncing ? (
+            <>
+              <HvRefreshCw className="h-4 w-4 animate-spin" />
+              {t("syncing")}
+            </>
+          ) : (
+            <>
+              <HvRefreshCw className="h-4 w-4" />
+              {t("sync_now")}
+            </>
+          )}
+        </button>
+      </div>
+    </>
   );
 }

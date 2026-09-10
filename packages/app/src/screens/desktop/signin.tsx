@@ -66,8 +66,7 @@ export default function SignInPage() {
   };
 
   return (
-    <Page>
-      <Navbar title="Sign In" />
+    <Page navbar={<Navbar title="Sign In" />}>
       <Block>
         <div className="mx-auto w-full max-w-md">
           <div className="">

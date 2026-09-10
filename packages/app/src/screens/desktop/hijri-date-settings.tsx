@@ -1,5 +1,4 @@
-import { PageDesktop as Page } from "./page";
-import { NavbarDesktop as Navbar } from "./navbar-desktop";
+import { SettingsHeader } from "./settings-header";
 import { useSettings } from "@/modules/settings";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { ListInputSelect } from "@/modules/components/list-input-select";
@@ -22,7 +21,7 @@ export default function HijriDateSettings() {
     new Date(),
     {
       monthOffsets: {},
-    }
+    },
   );
   const todayWithOffset = HijriDate.fromDate(latitude, longitude, new Date(), {
     monthOffsets,
@@ -71,11 +70,11 @@ export default function HijriDateSettings() {
     todayWithoutOffset.year !== todayWithOffset.year;
 
   return (
-    <Page>
-      <Navbar title={t("hijri_date_settings")} showBackButton={true} />
+    <>
+      <SettingsHeader title={t("hijri_date_settings")} />
 
       {/* Preview Card */}
-      <div className="bg-white p-4 m-4 rounded-lg border border-gray-200">
+      <div className="bg-white p-4 mb-4 rounded-lg border border-gray-200">
         <h3 className="text-sm font-semibold text-gray-700 mb-3">
           Today's Hijri Date Preview
         </h3>
@@ -102,7 +101,7 @@ export default function HijriDateSettings() {
         {hijriMonths.map((month, index) => {
           const currentOffset = monthOffsets[month.key] ?? 0;
           const nextMonth = hijriMonths[index + 1];
-          const nextOffset = nextMonth ? monthOffsets[nextMonth.key] ?? 0 : 0;
+          const nextOffset = nextMonth ? (monthOffsets[nextMonth.key] ?? 0) : 0;
           const gap = Math.abs(currentOffset - nextOffset);
           const showWarning = gap > 1 && index < 11;
 
@@ -130,6 +129,6 @@ export default function HijriDateSettings() {
           );
         })}
       </div>
-    </Page>
+    </>
   );
 }

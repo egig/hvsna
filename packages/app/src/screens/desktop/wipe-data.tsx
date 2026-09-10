@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { HvDatabase, HvTrash2, HvAlertTriangle } from "@/modules/icons";
 import { getSqliteClient } from "@/modules/sqlite/sqlite-singleton";
-import { PageDesktop as Page } from "./page";
-import { NavbarDesktop as Navbar } from "./navbar-desktop";
+import { SettingsHeader } from "./settings-header";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 
 async function wipeLocalData(): Promise<void> {
@@ -38,10 +37,10 @@ export default function WipeData() {
   };
 
   return (
-    <Page>
-      <Navbar title={t("reset_device_data")} showBackButton />
+    <>
+      <SettingsHeader title={t("reset_device_data")} />
 
-      <main className="max-w-[520px] mx-auto p-6">
+      <div>
         {/* Warning Section */}
         <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4 mb-6">
           <div className="flex items-start space-x-3">
@@ -78,7 +77,7 @@ export default function WipeData() {
             <span>{isDeleting ? t("deleting") : t("wipe_all_data")}</span>
           </button>
         </div>
-      </main>
-    </Page>
+      </div>
+    </>
   );
 }
