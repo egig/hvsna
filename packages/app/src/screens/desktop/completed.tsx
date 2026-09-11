@@ -34,7 +34,7 @@ export function Completed() {
                 key={task.id}
                 task={task}
                 showGoalInfo={false}
-                className="transition-all hover:shadow-sm"
+                className="transition-all"
               />
             ))}
           </div>

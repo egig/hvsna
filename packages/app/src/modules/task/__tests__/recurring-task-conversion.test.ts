@@ -242,6 +242,32 @@ describe("promoteTaskToRecurring", () => {
     expect(created.length).toBe(0);
   });
 
+  it("excludes the task's own day from the template so the generator doesn't also emit a virtual for it (no duplicate on Today)", async () => {
+    const createRecurringTask = makeCreateRecurringTask("rtask_abc");
+    const updateTask = makeUpdateTask();
+    const repo = makeRepo();
+
+    await promoteTaskToRecurring(
+      "task_1",
+      BASE_TASK_INPUT, // atEpochMillis: EPOCH_07_01
+      "weekly",
+      1,
+      {
+        name: "Daily standup",
+        baseDateEpoch: EPOCH_07_01,
+        recurringType: "weekly",
+        recurringInterval: 1,
+      },
+      { createRecurringTask, updateTask, taskRepository: repo }
+    );
+
+    expect(createRecurringTask).toHaveBeenCalledOnce();
+    const templateArg = createRecurringTask.mock.calls[0][0];
+    expect(templateArg.occurrenceExceptions).toEqual([
+      dayjs(EPOCH_07_01).format("YYYYMMDD"),
+    ]);
+  });
+
   it("returns the result of updateTask", async () => {
     const expectedTask = new Task({
       id: "task_1",

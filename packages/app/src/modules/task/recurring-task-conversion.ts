@@ -95,10 +95,11 @@ export async function updateRecurringSeries(
  * Converts a regular task into a recurring task series.
  *
  * Steps:
- * 1. Create a RecurringTask template (rtask_ row).
- * 2. Link this task to the template first — so the occurrence generator
- *    finds it via findByRecurringTaskId and skips this date (no duplicate).
- * 3. Generate future instances up to the horizon.
+ * 1. Create a RecurringTask template (rtask_ row), excluding this task's own
+ *    day via occurrenceExceptions — this instance stays a real materialized
+ *    task, so the generator must not also emit a virtual for that day
+ *    (mirrors the exception bookkeeping in updateRecurringSeries above).
+ * 2. Link this task to the template.
  */
 export async function promoteTaskToRecurring(
   taskId: string,
@@ -110,7 +111,15 @@ export async function promoteTaskToRecurring(
 ): Promise<Task> {
   const { createRecurringTask, updateTask } = deps;
 
-  const template = await createRecurringTask(templateInput);
+  const anchorDay =
+    taskInput.atEpochMillis != null
+      ? dayjs(taskInput.atEpochMillis).format("YYYYMMDD")
+      : null;
+
+  const template = await createRecurringTask({
+    ...templateInput,
+    occurrenceExceptions: anchorDay ? [anchorDay] : [],
+  });
 
   return updateTask(taskId, {
     ...taskInput,

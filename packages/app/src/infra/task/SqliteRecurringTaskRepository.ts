@@ -128,6 +128,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       recurringEndEpoch: input.recurringEndEpoch,
       recurringEndOccurrences: input.recurringEndOccurrences,
       useGregorian: input.useGregorian,
+      occurrenceExceptions: input.occurrenceExceptions,
     };
     await this.client.run(UPSERT_SQL, recurringTaskParams(recurringTask));
     this.writeNotifier.notify("recurring_tasks");

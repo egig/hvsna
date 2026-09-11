@@ -40,6 +40,7 @@ export interface RecurringTaskCreateInput {
   recurringEndEpoch?: number;
   recurringEndOccurrences?: number;
   useGregorian?: boolean;
+  occurrenceExceptions?: string[];
 }
 
 export interface RecurringTaskUpdateInput {
