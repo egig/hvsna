@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { HvSquare, HvSquareCheckFilled } from "@/modules/icons";
+import { HvEdit, HvSquare, HvSquareCheckFilled } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
@@ -196,7 +196,7 @@ export function TaskListItem({
   const isOnTodayPage =
     location.pathname === "/today" || location.pathname === "/tasks";
 
-  const contentBg = "bg-white hover:bg-gray-50";
+  const contentBg = "bg-white";
 
   return (
     <motion.div
@@ -207,7 +207,7 @@ export function TaskListItem({
       layout
     >
       <div
-        className={`relative z-10 w-full px-4 py-2 transition-colors cursor-pointer ${contentBg}`}
+        className={`group relative z-10 w-full p-4 transition-colors cursor-pointer ${contentBg}`}
         onClick={handleItemClick}
       >
         <div className="flex items-start gap-2">
@@ -222,35 +222,50 @@ export function TaskListItem({
           </button>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3
-                className={`leading-6 transition-colors duration-200 ${getStatusColor(
-                  showDone
-                )} ${showDone ? "line-through" : ""}`}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3
+                    className={`leading-6 transition-colors duration-200 ${getStatusColor(
+                      showDone
+                    )} ${showDone ? "line-through" : ""}`}
+                  >
+                    {task.name}
+                  </h3>
+                </div>
+
+                {task.description && (
+                  <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
+                    {task.description}
+                  </p>
+                )}
+
+                <p
+                  className={`text-xs mt-0.5 ${
+                    task.isOverdue() && task.status !== 1
+                      ? "text-[var(--hvsna-danger-color)]"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {formatScheduledDate(task, isOnTodayPage ? "today" : "upcoming")}
+                </p>
+
+                {task.tags && task.tags.length > 0 && (
+                  <TagList tags={task.tags} className="mt-1.5" />
+                )}
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleItemClick();
+                }}
+                className="shrink-0 p-1.5 rounded-md text-gray-400 opacity-0 transition-opacity hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 cursor-pointer"
+                aria-label={t("edit")}
               >
-                {task.name}
-              </h3>
+                <HvEdit size={18} />
+              </button>
             </div>
-
-            {task.description && (
-              <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
-                {task.description}
-              </p>
-            )}
-
-            <p
-              className={`text-xs mt-0.5 ${
-                task.isOverdue() && task.status !== 1
-                  ? "text-[var(--hvsna-danger-color)]"
-                  : "text-gray-500"
-              }`}
-            >
-              {formatScheduledDate(task, isOnTodayPage ? "today" : "upcoming")}
-            </p>
-
-            {task.tags && task.tags.length > 0 && (
-              <TagList tags={task.tags} className="mt-1.5" />
-            )}
           </div>
         </div>
       </div>

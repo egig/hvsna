@@ -244,7 +244,7 @@ function DraggableTaskItem({
       {...listeners}
       {...attributes}
       className={[
-        "group relative rounded bg-white border-b border-gray-200 dark:bg-gray-900 overflow-hidden cursor-grab transition-all hover:shadow-sm",
+        "group relative rounded-lg bg-white border-b border-gray-200 dark:bg-gray-900 overflow-hidden cursor-grab transition-all",
         isDragging ? "opacity-40" : "",
       ].join(" ")}
     >
@@ -423,7 +423,7 @@ export function DragOverlayContent({
   return (
     <DragOverlay dropAnimation={null}>
       {activeTask && (
-        <div className="rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg opacity-90 cursor-grabbing">
           <TaskListItem
             task={activeTask}
             onEdit={() => {}}

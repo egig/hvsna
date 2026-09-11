@@ -30,7 +30,7 @@ function TodayInner() {
   const { pageTitle, subTitle } = useToday();
 
   return (
-    <Page navbar={<Navbar eyebrow={subTitle} title={pageTitle} />}>
+    <Page navbar={<Navbar eyebrow={subTitle} title={pageTitle} titleAreaClassName="pt-8" />}>
       <TodayContent />
     </Page>
   );
@@ -180,7 +180,7 @@ function TodayTasks({
                 key={task.id}
                 task={task}
                 showGoalInfo={false}
-                className="transition-all hover:shadow-sm"
+                className="transition-all"
               />
             ))}
           </div>

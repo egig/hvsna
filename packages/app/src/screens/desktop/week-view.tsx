@@ -49,8 +49,8 @@ function DraggableTaskCard({
       {...attributes}
       ref={setNodeRef}
       className={[
-        "rounded-sm border bg-white dark:bg-gray-900 cursor-grab",
-        "shadow-xs hover:shadow-md transition-shadow overflow-hidden",
+        "rounded-lg border bg-white dark:bg-gray-900 cursor-grab",
+        "hover:shadow-md transition-shadow overflow-hidden",
         isDragging ? "opacity-40" : "",
         isCompleted
           ? "border-gray-100 dark:border-gray-800 opacity-60"

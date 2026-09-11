@@ -11,6 +11,8 @@ export interface NavbarDesktopProps {
   leftAction?: ReactNode;
   rightAction?: ReactNode;
   className?: string;
+  /** Extra classes for the eyebrow/title/subtitle block (e.g. top spacing). */
+  titleAreaClassName?: string;
   /** Match a `fluid` PageDesktop — drop the centered inset and span full width. */
   fluid?: boolean;
   showSearch?: boolean;
@@ -31,6 +33,7 @@ export function NavbarDesktop({
   leftAction,
   rightAction,
   className = "",
+  titleAreaClassName = "",
   fluid = false,
   showSearch,
   searchPlaceholder = "Search...",
@@ -51,7 +54,7 @@ export function NavbarDesktop({
         {leftAction && <div className="flex-shrink-0">{leftAction}</div>}
 
         {/* Only the title/search block honours the inset — edge actions stay put. */}
-        <div className={`flex-1 min-w-0 ${fluid ? "" : DESKTOP_INSET}`}>
+        <div className={`flex-1 min-w-0 ${fluid ? "" : DESKTOP_INSET} px-4`}>
           {showSearch ? (
             <SearchInput
               value={searchValue}
@@ -60,7 +63,7 @@ export function NavbarDesktop({
               onSubmit={onSearchSubmit}
             />
           ) : (
-            <>
+            <div className={titleAreaClassName}>
               {eyebrow && (
                 <div className="text-[10px] font-extrabold tracking-wide uppercase text-primary-500 dark:text-primary-300 truncate">
                   {eyebrow}
@@ -77,7 +80,7 @@ export function NavbarDesktop({
               {subtitle && (
                 <div className="text-xs text-gray-500 truncate">{subtitle}</div>
               )}
-            </>
+            </div>
           )}
         </div>
 

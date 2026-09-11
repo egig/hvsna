@@ -35,11 +35,7 @@ export function SidebarTagsSection({
               }`
             }
           >
-            <span
-              style={{color: tag.color }}
-              aria-hidden
-            ><HvHash size={14}/></span>
-            <span className="text-sm truncate flex-1">{tag.name}</span>
+            <span style={{color: tag.color }} className="text-sm truncate flex-1">#{tag.name}</span>
             {tag.count > 0 && <span className="text-xs text-gray-400">{tag.count }</span> }
           </NavLink>
         ))}

@@ -177,7 +177,7 @@ export default function TagDetailPage() {
 
   const navTitle = (
     <span className="flex items-center gap-2">
-      <span style={{ color: tagColor }}>#</span>{decodedTag}
+      <span style={{ color: tagColor }}>#{decodedTag}</span>
     </span>
   );
 
