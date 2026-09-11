@@ -21,6 +21,50 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    date: "September 11, 2026",
+    releases: [
+      {
+        platform: "Web",
+        version: "v1.1.0",
+        changes: {
+          new: [
+            "Tags, so you can organize and filter your tasks your way",
+            "Sync your tasks across devices (Sync plan)",
+            "Redesigned layouts for phone and desktop, each tuned for its screen",
+          ],
+          improved: [
+            "Refreshed icons and dark mode colors for better readability",
+            "Smoother recurring task editing",
+            "More reliable login sessions",
+            "Pricing and sync info on the website is now always up to date",
+          ],
+          fixed: [
+            "Fixed a bug where having multiple tabs open at once could mix up your data",
+            "Fixed prayer time edge cases around sunrise",
+            "Fixed subscription checkout emails not always going out",
+          ],
+        },
+      },
+      {
+        platform: "Android",
+        version: "v2.2.0",
+        changes: {
+          new: [
+            "Tags, so you can organize and filter your tasks your way",
+            "Light, dark, and system appearance settings",
+            "Bahasa Indonesia language support",
+          ],
+          improved: [
+            "Native Android navigation for a snappier feel",
+            "Quick undo feedback when you complete or delete a task",
+            "Smoother recurring task editing",
+          ],
+          fixed: ["Various small bug fixes"],
+        },
+      },
+    ],
+  },
+  {
     date: "August 14, 2026",
     releases: [
       {
