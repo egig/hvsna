@@ -21,6 +21,20 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    date: "September 14, 2026",
+    releases: [
+      {
+        platform: "Web",
+        version: "v1.1.1",
+        changes: {
+          new: [],
+          improved: [],
+          fixed: ["Fixed a bug where turning a task into a repeating task could create a duplicate for that same day"],
+        },
+      },
+    ],
+  },
+  {
     date: "September 11, 2026",
     releases: [
       {
