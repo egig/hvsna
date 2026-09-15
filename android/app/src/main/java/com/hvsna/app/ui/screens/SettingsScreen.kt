@@ -64,7 +64,7 @@ fun SettingsScreen(
             return
         }
         SettingsSubScreen.SYNC -> {
-            SettingsSyncScreen(syncManager = syncManager, authViewModel = authViewModel, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
+            SettingsSyncScreen(syncManager = syncManager, authViewModel = authViewModel, settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
         SettingsSubScreen.LOCATION -> {

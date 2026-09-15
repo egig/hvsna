@@ -53,6 +53,7 @@ fun UpcomingScreen(
     val strings = LocalStrings.current
     val upcomingTasks by viewModel.upcomingTasks.collectAsState()
     val unscheduledTasks by viewModel.unscheduledTasks.collectAsState()
+    val settings by viewModel.settings.collectAsState()
 
     val taskGroups = groupUpcomingTasks(upcomingTasks, strings).filter { it.tasks.isNotEmpty() }
 
@@ -152,6 +153,7 @@ fun UpcomingScreen(
                                     onToggleDone = { viewModel.toggleDone(entry) },
                                     onClick = { onEditTask(entry, null) },
                                     showDivider = index != group.tasks.lastIndex,
+                                    hijriMonthOffsets = settings.hijriMonthOffsets,
                                     modifier = Modifier.animateItem(),
                                 )
                             }
@@ -181,6 +183,7 @@ fun UpcomingScreen(
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
                             showDivider = index != unscheduledTasks.lastIndex,
+                            hijriMonthOffsets = settings.hijriMonthOffsets,
                             modifier = Modifier.animateItem(),
                         )
                     }

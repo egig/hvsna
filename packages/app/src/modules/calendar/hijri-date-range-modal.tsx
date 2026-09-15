@@ -3,6 +3,7 @@ import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { ModalNavbar, useModal } from "src/modules/navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useCombinedDateFormat } from "./use-combined-date-format";
 import { HijriRangeCalendarGrid } from "./hijri-date-range-grid";
 import dayjs, { type Dayjs } from "dayjs";
 
@@ -26,6 +27,7 @@ export function HijriDateRangeModal({
 }: HijriDateRangeModalProps) {
   const Modal = useModal();
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
 
   const initial = selectedRange?.startDate
     ? dayjs(selectedRange.startDate)
@@ -100,7 +102,7 @@ export function HijriDateRangeModal({
     const d = dayjs(epoch);
     if (d.isSame(dayjs(), "day")) return t("today");
     if (d.isSame(dayjs().add(1, "day"), "day")) return t("tomorrow");
-    return d.format("DD MMMM YYYY");
+    return formatCombinedDate(d.toDate(), { includeYear: true });
   };
 
   return (

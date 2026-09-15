@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
+import com.hvsna.app.data.combinedDateLabel
 import com.hvsna.app.data.isPrayerAnchored
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -170,16 +171,20 @@ fun TaskListItem(
     showDate: Boolean = true,
     showYear: Boolean = false,
     showDivider: Boolean = true,
+    hijriMonthOffsets: Map<Int, Int> = emptyMap(),
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
     val timeFormat = remember(strings.locale) { SimpleDateFormat("HH:mm", strings.locale) }
-    val dateFormat = remember(strings.locale) { SimpleDateFormat("EEE, MMM d", strings.locale) }
-    val dateFormatWithYear = remember(strings.locale) { SimpleDateFormat("EEE, MMM d, yyyy", strings.locale) }
+    val weekdayFormat = remember(strings.locale) { SimpleDateFormat("EEE", strings.locale) }
 
     val done = task.isDone == 1
     val dateLabel = if (showDate) {
-        task.scheduledTime?.let { (if (showYear) dateFormatWithYear else dateFormat).format(Date(it)) } ?: ""
+        task.scheduledTime?.let {
+            val weekday = weekdayFormat.format(Date(it))
+            val combined = combinedDateLabel(it, hijriMonthOffsets, strings = strings, includeYear = showYear)
+            "$weekday, $combined"
+        } ?: ""
     } else ""
     val timeOnlyLabel = when {
         task.atTime.isNullOrBlank() -> ""

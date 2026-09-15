@@ -10,6 +10,7 @@ import { useTaskContext } from "./task-context";
 import { useTaskFormContext } from "./task-form-context";
 import { useCompletionGrace } from "./completion-grace-context";
 import { TagList } from "./tag-pill";
+import { useCombinedDateFormat } from "../calendar/use-combined-date-format";
 import dayjs from "dayjs";
 
 interface TaskListItemProps {
@@ -57,6 +58,7 @@ export function TaskListItem({
   const { t } = useLanguageContext();
   const { showSnackbar, hideSnackbar } = useSnackbar();
   const grace = useCompletionGrace();
+  const { formatCombinedDate } = useCombinedDateFormat();
 
   const gracePhase = grace.phase(task.id ?? "");
   // Treat a held row as done straight away so the pop + strike fire on click,
@@ -106,8 +108,10 @@ export function TaskListItem({
         dayjs(task.atEpochMillis).format("dddd") + (time ? `, ${time}` : "")
       );
     }
-    const dateFormat = taskDay.year() === today.year() ? "D MMMM" : "D MMMM YYYY";
-    return taskDay.format(dateFormat) + (time ? `, ${time}` : "");
+    const combined = formatCombinedDate(task.atEpochMillis, {
+      includeYear: taskDay.year() !== today.year(),
+    });
+    return combined + (time ? `, ${time}` : "");
   };
 
   const handleStatusClick = async (e: React.MouseEvent) => {

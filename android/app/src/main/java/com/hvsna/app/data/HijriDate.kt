@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.chrono.HijrahDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.util.Locale
 
@@ -30,6 +31,18 @@ val hijriMonthNames = listOf(
  */
 fun hijriMonthName(monthNumber: Int, strings: Strings? = null): String =
     strings?.get("hijriMonth.$monthNumber") ?: hijriMonthNames[monthNumber - 1]
+
+// Short English transliterations used only by [combinedDateLabel]'s paired Gregorian/Hijri format
+// (e.g. "15 Sep / 24 Rabi II") — matches the web app's HIJRI_MONTH_NAMES_EN_SHORT exactly.
+// Indonesian has no natural short form, so the combined format always uses the full translated
+// hijriMonth.<n> name for that language instead (see [hijriMonthLabelForCombined]).
+val hijriMonthNamesShortEn = listOf(
+    "Muharram", "Safar", "Rabi I", "Rabi II", "Jumada I", "Jumada II",
+    "Rajab", "Shaban", "Ramadan", "Shawwal", "Dhu al-Qidah", "Dhu al-Hijjah",
+)
+
+private fun hijriMonthLabelForCombined(monthNumber: Int, strings: Strings?): String =
+    if (strings?.locale?.language == "en") hijriMonthNamesShortEn[monthNumber - 1] else hijriMonthName(monthNumber, strings)
 
 // Resolves which per-month offset applies by computing the *raw* (un-offset)
 // Hijri month for this date first, then looking that month up in the map —
@@ -73,4 +86,45 @@ fun hijriDateLabel(
     val sunsetShift = if (maghribEpochMillis != null && epochMillis >= maghribEpochMillis) 1L else 0L
     val date = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate().plusDays(sunsetShift)
     return hijriDateLabel(date, monthOffsets, strings)
+}
+
+/**
+ * Paired Gregorian/Hijri label used on task rows, the sync screen, and the due-date picker's
+ * selected-date field, e.g. "15 Sep / 24 Rabi II" (English) or "15 Sep / 24 Rabiul Akhir"
+ * (Indonesian). The Gregorian side always uses a 3-letter month abbreviation ("Sep") for this
+ * format specifically (never the 4-letter/full name some surfaces otherwise use);
+ * [includeYear] appends the year to both sides when the surface's existing year policy calls
+ * for one.
+ */
+fun combinedDateLabel(
+    date: LocalDate,
+    monthOffsets: Map<Int, Int> = emptyMap(),
+    strings: Strings? = null,
+    includeYear: Boolean = false,
+): String {
+    val pattern = if (includeYear) "d MMM yyyy" else "d MMM"
+    val gregorian = date.format(DateTimeFormatter.ofPattern(pattern, strings?.locale ?: Locale.ENGLISH))
+    val hijrah = adjustedHijrahDate(date, monthOffsets)
+    val hijriMonth = hijriMonthLabelForCombined(hijrah.get(ChronoField.MONTH_OF_YEAR), strings)
+    val hijriDay = hijrah.get(ChronoField.DAY_OF_MONTH)
+    val hijri = if (includeYear) {
+        "$hijriDay $hijriMonth ${hijrah.get(ChronoField.YEAR_OF_ERA)}"
+    } else {
+        "$hijriDay $hijriMonth"
+    }
+    return "$gregorian / $hijri"
+}
+
+// Mirrors [hijriDateLabel]'s epoch-millis overload's sunset-rollover logic exactly — the Islamic
+// calendar day begins at sunset, not midnight.
+fun combinedDateLabel(
+    epochMillis: Long,
+    monthOffsets: Map<Int, Int> = emptyMap(),
+    maghribEpochMillis: Long? = null,
+    strings: Strings? = null,
+    includeYear: Boolean = false,
+): String {
+    val sunsetShift = if (maghribEpochMillis != null && epochMillis >= maghribEpochMillis) 1L else 0L
+    val date = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate().plusDays(sunsetShift)
+    return combinedDateLabel(date, monthOffsets, strings, includeYear)
 }

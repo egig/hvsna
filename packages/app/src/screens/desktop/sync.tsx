@@ -7,10 +7,12 @@ import {
   HvClock,
 } from "@/modules/icons";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
+import { useCombinedDateFormat } from "@/modules/calendar/use-combined-date-format";
 import { useSync } from "@/modules/sync/context";
 
 export default function Sync() {
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
   const { lastSyncTime, isSyncing, manualSync, isManualSyncing, canSync } =
     useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
@@ -46,7 +48,7 @@ export default function Sync() {
     if (diffHours < 24) return t("hours_ago", { count: diffHours });
     if (diffDays < 7) return t("days_ago", { count: diffDays });
 
-    return date.toLocaleDateString();
+    return formatCombinedDate(date, { includeYear: true });
   };
 
   const getStatusIcon = () => {

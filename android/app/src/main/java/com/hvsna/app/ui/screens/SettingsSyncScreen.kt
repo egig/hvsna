@@ -23,6 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
+import com.hvsna.app.data.AppSettings
+import com.hvsna.app.data.SettingsRepository
+import com.hvsna.app.data.combinedDateLabel
 import com.hvsna.app.sync.SyncManager
 import com.hvsna.app.ui.AuthViewModel
 import java.text.SimpleDateFormat
@@ -37,11 +40,13 @@ import com.hvsna.app.i18n.LocalStrings
 fun SettingsSyncScreen(
     syncManager: SyncManager,
     authViewModel: AuthViewModel,
+    settingsRepository: SettingsRepository,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
-    val lastSyncedFormat = remember(strings.locale) { SimpleDateFormat("MMM d, h:mm a", strings.locale) }
+    val settings by settingsRepository.settings.collectAsState(initial = AppSettings())
+    val lastSyncedTimeFormat = remember(strings.locale) { SimpleDateFormat("h:mm a", strings.locale) }
     val authState by authViewModel.state.collectAsState()
     val isSyncing by syncManager.isSyncing.collectAsState()
     val isManualSyncing by syncManager.isManualSyncing.collectAsState()
@@ -101,9 +106,12 @@ fun SettingsSyncScreen(
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                     Text(
-                        remember(lastSyncedAt, strings) {
-                            lastSyncedAt?.let { strings.format("sync.lastSynced", lastSyncedFormat.format(Date(it))) }
-                                ?: strings["sync.notSyncedYet"]
+                        remember(lastSyncedAt, strings, settings.hijriMonthOffsets) {
+                            lastSyncedAt?.let {
+                                val combinedDate = combinedDateLabel(it, settings.hijriMonthOffsets, strings = strings, includeYear = false)
+                                val time = lastSyncedTimeFormat.format(Date(it))
+                                strings.format("sync.lastSynced", "$combinedDate, $time")
+                            } ?: strings["sync.notSyncedYet"]
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,

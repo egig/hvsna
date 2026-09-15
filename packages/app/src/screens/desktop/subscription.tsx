@@ -8,6 +8,7 @@ import {
   HvAlertCircle,
 } from "@/modules/icons";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
+import { useCombinedDateFormat } from "@/modules/calendar/use-combined-date-format";
 import { useSubscription } from "@/modules/subscription/use-subscription";
 import type { SubscriptionStatus } from "@/domain/subscription/Subscription";
 
@@ -21,6 +22,7 @@ const ACTIVE_STATUSES: SubscriptionStatus[] = [
 
 export default function Subscription() {
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
   const [searchParams] = useSearchParams();
   const {
     subscription,
@@ -41,7 +43,7 @@ export default function Subscription() {
     !!subscription && ACTIVE_STATUSES.includes(subscription.status);
   const formatDate = (isoDate: string | null) => {
     if (!isoDate) return null;
-    return new Date(isoDate).toLocaleDateString();
+    return formatCombinedDate(new Date(isoDate), { includeYear: true });
   };
 
   return (

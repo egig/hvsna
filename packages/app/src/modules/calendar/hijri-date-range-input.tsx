@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { HijriDateRangeModal } from "./hijri-date-range-modal";
 import { HvCalendar, HvX } from "@/modules/icons";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useCombinedDateFormat } from "./use-combined-date-format";
 import dayjs from "dayjs";
 
 interface DateRange {
@@ -27,6 +28,7 @@ export function HijriDateRangeInput({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRange, setSelectedRange] = useState<DateRange | null>(null);
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
 
   // Initialize from value
   useEffect(() => {
@@ -53,7 +55,7 @@ export function HijriDateRangeInput({
     const d = dayjs(epoch);
     if (d.isSame(dayjs(), "day")) return t("today");
     if (d.isSame(dayjs().add(1, "day"), "day")) return t("tomorrow");
-    return d.format("DD MMMM YYYY");
+    return formatCombinedDate(d.toDate(), { includeYear: true });
   };
 
   const formatDateRangeDisplay = (range: DateRange | null) => {

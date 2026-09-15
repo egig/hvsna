@@ -3,6 +3,7 @@ import { Popover, PopoverDisclosure, usePopoverStore } from "@ariakit/react";
 import { HvCalendar, HvRepeat, HvChevronRight } from "@/modules/icons";
 import { CalendarMonthGrid } from "src/modules/calendar/hijri-date-input/calendar-month-grid";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
+import { useCombinedDateFormat } from "src/modules/calendar/use-combined-date-format";
 import type { TaskRecurringType } from "@/domain/task";
 import dayjs from "dayjs";
 
@@ -97,6 +98,7 @@ export default function DatePrayerInputDesktop({
   onChange,
 }: DatePrayerInputDesktopProps) {
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
 
   const datePopover = usePopoverStore({ placement: "right-start" });
   const repeatPopover = usePopoverStore({ placement: "right-start" });
@@ -161,7 +163,7 @@ export default function DatePrayerInputDesktop({
     if (isSameDate(selectedDate, new Date())) return t("today");
     if (isSameDate(selectedDate, dayjs().add(1, "day").toDate()))
       return t("tomorrow");
-    return dayjs(selectedDate).format("DD MMMM");
+    return formatCombinedDate(selectedDate);
   };
 
   const repeatLabel =

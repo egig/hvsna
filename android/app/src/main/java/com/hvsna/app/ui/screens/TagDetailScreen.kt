@@ -56,6 +56,7 @@ fun TagDetailScreen(
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
+    val settings by viewModel.settings.collectAsState()
     var tasks by remember(tag.id) { mutableStateOf<List<TaskWithTags>>(emptyList()) }
     val flow = remember(tag.id) { viewModel.tasksForTag(tag.id) }
     LaunchedEffect(flow) {
@@ -167,6 +168,7 @@ fun TagDetailScreen(
                                 onToggleDone = { viewModel.toggleDone(entry) },
                                 onClick = { onEditTask(entry, null) },
                                 showDivider = index != entries.lastIndex,
+                                hijriMonthOffsets = settings.hijriMonthOffsets,
                                 modifier = Modifier.animateItem(),
                             )
                         }

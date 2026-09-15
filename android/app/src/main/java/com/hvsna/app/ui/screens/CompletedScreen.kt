@@ -40,6 +40,7 @@ fun CompletedScreen(
 ) {
     val strings = LocalStrings.current
     val tasks by viewModel.allCompletedTasks.collectAsState()
+    val settings by viewModel.settings.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val listState = rememberLazyListState()
@@ -86,6 +87,7 @@ fun CompletedScreen(
                     onToggleDone = { viewModel.toggleDone(entry) },
                     onClick = { onEditTask(entry, null) },
                     showDivider = index != tasks.lastIndex,
+                    hijriMonthOffsets = settings.hijriMonthOffsets,
                     modifier = Modifier.animateItem(),
                 )
             }

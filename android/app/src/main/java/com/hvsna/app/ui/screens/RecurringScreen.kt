@@ -57,6 +57,7 @@ fun RecurringScreen(
 ) {
     val strings = LocalStrings.current
     val series by viewModel.recurringSeries.collectAsState()
+    val settings by viewModel.settings.collectAsState()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val listState = rememberLazyListState()
@@ -112,6 +113,7 @@ fun RecurringScreen(
                     onToggleDone = { viewModel.toggleDone(TaskWithTags(entry.nextOccurrence, entry.tags)) },
                     onClick = { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
                     showDivider = index != series.lastIndex,
+                    hijriMonthOffsets = settings.hijriMonthOffsets,
                     modifier = Modifier.animateItem(),
                 )
             }

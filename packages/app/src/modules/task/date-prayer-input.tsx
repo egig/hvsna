@@ -2,6 +2,7 @@ import { useState } from "react";
 import { HvCalendar, HvRepeat } from "@/modules/icons";
 import { CalendarModal } from "src/modules/calendar/hijri-date-input/calendar-modal";
 import { useLanguageContext } from "src/modules/i18n/LanguageContext";
+import { useCombinedDateFormat } from "src/modules/calendar/use-combined-date-format";
 import type { TaskRecurringType } from "@/domain/task";
 import dayjs from "dayjs";
 
@@ -50,6 +51,7 @@ export function DatePrayerInput({
   onChange,
 }: DatePrayerInputProps) {
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
   const [isOpen, setIsOpen] = useState(false);
 
   const formatDateLabel = () => {
@@ -57,7 +59,7 @@ export function DatePrayerInput({
     if (isSameDate(selectedDate as Date, new Date())) return t("today");
     if (isSameDate(selectedDate as Date, dayjs().add(1, "day").toDate()))
       return t("tomorrow");
-    return dayjs(selectedDate).format("DD MMMM");
+    return formatCombinedDate(selectedDate as Date);
   };
 
   return (

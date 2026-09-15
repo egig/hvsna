@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { HvCheck } from "@/modules/icons";
 import { NavActionButton } from "../components/nav-action-button";
 import { useLanguageContext } from "../i18n/LanguageContext";
+import { useCombinedDateFormat } from "../calendar/use-combined-date-format";
 import { ModalNavbar } from "../navigation";
 import type { TaskRecurringType } from "@/domain/task";
 
@@ -63,9 +64,12 @@ function getInitialOption(
   return "custom";
 }
 
-function formatRepeatEndDate(dateStr: string | null): string {
+function formatRepeatEndDate(
+  dateStr: string | null,
+  formatCombinedDate: (date: Date | number, options?: { includeYear?: boolean }) => string
+): string {
   if (!dateStr) return "On date";
-  return dayjs(dateStr).format("DD/MM/YYYY");
+  return formatCombinedDate(dayjs(dateStr).toDate(), { includeYear: true });
 }
 
 export function RepeatSelectorModal({
@@ -81,6 +85,7 @@ export function RepeatSelectorModal({
   useGregorian: useGregorianProp = false,
 }: RepeatSelectorModalProps) {
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
 
   const [selectedOption, setSelectedOption] = useState<RepeatOption>(
     getInitialOption(recurringType, interval)
@@ -260,7 +265,7 @@ export function RepeatSelectorModal({
               } ${selectedOption === "none" ? "cursor-not-allowed" : ""}`}
             >
               {recurringEndDate
-                ? formatRepeatEndDate(recurringEndDate)
+                ? formatRepeatEndDate(recurringEndDate, formatCombinedDate)
                 : t("repeat_ends_on_date")}
             </button>
             <button

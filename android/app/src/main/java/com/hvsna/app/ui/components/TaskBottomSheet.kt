@@ -78,6 +78,7 @@ import com.hvsna.app.data.RecurringEnd
 import com.hvsna.app.data.RecurringType
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
+import com.hvsna.app.data.combinedDateLabel
 import com.hvsna.app.data.isPrayerAnchored
 import com.hvsna.app.data.nextPrayerTime
 import com.hvsna.app.data.reminderOffsetPresets
@@ -315,7 +316,6 @@ fun TaskBottomSheet(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val strings = LocalStrings.current
-    val dateFormat = remember(strings.locale) { SimpleDateFormat("MMM d, yyyy", strings.locale) }
     val timeFormat = remember(strings.locale) { SimpleDateFormat("h:mm a", strings.locale) }
 
     var titleTagState by remember(task) {
@@ -686,7 +686,7 @@ fun TaskBottomSheet(
                         }
                     } else {
                         OutlinedButton(onClick = { showDatePicker = true }) {
-                            Text(dateFormat.format(scheduledTime))
+                            Text(combinedDateLabel(scheduledTime!!, hijriMonthOffsets, strings = strings, includeYear = false))
                         }
                         OutlinedButton(onClick = { showPrayerPicker = true }) {
                             Text(

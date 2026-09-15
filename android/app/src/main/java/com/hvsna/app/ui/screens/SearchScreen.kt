@@ -52,6 +52,7 @@ fun SearchScreen(
     val strings = LocalStrings.current
     val query by viewModel.searchQuery.collectAsState()
     val results by viewModel.searchResults.collectAsState()
+    val settings by viewModel.settings.collectAsState()
 
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -98,6 +99,7 @@ fun SearchScreen(
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
                             showDivider = index != results.lastIndex,
+                            hijriMonthOffsets = settings.hijriMonthOffsets,
                             modifier = Modifier.animateItem(),
                         )
                     }

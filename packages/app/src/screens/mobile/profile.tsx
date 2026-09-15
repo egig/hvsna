@@ -2,10 +2,12 @@ import { useAuth } from "@/modules/auth/use-auth";
 import { PageMobile as Page } from "./page";
 import { NavbarMobile as Navbar } from "./navbar-mobile";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
+import { useCombinedDateFormat } from "@/modules/calendar/use-combined-date-format";
 import { HvUser, HvMail } from "@/modules/icons";
 
 export default function Profile() {
   const { t } = useLanguageContext();
+  const { formatCombinedDate } = useCombinedDateFormat();
   const { user } = useAuth();
 
   return (
@@ -47,7 +49,9 @@ export default function Profile() {
                   <HvUser className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">
                     Member since:{" "}
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {formatCombinedDate(new Date(user.createdAt), {
+                      includeYear: true,
+                    })}
                   </span>
                 </div>
               )}
