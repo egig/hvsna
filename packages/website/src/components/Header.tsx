@@ -55,13 +55,13 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
             <nav className="hidden md:flex items-center space-x-4">
               <Link
                 to={currentLang === "id" ? "/id/about" : "/about"}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none hover:bg-primary-100 px-2 py-1 rounded-lg"
               >
                 {t.nav.about}
               </Link>
               <Link
                 to={currentLang === "id" ? "/id/pricing" : "/pricing"}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
+                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none hover:bg-primary-100 px-2 py-1 rounded-lg"
               >
                 {t.nav.pricing}
               </Link>
@@ -70,7 +70,7 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
             {/* Language Toggle */}
             <Link
               to={currentLang === "id" ? "/" : "/id"}
-              className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              className="flex items-center space-x-1 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors hover:bg-primary-100 px-2 py-1 rounded-lg"
               title={t.language}
             >
               <Globe className="w-4 h-4" />
@@ -120,7 +120,7 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
                 className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
                 onClick={() => setIsMenuOpen(false)}
               >
-                {t.nav.webApp} — {t.signIn}
+                {t.nav.webApp}
               </a>
               <Link
                 to={downloadHref}

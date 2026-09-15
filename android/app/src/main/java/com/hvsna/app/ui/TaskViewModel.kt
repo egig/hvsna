@@ -222,8 +222,30 @@ class TaskViewModel(
         _searchQuery.value = query
     }
 
-    fun tasksForTag(tagId: String): Flow<List<TaskWithTags>> =
-        completionGrace.retain(repository.getTasksForTag(tagId), byScheduledTime)
+    /** Real tagged tasks plus, per recurring series that carries this tag, its one overdue occurrence (if any) and its one next occurrence (within [UPCOMING_HORIZON_DAYS]) — not every future instance. */
+    fun tasksForTag(tagId: String): Flow<List<TaskWithTags>> {
+        val start = todayStart()
+        val horizon = start + UPCOMING_HORIZON_DAYS * 86_400_000L
+        return completionGrace.retain(
+            combine(
+                repository.getTasksForTag(tagId),
+                repository.getAllRecurrenceRulesWithTags(),
+                settings,
+            ) { real, rules, appSettings ->
+                val taggedRules = rules.filter { entry -> entry.tags.any { it.id == tagId } }
+                val overdue = taggedRules.mapNotNull { entry ->
+                    recurrenceManager.overdueOccurrenceFor(entry.rule, start, appSettings)
+                        ?.let { TaskWithTags(it, entry.tags) }
+                }
+                val next = taggedRules.mapNotNull { entry ->
+                    recurrenceManager.nextOccurrenceFor(entry.rule, start, horizon, appSettings)
+                        ?.let { TaskWithTags(it, entry.tags) }
+                }
+                real + (overdue + next).filter { it.task.isDone == 0 }
+            },
+            byScheduledTime,
+        )
+    }
 
     /**
      * Save path for **non-recurring-original** edits only: brand-new tasks

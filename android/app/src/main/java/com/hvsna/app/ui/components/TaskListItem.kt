@@ -169,6 +169,7 @@ fun TaskListItem(
     inPrayerSection: Boolean = false,
     showDate: Boolean = true,
     showYear: Boolean = false,
+    showDivider: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -282,11 +283,13 @@ fun TaskListItem(
                 }
             }
         }
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant,
-        )
+        if (showDivider) {
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 20.dp),
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+            )
+        }
     }
 }
 

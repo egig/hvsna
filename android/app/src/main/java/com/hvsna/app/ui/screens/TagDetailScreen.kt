@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -160,12 +160,13 @@ fun TagDetailScreen(
                         )
                     }
                     if (isExpanded) {
-                        items(entries, key = { it.task.id }) { entry ->
+                        itemsIndexed(entries, key = { _, entry -> entry.task.id }) { index, entry ->
                             TaskListItem(
                                 task = entry.task,
                                 tags = entry.tags,
                                 onToggleDone = { viewModel.toggleDone(entry) },
                                 onClick = { onEditTask(entry, null) },
+                                showDivider = index != entries.lastIndex,
                                 modifier = Modifier.animateItem(),
                             )
                         }

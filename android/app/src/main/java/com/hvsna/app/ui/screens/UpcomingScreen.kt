@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -143,7 +143,7 @@ fun UpcomingScreen(
 
                         if (isExpanded) {
                             val isYearGroup = group.key.startsWith("year_")
-                            items(group.tasks, key = { it.task.id }) { entry ->
+                            itemsIndexed(group.tasks, key = { _, entry -> entry.task.id }) { index, entry ->
                                 TaskListItem(
                                     task = entry.task,
                                     tags = entry.tags,
@@ -151,6 +151,7 @@ fun UpcomingScreen(
                                     showYear = isYearGroup,
                                     onToggleDone = { viewModel.toggleDone(entry) },
                                     onClick = { onEditTask(entry, null) },
+                                    showDivider = index != group.tasks.lastIndex,
                                     modifier = Modifier.animateItem(),
                                 )
                             }
@@ -172,13 +173,14 @@ fun UpcomingScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = innerPadding,
                 ) {
-                    items(unscheduledTasks, key = { it.task.id }) { entry ->
+                    itemsIndexed(unscheduledTasks, key = { _, entry -> entry.task.id }) { index, entry ->
                         TaskListItem(
                             task = entry.task,
                             tags = entry.tags,
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            showDivider = index != unscheduledTasks.lastIndex,
                             modifier = Modifier.animateItem(),
                         )
                     }

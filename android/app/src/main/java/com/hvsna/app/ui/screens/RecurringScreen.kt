@@ -3,7 +3,7 @@ package com.hvsna.app.ui.screens
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -97,7 +97,7 @@ fun RecurringScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = innerPadding,
         ) {
-            items(series, key = { it.rule.id }) { entry ->
+            itemsIndexed(series, key = { _, entry -> entry.rule.id }) { index, entry ->
                 val cadence = cadenceLabel(entry.rule.recurringInterval, entry.rule.recurringType, strings)
                 val displayTask = entry.nextOccurrence.copy(
                     description = if (entry.nextOccurrence.description.isNotEmpty()) {
@@ -111,6 +111,7 @@ fun RecurringScreen(
                     tags = entry.tags,
                     onToggleDone = { viewModel.toggleDone(TaskWithTags(entry.nextOccurrence, entry.tags)) },
                     onClick = { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
+                    showDivider = index != series.lastIndex,
                     modifier = Modifier.animateItem(),
                 )
             }

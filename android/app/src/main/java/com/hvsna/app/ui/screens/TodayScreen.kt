@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -298,7 +298,7 @@ fun TodayScreen(
                     )
                 }
                 if (isExpanded) {
-                    items(allOverdueTasks, key = { it.task.id }) { entry ->
+                    itemsIndexed(allOverdueTasks, key = { _, entry -> entry.task.id }) { index, entry ->
                         TaskListItem(
                             task = entry.task,
                             tags = entry.tags,
@@ -307,6 +307,7 @@ fun TodayScreen(
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            showDivider = index != allOverdueTasks.lastIndex,
                             modifier = Modifier.animateItem(),
                         )
                     }
@@ -318,9 +319,9 @@ fun TodayScreen(
                     item.groupKey == null ||
                     expandedGroups[item.groupKey] != false
             }
-            items(
+            itemsIndexed(
                 visibleTodayItems,
-                key = { item ->
+                key = { _, item ->
                     when (item) {
                         is TodayListItem.PrayerHeader -> item.groupKey
                         is TodayListItem.TaskEntry -> item.entry.task.id
@@ -328,7 +329,7 @@ fun TodayScreen(
                         is TodayListItem.SunsetHairline -> "sunset_hairline"
                     }
                 },
-            ) { item ->
+            ) { index, item ->
                 val itemModifier = Modifier.animateItem()
                 when (item) {
                     is TodayListItem.PrayerHeader -> {
@@ -341,16 +342,21 @@ fun TodayScreen(
                             modifier = itemModifier,
                         )
                     }
-                    is TodayListItem.TaskEntry -> TaskListItem(
-                        task = item.entry.task,
-                        tags = item.entry.tags,
-                        isOverdue = false,
-                        inPrayerSection = true,
-                        showDate = false,
-                        onToggleDone = { viewModel.toggleDone(item.entry) },
-                        onClick = { onEditTask(item.entry, null) },
-                        modifier = itemModifier,
-                    )
+                    is TodayListItem.TaskEntry -> {
+                        val nextItem = visibleTodayItems.getOrNull(index + 1)
+                        val isLastInGroup = nextItem !is TodayListItem.TaskEntry || nextItem.groupKey != item.groupKey
+                        TaskListItem(
+                            task = item.entry.task,
+                            tags = item.entry.tags,
+                            isOverdue = false,
+                            inPrayerSection = true,
+                            showDate = false,
+                            onToggleDone = { viewModel.toggleDone(item.entry) },
+                            onClick = { onEditTask(item.entry, null) },
+                            showDivider = !isLastInGroup,
+                            modifier = itemModifier,
+                        )
+                    }
                     is TodayListItem.DayDivider -> DayDivider(
                         label = item.label,
                         leadingNote = item.leadingNote,
@@ -377,7 +383,7 @@ fun TodayScreen(
                     )
                 }
                 if (isExpanded) {
-                    items(completedTasks, key = { it.task.id }) { entry ->
+                    itemsIndexed(completedTasks, key = { _, entry -> entry.task.id }) { index, entry ->
                         TaskListItem(
                             task = entry.task,
                             tags = entry.tags,
@@ -386,6 +392,7 @@ fun TodayScreen(
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            showDivider = index != completedTasks.lastIndex,
                             modifier = Modifier.animateItem(),
                         )
                     }

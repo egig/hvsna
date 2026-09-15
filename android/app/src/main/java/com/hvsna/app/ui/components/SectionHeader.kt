@@ -22,7 +22,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -59,7 +61,7 @@ fun SectionHeader(
             .fillMaxWidth()
             .then(if (background != null) Modifier.background(background) else Modifier)
             .clickable { onToggle() }
-            .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 6.dp),
+            .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 14.dp),
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_chevron_down),
@@ -75,6 +77,13 @@ fun SectionHeader(
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
             color = color,
+            style = TextStyle(
+                lineHeight = 14.sp,
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+            ),
         )
         if (count != null) {
             Text(
@@ -82,6 +91,13 @@ fun SectionHeader(
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = TextStyle(
+                    lineHeight = 14.sp,
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.Both,
+                    ),
+                ),
             )
         }
     }

@@ -8,6 +8,7 @@ import { EmptyState } from "@/modules/components/empty-state";
 import TaskListItem from "@/modules/task/task-list-item";
 import { TaskGroupCollapsible } from "@/modules/task/task-group-collapsible";
 import { useAllTasks } from "@/modules/task/use-all-tasks";
+import { useVirtualTasks } from "@/modules/task/use-virtual-tasks";
 import { useCompletionGrace } from "@/modules/task/completion-grace-context";
 import dayjs from "dayjs";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
@@ -16,11 +17,39 @@ import { Menu } from "@base-ui/react/menu";
 import type { Task } from "@/domain/task";
 import { TAG_COLOR_PALETTE, DEFAULT_TAG_COLOR, normalizeTagName } from "@/domain/tag";
 
+// Matches the Android tag detail screen's UPCOMING_HORIZON_DAYS.
+const TAG_DETAIL_HORIZON_DAYS = 365;
+
+// useVirtualTasks emits every occurrence of a daily/weekly series within the
+// horizon (plus one overdue instance, already singular). Collapse the future
+// side down to one row per series — the next occurrence only — matching
+// Android's tasksForTag (nextOccurrenceFor, not virtualOccurrencesFor).
+function nextOccurrencePerSeries(virtualTasks: Task[], nowEpoch: number): Task[] {
+  const pastOrUnscheduled: Task[] = [];
+  const nextFuture = new Map<string | number, Task>();
+  for (const task of virtualTasks) {
+    if (task.recurringTaskId == null || task.atEpochMillis == null || task.atEpochMillis < nowEpoch) {
+      pastOrUnscheduled.push(task);
+      continue;
+    }
+    const existing = nextFuture.get(task.recurringTaskId);
+    if (!existing || task.atEpochMillis < existing.atEpochMillis!) {
+      nextFuture.set(task.recurringTaskId, task);
+    }
+  }
+  return [...pastOrUnscheduled, ...nextFuture.values()];
+}
+
 export default function TagDetailPage() {
   const { tagName } = useParams<{ tagName: string }>();
   const navigate = useNavigate();
   const { t } = useLanguageContext();
   const allTasksQuery = useAllTasks();
+  const startOfToday = dayjs().startOf("day").valueOf();
+  const virtualTaskQuery = useVirtualTasks(
+    startOfToday,
+    startOfToday + TAG_DETAIL_HORIZON_DAYS * 24 * 60 * 60 * 1000
+  );
   const { tags, renameTag, setTagColor, deleteTag } = useTags();
   const { phase: gracePhase } = useCompletionGrace();
 
@@ -42,11 +71,16 @@ export default function TagDetailPage() {
 
   const tasks = useMemo<Task[]>(() => {
     if (!allTasksQuery.data || !decodedTag) return [];
-    return allTasksQuery.data.filter(
+    const real = allTasksQuery.data.filter(
       (task) => task.tags?.includes(decodedTag) && isActive(task)
     );
+    const virtual = nextOccurrencePerSeries(
+      (virtualTaskQuery.data ?? []).filter((task) => task.tags?.includes(decodedTag)),
+      startOfToday
+    );
+    return [...real, ...virtual];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allTasksQuery.data, decodedTag]);
+  }, [allTasksQuery.data, virtualTaskQuery.data, decodedTag]);
 
   const completedTasks = useMemo<Task[]>(() => {
     if (!allTasksQuery.data || !decodedTag) return [];

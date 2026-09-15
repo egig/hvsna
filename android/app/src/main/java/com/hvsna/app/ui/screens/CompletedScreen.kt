@@ -3,7 +3,7 @@ package com.hvsna.app.ui.screens
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -79,12 +79,13 @@ fun CompletedScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = innerPadding,
         ) {
-            items(tasks, key = { it.task.id }) { entry ->
+            itemsIndexed(tasks, key = { _, entry -> entry.task.id }) { index, entry ->
                 TaskListItem(
                     task = entry.task,
                     tags = entry.tags,
                     onToggleDone = { viewModel.toggleDone(entry) },
                     onClick = { onEditTask(entry, null) },
+                    showDivider = index != tasks.lastIndex,
                     modifier = Modifier.animateItem(),
                 )
             }
