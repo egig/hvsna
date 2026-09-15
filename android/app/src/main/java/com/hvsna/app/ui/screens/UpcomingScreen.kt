@@ -60,15 +60,6 @@ fun UpcomingScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val expandedGroups = remember { mutableStateMapOf<String, Boolean>() }
     var selectedTab by remember { mutableIntStateOf(TAB_SCHEDULED) }
-    val defaultScheduledTime = remember {
-        Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_MONTH, 1)
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-        }.timeInMillis
-    }
     val scheduledListState = rememberLazyListState()
     val unscheduledListState = rememberLazyListState()
     val isScheduledEmpty = taskGroups.isEmpty()
@@ -104,15 +95,6 @@ fun UpcomingScreen(
                         text = { Text(strings["upcoming.tabUnscheduled"]) },
                     )
                 }
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onEditTask(null, defaultScheduledTime) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
             }
         },
     ) { innerPadding ->
@@ -190,5 +172,28 @@ fun UpcomingScreen(
                 }
             }
         }
+    }
+}
+
+/** Rendered outside [UpcomingScreen]'s own Scaffold (see MainActivity's SyncPullToRefreshBox) so
+ * the FAB stays pinned in place rather than stretching along with pull-to-refresh. */
+@Composable
+fun UpcomingScreenFab(onEditTask: (TaskWithTags?, Long?) -> Unit) {
+    val strings = LocalStrings.current
+    val defaultScheduledTime = remember {
+        Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }.timeInMillis
+    }
+    FloatingActionButton(
+        onClick = { onEditTask(null, defaultScheduledTime) },
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    ) {
+        Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
     }
 }

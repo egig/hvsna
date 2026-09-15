@@ -94,8 +94,11 @@ import com.hvsna.app.ui.screens.BrowseScreen
 import com.hvsna.app.ui.screens.SearchScreen
 import com.hvsna.app.ui.screens.SettingsScreen
 import com.hvsna.app.ui.screens.TagDetailScreen
+import com.hvsna.app.ui.screens.TagDetailScreenFab
 import com.hvsna.app.ui.screens.TodayScreen
+import com.hvsna.app.ui.screens.TodayScreenFab
 import com.hvsna.app.ui.screens.UpcomingScreen
+import com.hvsna.app.ui.screens.UpcomingScreenFab
 import com.hvsna.app.ui.theme.HvsnaTheme
 import okhttp3.OkHttpClient
 import androidx.compose.ui.res.vectorResource
@@ -283,12 +286,20 @@ fun HvsnaApp() {
     ) {
         NavHost(navController = navController, startDestination = AppRoute.Today) {
             composable<AppRoute.Today> {
-                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                SyncPullToRefreshBox(
+                    syncManager = syncManager,
+                    canSync = canSync,
+                    floatingActionButton = { TodayScreenFab(onEditTask = onEditTask) },
+                ) {
                     TodayScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
                 }
             }
             composable<AppRoute.Upcoming> {
-                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                SyncPullToRefreshBox(
+                    syncManager = syncManager,
+                    canSync = canSync,
+                    floatingActionButton = { UpcomingScreenFab(onEditTask = onEditTask) },
+                ) {
                     UpcomingScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
                 }
             }
@@ -311,13 +322,16 @@ fun HvsnaApp() {
                 val route: AppRoute.TagDetail = backStackEntry.toRoute()
                 val tag = allTags.firstOrNull { it.id == route.tagId }
                 if (tag != null) {
-                    SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                    SyncPullToRefreshBox(
+                        syncManager = syncManager,
+                        canSync = canSync,
+                        floatingActionButton = { TagDetailScreenFab(onAddTaskWithTag = { onAddTaskWithTag(tag.id) }) },
+                    ) {
                         TagDetailScreen(
                             viewModel = taskViewModel,
                             tag = tag,
                             onBack = { navController.popBackStack() },
                             onEditTask = onEditTask,
-                            onAddTaskWithTag = onAddTaskWithTag,
                         )
                     }
                 } else {
@@ -452,6 +466,7 @@ private const val StretchScaleAmount = 0.025f
 private fun SyncPullToRefreshBox(
     syncManager: SyncManager,
     canSync: Boolean,
+    floatingActionButton: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val isManualSyncing by syncManager.isManualSyncing.collectAsState()
@@ -476,6 +491,17 @@ private fun SyncPullToRefreshBox(
                 }
         ) {
             content()
+        }
+        // Rendered as a sibling of the stretched Box above (not inside it) so the FAB stays
+        // pinned in place — genuinely "floating" — instead of dragging/stretching along with
+        // the rest of the screen while the user pulls to refresh.
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .navigationBarsPadding()
+                .padding(16.dp),
+        ) {
+            floatingActionButton()
         }
     }
 }

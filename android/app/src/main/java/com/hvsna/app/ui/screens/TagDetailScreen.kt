@@ -52,7 +52,6 @@ fun TagDetailScreen(
     tag: Tag,
     onBack: () -> Unit,
     onEditTask: (TaskWithTags?, Long?) -> Unit,
-    onAddTaskWithTag: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -118,16 +117,6 @@ fun TagDetailScreen(
                 },
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onAddTaskWithTag(tag.id) },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
-            }
-        },
     ) { innerPadding ->
         if (isEmpty) {
             EmptyState(
@@ -189,5 +178,20 @@ fun TagDetailScreen(
                 onBack()
             },
         )
+    }
+}
+
+/** Rendered outside [TagDetailScreen]'s own Scaffold (see MainActivity's SyncPullToRefreshBox) so
+ * the FAB stays pinned in place rather than stretching along with pull-to-refresh. */
+@Composable
+fun TagDetailScreenFab(onAddTaskWithTag: () -> Unit) {
+    val strings = LocalStrings.current
+    FloatingActionButton(
+        onClick = onAddTaskWithTag,
+        shape = RoundedCornerShape(16.dp),
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    ) {
+        Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
     }
 }

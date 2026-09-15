@@ -22,6 +22,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -62,6 +64,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
@@ -103,13 +106,14 @@ private fun UnderlineTextField(
     modifier: Modifier = Modifier,
     singleLine: Boolean = false,
     minLines: Int = 1,
+    focusRequester: FocusRequester? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val textColor = MaterialTheme.colorScheme.onSurface
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier.then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
         textStyle = LocalTextStyle.current.copy(color = textColor),
         singleLine = singleLine,
         minLines = minLines,
@@ -146,6 +150,7 @@ private fun TitleTagInput(
     placeholder: String,
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
+    onSubmit: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val strings = LocalStrings.current
@@ -185,6 +190,8 @@ private fun TitleTagInput(
                 .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
             textStyle = LocalTextStyle.current.copy(color = textColor),
             singleLine = false,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             interactionSource = interactionSource,
             visualTransformation = transformation,
@@ -344,6 +351,7 @@ fun TaskBottomSheet(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTagPicker by remember { mutableStateOf(false) }
     val titleFocusRequester = remember { FocusRequester() }
+    val descriptionFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         titleFocusRequester.requestFocus()
@@ -665,6 +673,7 @@ fun TaskBottomSheet(
                     placeholder = strings["task.titlePlaceholder"],
                     modifier = Modifier.fillMaxWidth(),
                     focusRequester = titleFocusRequester,
+                    onSubmit = { descriptionFocusRequester.requestFocus() },
                 )
 
                 UnderlineTextField(
@@ -673,6 +682,7 @@ fun TaskBottomSheet(
                     placeholder = strings["task.descriptionPlaceholder"],
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth(),
+                    focusRequester = descriptionFocusRequester,
                 )
 
                 FlowRow(

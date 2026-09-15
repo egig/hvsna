@@ -218,14 +218,6 @@ fun TodayScreen(
     val expandedGroups = remember {
         mutableStateMapOf("Overdue" to true, "Completed" to false)
     }
-    val defaultScheduledTime = remember {
-        Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-        }.timeInMillis
-    }
 
     Scaffold(
         modifier = modifier
@@ -259,16 +251,6 @@ fun TodayScreen(
                     scrolledContainerColor = MaterialTheme.colorScheme.surface,
                 ),
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onEditTask(null, defaultScheduledTime) },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
-            }
         },
     ) { innerPadding ->
         if (isEmpty) {
@@ -492,6 +474,29 @@ private fun SunsetHairline(label: String, leadingNote: String?, modifier: Modifi
                 .dashedLine(MaterialTheme.colorScheme.outlineVariant),
         )
     }
+    }
+}
+
+/** Rendered outside [TodayScreen]'s own Scaffold (see MainActivity's SyncPullToRefreshBox) so
+ * the FAB stays pinned in place rather than stretching along with pull-to-refresh. */
+@Composable
+fun TodayScreenFab(onEditTask: (TaskWithTags?, Long?) -> Unit) {
+    val strings = LocalStrings.current
+    val defaultScheduledTime = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }.timeInMillis
+    }
+    FloatingActionButton(
+        onClick = { onEditTask(null, defaultScheduledTime) },
+        shape = RoundedCornerShape(16.dp),
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+    ) {
+        Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), contentDescription = strings["a11y.addTask"])
     }
 }
 
