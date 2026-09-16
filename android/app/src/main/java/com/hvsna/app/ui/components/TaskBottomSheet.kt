@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,7 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
@@ -43,7 +41,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -352,11 +349,6 @@ fun TaskBottomSheet(
     var showTagPicker by remember { mutableStateOf(false) }
     val titleFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(Unit) {
-        titleFocusRequester.requestFocus()
-    }
-
     fun calFromTime() = Calendar.getInstance().apply { timeInMillis = scheduledTime ?: System.currentTimeMillis() }
 
     fun applySelectedDate(date: LocalDate) {
@@ -389,7 +381,6 @@ fun TaskBottomSheet(
                 }.timeInMillis
             }
         }
-        showDatePicker = false
     }
 
     fun showCustomTimePicker() {
@@ -416,15 +407,16 @@ fun TaskBottomSheet(
         ).show()
     }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
+    TaskEditorContainer(
+        isNewTask = task == null,
+        titleFocusRequester = titleFocusRequester,
+        onDismiss = onDismiss,
         sheetState = sheetState,
-    ) {
+    ) { dismiss ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .imePadding(),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (showDatePicker) {
@@ -451,6 +443,74 @@ fun TaskBottomSheet(
                     modifier = Modifier.fillMaxWidth(),
                     locale = strings.locale,
                 )
+
+                if (scheduledTime != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null)
+                        Text(
+                            strings["task.repeat"],
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 12.dp),
+                        )
+                        Switch(checked = repeatEnabled, onCheckedChange = { repeatEnabled = it })
+                    }
+
+                    if (repeatEnabled) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text(strings["task.every"], style = MaterialTheme.typography.bodyMedium)
+                            IconButton(onClick = { repeatIntervalCount = (repeatIntervalCount - 1).coerceAtLeast(1) }) {
+                                Text("−", style = MaterialTheme.typography.titleLarge)
+                            }
+                            Text(repeatIntervalCount.toString(), style = MaterialTheme.typography.bodyLarge)
+                            IconButton(onClick = { repeatIntervalCount += 1 }) {
+                                Text("+", style = MaterialTheme.typography.titleLarge)
+                            }
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            val plural = repeatIntervalCount != 1
+                            val unitLabels = listOf(
+                                RecurringType.DAILY to if (plural) "unit.days" else "unit.day",
+                                RecurringType.WEEKLY to if (plural) "unit.weeks" else "unit.week",
+                                RecurringType.MONTHLY to if (plural) "unit.months" else "unit.month",
+                                RecurringType.YEARLY to if (plural) "unit.years" else "unit.year",
+                            )
+                            unitLabels.forEach { (type, unitKey) ->
+                                FilterChip(
+                                    selected = repeatType == type,
+                                    onClick = { repeatType = type },
+                                    label = { Text(strings[unitKey]) },
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            scheduledTime = null
+                            selectedPrayerName = null
+                            isAllDay = false
+                            repeatEnabled = false
+                            showDatePicker = false
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(strings["task.removeDate"])
+                    }
+                }
 
                 // bottom padding
                 Text("", modifier = Modifier.padding(bottom = 4.dp))
@@ -482,7 +542,7 @@ fun TaskBottomSheet(
                         )
                         TextButton(onClick = {
                             showPrayerPicker = false
-                            onDismiss()
+                            dismiss()
                             onOpenSettings()
                         }) {
                             Text(strings["task.setLocationInSettings"])
@@ -718,89 +778,30 @@ fun TaskBottomSheet(
                     }
                 }
 
-                if (scheduledTime != null) {
-                    TextButton(
-                        onClick = { scheduledTime = null; selectedPrayerName = null; isAllDay = false },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(strings["task.removeDate"])
-                    }
-
-                    if (remindersGloballyEnabled && !isAllDay && selectedPrayerName == null) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(
-                                strings["task.reminder"],
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f),
-                            )
-                            Switch(checked = reminderEnabled, onCheckedChange = { reminderEnabled = it })
-                        }
-
-                        if (reminderEnabled) {
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                reminderOffsetPresets.forEach { preset ->
-                                    FilterChip(
-                                        selected = reminderOffsetMinutes == preset.minutes,
-                                        onClick = { reminderOffsetMinutes = preset.minutes },
-                                        label = { Text(strings[preset.labelKey]) },
-                                    )
-                                }
-                            }
-                        }
-                    }
-
+                if (scheduledTime != null && remindersGloballyEnabled && !isAllDay && selectedPrayerName == null) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_repeat), contentDescription = null)
                         Text(
-                            strings["task.repeat"],
+                            strings["task.reminder"],
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 12.dp),
+                            modifier = Modifier.weight(1f),
                         )
-                        Switch(checked = repeatEnabled, onCheckedChange = { repeatEnabled = it })
+                        Switch(checked = reminderEnabled, onCheckedChange = { reminderEnabled = it })
                     }
 
-                    if (repeatEnabled) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text(strings["task.every"], style = MaterialTheme.typography.bodyMedium)
-                            IconButton(onClick = { repeatIntervalCount = (repeatIntervalCount - 1).coerceAtLeast(1) }) {
-                                Text("−", style = MaterialTheme.typography.titleLarge)
-                            }
-                            Text(repeatIntervalCount.toString(), style = MaterialTheme.typography.bodyLarge)
-                            IconButton(onClick = { repeatIntervalCount += 1 }) {
-                                Text("+", style = MaterialTheme.typography.titleLarge)
-                            }
-                        }
-                        Row(
+                    if (reminderEnabled) {
+                        FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            val plural = repeatIntervalCount != 1
-                            val unitLabels = listOf(
-                                RecurringType.DAILY to if (plural) "unit.days" else "unit.day",
-                                RecurringType.WEEKLY to if (plural) "unit.weeks" else "unit.week",
-                                RecurringType.MONTHLY to if (plural) "unit.months" else "unit.month",
-                                RecurringType.YEARLY to if (plural) "unit.years" else "unit.year",
-                            )
-                            unitLabels.forEach { (type, unitKey) ->
+                            reminderOffsetPresets.forEach { preset ->
                                 FilterChip(
-                                    selected = repeatType == type,
-                                    onClick = { repeatType = type },
-                                    label = { Text(strings[unitKey]) },
+                                    selected = reminderOffsetMinutes == preset.minutes,
+                                    onClick = { reminderOffsetMinutes = preset.minutes },
+                                    label = { Text(strings[preset.labelKey]) },
                                 )
                             }
                         }
@@ -840,7 +841,7 @@ fun TaskBottomSheet(
                                 RecurrenceInput.None
                             },
                         )
-                        onDismiss()
+                        dismiss()
                     },
                     enabled = titleTagState.hasTitle,
                     modifier = Modifier
@@ -854,7 +855,7 @@ fun TaskBottomSheet(
                     OutlinedButton(
                         onClick = {
                             onDelete(task)
-                            onDismiss()
+                            dismiss()
                         },
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.error,

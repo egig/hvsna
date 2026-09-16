@@ -317,15 +317,6 @@ export default function DatePrayerInputDesktop({
           >
             {t("next_week")}
           </button>
-          {selectedDate && (
-            <button
-              type="button"
-              onClick={handleNoDate}
-              className="px-2.5 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors"
-            >
-              {t("no_date")}
-            </button>
-          )}
         </div>
 
         {/* Calendar */}
@@ -369,13 +360,23 @@ export default function DatePrayerInputDesktop({
           />
         </div>
 
-        {/* Done */}
-        <div className="flex justify-end p-2 border-t border-gray-100 dark:border-gray-700">
+        {/* Remove date + Done */}
+        <div className="flex items-center justify-between p-2 border-t border-gray-100 dark:border-gray-700">
+          {selectedDate && (
+            <button
+              type="button"
+              onClick={handleNoDate}
+              className="text-xs text-[var(--hvsna-danger-color)] hover:text-[var(--hvsna-danger-color-hover)] px-1 py-1 transition-colors"
+              data-testid="remove-date-button"
+            >
+              {t("remove_date")}
+            </button>
+          )}
           <button
             type="button"
             disabled={!tempDate}
             onClick={handleConfirm}
-            className="px-4 py-1.5 text-sm bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="ml-auto px-4 py-1.5 text-sm bg-[var(--hvsna-primary-color)] hover:bg-[var(--hvsna-primary-color-hover)] active:bg-[var(--hvsna-primary-color-pressed)] text-white rounded-md disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {t("done") || "Done"}
           </button>

@@ -98,6 +98,10 @@ export const taskTranslations = {
     en: "No Date",
     id: "Tanpa Tanggal",
   },
+  remove_date: {
+    en: "Remove date",
+    id: "Hapus tanggal",
+  },
   repeat: {
     en: "Repeat",
     id: "Ulangi",

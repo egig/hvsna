@@ -1,5 +1,14 @@
 # AGENTS.md
 
+## Working in this repository
+
+- Install JavaScript dependencies with `npm ci` from the repository root; npm workspaces use the root `package-lock.json`.
+- Check `git status --short` before editing and preserve unrelated changes already in the working tree.
+- Each JavaScript workspace has a `.env.example`; use the relevant example when configuring local development. Keep credentials out of source control.
+- Validate changes in the affected workspace: app → `npm run typecheck` and `npm test`; API → `npm run typecheck:api` and `npm run test:api`; website → `npm run typecheck:website` and `npm run build:website` (includes prerendering).
+- For a specific app test, pass arguments directly to the workspace: `npm run test -w @hvsna/app -- <file>`. To run all workspace unit tests, use `npm run test --workspaces --if-present`.
+- Run `npm run test:e2e` when changing browser flows or SQLite/OPFS integration; Playwright starts the dev server automatically. Read `android/CLAUDE.md` for Android validation.
+
 ## Monorepo layout
 
 npm workspaces, three packages: [packages/app/](packages/app/) (`@hvsna/app`) — the Vite/React client — [packages/website/](packages/website/) (`@hvsna/website`) — the marketing/docs site — and [packages/api/](packages/api/) (`@hvsna/api`) — the backend (React Router v8 framework mode, deployed to Vercel). Root `package.json` only holds workspace config and delegates scripts (e.g. `npm run dev` → `npm run dev -w @hvsna/app`); run everything from the repo root. `../hvsna-sync2` (the old Cloudflare Worker backend) is a separate sibling repo, fully decoupled — no longer referenced by anything in this monorepo.
@@ -60,7 +69,7 @@ Auth is the pre-existing hand-rolled system: `AuthService`/`AuthServiceFactory` 
 **Geocoding**: `GET /geocode/reverse` and `GET /geocode/search` (`packages/api/app/routes/geocode.*.ts`) proxy OpenStreetMap Nominatim (`src/lib/nominatim.ts`) so the client isn't calling a third party directly.
 
 ### Routing
-Client-side React Router 7. Routes split by screen size (under `packages/app/src/`):
+Client-side React Router 8. Routes split by screen size (under `packages/app/src/`):
 - `screens/desktop/routes-desktop.tsx`
 - `screens/mobile/routes.tsx`
 - `screens/platform.tsx` — `PlatformProvider` / `usePlatform()`. **This holds the app's single `isDesktop` decision** (`const platform = isDesktop ? desktop : mobile`, one read of `useScreenSize()`), exposing `{ isDesktop, Routes, Modal }` and feeding `Modal` into a `ModalProvider`. Seeded high in `app.tsx` (just inside `ScreenSizeProvider`) so providers above the router — e.g. `LocationProvider`, which renders `LocationPickerModal` — are still inside `ModalProvider`. Don't reintroduce runtime `isDesktop` / `useScreenSize` branches anywhere else.

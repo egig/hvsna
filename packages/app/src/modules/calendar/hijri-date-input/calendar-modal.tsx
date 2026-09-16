@@ -232,9 +232,6 @@ export function CalendarModal({
             {!isSelectedNextWeek() && (
               <ListInput onClick={handleNextWeek} label={t("next_week")} />
             )}
-            {!isSelectedNoDate() && (
-              <ListInput onClick={handleNoDate} label={t("no_date")} />
-            )}
           </div>
 
           <div className="pb-[env(safe-area-inset-bottom)]">
@@ -258,6 +255,19 @@ export function CalendarModal({
                 testId="repeat-list-button"
               />
             </div>
+
+            {!isSelectedNoDate() && (
+              <div className="mt-2 border-t border-gray-200 dark:border-gray-700 safe-bottom">
+                <button
+                  type="button"
+                  onClick={handleNoDate}
+                  className="w-full px-4 py-3 hover:text-red-600 text-red-600 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  data-testid="remove-date-button"
+                >
+                  {t("remove_date")}
+                </button>
+              </div>
+            )}
           </div>
         </>
       </Activity>
