@@ -48,6 +48,7 @@ fun UpcomingScreen(
     viewModel: TaskViewModel,
     onTagClick: (Tag) -> Unit = {},
     onEditTask: (TaskWithTags?, Long?) -> Unit,
+    onReschedule: (TaskWithTags) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -134,6 +135,7 @@ fun UpcomingScreen(
                                     showYear = isYearGroup,
                                     onToggleDone = { viewModel.toggleDone(entry) },
                                     onClick = { onEditTask(entry, null) },
+                                    onReschedule = { onReschedule(entry) },
                                     showDivider = index != group.tasks.lastIndex,
                                     hijriMonthOffsets = settings.hijriMonthOffsets,
                                     modifier = Modifier.animateItem(),
@@ -164,6 +166,7 @@ fun UpcomingScreen(
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            onReschedule = { onReschedule(entry) },
                             showDivider = index != unscheduledTasks.lastIndex,
                             hijriMonthOffsets = settings.hijriMonthOffsets,
                             modifier = Modifier.animateItem(),

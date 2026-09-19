@@ -88,6 +88,7 @@ import com.hvsna.app.ui.RecurringScope
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.rememberCompletionFeedback
 import com.hvsna.app.ui.components.RecurringScopeDialog
+import com.hvsna.app.ui.components.RescheduleSheet
 import com.hvsna.app.ui.components.TaskBottomSheet
 import com.hvsna.app.ui.navigation.AppRoute
 import com.hvsna.app.ui.screens.BrowseScreen
@@ -102,6 +103,7 @@ import com.hvsna.app.ui.screens.UpcomingScreenFab
 import com.hvsna.app.ui.theme.HvsnaTheme
 import okhttp3.OkHttpClient
 import androidx.compose.ui.res.vectorResource
+import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,6 +140,9 @@ fun HvsnaApp() {
     var pendingRecurringEdit by remember { mutableStateOf<PendingRecurringEdit?>(null) }
     var pendingRecurringDelete by remember { mutableStateOf<Task?>(null) }
     val taskSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showRescheduleSheet by remember { mutableStateOf(false) }
+    var reschedulingTask by remember { mutableStateOf<TaskWithTags?>(null) }
+    val rescheduleSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val context = LocalContext.current
     val okHttpClient = remember { OkHttpClient() }
@@ -237,6 +242,10 @@ fun HvsnaApp() {
         taskInitialTagIds = setOf(tagId)
         showTaskSheet = true
     }
+    val onReschedule: (TaskWithTags) -> Unit = { entry ->
+        reschedulingTask = entry
+        showRescheduleSheet = true
+    }
 
     val navController = rememberNavController()
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
@@ -291,7 +300,7 @@ fun HvsnaApp() {
                     canSync = canSync,
                     floatingActionButton = { TodayScreenFab(onEditTask = onEditTask) },
                 ) {
-                    TodayScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
+                    TodayScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask, onReschedule = onReschedule)
                 }
             }
             composable<AppRoute.Upcoming> {
@@ -300,12 +309,12 @@ fun HvsnaApp() {
                     canSync = canSync,
                     floatingActionButton = { UpcomingScreenFab(onEditTask = onEditTask) },
                 ) {
-                    UpcomingScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
+                    UpcomingScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask, onReschedule = onReschedule)
                 }
             }
             composable<AppRoute.Search> {
                 SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
-                    SearchScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask)
+                    SearchScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask, onReschedule = onReschedule)
                 }
             }
             composable<AppRoute.Browse> {
@@ -315,6 +324,7 @@ fun HvsnaApp() {
                         onOpenSettings = { navController.navigate(AppRoute.Settings) },
                         onTagClick = onTagClick,
                         onEditTask = onEditTask,
+                        onReschedule = onReschedule,
                     )
                 }
             }
@@ -332,6 +342,7 @@ fun HvsnaApp() {
                             tag = tag,
                             onBack = { navController.popBackStack() },
                             onEditTask = onEditTask,
+                            onReschedule = onReschedule,
                         )
                     }
                 } else {
@@ -404,6 +415,24 @@ fun HvsnaApp() {
             defaultScheduledTime = taskDefaultScheduledTime,
             recurrenceRule = editingTask?.task?.recurringTaskId?.let { id -> allRecurrenceRules.firstOrNull { it.id == id } },
         )
+    }
+
+    if (showRescheduleSheet) {
+        BackHandler { showRescheduleSheet = false }
+        reschedulingTask?.let { entry ->
+            RescheduleSheet(
+                task = entry.task,
+                sheetState = rescheduleSheetState,
+                onDismiss = { showRescheduleSheet = false },
+                onReschedule = { newScheduledTime ->
+                    val cal = Calendar.getInstance().apply { timeInMillis = newScheduledTime }
+                    val atTime = "%02d:%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
+                    val edited = entry.task.copy(scheduledTime = newScheduledTime, atTime = atTime)
+                    taskViewModel.upsert(entry.task, edited, entry.tags.map { it.id })
+                },
+                hijriMonthOffsets = settings.hijriMonthOffsets,
+            )
+        }
     }
 
     pendingRecurringEdit?.let { req ->
