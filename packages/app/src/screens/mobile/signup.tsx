@@ -124,7 +124,7 @@ export default function SignUpPage() {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                    className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                     placeholder="First name"
                     disabled={loading}
                     autoComplete="given-name"
@@ -144,7 +144,7 @@ export default function SignUpPage() {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                    className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                     placeholder="Last name"
                     disabled={loading}
                     autoComplete="family-name"
@@ -165,7 +165,7 @@ export default function SignUpPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                   placeholder="Enter your email"
                   disabled={loading}
                   autoComplete="email"
@@ -185,7 +185,7 @@ export default function SignUpPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                   placeholder="Create a password"
                   disabled={loading}
                   autoComplete="new-password"
@@ -205,7 +205,7 @@ export default function SignUpPage() {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                   placeholder="Confirm your password"
                   disabled={loading}
                   autoComplete="new-password"
@@ -215,7 +215,7 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-3 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
                 {loading ? (
                   <HvLoader2 className="w-5 h-5 animate-spin" />

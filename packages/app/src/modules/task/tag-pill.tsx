@@ -40,7 +40,7 @@ export function TagPill({
   return (
     <span
       onClick={onClick}
-      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide leading-tight ${
+      className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium tracking-wide leading-tight ${
         onClick ? "cursor-pointer" : ""
       } ${className}`}
       style={{ backgroundColor: washBackground(color), color }}

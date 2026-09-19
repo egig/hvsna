@@ -65,7 +65,7 @@ export default function TaskFormEditDesktop({
   const menu = (
     <Menu.Root>
       <Menu.Trigger
-        className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg flex items-center justify-center transition-colors"
+        className="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md flex items-center justify-center transition-colors"
         aria-label={t("more_options")}
       >
         <HvMoreVertical size={18} />
@@ -106,7 +106,7 @@ export default function TaskFormEditDesktop({
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("delete_this_task")}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-muted dark:text-gray-400">
               {t("delete_this_task_desc")}
             </div>
           </button>
@@ -135,7 +135,7 @@ export default function TaskFormEditDesktop({
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("change_this_event_only")}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-muted dark:text-gray-400">
               {t("change_this_event_only_desc")}
             </div>
           </button>

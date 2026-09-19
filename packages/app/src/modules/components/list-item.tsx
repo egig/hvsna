@@ -38,7 +38,7 @@ export function ListItem({
         {/* Main Content */}
         <div className="flex-1 min-w-0" onClick={onClick}>
           <h3
-            className={`font-medium text-gray-900 dark:text-white truncate ${
+            className={`text-sm font-medium text-gray-900 dark:text-white truncate ${
               hoverable && onClick
                 ? "hover:text-blue-600 dark:hover:text-blue-400"
                 : ""
@@ -49,7 +49,7 @@ export function ListItem({
 
           {subtitle && (
             <p
-              className={`text-gray-500 dark:text-gray-400 mt-1 ${
+              className={`text-muted dark:text-gray-400 mt-1 ${
                 compact ? "text-xs" : "text-sm"
               }`}
             >
@@ -58,7 +58,7 @@ export function ListItem({
           )}
 
           {description && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            <p className="text-xs text-muted dark:text-gray-500 mt-1">
               {description}
             </p>
           )}

@@ -87,7 +87,7 @@ export function MenuItem({
               <div
                 className="
                 text-sm
-                text-gray-500
+                text-muted
                 mt-0.5
                 truncate
               "
@@ -186,7 +186,7 @@ export function MenuItem({
             <div
               className="
               text-sm
-              text-gray-500
+              text-muted
               mt-0.5
               truncate
             "

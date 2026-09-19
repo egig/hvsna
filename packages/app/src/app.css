@@ -12,10 +12,17 @@ body {
   height: 100%;
   overflow: hidden;
   position: fixed;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  /* Base size/line-height for primary body text, metadata, inputs, and
+     task/list titles — headings opt into larger Tailwind text-* sizes. */
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 #root {

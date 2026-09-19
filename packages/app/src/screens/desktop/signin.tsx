@@ -109,7 +109,7 @@ export default function SignInPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                   placeholder="Enter your email"
                   disabled={loading}
                   autoComplete="email"
@@ -129,7 +129,7 @@ export default function SignInPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
+                  className="w-full px-4 py-3 border border-primary-200 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-colors"
                   placeholder="Enter your password"
                   disabled={loading}
                   autoComplete="current-password"
@@ -139,7 +139,7 @@ export default function SignInPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-3 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
               >
                 {loading ? (
                   <HvLoader2 className="w-5 h-5 animate-spin" />

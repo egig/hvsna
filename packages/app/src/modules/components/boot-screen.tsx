@@ -17,7 +17,8 @@ export function BootScreen() {
         gap: 14,
         background: "#ffffff",
         color: "#2e335a",
-        fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
       }}
     >
       <div
