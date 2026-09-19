@@ -37,7 +37,7 @@ export function SidebarToggleButton({ className = "" }: { className?: string }) 
       aria-label={t("expand_sidebar")}
       title={t("expand_sidebar")}
     >
-      <HvPanelLeft className="size-4" />
+      <HvPanelLeft className="size-5" />
     </button>
   );
 }

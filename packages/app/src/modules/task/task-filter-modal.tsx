@@ -53,7 +53,7 @@ export default function TaskFilterModal({
         onModalClose={onClose}
         rightAction={
           <NavActionButton variant="primary" onClick={onClose}>
-            <HvCheck size={16} />
+            <HvCheck size={20} />
           </NavActionButton>
         }
       />

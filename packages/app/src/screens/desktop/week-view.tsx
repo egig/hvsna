@@ -257,7 +257,7 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
           className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Previous week"
         >
-          <HvArrowLeft className="size-4" />
+          <HvArrowLeft className="size-5" />
         </button>
 
         <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ export function WeekView({ upcomingTasks, droppable }: WeekViewProps) {
           className="p-1.5 rounded-md text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
           title="Next week"
         >
-          <HvArrowRight className="size-4" />
+          <HvArrowRight className="size-5" />
         </button>
       </div>
 

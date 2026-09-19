@@ -63,7 +63,7 @@ export function RepeatSelector({
             : "text-gray-500 dark:text-gray-400"
         }`}
       >
-        <HvRepeat size={16} />
+        <HvRepeat size={20} />
         {isActive && <span>{label}</span>}
       </button>
 

@@ -175,7 +175,7 @@ export function RepeatSelectorModal({
             }`}
           >
             <span>{t(labelKey)}</span>
-            {selectedOption === value && <HvCheck size={16} />}
+            {selectedOption === value && <HvCheck size={20} />}
           </button>
         ))}
 
@@ -188,7 +188,7 @@ export function RepeatSelectorModal({
           }`}
         >
           <span>{t("repeat_custom") || "Custom"}</span>
-          {selectedOption === "custom" && <HvCheck size={16} />}
+          {selectedOption === "custom" && <HvCheck size={20} />}
         </button>
 
         {/* Custom interval inputs */}

@@ -193,14 +193,14 @@ export default function TagDetailPage() {
               onClick={openEdit}
               className="px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer"
             >
-              <HvEdit size={16} />
+              <HvEdit size={20} />
               {t("edit_tag")}
             </Menu.Item>
             <Menu.Item
               onClick={openDelete}
               className="px-4 py-3 text-left text-sm text-[var(--hvsna-danger-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 cursor-pointer"
             >
-              <HvTrash2 size={16} />
+              <HvTrash2 size={20} />
               {t("delete_tag")}
             </Menu.Item>
           </Menu.Popup>
@@ -311,7 +311,7 @@ export default function TagDetailPage() {
                   style={{ backgroundColor: color }}
                 >
                   {!isCustomColor && color === editColor && (
-                    <HvCheck size={16} className="text-white" />
+                    <HvCheck size={20} className="text-white" />
                   )}
                 </button>
               ))}
@@ -321,9 +321,9 @@ export default function TagDetailPage() {
                 aria-label={t("custom_color")}
               >
                 {isCustomColor ? (
-                  <HvCheck size={16} className="text-white" />
+                  <HvCheck size={20} className="text-white" />
                 ) : (
-                  <HvPlus size={16} className="text-gray-400 dark:text-gray-500" />
+                  <HvPlus size={20} className="text-gray-400 dark:text-gray-500" />
                 )}
                 <input
                   type="color"

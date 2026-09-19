@@ -84,7 +84,7 @@ export default function UpcomingDesktop() {
               : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
           ].join(" ")}
         >
-          <HvLayoutList className="size-4" />
+          <HvLayoutList className="size-5" />
         </button>
         <button
           onClick={() => toggleMode("week")}
@@ -96,7 +96,7 @@ export default function UpcomingDesktop() {
               : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300",
           ].join(" ")}
         >
-          <HvCalendarMonth className="size-4" />
+          <HvCalendarMonth className="size-5" />
         </button>
         {inboxCollapsed && (
           <button
@@ -104,7 +104,7 @@ export default function UpcomingDesktop() {
             className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title={inboxCollapsed ? "Show inbox" : "Hide inbox"}
           >
-            <HvHiInbox className="size-4 -scale-x-100" />
+            <HvHiInbox className="size-5 -scale-x-100" />
           </button>
         )}
       </div>
@@ -179,7 +179,7 @@ export default function UpcomingDesktop() {
           <div className="flex flex-col h-full border-l border-gray-200 dark:border-gray-800">
             <div className="flex justify-between shrink-0 border-b border-gray-200 dark:border-gray-800 flex items-center gap-2 px-4 py-3">
               <div className="flex-1 flex justify-items-center items-center gap-1">
-                <HvHiInbox className="size-4 text-gray-500 dark:text-gray-400" />
+                <HvHiInbox className="size-5 text-gray-500 dark:text-gray-400" />
                 <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   {t("unscheduled") || "Unscheduled"}
                 </h2>
@@ -190,7 +190,7 @@ export default function UpcomingDesktop() {
                   className="p-1.5 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   title={inboxCollapsed ? "Show inbox" : "Hide inbox"}
                 >
-                  <HvPanelLeftClose className="size-4 -scale-x-100" />
+                  <HvPanelLeftClose className="size-5 -scale-x-100" />
                 </button>
               )}
             </div>

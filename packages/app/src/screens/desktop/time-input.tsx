@@ -21,11 +21,11 @@ interface TimeInputProps {
 }
 
 const PRAYER_TIMES: { value: PrayerTime; icon: React.ReactNode }[] = [
-  { value: "Fajr", icon: <HvFajr size={16} /> },
-  { value: "Dhuhr", icon: <HvDhuhr size={16} /> },
-  { value: "Asr", icon: <HvAsr size={16} /> },
-  { value: "Maghrib", icon: <HvMaghrib size={16} /> },
-  { value: "Isha", icon: <HvIsha size={16} /> },
+  { value: "Fajr", icon: <HvFajr size={20} /> },
+  { value: "Dhuhr", icon: <HvDhuhr size={20} /> },
+  { value: "Asr", icon: <HvAsr size={20} /> },
+  { value: "Maghrib", icon: <HvMaghrib size={20} /> },
+  { value: "Isha", icon: <HvIsha size={20} /> },
 ];
 
 export default function TimeInputDesktop({
@@ -136,7 +136,7 @@ export default function TimeInputDesktop({
                   : ""
               }`}
             >
-              <HvClock size={16} className="flex-shrink-0" />
+              <HvClock size={20} className="flex-shrink-0" />
               <input
                 type="time"
                 value={inputMode === "custom" ? customTime : ""}
