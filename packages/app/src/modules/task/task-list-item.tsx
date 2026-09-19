@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { HvEdit, HvCircle, HvCircleCheckFilled } from "@/modules/icons";
+import { HvEdit, HvSquare, HvSquareCheckFilled } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
@@ -35,9 +35,9 @@ function TaskCheckbox({ done }: { done: boolean }) {
       transition={{ duration: 0.3, ease: "easeOut", times: [0, 0.45, 1] }}
     >
       {done ? (
-        <HvCircleCheckFilled size={24} className="text-gray-400" />
+        <HvSquareCheckFilled size={24} className="text-gray-400" />
       ) : (
-        <HvCircle strokeWidth={1.5} size={24} className="text-gray-400" />
+        <HvSquare strokeWidth={1} size={24} className="text-gray-500" />
       )}
     </motion.span>
   );

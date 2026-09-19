@@ -13,8 +13,6 @@ export { IconBell as HvBell } from "./generated/bell";
 export { IconBriefcase as HvBriefcase } from "./generated/briefcase";
 export { IconCheck as HvCheck } from "./generated/check";
 export { IconCircleCheck as HvCheckCircle } from "./generated/circle-check";
-export { IconCircleCheckFilled as HvCircleCheckFilled } from "./generated/circle-check-filled";
-export { IconCircle as HvCircle } from "./generated/circle";
 export { IconChevronDown as HvChevronDown } from "./generated/chevron-down";
 export { IconChevronLeft as HvChevronLeft } from "./generated/chevron-left";
 export { IconChevronRight as HvChevronRight } from "./generated/chevron-right";
