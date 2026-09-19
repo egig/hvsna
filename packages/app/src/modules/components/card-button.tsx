@@ -36,7 +36,7 @@ export function CardButton({
             {title}
           </h3>
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-muted dark:text-gray-400">
               {description}
             </p>
           )}

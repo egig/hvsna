@@ -108,7 +108,7 @@ export default function TaskFormEditMobile({
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("delete_this_task")}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-muted dark:text-gray-400">
               {t("delete_this_task_desc")}
             </div>
           </button>
@@ -135,7 +135,7 @@ export default function TaskFormEditMobile({
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("change_this_event_only")}</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-muted dark:text-gray-400">
               {t("change_this_event_only_desc")}
             </div>
           </button>

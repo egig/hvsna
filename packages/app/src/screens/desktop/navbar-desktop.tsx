@@ -78,7 +78,7 @@ export function NavbarDesktop({
                 </h1>
               )}
               {subtitle && (
-                <div className="text-xs text-gray-500 truncate">{subtitle}</div>
+                <div className="text-xs text-muted truncate">{subtitle}</div>
               )}
             </div>
           )}

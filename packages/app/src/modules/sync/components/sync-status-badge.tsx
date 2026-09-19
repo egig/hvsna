@@ -5,7 +5,7 @@ import { HvRefreshCw, HvCloudOff, HvCloudCheck } from "@/modules/icons";
 import { useAuth } from "@/modules/auth";
 
 const badgeClass =
-  "inline-flex items-center gap-1 text-sm px-1.5 mr-3 rounded-sm border-1";
+  "inline-flex items-center gap-1 text-sm px-1.5 mr-3 rounded-full border-1";
 
 export function SyncStatusBadge() {
   const { t } = useLanguageContext();

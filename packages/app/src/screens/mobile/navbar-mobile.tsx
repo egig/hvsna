@@ -109,7 +109,7 @@ export function NavbarMobile({
             )}
             {/* Subtitle */}
             {subtitle && (
-              <div className="text-xs text-gray-500">{subtitle}</div>
+              <div className="text-xs text-muted">{subtitle}</div>
             )}
           </>
         )}
@@ -256,7 +256,7 @@ export function LargeNavbarMobile({
                   )}
                   {/* Subtitle */}
                   {subtitle && (
-                    <div className={`text-xs text-gray-500`}>{subtitle}</div>
+                    <div className={`text-xs text-muted`}>{subtitle}</div>
                   )}
                 </>
               )}
@@ -307,12 +307,12 @@ export function LargeNavbarMobile({
                 </div>
               )}
               {title && (
-                <h1 className="text-2xl font-semibold text-gray-900 truncate">
+                <h1 className="text-2xl font-bold text-gray-900 truncate">
                   {title}
                 </h1>
               )}
               {subtitle && (
-                <div className="text-sm text-gray-500 truncate">{subtitle}</div>
+                <div className="text-sm text-muted truncate">{subtitle}</div>
               )}
             </>
           )}

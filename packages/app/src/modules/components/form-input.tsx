@@ -59,7 +59,7 @@ export function FormInput({
           px-3
           py-2
           border
-          rounded-lg
+          rounded-md
           text-base
           transition-colors
           duration-150

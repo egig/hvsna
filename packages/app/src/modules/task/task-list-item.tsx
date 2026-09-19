@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { HvEdit, HvSquare, HvSquareCheckFilled } from "@/modules/icons";
+import { HvEdit, HvCircle, HvCircleCheckFilled } from "@/modules/icons";
 import { useLocation } from "react-router";
 import { useLanguageContext } from "../i18n/LanguageContext";
 import { useSnackbar } from "../components/snackbar-provider";
@@ -35,9 +35,9 @@ function TaskCheckbox({ done }: { done: boolean }) {
       transition={{ duration: 0.3, ease: "easeOut", times: [0, 0.45, 1] }}
     >
       {done ? (
-        <HvSquareCheckFilled size={24} className="text-gray-400" />
+        <HvCircleCheckFilled size={24} className="text-gray-400" />
       ) : (
-        <HvSquare strokeWidth={1} size={24} className="text-gray-500" />
+        <HvCircle strokeWidth={1.5} size={24} className="text-gray-400" />
       )}
     </motion.span>
   );
@@ -230,7 +230,7 @@ export function TaskListItem({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <h3
-                    className={`leading-6 transition-colors duration-200 ${getStatusColor(
+                    className={`text-sm leading-6 transition-colors duration-200 ${getStatusColor(
                       showDone
                     )} ${showDone ? "line-through" : ""}`}
                   >
@@ -239,7 +239,7 @@ export function TaskListItem({
                 </div>
 
                 {task.description && (
-                  <p className="text-sm text-gray-500 mt-0.5 line-clamp-2">
+                  <p className="text-sm text-muted mt-0.5 line-clamp-2">
                     {task.description}
                   </p>
                 )}
@@ -248,7 +248,7 @@ export function TaskListItem({
                   className={`text-xs mt-0.5 ${
                     task.isOverdue() && task.status !== 1
                       ? "text-[var(--hvsna-danger-color)]"
-                      : "text-gray-500"
+                      : "text-muted"
                   }`}
                 >
                   {formatScheduledDate(task, isOnTodayPage ? "today" : "upcoming")}
