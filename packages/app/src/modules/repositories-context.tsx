@@ -9,10 +9,13 @@ import { SqliteRecurringTaskRepository } from "../infra/task/SqliteRecurringTask
 import { LocalReminderRegistryRepository } from "../infra/task/LocalReminderRegistryRepository";
 import { SqliteSettingsRepository } from "../infra/settings/SqliteSettingsRepository";
 import { SqliteTagRepository } from "../infra/tag/SqliteTagRepository";
-import type { SqliteClient } from "./sqlite/client";
+import type { SqliteExecutor } from "./sqlite/client";
 import { createWriteNotifier, type WriteNotifier } from "./sync/write-notifier";
 
+export type TaskRepositories = Pick<Repositories, "taskRepository" | "recurringTaskRepository">;
+
 export interface Repositories {
+  transaction<T>(operation: (repositories: TaskRepositories) => Promise<T>): Promise<T>;
   taskRepository: ITaskRepository;
   recurringTaskRepository: IRecurringTaskRepository;
   settingsRepository: ISettingsRepository;
@@ -25,12 +28,16 @@ export interface Repositories {
   writeNotifier: WriteNotifier;
 }
 
-export function createWebRepositories(sqliteClient: SqliteClient): Repositories {
-  const writeNotifier = createWriteNotifier();
+export function createWebRepositories(
+  sqliteClient: SqliteExecutor,
+  writeNotifier = createWriteNotifier(),
+): Repositories {
   const tagRepository = new SqliteTagRepository(sqliteClient, writeNotifier);
   return {
-    taskRepository: new SqliteTaskRepository(sqliteClient, tagRepository, writeNotifier),
-    recurringTaskRepository: new SqliteRecurringTaskRepository(sqliteClient, tagRepository, writeNotifier),
+    transaction: (operation) => sqliteClient.transaction((client) =>
+      operation(createWebRepositories(client, writeNotifier))),
+    taskRepository: new SqliteTaskRepository(sqliteClient, writeNotifier),
+    recurringTaskRepository: new SqliteRecurringTaskRepository(sqliteClient, writeNotifier),
     settingsRepository: new SqliteSettingsRepository(sqliteClient, writeNotifier),
     reminderRegistryRepository: new LocalReminderRegistryRepository(),
     tagRepository,

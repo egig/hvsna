@@ -2,14 +2,12 @@
 import { describe, expect, it } from "vitest";
 import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
 import { SqliteTaskRepository } from "../SqliteTaskRepository";
-import { SqliteTagRepository } from "@/infra/tag/SqliteTagRepository";
 import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
   const client = await createTestSqliteClient();
   const writeNotifier = createWriteNotifier();
-  const tagRepo = new SqliteTagRepository(client, writeNotifier);
-  return { client, writeNotifier, repo: new SqliteTaskRepository(client, tagRepo, writeNotifier) };
+  return { client, writeNotifier, repo: new SqliteTaskRepository(client, writeNotifier) };
 }
 
 describe("SqliteTaskRepository", () => {

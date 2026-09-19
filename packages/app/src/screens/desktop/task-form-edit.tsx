@@ -102,6 +102,7 @@ export default function TaskFormEditDesktop({
           </p>
           <button
             onClick={handleDeleteSingle}
+            disabled={isSubmitting}
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("delete_this_task")}</div>
@@ -111,6 +112,7 @@ export default function TaskFormEditDesktop({
           </button>
           <button
             onClick={handleDeleteAll}
+            disabled={isSubmitting}
             className="w-full px-4 py-3 text-left rounded-lg border border-red-200 dark:border-red-900 text-[var(--hvsna-danger-color)] hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
           >
             <div className="font-medium">{t("delete_all_recurring")}</div>
@@ -129,6 +131,7 @@ export default function TaskFormEditDesktop({
         <div className="flex flex-col gap-3 p-2">
           <button
             onClick={handleScopeThisOnly}
+            disabled={isSubmitting}
             className="w-full px-4 py-3 text-left rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             <div className="font-medium">{t("change_this_event_only")}</div>
@@ -138,6 +141,7 @@ export default function TaskFormEditDesktop({
           </button>
           <button
             onClick={handleScopeAllFuture}
+            disabled={isSubmitting}
             className="w-full px-4 py-3 text-left rounded-lg border border-red-200 dark:border-red-900 text-[var(--hvsna-danger-color)] hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
           >
             <div className="font-medium">{t("change_all_future_events")}</div>

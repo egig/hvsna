@@ -121,7 +121,7 @@ export function RepeatSelectorModal({
         selectedRepeatEnd,
         recurringEndDate ?? null,
         endOccurrences,
-        false
+        useGregorianProp
       );
     } else {
       onConfirm(
@@ -130,7 +130,7 @@ export function RepeatSelectorModal({
         selectedRepeatEnd,
         recurringEndDate ?? null,
         endOccurrences,
-        false
+        useGregorianProp
       );
     }
   };
@@ -157,7 +157,7 @@ export function RepeatSelectorModal({
         title={t("repeat")}
         onModalClose={onBack}
         rightAction={
-          <NavActionButton variant="primary" onClick={handleConfirm}>
+          <NavActionButton variant="primary" type="button" aria-label={t("save")} data-testid="repeat-confirm-button" onClick={handleConfirm}>
             <HvCheck />
           </NavActionButton>
         }

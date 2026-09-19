@@ -7,7 +7,7 @@ import type {
   SyncPushResponse,
   WireRow,
 } from "@/infra/sync/types";
-import { applyRemoteRow, clearDirty, findDirty, type SyncTable } from "./dirty-rows";
+import { applyRemoteRow, clearDirty, findDirty, type SyncTable, type WireRowFor } from "./dirty-rows";
 import { getCursor, setCursor, setLastSuccessAt } from "./cursor-store";
 
 const BATCH_SIZE = 500;
@@ -32,15 +32,15 @@ function isFullServerRow<T extends WireRow>(
   return "updated_at" in row;
 }
 
-async function applyPushResult<T extends WireRow>(
+async function applyPushResult<T extends SyncTable>(
   executor: SqliteExecutor,
-  table: SyncTable,
-  result: { applied: string[]; rejected: { id: string; server_row: RejectedServerRow<T> }[] }
+  table: T,
+  uploaded: WireRowFor<T>[],
+  result: { applied: string[]; rejected: { id: string; server_row: RejectedServerRow<WireRowFor<T>> }[] }
 ): Promise<void> {
-  // Sequential, not Promise.all: these all share the single sqlite
-  // connection (see SqliteClient/worker.ts), which isn't safe to hit with
-  // overlapping in-flight statements.
-  await clearDirty(executor, table, result.applied);
+  // Reconcile acknowledgements before adopting any rejected server rows.
+  const applied = new Set(result.applied);
+  await clearDirty(executor, table, uploaded.filter((row) => applied.has("id" in row ? row.id : row.key)));
   for (const { server_row } of result.rejected) {
     if (isFullServerRow(server_row)) {
       // A newer write (from another device) already won this row on the
@@ -55,8 +55,7 @@ export function createSyncEngine(executor: SqliteExecutor, apiClient: SyncApiPor
   async function push(): Promise<void> {
     let more = true;
     while (more) {
-      // Sequential — see the note in applyPushResult about sharing one
-      // sqlite connection. tags is read (and later applied) before
+      // tags is read (and later applied) before
       // recurring_tasks/tasks so a newly-created tag lands server-side
       // before the task_tags/recurring_task_tags membership referencing it.
       const tags = await findDirty(executor, "tags", BATCH_SIZE);
@@ -80,10 +79,10 @@ export function createSyncEngine(executor: SqliteExecutor, apiClient: SyncApiPor
         settings,
       });
 
-      await applyPushResult(executor, "tags", response.tags);
-      await applyPushResult(executor, "recurring_tasks", response.recurring_tasks);
-      await applyPushResult(executor, "tasks", response.tasks);
-      await applyPushResult(executor, "settings", response.settings);
+      await applyPushResult(executor, "tags", tags, response.tags);
+      await applyPushResult(executor, "recurring_tasks", recurringTasks, response.recurring_tasks);
+      await applyPushResult(executor, "tasks", tasks, response.tasks);
+      await applyPushResult(executor, "settings", settings, response.settings);
 
       more =
         tags.length === BATCH_SIZE ||

@@ -26,6 +26,12 @@ export class SqliteSettingsRepository implements ISettingsRepository {
   }
 
   async save(settings: GeneralSettings): Promise<void> {
+    return this.client.transaction((client) =>
+      new SqliteSettingsRepository(client, this.writeNotifier).saveInTransaction(settings)
+    );
+  }
+
+  private async saveInTransaction(settings: GeneralSettings): Promise<void> {
     const now = Date.now();
     const entries = Object.entries(settings).filter(([, value]) => value !== undefined);
     const keys = entries.map(([key]) => key);
@@ -47,6 +53,6 @@ export class SqliteSettingsRepository implements ISettingsRepository {
         [key, JSON.stringify(value), now]
       );
     }
-    this.writeNotifier.notify("settings");
+    this.client.afterCommit(() => this.writeNotifier.notify("settings"));
   }
 }

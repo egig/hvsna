@@ -1,3 +1,4 @@
+import { createTransactionalExecutor } from "../transaction-executor";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import SQLiteESMFactory from "wa-sqlite/dist/wa-sqlite.mjs";
@@ -54,7 +55,7 @@ export async function createTestSqliteClient(): Promise<SqliteExecutor> {
 
   await applyMigrations(sqlite3, db);
 
-  return {
+  return createTransactionalExecutor({
     async exec(sql: string): Promise<void> {
       await sqlite3.exec(db, sql);
     },
@@ -64,5 +65,5 @@ export async function createTestSqliteClient(): Promise<SqliteExecutor> {
     ): Promise<Record<string, SqliteValue>[]> {
       return runQuery(sqlite3, db, sql, params);
     },
-  };
+  });
 }

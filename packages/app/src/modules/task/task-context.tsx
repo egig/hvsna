@@ -1,3 +1,4 @@
+import { useRepositories, type TaskRepositories } from "../repositories-context";
 import React, {
   createContext,
   useContext,
@@ -24,6 +25,7 @@ interface TaskContextType {
   // Task data
   task: Task | null;
 
+  runTaskTransaction: (operation: (repositories: TaskRepositories) => Promise<Task>, originalTask?: Task) => Promise<Task>;
   createTask: (input: TaskCreateInput) => Promise<Task>;
   updateTask: (id: string | number, input: TaskUpdateInput) => Promise<Task>;
   deleteTask: (id: string | number) => Promise<void>;
@@ -46,6 +48,7 @@ export const TaskProvider: React.FC<{
   children: ReactNode;
   taskId?: string;
 }> = ({ children, taskId }) => {
+  const { transaction } = useRepositories();
   const invalidateTaskQueries = useInvalidateTaskQueries();
   const { settings } = useSettings();
   const taskRepo = useTaskRepository();
@@ -218,52 +221,45 @@ export const TaskProvider: React.FC<{
     },
   });
 
-  const materializeVirtualTask = async (task: Task): Promise<Task> => {
-    const cancelReminder = settings.notifications
-      ? (virtualTaskId: string) =>
-          cancelVirtualReminder(reminderRegistry, virtualTaskId)
-      : undefined;
-
-    const created = await materializeVirtualTaskFn(
-      task,
-      taskRepo,
-      recurringRepo,
-      cancelReminder
-    );
-
-    if (settings.notifications && created.atTime?.includes(":")) {
+  // Database work commits before reminder side effects or query invalidation.
+  const runTaskTransaction = async (
+    operation: (repositories: TaskRepositories) => Promise<Task>,
+    originalTask?: Task,
+  ): Promise<Task> => {
+    const result = await transaction(operation);
+    if (settings.notifications) {
       try {
-        await ReminderService.scheduleTaskReminders(
-          created,
-          settings.reminderMinutesBefore ?? 15
-        );
+        if (originalTask?.isVirtual && originalTask.id) {
+          await cancelVirtualReminder(reminderRegistry, String(originalTask.id));
+        }
+        if (result.deletedAt || result.status === 1 || !result.atEpochMillis) {
+          await ReminderService.cancelTaskReminders(result.id!);
+        } else {
+          await ReminderService.updateTaskReminders(result, settings.reminderMinutesBefore ?? 15);
+        }
       } catch (error) {
-        logger.error(
-          "Failed to schedule reminders for materialized task:",
-          error
-        );
+        logger.error("Failed to update reminders after task transaction:", error);
       }
     }
     invalidateTaskQueries();
-
-    return created;
+    return result;
   };
 
-  const deleteRecurringTaskSeries = async (
-    recurringTaskId: string | number
-  ) => {
-    await taskRepo.deletePendingByRecurringTaskId(recurringTaskId);
-    // Also delete the template document
-    try {
-      await recurringRepo.delete(recurringTaskId);
-    } catch (err) {
-      logger.error("Failed to delete recurring task template:", err);
-    }
+  const materializeVirtualTask = (task: Task): Promise<Task> =>
+    runTaskTransaction(({ taskRepository, recurringTaskRepository }) =>
+      materializeVirtualTaskFn(task, taskRepository, recurringTaskRepository), task);
+
+  const deleteRecurringTaskSeries = async (recurringTaskId: string | number) => {
+    await transaction(async ({ taskRepository, recurringTaskRepository }) => {
+      await taskRepository.deletePendingByRecurringTaskId(recurringTaskId);
+      await recurringTaskRepository.delete(recurringTaskId);
+    });
     invalidateTaskQueries();
   };
 
   const contextValue: TaskContextType = {
     task,
+    runTaskTransaction,
     createTask: (input: TaskCreateInput) =>
       createTaskMutation.mutateAsync(input),
     updateTask: (id: string | number, input: TaskUpdateInput) =>

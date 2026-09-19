@@ -1,3 +1,4 @@
+import { SqliteTagRepository } from "../tag/SqliteTagRepository";
 import type {
   RecurringTask,
   RecurringTaskCreateInput,
@@ -86,11 +87,14 @@ function recurringTaskParams(t: RecurringTask): SqliteValue[] {
 }
 
 export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
+  private readonly tagRepo: ITagRepository;
+
   constructor(
     private readonly client: SqliteExecutor,
-    private readonly tagRepo: ITagRepository,
     private readonly writeNotifier: WriteNotifier
-  ) {}
+  ) {
+    this.tagRepo = new SqliteTagRepository(client, writeNotifier);
+  }
 
   private async attachTags(recurringTasks: RecurringTask[]): Promise<RecurringTask[]> {
     if (recurringTasks.length === 0) return recurringTasks;
@@ -109,6 +113,12 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
   }
 
   async create(input: RecurringTaskCreateInput): Promise<RecurringTask> {
+    return this.client.transaction((client) =>
+      new SqliteRecurringTaskRepository(client, this.writeNotifier).createInTransaction(input)
+    );
+  }
+
+  private async createInTransaction(input: RecurringTaskCreateInput): Promise<RecurringTask> {
     const now = Date.now();
     const recurringTask: RecurringTask = {
       id: input.id || `rtask_${crypto.randomUUID()}`,
@@ -131,12 +141,18 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       occurrenceExceptions: input.occurrenceExceptions,
     };
     await this.client.run(UPSERT_SQL, recurringTaskParams(recurringTask));
-    this.writeNotifier.notify("recurring_tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("recurring_tasks"));
     await this.tagRepo.setRecurringTaskTags(String(recurringTask.id), input.tags ?? []);
     return this.attachTag(recurringTask);
   }
 
-  async update(
+  async update(id: string | number, input: RecurringTaskUpdateInput): Promise<RecurringTask> {
+    return this.client.transaction((client) =>
+      new SqliteRecurringTaskRepository(client, this.writeNotifier).updateInTransaction(id, input)
+    );
+  }
+
+  private async updateInTransaction(
     id: string | number,
     input: RecurringTaskUpdateInput
   ): Promise<RecurringTask> {
@@ -152,7 +168,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
     };
 
     await this.client.run(UPSERT_SQL, recurringTaskParams(merged));
-    this.writeNotifier.notify("recurring_tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("recurring_tasks"));
     if (input.tags !== undefined) {
       await this.tagRepo.setRecurringTaskTags(String(merged.id), input.tags ?? []);
     }
@@ -171,7 +187,7 @@ export class SqliteRecurringTaskRepository implements IRecurringTaskRepository {
       `UPDATE recurring_tasks SET deleted_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, toStr(id)]
     );
-    this.writeNotifier.notify("recurring_tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("recurring_tasks"));
   }
 
   async findById(id: string | number): Promise<RecurringTask | null> {

@@ -1,3 +1,4 @@
+import { createTransactionalExecutor } from "./transaction-executor";
 import type {
   SqliteRequest,
   SqliteRequestPayload,
@@ -18,6 +19,10 @@ export type SqliteLockState = "locked" | "ready";
  * otherwise make a structural test double unassignable to it.
  */
 export interface SqliteExecutor {
+  /** Uses the supplied client exclusively until commit; errors roll back all writes. */
+  transaction<T>(operation: (client: SqliteExecutor) => Promise<T>): Promise<T>;
+  /** Defers notifications until the outer transaction commits; discards them on rollback. */
+  afterCommit(effect: () => void): void;
   exec(sql: string): Promise<void>;
   run(sql: string, params?: SqliteValue[]): Promise<Record<string, SqliteValue>[]>;
 }
@@ -41,6 +46,17 @@ export class SqliteClient implements SqliteExecutor {
   >();
   private lockListeners = new Set<(state: SqliteLockState) => void>();
   private lockState: SqliteLockState | null = null;
+
+  private readonly executor = createTransactionalExecutor({
+    exec: async (sql) => { await this.send({ type: "exec", sql }); },
+    run: (sql, params) => this.send({ type: "run", sql, params }),
+  });
+
+  transaction<T>(operation: (client: SqliteExecutor) => Promise<T>): Promise<T> {
+    return this.executor.transaction(operation);
+  }
+
+  afterCommit(effect: () => void): void { this.executor.afterCommit(effect); }
 
   constructor() {
     this.worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -90,7 +106,7 @@ export class SqliteClient implements SqliteExecutor {
 
   /** Runs a multi-statement script with no parameters (schema DDL only). */
   async exec(sql: string): Promise<void> {
-    await this.send({ type: "exec", sql });
+    await this.executor.exec(sql);
   }
 
   /** Runs a single parameterized statement, returning its result rows. */
@@ -98,12 +114,12 @@ export class SqliteClient implements SqliteExecutor {
     sql: string,
     params: SqliteValue[] = []
   ): Promise<Record<string, SqliteValue>[]> {
-    return this.send({ type: "run", sql, params });
+    return this.executor.run(sql, params);
   }
 
   /** Deletes all local data. Reload the page afterward to re-bootstrap. */
   async wipe(): Promise<void> {
-    await this.send({ type: "wipe" });
+    await this.executor.exclusive(async () => { await this.send({ type: "wipe" }); });
   }
 
   terminate(): void {

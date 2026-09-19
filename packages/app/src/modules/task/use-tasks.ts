@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useTaskRepository } from "./use-task-repository";
 import { queryKeys } from "../query-keys";
 import type { Task, TaskQuery, TaskTypeFilter } from "@/domain/task";
-import { useTaskContext } from "./task-context";
+import { useTaskFormContext } from "./task-form-context";
 import log from "../logger";
 
 export function useTasks() {
+  const PAGE_SIZE = 50;
   const [initiated, setInitiated] = useState(false);
   const [isScrollable, setIsScrollable] = useState(false);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
 
-  const { openEditTaskForm, setEditingTaskId } = useTaskContext();
+  const { openEditTaskForm } = useTaskFormContext();
   const taskRepo = useTaskRepository();
 
   // Local filter state
@@ -45,7 +44,7 @@ export function useTasks() {
   ].join("|");
 
   // Build query object for repository
-  const buildQuery = (): TaskQuery => {
+  const buildQuery = useCallback((): TaskQuery => {
     const query: TaskQuery = { status: 0 as const };
 
     if (searchTextFilter && searchTextFilter.trim()) {
@@ -76,46 +75,49 @@ export function useTasks() {
     }
 
     return query;
-  };
+  }, [dateRangeFilter, searchTextFilter, tagFilter, taskTypeFilter, unscheduledFilter]);
 
-  // React Query for browsed tasks
-  const browsedTasksQuery = useQuery({
+  // React Query owns the page cursor so each request fetches a distinct slice.
+  const browsedTasksQuery = useInfiniteQuery({
     queryKey: queryKeys.browsedTasks(filterKey),
-    queryFn: () => taskRepo.findBrowsedTasks(buildQuery()), // Load initial page
+    queryFn: ({ pageParam }) =>
+      taskRepo.findBrowsedTasks(buildQuery(), pageParam, PAGE_SIZE),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage.length === PAGE_SIZE ? allPages.length * PAGE_SIZE : undefined,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 
+  const tasks = useMemo(
+    () => browsedTasksQuery.data?.pages.flat() ?? [],
+    [browsedTasksQuery.data],
+  );
+  const hasMore =
+    browsedTasksQuery.hasNextPage ?? browsedTasksQuery.isPending;
+
   // Load more tasks (pagination)
   const loadMoreTasks = useCallback(async () => {
-    if (!hasMore || browsedTasksQuery.isFetching || browsedTasksQuery.isPending)
+    if (
+      !hasMore ||
+      browsedTasksQuery.isFetchingNextPage ||
+      browsedTasksQuery.isPending
+    )
       return;
 
     try {
-      const newTasks = await taskRepo.findBrowsedTasks(buildQuery());
-
-      // Update hasMore based on whether we got a full page
-      setHasMore(newTasks.length >= 10);
-
-      // Update offset for next page
-      setOffset((prev) => prev + newTasks.length);
-
-      // Invalidate query to trigger refetch with new data
-      browsedTasksQuery.refetch();
+      await browsedTasksQuery.fetchNextPage();
     } catch (error) {
       log.error("Failed to load more tasks:", error);
     }
   }, [
     hasMore,
-    browsedTasksQuery.isFetching,
+    browsedTasksQuery.isFetchingNextPage,
     browsedTasksQuery.isPending,
-    offset,
-    buildQuery,
+    browsedTasksQuery.fetchNextPage,
   ]);
 
-  // Reset pagination when filters change
+  // React Query resets the page stack when filterKey changes.
   const resetPagination = useCallback(() => {
-    setOffset(0);
-    setHasMore(true);
     browsedTasksQuery.refetch();
   }, [browsedTasksQuery]);
 
@@ -126,7 +128,7 @@ export function useTasks() {
 
   const openEditPopup = useCallback((task: Task) => {
     openEditTaskForm(task.id as string);
-  }, []);
+  }, [openEditTaskForm]);
 
   const handleTaskSuccess = useCallback(() => {
     resetPagination();
@@ -181,8 +183,7 @@ export function useTasks() {
     if (
       initiated &&
       !browsedTasksQuery.isPending &&
-      browsedTasksQuery.data &&
-      browsedTasksQuery.data.length > 0
+      tasks.length > 0
     ) {
       // Trigger a scroll check after a short delay to let DOM update
       const timer = setTimeout(() => {
@@ -204,7 +205,7 @@ export function useTasks() {
   }, [
     initiated,
     browsedTasksQuery.isPending,
-    browsedTasksQuery.data,
+    tasks,
     hasMore,
     browsedTasksQuery.isFetching,
     loadMoreTasks,
@@ -243,10 +244,10 @@ export function useTasks() {
 
   return {
     // Data
-    tasks: browsedTasksQuery.data || [],
+    tasks,
     loading: browsedTasksQuery.isPending,
     initiated,
-    loadingMore: browsedTasksQuery.isFetching,
+    loadingMore: browsedTasksQuery.isFetchingNextPage,
     error: browsedTasksQuery.error
       ? browsedTasksQuery.error instanceof Error
         ? browsedTasksQuery.error.message

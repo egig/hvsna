@@ -130,18 +130,27 @@ export async function findDirty<T extends SyncTable>(
   );
 }
 
-/** Clears `_dirty` on the given ids after a successful push. */
-export async function clearDirty(
+/** Acknowledge only the exact snapshot sent. Timestamps alone cannot detect
+ * two edits in the same millisecond; tag membership belongs to the snapshot too. */
+export async function clearDirty<T extends SyncTable>(
   executor: SqliteExecutor,
-  table: SyncTable,
-  ids: string[]
+  table: T,
+  uploaded: WireRowFor<T>[]
 ): Promise<void> {
-  if (ids.length === 0) return;
-  const placeholders = ids.map(() => "?").join(", ");
-  await executor.run(
-    `UPDATE ${table} SET _dirty = 0 WHERE ${PRIMARY_KEY[table]} IN (${placeholders})`,
-    ids
-  );
+  const columns = TABLE_COLUMNS[table];
+  const assoc = TAG_ASSOCIATIONS[table];
+  for (const row of uploaded) {
+    const values = row as unknown as Record<string, SqliteValue>;
+    const conditions = columns.map((column) => `${column} IS ?`);
+    const params = columns.map((column) => values[column] ?? null);
+    if (assoc) {
+      const ids = (row as unknown as { tag_ids: string[] }).tag_ids;
+      conditions.push(`(SELECT COUNT(*) FROM ${assoc.joinTable} WHERE ${assoc.column} = ${table}.id) = ?`);
+      conditions.push(`NOT EXISTS (SELECT 1 FROM ${assoc.joinTable} WHERE ${assoc.column} = ${table}.id AND tag_id NOT IN (SELECT value FROM json_each(?)))`);
+      params.push(ids.length, JSON.stringify(ids));
+    }
+    await executor.run(`UPDATE ${table} SET _dirty = 0 WHERE ${conditions.join(" AND ")}`, params);
+  }
 }
 
 async function replaceTagAssociations(
@@ -163,8 +172,9 @@ async function replaceTagAssociations(
  * Upserts a row received from the server (a pull, or a rejected push's
  * winning server_row) with `_dirty` forced to 0 — this is data that already
  * matches the server, so it must not be re-queued for push. Guarded by the
- * same last-write-wins predicate the server itself applies, so an in-flight
- * pull can never clobber a newer local edit made since the pull started —
+ * last-write-wins predicate, preserving dirty local edits on timestamp ties
+ * as well (two local edits may share a millisecond). An in-flight pull must
+ * not clobber edits that remain queued after snapshot acknowledgement —
  * `RETURNING` tells us whether the guard actually let the write through, so
  * tag membership (for tasks/recurring_tasks) is only replaced when it did.
  */
@@ -172,6 +182,14 @@ export async function applyRemoteRow<T extends SyncTable>(
   executor: SqliteExecutor,
   table: T,
   row: WireRowFor<T>
+): Promise<void> {
+  return executor.transaction((client) => applyRemoteRowInTransaction(client, table, row));
+}
+
+async function applyRemoteRowInTransaction<T extends SyncTable>(
+  executor: SqliteExecutor,
+  table: T,
+  row: WireRowFor<T>,
 ): Promise<void> {
   const columns = TABLE_COLUMNS[table];
   const pk = PRIMARY_KEY[table];
@@ -186,7 +204,8 @@ export async function applyRemoteRow<T extends SyncTable>(
     INSERT INTO ${table} (${columns.join(", ")}, _dirty)
     VALUES (${columns.map(() => "?").join(", ")}, 0)
     ON CONFLICT(${pk}) DO UPDATE SET ${updateSet}
-    WHERE excluded.updated_at >= ${table}.updated_at
+    WHERE excluded.updated_at > ${table}.updated_at
+       OR (excluded.updated_at = ${table}.updated_at AND ${table}._dirty = 0)
     RETURNING ${pk}
   `;
   const params = columns.map((c) => (row as unknown as Record<string, SqliteValue>)[c] ?? null);

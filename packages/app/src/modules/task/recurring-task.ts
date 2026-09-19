@@ -15,8 +15,8 @@ export interface RecurringTask {
   hijriDateOffset?: number;
   tags?: string[];
   recurringEnd?: "never" | "on_date" | "after_occurrences";
-  recurringEndEpoch?: number;
-  recurringEndOccurrences?: number;
+  recurringEndEpoch?: number | null;
+  recurringEndOccurrences?: number | null;
   useGregorian?: boolean;
   occurrenceExceptions?: string[];
   created_at?: number;
@@ -37,8 +37,8 @@ export interface RecurringTaskCreateInput {
   hijriDateOffset?: number;
   tags?: string[];
   recurringEnd?: "never" | "on_date" | "after_occurrences";
-  recurringEndEpoch?: number;
-  recurringEndOccurrences?: number;
+  recurringEndEpoch?: number | null;
+  recurringEndOccurrences?: number | null;
   useGregorian?: boolean;
   occurrenceExceptions?: string[];
 }
@@ -56,8 +56,8 @@ export interface RecurringTaskUpdateInput {
   hijriDateOffset?: number;
   tags?: string[] | null;
   recurringEnd?: "never" | "on_date" | "after_occurrences";
-  recurringEndEpoch?: number;
-  recurringEndOccurrences?: number;
+  recurringEndEpoch?: number | null;
+  recurringEndOccurrences?: number | null;
   useGregorian?: boolean;
   occurrenceExceptions?: string[];
 }

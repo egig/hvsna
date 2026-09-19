@@ -7,6 +7,7 @@ import type {
   SyncPullResponse,
   SyncPushRequest,
   SyncPushResponse,
+  TaskWireRow,
 } from "@/infra/sync/types";
 import { createSyncEngine, type SyncApiPort } from "../sync-engine";
 import { getCursor } from "../cursor-store";
@@ -199,5 +200,36 @@ describe("sync-engine", () => {
 
     expect(order).toEqual(["push", "pull"]);
     expect(applied).toBe(false);
+  });
+});
+
+
+describe("edits during upload", () => {
+  it.each([1000, 2000])("preserves and later uploads a concurrent edit at timestamp %i", async (updatedAt) => {
+    const client = await createTestSqliteClient();
+    await insertRawTask(client, "task_1");
+    const uploads: SyncPushRequest[] = [];
+    let serverRow: TaskWireRow & { rev: number } = remoteTaskRow({ id: "task_1", name: "Buy milk" });
+    const engine = createSyncEngine(client, {
+      push: async (body) => {
+        uploads.push(body);
+        serverRow = { ...serverRow, ...body.tasks[0] };
+        if (uploads.length === 1) {
+          await client.run("UPDATE tasks SET name = 'New edit', updated_at = ?, _dirty = 1 WHERE id = 'task_1'", [updatedAt]);
+        }
+        return { ...emptyPushResponse(), tasks: { applied: ["task_1"], rejected: [] } };
+      },
+      pull: async (cursors) => ({
+        ...emptyPullResponse(cursors),
+        tasks: { rows: [serverRow], next_cursor: 1, has_more: false },
+      }),
+    });
+    await engine.fullSync();
+    expect(await client.run("SELECT name, _dirty FROM tasks WHERE id = 'task_1'"))
+      .toEqual([{ name: "New edit", _dirty: 1 }]);
+    await engine.fullSync();
+    expect(uploads[1].tasks[0].name).toBe("New edit");
+    expect(await client.run("SELECT _dirty FROM tasks WHERE id = 'task_1'"))
+      .toEqual([{ _dirty: 0 }]);
   });
 });

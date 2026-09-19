@@ -7,6 +7,8 @@ import type {
   RecurringTaskCreateInput,
   RecurringTaskUpdateInput,
 } from "./recurring-task";
+/** Multi-write helpers must receive repositories/callbacks from the same
+ * Repositories.transaction scope. UI effects run only after it commits. */
 export interface UpdateRecurringSeriesDeps {
   updateTask: (id: string, input: TaskUpdateInput) => Promise<Task>;
   updateRecurringTask: (
@@ -60,7 +62,7 @@ export async function updateRecurringSeries(
       t.status !== 1 &&
       (t.atEpochMillis ?? 0) >= (task.atEpochMillis ?? 0)
   );
-  await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
+  for (const task of futurePending) await taskRepository.delete(task.id!);
 
   // The instance being edited stays as a real (materialized) task at its own
   // date, so the generator must not also emit a virtual occurrence for that
@@ -150,7 +152,7 @@ export async function demoteTaskFromRecurringAndDeleteFuture(
       t.status !== 1 &&
       (t.atEpochMillis ?? 0) >= (task.atEpochMillis ?? 0)
   );
-  await Promise.all(futurePending.map((t) => taskRepository.delete(t.id!)));
+  for (const task of futurePending) await taskRepository.delete(task.id!);
   await deleteRecurringTask(task.recurringTaskId!);
 
   return updateTask(taskId, {

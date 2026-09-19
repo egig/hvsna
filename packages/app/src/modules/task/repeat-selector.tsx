@@ -2,7 +2,7 @@ import { useState } from "react";
 import { HvRepeat } from "@/modules/icons";
 import { useModal } from "src/modules/navigation";
 import { useLanguageContext } from "../i18n/LanguageContext";
-import type { TaskRepeat } from "./types";
+import type { TaskRecurringType as TaskRepeat } from "@/domain/task";
 import { RepeatSelectorModal } from "./repeat-selector-modal";
 
 interface RepeatSelectorProps {

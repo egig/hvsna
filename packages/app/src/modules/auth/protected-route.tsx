@@ -11,7 +11,7 @@ export function ProtectedRoute({
   children,
   redirectTo = "/signin",
 }: ProtectedRouteProps) {
-  const { isSignedIn, isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -26,8 +26,8 @@ export function ProtectedRoute({
   }
 
   // Redirect to signin if not authenticated
-  if (!isSignedIn || !isAuthenticated) {
-    // return <Navigate to={redirectTo} replace />;
+  if (!isAuthenticated) {
+    return <Navigate to={redirectTo} replace />;
   }
 
   // Render children if authenticated

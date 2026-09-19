@@ -1,3 +1,4 @@
+import { SqliteTagRepository } from "../tag/SqliteTagRepository";
 import { Task } from "@/domain/task";
 import type {
   TaskCreateInput,
@@ -95,11 +96,14 @@ function tagFilterCondition(tags: string[]): string {
 }
 
 export class SqliteTaskRepository implements ITaskRepository {
+  private readonly tagRepo: ITagRepository;
+
   constructor(
     private readonly client: SqliteExecutor,
-    private readonly tagRepo: ITagRepository,
     private readonly writeNotifier: WriteNotifier
-  ) {}
+  ) {
+    this.tagRepo = new SqliteTagRepository(client, writeNotifier);
+  }
 
   private async attachTags(tasks: Task[]): Promise<Task[]> {
     if (tasks.length === 0) return tasks;
@@ -121,6 +125,12 @@ export class SqliteTaskRepository implements ITaskRepository {
   }
 
   async create(input: TaskCreateInput): Promise<Task> {
+    return this.client.transaction((client) =>
+      new SqliteTaskRepository(client, this.writeNotifier).createInTransaction(input)
+    );
+  }
+
+  private async createInTransaction(input: TaskCreateInput): Promise<Task> {
     const now = Date.now();
     const task = new Task({
       id: generatePrefixedUUID("task_"),
@@ -140,12 +150,18 @@ export class SqliteTaskRepository implements ITaskRepository {
       recurringTaskId: input.recurringTaskId,
     });
     await this.client.run(UPSERT_SQL, taskParams(task));
-    this.writeNotifier.notify("tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("tasks"));
     await this.tagRepo.setTaskTags(String(task.id), input.tags ?? []);
     return this.attachTag(task);
   }
 
   async update(id: string | number, input: TaskUpdateInput): Promise<Task> {
+    return this.client.transaction((client) =>
+      new SqliteTaskRepository(client, this.writeNotifier).updateInTransaction(id, input)
+    );
+  }
+
+  private async updateInTransaction(id: string | number, input: TaskUpdateInput): Promise<Task> {
     const existing = await this.findById(id);
     if (!existing) {
       throw new Error(`Task ${id} not found`);
@@ -164,7 +180,7 @@ export class SqliteTaskRepository implements ITaskRepository {
     }
 
     await this.client.run(UPSERT_SQL, taskParams(merged));
-    this.writeNotifier.notify("tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("tasks"));
     if (input.tags !== undefined) {
       await this.tagRepo.setTaskTags(String(merged.id), input.tags ?? []);
     }
@@ -177,7 +193,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       `UPDATE tasks SET deleted_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, toStr(id)]
     );
-    this.writeNotifier.notify("tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("tasks"));
   }
 
   async findById(id: string | number): Promise<Task | null> {
@@ -375,30 +391,46 @@ export class SqliteTaskRepository implements ITaskRepository {
   }
 
   async deletePendingByRecurringTaskId(recurringTaskId: string | number): Promise<void> {
-    const tasks = await this.findByRecurringTaskId(recurringTaskId);
-    const pending = tasks.filter((t) => t.status !== 1);
-    await Promise.all(pending.map((t) => this.delete(t.id!)));
+    const now = Date.now();
+    await this.client.run(
+      `UPDATE tasks SET deleted_at = ?, updated_at = ?, _dirty = 1
+       WHERE recurring_task_id = ? AND status = 0 AND deleted_at IS NULL`,
+      [now, now, toStr(recurringTaskId)]
+    );
+    this.client.afterCommit(() => this.writeNotifier.notify("tasks"));
   }
 
   async completeTask(id: string | number): Promise<Task> {
+    return this.client.transaction((client) =>
+      new SqliteTaskRepository(client, this.writeNotifier).completeTaskInTransaction(id)
+    );
+  }
+
+  private async completeTaskInTransaction(id: string | number): Promise<Task> {
     const now = Date.now();
     await this.client.run(
       `UPDATE tasks SET status = 1, completed_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, toStr(id)]
     );
-    this.writeNotifier.notify("tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("tasks"));
     const task = await this.findById(id);
     if (!task) throw new Error(`Task ${id} not found`);
     return task;
   }
 
   async reopenTask(id: string | number): Promise<Task> {
+    return this.client.transaction((client) =>
+      new SqliteTaskRepository(client, this.writeNotifier).reopenTaskInTransaction(id)
+    );
+  }
+
+  private async reopenTaskInTransaction(id: string | number): Promise<Task> {
     const now = Date.now();
     await this.client.run(
       `UPDATE tasks SET status = 0, completed_at = NULL, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, toStr(id)]
     );
-    this.writeNotifier.notify("tasks");
+    this.client.afterCommit(() => this.writeNotifier.notify("tasks"));
     const task = await this.findById(id);
     if (!task) throw new Error(`Task ${id} not found`);
     return task;

@@ -69,6 +69,12 @@ export class SqliteTagRepository implements ITagRepository {
   }
 
   async update(id: string, input: TagUpdateInput): Promise<Tag> {
+    return this.client.transaction((client) =>
+      new SqliteTagRepository(client, this.writeNotifier).updateInTransaction(id, input)
+    );
+  }
+
+  private async updateInTransaction(id: string, input: TagUpdateInput): Promise<Tag> {
     const rows = await this.client.run(`SELECT * FROM tags WHERE id = ? AND deleted_at IS NULL`, [id]);
     if (!rows[0]) throw new Error(`Tag ${id} not found`);
     const existing = rowToTag(rows[0]);
@@ -81,11 +87,17 @@ export class SqliteTagRepository implements ITagRepository {
       `UPDATE tags SET name = ?, color = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [name, color, now, id]
     );
-    this.writeNotifier.notify("tags");
+    this.client.afterCommit(() => this.writeNotifier.notify("tags"));
     return { ...existing, name, color, updatedAt: now };
   }
 
   async delete(id: string): Promise<void> {
+    return this.client.transaction((client) =>
+      new SqliteTagRepository(client, this.writeNotifier).deleteInTransaction(id)
+    );
+  }
+
+  private async deleteInTransaction(id: string): Promise<void> {
     const now = Date.now();
     // Soft-delete (for future sync propagation, matching Task/RecurringTask)
     // doesn't cascade through the FKs, so the join rows are cleared explicitly —
@@ -96,7 +108,7 @@ export class SqliteTagRepository implements ITagRepository {
       `UPDATE tags SET deleted_at = ?, updated_at = ?, _dirty = 1 WHERE id = ?`,
       [now, now, id]
     );
-    this.writeNotifier.notify("tags");
+    this.client.afterCommit(() => this.writeNotifier.notify("tags"));
   }
 
   private async findOrCreateTagId(name: string): Promise<string> {
@@ -111,6 +123,12 @@ export class SqliteTagRepository implements ITagRepository {
   }
 
   async setTaskTags(taskId: string, tagNames: string[]): Promise<void> {
+    return this.client.transaction((client) =>
+      new SqliteTagRepository(client, this.writeNotifier).setTaskTagsInTransaction(taskId, tagNames)
+    );
+  }
+
+  private async setTaskTagsInTransaction(taskId: string, tagNames: string[]): Promise<void> {
     const normalized = dedupeNormalized(tagNames);
     await this.client.run(`DELETE FROM task_tags WHERE task_id = ?`, [taskId]);
     for (const name of normalized) {
@@ -123,6 +141,12 @@ export class SqliteTagRepository implements ITagRepository {
   }
 
   async setRecurringTaskTags(recurringTaskId: string, tagNames: string[]): Promise<void> {
+    return this.client.transaction((client) =>
+      new SqliteTagRepository(client, this.writeNotifier).setRecurringTaskTagsInTransaction(recurringTaskId, tagNames)
+    );
+  }
+
+  private async setRecurringTaskTagsInTransaction(recurringTaskId: string, tagNames: string[]): Promise<void> {
     const normalized = dedupeNormalized(tagNames);
     await this.client.run(`DELETE FROM recurring_task_tags WHERE recurring_task_id = ?`, [
       recurringTaskId,

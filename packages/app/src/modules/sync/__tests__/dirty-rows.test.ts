@@ -88,7 +88,7 @@ describe("dirty-rows", () => {
     const dirty = await findDirty(client, "tasks", 10);
     expect(dirty.map((r) => r.id)).toEqual(["task_1"]);
 
-    await clearDirty(client, "tasks", ["task_1"]);
+    await clearDirty(client, "tasks", dirty);
     expect(await findDirty(client, "tasks", 10)).toEqual([]);
   });
 
@@ -211,4 +211,25 @@ describe("dirty-rows", () => {
     expect(stored.color).toBe("#EF4444");
     expect(stored._dirty).toBe(0);
   });
+});
+
+
+it("does not acknowledge a tag-only edit with an unchanged timestamp", async () => {
+  const client = await createTestSqliteClient();
+  await insertRawTask(client);
+  const uploaded = await findDirty(client, "tasks", 10);
+  await insertRawTag(client);
+  await client.run("INSERT INTO task_tags VALUES ('task_1', 'tag_1')");
+  await clearDirty(client, "tasks", uploaded);
+  expect(await findDirty(client, "tasks", 10)).toHaveLength(1);
+});
+
+it("rolls back a remote row if replacing its tags fails", async () => {
+  const client = await createTestSqliteClient();
+  await insertRawTask(client, { _dirty: 0 });
+  await client.exec(`CREATE TRIGGER fail_remote_tag BEFORE INSERT ON task_tags
+    BEGIN SELECT RAISE(ABORT, 'membership failed'); END;`);
+  await expect(applyRemoteRow(client, "tasks", { ...baseTaskRow, name: "Changed", tag_ids: ["tag_1"], updated_at: 2000 }))
+    .rejects.toThrow("membership failed");
+  expect(await client.run("SELECT name FROM tasks")).toEqual([{ name: "Buy milk" }]);
 });
