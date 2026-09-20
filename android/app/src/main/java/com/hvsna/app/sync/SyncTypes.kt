@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonElement
  * Wire shapes for /sync/push and /sync/pull — snake_case, 1:1 with
  * packages/api/src/lib/sync-types.ts / packages/app/src/infra/sync/types.ts.
  * Deliberately raw wire types rather than the app's Task/RecurrenceRule/Tag
- * Room entities — local column names diverge from these (title vs. name,
+ * entities — local column names diverge from these (title vs. name,
  * isDone vs. status, etc.), so DirtyRows.kt owns the explicit mapping in
  * both directions.
  */

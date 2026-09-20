@@ -5,7 +5,7 @@ import android.content.Context
 import kotlinx.coroutines.flow.Flow
 
 class TaskRepository(
-    private val dao: TaskDao,
+    private val dao: TaskStore,
     context: Context,
     private val onDataChanged: () -> Unit = {},
 ) {

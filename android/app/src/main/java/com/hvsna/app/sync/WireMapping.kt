@@ -6,12 +6,12 @@ import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 
 /**
- * Local Room entities use different column names/types than the wire format
+ * Local entities use different column names/types than the wire format
  * (title vs. name, isDone vs. status, Long ARGB color vs. hex string, ...) —
  * these are the explicit translations in both directions. Local-only fields
  * with no wire counterpart (reminderEnabled/reminderOffsetMinutes) are
  * simply dropped when going to the wire and left for the caller (see
- * TaskDao.applyIncomingTask) to preserve from the existing row when coming
+ * TaskStore.applyIncomingTask) to preserve from the existing row when coming
  * back from it.
  */
 

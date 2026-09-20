@@ -33,7 +33,7 @@ private fun languageFromPrefs(prefs: Preferences): AppLanguage =
 /**
  * Reads just the theme mode, independent of [SettingsRepository] — used by
  * [com.hvsna.app.MainActivity] to pick the color scheme before the rest of
- * the app's dependency graph (Room DAOs, sync engine, etc.) is constructed.
+ * the app's dependency graph (ObjectBox stores, sync engine, etc.) is constructed.
  */
 fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore.data.map(::themeModeFromPrefs)
 
@@ -45,8 +45,8 @@ fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore
 fun languageFlow(context: Context): Flow<AppLanguage> = context.settingsDataStore.data.map(::languageFromPrefs)
 
 /**
- * `location`/`calculationMethod`/`madhab`/`hijriMonthOffsets` live in Room as
- * a key-value table (see [SettingsEntry]) so they can flow through sync —
+ * `location`/`calculationMethod`/`madhab`/`hijriMonthOffsets` live in
+ * ObjectBox as a key-value entity (see [SettingsEntry]) so they can flow through sync —
  * `location` and `hijriMonthOffsets` have web counterparts (shaped to match
  * packages/app/src/modules/settings/settings.ts's `LocationSetting` and
  * `GeneralSettings.hijriMonthOffsets` exactly), `calculationMethod`/`madhab`
@@ -56,7 +56,7 @@ fun languageFlow(context: Context): Flow<AppLanguage> = context.settingsDataStor
  */
                                     class SettingsRepository(
     private val context: Context,
-    private val settingsDao: SettingsDao,
+    private val settingsDao: SettingsStore,
     private val onDataChanged: () -> Unit = {},
 ) {
 

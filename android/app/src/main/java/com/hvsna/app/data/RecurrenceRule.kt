@@ -1,8 +1,12 @@
 package com.hvsna.app.data
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
+import io.objectbox.annotation.Index
+import io.objectbox.annotation.Unique
+import io.objectbox.relation.ToMany
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.UUID
 
 /** Valid [RecurrenceRule.recurringType] values — matches packages/app's TaskRecurringType. */
@@ -29,11 +33,13 @@ object RecurringEnd {
  * same occurrences from the same template. `useGregorian`/`hijriDateOffset`
  * are carried for wire compatibility only — no Hijri-calendar recurrence
  * algorithm exists on the web side either, so this field is inert here too.
+ *
+ * See [Task]'s doc comment for why [boxId] exists alongside [id].
  */
 @Serializable
-@Entity(tableName = "recurrence_rule")
+@Entity
 data class RecurrenceRule(
-    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    @Unique @Index val id: String = UUID.randomUUID().toString(),
     val title: String,
     val description: String,
     val recurringType: String,
@@ -56,4 +62,12 @@ data class RecurrenceRule(
     val updatedAt: Long = System.currentTimeMillis(),
     val deletedAt: Long? = null,
     val _dirty: Int = 1,
-)
+    @Transient @Id var boxId: Long = 0,
+) {
+    /**
+     * Standalone many-to-many relation to Tag, independent from Task.tags —
+     * only touched by TaskStore. See [Task.tags]'s doc comment for why this
+     * is deliberately uninitialized.
+     */
+    @Transient lateinit var tags: ToMany<Tag>
+}

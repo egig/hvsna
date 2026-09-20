@@ -56,7 +56,7 @@ class WireMappingTest {
         assertEquals(task.updatedAt, roundTripped.updatedAt)
         // reminderEnabled/reminderOffsetMinutes have no wire counterpart, so a bare
         // round-trip through the wire type can't preserve them — that's the caller's
-        // job (see TaskDao.applyIncomingTask), not this mapping layer's.
+        // job (see TaskStore.applyIncomingTask), not this mapping layer's.
     }
 
     @Test

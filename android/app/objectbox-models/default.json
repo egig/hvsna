@@ -1,0 +1,387 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:2984971189962755532",
+      "lastPropertyId": "23:534494238112741076",
+      "name": "RecurrenceRule",
+      "properties": [
+        {
+          "id": "1:1181861178353547845",
+          "name": "id",
+          "indexId": "1:6751847817263652828",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "2:6899335194911756741",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:1764188551346605968",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "4:8073739649943952225",
+          "name": "recurringType",
+          "type": 9
+        },
+        {
+          "id": "5:6348450167332531348",
+          "name": "recurringInterval",
+          "type": 5
+        },
+        {
+          "id": "6:2380489717579900346",
+          "name": "baseDateEpoch",
+          "type": 6
+        },
+        {
+          "id": "7:3065029409085251847",
+          "name": "atTime",
+          "type": 9
+        },
+        {
+          "id": "8:4600489866410987544",
+          "name": "lat",
+          "type": 8
+        },
+        {
+          "id": "9:5015142344073620774",
+          "name": "lng",
+          "type": 8
+        },
+        {
+          "id": "10:443761949302712566",
+          "name": "timezone",
+          "type": 9
+        },
+        {
+          "id": "11:1234239672855579354",
+          "name": "hijriDateOffset",
+          "type": 5
+        },
+        {
+          "id": "12:6961199267587863299",
+          "name": "recurringEnd",
+          "type": 9
+        },
+        {
+          "id": "13:5488805048578300808",
+          "name": "recurringEndEpoch",
+          "type": 6
+        },
+        {
+          "id": "14:7512934140169668532",
+          "name": "recurringEndOccurrences",
+          "type": 5
+        },
+        {
+          "id": "15:1700766823660326849",
+          "name": "useGregorian",
+          "type": 1
+        },
+        {
+          "id": "16:5462626068566934996",
+          "name": "occurrenceExceptions",
+          "type": 9
+        },
+        {
+          "id": "17:7158888794579034499",
+          "name": "reminderEnabled",
+          "type": 1
+        },
+        {
+          "id": "18:8054934391407399725",
+          "name": "reminderOffsetMinutes",
+          "type": 5
+        },
+        {
+          "id": "19:7937927408930736638",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "20:5995655964228147126",
+          "name": "updatedAt",
+          "type": 6
+        },
+        {
+          "id": "21:2752711229433042127",
+          "name": "deletedAt",
+          "type": 6
+        },
+        {
+          "id": "22:849037597793741165",
+          "name": "_dirty",
+          "type": 5
+        },
+        {
+          "id": "23:534494238112741076",
+          "name": "boxId",
+          "type": 6,
+          "flags": 1
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:6579507287907354838",
+          "name": "tags",
+          "targetId": "4:7547822092392517445"
+        }
+      ]
+    },
+    {
+      "id": "2:7296854526159210464",
+      "lastPropertyId": "5:5238380579717304874",
+      "name": "SettingsEntry",
+      "properties": [
+        {
+          "id": "1:4271146318890576785",
+          "name": "key",
+          "indexId": "2:5920287533386038906",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "2:5470685703267083480",
+          "name": "value",
+          "type": 9
+        },
+        {
+          "id": "3:6281476323800959041",
+          "name": "updatedAt",
+          "type": 6
+        },
+        {
+          "id": "4:2535708978025453015",
+          "name": "_dirty",
+          "type": 5
+        },
+        {
+          "id": "5:5238380579717304874",
+          "name": "boxId",
+          "type": 6,
+          "flags": 1
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:2173225228016156748",
+      "lastPropertyId": "3:2820235681560509588",
+      "name": "SyncStateEntry",
+      "properties": [
+        {
+          "id": "1:4287670901936290901",
+          "name": "key",
+          "indexId": "3:1729984087169291223",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "2:206302711397300563",
+          "name": "value",
+          "type": 9
+        },
+        {
+          "id": "3:2820235681560509588",
+          "name": "boxId",
+          "type": 6,
+          "flags": 1
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:7547822092392517445",
+      "lastPropertyId": "8:5327639006901608879",
+      "name": "Tag",
+      "properties": [
+        {
+          "id": "1:5820276789584598653",
+          "name": "id",
+          "indexId": "4:4095308822775270024",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "2:875829153146569562",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:7254544588834890702",
+          "name": "color",
+          "type": 6
+        },
+        {
+          "id": "4:2663634481801121074",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "5:6300279190465676762",
+          "name": "updatedAt",
+          "type": 6
+        },
+        {
+          "id": "6:1812602683812958048",
+          "name": "deletedAt",
+          "type": 6
+        },
+        {
+          "id": "7:8137484422715278498",
+          "name": "_dirty",
+          "type": 5
+        },
+        {
+          "id": "8:5327639006901608879",
+          "name": "boxId",
+          "type": 6,
+          "flags": 1
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:8293271835375776687",
+      "lastPropertyId": "21:8166082117825783423",
+      "name": "Task",
+      "properties": [
+        {
+          "id": "1:1535831682556461486",
+          "name": "id",
+          "indexId": "5:6113178631315266878",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "2:151643723389866343",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:510400000126758485",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "4:7909150967200453860",
+          "name": "scheduledTime",
+          "type": 6
+        },
+        {
+          "id": "5:3157598015226976703",
+          "name": "isDone",
+          "type": 5
+        },
+        {
+          "id": "6:33044951897216056",
+          "name": "atTime",
+          "type": 9
+        },
+        {
+          "id": "7:3789405114520370041",
+          "name": "completedTime",
+          "type": 6
+        },
+        {
+          "id": "8:4775467851671442552",
+          "name": "recurringTaskId",
+          "indexId": "6:7092310889399704877",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "9:346793342439271825",
+          "name": "recurringType",
+          "type": 9
+        },
+        {
+          "id": "10:7753778796603979732",
+          "name": "recurringInterval",
+          "type": 5
+        },
+        {
+          "id": "11:4707771074989151674",
+          "name": "lat",
+          "type": 8
+        },
+        {
+          "id": "12:7825912340404157909",
+          "name": "lng",
+          "type": 8
+        },
+        {
+          "id": "13:5447818842490491508",
+          "name": "timezone",
+          "type": 9
+        },
+        {
+          "id": "14:173690311117702276",
+          "name": "hijriDateOffset",
+          "type": 5
+        },
+        {
+          "id": "15:6892999986411904818",
+          "name": "reminderEnabled",
+          "type": 1
+        },
+        {
+          "id": "16:6189187312762231448",
+          "name": "reminderOffsetMinutes",
+          "type": 5
+        },
+        {
+          "id": "17:4479337410668667935",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "18:9133317974481600752",
+          "name": "updatedAt",
+          "type": 6
+        },
+        {
+          "id": "19:2842459937781594516",
+          "name": "deletedAt",
+          "type": 6
+        },
+        {
+          "id": "20:3062258510551716424",
+          "name": "_dirty",
+          "type": 5
+        },
+        {
+          "id": "21:8166082117825783423",
+          "name": "boxId",
+          "type": 6,
+          "flags": 1
+        }
+      ],
+      "relations": [
+        {
+          "id": "2:2752128936149555657",
+          "name": "tags",
+          "targetId": "4:7547822092392517445"
+        }
+      ]
+    }
+  ],
+  "lastEntityId": "5:8293271835375776687",
+  "lastIndexId": "6:7092310889399704877",
+  "lastRelationId": "2:2752128936149555657",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

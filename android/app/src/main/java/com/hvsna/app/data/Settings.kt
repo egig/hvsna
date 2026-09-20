@@ -1,16 +1,20 @@
 package com.hvsna.app.data
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
+import io.objectbox.annotation.Index
+import io.objectbox.annotation.Unique
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
-@Entity(tableName = "settings")
+@Entity
 data class SettingsEntry(
-    @PrimaryKey val key: String,
+    @Unique @Index val key: String,
     val value: String,
     val updatedAt: Long = 0L,
     val _dirty: Int = 1,
+    @Transient @Id var boxId: Long = 0,
 )
 
 /**

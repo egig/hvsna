@@ -1,11 +1,11 @@
 package com.hvsna.app.sync
 
 import com.hvsna.app.data.RecurrenceRule
-import com.hvsna.app.data.SettingsDao
 import com.hvsna.app.data.SettingsEntry
+import com.hvsna.app.data.SettingsStore
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
-import com.hvsna.app.data.TaskDao
+import com.hvsna.app.data.TaskStore
 
 /**
  * Sync-specific data access, separate from TaskRepository/SettingsRepository
@@ -13,7 +13,7 @@ import com.hvsna.app.data.TaskDao
  * dirty-rows.ts operating directly against the sqlite client rather than
  * through a domain repository.
  */
-class SyncRepository(private val taskDao: TaskDao, private val settingsDao: SettingsDao) {
+class SyncRepository(private val taskDao: TaskStore, private val settingsDao: SettingsStore) {
     /** Settings keys with no web counterpart — never pushed (see SettingsKeys' doc comment). */
     private val settingsPushExclusions = setOf(
         com.hvsna.app.data.SettingsKeys.CALCULATION_METHOD,

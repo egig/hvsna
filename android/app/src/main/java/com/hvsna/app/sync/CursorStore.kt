@@ -1,10 +1,10 @@
 package com.hvsna.app.sync
 
-import com.hvsna.app.data.SyncStateDao
 import com.hvsna.app.data.SyncStateKeys
+import com.hvsna.app.data.SyncStateStore
 
 /** Local-only sync bookkeeping (pull cursors, last-success timestamp) — see SyncState.kt. */
-class CursorStore(private val dao: SyncStateDao) {
+class CursorStore(private val dao: SyncStateStore) {
     suspend fun getCursors(): SyncPullCursors = SyncPullCursors(
         tasks = dao.get(SyncStateKeys.CURSOR_TASKS)?.toLongOrNull() ?: 0,
         recurringTasks = dao.get(SyncStateKeys.CURSOR_RECURRING_TASKS)?.toLongOrNull() ?: 0,

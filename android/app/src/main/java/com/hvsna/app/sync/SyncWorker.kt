@@ -14,7 +14,10 @@ import com.hvsna.app.auth.AuthApi
 import com.hvsna.app.auth.AuthService
 import com.hvsna.app.auth.SessionRepository
 import com.hvsna.app.auth.TokenStore
-import com.hvsna.app.data.TaskDatabase
+import com.hvsna.app.data.ObjectBoxStore
+import com.hvsna.app.data.SettingsStore
+import com.hvsna.app.data.SyncStateStore
+import com.hvsna.app.data.TaskStore
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
@@ -37,11 +40,11 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         if (!authService.isAuthenticated()) {
             Result.success()
         } else {
-            val db = TaskDatabase.getInstance(applicationContext)
+            val store = ObjectBoxStore.getInstance(applicationContext)
             val engine = SyncEngine(
-                SyncRepository(db.taskDao(), db.settingsDao()),
+                SyncRepository(TaskStore(store), SettingsStore(store)),
                 SyncApi(okHttpClient, authService, tokenStore),
-                CursorStore(db.syncStateDao()),
+                CursorStore(SyncStateStore(store)),
             )
             engine.fullSync()
             Result.success()

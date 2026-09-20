@@ -1,17 +1,20 @@
 package com.hvsna.app.data
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import io.objectbox.annotation.Entity
+import io.objectbox.annotation.Id
+import io.objectbox.annotation.Index
+import io.objectbox.annotation.Unique
 
 /**
  * Local-only sync bookkeeping — per-table pull cursors and last-success
  * timestamp. Never itself synced, matching packages/app's `_sync_state`
  * table (modules/sqlite/schema.ts).
  */
-@Entity(tableName = "_sync_state")
+@Entity
 data class SyncStateEntry(
-    @PrimaryKey val key: String,
+    @Unique @Index val key: String,
     val value: String,
+    @Id var boxId: Long = 0,
 )
 
 object SyncStateKeys {

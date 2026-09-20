@@ -58,13 +58,16 @@ import com.hvsna.app.auth.SessionRepository
 import com.hvsna.app.auth.TokenStore
 import com.hvsna.app.backup.BackupFileService
 import com.hvsna.app.data.LocationRepository
+import com.hvsna.app.data.ObjectBoxStore
 import com.hvsna.app.data.PrayerTimesRepository
 import com.hvsna.app.data.RecurrenceManager
 import com.hvsna.app.data.SettingsRepository
+import com.hvsna.app.data.SettingsStore
+import com.hvsna.app.data.SyncStateStore
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
-import com.hvsna.app.data.TaskDatabase
 import com.hvsna.app.data.TaskRepository
+import com.hvsna.app.data.TaskStore
 import com.hvsna.app.data.TaskWithTags
 import com.hvsna.app.data.recurringEditChangedAnything
 import com.hvsna.app.data.AppLanguage
@@ -146,7 +149,7 @@ fun HvsnaApp() {
 
     val context = LocalContext.current
     val okHttpClient = remember { OkHttpClient() }
-    val db = TaskDatabase.getInstance(context)
+    val boxStore = remember { ObjectBoxStore.getInstance(context) }
 
     val tokenStore = remember { TokenStore() }
     val authService = remember {
@@ -159,9 +162,9 @@ fun HvsnaApp() {
     val syncCoroutineScope = rememberCoroutineScope()
     val syncEngine = remember {
         SyncEngine(
-            SyncRepository(db.taskDao(), db.settingsDao()),
+            SyncRepository(TaskStore(boxStore), SettingsStore(boxStore)),
             SyncApi(okHttpClient, authService, tokenStore),
-            CursorStore(db.syncStateDao()),
+            CursorStore(SyncStateStore(boxStore)),
         )
     }
     val syncManager = remember {
@@ -173,10 +176,10 @@ fun HvsnaApp() {
         )
     }
 
-    val taskRepo = remember { TaskRepository(db.taskDao(), context, onDataChanged = syncManager::notifyWrite) }
+    val taskRepo = remember { TaskRepository(TaskStore(boxStore), context, onDataChanged = syncManager::notifyWrite) }
     val backupFileService = remember(taskRepo) { BackupFileService(taskRepo, context) }
     val settingsRepo = remember {
-        SettingsRepository(context, db.settingsDao(), onDataChanged = syncManager::notifyWrite)
+        SettingsRepository(context, SettingsStore(boxStore), onDataChanged = syncManager::notifyWrite)
     }
     val locationRepo = remember { LocationRepository(context, okHttpClient) }
     val prayerTimesRepo = remember { PrayerTimesRepository() }
