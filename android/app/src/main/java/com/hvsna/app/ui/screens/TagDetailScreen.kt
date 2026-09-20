@@ -52,6 +52,7 @@ fun TagDetailScreen(
     tag: Tag,
     onBack: () -> Unit,
     onEditTask: (TaskWithTags?, Long?) -> Unit,
+    onReschedule: (TaskWithTags) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -156,6 +157,7 @@ fun TagDetailScreen(
                                 tags = entry.tags,
                                 onToggleDone = { viewModel.toggleDone(entry) },
                                 onClick = { onEditTask(entry, null) },
+                                onReschedule = { onReschedule(entry) },
                                 showDivider = index != entries.lastIndex,
                                 hijriMonthOffsets = settings.hijriMonthOffsets,
                                 modifier = Modifier.animateItem(),

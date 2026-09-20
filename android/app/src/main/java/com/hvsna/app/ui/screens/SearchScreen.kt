@@ -47,6 +47,7 @@ fun SearchScreen(
     viewModel: TaskViewModel,
     onTagClick: (Tag) -> Unit = {},
     onEditTask: (TaskWithTags?, Long?) -> Unit,
+    onReschedule: (TaskWithTags) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -98,6 +99,7 @@ fun SearchScreen(
                             tags = entry.tags,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            onReschedule = { onReschedule(entry) },
                             showDivider = index != results.lastIndex,
                             hijriMonthOffsets = settings.hijriMonthOffsets,
                             modifier = Modifier.animateItem(),

@@ -53,6 +53,7 @@ fun RecurringScreen(
     onBack: () -> Unit,
     onTagClick: (Tag) -> Unit = {},
     onEditTask: (TaskWithTags?, Long?) -> Unit,
+    onReschedule: (TaskWithTags) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -112,6 +113,7 @@ fun RecurringScreen(
                     tags = entry.tags,
                     onToggleDone = { viewModel.toggleDone(TaskWithTags(entry.nextOccurrence, entry.tags)) },
                     onClick = { onEditTask(TaskWithTags(entry.nextOccurrence, entry.tags), null) },
+                    onReschedule = { onReschedule(TaskWithTags(entry.nextOccurrence, entry.tags)) },
                     showDivider = index != series.lastIndex,
                     hijriMonthOffsets = settings.hijriMonthOffsets,
                     modifier = Modifier.animateItem(),

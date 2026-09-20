@@ -26,6 +26,8 @@
   "a11y.removeTag": "Remove %s",
   "a11y.collapse": "Collapse",
   "a11y.expand": "Expand",
+  "a11y.completeTaskSwipe": "Complete task",
+  "a11y.rescheduleTaskSwipe": "Reschedule task",
 
   "unit.day": "Day",
   "unit.days": "Days",
@@ -132,6 +134,12 @@
   "task.recurringDelete.thisOnlyDesc": "Only remove this occurrence",
   "task.recurringDelete.all": "Delete all recurring tasks",
   "task.recurringDelete.allDesc": "Remove all pending occurrences and stop the recurrence",
+
+  "reschedule.title": "Reschedule",
+  "reschedule.laterToday": "Later today",
+  "reschedule.tomorrow": "Tomorrow",
+  "reschedule.nextWeek": "Next week",
+  "reschedule.pickDateTime": "Choose date & time…",
 
   "reminderPreset.atTime": "At time of",
   "reminderPreset.min5": "5 min before",

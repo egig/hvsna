@@ -26,6 +26,8 @@
   "a11y.removeTag": "Hapus %s",
   "a11y.collapse": "Ciutkan",
   "a11y.expand": "Perluas",
+  "a11y.completeTaskSwipe": "Selesaikan tugas",
+  "a11y.rescheduleTaskSwipe": "Jadwalkan ulang tugas",
 
   "unit.day": "Hari",
   "unit.days": "Hari",
@@ -132,6 +134,12 @@
   "task.recurringDelete.thisOnlyDesc": "Hanya hapus kejadian ini",
   "task.recurringDelete.all": "Hapus semua tugas berulang",
   "task.recurringDelete.allDesc": "Hapus semua kejadian yang tertunda dan hentikan pengulangan",
+
+  "reschedule.title": "Jadwalkan Ulang",
+  "reschedule.laterToday": "Nanti hari ini",
+  "reschedule.tomorrow": "Besok",
+  "reschedule.nextWeek": "Minggu depan",
+  "reschedule.pickDateTime": "Pilih tanggal & waktu…",
 
   "reminderPreset.atTime": "Saat waktunya",
   "reminderPreset.min5": "5 menit sebelum",

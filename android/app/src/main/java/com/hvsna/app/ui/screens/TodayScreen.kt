@@ -128,6 +128,7 @@ fun TodayScreen(
     viewModel: TaskViewModel,
     onTagClick: (Tag) -> Unit = {},
     onEditTask: (TaskWithTags?, Long?) -> Unit,
+    onReschedule: (TaskWithTags) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -289,6 +290,7 @@ fun TodayScreen(
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            onReschedule = { onReschedule(entry) },
                             showDivider = index != allOverdueTasks.lastIndex,
                             modifier = Modifier.animateItem(),
                         )
@@ -335,6 +337,7 @@ fun TodayScreen(
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(item.entry) },
                             onClick = { onEditTask(item.entry, null) },
+                            onReschedule = { onReschedule(item.entry) },
                             showDivider = !isLastInGroup,
                             modifier = itemModifier,
                         )
@@ -374,6 +377,7 @@ fun TodayScreen(
                             showDate = false,
                             onToggleDone = { viewModel.toggleDone(entry) },
                             onClick = { onEditTask(entry, null) },
+                            onReschedule = { onReschedule(entry) },
                             showDivider = index != completedTasks.lastIndex,
                             modifier = Modifier.animateItem(),
                         )

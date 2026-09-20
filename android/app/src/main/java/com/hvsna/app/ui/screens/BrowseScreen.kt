@@ -43,6 +43,7 @@ fun BrowseScreen(
     onOpenSettings: () -> Unit,
     onTagClick: (Tag) -> Unit = {},
     onEditTask: (TaskWithTags?, Long?) -> Unit,
+    onReschedule: (TaskWithTags) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val strings = LocalStrings.current
@@ -55,6 +56,7 @@ fun BrowseScreen(
             onBack = { showCompleted = false },
             onTagClick = onTagClick,
             onEditTask = onEditTask,
+            onReschedule = onReschedule,
             modifier = modifier,
         )
         return
@@ -66,6 +68,7 @@ fun BrowseScreen(
             onBack = { showRecurring = false },
             onTagClick = onTagClick,
             onEditTask = onEditTask,
+            onReschedule = onReschedule,
             modifier = modifier,
         )
         return

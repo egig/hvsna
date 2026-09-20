@@ -17,16 +17,21 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -159,13 +164,14 @@ fun TagPill(
  * [showYear] switches the date portion to include the year (Upcoming's later-year groups span
  * more than one year, so the bare "EEE, MMM d" format would be ambiguous there).
  */
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListItem(
     task: Task,
     tags: List<Tag> = emptyList(),
     onToggleDone: () -> Unit,
     onClick: () -> Unit,
+    onReschedule: () -> Unit = {},
     isOverdue: Boolean = false,
     inPrayerSection: Boolean = false,
     showDate: Boolean = true,
@@ -212,91 +218,153 @@ fun TaskListItem(
     val strikeColor = MaterialTheme.colorScheme.onSurfaceVariant
     var titleLayout by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    Column(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { onClick() }
-                .padding(horizontal = 20.dp, vertical = 11.dp),
-        ) {
-            Row(verticalAlignment = Alignment.Top) {
-                TaskCheckbox(
-                    checked = done,
-                    onCheckedChange = onToggleDone,
-                    modifier = Modifier.padding(top = 2.dp),
+    // Swipe right marks the task complete (same toggle the checkbox drives); swipe left opens the
+    // reschedule sheet. Neither commits an actual dismissal — confirmValueChange fires the action
+    // and always returns false, so the row springs back to Settled instead of leaving the list.
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> onToggleDone()
+                SwipeToDismissBoxValue.EndToStart -> onReschedule()
+                SwipeToDismissBoxValue.Settled -> {}
+            }
+            false
+        },
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = modifier,
+        backgroundContent = {
+            val spec = when (dismissState.dismissDirection) {
+                SwipeToDismissBoxValue.StartToEnd -> SwipeBackgroundSpec(
+                    color = MaterialTheme.colorScheme.primary,
+                    onColor = MaterialTheme.colorScheme.onPrimary,
+                    icon = R.drawable.ic_square_check_filled,
+                    alignment = Alignment.CenterStart,
+                    contentDescription = strings["a11y.completeTaskSwipe"],
                 )
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    task.title,
-                    fontSize = 16.sp,
-                    color = textColor,
-                    onTextLayout = { titleLayout = it },
+                SwipeToDismissBoxValue.EndToStart -> SwipeBackgroundSpec(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    onColor = MaterialTheme.colorScheme.onTertiary,
+                    icon = R.drawable.ic_calendar_event,
+                    alignment = Alignment.CenterEnd,
+                    contentDescription = strings["a11y.rescheduleTaskSwipe"],
+                )
+                SwipeToDismissBoxValue.Settled -> null
+            }
+            if (spec != null) {
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .drawWithContent {
-                            drawContent()
-                            val layout = titleLayout
-                            if (strike <= 0f || layout == null) return@drawWithContent
-                            val lineWidths = (0 until layout.lineCount).map {
-                                layout.getLineRight(it) - layout.getLineLeft(it)
-                            }
-                            val total = lineWidths.sum()
-                            if (total <= 0f) return@drawWithContent
-                            var budget = total * strike
-                            val stroke = 1.5.dp.toPx()
-                            for (line in 0 until layout.lineCount) {
-                                if (budget <= 0f) break
-                                val seg = minOf(budget, lineWidths[line])
-                                val left = layout.getLineLeft(line)
-                                val y = (layout.getLineTop(line) + layout.getLineBottom(line)) / 2f
-                                drawLine(
-                                    color = strikeColor,
-                                    start = Offset(left, y),
-                                    end = Offset(left + seg, y),
-                                    strokeWidth = stroke,
-                                )
-                                budget -= lineWidths[line]
-                            }
-                        },
-                )
-            }
-
-            if (task.description.isNotEmpty()) {
-                Text(
-                    task.description,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = leadingColumnWidth, top = 3.dp),
-                )
-            }
-
-            if (timeLabel.isNotEmpty() || tags.isNotEmpty()) {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = leadingColumnWidth, top = 4.dp),
+                        .fillMaxSize()
+                        .background(spec.color)
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = spec.alignment,
                 ) {
-                    if (timeLabel.isNotEmpty()) {
-                        Text(
-                            timeLabel,
-                            fontSize = 12.sp,
-                            color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 2.dp),
-                        )
-                    }
-                    tags.forEach { tag -> TagPill(tag = tag) }
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = spec.icon),
+                        contentDescription = spec.contentDescription,
+                        tint = spec.onColor,
+                    )
                 }
             }
-        }
-        if (showDivider) {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 20.dp),
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-            )
+        },
+    ) {
+        Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onClick() }
+                    .padding(horizontal = 20.dp, vertical = 11.dp),
+            ) {
+                Row(verticalAlignment = Alignment.Top) {
+                    TaskCheckbox(
+                        checked = done,
+                        onCheckedChange = onToggleDone,
+                        modifier = Modifier.padding(top = 2.dp),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        task.title,
+                        fontSize = 16.sp,
+                        color = textColor,
+                        onTextLayout = { titleLayout = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .drawWithContent {
+                                drawContent()
+                                val layout = titleLayout
+                                if (strike <= 0f || layout == null) return@drawWithContent
+                                val lineWidths = (0 until layout.lineCount).map {
+                                    layout.getLineRight(it) - layout.getLineLeft(it)
+                                }
+                                val total = lineWidths.sum()
+                                if (total <= 0f) return@drawWithContent
+                                var budget = total * strike
+                                val stroke = 1.5.dp.toPx()
+                                for (line in 0 until layout.lineCount) {
+                                    if (budget <= 0f) break
+                                    val seg = minOf(budget, lineWidths[line])
+                                    val left = layout.getLineLeft(line)
+                                    val y = (layout.getLineTop(line) + layout.getLineBottom(line)) / 2f
+                                    drawLine(
+                                        color = strikeColor,
+                                        start = Offset(left, y),
+                                        end = Offset(left + seg, y),
+                                        strokeWidth = stroke,
+                                    )
+                                    budget -= lineWidths[line]
+                                }
+                            },
+                    )
+                }
+
+                if (task.description.isNotEmpty()) {
+                    Text(
+                        task.description,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = leadingColumnWidth, top = 3.dp),
+                    )
+                }
+
+                if (timeLabel.isNotEmpty() || tags.isNotEmpty()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier.padding(start = leadingColumnWidth, top = 4.dp),
+                    ) {
+                        if (timeLabel.isNotEmpty()) {
+                            Text(
+                                timeLabel,
+                                fontSize = 12.sp,
+                                color = if (isOverdue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(vertical = 2.dp),
+                            )
+                        }
+                        tags.forEach { tag -> TagPill(tag = tag) }
+                    }
+                }
+            }
+            if (showDivider) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+            }
         }
     }
 }
+
+/** Icon/color spec for the surface revealed behind a [TaskListItem] mid-swipe. */
+private data class SwipeBackgroundSpec(
+    val color: Color,
+    val onColor: Color,
+    val icon: Int,
+    val alignment: Alignment,
+    val contentDescription: String?,
+)
 
 @Preview
 @Composable
