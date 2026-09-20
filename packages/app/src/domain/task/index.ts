@@ -28,6 +28,7 @@ export class Task {
   recurringInterval?: number;
   recurringTaskId?: string | number | null;
   hijriDateOffset?: number;
+  durationMinutes?: number;
   tags?: string[] | null = null;
   createdAt?: number;
   updatedAt?: number;
@@ -66,6 +67,7 @@ export interface TaskCreateInput {
   recurringInterval?: number;
   recurringTaskId?: string | number;
   hijriDateOffset?: number;
+  durationMinutes?: number;
   tags: string[];
 }
 
@@ -82,6 +84,7 @@ export interface TaskUpdateInput {
   recurringInterval?: number;
   recurringTaskId?: string | number | null;
   hijriDateOffset?: number;
+  durationMinutes?: number;
   removeTime?: boolean;
   tags?: string[] | null;
   logEntries?: { value: number; note?: string; occurredAt: number }[];

@@ -50,6 +50,13 @@
       "when": 1787295654635,
       "tag": "0006_first_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789825492176,
+      "tag": "0007_mature_jackal",
+      "breakpoints": true
     }
   ]
 }

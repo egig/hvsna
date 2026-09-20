@@ -34,6 +34,10 @@ function rowToTask(row: TaskRow): Task {
     recurringTaskId: row.recurring_task_id !== null ? String(row.recurring_task_id) : null,
     hijriDateOffset:
       row.hijri_date_offset !== null ? Number(row.hijri_date_offset) : undefined,
+    durationMinutes:
+      row.duration_minutes !== null && row.duration_minutes !== undefined
+        ? Number(row.duration_minutes)
+        : 15,
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),
     completedAt: row.completed_at !== null ? Number(row.completed_at) : undefined,
@@ -51,8 +55,8 @@ const UPSERT_SQL = `
   INSERT INTO tasks (
     id, name, description, status, at_time, at_epoch_millis, lat, lng, timezone,
     recurring_type, recurring_interval, recurring_task_id, hijri_date_offset,
-    created_at, updated_at, completed_at, deleted_at, _dirty
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+    created_at, updated_at, completed_at, deleted_at, duration_minutes, _dirty
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
   ON CONFLICT(id) DO UPDATE SET
     name = excluded.name, description = excluded.description, status = excluded.status,
     at_time = excluded.at_time, at_epoch_millis = excluded.at_epoch_millis,
@@ -60,7 +64,8 @@ const UPSERT_SQL = `
     recurring_type = excluded.recurring_type, recurring_interval = excluded.recurring_interval,
     recurring_task_id = excluded.recurring_task_id, hijri_date_offset = excluded.hijri_date_offset,
     updated_at = excluded.updated_at,
-    completed_at = excluded.completed_at, deleted_at = excluded.deleted_at, _dirty = 1
+    completed_at = excluded.completed_at, deleted_at = excluded.deleted_at,
+    duration_minutes = excluded.duration_minutes, _dirty = 1
 `;
 
 function taskParams(task: Task): SqliteValue[] {
@@ -84,6 +89,7 @@ function taskParams(task: Task): SqliteValue[] {
     task.updatedAt ?? Date.now(),
     task.completedAt ?? null,
     task.deletedAt ?? null,
+    task.durationMinutes ?? 15,
   ];
 }
 
@@ -145,6 +151,7 @@ export class SqliteTaskRepository implements ITaskRepository {
       long: input.long,
       timezone: input.timezone,
       hijriDateOffset: input.hijriDateOffset || 0,
+      durationMinutes: input.durationMinutes ?? 15,
       recurringType: input.recurringType,
       recurringInterval: input.recurringInterval,
       recurringTaskId: input.recurringTaskId,

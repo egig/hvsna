@@ -66,6 +66,7 @@ export function validateTaskRows(input: unknown): TaskPushRow[] {
     if (!isNullableNumber(row.recurring_interval)) invalid("tasks", i, "recurring_interval");
     if (!isNullableString(row.recurring_task_id)) invalid("tasks", i, "recurring_task_id");
     if (!isNullableNumber(row.hijri_date_offset)) invalid("tasks", i, "hijri_date_offset");
+    if (!isNumber(row.duration_minutes)) invalid("tasks", i, "duration_minutes");
     if (!isStringArray(row.tag_ids)) invalid("tasks", i, "tag_ids");
     if (!isNumber(row.created_at)) invalid("tasks", i, "created_at");
     if (!isNumber(row.updated_at)) invalid("tasks", i, "updated_at");
@@ -86,6 +87,7 @@ export function validateTaskRows(input: unknown): TaskPushRow[] {
       recurring_interval: (row.recurring_interval ?? null) as number | null,
       recurring_task_id: (row.recurring_task_id ?? null) as string | null,
       hijri_date_offset: (row.hijri_date_offset ?? null) as number | null,
+      duration_minutes: row.duration_minutes as number,
       tag_ids: row.tag_ids as string[],
       created_at: row.created_at,
       updated_at: row.updated_at,
@@ -115,6 +117,7 @@ export function validateRecurringTaskRows(input: unknown): RecurringTaskPushRow[
     if (!isNullableNumber(row.lng)) invalid(e, i, "lng");
     if (!isNullableString(row.timezone)) invalid(e, i, "timezone");
     if (!isNullableNumber(row.hijri_date_offset)) invalid(e, i, "hijri_date_offset");
+    if (!isNumber(row.duration_minutes)) invalid(e, i, "duration_minutes");
     if (!isStringArray(row.tag_ids)) invalid(e, i, "tag_ids");
     if (!isNullableString(row.recurring_end)) invalid(e, i, "recurring_end");
     if (!isNullableNumber(row.recurring_end_epoch)) invalid(e, i, "recurring_end_epoch");
@@ -138,6 +141,7 @@ export function validateRecurringTaskRows(input: unknown): RecurringTaskPushRow[
       lng: (row.lng ?? null) as number | null,
       timezone: (row.timezone ?? null) as string | null,
       hijri_date_offset: (row.hijri_date_offset ?? null) as number | null,
+      duration_minutes: row.duration_minutes as number,
       tag_ids: row.tag_ids as string[],
       recurring_end: (row.recurring_end ?? null) as string | null,
       recurring_end_epoch: (row.recurring_end_epoch ?? null) as number | null,

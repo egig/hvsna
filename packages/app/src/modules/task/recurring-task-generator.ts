@@ -165,6 +165,7 @@ function createVirtualTask(template: RecurringTask, epoch: number): Task {
     long: template.long,
     timezone: template.timezone,
     hijriDateOffset: template.hijriDateOffset,
+    durationMinutes: template.durationMinutes ?? 15,
     tags: template.tags ?? [],
     status: 0,
   });

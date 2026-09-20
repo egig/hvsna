@@ -13,6 +13,7 @@ export interface RecurringTask {
   long?: number;
   timezone?: string;
   hijriDateOffset?: number;
+  durationMinutes?: number;
   tags?: string[];
   recurringEnd?: "never" | "on_date" | "after_occurrences";
   recurringEndEpoch?: number | null;
@@ -35,6 +36,7 @@ export interface RecurringTaskCreateInput {
   long?: number;
   timezone?: string;
   hijriDateOffset?: number;
+  durationMinutes?: number;
   tags?: string[];
   recurringEnd?: "never" | "on_date" | "after_occurrences";
   recurringEndEpoch?: number | null;
@@ -54,6 +56,7 @@ export interface RecurringTaskUpdateInput {
   long?: number;
   timezone?: string;
   hijriDateOffset?: number;
+  durationMinutes?: number;
   tags?: string[] | null;
   recurringEnd?: "never" | "on_date" | "after_occurrences";
   recurringEndEpoch?: number | null;

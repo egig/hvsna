@@ -36,6 +36,7 @@ export async function materializeVirtualTask(
     long: task.long,
     timezone: task.timezone,
     hijriDateOffset: task.hijriDateOffset,
+    durationMinutes: task.durationMinutes,
     recurringType: task.recurringType,
     recurringInterval: task.recurringInterval,
     recurringTaskId: task.recurringTaskId ?? undefined,

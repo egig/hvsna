@@ -17,7 +17,11 @@ import { LargeNavbarMobile as LargeNavbar } from "./navbar-mobile";
 import { usePrayerTimes } from "@/modules/prayer";
 import type { PrayerTimes } from "adhan";
 import { groupTasksByPrayerTimes } from "@/modules/prayer-time-utils";
+import { useTodayViewMode, TodayViewModeToggle } from "@/modules/task/today-view-mode";
+import { TimelineView } from "@/modules/timeline/timeline-view";
 import dayjs from "dayjs";
+
+const TIMELINE_HOUR_HEIGHT_PX = 56;
 
 export function Today() {
   return (
@@ -29,6 +33,7 @@ export function Today() {
 
 function TodayInner() {
   const { pageTitle, subTitle } = useToday();
+  const { mode, toggleMode } = useTodayViewMode();
 
   return (
     <>
@@ -38,17 +43,18 @@ function TodayInner() {
             showBackButton={false}
             eyebrow={subTitle}
             title={pageTitle}
+            rightAction={<TodayViewModeToggle mode={mode} toggleMode={toggleMode} />}
           />
         }
       >
-        <TodayContent />
+        <TodayContent mode={mode} />
       </Page>
       {/* <MockTimeControl /> */}
     </>
   );
 }
 
-export function TodayContent() {
+export function TodayContent({ mode = "list" }: { mode?: "list" | "timeline" }) {
   const { t } = useLanguageContext();
   const {
     todayTasks,
@@ -111,6 +117,17 @@ export function TodayContent() {
   const isEmpty = todayTasks.length === 0 && todayCompletedTasks.length === 0;
 
   if (!initiated) return null;
+
+  if (mode === "timeline") {
+    return (
+      <TimelineView
+        tasks={todayTasks}
+        completedTasks={todayCompletedTasks}
+        hourHeightPx={TIMELINE_HOUR_HEIGHT_PX}
+        isAfterMaghrib={isAfterMaghrib}
+      />
+    );
+  }
 
   if (isEmpty) {
     return (

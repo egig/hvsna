@@ -22,6 +22,7 @@ export interface TaskWireRow {
   recurring_interval: number | null;
   recurring_task_id: string | null;
   hijri_date_offset: number | null;
+  duration_minutes: number;
   /** Full current membership snapshot — the owning row's `task_tags`. */
   tag_ids: string[];
   created_at: number;
@@ -42,6 +43,7 @@ export interface RecurringTaskWireRow {
   lng: number | null;
   timezone: string | null;
   hijri_date_offset: number | null;
+  duration_minutes: number;
   /** Full current membership snapshot — the owning row's `recurring_task_tags`. */
   tag_ids: string[];
   recurring_end: string | null;

@@ -45,6 +45,7 @@ function remoteTaskRow(overrides: Partial<Record<string, unknown>> = {}) {
     recurring_interval: null,
     recurring_task_id: null,
     hijri_date_offset: null,
+    duration_minutes: 15,
     tag_ids: [],
     created_at: 1000,
     updated_at: 1000,

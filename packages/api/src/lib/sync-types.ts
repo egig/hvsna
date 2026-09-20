@@ -18,6 +18,7 @@ export interface TaskPushRow {
   recurring_interval: number | null;
   recurring_task_id: string | null;
   hijri_date_offset: number | null;
+  duration_minutes: number;
   tag_ids: string[];
   created_at: number;
   updated_at: number;
@@ -37,6 +38,7 @@ export interface RecurringTaskPushRow {
   lng: number | null;
   timezone: string | null;
   hijri_date_offset: number | null;
+  duration_minutes: number;
   tag_ids: string[];
   recurring_end: string | null;
   recurring_end_epoch: number | null;
