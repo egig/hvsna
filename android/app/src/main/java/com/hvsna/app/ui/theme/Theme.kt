@@ -9,8 +9,18 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
+/**
+ * The resolved dark/light state [HvsnaTheme] rendered with — distinct from [isSystemInDarkTheme]
+ * because the app's theme setting (system/light/dark, see `SettingsAppearanceScreen`) can override
+ * the system value. Read this instead of [isSystemInDarkTheme] whenever a composable needs to
+ * branch on dark mode rather than pull a color straight from `MaterialTheme.colorScheme`.
+ */
+val LocalDarkTheme = staticCompositionLocalOf { false }
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -62,9 +72,11 @@ fun HvsnaTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

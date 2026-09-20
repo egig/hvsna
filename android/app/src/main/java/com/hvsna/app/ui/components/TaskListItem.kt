@@ -61,6 +61,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
+import com.hvsna.app.ui.theme.LocalDarkTheme
+import com.hvsna.app.ui.theme.SwipeCompleteBackgroundDark
+import com.hvsna.app.ui.theme.SwipeCompleteOnBackgroundDark
+import com.hvsna.app.ui.theme.SwipeRescheduleBackgroundDark
+import com.hvsna.app.ui.theme.SwipeRescheduleOnBackgroundDark
 import com.hvsna.app.ui.theme.accessibleColor
 
 private val leadingColumnWidth = 32.dp
@@ -232,21 +237,23 @@ fun TaskListItem(
         },
     )
 
+    val isDarkTheme = LocalDarkTheme.current
+
     SwipeToDismissBox(
         state = dismissState,
         modifier = modifier,
         backgroundContent = {
             val spec = when (dismissState.dismissDirection) {
                 SwipeToDismissBoxValue.StartToEnd -> SwipeBackgroundSpec(
-                    color = MaterialTheme.colorScheme.primary,
-                    onColor = MaterialTheme.colorScheme.onPrimary,
+                    color = if (isDarkTheme) SwipeCompleteBackgroundDark else MaterialTheme.colorScheme.primary,
+                    onColor = if (isDarkTheme) SwipeCompleteOnBackgroundDark else MaterialTheme.colorScheme.onPrimary,
                     icon = R.drawable.ic_square_check_filled,
                     alignment = Alignment.CenterStart,
                     contentDescription = strings["a11y.completeTaskSwipe"],
                 )
                 SwipeToDismissBoxValue.EndToStart -> SwipeBackgroundSpec(
-                    color = MaterialTheme.colorScheme.tertiary,
-                    onColor = MaterialTheme.colorScheme.onTertiary,
+                    color = if (isDarkTheme) SwipeRescheduleBackgroundDark else MaterialTheme.colorScheme.tertiary,
+                    onColor = if (isDarkTheme) SwipeRescheduleOnBackgroundDark else MaterialTheme.colorScheme.onTertiary,
                     icon = R.drawable.ic_calendar_event,
                     alignment = Alignment.CenterEnd,
                     contentDescription = strings["a11y.rescheduleTaskSwipe"],

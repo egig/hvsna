@@ -16,6 +16,14 @@ val Pink40 = Color(0xFF7D5260)
 val BrandPrimaryContainer = Color(0xFFDDE1FF)
 val BrandOnPrimaryContainer = Color(0xFF001453)
 
+// Dark-mode swipe-action background colors. Dark mode's primary/tertiary tones (Purple80/Pink80)
+// are calibrated for text and icons drawn on a dark surface, not as full-bleed swipe-reveal
+// fills, so a dedicated muted pair avoids a blown-out pastel flash mid-swipe.
+val SwipeCompleteBackgroundDark = Color(0xFF41467D)
+val SwipeCompleteOnBackgroundDark = BrandPrimaryContainer
+val SwipeRescheduleBackgroundDark = Color(0xFF644451)
+val SwipeRescheduleOnBackgroundDark = Color(0xFFFFD9E2)
+
 val TagPalette = listOf(
     Color(0xFFE57373), // red
     Color(0xFFFFB74D), // orange
