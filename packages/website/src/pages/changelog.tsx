@@ -21,6 +21,37 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
+    date: "September 21, 2026",
+    releases: [
+      {
+        platform: "Android",
+        version: "v2.3.0",
+        changes: {
+          new: ["Swipe a task right to mark it done, or left to quickly reschedule it (later today, tomorrow, next week, or pick a date)"],
+          improved: [
+            "Faster, more reliable local storage under the hood",
+            "Refreshed icons for a cleaner look",
+            "Hijri (Islamic) date now shown in more places across the app",
+          ],
+          fixed: ["Fixed a task title input bug on the Today, Upcoming, and Tag screens"],
+        },
+      },
+      {
+        platform: "Web",
+        version: "v1.1.1",
+        changes: {
+          new: [],
+          improved: [
+            "Smoother animations when picking a date or time for a task",
+            "Cleaner text, spacing, and checkbox styling throughout the app",
+            "More reliable saving for tags, recurring tasks, and settings",
+          ],
+          fixed: ["Fixed promoting a task to a recurring task not always working", "Fixed a couple of recurring task display glitches"],
+        },
+      },
+    ],
+  },
+  {
     date: "September 11, 2026",
     releases: [
       {
