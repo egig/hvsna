@@ -322,7 +322,6 @@ fun TodayScreen(
                             label = prayerHeaderLabel(strings["prayer.${item.name}"], item.timeLabel),
                             isExpanded = isExpanded,
                             onToggle = { expandedGroups[item.groupKey] = !isExpanded },
-                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = itemModifier,
                         )
                     }
