@@ -230,6 +230,8 @@ fun TaskListItem(
     // Swipe right marks the task complete (same toggle the checkbox drives); swipe left opens the
     // reschedule sheet. Neither commits an actual dismissal — confirmValueChange fires the action
     // and always returns false, so the row springs back to Settled instead of leaving the list.
+    // positionalThreshold is raised from the default 50% of row width to 70% — the default fired
+    // on brushes/small drags that weren't meant as a swipe action.
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
@@ -239,6 +241,7 @@ fun TaskListItem(
             }
             false
         },
+        positionalThreshold = { totalDistance -> totalDistance * 0.7f },
     )
 
     // Buzz the moment a drag crosses the action threshold (targetValue leaves Settled), using the

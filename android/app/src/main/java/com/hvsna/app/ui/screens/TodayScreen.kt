@@ -361,7 +361,7 @@ fun TodayScreen(
                         label = strings["group.completed"],
                         isExpanded = isExpanded,
                         onToggle = { expandedGroups["Completed"] = !isExpanded },
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         count = completedTasks.size,
                         background = MaterialTheme.colorScheme.surface,
                     )

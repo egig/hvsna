@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -767,22 +768,25 @@ fun TaskBottomSheet(
                             .thenBy { it.name.lowercase(strings.locale) },
                     )
 
-                Column(
+                // Tags wrap as inline pills rather than one full-width row each, so a typical tag
+                // set fits on screen at once. Selected pills carry a stronger tint plus a check.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 360.dp)
                         .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     sortedTags.forEach { tag ->
                         val selected = tag.id in selectedIds
                         val tagColor = tag.accessibleColor()
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 48.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .heightIn(min = 40.dp)
+                                .clip(CircleShape)
                                 .background(tagColor.copy(alpha = if (selected) 0.22f else 0.10f))
                                 // Checkbox role: TalkBack announces each tag as checked / not checked
                                 // instead of relying on the tint and check icon alone.
@@ -793,31 +797,31 @@ fun TaskBottomSheet(
                                         titleTagState.removeTag(tag.id)
                                     }
                                 }
-                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                                .padding(start = if (selected) 10.dp else 14.dp, end = 14.dp, top = 8.dp, bottom = 8.dp),
                         ) {
-                            Text(
-                                "#${tag.name}",
-                                color = tagColor,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f),
-                            )
                             if (selected) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
                                     contentDescription = null,
                                     tint = tagColor,
-                                    modifier = Modifier.size(18.dp),
+                                    modifier = Modifier.size(16.dp),
                                 )
                             }
+                            Text(
+                                "#${tag.name}",
+                                color = tagColor,
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         }
                     }
                     if (pickerQuery.isNotEmpty() && !pickerHasExact) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 48.dp)
-                                .clip(RoundedCornerShape(8.dp))
+                                .heightIn(min = 40.dp)
+                                .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
                                 .clickable(role = Role.Button) {
                                     coroutineScope.launch {
@@ -826,12 +830,14 @@ fun TaskBottomSheet(
                                     }
                                     tagPickerQuery = ""
                                 }
-                                .padding(horizontal = 14.dp, vertical = 12.dp),
+                                .padding(horizontal = 14.dp, vertical = 8.dp),
                         ) {
                             Text(
                                 strings.format("task.createTag", pickerQuery),
                                 color = MaterialTheme.colorScheme.primary,
                                 style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }

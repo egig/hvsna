@@ -146,7 +146,7 @@ fun TagDetailScreen(
                             isExpanded = isExpanded,
                             onToggle = { expandedGroups[key] = !isExpanded },
                             color = if (key == "Overdue") MaterialTheme.colorScheme.error
-                            else MaterialTheme.colorScheme.primary,
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                             background = MaterialTheme.colorScheme.surface,
                         )
                     }
