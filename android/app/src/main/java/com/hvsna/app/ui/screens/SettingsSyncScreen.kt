@@ -1,5 +1,7 @@
 package com.hvsna.app.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +19,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.AppSettings
@@ -33,7 +37,12 @@ import java.util.Date
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
+import com.hvsna.app.auth.canSync
+import com.hvsna.app.auth.needsSyncPlan
 import com.hvsna.app.i18n.LocalStrings
+
+/** Android has no checkout of its own — the Sync plan is bought on the web app's subscription page. */
+private const val SUBSCRIPTION_URL = "https://app.hvsna.com/settings/subscription"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +61,12 @@ fun SettingsSyncScreen(
     val isManualSyncing by syncManager.isManualSyncing.collectAsState()
     val lastSyncedAt by syncManager.lastSyncedAt.collectAsState()
     val isSignedIn = authState.user != null
-    val canSync = authState.user?.emailVerified == true
+    val canSync = authState.user?.canSync == true
+    val needsSyncPlan = authState.user?.needsSyncPlan == true
+    val context = LocalContext.current
+
+    // Re-read /me on open so a Sync plan bought (on the web) since sign-in takes effect here.
+    LaunchedEffect(Unit) { authViewModel.refreshUser() }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -93,6 +107,19 @@ fun SettingsSyncScreen(
                         strings["sync.signInPrompt"],
                         style = MaterialTheme.typography.bodyLarge,
                     )
+                } else if (needsSyncPlan) {
+                    Text(
+                        strings["sync.planRequiredPrompt"],
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Button(
+                        onClick = {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(SUBSCRIPTION_URL)))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(strings["sync.viewPlan"])
+                    }
                 } else if (!canSync) {
                     Text(
                         strings["sync.verifyEmailPrompt"],

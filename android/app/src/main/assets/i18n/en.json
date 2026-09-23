@@ -203,6 +203,8 @@
   "sync.title": "Sync",
   "sync.signInPrompt": "Sign in to sync your tasks across devices.",
   "sync.verifyEmailPrompt": "Verify your email to sync your tasks across devices.",
+  "sync.planRequiredPrompt": "Syncing across devices is part of the paid Sync plan. Your tasks stay on this device until you upgrade.",
+  "sync.viewPlan": "View Sync plan",
   "sync.lastSynced": "Last synced %s",
   "sync.notSyncedYet": "Not synced yet",
   "sync.syncNow": "Sync now",

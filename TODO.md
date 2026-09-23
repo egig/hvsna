@@ -7,12 +7,9 @@ describe these. They've been removed from user-facing docs (2026-09-09) and
 parked here until implemented.
 
 ### Sync
-- **Paid-plan enforcement** — docs and the pricing page present Sync as a paid
-  plan, but nothing enforces it. Both clients gate only on `emailVerified`
-  (`modules/sync/context.ts`; Android `SettingsSyncScreen.kt`) and the API's
-  `/sync/push` + `/sync/pull` only call `requireVerifiedAuth` — no subscription
-  check anywhere. Android has no billing code at all. Needs a server-side
-  entitlement check on the sync routes + a client gate.
+- **In-app billing (Android)** — the Sync plan is enforced on both clients
+  (`requireSyncAuth` + `/me`'s `syncEnabled`), but Android has no checkout of its
+  own; its sync screen links out to the web app's subscription page.
 - **Data export (web)** — Android has Backup & Restore (export/import file); the
   web app has no equivalent.
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { SettingsHeader } from "./settings-header";
 import {
   HvRefreshCw,
   HvCheckCircle,
   HvAlertCircle,
   HvClock,
+  HvInfo,
 } from "@/modules/icons";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
 import { useCombinedDateFormat } from "@/modules/calendar/use-combined-date-format";
@@ -13,7 +15,14 @@ import { useSync } from "@/modules/sync/context";
 export default function Sync() {
   const { t } = useLanguageContext();
   const { formatCombinedDate } = useCombinedDateFormat();
-  const { lastSyncTime, isSyncing, manualSync, isManualSyncing, canSync } =
+  const {
+    lastSyncTime,
+    isSyncing,
+    manualSync,
+    isManualSyncing,
+    canSync,
+    needsSyncPlan,
+  } =
     useSync();
   const [manualSyncStatus, setManualSyncStatus] = useState<
     "idle" | "success" | "error"
@@ -111,6 +120,29 @@ export default function Sync() {
                   {t("sync_failed")}
                 </h3>
                 <p className="text-sm text-red-700">{errorMessage}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {needsSyncPlan && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-start gap-3">
+              <HvInfo className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-amber-800 mb-1">
+                  {t("sync_plan_required")}
+                </h3>
+                <p className="text-sm text-amber-700 mb-3">
+                  {t("sync_plan_required_description")}
+                </p>
+                <Link
+                  to="/settings/subscription"
+                  className="text-sm font-medium underline"
+                  style={{ color: "var(--hvsna-primary-color)" }}
+                >
+                  {t("view_sync_plan")}
+                </Link>
               </div>
             </div>
           </div>

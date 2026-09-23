@@ -1,4 +1,4 @@
-import { requireVerifiedAuth } from "@/lib/require-auth";
+import { requireSyncAuth } from "@/lib/require-auth";
 import { jsonOk, jsonUnexpectedError } from "@/lib/response";
 import {
   clampPullLimit,
@@ -11,7 +11,7 @@ import {
 
 export async function loader({ request }: { request: Request }) {
   try {
-    const userId = await requireVerifiedAuth(request);
+    const userId = await requireSyncAuth(request);
     const url = new URL(request.url);
     const limit = clampPullLimit(url.searchParams.get("limit"));
     const tasksCursor = parseCursor(url.searchParams.get("tasks_cursor"));

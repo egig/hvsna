@@ -4,7 +4,7 @@ import { useAuth } from "@/modules/auth";
 import { queryKeys } from "@/modules/query-keys";
 
 export function useSubscription() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, fetchUser } = useAuth();
   const queryClient = useQueryClient();
   const repo = getSubscriptionRepository();
 
@@ -18,7 +18,13 @@ export function useSubscription() {
     mutationFn: () => repo.createCheckoutSession(),
   });
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: queryKeys.subscription() });
+  // Also re-reads /me: its syncEnabled flag is what gates sync (see
+  // modules/sync/can-sync.ts), so returning from checkout must refresh it too.
+  const refresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.subscription() }),
+      fetchUser().catch(() => {}),
+    ]);
 
   const startCheckout = async (): Promise<void> => {
     const url = await checkoutMutation.mutateAsync();

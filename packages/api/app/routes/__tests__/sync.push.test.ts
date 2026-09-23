@@ -53,12 +53,14 @@ beforeEach(() => {
 });
 
 /**
- * requireVerifiedAuth's emailVerified lookup is the first db.select call
+ * requireSyncAuth's users ⟕ subscriptions lookup is the first db.select call
  * on any authenticated request — queue it ahead of any test-specific
  * mockReturnValueOnce sequence.
  */
 function mockVerifiedAuth() {
-  db.select.mockReturnValueOnce(createChain([{ emailVerified: true }]));
+  db.select.mockReturnValueOnce(
+    createChain([{ emailVerified: true, subscriptionStatus: "active", subscriptionEndsAt: null }])
+  );
 }
 
 describe("POST /sync/push", () => {
@@ -67,6 +69,19 @@ describe("POST /sync/push", () => {
     expect(response.status).toBe(401);
     const body = await response.json();
     expect(body.code).toBe("TOKEN_EXPIRED");
+  });
+
+  it("returns 403 SYNC_PLAN_REQUIRED when the user has no Sync plan", async () => {
+    const token = await signAccessToken("user-1");
+    db.select.mockReturnValueOnce(
+      createChain([{ emailVerified: true, subscriptionStatus: null, subscriptionEndsAt: null }])
+    );
+
+    const response = await action({ request: makeRequest({}, token) });
+
+    expect(response.status).toBe(403);
+    const body = await response.json();
+    expect(body.code).toBe("SYNC_PLAN_REQUIRED");
   });
 
   it("returns 403 EMAIL_NOT_VERIFIED when the user hasn't verified their email", async () => {

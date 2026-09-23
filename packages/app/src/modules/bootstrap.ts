@@ -3,6 +3,7 @@ import { getAuthService } from "@/infra/auth/AuthServiceFactory";
 import { getSyncApiClient } from "@/infra/sync/SyncApiClientFactory";
 import { createSyncEngine } from "@/modules/sync/sync-engine";
 import { getLastSuccessAt } from "@/modules/sync/cursor-store";
+import { userCanSync } from "@/modules/sync/can-sync";
 import type { User } from "@/modules/auth/user";
 import log from "@/modules/logger";
 
@@ -64,9 +65,9 @@ export async function bootstrapApp(
     log.warn("bootstrap: session restore failed", error);
   }
 
-  // Matches SyncProvider's canSync gate — the API rejects /sync/* until the
-  // email is verified, so there's nothing to pull for an unverified account.
-  if (result.user?.emailVerified) {
+  // Matches SyncProvider's canSync gate — the API rejects /sync/* without a
+  // verified email and a Sync plan, so there's nothing to pull otherwise.
+  if (userCanSync(result.user)) {
     try {
       const engine = createSyncEngine(sqliteClient, getSyncApiClient());
       await withTimeout(engine.fullSync(), SYNC_BUDGET_MS, "initial sync");

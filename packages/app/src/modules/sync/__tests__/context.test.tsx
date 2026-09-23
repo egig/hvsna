@@ -7,6 +7,8 @@ import { createWriteNotifier } from "../write-notifier";
 const mockFullSync = vi.fn();
 let mockIsAuthenticated = false;
 let mockEmailVerified = false;
+let mockSyncEnabled = true;
+const mockFetchUser = vi.fn().mockResolvedValue(undefined);
 let mockIsOnline = true;
 const mockWriteNotifier = createWriteNotifier();
 
@@ -22,7 +24,10 @@ vi.mock("@/modules/repositories-context", () => ({
 vi.mock("@/modules/auth", () => ({
   useAuth: () => ({
     isAuthenticated: mockIsAuthenticated,
-    user: mockIsAuthenticated ? { emailVerified: mockEmailVerified } : null,
+    user: mockIsAuthenticated
+      ? { emailVerified: mockEmailVerified, syncEnabled: mockSyncEnabled }
+      : null,
+    fetchUser: mockFetchUser,
   }),
 }));
 vi.mock("@/modules/settings", () => ({
@@ -79,6 +84,8 @@ describe("SyncProvider poll trigger", () => {
     mockFullSync.mockReset().mockResolvedValue(false);
     mockIsAuthenticated = false;
     mockEmailVerified = false;
+    mockSyncEnabled = true;
+    mockFetchUser.mockClear();
     mockIsOnline = true;
     setVisibility("visible");
   });
@@ -217,6 +224,38 @@ describe("SyncProvider poll trigger", () => {
     ).rejects.toThrow(/verify your email/i);
     expect(mockFullSync).not.toHaveBeenCalled();
   });
+
+  it("does not sync a verified user without a Sync plan, and flags needsSyncPlan", async () => {
+    const { result, rerender } = renderHook(() => useSync(), { wrapper });
+
+    mockIsAuthenticated = true;
+    mockEmailVerified = true;
+    mockSyncEnabled = false;
+    rerender();
+    await flushMicrotasks();
+
+    expect(result.current.canSync).toBe(false);
+    expect(result.current.needsSyncPlan).toBe(true);
+    await expect(
+      act(async () => {
+        await result.current.manualSync();
+      })
+    ).rejects.toThrow(/sync plan/i);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120_000);
+    });
+    expect(mockFullSync).not.toHaveBeenCalled();
+  });
+
+  it("refetches the user when the server reports SYNC_PLAN_REQUIRED", async () => {
+    mockFullSync.mockRejectedValueOnce({ status: 403, code: "SYNC_PLAN_REQUIRED" });
+    const { rerender } = renderHook(() => useSync(), { wrapper });
+
+    await signIn(rerender);
+
+    expect(mockFullSync).toHaveBeenCalledTimes(1);
+    expect(mockFetchUser).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("SyncProvider write trigger", () => {
@@ -225,6 +264,7 @@ describe("SyncProvider write trigger", () => {
     mockFullSync.mockReset().mockResolvedValue(false);
     mockIsAuthenticated = true;
     mockEmailVerified = true;
+    mockSyncEnabled = true;
     mockIsOnline = true;
     setVisibility("visible");
   });
