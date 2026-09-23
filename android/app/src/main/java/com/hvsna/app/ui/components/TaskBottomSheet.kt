@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,7 +41,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +61,11 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +75,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -130,6 +139,77 @@ private fun UnderlineTextField(
             )
         },
     )
+}
+
+/**
+ * Filter/create field at the top of the tag picker. Styled as a filled rounded search field (like
+ * the Search screen's) so it reads as an input rather than the title's bare underline style, with
+ * a clear button and an IME "Done" action that commits the typed name ([onSubmit]).
+ */
+@Composable
+private fun TagPickerField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
+) {
+    val strings = LocalStrings.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val contentColor = MaterialTheme.colorScheme.onSurface
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            textStyle = LocalTextStyle.current.copy(color = contentColor),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            interactionSource = interactionSource,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+                // The placeholder disappears once text is typed, so give the field a stable label.
+                .semantics { contentDescription = strings["task.addTags"] },
+            decorationBox = { innerTextField ->
+                TextFieldDefaults.DecorationBox(
+                    value = value,
+                    innerTextField = innerTextField,
+                    enabled = true,
+                    singleLine = true,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = interactionSource,
+                    placeholder = { Text(strings["task.addTags"]) },
+                    leadingIcon = {
+                        Icon(ImageVector.vectorResource(id = R.drawable.ic_hash), contentDescription = null)
+                    },
+                    trailingIcon = if (value.isNotEmpty()) {
+                        {
+                            IconButton(onClick = { onValueChange("") }) {
+                                Icon(
+                                    ImageVector.vectorResource(id = R.drawable.ic_x),
+                                    contentDescription = strings["a11y.clearSearch"],
+                                )
+                            }
+                        }
+                    } else null,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
+                    contentPadding = TextFieldDefaults.contentPaddingWithoutLabel(start = 4.dp, end = 4.dp),
+                )
+            },
+        )
+    }
 }
 
 /**
@@ -349,6 +429,8 @@ fun TaskBottomSheet(
     var showTagPicker by remember { mutableStateOf(false) }
     val titleFocusRequester = remember { FocusRequester() }
     val descriptionFocusRequester = remember { FocusRequester() }
+    val tagPickerFocusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
     fun calFromTime() = Calendar.getInstance().apply { timeInMillis = scheduledTime ?: System.currentTimeMillis() }
 
     fun applySelectedDate(date: LocalDate) {
@@ -634,20 +716,50 @@ fun TaskBottomSheet(
                     IconButton(onClick = { showTagPicker = false }) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_arrow_left), contentDescription = strings["common.back"])
                     }
-                    Text(strings["task.selectTags"], style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        strings["task.selectTags"],
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.semantics { heading() },
+                    )
                 }
-
-                UnderlineTextField(
-                    value = tagPickerQuery,
-                    onValueChange = { tagPickerQuery = it },
-                    placeholder = strings["task.addTags"],
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                )
 
                 val pickerQuery = tagPickerQuery.trim()
                 val selectedIds = titleTagState.effectiveTagIds.toSet()
-                val pickerHasExact = allTags.any { it.name.equals(pickerQuery, ignoreCase = true) }
+                val exactTag = allTags.firstOrNull { it.name.equals(pickerQuery, ignoreCase = true) }
+                val pickerHasExact = exactTag != null
+
+                // Opening the picker (tapping the Tags button) lands the cursor in the field with
+                // the keyboard up, so the user can type a tag name straight away.
+                LaunchedEffect(Unit) {
+                    tagPickerFocusRequester.requestFocus()
+                    keyboardController?.show()
+                }
+
+                TagPickerField(
+                    value = tagPickerQuery,
+                    onValueChange = { tagPickerQuery = it },
+                    // "Done" selects the exactly-matching tag, or creates it when none exists.
+                    onSubmit = {
+                        when {
+                            pickerQuery.isEmpty() -> keyboardController?.hide()
+                            exactTag != null -> {
+                                if (exactTag.id !in selectedIds) {
+                                    titleTagState = titleTagState.addPickerTag(exactTag.id)
+                                }
+                                tagPickerQuery = ""
+                            }
+                            else -> {
+                                coroutineScope.launch {
+                                    val tag = onCreateTag(pickerQuery)
+                                    titleTagState = titleTagState.addPickerTag(tag.id)
+                                }
+                                tagPickerQuery = ""
+                            }
+                        }
+                    },
+                    focusRequester = tagPickerFocusRequester,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 val sortedTags = allTags
                     .filter { it.name.contains(pickerQuery, ignoreCase = true) }
                     .sortedWith(
@@ -669,13 +781,16 @@ fun TaskBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .heightIn(min = 48.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(tagColor.copy(alpha = if (selected) 0.22f else 0.10f))
-                                .clickable {
-                                    titleTagState = if (selected) {
-                                        titleTagState.removeTag(tag.id)
-                                    } else {
+                                // Checkbox role: TalkBack announces each tag as checked / not checked
+                                // instead of relying on the tint and check icon alone.
+                                .toggleable(value = selected, role = Role.Checkbox) { checked ->
+                                    titleTagState = if (checked) {
                                         titleTagState.addPickerTag(tag.id)
+                                    } else {
+                                        titleTagState.removeTag(tag.id)
                                     }
                                 }
                                 .padding(horizontal = 14.dp, vertical = 12.dp),
@@ -701,9 +816,10 @@ fun TaskBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .heightIn(min = 48.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
-                                .clickable {
+                                .clickable(role = Role.Button) {
                                     coroutineScope.launch {
                                         val tag = onCreateTag(pickerQuery)
                                         titleTagState = titleTagState.addPickerTag(tag.id)
@@ -767,13 +883,21 @@ fun TaskBottomSheet(
                         }
                     }
                     OutlinedButton(onClick = { showTagPicker = true }) {
-                        val tagCount = titleTagState.effectiveTagIds.size
+                        val tagIds = titleTagState.effectiveTagIds
+                        // A single tag is shown by name; several collapse to a count. Falls back to
+                        // the count while a just-created tag hasn't reached allTags yet.
+                        val singleTag = tagIds.singleOrNull()?.let { id -> allTags.firstOrNull { it.id == id } }
                         Text(
-                            if (tagCount == 0) strings["task.tags"]
-                            else strings.format(
-                                if (tagCount == 1) "task.tagCount.one" else "task.tagCount.other",
-                                tagCount,
-                            )
+                            when {
+                                tagIds.isEmpty() -> strings["task.tags"]
+                                singleTag != null -> "#${singleTag.name}"
+                                else -> strings.format(
+                                    if (tagIds.size == 1) "task.tagCount.one" else "task.tagCount.other",
+                                    tagIds.size,
+                                )
+                            },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
