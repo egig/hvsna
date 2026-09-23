@@ -6,7 +6,7 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import { useSqliteClient } from "@/modules/sqlite/context";
+import { useDatabase } from "@/modules/db/context";
 import { useNetworkContext } from "@/modules/network/context";
 import { useAuth } from "@/modules/auth";
 import { useSettings } from "@/modules/settings";
@@ -70,7 +70,7 @@ export const SyncProvider = ({
    *  state. Lets the provider skip re-running a sync bootstrap already did. */
   initialSync?: { performed: boolean; lastSyncAt: Date | null };
 }) => {
-  const { client } = useSqliteClient();
+  const database = useDatabase();
   const { isOnline } = useNetworkContext();
   const { isAuthenticated, user, fetchUser } = useAuth();
   const { writeNotifier } = useRepositories();
@@ -85,7 +85,7 @@ export const SyncProvider = ({
 
   const engineRef = useRef<SyncEngine | null>(null);
   if (!engineRef.current) {
-    engineRef.current = createSyncEngine(client, getSyncApiClient());
+    engineRef.current = createSyncEngine(database, getSyncApiClient());
   }
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -103,10 +103,10 @@ export const SyncProvider = ({
   const rerunRef = useRef(false);
 
   useEffect(() => {
-    getLastSuccessAt(client)
+    getLastSuccessAt(database)
       .then(setLastSyncTime)
       .catch(() => {});
-  }, [client]);
+  }, [database]);
 
   const runSync = async (silent = false): Promise<boolean> => {
     if (inFlightRef.current) {

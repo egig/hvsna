@@ -1,4 +1,5 @@
-import type { SqliteExecutor, SqliteValue } from "@/modules/sqlite/client";
+import type { DbExecutor } from "@/modules/db/executor";
+import type { HvsnaDatabase } from "@/modules/db/database";
 import type {
   RecurringTaskWireRow,
   SettingsWireRow,
@@ -9,14 +10,13 @@ import type {
 export type SyncTable = "tasks" | "recurring_tasks" | "settings" | "tags";
 
 /**
- * Column lists mirror the sqlite schema exactly (see
- * modules/sqlite/migrations/user/0000_rainy_brother_voodoo.sql and
- * 0001_normalize_tags_and_settings.sql) — wire rows are snake_case with the
- * same field names as these columns, so no mapping layer is needed between
- * a dirty-row scan and a push request body, or between a pulled row and a
- * local upsert. `tasks`/`recurring_tasks` no longer carry a `tags` column —
- * their tag membership lives in `task_tags`/`recurring_task_tags` and is
- * attached separately (see TAG_ASSOCIATIONS below).
+ * Field lists mirror the stored row shapes exactly (see
+ * modules/db/database.ts) — wire rows are snake_case with the same field
+ * names, so no mapping layer is needed between a dirty-row scan and a push
+ * request body, or between a pulled row and a local upsert. Stored
+ * `tasks`/`recurring_tasks` rows carry no `tags` — their tag membership
+ * lives in `task_tags`/`recurring_task_tags` and is attached separately
+ * (see TAG_ASSOCIATIONS below).
  */
 const TABLE_COLUMNS: Record<SyncTable, readonly string[]> = {
   tasks: [
@@ -84,11 +84,13 @@ const PRIMARY_KEY: Record<SyncTable, string> = {
  * (`tag_ids`), backed by a join table that itself has no `_dirty`/
  * `updated_at` of its own — membership rides along with the owning row's
  * own push/pull instead of being synced independently (see
- * infra/tag/SqliteTagRepository.ts: every write to task_tags/
+ * infra/tag/DexieTagRepository.ts: every write to task_tags/
  * recurring_task_tags happens alongside a write to the owning task/
  * recurring_task row, which is what actually gets marked dirty).
  */
-const TAG_ASSOCIATIONS: Partial<Record<SyncTable, { joinTable: string; column: string }>> = {
+const TAG_ASSOCIATIONS: Partial<
+  Record<SyncTable, { joinTable: "task_tags" | "recurring_task_tags"; column: string }>
+> = {
   tasks: { joinTable: "task_tags", column: "task_id" },
   recurring_tasks: { joinTable: "recurring_task_tags", column: "recurring_task_id" },
 };
@@ -101,71 +103,94 @@ export type WireRowFor<T extends SyncTable> = T extends "tasks"
       ? SettingsWireRow
       : TagWireRow;
 
-function rowToWire<T extends SyncTable>(row: Record<string, SqliteValue>): WireRowFor<T> {
-  return row as unknown as WireRowFor<T>;
+type StoredRow = Record<string, unknown> & { _dirty: 0 | 1 };
+
+// Dexie's per-table typings don't survive indexing by a SyncTable union, so
+// the helpers below work on untyped rows; TABLE_COLUMNS keeps them honest.
+function table(db: HvsnaDatabase, name: SyncTable) {
+  return db.table<StoredRow, string>(name);
 }
 
-function parseTagIds(value: SqliteValue | undefined): string[] {
-  if (value === undefined || value === null) return [];
-  return JSON.parse(String(value)) as string[];
+function joinTable(db: HvsnaDatabase, name: "task_tags" | "recurring_task_tags") {
+  return db.table<Record<string, string>, [string, string]>(name);
+}
+
+/** Copies exactly the table's wire fields, with absent values as null. */
+function pickColumns(tableName: SyncTable, row: Record<string, unknown>): Record<string, unknown> {
+  const picked: Record<string, unknown> = {};
+  for (const column of TABLE_COLUMNS[tableName]) picked[column] = row[column] ?? null;
+  return picked;
+}
+
+async function tagIdsFor(
+  db: HvsnaDatabase,
+  assoc: { joinTable: "task_tags" | "recurring_task_tags"; column: string },
+  entityIds: string[]
+): Promise<Map<string, string[]>> {
+  const links = await joinTable(db, assoc.joinTable).where(assoc.column).anyOf(entityIds).toArray();
+  const result = new Map<string, string[]>();
+  for (const link of links) {
+    const list = result.get(link[assoc.column]) ?? [];
+    list.push(link.tag_id);
+    result.set(link[assoc.column], list);
+  }
+  return result;
 }
 
 /** Reads up to `limit` locally-dirty rows for a table, tombstones included. */
 export async function findDirty<T extends SyncTable>(
-  executor: SqliteExecutor,
-  table: T,
+  executor: DbExecutor,
+  tableName: T,
   limit: number
 ): Promise<WireRowFor<T>[]> {
-  const columns = TABLE_COLUMNS[table].join(", ");
-  const assoc = TAG_ASSOCIATIONS[table];
-  const tagSelect = assoc
-    ? `, (SELECT COALESCE(json_group_array(tag_id), '[]') FROM ${assoc.joinTable} WHERE ${assoc.column} = ${table}.id) AS tag_ids`
-    : "";
-  const rows = await executor.run(
-    `SELECT ${columns}${tagSelect} FROM ${table} WHERE _dirty = 1 LIMIT ?`,
-    [limit]
-  );
-  return rows.map((row) =>
-    rowToWire<T>(assoc ? { ...row, tag_ids: parseTagIds(row.tag_ids) as unknown as SqliteValue } : row)
-  );
+  const { db } = executor;
+  return executor.transaction(async () => {
+    const rows = await table(db, tableName).where("_dirty").equals(1).limit(limit).toArray();
+    const assoc = TAG_ASSOCIATIONS[tableName];
+    const pk = PRIMARY_KEY[tableName];
+    const tagIds = assoc
+      ? await tagIdsFor(db, assoc, rows.map((row) => String(row[pk])))
+      : null;
+    return rows.map((row) => {
+      const wire = pickColumns(tableName, row);
+      if (tagIds) wire.tag_ids = tagIds.get(String(row[pk])) ?? [];
+      return wire as unknown as WireRowFor<T>;
+    });
+  });
+}
+
+function sameMembers(current: string[], uploaded: string[]): boolean {
+  const uploadedSet = new Set(uploaded);
+  return current.length === uploaded.length && current.every((id) => uploadedSet.has(id));
 }
 
 /** Acknowledge only the exact snapshot sent. Timestamps alone cannot detect
  * two edits in the same millisecond; tag membership belongs to the snapshot too. */
 export async function clearDirty<T extends SyncTable>(
-  executor: SqliteExecutor,
-  table: T,
+  executor: DbExecutor,
+  tableName: T,
   uploaded: WireRowFor<T>[]
 ): Promise<void> {
-  const columns = TABLE_COLUMNS[table];
-  const assoc = TAG_ASSOCIATIONS[table];
-  for (const row of uploaded) {
-    const values = row as unknown as Record<string, SqliteValue>;
-    const conditions = columns.map((column) => `${column} IS ?`);
-    const params = columns.map((column) => values[column] ?? null);
-    if (assoc) {
-      const ids = (row as unknown as { tag_ids: string[] }).tag_ids;
-      conditions.push(`(SELECT COUNT(*) FROM ${assoc.joinTable} WHERE ${assoc.column} = ${table}.id) = ?`);
-      conditions.push(`NOT EXISTS (SELECT 1 FROM ${assoc.joinTable} WHERE ${assoc.column} = ${table}.id AND tag_id NOT IN (SELECT value FROM json_each(?)))`);
-      params.push(ids.length, JSON.stringify(ids));
+  const { db } = executor;
+  const columns = TABLE_COLUMNS[tableName];
+  const assoc = TAG_ASSOCIATIONS[tableName];
+  const pk = PRIMARY_KEY[tableName];
+  await executor.transaction(async () => {
+    for (const sent of uploaded) {
+      const values = sent as unknown as Record<string, unknown>;
+      const id = String(values[pk]);
+      const current = await table(db, tableName).get(id);
+      if (!current) continue;
+      if (!columns.every((column) => (current[column] ?? null) === (values[column] ?? null))) {
+        continue;
+      }
+      if (assoc) {
+        const currentTagIds = (await tagIdsFor(db, assoc, [id])).get(id) ?? [];
+        if (!sameMembers(currentTagIds, values.tag_ids as string[])) continue;
+      }
+      await table(db, tableName).update(id, { _dirty: 0 });
     }
-    await executor.run(`UPDATE ${table} SET _dirty = 0 WHERE ${conditions.join(" AND ")}`, params);
-  }
-}
-
-async function replaceTagAssociations(
-  executor: SqliteExecutor,
-  assoc: { joinTable: string; column: string },
-  entityId: string,
-  tagIds: string[]
-): Promise<void> {
-  await executor.run(`DELETE FROM ${assoc.joinTable} WHERE ${assoc.column} = ?`, [entityId]);
-  for (const tagId of tagIds) {
-    await executor.run(
-      `INSERT OR IGNORE INTO ${assoc.joinTable} (${assoc.column}, tag_id) VALUES (?, ?)`,
-      [entityId, tagId]
-    );
-  }
+  });
 }
 
 /**
@@ -174,47 +199,40 @@ async function replaceTagAssociations(
  * matches the server, so it must not be re-queued for push. Guarded by the
  * last-write-wins predicate, preserving dirty local edits on timestamp ties
  * as well (two local edits may share a millisecond). An in-flight pull must
- * not clobber edits that remain queued after snapshot acknowledgement —
- * `RETURNING` tells us whether the guard actually let the write through, so
- * tag membership (for tasks/recurring_tasks) is only replaced when it did.
+ * not clobber edits that remain queued after snapshot acknowledgement, and
+ * tag membership (for tasks/recurring_tasks) is only replaced when the
+ * guard let the row through.
  */
 export async function applyRemoteRow<T extends SyncTable>(
-  executor: SqliteExecutor,
-  table: T,
+  executor: DbExecutor,
+  tableName: T,
   row: WireRowFor<T>
 ): Promise<void> {
-  return executor.transaction((client) => applyRemoteRowInTransaction(client, table, row));
-}
+  const { db } = executor;
+  const values = row as unknown as Record<string, unknown>;
+  const pk = PRIMARY_KEY[tableName];
+  const id = String(values[pk]);
+  const remote = pickColumns(tableName, values);
 
-async function applyRemoteRowInTransaction<T extends SyncTable>(
-  executor: SqliteExecutor,
-  table: T,
-  row: WireRowFor<T>,
-): Promise<void> {
-  const columns = TABLE_COLUMNS[table];
-  const pk = PRIMARY_KEY[table];
-  const immutable = new Set(IMMUTABLE_ON_UPDATE[table]);
-  const updateSet = columns
-    .filter((c) => !immutable.has(c))
-    .map((c) => `${c} = excluded.${c}`)
-    .concat("_dirty = 0")
-    .join(", ");
+  await executor.transaction(async () => {
+    const existing = await table(db, tableName).get(id);
+    if (existing) {
+      const remoteUpdatedAt = Number(remote.updated_at);
+      const localUpdatedAt = Number(existing.updated_at);
+      const wins =
+        remoteUpdatedAt > localUpdatedAt ||
+        (remoteUpdatedAt === localUpdatedAt && existing._dirty === 0);
+      if (!wins) return;
+      for (const column of IMMUTABLE_ON_UPDATE[tableName]) remote[column] = existing[column];
+    }
+    await table(db, tableName).put({ ...remote, _dirty: 0 });
 
-  const sql = `
-    INSERT INTO ${table} (${columns.join(", ")}, _dirty)
-    VALUES (${columns.map(() => "?").join(", ")}, 0)
-    ON CONFLICT(${pk}) DO UPDATE SET ${updateSet}
-    WHERE excluded.updated_at > ${table}.updated_at
-       OR (excluded.updated_at = ${table}.updated_at AND ${table}._dirty = 0)
-    RETURNING ${pk}
-  `;
-  const params = columns.map((c) => (row as unknown as Record<string, SqliteValue>)[c] ?? null);
-  const result = await executor.run(sql, params);
-
-  const assoc = TAG_ASSOCIATIONS[table];
-  if (assoc && result.length > 0) {
-    const entityId = String(result[0][pk]);
-    const tagIds = (row as unknown as { tag_ids?: string[] }).tag_ids ?? [];
-    await replaceTagAssociations(executor, assoc, entityId, tagIds);
-  }
+    const assoc = TAG_ASSOCIATIONS[tableName];
+    if (assoc) {
+      const links = joinTable(db, assoc.joinTable);
+      await links.where(assoc.column).equals(id).delete();
+      const tagIds = [...new Set((values.tag_ids as string[] | undefined) ?? [])];
+      await links.bulkPut(tagIds.map((tagId) => ({ [assoc.column]: id, tag_id: tagId })));
+    }
+  });
 }

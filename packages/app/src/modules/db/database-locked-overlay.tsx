@@ -1,7 +1,8 @@
-// Rendered outside the language/settings provider tree (see
-// SqliteProvider — it wraps them), so text here is hardcoded English rather
-// than run through useLanguageContext(), matching the same constraint on
-// ErrorBoundary's fallback UI.
+// Shown by main.tsx while the one-time legacy SQLite import waits for a tab
+// running an older build to close (see legacy-sqlite-import.ts). Rendered
+// before the language/settings provider tree mounts, so text here is
+// hardcoded English rather than run through useLanguageContext(), matching
+// the same constraint on ErrorBoundary's fallback UI.
 export function DatabaseLockedOverlay() {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">

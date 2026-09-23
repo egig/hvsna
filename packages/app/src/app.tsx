@@ -1,7 +1,7 @@
 import { BrowserRouter } from "react-router";
 import "@/app.css";
-import { SqliteProvider } from "@/modules/sqlite/context";
-import type { SqliteClient } from "@/modules/sqlite/client";
+import { DatabaseProvider } from "@/modules/db/context";
+import type { DbExecutor } from "@/modules/db/executor";
 import DroppableContext from "@/modules/components/droppable-context";
 import { ScreenSizeProvider } from "@/modules/components/screen-size-wrapper";
 import { Provider } from "@rollbar/react";
@@ -52,7 +52,7 @@ const posthogOptions = {
 
 export default function App({
   config,
-  sqliteClient,
+  database,
   platform,
   Router,
   Routes,
@@ -60,14 +60,14 @@ export default function App({
 }: {
   platform: "web";
   config: AppConfig;
-  sqliteClient: SqliteClient;
+  database: DbExecutor;
   Router: typeof BrowserRouter;
   Routes: React.FC;
   /** Session + initial-sync results from modules/bootstrap.ts, resolved
    *  before this component ever renders. Optional so tests can skip it. */
   bootstrap?: BootstrapResult;
 }) {
-  const repositories = createWebRepositories(sqliteClient);
+  const repositories = createWebRepositories(database);
 
   return (
     <EnsureRequiredParams
@@ -99,7 +99,7 @@ export default function App({
               <SnackbarProvider>
                 <ScreenSizeProvider>
                   <PlatformProvider>
-                    <SqliteProvider client={sqliteClient}>
+                    <DatabaseProvider database={database}>
                       <RepositoriesProvider repositories={repositories}>
                         <AuthProvider initialUser={bootstrap?.user ?? null}>
                           <SettingsProvider>
@@ -140,7 +140,7 @@ export default function App({
                           </SettingsProvider>
                         </AuthProvider>
                       </RepositoriesProvider>
-                    </SqliteProvider>
+                    </DatabaseProvider>
                   </PlatformProvider>
                 </ScreenSizeProvider>
               </SnackbarProvider>

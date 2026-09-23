@@ -1,4 +1,4 @@
-import type { SqliteExecutor } from "@/modules/sqlite/client";
+import type { DbExecutor } from "@/modules/db/executor";
 import type {
   RejectedServerRow,
   SyncPullCursors,
@@ -33,7 +33,7 @@ function isFullServerRow<T extends WireRow>(
 }
 
 async function applyPushResult<T extends SyncTable>(
-  executor: SqliteExecutor,
+  executor: DbExecutor,
   table: T,
   uploaded: WireRowFor<T>[],
   result: { applied: string[]; rejected: { id: string; server_row: RejectedServerRow<WireRowFor<T>> }[] }
@@ -51,7 +51,7 @@ async function applyPushResult<T extends SyncTable>(
   }
 }
 
-export function createSyncEngine(executor: SqliteExecutor, apiClient: SyncApiPort): SyncEngine {
+export function createSyncEngine(executor: DbExecutor, apiClient: SyncApiPort): SyncEngine {
   async function push(): Promise<void> {
     let more = true;
     while (more) {
@@ -110,9 +110,8 @@ export function createSyncEngine(executor: SqliteExecutor, apiClient: SyncApiPor
 
       const response = await apiClient.pull(cursors, BATCH_SIZE);
 
-      // tags, then recurring_tasks before tasks — the local schema's FKs
-      // mirror the server's, even though sqlite here doesn't enforce them
-      // strictly.
+      // tags, then recurring_tasks before tasks — the order the server's
+      // foreign keys need; IndexedDB itself enforces no references.
       for (const row of response.tags.rows) {
         await applyRemoteRow(executor, "tags", row);
       }

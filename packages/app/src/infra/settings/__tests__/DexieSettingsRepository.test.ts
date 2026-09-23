@@ -1,17 +1,17 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
-import { SqliteSettingsRepository } from "../SqliteSettingsRepository";
+import { createTestDatabase } from "@/modules/db/__tests__/test-database";
+import { DexieSettingsRepository } from "../DexieSettingsRepository";
 import type { GeneralSettings } from "@/modules/settings/settings";
 import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
-  const client = await createTestSqliteClient();
+  const client = createTestDatabase();
   const writeNotifier = createWriteNotifier();
-  return { client, writeNotifier, repo: new SqliteSettingsRepository(client, writeNotifier) };
+  return { client, writeNotifier, repo: new DexieSettingsRepository(client, writeNotifier) };
 }
 
-describe("SqliteSettingsRepository", () => {
+describe("DexieSettingsRepository", () => {
   it("returns null when no settings have been saved", async () => {
     const { repo } = await makeRepo();
     expect(await repo.load()).toBeNull();
@@ -25,8 +25,8 @@ describe("SqliteSettingsRepository", () => {
     const loaded = await repo.load();
 
     expect(loaded).toEqual(settings);
-    const rows = await client.run(`SELECT key, _dirty FROM settings ORDER BY key`);
-    expect(rows).toEqual([
+    const rows = await client.db.settings.orderBy("key").toArray();
+    expect(rows.map(({ key, _dirty }) => ({ key, _dirty }))).toEqual([
       { key: "language", _dirty: 1 },
       { key: "theme", _dirty: 1 },
     ]);

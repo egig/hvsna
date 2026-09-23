@@ -12,8 +12,8 @@ const mockFetchUser = vi.fn().mockResolvedValue(undefined);
 let mockIsOnline = true;
 const mockWriteNotifier = createWriteNotifier();
 
-vi.mock("@/modules/sqlite/context", () => ({
-  useSqliteClient: () => ({ client: {} }),
+vi.mock("@/modules/db/context", () => ({
+  useDatabase: () => ({}),
 }));
 vi.mock("@/modules/network/context", () => ({
   useNetworkContext: () => ({ isOnline: mockIsOnline }),

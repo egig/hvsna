@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { HvDatabase, HvTrash2, HvAlertTriangle } from "@/modules/icons";
-import { getSqliteClient } from "@/modules/sqlite/sqlite-singleton";
+import { wipeLocalData } from "@/modules/db/database-singleton";
 import { PageMobile as Page } from "./page";
 import { NavbarMobile as Navbar } from "./navbar-mobile";
 import { useLanguageContext } from "@/modules/i18n/LanguageContext";
-
-async function wipeLocalData(): Promise<void> {
-  await getSqliteClient().wipe();
-}
 
 export default function WipeData() {
   const { t } = useLanguageContext();

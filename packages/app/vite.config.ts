@@ -15,6 +15,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+  // wa-sqlite is only loaded by the one-time legacy SQLite → IndexedDB import
+  // (src/modules/db/legacy-sqlite/worker.ts).
   // wa-sqlite.mjs locates its .wasm file at runtime via
   // `new URL("wa-sqlite.wasm", import.meta.url)`. If esbuild pre-bundles it
   // into node_modules/.vite/deps/, the .wasm sibling isn't copied there, so

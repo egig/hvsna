@@ -1,16 +1,16 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
-import { SqliteTagRepository } from "../SqliteTagRepository";
+import { createTestDatabase, taskRow } from "@/modules/db/__tests__/test-database";
+import { DexieTagRepository } from "../DexieTagRepository";
 import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
-  const client = await createTestSqliteClient();
+  const client = createTestDatabase();
   const writeNotifier = createWriteNotifier();
-  return { client, writeNotifier, repo: new SqliteTagRepository(client, writeNotifier) };
+  return { client, writeNotifier, repo: new DexieTagRepository(client, writeNotifier) };
 }
 
-describe("SqliteTagRepository", () => {
+describe("DexieTagRepository", () => {
   it("creates tags on demand when tasks are tagged, normalizing the name", async () => {
     const { repo } = await makeRepo();
 
@@ -27,15 +27,16 @@ describe("SqliteTagRepository", () => {
     await repo.setTaskTags("task_1", ["work"]);
     await repo.setTaskTags("task_2", ["Work"]);
 
-    const rows = await client.run(`SELECT id FROM tags WHERE name = 'work'`);
+    const rows = await client.db.tags.where("name").equals("work").toArray();
     expect(rows).toHaveLength(1);
   });
 
   it("counts only non-deleted tasks, not recurring task templates", async () => {
     const { client, repo } = await makeRepo();
-    await client.run(
-      `INSERT INTO tasks (id, name, status, created_at, updated_at) VALUES ('task_1','A',0,1,1), ('task_2','B',0,1,1)`
-    );
+    await client.db.tasks.bulkPut([
+      taskRow({ id: "task_1", name: "A" }),
+      taskRow({ id: "task_2", name: "B" }),
+    ]);
     await repo.setTaskTags("task_1", ["work"]);
     await repo.setTaskTags("task_2", ["work"]);
     await repo.setRecurringTaskTags("rtask_1", ["work"]);
@@ -46,9 +47,10 @@ describe("SqliteTagRepository", () => {
 
   it("counts only uncompleted (status = 0) tasks", async () => {
     const { client, repo } = await makeRepo();
-    await client.run(
-      `INSERT INTO tasks (id, name, status, created_at, updated_at) VALUES ('task_1','A',0,1,1), ('task_2','B',1,1,1)`
-    );
+    await client.db.tasks.bulkPut([
+      taskRow({ id: "task_1", name: "A" }),
+      taskRow({ id: "task_2", name: "B", status: 1 }),
+    ]);
     await repo.setTaskTags("task_1", ["work"]);
     await repo.setTaskTags("task_2", ["work"]);
 
@@ -66,7 +68,7 @@ describe("SqliteTagRepository", () => {
     expect(tagMap.get("task_1")).toEqual(["b", "c"]);
   });
 
-  it("update renames a tag and rejects colliding with another tag's name via the unique index", async () => {
+  it("update renames a tag and rejects colliding with another live tag's name", async () => {
     const { repo } = await makeRepo();
     await repo.setTaskTags("task_1", ["work"]);
     await repo.setTaskTags("task_2", ["home"]);
@@ -118,7 +120,7 @@ describe("SqliteTagRepository", () => {
     writeNotifier.subscribe((table) => notified.push(table));
 
     // Membership rides on the owning task/recurring-task row's own dirty
-    // flag (see dirty-rows.ts) — SqliteTagRepository itself must not notify
+    // flag (see dirty-rows.ts) — DexieTagRepository itself must not notify
     // for these, or a tag-only write would be double-counted against the
     // caller's own notify.
     await repo.setTaskTags("task_1", ["work"]);

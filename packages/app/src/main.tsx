@@ -2,7 +2,8 @@ import { createRoot, type Container } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import type { AppConfig } from "@/app";
 import App from "@/app";
-import { getSqliteClient } from "@/modules/sqlite/sqlite-singleton";
+import { getDatabase, wipeLocalData } from "@/modules/db/database-singleton";
+import { importLegacySqlite } from "@/modules/db/legacy-sqlite-import";
 import { configureLogger } from "@/modules/logger";
 import { registerWebImplementations } from "./register";
 import log from "@/modules/logger";
@@ -10,7 +11,7 @@ import { BrowserRouter } from "react-router";
 import { ResponsiveRoutes } from "@/routes";
 import { bootstrapApp } from "@/modules/bootstrap";
 import { BootScreen } from "@/modules/components/boot-screen";
-import { DatabaseLockedOverlay } from "@/modules/sqlite/database-locked-overlay";
+import { DatabaseLockedOverlay } from "@/modules/db/database-locked-overlay";
 
 registerWebImplementations();
 
@@ -26,7 +27,7 @@ const config: AppConfig = {
 };
 
 const root = createRoot(document.getElementById("root") as Container);
-const sqliteClient = getSqliteClient();
+const database = getDatabase();
 
 configureLogger();
 
@@ -36,14 +37,11 @@ configureLogger();
 // state that a moment-later sync overwrites.
 root.render(<BootScreen />);
 
-// When another tab already holds the exclusive SQLite lock, the worker can't
-// open the database and bootstrapApp()'s queries below block indefinitely —
-// leaving this tab stuck on the "Initiating…" screen. Surface the multi-tab
-// prompt in its place until this tab acquires the lock, at which point
-// bootstrap resumes on its own and renders <App />.
-let appMounted = false;
-const stopWatchingLock = sqliteClient.onLockStateChange((state) => {
-  if (appMounted) return;
+// Existing installs still have their data in the SQLite/OPFS database older
+// builds used; copy it into IndexedDB before anything reads. If a tab running
+// an older build still has that database open, the import waits for it —
+// surface the multi-tab prompt meanwhile instead of a silent boot screen.
+function renderLegacyLockState(state: "locked" | "ready") {
   root.render(
     state === "locked" ? (
       <>
@@ -54,17 +52,21 @@ const stopWatchingLock = sqliteClient.onLockStateChange((state) => {
       <BootScreen />
     )
   );
-});
+}
 
 (async () => {
-  const bootstrap = await bootstrapApp(sqliteClient);
-  appMounted = true;
-  stopWatchingLock();
+  try {
+    await importLegacySqlite(database, renderLegacyLockState);
+  } catch (error) {
+    // The old database stays in place, so the import is retried next load.
+    log.error("Importing the legacy SQLite database failed", error);
+  }
+  const bootstrap = await bootstrapApp(database);
 
   root.render(
     <App
       config={config}
-      sqliteClient={sqliteClient}
+      database={database}
       platform="web"
       Router={BrowserRouter}
       Routes={ResponsiveRoutes}
@@ -75,12 +77,12 @@ const stopWatchingLock = sqliteClient.onLockStateChange((state) => {
   window.__dtMounted = true;
 
   if (import.meta.env.DEV) {
-    // E2E-test-only hook (see e2e/helpers/db-reset.ts) — wipes local SQLite
+    // E2E-test-only hook (see e2e/helpers/db-reset.ts) — wipes local
     // storage the same way the in-app "wipe data" settings feature does.
     // Stripped from production builds since import.meta.env.DEV is inlined
     // and dead-code-eliminated by Vite.
     // @ts-ignore
-    window.__hvsnaResetLocalData = () => sqliteClient.wipe();
+    window.__hvsnaResetLocalData = () => wipeLocalData();
   }
 })();
 

@@ -71,6 +71,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/suncalc": "^1.9.2",
     "@vitest/ui": "^4.0.16",
+    "fake-indexeddb": "^6.2.5",
     "jsdom": "^27.4.0",
     "node-fetch": "^3.3.2",
     "tailwindcss": "^4.1.18",

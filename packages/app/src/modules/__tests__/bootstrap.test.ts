@@ -34,7 +34,7 @@ vi.mock("@/modules/logger", () => ({ default: { warn: vi.fn() } }));
 
 import { bootstrapApp } from "../bootstrap";
 
-const sqlite = {} as never;
+const database = {} as never;
 
 describe("bootstrapApp", () => {
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe("bootstrapApp", () => {
   });
 
   it("restores the session and returns no user when signed out", async () => {
-    const result = await bootstrapApp(sqlite);
+    const result = await bootstrapApp(database);
 
     expect(mockInitialize).toHaveBeenCalledOnce();
     expect(mockFullSync).not.toHaveBeenCalled();
@@ -64,7 +64,7 @@ describe("bootstrapApp", () => {
     const syncedAt = new Date("2026-01-01T00:00:00Z");
     mockGetLastSuccessAt.mockResolvedValue(syncedAt);
 
-    const result = await bootstrapApp(sqlite);
+    const result = await bootstrapApp(database);
 
     expect(mockFullSync).toHaveBeenCalledOnce();
     expect(result.initialSyncPerformed).toBe(true);
@@ -75,7 +75,7 @@ describe("bootstrapApp", () => {
     mockIsAuthenticated.mockResolvedValue(true);
     mockGetCurrentUser.mockResolvedValue({ emailVerified: false });
 
-    const result = await bootstrapApp(sqlite);
+    const result = await bootstrapApp(database);
 
     expect(mockFullSync).not.toHaveBeenCalled();
     expect(result.user).toEqual({ emailVerified: false });
@@ -86,7 +86,7 @@ describe("bootstrapApp", () => {
     mockIsAuthenticated.mockResolvedValue(true);
     mockGetCurrentUser.mockResolvedValue({ emailVerified: true, syncEnabled: false });
 
-    const result = await bootstrapApp(sqlite);
+    const result = await bootstrapApp(database);
 
     expect(mockFullSync).not.toHaveBeenCalled();
     expect(result.initialSyncPerformed).toBe(false);
@@ -97,7 +97,7 @@ describe("bootstrapApp", () => {
     mockGetCurrentUser.mockResolvedValue({ emailVerified: true, syncEnabled: true });
     mockFullSync.mockRejectedValue(new Error("network down"));
 
-    const result = await bootstrapApp(sqlite);
+    const result = await bootstrapApp(database);
 
     expect(result.initialSyncPerformed).toBe(false);
     expect(result.user).toEqual({ emailVerified: true, syncEnabled: true });
@@ -106,7 +106,7 @@ describe("bootstrapApp", () => {
   it("still resolves when the session restore throws", async () => {
     mockInitialize.mockRejectedValue(new Error("boom"));
 
-    const result = await bootstrapApp(sqlite);
+    const result = await bootstrapApp(database);
 
     expect(result).toEqual({
       user: null,

@@ -23,7 +23,7 @@ export const test = base.extend<AppFixtures>({
    * For task pages (/, /inbox, /upcoming, /browse, etc.).
    */
   taskPage: async ({ page }, use) => {
-    // Navigate first so the SQLite Worker/OPFS storage is accessible, then wipe any leftover state
+    // Navigate first so the app's IndexedDB storage is accessible, then wipe any leftover state
     await page.goto("/");
     await resetLocalData(page);
     await page.evaluate(() => localStorage.clear());

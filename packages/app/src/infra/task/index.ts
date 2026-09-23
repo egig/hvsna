@@ -1,3 +1,3 @@
-export { SqliteTaskRepository } from "./SqliteTaskRepository";
-export { SqliteRecurringTaskRepository } from "./SqliteRecurringTaskRepository";
+export { DexieTaskRepository } from "./DexieTaskRepository";
+export { DexieRecurringTaskRepository } from "./DexieRecurringTaskRepository";
 export { LocalReminderRegistryRepository } from "./LocalReminderRegistryRepository";
