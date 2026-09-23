@@ -9,6 +9,7 @@ import { vi } from "vitest";
 export function createChain<T>(result: T) {
   const chain = {
     from: vi.fn(() => chain),
+    leftJoin: vi.fn(() => chain),
     where: vi.fn(() => chain),
     limit: vi.fn(() => chain),
     orderBy: vi.fn(() => chain),
@@ -28,6 +29,7 @@ export function createChain<T>(result: T) {
 export function createRejectingChain(error: unknown) {
   const chain = {
     from: vi.fn(() => chain),
+    leftJoin: vi.fn(() => chain),
     where: vi.fn(() => chain),
     limit: vi.fn(() => chain),
     orderBy: vi.fn(() => chain),

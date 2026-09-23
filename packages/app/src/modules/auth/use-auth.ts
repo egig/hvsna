@@ -40,6 +40,7 @@ export const useAuth = () => {
     loading,
     error,
     isAuthenticated: !!user,
+    fetchUser,
     clearError,
     login,
     register,

@@ -25,13 +25,17 @@ describe("GET /me", () => {
     db.select.mockReturnValue(
       createChain([
         {
-          id: "user-1",
-          email: "person@example.com",
-          passwordHash: "irrelevant",
-          firstName: "A",
-          lastName: "B",
-          emailVerified: true,
-          createdAt,
+          user: {
+            id: "user-1",
+            email: "person@example.com",
+            passwordHash: "irrelevant",
+            firstName: "A",
+            lastName: "B",
+            emailVerified: true,
+            createdAt,
+          },
+          subscriptionStatus: null,
+          subscriptionEndsAt: null,
         },
       ])
     );
@@ -46,9 +50,35 @@ describe("GET /me", () => {
       lastName: "B",
       email: "person@example.com",
       emailVerified: true,
+      syncEnabled: false,
       createdAt: createdAt.toISOString(),
       featureFlags: {},
     });
+  });
+
+  it("reports syncEnabled for a user with an active Sync plan", async () => {
+    const token = await signAccessToken("user-1");
+    db.select.mockReturnValue(
+      createChain([
+        {
+          user: {
+            id: "user-1",
+            email: "person@example.com",
+            firstName: "A",
+            lastName: "B",
+            emailVerified: true,
+            createdAt: new Date("2026-01-01T00:00:00Z"),
+          },
+          subscriptionStatus: "active",
+          subscriptionEndsAt: null,
+        },
+      ])
+    );
+
+    const response = await loader({ request: makeRequest(token) });
+
+    const body = await response.json();
+    expect(body.data.syncEnabled).toBe(true);
   });
 
   it("returns 401 TOKEN_EXPIRED when the Authorization header is missing", async () => {

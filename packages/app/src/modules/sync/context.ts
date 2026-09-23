@@ -17,6 +17,7 @@ import { useRepositories } from "@/modules/repositories-context";
 import { getSyncApiClient } from "@/infra/sync/SyncApiClientFactory";
 import { createSyncEngine, type SyncEngine } from "./sync-engine";
 import { getLastSuccessAt } from "./cursor-store";
+import { isSyncPlanRequiredError, userCanSync, userNeedsSyncPlan } from "./can-sync";
 
 const POLL_INTERVAL_MS = 30_000;
 const WRITE_DEBOUNCE_MS = 1_500;
@@ -29,6 +30,8 @@ export type SyncContextType = {
   isManualSyncing: boolean;
   initialSyncPerformed: boolean;
   canSync: boolean;
+  /** Signed in and verified, but without a Sync plan — show the upgrade prompt. */
+  needsSyncPlan: boolean;
   manualSync: () => Promise<void>;
 };
 
@@ -69,13 +72,13 @@ export const SyncProvider = ({
 }) => {
   const { client } = useSqliteClient();
   const { isOnline } = useNetworkContext();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, fetchUser } = useAuth();
   const { writeNotifier } = useRepositories();
   // Signed in isn't enough — the API rejects /sync/push and /sync/pull with
-  // 403 EMAIL_NOT_VERIFIED until the user confirms their address, so every
-  // auto-trigger gates on this too (matching that server-side check) rather
-  // than firing requests that are guaranteed to fail.
-  const canSync = isAuthenticated && !!user?.emailVerified;
+  // 403 EMAIL_NOT_VERIFIED / SYNC_PLAN_REQUIRED without a verified email and
+  // a Sync plan, so every auto-trigger gates on both (see can-sync.ts).
+  const canSync = isAuthenticated && userCanSync(user);
+  const needsSyncPlan = isAuthenticated && userNeedsSyncPlan(user);
   const invalidateTaskQueries = useInvalidateTaskQueries();
   const settingsRepo = useSettingsRepository();
   const { setSettings } = useSettings();
@@ -130,6 +133,11 @@ export const SyncProvider = ({
         }
       }
       return applied;
+    } catch (error) {
+      // The plan lapsed since /me was last read — refetch the user so
+      // syncEnabled (and with it canSync) flips off and the triggers stop.
+      if (isSyncPlanRequiredError(error)) fetchUser().catch(() => {});
+      throw error;
     } finally {
       inFlightRef.current = false;
       if (!silent) setIsSyncing(false);
@@ -138,7 +146,11 @@ export const SyncProvider = ({
 
   const manualSync = async (): Promise<void> => {
     if (!canSync) {
-      throw new Error("Verify your email before syncing");
+      throw new Error(
+        needsSyncPlan
+          ? "An active Sync plan is required to sync"
+          : "Verify your email before syncing"
+      );
     }
     setIsManualSyncing(true);
     try {
@@ -225,6 +237,7 @@ export const SyncProvider = ({
     isManualSyncing,
     initialSyncPerformed,
     canSync,
+    needsSyncPlan,
     manualSync,
   };
 

@@ -52,4 +52,16 @@ export const syncTranslations = {
     en: "Your data is automatically synced when you're online. You can also manually trigger a sync to ensure all your latest changes are saved.",
     id: "Data anda otomatis disinkronkan saat anda online. Anda juga dapat memicu sinkronisasi manual untuk memastikan semua perubahan terbaru anda tersimpan.",
   },
+  sync_plan_required: {
+    en: "Sync plan required",
+    id: "Paket Sync diperlukan",
+  },
+  sync_plan_required_description: {
+    en: "Syncing across devices is part of the paid Sync plan. Your data stays on this device until you upgrade.",
+    id: "Sinkronisasi antar perangkat termasuk dalam paket Sync berbayar. Data anda tetap tersimpan di perangkat ini sampai anda upgrade.",
+  },
+  view_sync_plan: {
+    en: "View Sync plan",
+    id: "Lihat paket Sync",
+  },
 };

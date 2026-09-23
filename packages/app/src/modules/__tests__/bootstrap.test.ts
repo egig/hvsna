@@ -60,7 +60,7 @@ describe("bootstrapApp", () => {
 
   it("runs an initial sync for a signed-in, verified user", async () => {
     mockIsAuthenticated.mockResolvedValue(true);
-    mockGetCurrentUser.mockResolvedValue({ emailVerified: true });
+    mockGetCurrentUser.mockResolvedValue({ emailVerified: true, syncEnabled: true });
     const syncedAt = new Date("2026-01-01T00:00:00Z");
     mockGetLastSuccessAt.mockResolvedValue(syncedAt);
 
@@ -82,15 +82,25 @@ describe("bootstrapApp", () => {
     expect(result.initialSyncPerformed).toBe(false);
   });
 
+  it("skips the sync for a verified user without a Sync plan", async () => {
+    mockIsAuthenticated.mockResolvedValue(true);
+    mockGetCurrentUser.mockResolvedValue({ emailVerified: true, syncEnabled: false });
+
+    const result = await bootstrapApp(sqlite);
+
+    expect(mockFullSync).not.toHaveBeenCalled();
+    expect(result.initialSyncPerformed).toBe(false);
+  });
+
   it("still resolves (initialSyncPerformed false) when the sync throws", async () => {
     mockIsAuthenticated.mockResolvedValue(true);
-    mockGetCurrentUser.mockResolvedValue({ emailVerified: true });
+    mockGetCurrentUser.mockResolvedValue({ emailVerified: true, syncEnabled: true });
     mockFullSync.mockRejectedValue(new Error("network down"));
 
     const result = await bootstrapApp(sqlite);
 
     expect(result.initialSyncPerformed).toBe(false);
-    expect(result.user).toEqual({ emailVerified: true });
+    expect(result.user).toEqual({ emailVerified: true, syncEnabled: true });
   });
 
   it("still resolves when the session restore throws", async () => {

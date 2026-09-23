@@ -10,10 +10,12 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.hvsna.app.auth.ApiException
 import com.hvsna.app.auth.AuthApi
 import com.hvsna.app.auth.AuthService
 import com.hvsna.app.auth.SessionRepository
 import com.hvsna.app.auth.TokenStore
+import com.hvsna.app.auth.canSync
 import com.hvsna.app.data.ObjectBoxStore
 import com.hvsna.app.data.SettingsStore
 import com.hvsna.app.data.SyncStateStore
@@ -37,7 +39,9 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         val tokenStore = TokenStore()
         val authService = AuthService(AuthApi(okHttpClient), tokenStore, SessionRepository(applicationContext))
         authService.initialize()
-        if (!authService.isAuthenticated()) {
+        // /me gate mirrors SyncManager's canSync: without a verified email and a Sync plan the
+        // server would just 403 every run, so don't send the push at all.
+        if (!authService.isAuthenticated() || !authService.getCurrentUser().canSync) {
             Result.success()
         } else {
             val store = ObjectBoxStore.getInstance(applicationContext)
@@ -49,6 +53,9 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
             engine.fullSync()
             Result.success()
         }
+    } catch (e: ApiException) {
+        // 403 (EMAIL_NOT_VERIFIED / SYNC_PLAN_REQUIRED) won't fix itself on a retry — wait for the next period.
+        if (e.status == 403) Result.success() else Result.retry()
     } catch (_: Exception) {
         Result.retry()
     }

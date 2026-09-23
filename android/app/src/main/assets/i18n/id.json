@@ -203,6 +203,8 @@
   "sync.title": "Sinkronisasi",
   "sync.signInPrompt": "Masuk untuk menyinkronkan tugas Anda di seluruh perangkat.",
   "sync.verifyEmailPrompt": "Verifikasi email Anda untuk menyinkronkan tugas di seluruh perangkat.",
+  "sync.planRequiredPrompt": "Sinkronisasi antar perangkat termasuk dalam paket Sync berbayar. Tugas Anda tetap tersimpan di perangkat ini sampai Anda upgrade.",
+  "sync.viewPlan": "Lihat paket Sync",
   "sync.lastSynced": "Terakhir disinkronkan %s",
   "sync.notSyncedYet": "Belum disinkronkan",
   "sync.syncNow": "Sinkronkan sekarang",

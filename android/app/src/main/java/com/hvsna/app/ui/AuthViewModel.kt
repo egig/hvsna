@@ -106,6 +106,14 @@ class AuthViewModel(
         _state.value = AuthUiState(loading = false)
     }
 
+    /** Silently re-reads /me so a changed `syncEnabled` (plan bought or lapsed) or `emailVerified` takes
+     * effect without a restart. Failures keep the current state — this is never a sign-out path. */
+    fun refreshUser() = viewModelScope.launch {
+        if (_state.value.user == null) return@launch
+        runCatching { authService.getCurrentUser() }
+            .onSuccess { user -> _state.value = _state.value.copy(user = user) }
+    }
+
     fun clearError() {
         _state.value = _state.value.copy(error = null)
     }

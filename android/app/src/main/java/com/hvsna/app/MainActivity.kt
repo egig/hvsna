@@ -52,10 +52,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.flow.collectLatest
+import com.hvsna.app.auth.ApiException
 import com.hvsna.app.auth.AuthApi
 import com.hvsna.app.auth.AuthService
 import com.hvsna.app.auth.SessionRepository
 import com.hvsna.app.auth.TokenStore
+import com.hvsna.app.auth.canSync
+import com.hvsna.app.auth.isSyncPlanRequired
 import com.hvsna.app.backup.BackupFileService
 import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.ObjectBoxStore
@@ -157,7 +160,7 @@ fun HvsnaApp() {
     }
     val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(authService, context))
     val authState by authViewModel.state.collectAsState()
-    val canSync = authState.user?.emailVerified == true
+    val canSync = authState.user?.canSync == true
 
     val syncCoroutineScope = rememberCoroutineScope()
     val syncEngine = remember {
@@ -170,9 +173,11 @@ fun HvsnaApp() {
     val syncManager = remember {
         SyncManager(
             fullSync = syncEngine::fullSync,
-            canSync = { authService.isAuthenticated() && authViewModel.state.value.user?.emailVerified == true },
+            canSync = { authService.isAuthenticated() && authViewModel.state.value.user?.canSync == true },
             scope = syncCoroutineScope,
             isOnline = { isOnline(context) },
+            // The plan lapsed since /me was last read — refresh so canSync flips off.
+            onSyncError = { if (it is ApiException && it.isSyncPlanRequired) authViewModel.refreshUser() },
         )
     }
 
@@ -195,11 +200,14 @@ fun HvsnaApp() {
     // trigger (e.g. a fresh sign-in) re-schedules it.
     LaunchedEffect(authState.user != null) {
         if (authState.user != null) {
-            syncManager.requestSync()
             SyncWorker.schedule(context)
         } else if (!authState.loading && !authState.reconnecting) {
             SyncWorker.cancel(context)
         }
+    }
+    // Sign-in / email-verified / plan-activated trigger: fires whenever syncing becomes possible.
+    LaunchedEffect(canSync) {
+        if (canSync) syncManager.requestSync()
     }
     // Reconnect trigger.
     LaunchedEffect(Unit) {

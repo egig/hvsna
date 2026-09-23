@@ -135,4 +135,36 @@ class SyncManagerTest {
         assertEquals(2, callCount) // the original run, plus exactly one rerun
         assertEquals(1, maxConcurrent) // never two fullSync bodies in flight at once
     }
+
+    @Test
+    fun `runSync reports a failed sync to onSyncError`() = runTest {
+        val failure = IllegalStateException("boom")
+        val reported = mutableListOf<Throwable>()
+        val manager = SyncManager(
+            fullSync = { throw failure },
+            canSync = { true },
+            scope = this,
+            isOnline = { true },
+            onSyncError = { reported += it },
+        )
+
+        manager.runSync()
+
+        assertEquals(listOf<Throwable>(failure), reported)
+    }
+
+    @Test
+    fun `runSync does nothing when canSync is false`() = runTest {
+        var callCount = 0
+        val manager = SyncManager(
+            fullSync = { callCount++; false },
+            canSync = { false },
+            scope = this,
+            isOnline = { true },
+        )
+
+        manager.runSync()
+
+        assertEquals(0, callCount)
+    }
 }

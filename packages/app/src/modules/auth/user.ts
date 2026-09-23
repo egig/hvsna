@@ -6,6 +6,9 @@ export interface User {
   lastName: string;
   email: string;
   emailVerified: boolean;
+  /** Server-computed Sync plan entitlement (see packages/api's
+   *  hasSyncEntitlement) — the same rule /sync/* enforces. */
+  syncEnabled: boolean;
   createdAt: string;
   featureFlags?: FeatureFlags;
 }

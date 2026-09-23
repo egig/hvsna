@@ -19,6 +19,8 @@ class SyncManager(
     private val canSync: suspend () -> Boolean,
     private val scope: CoroutineScope,
     private val isOnline: () -> Boolean,
+    /** Called with each failed sync's error — e.g. to refresh the user on 403 SYNC_PLAN_REQUIRED. */
+    private val onSyncError: (Throwable) -> Unit = {},
 ) {
     private val mutex = Mutex()
     private var running = false
@@ -77,7 +79,7 @@ class SyncManager(
                 rerunRequested = false
                 val runManual = mutex.withLock { manualRequested }
                 _isManualSyncing.value = runManual
-                runCatching { fullSync() }
+                runCatching { fullSync() }.onFailure(onSyncError)
                 _lastSyncedAt.value = System.currentTimeMillis()
                 mutex.withLock { manualRequested = false }
             } while (rerunRequested)

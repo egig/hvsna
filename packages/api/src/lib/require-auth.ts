@@ -1,8 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { users } from "@/db/schema";
+import { subscriptions, users } from "@/db/schema";
 import { verifyAccessToken } from "./jwt";
 import { ApiError } from "./response";
+import { hasSyncEntitlement } from "./sync-entitlement";
 
 function getBearerToken(request: Request): string | null {
   const header = request.headers.get("Authorization") ?? "";
@@ -27,24 +28,37 @@ export async function requireAuth(request: Request): Promise<string> {
 }
 
 /**
- * Like requireAuth, but additionally requires the user has verified their
- * email — used to gate sync, which needs a real DB round trip anyway to
- * check `emailVerified` (unlike requireAuth, which deliberately skips one).
+ * Like requireAuth, but additionally requires what sync needs: a verified
+ * email and a Sync plan entitlement (see hasSyncEntitlement). Both come from
+ * one users ⟕ subscriptions lookup, so gating on the plan costs no extra
+ * neon-http round trip over the emailVerified check alone.
  */
-export async function requireVerifiedAuth(request: Request): Promise<string> {
+export async function requireSyncAuth(request: Request): Promise<string> {
   const userId = await requireAuth(request);
 
-  const [user] = await db
-    .select({ emailVerified: users.emailVerified })
+  const [row] = await db
+    .select({
+      emailVerified: users.emailVerified,
+      subscriptionStatus: subscriptions.status,
+      subscriptionEndsAt: subscriptions.endsAt,
+    })
     .from(users)
+    .leftJoin(subscriptions, eq(subscriptions.userId, users.id))
     .where(eq(users.id, userId))
     .limit(1);
 
-  if (!user) {
+  if (!row) {
     throw new ApiError(401, "TOKEN_EXPIRED", "User no longer exists");
   }
-  if (!user.emailVerified) {
+  if (!row.emailVerified) {
     throw new ApiError(403, "EMAIL_NOT_VERIFIED", "Verify your email before syncing");
+  }
+  const subscription =
+    row.subscriptionStatus === null
+      ? null
+      : { status: row.subscriptionStatus, endsAt: row.subscriptionEndsAt };
+  if (!hasSyncEntitlement(subscription)) {
+    throw new ApiError(403, "SYNC_PLAN_REQUIRED", "An active Sync plan is required to sync");
   }
 
   return userId;
