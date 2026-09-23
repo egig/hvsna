@@ -33,10 +33,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +46,8 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -236,6 +240,18 @@ fun TaskListItem(
             false
         },
     )
+
+    // Buzz the moment a drag crosses the action threshold (targetValue leaves Settled), using the
+    // same haptic as a checkbox completion (see rememberCompletionFeedback), so the user feels the
+    // action arm before lifting their finger.
+    val haptics = LocalHapticFeedback.current
+    LaunchedEffect(dismissState) {
+        snapshotFlow { dismissState.targetValue }.collect { target ->
+            if (target != SwipeToDismissBoxValue.Settled) {
+                haptics.performHapticFeedback(HapticFeedbackType.ToggleOn)
+            }
+        }
+    }
 
     val isDarkTheme = LocalDarkTheme.current
 
