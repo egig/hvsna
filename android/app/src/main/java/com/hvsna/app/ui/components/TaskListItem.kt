@@ -277,7 +277,9 @@ fun TaskListItem(
             }
         },
     ) {
-        Column {
+        // Opaque fill matching the Scaffold's default container color, so the swipe color only
+        // shows in the gap uncovered behind the sliding row instead of bleeding through it.
+        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
