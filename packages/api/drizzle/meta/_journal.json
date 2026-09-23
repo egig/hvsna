@@ -50,6 +50,20 @@
       "when": 1787295654635,
       "tag": "0006_first_impossible_man",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790154244838,
+      "tag": "0007_sync_entities",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790154279189,
+      "tag": "0008_drop_legacy_sync_tables",
+      "breakpoints": true
     }
   ]
 }

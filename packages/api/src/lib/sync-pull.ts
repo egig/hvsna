@@ -1,18 +1,16 @@
 import { and, asc, eq, gt } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db/client";
-import { recurringTasks, settings, tags, tasks } from "@/db/schema";
-import {
-  recurringTaskWireColumns,
-  settingsWireColumns,
-  tagWireColumns,
-  taskWireColumns,
-} from "./sync-columns";
-import { fetchRecurringTaskTagIds, fetchTaskTagIds } from "./sync-tag-links";
-import type { SyncPullTableResult } from "./sync-types";
+import { syncEntities, type SyncEntityRow } from "@/db/schema";
+import { ALWAYS_REPORTED_TYPES, toWireRow } from "./sync-envelope";
+import { assertEntityType, assertEntityTypeCount } from "./sync-validation";
+import type { SyncPullResponse } from "./sync-types";
 
 export const DEFAULT_PULL_LIMIT = 500;
 export const MIN_PULL_LIMIT = 1;
 export const MAX_PULL_LIMIT = 2000;
+
+const CURSOR_SUFFIX = "_cursor";
 
 export function clampPullLimit(raw: string | null): number {
   const parsed = raw !== null ? Number(raw) : DEFAULT_PULL_LIMIT;
@@ -25,79 +23,61 @@ export function parseCursor(raw: string | null): number {
   return Number.isFinite(parsed) && parsed >= 0 ? Math.trunc(parsed) : 0;
 }
 
-function toResult(rows: { rev: number }[], cursor: number, limit: number): SyncPullTableResult {
-  const lastRev = rows.length > 0 ? rows[rows.length - 1].rev : cursor;
-  return { rows, next_cursor: lastRev, has_more: rows.length === limit };
+/**
+ * One cursor per entity type, read from `<type>_cursor` query params — any
+ * type matching the entity-type pattern, so a new type needs no server
+ * change. The shipped four are always included (cursor 0 when absent).
+ */
+export function parsePullCursors(params: URLSearchParams): Map<string, number> {
+  const cursors = new Map<string, number>(ALWAYS_REPORTED_TYPES.map((t) => [t, 0]));
+  for (const [name, value] of params) {
+    if (!name.endsWith(CURSOR_SUFFIX)) continue;
+    const entityType = name.slice(0, -CURSOR_SUFFIX.length);
+    assertEntityType(entityType);
+    cursors.set(entityType, parseCursor(value));
+  }
+  assertEntityTypeCount(cursors.size);
+  return cursors;
 }
 
-export async function pullRecurringTasks(
+/**
+ * Pages each type by `rev` in one batch, so every type is read from the same
+ * snapshot in a single round trip. Deleted rows are returned like any other
+ * (with `deleted_at` set) so the delete propagates.
+ */
+export async function applyPull(
   userId: string,
-  cursor: number,
+  cursors: Map<string, number>,
   limit: number
-): Promise<SyncPullTableResult> {
-  const rows = await db
-    .select(recurringTaskWireColumns)
-    .from(recurringTasks)
-    .where(and(eq(recurringTasks.userId, userId), gt(recurringTasks.rev, cursor)))
-    .orderBy(asc(recurringTasks.rev))
-    .limit(limit);
-
-  const tagMap = await fetchRecurringTaskTagIds(
-    userId,
-    rows.map((r) => r.id)
+): Promise<SyncPullResponse> {
+  const types = [...cursors.entries()];
+  const queries: BatchItem<"pg">[] = types.map(([entityType, cursor]) =>
+    db
+      .select()
+      .from(syncEntities)
+      .where(
+        and(
+          eq(syncEntities.userId, userId),
+          eq(syncEntities.entityType, entityType),
+          gt(syncEntities.rev, cursor)
+        )
+      )
+      .orderBy(asc(syncEntities.rev))
+      .limit(limit)
   );
-  const withTags = rows.map((row) => ({ ...row, tag_ids: tagMap.get(row.id) ?? [] }));
+  // ALWAYS_REPORTED_TYPES guarantees at least one query.
+  const results = (await db.batch(
+    queries as [BatchItem<"pg">, ...BatchItem<"pg">[]]
+  )) as SyncEntityRow[][];
 
-  return toResult(withTags, cursor, limit);
-}
-
-export async function pullTasks(
-  userId: string,
-  cursor: number,
-  limit: number
-): Promise<SyncPullTableResult> {
-  const rows = await db
-    .select(taskWireColumns)
-    .from(tasks)
-    .where(and(eq(tasks.userId, userId), gt(tasks.rev, cursor)))
-    .orderBy(asc(tasks.rev))
-    .limit(limit);
-
-  const tagMap = await fetchTaskTagIds(
-    userId,
-    rows.map((r) => r.id)
-  );
-  const withTags = rows.map((row) => ({ ...row, tag_ids: tagMap.get(row.id) ?? [] }));
-
-  return toResult(withTags, cursor, limit);
-}
-
-export async function pullSettings(
-  userId: string,
-  cursor: number,
-  limit: number
-): Promise<SyncPullTableResult> {
-  const rows = await db
-    .select(settingsWireColumns)
-    .from(settings)
-    .where(and(eq(settings.userId, userId), gt(settings.rev, cursor)))
-    .orderBy(asc(settings.rev))
-    .limit(limit);
-
-  return toResult(rows, cursor, limit);
-}
-
-export async function pullTags(
-  userId: string,
-  cursor: number,
-  limit: number
-): Promise<SyncPullTableResult> {
-  const rows = await db
-    .select(tagWireColumns)
-    .from(tags)
-    .where(and(eq(tags.userId, userId), gt(tags.rev, cursor)))
-    .orderBy(asc(tags.rev))
-    .limit(limit);
-
-  return toResult(rows, cursor, limit);
+  const response: SyncPullResponse = {};
+  types.forEach(([entityType, cursor], i) => {
+    const rows = results[i];
+    response[entityType] = {
+      rows: rows.map(toWireRow),
+      next_cursor: rows.length > 0 ? rows[rows.length - 1].rev : cursor,
+      has_more: rows.length === limit,
+    };
+  });
+  return response;
 }

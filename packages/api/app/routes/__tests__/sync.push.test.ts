@@ -3,7 +3,7 @@ import { createChain } from "../../../src/__tests__/mock-db";
 import { signAccessToken } from "../../../src/lib/jwt";
 
 const { db } = vi.hoisted(() => ({
-  db: { insert: vi.fn(), select: vi.fn(), delete: vi.fn() },
+  db: { insert: vi.fn(), select: vi.fn(), execute: vi.fn(), batch: vi.fn() },
 }));
 
 vi.mock("@/db/client", () => ({ db }));
@@ -25,31 +25,33 @@ const taskRow = {
   name: "Buy milk",
   description: null,
   status: 0,
-  at_time: null,
-  at_epoch_millis: null,
-  lat: null,
-  lng: null,
-  timezone: null,
-  recurring_type: null,
-  recurring_interval: null,
   recurring_task_id: null,
-  hijri_date_offset: null,
-  tag_ids: [],
+  tag_ids: ["tag_1"],
   created_at: 1000,
   updated_at: 2000,
   completed_at: null,
   deleted_at: null,
 };
 
+const { id: _id, updated_at: _u, deleted_at: _d, ...taskPayload } = taskRow;
+
+const storedTask = {
+  userId: "user-1",
+  entityType: "tasks",
+  id: "task_1",
+  payload: taskPayload,
+  updatedAt: 2000,
+  deletedAt: null,
+  rev: 7,
+};
+
 const emptyResult = { applied: [], rejected: [] };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  // Association replace (task_tags/recurring_task_tags) and the tag-id
-  // lookup for rejected rows fall back to this whenever a test doesn't
-  // care about them.
   db.select.mockReturnValue(createChain([]));
-  db.delete.mockReturnValue(createChain([]));
+  db.insert.mockReturnValue(createChain([]));
+  db.execute.mockReturnValue(createChain([]));
 });
 
 /**
@@ -61,6 +63,20 @@ function mockVerifiedAuth() {
   db.select.mockReturnValueOnce(
     createChain([{ emailVerified: true, subscriptionStatus: "active", subscriptionEndsAt: null }])
   );
+}
+
+/** The chain handed to the n-th db.insert call, to inspect its .values(). */
+function insertedValues(call = 0) {
+  const chain = db.insert.mock.results[call].value as {
+    values: { mock: { calls: [Record<string, unknown>[]][] } };
+  };
+  return chain.values.mock.calls[0][0];
+}
+
+async function push(body: unknown) {
+  const token = await signAccessToken("user-1");
+  mockVerifiedAuth();
+  return action({ request: makeRequest(body, token) });
 }
 
 describe("POST /sync/push", () => {
@@ -97,25 +113,46 @@ describe("POST /sync/push", () => {
     expect(body.code).toBe("EMAIL_NOT_VERIFIED");
   });
 
-  it("returns 400 INVALID_REQUEST for a malformed task row", async () => {
-    const token = await signAccessToken("user-1");
-    mockVerifiedAuth();
-    const response = await action({
-      request: makeRequest({ tasks: [{ id: "task_1" }] }, token),
-    });
+  it.each([
+    ["a row without updated_at", { tasks: [{ id: "task_1" }] }],
+    ["a row without an id", { tasks: [{ updated_at: 1 }] }],
+    ["a settings row without a key", { settings: [{ id: "theme", value: "x", updated_at: 1 }] }],
+    ["a non-numeric deleted_at", { tasks: [{ ...taskRow, deleted_at: "yesterday" }] }],
+    ["a non-array type", { tasks: taskRow }],
+    ["a malformed type name", { "Tasks!": [taskRow] }],
+    ["too many rows", { tasks: Array.from({ length: 501 }, (_, i) => ({ ...taskRow, id: `t${i}` })) }],
+    ["an oversized payload", { tasks: [{ ...taskRow, description: "x".repeat(70 * 1024) }] }],
+    [
+      "too many types",
+      Object.fromEntries(Array.from({ length: 17 }, (_, i) => [`type_${"a".repeat(i + 1)}`, []])),
+    ],
+  ])("returns 400 INVALID_REQUEST for %s", async (_label, body) => {
+    const response = await push(body);
     expect(response.status).toBe(400);
-    const body = await response.json();
-    expect(body.code).toBe("INVALID_REQUEST");
+    const json = await response.json();
+    expect(json.code).toBe("INVALID_REQUEST");
+    expect(db.batch).not.toHaveBeenCalled();
   });
 
-  it("upserts applied rows and reports them back", async () => {
-    const token = await signAccessToken("user-1");
-    mockVerifiedAuth();
-    db.insert.mockReturnValueOnce(createChain([{ id: "task_1" }]));
+  it("skips the database when there is nothing to push, still reporting every shipped type", async () => {
+    const response = await push({ tasks: [], settings: [] });
 
-    const response = await action({
-      request: makeRequest({ tasks: [taskRow] }, token),
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.data).toEqual({
+      tasks: emptyResult,
+      recurring_tasks: emptyResult,
+      settings: emptyResult,
+      tags: emptyResult,
     });
+    expect(db.batch).not.toHaveBeenCalled();
+  });
+
+  it("locks, upserts and reads back in one batch, reporting applied rows", async () => {
+    // lock, tasks upsert, tasks read-back
+    db.batch.mockResolvedValueOnce([[], [{ id: "task_1" }], [storedTask]]);
+
+    const response = await push({ tasks: [taskRow] });
 
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -123,46 +160,98 @@ describe("POST /sync/push", () => {
     expect(body.data.recurring_tasks).toEqual(emptyResult);
     expect(body.data.settings).toEqual(emptyResult);
     expect(body.data.tags).toEqual(emptyResult);
-    // Membership is replaced (deleted then re-inserted) for every applied
-    // row, even one with no tags, so a locally-cleared tag list propagates.
-    expect(db.delete).toHaveBeenCalled();
+
+    expect(db.execute).toHaveBeenCalledTimes(1);
+    const items = db.batch.mock.calls[0][0] as unknown[];
+    expect(items).toHaveLength(3);
+    expect(items[0]).toBe(db.execute.mock.results[0].value);
   });
 
-  it("reports a stale row as rejected with the winning server row and its current tags", async () => {
-    const token = await signAccessToken("user-1");
-    mockVerifiedAuth();
-    const serverRow = { ...taskRow, updated_at: 9999, rev: 5 };
-    db.insert.mockReturnValueOnce(createChain([])); // conflict predicate rejected the row
-    db.select.mockReturnValueOnce(createChain([serverRow])); // rejected-row lookup
+  it("stores everything but the envelope as the payload", async () => {
+    db.batch.mockResolvedValueOnce([[], [{ id: "task_1" }], [storedTask]]);
 
-    const response = await action({
-      request: makeRequest({ tasks: [taskRow] }, token),
-    });
+    await push({ tasks: [{ ...taskRow, rev: 3, priority: 2 }] });
 
-    expect(response.status).toBe(200);
-    const body = await response.json();
-    expect(body.data.tasks.applied).toEqual([]);
-    expect(body.data.tasks.rejected).toEqual([
-      { id: "task_1", server_row: { ...serverRow, tag_ids: [] } },
+    expect(insertedValues()).toEqual([
+      {
+        userId: "user-1",
+        entityType: "tasks",
+        id: "task_1",
+        payload: { ...taskPayload, priority: 2 },
+        updatedAt: 2000,
+        deletedAt: null,
+      },
     ]);
   });
 
-  it("pushes tags before recurring_tasks and tasks", async () => {
-    const token = await signAccessToken("user-1");
-    mockVerifiedAuth();
-    db.insert.mockReturnValueOnce(createChain([{ id: "tag_1" }])); // tags
-    db.insert.mockReturnValueOnce(createChain([{ id: "task_1" }])); // tasks (no recurring_tasks sent, so pushRecurringTasks never calls insert)
+  it("uses settings' key as the row id", async () => {
+    db.batch.mockResolvedValueOnce([[], [{ id: "theme" }], []]);
 
-    const response = await action({
-      request: makeRequest(
-        { tags: [{ id: "tag_1", name: "urgent", color: "#fff", created_at: 1, updated_at: 1, deleted_at: null }], tasks: [taskRow] },
-        token
-      ),
+    const response = await push({ settings: [{ key: "theme", value: "dark", updated_at: 5 }] });
+
+    const body = await response.json();
+    expect(body.data.settings).toEqual({ applied: ["theme"], rejected: [] });
+    expect(insertedValues()[0]).toMatchObject({
+      entityType: "settings",
+      id: "theme",
+      payload: { value: "dark" },
+      deletedAt: null,
+    });
+  });
+
+  it("reports a stale row as rejected with the server's current row in wire shape", async () => {
+    const newer = { ...storedTask, payload: { ...taskPayload, name: "Buy oat milk" }, updatedAt: 9999 };
+    db.batch.mockResolvedValueOnce([[], [], [newer]]);
+
+    const response = await push({ tasks: [taskRow] });
+
+    const body = await response.json();
+    expect(body.data.tasks.applied).toEqual([]);
+    expect(body.data.tasks.rejected).toEqual([
+      {
+        id: "task_1",
+        server_row: { ...taskRow, name: "Buy oat milk", updated_at: 9999, rev: 7 },
+      },
+    ]);
+  });
+
+  it("accepts and reports a type the server has never seen", async () => {
+    db.batch.mockResolvedValueOnce([[], [{ id: "rem_1" }], []]);
+
+    const response = await push({ reminders: [{ id: "rem_1", text: "hi", updated_at: 1 }] });
+
+    const body = await response.json();
+    expect(body.data.reminders).toEqual({ applied: ["rem_1"], rejected: [] });
+    expect(body.data.tasks).toEqual(emptyResult);
+  });
+
+  it("collapses a repeated id to its newest version", async () => {
+    db.batch.mockResolvedValueOnce([[], [{ id: "task_1" }], []]);
+
+    await push({
+      tasks: [
+        { ...taskRow, name: "newest", updated_at: 3000 },
+        { ...taskRow, name: "older", updated_at: 2500 },
+      ],
     });
 
-    expect(response.status).toBe(200);
+    const values = insertedValues();
+    expect(values).toHaveLength(1);
+    expect(values[0]).toMatchObject({ updatedAt: 3000, payload: { name: "newest" } });
+  });
+
+  it("upserts each type once and reads each back", async () => {
+    db.batch.mockResolvedValueOnce([[], [{ id: "tag_1" }], [{ id: "task_1" }], [], []]);
+
+    const response = await push({
+      tags: [{ id: "tag_1", name: "urgent", color: "#fff", created_at: 1, updated_at: 1 }],
+      tasks: [taskRow],
+    });
+
     const body = await response.json();
     expect(body.data.tags).toEqual({ applied: ["tag_1"], rejected: [] });
     expect(body.data.tasks).toEqual({ applied: ["task_1"], rejected: [] });
+    expect(db.insert).toHaveBeenCalledTimes(2);
+    expect(db.batch.mock.calls[0][0]).toHaveLength(5);
   });
 });

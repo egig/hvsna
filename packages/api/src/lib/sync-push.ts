@@ -1,375 +1,89 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db/client";
-import { recurringTasks, settings, tags, tasks } from "@/db/schema";
-import {
-  recurringTaskWireColumns,
-  settingsWireColumns,
-  tagWireColumns,
-  taskWireColumns,
-} from "./sync-columns";
-import {
-  fetchRecurringTaskTagIds,
-  fetchTaskTagIds,
-  replaceRecurringTaskTagLinks,
-  replaceTaskTagLinks,
-} from "./sync-tag-links";
-import type {
-  RecurringTaskPushRow,
-  SettingsPushRow,
-  SyncPushTableResult,
-  TagPushRow,
-  TaskPushRow,
-} from "./sync-types";
+import { syncEntities, type SyncEntityRow } from "@/db/schema";
+import { ALWAYS_REPORTED_TYPES, toWireRow } from "./sync-envelope";
+import type { SyncPushBatch, SyncPushResponse, SyncPushRow } from "./sync-types";
 
-const FOREIGN_KEY_VIOLATION = "23503";
-
-function isForeignKeyViolation(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code?: unknown }).code === FOREIGN_KEY_VIOLATION
-  );
-}
-
-function diffIds(inputIds: string[], returnedIds: string[]): string[] {
-  const returned = new Set(returnedIds);
-  return inputIds.filter((id) => !returned.has(id));
-}
-
-export async function pushTags(userId: string, rows: TagPushRow[]): Promise<SyncPushTableResult> {
-  if (rows.length === 0) return { applied: [], rejected: [] };
-
-  const values = rows.map((r) => ({
-    userId,
-    id: r.id,
-    name: r.name,
-    color: r.color,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-    deletedAt: r.deleted_at,
-  }));
-
-  const returned = await db
-    .insert(tags)
-    .values(values)
+function upsert(userId: string, entityType: string, rows: SyncPushRow[]) {
+  return db
+    .insert(syncEntities)
+    .values(
+      rows.map((r) => ({
+        userId,
+        entityType,
+        id: r.id,
+        payload: r.payload,
+        updatedAt: r.updatedAt,
+        deletedAt: r.deletedAt,
+      }))
+    )
     .onConflictDoUpdate({
-      target: [tags.userId, tags.id],
+      target: [syncEntities.userId, syncEntities.entityType, syncEntities.id],
       set: {
-        name: sql`excluded.name`,
-        color: sql`excluded.color`,
+        // Shallow merge: keys the pushing client didn't send (e.g. a field
+        // only a newer client knows) survive; an explicit null clears one.
+        payload: sql`${syncEntities.payload} || excluded.payload`,
         updatedAt: sql`excluded.updated_at`,
         deletedAt: sql`excluded.deleted_at`,
-        rev: sql`nextval('tags_rev_seq')`,
+        rev: sql`nextval('sync_entities_rev_seq')`,
       },
-      where: sql`excluded.updated_at >= ${tags.updatedAt}`,
+      // Row-level last-write-wins on the client clock; a tie goes to the
+      // incoming row so a retried push is idempotent.
+      where: sql`excluded.updated_at >= ${syncEntities.updatedAt}`,
     })
-    .returning({ id: tags.id });
-
-  const applied = returned.map((r) => r.id);
-  const rejectedIds = diffIds(
-    rows.map((r) => r.id),
-    applied
-  );
-  if (rejectedIds.length === 0) return { applied, rejected: [] };
-
-  const serverRows = await db
-    .select(tagWireColumns)
-    .from(tags)
-    .where(and(eq(tags.userId, userId), inArray(tags.id, rejectedIds)));
-
-  return {
-    applied,
-    rejected: serverRows.map((row) => ({ id: row.id, server_row: row })),
-  };
+    .returning({ id: syncEntities.id });
 }
 
-export async function pushRecurringTasks(
-  userId: string,
-  rows: RecurringTaskPushRow[]
-): Promise<SyncPushTableResult> {
-  if (rows.length === 0) return { applied: [], rejected: [] };
-
-  const values = rows.map((r) => ({
-    userId,
-    id: r.id,
-    name: r.name,
-    description: r.description,
-    recurringType: r.recurring_type,
-    recurringInterval: r.recurring_interval,
-    baseDateEpoch: r.base_date_epoch,
-    atTime: r.at_time,
-    lat: r.lat,
-    lng: r.lng,
-    timezone: r.timezone,
-    hijriDateOffset: r.hijri_date_offset,
-    recurringEnd: r.recurring_end,
-    recurringEndEpoch: r.recurring_end_epoch,
-    recurringEndOccurrences: r.recurring_end_occurrences,
-    useGregorian: r.use_gregorian,
-    occurrenceExceptions: r.occurrence_exceptions,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-    deletedAt: r.deleted_at,
-  }));
-
-  const returned = await db
-    .insert(recurringTasks)
-    .values(values)
-    .onConflictDoUpdate({
-      target: [recurringTasks.userId, recurringTasks.id],
-      set: {
-        name: sql`excluded.name`,
-        description: sql`excluded.description`,
-        recurringType: sql`excluded.recurring_type`,
-        recurringInterval: sql`excluded.recurring_interval`,
-        baseDateEpoch: sql`excluded.base_date_epoch`,
-        atTime: sql`excluded.at_time`,
-        lat: sql`excluded.lat`,
-        lng: sql`excluded.lng`,
-        timezone: sql`excluded.timezone`,
-        hijriDateOffset: sql`excluded.hijri_date_offset`,
-        recurringEnd: sql`excluded.recurring_end`,
-        recurringEndEpoch: sql`excluded.recurring_end_epoch`,
-        recurringEndOccurrences: sql`excluded.recurring_end_occurrences`,
-        useGregorian: sql`excluded.use_gregorian`,
-        occurrenceExceptions: sql`excluded.occurrence_exceptions`,
-        updatedAt: sql`excluded.updated_at`,
-        deletedAt: sql`excluded.deleted_at`,
-        rev: sql`nextval('recurring_tasks_rev_seq')`,
-      },
-      where: sql`excluded.updated_at >= ${recurringTasks.updatedAt}`,
-    })
-    .returning({ id: recurringTasks.id });
-
-  const applied = returned.map((r) => r.id);
-  await replaceRecurringTaskTagLinks(
-    userId,
-    rows.filter((r) => applied.includes(r.id)).map((r) => ({ id: r.id, tag_ids: r.tag_ids }))
-  );
-
-  const rejectedIds = diffIds(
-    rows.map((r) => r.id),
-    applied
-  );
-  if (rejectedIds.length === 0) return { applied, rejected: [] };
-
-  const serverRows = await db
-    .select(recurringTaskWireColumns)
-    .from(recurringTasks)
-    .where(and(eq(recurringTasks.userId, userId), inArray(recurringTasks.id, rejectedIds)));
-  const tagMap = await fetchRecurringTaskTagIds(userId, rejectedIds);
-
-  return {
-    applied,
-    rejected: serverRows.map((row) => ({
-      id: row.id,
-      server_row: { ...row, tag_ids: tagMap.get(row.id) ?? [] },
-    })),
-  };
+function readBack(userId: string, entityType: string, ids: string[]) {
+  return db
+    .select()
+    .from(syncEntities)
+    .where(
+      and(
+        eq(syncEntities.userId, userId),
+        eq(syncEntities.entityType, entityType),
+        inArray(syncEntities.id, ids)
+      )
+    );
 }
 
-async function upsertTaskRow(userId: string, r: TaskPushRow): Promise<string | null> {
-  const returned = await db
-    .insert(tasks)
-    .values({
-      userId,
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      status: r.status,
-      atTime: r.at_time,
-      atEpochMillis: r.at_epoch_millis,
-      lat: r.lat,
-      lng: r.lng,
-      timezone: r.timezone,
-      recurringType: r.recurring_type,
-      recurringInterval: r.recurring_interval,
-      recurringTaskId: r.recurring_task_id,
-      hijriDateOffset: r.hijri_date_offset,
-      createdAt: r.created_at,
-      updatedAt: r.updated_at,
-      completedAt: r.completed_at,
-      deletedAt: r.deleted_at,
-    })
-    .onConflictDoUpdate({
-      target: [tasks.userId, tasks.id],
-      set: {
-        name: sql`excluded.name`,
-        description: sql`excluded.description`,
-        status: sql`excluded.status`,
-        atTime: sql`excluded.at_time`,
-        atEpochMillis: sql`excluded.at_epoch_millis`,
-        lat: sql`excluded.lat`,
-        lng: sql`excluded.lng`,
-        timezone: sql`excluded.timezone`,
-        recurringType: sql`excluded.recurring_type`,
-        recurringInterval: sql`excluded.recurring_interval`,
-        recurringTaskId: sql`excluded.recurring_task_id`,
-        hijriDateOffset: sql`excluded.hijri_date_offset`,
-        updatedAt: sql`excluded.updated_at`,
-        completedAt: sql`excluded.completed_at`,
-        deletedAt: sql`excluded.deleted_at`,
-        rev: sql`nextval('tasks_rev_seq')`,
-      },
-      where: sql`excluded.updated_at >= ${tasks.updatedAt}`,
-    })
-    .returning({ id: tasks.id });
-
-  return returned[0]?.id ?? null;
-}
-
-export async function pushTasks(
-  userId: string,
-  rows: TaskPushRow[]
-): Promise<SyncPushTableResult> {
-  if (rows.length === 0) return { applied: [], rejected: [] };
-
-  const applied: string[] = [];
-  const invalidReferenceIds: string[] = [];
-
-  try {
-    const values = rows.map((r) => ({
-      userId,
-      id: r.id,
-      name: r.name,
-      description: r.description,
-      status: r.status,
-      atTime: r.at_time,
-      atEpochMillis: r.at_epoch_millis,
-      lat: r.lat,
-      lng: r.lng,
-      timezone: r.timezone,
-      recurringType: r.recurring_type,
-      recurringInterval: r.recurring_interval,
-      recurringTaskId: r.recurring_task_id,
-      hijriDateOffset: r.hijri_date_offset,
-      createdAt: r.created_at,
-      updatedAt: r.updated_at,
-      completedAt: r.completed_at,
-      deletedAt: r.deleted_at,
-    }));
-
-    const returned = await db
-      .insert(tasks)
-      .values(values)
-      .onConflictDoUpdate({
-        target: [tasks.userId, tasks.id],
-        set: {
-          name: sql`excluded.name`,
-          description: sql`excluded.description`,
-          status: sql`excluded.status`,
-          atTime: sql`excluded.at_time`,
-          atEpochMillis: sql`excluded.at_epoch_millis`,
-          lat: sql`excluded.lat`,
-          lng: sql`excluded.lng`,
-          timezone: sql`excluded.timezone`,
-          recurringType: sql`excluded.recurring_type`,
-          recurringInterval: sql`excluded.recurring_interval`,
-          recurringTaskId: sql`excluded.recurring_task_id`,
-          hijriDateOffset: sql`excluded.hijri_date_offset`,
-          updatedAt: sql`excluded.updated_at`,
-          completedAt: sql`excluded.completed_at`,
-          deletedAt: sql`excluded.deleted_at`,
-          rev: sql`nextval('tasks_rev_seq')`,
-        },
-        where: sql`excluded.updated_at >= ${tasks.updatedAt}`,
-      })
-      .returning({ id: tasks.id });
-
-    applied.push(...returned.map((r) => r.id));
-  } catch (error) {
-    if (!isForeignKeyViolation(error)) throw error;
-
-    // One or more rows reference a recurring_task_id that doesn't exist
-    // server-side yet (e.g. offline-created recurring task + instances in
-    // the same push, arriving out of order). Fall back to per-row upserts
-    // so only the offending rows are rejected instead of the whole batch.
-    for (const row of rows) {
-      try {
-        const id = await upsertTaskRow(userId, row);
-        if (id) applied.push(id);
-      } catch (rowError) {
-        if (!isForeignKeyViolation(rowError)) throw rowError;
-        invalidReferenceIds.push(row.id);
-      }
-    }
+/**
+ * Applies a push in one transaction (neon-http runs `db.batch` as a single
+ * non-interactive transaction): a per-user advisory lock first, so pushes
+ * for one user serialize and their revs commit in order — otherwise a pull
+ * could advance its cursor past a lower rev still uncommitted — then one
+ * upsert per type, then a read-back of every pushed id. Rows the upsert
+ * didn't return lost the last-write-wins check and are reported as
+ * rejected along with the server's current version.
+ */
+export async function applyPush(userId: string, batch: SyncPushBatch): Promise<SyncPushResponse> {
+  const response: SyncPushResponse = {};
+  for (const entityType of [...ALWAYS_REPORTED_TYPES, ...batch.keys()]) {
+    response[entityType] = { applied: [], rejected: [] };
   }
 
-  await replaceTaskTagLinks(
-    userId,
-    rows.filter((r) => applied.includes(r.id)).map((r) => ({ id: r.id, tag_ids: r.tag_ids }))
+  const types = [...batch.entries()].filter(([, rows]) => rows.length > 0);
+  if (types.length === 0) return response;
+
+  const lock = db.execute(sql`select pg_advisory_xact_lock(hashtextextended(${userId}, 0))`);
+  const upserts = types.map(([entityType, rows]) => upsert(userId, entityType, rows));
+  const readBacks = types.map(([entityType, rows]) =>
+    readBack(userId, entityType, rows.map((r) => r.id))
   );
+  const queries: [BatchItem<"pg">, ...BatchItem<"pg">[]] = [lock, ...upserts, ...readBacks];
+  const results = (await db.batch(queries)) as unknown[];
 
-  const rejectedIds = diffIds(
-    rows.map((r) => r.id),
-    applied
-  ).filter((id) => !invalidReferenceIds.includes(id));
-
-  const serverRows = rejectedIds.length
-    ? await db
-        .select(taskWireColumns)
-        .from(tasks)
-        .where(and(eq(tasks.userId, userId), inArray(tasks.id, rejectedIds)))
-    : [];
-  const tagMap = await fetchTaskTagIds(userId, rejectedIds);
-
-  return {
-    applied,
-    rejected: [
-      ...serverRows.map((row) => ({
-        id: row.id,
-        server_row: { ...row, tag_ids: tagMap.get(row.id) ?? [] },
-      })),
-      ...invalidReferenceIds.map((id) => ({
-        id,
-        server_row: { id, reason: "INVALID_REFERENCE" },
-      })),
-    ],
-  };
-}
-
-export async function pushSettings(
-  userId: string,
-  rows: SettingsPushRow[]
-): Promise<SyncPushTableResult> {
-  if (rows.length === 0) return { applied: [], rejected: [] };
-
-  const values = rows.map((r) => ({
-    userId,
-    key: r.key,
-    value: r.value,
-    updatedAt: r.updated_at,
-  }));
-
-  const returned = await db
-    .insert(settings)
-    .values(values)
-    .onConflictDoUpdate({
-      target: [settings.userId, settings.key],
-      set: {
-        value: sql`excluded.value`,
-        updatedAt: sql`excluded.updated_at`,
-        rev: sql`nextval('settings_rev_seq')`,
-      },
-      where: sql`excluded.updated_at >= ${settings.updatedAt}`,
-    })
-    .returning({ id: settings.key });
-
-  const applied = returned.map((r) => r.id);
-  const rejectedIds = diffIds(
-    rows.map((r) => r.key),
-    applied
-  );
-  if (rejectedIds.length === 0) return { applied, rejected: [] };
-
-  const serverRows = await db
-    .select(settingsWireColumns)
-    .from(settings)
-    .where(and(eq(settings.userId, userId), inArray(settings.key, rejectedIds)));
-
-  return {
-    applied,
-    rejected: serverRows.map((row) => ({ id: row.key, server_row: row })),
-  };
+  types.forEach(([entityType], i) => {
+    const applied = (results[1 + i] as { id: string }[]).map((r) => r.id);
+    const appliedSet = new Set(applied);
+    const current = results[1 + types.length + i] as SyncEntityRow[];
+    response[entityType] = {
+      applied,
+      rejected: current
+        .filter((row) => !appliedSet.has(row.id))
+        .map((row) => ({ id: row.id, server_row: toWireRow(row) })),
+    };
+  });
+  return response;
 }
