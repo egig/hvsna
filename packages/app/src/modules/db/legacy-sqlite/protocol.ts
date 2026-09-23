@@ -22,9 +22,7 @@ export type LegacyTable = (typeof LEGACY_TABLES)[number];
 export type LegacyDump = Record<LegacyTable, LegacyRow[]>;
 
 // The worker sends no request/response pairs: it starts exporting as soon
-// as it's created, reports cross-tab lock state while it waits, and posts
-// exactly one "dump" or "error" message.
+// as it's created and posts exactly one "dump" or "error" message.
 export type LegacyWorkerMessage =
-  | { kind: "status"; state: "locked" | "ready" }
   | { kind: "dump"; dump: LegacyDump }
   | { kind: "error"; error: string };

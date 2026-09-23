@@ -143,15 +143,11 @@ export async function writeLegacyDump(executor: DbExecutor, dump: LegacyDump): P
   });
 }
 
-function readLegacyDump(
-  worker: Worker,
-  onLockStateChange: (state: "locked" | "ready") => void
-): Promise<LegacyDump> {
+function readLegacyDump(worker: Worker): Promise<LegacyDump> {
   return new Promise((resolve, reject) => {
     worker.onmessage = (event: MessageEvent<LegacyWorkerMessage>) => {
       const message = event.data;
-      if (message.kind === "status") onLockStateChange(message.state);
-      else if (message.kind === "dump") resolve(message.dump);
+      if (message.kind === "dump") resolve(message.dump);
       else reject(new Error(message.error));
     };
     worker.onerror = (event) => reject(new Error(event.message || "Legacy SQLite worker failed"));
@@ -161,14 +157,10 @@ function readLegacyDump(
 /**
  * One-time move from the SQLite/OPFS database older builds used (wa-sqlite in
  * a Worker) into IndexedDB. A no-op, without loading wa-sqlite, once the OPFS
- * directory is gone. Runs before the first render; if another tab of an
- * older build still has the database open, it waits for that tab to close
- * and reports "locked" meanwhile so the boot screen can say so.
+ * directory is gone. Call only while holding the tab lock (./tab-lock.ts),
+ * which also keeps out tabs still running an older build.
  */
-export async function importLegacySqlite(
-  executor: DbExecutor,
-  onLockStateChange: (state: "locked" | "ready") => void = () => {}
-): Promise<void> {
+export async function importLegacySqlite(executor: DbExecutor): Promise<void> {
   if (!(await hasLegacySqliteData())) return;
 
   if (!(await executor.db._sync_state.get(LEGACY_IMPORTED_KEY))) {
@@ -176,9 +168,7 @@ export async function importLegacySqlite(
       type: "module",
     });
     try {
-      await writeLegacyDump(executor, await readLegacyDump(worker, onLockStateChange));
-      // Removed while the worker still holds the old build's Web Lock, so an
-      // old-version tab can't reopen the database mid-delete.
+      await writeLegacyDump(executor, await readLegacyDump(worker));
       await removeLegacySqliteData();
     } finally {
       worker.terminate();

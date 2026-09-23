@@ -13,34 +13,12 @@ import {
 // Reads the SQLite database older builds of the app kept in OPFS so
 // ../legacy-sqlite-import.ts can copy it into IndexedDB. OPFS sync access
 // handles (what AccessHandlePoolVFS uses) only exist inside a dedicated
-// Worker. That VFS doesn't implement SQLite's locking protocol, so older
-// builds serialized tabs with the `DB_LOCK_NAME` Web Lock — taken here too,
-// so a still-open old-version tab finishes with the database before it's
-// read. The lock is held until the importer terminates this worker, after
-// it has removed the OPFS directory.
+// Worker. The importer only starts this worker once its tab holds the tab
+// lock (../tab-lock.ts, the same lock older builds used), so no other tab
+// has the database open while it's read.
 declare const self: {
   postMessage: (message: LegacyWorkerMessage) => void;
 };
-
-const DB_LOCK_NAME = "hvsna-sqlite-db";
-
-function waitForDbLock(): Promise<void> {
-  return new Promise<void>((resolveHeld) => {
-    void navigator.locks.request(DB_LOCK_NAME, { ifAvailable: true }, async (lock) => {
-      if (lock) {
-        resolveHeld();
-        await new Promise<void>(() => {});
-        return;
-      }
-      self.postMessage({ kind: "status", state: "locked" });
-      await navigator.locks.request(DB_LOCK_NAME, async () => {
-        self.postMessage({ kind: "status", state: "ready" });
-        resolveHeld();
-        await new Promise<void>(() => {});
-      });
-    });
-  });
-}
 
 async function exportDatabase(): Promise<LegacyDump> {
   const module = await SQLiteESMFactory();
@@ -70,7 +48,6 @@ async function exportDatabase(): Promise<LegacyDump> {
 
 (async () => {
   try {
-    await waitForDbLock();
     self.postMessage({ kind: "dump", dump: await exportDatabase() });
   } catch (error) {
     self.postMessage({

@@ -4,6 +4,7 @@ import type { AppConfig } from "@/app";
 import App from "@/app";
 import { getDatabase, wipeLocalData } from "@/modules/db/database-singleton";
 import { importLegacySqlite } from "@/modules/db/legacy-sqlite-import";
+import { acquireTabLock } from "@/modules/db/tab-lock";
 import { configureLogger } from "@/modules/logger";
 import { registerWebImplementations } from "./register";
 import log from "@/modules/logger";
@@ -37,11 +38,10 @@ configureLogger();
 // state that a moment-later sync overwrites.
 root.render(<BootScreen />);
 
-// Existing installs still have their data in the SQLite/OPFS database older
-// builds used; copy it into IndexedDB before anything reads. If a tab running
-// an older build still has that database open, the import waits for it —
-// surface the multi-tab prompt meanwhile instead of a silent boot screen.
-function renderLegacyLockState(state: "locked" | "ready") {
+// Only one tab runs the app at a time (see tab-lock.ts). While another tab
+// holds the lock, show the multi-tab prompt over the boot screen; this tab
+// continues on its own once the other one closes.
+function renderLockState(state: "locked" | "ready") {
   root.render(
     state === "locked" ? (
       <>
@@ -55,8 +55,11 @@ function renderLegacyLockState(state: "locked" | "ready") {
 }
 
 (async () => {
+  await acquireTabLock(renderLockState);
+  // Existing installs still have their data in the SQLite/OPFS database older
+  // builds used; copy it into IndexedDB before anything reads.
   try {
-    await importLegacySqlite(database, renderLegacyLockState);
+    await importLegacySqlite(database);
   } catch (error) {
     // The old database stays in place, so the import is retried next load.
     log.error("Importing the legacy SQLite database failed", error);
