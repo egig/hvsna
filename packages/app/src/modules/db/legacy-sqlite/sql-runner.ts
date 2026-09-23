@@ -3,9 +3,8 @@ import type { SqliteValue } from "./protocol";
 
 /**
  * Runs one parameterized SQL statement against an open wa-sqlite database
- * and collects its result rows. Shared between the production Worker
- * (worker.ts) and the in-memory test harness (__tests__/test-sqlite-client.ts)
- * so both execute queries identically.
+ * and collects its result rows. Integers wa-sqlite hands back as bigint are
+ * converted to numbers — epoch millis fit well within Number's safe range.
  */
 export async function runQuery(
   sqlite3: SQLiteAPI,
@@ -20,10 +19,11 @@ export async function runQuery(
     }
     const columns = sqlite3.column_names(stmt);
     while ((await sqlite3.step(stmt)) === SQLite.SQLITE_ROW) {
-      const values = sqlite3.row(stmt) as SqliteValue[];
+      const values = sqlite3.row(stmt);
       const record: Record<string, SqliteValue> = {};
       columns.forEach((column, i) => {
-        record[column] = values[i];
+        const value = values[i];
+        record[column] = typeof value === "bigint" ? Number(value) : (value as SqliteValue);
       });
       rows.push(record);
     }

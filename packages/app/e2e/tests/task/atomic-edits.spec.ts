@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-// Fresh Playwright contexts have their own OPFS database. These regressions
+// Fresh Playwright contexts have their own IndexedDB database. These regressions
 // exercise the current routes directly (there is no onboarding route).
 async function openCreate(page: Page, name: string) {
   await page.goto("/today");

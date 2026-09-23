@@ -1,4 +1,4 @@
-import type { SqliteClient } from "@/modules/sqlite/client";
+import type { DbExecutor } from "@/modules/db/executor";
 import { getAuthService } from "@/infra/auth/AuthServiceFactory";
 import { getSyncApiClient } from "@/infra/sync/SyncApiClientFactory";
 import { createSyncEngine } from "@/modules/sync/sync-engine";
@@ -38,7 +38,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
  *   1. Restore the session — refresh the access token from the stored
  *      refresh token — and load the current user.
  *   2. If signed in with a verified email, run one full push/pull so the
- *      local SQLite DB is already reconciled before any screen mounts.
+ *      local database is already reconciled before any screen mounts.
  *
  * Every step is best-effort: a failure here just means the app starts in
  * whatever state it already had (offline, expired session, sync down),
@@ -47,7 +47,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
  * the work this function already did.
  */
 export async function bootstrapApp(
-  sqliteClient: SqliteClient
+  database: DbExecutor
 ): Promise<BootstrapResult> {
   const result: BootstrapResult = {
     user: null,
@@ -69,7 +69,7 @@ export async function bootstrapApp(
   // verified email and a Sync plan, so there's nothing to pull otherwise.
   if (userCanSync(result.user)) {
     try {
-      const engine = createSyncEngine(sqliteClient, getSyncApiClient());
+      const engine = createSyncEngine(database, getSyncApiClient());
       await withTimeout(engine.fullSync(), SYNC_BUDGET_MS, "initial sync");
       result.initialSyncPerformed = true;
     } catch (error) {
@@ -78,7 +78,7 @@ export async function bootstrapApp(
   }
 
   try {
-    result.lastSyncAt = await getLastSuccessAt(sqliteClient);
+    result.lastSyncAt = await getLastSuccessAt(database);
   } catch {
     // best-effort — SyncProvider re-reads this itself on mount too
   }

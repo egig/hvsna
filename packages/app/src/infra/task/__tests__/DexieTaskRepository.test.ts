@@ -1,16 +1,16 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
-import { SqliteTaskRepository } from "../SqliteTaskRepository";
+import { createTestDatabase } from "@/modules/db/__tests__/test-database";
+import { DexieTaskRepository } from "../DexieTaskRepository";
 import { createWriteNotifier } from "@/modules/sync/write-notifier";
 
 async function makeRepo() {
-  const client = await createTestSqliteClient();
+  const client = createTestDatabase();
   const writeNotifier = createWriteNotifier();
-  return { client, writeNotifier, repo: new SqliteTaskRepository(client, writeNotifier) };
+  return { client, writeNotifier, repo: new DexieTaskRepository(client, writeNotifier) };
 }
 
-describe("SqliteTaskRepository", () => {
+describe("DexieTaskRepository", () => {
   it("creates a task and marks it dirty", async () => {
     const { client, repo } = await makeRepo();
 
@@ -20,14 +20,11 @@ describe("SqliteTaskRepository", () => {
     expect(task.status).toBe(0);
     expect(task.tags).toEqual(["errands"]);
 
-    const [row] = await client.run(`SELECT _dirty FROM tasks WHERE id = ?`, [String(task.id)]);
-    expect(row._dirty).toBe(1);
+    expect((await client.db.tasks.get(String(task.id)))?._dirty).toBe(1);
 
-    const tagRows = await client.run(
-      `SELECT tags.name FROM task_tags JOIN tags ON tags.id = task_tags.tag_id WHERE task_tags.task_id = ?`,
-      [String(task.id)]
-    );
-    expect(tagRows.map((r) => r.name)).toEqual(["errands"]);
+    const links = await client.db.task_tags.where("task_id").equals(String(task.id)).toArray();
+    const tagRows = await client.db.tags.bulkGet(links.map((link) => link.tag_id));
+    expect(tagRows.map((r) => r?.name)).toEqual(["errands"]);
   });
 
   it("findById returns null for soft-deleted tasks", async () => {
@@ -42,14 +39,13 @@ describe("SqliteTaskRepository", () => {
   it("update merges only provided fields and re-dirties the row", async () => {
     const { client, repo } = await makeRepo();
     const task = await repo.create({ name: "Buy milk", description: "2%", tags: [] });
-    await client.run(`UPDATE tasks SET _dirty = 0 WHERE id = ?`, [String(task.id)]);
+    await client.db.tasks.update(String(task.id), { _dirty: 0 });
 
     const updated = await repo.update(task.id!, { name: "Buy oat milk" });
 
     expect(updated.name).toBe("Buy oat milk");
     expect(updated.description).toBe("2%"); // untouched field preserved
-    const [row] = await client.run(`SELECT _dirty FROM tasks WHERE id = ?`, [String(task.id)]);
-    expect(row._dirty).toBe(1);
+    expect((await client.db.tasks.get(String(task.id)))?._dirty).toBe(1);
   });
 
   it("update with removeTime clears atTime", async () => {
@@ -141,7 +137,7 @@ describe("SqliteTaskRepository", () => {
     await repo.create({ name: "Task A", tags: [" Work "] });
     await repo.create({ name: "Task B", tags: ["WORK"] });
 
-    const tagRows = await client.run(`SELECT id, name FROM tags`);
+    const tagRows = await client.db.tags.toArray();
     expect(tagRows).toHaveLength(1);
     expect(tagRows[0].name).toBe("work");
   });

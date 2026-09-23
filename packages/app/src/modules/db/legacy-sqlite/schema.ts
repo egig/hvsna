@@ -8,10 +8,10 @@ export interface UserMigration {
 }
 
 /**
- * Local-first schema, owned directly by this app (no longer mirrored from
- * an external backend), applied in order to bootstrap a new local database.
- * A future sync rebuild against packages/api will need to reconcile this
- * with whatever server-side schema it introduces for synced data.
+ * The schema of the SQLite database older builds of the web app kept in
+ * OPFS, before local storage moved to IndexedDB (see ../database.ts). Frozen:
+ * it exists only so ../legacy-sqlite-import.ts can bring any old database up
+ * to the final shape before copying it over — never add migrations here.
  *
  * Applied incrementally and tracked by id in `_migrations` — see
  * migration-runner.ts. The first entry is special-cased there as the base

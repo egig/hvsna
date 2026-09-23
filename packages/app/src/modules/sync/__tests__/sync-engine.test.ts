@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
-import type { SqliteExecutor } from "@/modules/sqlite/client";
+import { createTestDatabase, taskRow } from "@/modules/db/__tests__/test-database";
+import type { DbExecutor } from "@/modules/db/executor";
 import type {
   SyncPullCursors,
   SyncPullResponse,
@@ -55,16 +55,13 @@ function remoteTaskRow(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
-async function insertRawTask(client: SqliteExecutor, id: string, dirty = 1) {
-  await client.run(
-    `INSERT INTO tasks (id, name, status, created_at, updated_at, _dirty) VALUES (?, 'Buy milk', 0, 1000, 1000, ?)`,
-    [id, dirty]
-  );
+async function insertRawTask(client: DbExecutor, id: string, dirty: 0 | 1 = 1) {
+  await client.db.tasks.put(taskRow({ id, _dirty: dirty }));
 }
 
 describe("sync-engine", () => {
   it("push() sends dirty rows and clears _dirty on applied ids", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await insertRawTask(client, "task_1");
 
     const pushCalls: SyncPushRequest[] = [];
@@ -80,12 +77,11 @@ describe("sync-engine", () => {
 
     expect(pushCalls).toHaveLength(1);
     expect(pushCalls[0].tasks.map((t) => t.id)).toEqual(["task_1"]);
-    const [row] = await client.run(`SELECT _dirty FROM tasks WHERE id = ?`, ["task_1"]);
-    expect(row._dirty).toBe(0);
+    expect((await client.db.tasks.get("task_1"))?._dirty).toBe(0);
   });
 
   it("push() applies a rejected row's winning server_row locally", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await insertRawTask(client, "task_1");
 
     const apiClient: SyncApiPort = {
@@ -106,13 +102,13 @@ describe("sync-engine", () => {
 
     await createSyncEngine(client, apiClient).push();
 
-    const [row] = await client.run(`SELECT name, _dirty FROM tasks WHERE id = ?`, ["task_1"]);
-    expect(row.name).toBe("Server wins");
-    expect(row._dirty).toBe(0);
+    const row = await client.db.tasks.get("task_1");
+    expect(row?.name).toBe("Server wins");
+    expect(row?._dirty).toBe(0);
   });
 
   it("push() does not apply a rejected row that carries only an INVALID_REFERENCE reason", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await insertRawTask(client, "task_1");
 
     const apiClient: SyncApiPort = {
@@ -128,13 +124,13 @@ describe("sync-engine", () => {
 
     await createSyncEngine(client, apiClient).push();
 
-    const [row] = await client.run(`SELECT name, _dirty FROM tasks WHERE id = ?`, ["task_1"]);
-    expect(row.name).toBe("Buy milk"); // untouched
-    expect(row._dirty).toBe(1); // still needs pushing next cycle
+    const row = await client.db.tasks.get("task_1");
+    expect(row?.name).toBe("Buy milk"); // untouched
+    expect(row?._dirty).toBe(1); // still needs pushing next cycle
   });
 
   it("pull() applies remote rows and advances the cursor", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
 
     const apiClient: SyncApiPort = {
       push: async () => emptyPushResponse(),
@@ -147,13 +143,12 @@ describe("sync-engine", () => {
     const applied = await createSyncEngine(client, apiClient).pull();
 
     expect(applied).toBe(true);
-    const [row] = await client.run(`SELECT name FROM tasks WHERE id = ?`, ["task_remote"]);
-    expect(row.name).toBe("From server");
+    expect((await client.db.tasks.get("task_remote"))?.name).toBe("From server");
     expect(await getCursor(client, "tasks")).toBe(3);
   });
 
   it("pull() loops while has_more is true and stops once a page is empty", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     let call = 0;
 
     const apiClient: SyncApiPort = {
@@ -181,7 +176,7 @@ describe("sync-engine", () => {
   });
 
   it("fullSync() pushes before pulling and reports whether anything was pulled", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await insertRawTask(client, "task_1");
     const order: string[] = [];
 
@@ -206,7 +201,7 @@ describe("sync-engine", () => {
 
 describe("edits during upload", () => {
   it.each([1000, 2000])("preserves and later uploads a concurrent edit at timestamp %i", async (updatedAt) => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await insertRawTask(client, "task_1");
     const uploads: SyncPushRequest[] = [];
     let serverRow: TaskWireRow & { rev: number } = remoteTaskRow({ id: "task_1", name: "Buy milk" });
@@ -215,7 +210,7 @@ describe("edits during upload", () => {
         uploads.push(body);
         serverRow = { ...serverRow, ...body.tasks[0] };
         if (uploads.length === 1) {
-          await client.run("UPDATE tasks SET name = 'New edit', updated_at = ?, _dirty = 1 WHERE id = 'task_1'", [updatedAt]);
+          await client.db.tasks.update("task_1", { name: "New edit", updated_at: updatedAt, _dirty: 1 });
         }
         return { ...emptyPushResponse(), tasks: { applied: ["task_1"], rejected: [] } };
       },
@@ -225,11 +220,10 @@ describe("edits during upload", () => {
       }),
     });
     await engine.fullSync();
-    expect(await client.run("SELECT name, _dirty FROM tasks WHERE id = 'task_1'"))
-      .toEqual([{ name: "New edit", _dirty: 1 }]);
+    expect(await client.db.tasks.get("task_1"))
+      .toMatchObject({ name: "New edit", _dirty: 1 });
     await engine.fullSync();
     expect(uploads[1].tasks[0].name).toBe("New edit");
-    expect(await client.run("SELECT _dirty FROM tasks WHERE id = 'task_1'"))
-      .toEqual([{ _dirty: 0 }]);
+    expect((await client.db.tasks.get("task_1"))?._dirty).toBe(0);
   });
 });

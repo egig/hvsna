@@ -7,7 +7,7 @@ const STORAGE_KEY = "hvsna_reminder_registry";
  * Per-device OS-notification-scheduling bookkeeping — deliberately never
  * synced (see the plan): reconciling "which reminders did this device
  * already schedule" across devices doesn't mean anything. Plain
- * localStorage is enough; no need to round-trip through the SQLite Worker
+ * localStorage is enough; no need to round-trip through the database
  * for this.
  */
 export class LocalReminderRegistryRepository implements IReminderRegistryRepository {

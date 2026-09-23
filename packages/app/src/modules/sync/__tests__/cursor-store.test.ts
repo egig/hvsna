@@ -1,11 +1,11 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import { createTestSqliteClient } from "@/modules/sqlite/__tests__/test-sqlite-client";
+import { createTestDatabase } from "@/modules/db/__tests__/test-database";
 import { getCursor, getLastSuccessAt, setCursor, setLastSuccessAt } from "../cursor-store";
 
 describe("cursor-store", () => {
   it("defaults every entity's cursor to 0 when unset", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     expect(await getCursor(client, "tasks")).toBe(0);
     expect(await getCursor(client, "recurring_tasks")).toBe(0);
     expect(await getCursor(client, "settings")).toBe(0);
@@ -13,7 +13,7 @@ describe("cursor-store", () => {
   });
 
   it("persists a cursor per entity type independently", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await setCursor(client, "tasks", 42);
     await setCursor(client, "recurring_tasks", 7);
     await setCursor(client, "tags", 3);
@@ -25,7 +25,7 @@ describe("cursor-store", () => {
   });
 
   it("overwrites a previously-set cursor", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     await setCursor(client, "tasks", 42);
     await setCursor(client, "tasks", 100);
 
@@ -33,7 +33,7 @@ describe("cursor-store", () => {
   });
 
   it("defaults lastSuccessAt to null and persists it once set", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     expect(await getLastSuccessAt(client)).toBeNull();
 
     await setLastSuccessAt(client, 1700000000000);

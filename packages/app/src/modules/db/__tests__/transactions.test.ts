@@ -1,90 +1,64 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
-import { createTestSqliteClient } from "./test-sqlite-client";
+import { createTestDatabase } from "./test-database";
 import { createWebRepositories } from "@/modules/repositories-context";
 import {
   updateRecurringSeries,
   promoteTaskToRecurring,
 } from "@/modules/task/recurring-task-conversion";
 
-describe("SQLite transactions", () => {
+describe("database transactions", () => {
   it("rolls back task, tag creation, and notifications when membership fails", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     const repos = createWebRepositories(client);
     const notify = vi.fn();
     repos.writeNotifier.subscribe(notify);
-    await client.exec(`CREATE TRIGGER fail_tag BEFORE INSERT ON task_tags
-      BEGIN SELECT RAISE(ABORT, 'tag write failed'); END;`);
+    client.db.task_tags.hook("creating", () => {
+      throw new Error("tag write failed");
+    });
     await expect(
       repos.taskRepository.create({ name: "Test", tags: ["new"] }),
     ).rejects.toThrow("tag write failed");
-    expect(await client.run("SELECT * FROM tasks")).toEqual([]);
-    expect(await client.run("SELECT * FROM tags")).toEqual([]);
+    expect(await client.db.tasks.toArray()).toEqual([]);
+    expect(await client.db.tags.toArray()).toEqual([]);
     expect(notify).not.toHaveBeenCalled();
   });
 
-  it("queues outside reads until commit and defers nested notifications", async () => {
-    const client = await createTestSqliteClient();
+  it("defers notifications from nested repository writes until the outer commit", async () => {
+    const client = createTestDatabase();
     const repos = createWebRepositories(client);
     const notify = vi.fn();
     repos.writeNotifier.subscribe(notify);
-    let release!: () => void;
-    let started!: () => void;
-    const ready = new Promise<void>((resolve) => {
-      started = resolve;
-    });
-    const gate = new Promise<void>((resolve) => {
-      release = resolve;
-    });
-    const transaction = repos.transaction(async ({ taskRepository }) => {
+    await repos.transaction(async ({ taskRepository }) => {
       await taskRepository.create({ name: "Atomic", tags: ["home"] });
       expect(notify).not.toHaveBeenCalled();
-      started();
-      await gate;
     });
-    await ready;
-    let readFinished = false;
-    const read = client.run("SELECT name FROM tasks").then((rows) => {
-      readFinished = true;
-      return rows;
-    });
-    await Promise.resolve();
-    expect(readFinished).toBe(false);
-    release();
-    await transaction;
-    expect(await read).toEqual([{ name: "Atomic" }]);
     expect(notify).toHaveBeenCalledWith("tasks");
+    expect((await client.db.tasks.toArray()).map((row) => row.name)).toEqual(["Atomic"]);
   });
 
-  it("isolates concurrent nested scopes and discards effects from a rolled-back savepoint", async () => {
-    const client = await createTestSqliteClient();
-    const committed = vi.fn();
-    const rolledBack = vi.fn();
-    await client.transaction(async (scope) => {
-      await Promise.all([
-        scope.transaction(async (inner) => {
-          await inner.run("INSERT INTO settings VALUES ('a', '1', 1, 1)");
-          inner.afterCommit(committed);
-        }),
-        scope
-          .transaction(async (inner) => {
-            await inner.run("INSERT INTO settings VALUES ('b', '2', 1, 1)");
-            inner.afterCommit(rolledBack);
+  it("aborts the outer transaction when a nested one fails, even if the error is caught", async () => {
+    // IndexedDB has no savepoints — see executor.ts.
+    const client = createTestDatabase();
+    const effect = vi.fn();
+    await expect(
+      client.transaction(async (scope) => {
+        await client.db.settings.put({ key: "a", value: "1", updated_at: 1, _dirty: 1 });
+        scope.afterCommit(effect);
+        await scope
+          .transaction(async () => {
             throw new Error("rollback inner");
           })
-          .catch(() => {}),
-      ]);
-      expect(committed).not.toHaveBeenCalled();
-    });
-    expect(await client.run("SELECT key FROM settings")).toEqual([
-      { key: "a" },
-    ]);
-    expect(committed).toHaveBeenCalledOnce();
-    expect(rolledBack).not.toHaveBeenCalled();
+          .catch(() => {});
+        await client.db.settings.put({ key: "b", value: "2", updated_at: 1, _dirty: 1 });
+      }),
+    ).rejects.toThrow();
+    expect(await client.db.settings.toArray()).toEqual([]);
+    expect(effect).not.toHaveBeenCalled();
   });
 
   it("restores deleted future tasks and the template when the final series write fails", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     const repos = createWebRepositories(client);
     const template = await repos.recurringTaskRepository.create({
       name: "Series",
@@ -105,8 +79,9 @@ describe("SQLite transactions", () => {
     });
     const notify = vi.fn();
     repos.writeNotifier.subscribe(notify);
-    await client.exec(`CREATE TRIGGER fail_edit BEFORE UPDATE ON tasks WHEN NEW.name = 'Broken'
-      BEGIN SELECT RAISE(ABORT, 'final write failed'); END;`);
+    client.db.tasks.hook("updating", (mods) => {
+      if ((mods as { name?: string }).name === "Broken") throw new Error("final write failed");
+    });
     await expect(
       repos.transaction(({ taskRepository, recurringTaskRepository }) =>
         updateRecurringSeries(
@@ -134,7 +109,7 @@ describe("SQLite transactions", () => {
   });
 
   it("rolls back a promotion if linking the original task fails", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     const repos = createWebRepositories(client);
     await expect(
       repos.transaction(({ taskRepository, recurringTaskRepository }) =>
@@ -157,7 +132,7 @@ describe("SQLite transactions", () => {
   });
 
   it("rolls back task deletions if deleting the recurring template fails", async () => {
-    const client = await createTestSqliteClient();
+    const client = createTestDatabase();
     const repos = createWebRepositories(client);
     const template = await repos.recurringTaskRepository.create({
       name: "Series",
@@ -169,8 +144,11 @@ describe("SQLite transactions", () => {
       recurringTaskId: template.id,
       tags: [],
     });
-    await client.exec(`CREATE TRIGGER fail_delete BEFORE UPDATE ON recurring_tasks WHEN NEW.deleted_at IS NOT NULL
-      BEGIN SELECT RAISE(ABORT, 'template delete failed'); END;`);
+    client.db.recurring_tasks.hook("updating", (mods) => {
+      if ((mods as { deleted_at?: number | null }).deleted_at) {
+        throw new Error("template delete failed");
+      }
+    });
     await expect(
       repos.transaction(async ({ taskRepository, recurringTaskRepository }) => {
         await taskRepository.deletePendingByRecurringTaskId(template.id);

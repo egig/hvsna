@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e/tests",
-  fullyParallel: false, // SQLite/OPFS storage is per-origin; avoid cross-test races
+  fullyParallel: false, // IndexedDB storage is per-origin; avoid cross-test races
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : 2,

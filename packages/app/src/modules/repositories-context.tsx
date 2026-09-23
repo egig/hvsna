@@ -4,12 +4,12 @@ import type { IRecurringTaskRepository } from "@/domain/task/IRecurringTaskRepos
 import type { ISettingsRepository } from "@/domain/settings/ISettingsRepository";
 import type { IReminderRegistryRepository } from "@/domain/task/IReminderRegistryRepository";
 import type { ITagRepository } from "@/domain/tag/ITagRepository";
-import { SqliteTaskRepository } from "../infra/task/SqliteTaskRepository";
-import { SqliteRecurringTaskRepository } from "../infra/task/SqliteRecurringTaskRepository";
+import { DexieTaskRepository } from "../infra/task/DexieTaskRepository";
+import { DexieRecurringTaskRepository } from "../infra/task/DexieRecurringTaskRepository";
 import { LocalReminderRegistryRepository } from "../infra/task/LocalReminderRegistryRepository";
-import { SqliteSettingsRepository } from "../infra/settings/SqliteSettingsRepository";
-import { SqliteTagRepository } from "../infra/tag/SqliteTagRepository";
-import type { SqliteExecutor } from "./sqlite/client";
+import { DexieSettingsRepository } from "../infra/settings/DexieSettingsRepository";
+import { DexieTagRepository } from "../infra/tag/DexieTagRepository";
+import type { DbExecutor } from "./db/executor";
 import { createWriteNotifier, type WriteNotifier } from "./sync/write-notifier";
 
 export type TaskRepositories = Pick<Repositories, "taskRepository" | "recurringTaskRepository">;
@@ -29,16 +29,16 @@ export interface Repositories {
 }
 
 export function createWebRepositories(
-  sqliteClient: SqliteExecutor,
+  database: DbExecutor,
   writeNotifier = createWriteNotifier(),
 ): Repositories {
-  const tagRepository = new SqliteTagRepository(sqliteClient, writeNotifier);
+  const tagRepository = new DexieTagRepository(database, writeNotifier);
   return {
-    transaction: (operation) => sqliteClient.transaction((client) =>
-      operation(createWebRepositories(client, writeNotifier))),
-    taskRepository: new SqliteTaskRepository(sqliteClient, writeNotifier),
-    recurringTaskRepository: new SqliteRecurringTaskRepository(sqliteClient, writeNotifier),
-    settingsRepository: new SqliteSettingsRepository(sqliteClient, writeNotifier),
+    transaction: (operation) => database.transaction((executor) =>
+      operation(createWebRepositories(executor, writeNotifier))),
+    taskRepository: new DexieTaskRepository(database, writeNotifier),
+    recurringTaskRepository: new DexieRecurringTaskRepository(database, writeNotifier),
+    settingsRepository: new DexieSettingsRepository(database, writeNotifier),
     reminderRegistryRepository: new LocalReminderRegistryRepository(),
     tagRepository,
     writeNotifier,

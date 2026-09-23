@@ -7,7 +7,7 @@ export { BrowserNotificationsDriver } from "./notifications/BrowserNotifications
 export { createPermissionsProvider } from "./permissions";
 export { BrowserPermissionsProvider } from "./permissions/BrowserPermissionsProvider";
 
-export { SqliteTaskRepository } from "./task";
+export { DexieTaskRepository } from "./task";
 
 export { createLocationProvider } from "./location";
 export { BrowserLocationDriver as BrowserLocationProvider } from "./location/BrowserLocationDriver";

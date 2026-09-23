@@ -3,7 +3,7 @@
  * packages/api/src/lib/sync-types.ts, which must be kept in sync with this
  * file. Deliberately raw/snake_case rather than the app's domain types
  * (Task, RecurringTask, GeneralSettings) — the sync engine moves rows
- * straight between sqlite columns and these wire shapes without going
+ * straight between stored IndexedDB rows and these wire shapes without going
  * through domain mapping, since it operates beneath the repository layer
  * (see modules/sync/dirty-rows.ts).
  */
@@ -54,7 +54,7 @@ export interface RecurringTaskWireRow {
   deleted_at: number | null;
 }
 
-/** Key/value settings row — see infra/settings/SqliteSettingsRepository.ts. */
+/** Key/value settings row — see infra/settings/DexieSettingsRepository.ts. */
 export interface SettingsWireRow {
   key: string;
   value: string;
