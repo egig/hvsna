@@ -32,6 +32,7 @@ const changelogData: ChangelogEntry[] = [
             "Faster, more reliable local storage under the hood",
             "Refreshed icons for a cleaner look",
             "Hijri (Islamic) date now shown in more places across the app",
+            "Smoother, drag-to-dismiss animation when adding or editing a task",
           ],
           fixed: ["Fixed a task title input bug on the Today, Upcoming, and Tag screens"],
         },
@@ -42,6 +43,7 @@ const changelogData: ChangelogEntry[] = [
         changes: {
           new: [],
           improved: [
+            "Hijri (Islamic) date now shown alongside the date when scheduling a task",
             "Smoother animations when picking a date or time for a task",
             "Cleaner text, spacing, and checkbox styling throughout the app",
             "More reliable saving for tags, recurring tasks, and settings",
