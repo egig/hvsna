@@ -21,7 +21,7 @@ interface ChangelogEntry {
 
 const changelogData: ChangelogEntry[] = [
   {
-    date: "September 21, 2026",
+    date: "September 23, 2026",
     releases: [
       {
         platform: "Android",
@@ -33,6 +33,10 @@ const changelogData: ChangelogEntry[] = [
             "Refreshed icons for a cleaner look",
             "Hijri (Islamic) date now shown in more places across the app",
             "Smoother, drag-to-dismiss animation when adding or editing a task",
+            "Feel a light tap when a swipe on a task is far enough to trigger its action",
+            "Swipe between Scheduled and Unscheduled on the Upcoming screen",
+            "Clearer section headers in task lists and a nicer tag picker when adding a task",
+            "Sync is now part of the paid Sync plan, with a clear upgrade prompt on the Sync screen",
           ],
           fixed: ["Fixed a task title input bug on the Today, Upcoming, and Tag screens"],
         },
@@ -47,6 +51,8 @@ const changelogData: ChangelogEntry[] = [
             "Smoother animations when picking a date or time for a task",
             "Cleaner text, spacing, and checkbox styling throughout the app",
             "More reliable saving for tags, recurring tasks, and settings",
+            "Your tasks are now stored in a faster, more dependable way in your browser — existing data carries over automatically",
+            "Sync is now part of the paid Sync plan, with a clear upgrade prompt on the Sync screen",
           ],
           fixed: ["Fixed promoting a task to a recurring task not always working", "Fixed a couple of recurring task display glitches"],
         },
