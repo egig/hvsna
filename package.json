@@ -2,18 +2,10 @@
   "name": "hvsna",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
-    "dev:website": "npm run dev -w @hvsna/website",
-    "build:website": "npm run build -w @hvsna/website",
-    "typecheck:website": "npm run typecheck -w @hvsna/website",
-    "gen:icons": "node scripts/gen-icons.mjs",
-    "prepare": "husky || true"
+    "gen:icons": "node scripts/gen-icons.mjs"
   },
   "devDependencies": {
-    "husky": "^9.1.7",
     "svg2vectordrawable": "^2.9.1"
   }
 }

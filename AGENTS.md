@@ -2,14 +2,14 @@
 
 ## Working in this repository
 
-- Install JavaScript dependencies with `npm ci` from the repository root; npm workspaces use the root `package-lock.json`.
+- JavaScript tooling is only needed for `npm run gen:icons`; install with `npm ci` from the repository root.
 - Check `git status --short` before editing and preserve unrelated changes already in the working tree.
-- Validate website changes with `npm run typecheck:website` and `npm run build:website` (includes prerendering).
+- Website changes: edit the HTML under `docs/` directly and preview with `python3 -m http.server` (see Website below).
 - Read `android/CLAUDE.md` for Android build, test, and validation commands.
 
 ## Monorepo layout
 
-npm workspaces with one package: [packages/website/](packages/website/) (`@hvsna/website`) — the static marketing/docs site, served by GitHub Pages from the committed `docs/` folder. Root `package.json` only holds workspace config and delegates scripts; run everything from the repo root.
+The marketing/docs site is plain static HTML in [docs/](docs/), served by GitHub Pages from `main`'s `/docs` folder. There is no build step and no npm workspace.
 
 [android/](android/) is a native Android app (Kotlin, Jetpack Compose, ObjectBox) — offline-only (no sync/accounts). Not an npm workspace. Has its own `android/CLAUDE.md` with build/test commands (Gradle) and architecture notes — read that file before working in `android/`.
 
@@ -20,33 +20,32 @@ npm workspaces with one package: [packages/website/](packages/website/) (`@hvsna
 ## Commands
 
 ```sh
-npm run dev:website        # Vite dev server at http://localhost:5174 (@hvsna/website)
-npm run build:website      # client + SSR build, then prerenders every route to static HTML in the repo-root `docs/` (wiped on every build — never hand-edit it)
-npm run typecheck:website  # tsc (noEmit strict mode)
 npm run gen:icons          # regenerate Android icon drawables from icons/*.svg
 ```
 
-No lint and no test suite are configured for the website. Pre-commit hook (husky) runs `npm run test --workspaces --if-present`, which is currently a no-op.
+No lint, build or test suite is configured; there is no pre-commit hook.
 
-## Website (`packages/website/`)
+## Website (`docs/`)
 
-Separate Vite/React app for marketing pages + docs. Bilingual: English at `/`, `/about`, `/features`, `/download`, `/privacy`, `/terms`, `/changelog`; Indonesian mirrored under `/id/*` (see `src/routes.tsx`; `/changelog` is English-only). Docs live as MDX files in `src/content/docs/`, ordered by `meta.json`'s `pages` list and loaded via `import.meta.glob` in `src/pages/docs/registry.ts`, served under `/help`. Docs describe the Android app only and are kept in sync with `android/`; see repo-root `TODO.md` for features old docs described that aren't built.
+Hand-edited static HTML, committed and served as-is at `https://egig.github.io/hvsna/` (so every internal `href`/`src` starts with `/hvsna/`). It was previously generated from a Vite/React app (`packages/website`, removed — recover it from git history if ever needed).
 
-Static-generated, not SSR-served: `npm run build:website` builds the client bundle, then an SSR bundle (`src/entry-server.tsx`), then `scripts/prerender.mjs` renders every route (listed in `entry-server.tsx`'s `routes` array — add new routes there as well as in `src/routes.tsx`) to a static `index.html` under `docs/`. The prerender script also writes `404.html` (a copy of the home page) and `.nojekyll` for GitHub Pages. The client (`src/main.tsx`) deliberately does a fresh `createRoot` render rather than `hydrateRoot` — the prerendered HTML is for crawlers/social scrapers, not hydration, avoiding server/client mismatch bugs at the cost of a brief first-paint flash.
-
-Deploys by committing the build: run `npm run build:website` and commit `docs/` (GitHub Pages is set to deploy from `main`'s `/docs` folder; there is no CI workflow). The site is served at `https://egig.github.io/hvsna/`, so Vite's `base` is `/hvsna/` and the router uses a matching basename. Raw `<a href>`/`<img src>` paths must go through `withBase()` from `src/config.ts` (router `<Link>`s and MDX internal links get the basename automatically). If the site moves to a custom domain, change `base` and `SITE_URL`, and add `public/CNAME`. SEO head tags come from `src/seo/meta.ts`.
-
-Path alias `@/*` → `./src/*`.
+- English pages: `/`, `/about`, `/features`, `/download`, `/privacy`, `/terms`, `/changelog`, help under `/help/*`. Indonesian mirrors live under `docs/id/*` (`/changelog` and `/help` are English-only). Edit the `en` and `id` versions together.
+- Shared header/footer/SEO tags are duplicated in every page — a layout change means editing all of them (`grep -rl` + sed works).
+- Styling is one precompiled Tailwind file, `docs/assets/site.css`. It only contains classes that were in use when it was built, so new utility classes will not work; reuse existing classes or add plain CSS to the end of the file.
+- `docs/assets/site.js` is the only script (mobile menu, help sidebar dropdown, back-to-top). Pages work without it.
+- Help pages (`docs/help/*`) describe the Android app only and are kept in sync with `android/`; see repo-root `TODO.md` for features old docs described that aren't built.
+- `404.html` is a copy of the home page; `.nojekyll` must stay. On a custom domain, change the `/hvsna/` prefix everywhere, the canonical/og URLs, and add `docs/CNAME`.
+- `og-image.jpg` / `twitter-image.jpg` are referenced in `<meta>` tags but are not in `docs/` yet.
 
 ## Conventions
 
 - **TypeScript strict mode** with `verbatimModuleSyntax: true` — use `import type` for type-only imports
 - **Hijri months are 1-indexed** (not 0-based)
-- Website copy is bilingual: change the `en` and `id` versions together
+- Website copy is bilingual: change the `en` and `id` pages together
 - Legal pages (`privacy`, `terms`) describe an offline app with no accounts or payments; the Android app's only network use is Firebase Crashlytics — update them if that changes
 
 ## Key files
 
-- `packages/website/src/routes.tsx` — website route table; `packages/website/src/entry-server.tsx` — prerender route list; `packages/website/src/content/docs/` — MDX docs content
+- `docs/` — the entire website (static HTML, `assets/site.css`, `assets/site.js`)
 - `android/CLAUDE.md` — native Android app (Compose + ObjectBox) build commands and architecture
 - `icons/README.md` — how the shared icon set works; `scripts/gen-icons.mjs` — the generator itself

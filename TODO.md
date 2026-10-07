@@ -2,7 +2,7 @@
 
 ## Features referenced by old help docs but not yet built
 
-The help docs (`packages/website/src/content/docs/`) and marketing pages used to
+The help docs (`docs/help/`) and marketing pages used to
 describe these. They've been removed from user-facing docs (2026-09-09) and
 parked here until implemented.
 
