@@ -10,7 +10,7 @@ export interface RouteMeta {
   hreflang?: { en: string; id: string };
 }
 
-const SITE_URL = "https://hvsna.com";
+import { SITE_URL } from "@/config";
 
 export const DEFAULT_META: RouteMeta = {
   title: "Hvsna - Organize Your Day Around Prayers",

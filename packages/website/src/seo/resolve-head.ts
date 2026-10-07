@@ -1,3 +1,4 @@
+import { SITE_URL } from "@/config";
 import { getRouteMeta, type RouteMeta } from "./meta";
 import { getDocPage } from "@/pages/docs/registry";
 
@@ -33,8 +34,8 @@ export function metaToHeadHtml(meta: RouteMeta): string {
     `<meta name="twitter:card" content="summary_large_image" />`,
     meta.twitterImage ? `<meta name="twitter:image" content="${esc(meta.twitterImage)}" />` : "",
     `<link rel="canonical" href="${esc(meta.canonical)}" />`,
-    meta.hreflang ? `<link rel="alternate" hreflang="en" href="https://hvsna.com${esc(meta.hreflang.en)}" />` : "",
-    meta.hreflang ? `<link rel="alternate" hreflang="id" href="https://hvsna.com${esc(meta.hreflang.id)}" />` : "",
+    meta.hreflang ? `<link rel="alternate" hreflang="en" href="${SITE_URL}${esc(meta.hreflang.en)}" />` : "",
+    meta.hreflang ? `<link rel="alternate" hreflang="id" href="${SITE_URL}${esc(meta.hreflang.id)}" />` : "",
   ].filter(Boolean);
   return tags.join("\n    ");
 }

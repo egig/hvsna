@@ -1,5 +1,5 @@
 import { ArrowUp, Mail, Camera } from "lucide-react";
-import { SUPPORT_EMAIL } from "@/config";
+import { SUPPORT_EMAIL, withBase } from "@/config";
 
 export default function Footer({ currentLang = "en" }: { currentLang?: string }) {
   const content = {
@@ -70,7 +70,7 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
           {/* Brand */}
           <div className="col-span-2 sm:col-span-4">
             <div className="flex items-center space-x-2 mb-4">
-              <img src="/icon-192.png" alt="Hvsna logo" width={32} height={32} className="rounded-lg" />
+              <img src={withBase("/icon-192.png")} alt="Hvsna logo" width={32} height={32} className="rounded-lg" />
               <span className="text-xl font-bold">Hvsna</span>
             </div>
             <p className="text-sm mb-4">{t.description}</p>
@@ -90,7 +90,7 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
             <ul className="space-y-2">
               {t.quickLinks.links.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="hover:text-primary-400 transition-colors text-sm">
+                  <a href={withBase(link.href)} className="hover:text-primary-400 transition-colors text-sm">
                     {link.name}
                   </a>
                 </li>
@@ -104,7 +104,7 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
             <ul className="space-y-2">
               {t.legal.links.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="hover:text-primary-400 transition-colors text-sm">
+                  <a href={withBase(link.href)} className="hover:text-primary-400 transition-colors text-sm">
                     {link.name}
                   </a>
                 </li>

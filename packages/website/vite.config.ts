@@ -9,6 +9,12 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  base: "/hvsna/",
+  build: {
+    // GitHub Pages serves the committed build from the repo-root docs/ folder.
+    outDir: path.resolve(__dirname, "../../docs"),
+    emptyOutDir: true,
+  },
   server: {
     port: 5174,
   },

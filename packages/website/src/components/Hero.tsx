@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Download } from "lucide-react";
+import { withBase } from "@/config";
 
 export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
   const content = {
@@ -51,7 +52,7 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
           </div>
 
           <img
-            src="/images/hvsna-hero.webp"
+            src={withBase("/images/hvsna-hero.webp")}
             alt="Hvsna app showing today's prayer-anchored tasks"
             className="mx-auto w-full max-w-2xl rounded-xl"
           />

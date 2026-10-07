@@ -1,5 +1,5 @@
 import { Apple, Check } from "lucide-react";
-import { PLAY_STORE_URL } from "@/config";
+import { PLAY_STORE_URL, withBase } from "@/config";
 
 const content = {
   en: {
@@ -82,7 +82,7 @@ export default function Download({ currentLang = "en" }: { currentLang?: string 
               rel="noreferrer"
               className="inline-flex shrink-0 items-center self-start sm:self-center"
             >
-              <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt="Get it on Google Play" className="h-12 w-auto" />
+              <img src={withBase("/GetItOnGooglePlay_Badge_Web_color_English.svg")} alt="Get it on Google Play" className="h-12 w-auto" />
             </a>
           </div>
 
@@ -104,7 +104,7 @@ export default function Download({ currentLang = "en" }: { currentLang?: string 
 
         <p className="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
           {t.footnote}{" "}
-          <a href={t.footnoteHref} className="text-primary-600 dark:text-primary-400 underline hover:no-underline">
+          <a href={withBase(t.footnoteHref)} className="text-primary-600 dark:text-primary-400 underline hover:no-underline">
             {t.footnoteLink}
           </a>
         </p>

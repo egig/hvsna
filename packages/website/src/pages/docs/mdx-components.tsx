@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
+import { Link } from "react-router";
 
 export const mdxComponents = {
   h1: (props: ComponentPropsWithoutRef<"h1">) => <h1 className="text-3xl font-bold text-gray-900 dark:text-white mt-10 mb-4" {...props} />,
@@ -20,7 +21,12 @@ export const mdxComponents = {
   ),
   input: (props: ComponentPropsWithoutRef<"input">) =>
     props.type === "checkbox" ? <input className="mt-1.5 accent-primary-600" disabled {...props} /> : <input {...props} />,
-  a: (props: ComponentPropsWithoutRef<"a">) => <a className="text-primary-600 dark:text-primary-400 underline hover:no-underline" {...props} />,
+  a: ({ href, ...props }: ComponentPropsWithoutRef<"a">) => {
+    const className = "text-primary-600 dark:text-primary-400 underline hover:no-underline";
+    // Internal links go through the router so the site's base path is applied.
+    if (href?.startsWith("/")) return <Link to={href} className={className} {...props} />;
+    return <a href={href} className={className} {...props} />;
+  },
   strong: (props: ComponentPropsWithoutRef<"strong">) => <strong className="text-gray-900 dark:text-white" {...props} />,
   code: (props: ComponentPropsWithoutRef<"code">) => (
     <code className="text-sm bg-gray-100 dark:bg-gray-800 text-primary-700 dark:text-primary-300 rounded px-1.5 py-0.5" {...props} />

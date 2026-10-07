@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router";
+import { SITE_URL } from "@/config";
 import { getRouteMeta, type RouteMeta } from "./meta";
 
 function upsertMeta(attr: "name" | "property", key: string, content: string | undefined) {
@@ -44,8 +45,8 @@ export function useSeo(override?: Partial<RouteMeta>) {
     if (meta.twitterImage) upsertMeta("name", "twitter:image", meta.twitterImage);
     upsertLink("canonical", meta.canonical);
     if (meta.hreflang) {
-      upsertLink("alternate", `https://hvsna.com${meta.hreflang.en}`, "en");
-      upsertLink("alternate", `https://hvsna.com${meta.hreflang.id}`, "id");
+      upsertLink("alternate", `${SITE_URL}${meta.hreflang.en}`, "en");
+      upsertLink("alternate", `${SITE_URL}${meta.hreflang.id}`, "id");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, override?.title, override?.description]);

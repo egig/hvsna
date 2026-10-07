@@ -4,8 +4,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const distDir = path.join(root, "dist");
-const serverDir = path.join(distDir, "server");
+const distDir = path.resolve(root, "../../docs");
+// The SSR bundle stays inside the workspace so its npm imports resolve; it is
+// removed after prerendering. The client build + pages go to the repo-root docs/.
+const serverDir = path.join(root, "dist/server");
 
 const template = readFileSync(path.join(distDir, "index.html"), "utf-8");
 const entryServerUrl = pathToFileURL(path.join(serverDir, "entry-server.js")).href;
@@ -23,6 +25,6 @@ for (const routePath of routes) {
 copyFileSync(path.join(distDir, "index.html"), path.join(distDir, "404.html"));
 writeFileSync(path.join(distDir, ".nojekyll"), "");
 
-rmSync(serverDir, { recursive: true, force: true });
+rmSync(path.join(root, "dist"), { recursive: true, force: true });
 
 console.log(`Prerendered ${routes.length} routes.`);

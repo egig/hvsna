@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { SUPPORT_EMAIL } from "@/config";
+import { SUPPORT_EMAIL, withBase } from "@/config";
 import { useSeo } from "@/seo/Seo";
 
 export default function TermsPage() {
@@ -65,7 +65,7 @@ export default function TermsPage() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">6. Privacy Policy</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
             6.1 Our{" "}
-            <a href="/privacy" className="text-primary-600 dark:text-primary-400 underline hover:no-underline">
+            <a href={withBase("/privacy")} className="text-primary-600 dark:text-primary-400 underline hover:no-underline">
               Privacy Policy
             </a>{" "}
             governs the collection, use, and disclosure of personal information provided by you. By using the App,

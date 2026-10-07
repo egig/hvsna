@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Menu, X, Globe, Download } from "lucide-react";
+import { withBase } from "@/config";
 
 export default function Header({ currentLang = "en", doc = false }: { currentLang?: string, doc?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,7 +38,7 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to={currentLang === "id" ? "/id" : "/"} className="flex items-center space-x-2 outline-none">
-            <img src="/icon-192.png" alt="Hvsna logo" width={32} height={32} className="rounded-lg" />
+            <img src={withBase("/icon-192.png")} alt="Hvsna logo" width={32} height={32} className="rounded-lg" />
             <span className="text-xl font-bold text-gray-900 dark:text-white">Hvsna</span>
             <span className="text-[10px] font-semibold uppercase tracking-wide bg-primary-500 text-white px-1.5 py-0.5 rounded-full">Beta</span>
           </Link>

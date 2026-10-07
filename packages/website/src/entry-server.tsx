@@ -1,6 +1,7 @@
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router";
 import App from "@/app";
+import { BASENAME } from "@/config";
 import { resolveMetaForPath, metaToHeadHtml } from "@/seo/resolve-head";
 import { docsPages } from "@/pages/docs/registry";
 
@@ -27,7 +28,7 @@ export const routes: string[] = [
 
 export function render(url: string): { html: string; head: string } {
   const html = renderToString(
-    <StaticRouter location={url}>
+    <StaticRouter location={`${BASENAME}${url}`} basename={BASENAME}>
       <App />
     </StaticRouter>,
   );
