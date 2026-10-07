@@ -3,17 +3,14 @@
   "nav.upcoming": "Akan Datang",
   "nav.search": "Cari",
   "nav.more": "Lainnya",
-
   "common.back": "Kembali",
   "common.save": "Simpan",
   "common.delete": "Hapus",
   "common.cancel": "Batal",
   "common.undo": "Batal",
-
   "status.complete": "Selesai",
   "status.pending": "To Do",
   "task.statusChangedTo": "Status diubah menjadi %s",
-
   "a11y.settings": "Pengaturan",
   "a11y.clearSearch": "Hapus pencarian",
   "a11y.search": "Cari",
@@ -28,7 +25,6 @@
   "a11y.expand": "Perluas",
   "a11y.completeTaskSwipe": "Selesaikan tugas",
   "a11y.rescheduleTaskSwipe": "Jadwalkan ulang tugas",
-
   "unit.day": "Hari",
   "unit.days": "Hari",
   "unit.week": "Minggu",
@@ -45,7 +41,6 @@
   "unit.monthsLower": "bulan",
   "unit.yearLower": "tahun",
   "unit.yearsLower": "tahun",
-
   "hijriMonth.1": "Muharam",
   "hijriMonth.2": "Safar",
   "hijriMonth.3": "Rabiul Awal",
@@ -58,7 +53,6 @@
   "hijriMonth.10": "Syawal",
   "hijriMonth.11": "Zulkaidah",
   "hijriMonth.12": "Zulhijah",
-
   "group.today": "Hari Ini",
   "group.tomorrow": "Besok",
   "group.thisWeek": "Minggu Ini",
@@ -67,12 +61,10 @@
   "group.upcoming": "Akan Datang",
   "group.unscheduled": "Tanpa Jadwal",
   "group.completed": "Selesai",
-
   "today.emptyTitle": "Tidak ada jadwal hari ini",
   "today.emptySubtitle": "Ketuk + untuk menambah tugas.",
   "today.noTasksUntilSunset": "Tidak ada tugas lagi hingga magrib",
   "today.noTasksUntilTomorrow": "Tidak ada tugas lagi hingga besok",
-
   "upcoming.title": "Akan Datang",
   "upcoming.tabScheduled": "Terjadwal",
   "upcoming.tabUnscheduled": "Tanpa Jadwal",
@@ -80,29 +72,23 @@
   "upcoming.emptyScheduledSubtitle": "Tugas yang Anda jadwalkan untuk masa depan akan muncul di sini.",
   "upcoming.emptyUnscheduledTitle": "Tidak ada tugas tanpa jadwal",
   "upcoming.emptyUnscheduledSubtitle": "Tugas tanpa tanggal akan muncul di sini.",
-
   "search.placeholder": "Cari tugas…",
   "search.emptyTitle": "Cari tugas Anda",
   "search.emptySubtitle": "Temukan tugas berdasarkan judul atau deskripsi.",
   "search.noResultsTitle": "Tidak ada tugas ditemukan",
   "search.noResultsSubtitle": "Coba kata kunci lain.",
-
   "browse.recurring": "Berulang",
   "browse.completed": "Selesai",
   "browse.tags": "Tag",
   "browse.noTags": "Belum ada tag. Tambahkan saat membuat atau mengubah tugas.",
-
   "completed.title": "Selesai",
   "completed.emptyTitle": "Belum ada tugas selesai",
-
   "recurring.title": "Berulang",
   "recurring.emptyTitle": "Belum ada tugas berulang",
   "recurring.emptySubtitle": "Aktifkan Ulangi pada tugas untuk melihatnya di sini.",
   "recurring.cadenceEvery": "setiap %s",
   "recurring.cadenceEveryN": "setiap %1$d %2$s",
-
   "tagDetail.emptyTitle": "Tidak ada tugas dengan tag ini",
-
   "task.titlePlaceholder": "Judul",
   "task.descriptionPlaceholder": "Deskripsi",
   "task.addTags": "Tambah tag",
@@ -134,19 +120,16 @@
   "task.recurringDelete.thisOnlyDesc": "Hanya hapus kejadian ini",
   "task.recurringDelete.all": "Hapus semua tugas berulang",
   "task.recurringDelete.allDesc": "Hapus semua kejadian yang tertunda dan hentikan pengulangan",
-
   "reschedule.title": "Jadwalkan Ulang",
   "reschedule.laterToday": "Nanti hari ini",
   "reschedule.tomorrow": "Besok",
   "reschedule.nextWeek": "Minggu depan",
   "reschedule.pickDateTime": "Pilih tanggal & waktu…",
-
   "reminderPreset.atTime": "Saat waktunya",
   "reminderPreset.min5": "5 menit sebelum",
   "reminderPreset.min15": "15 menit sebelum",
   "reminderPreset.hour1": "1 jam sebelum",
   "reminderPreset.day1": "1 hari sebelum",
-
   "tagEdit.title": "Ubah tag",
   "tagEdit.name": "Nama",
   "tagEdit.color": "Warna",
@@ -154,10 +137,7 @@
   "tagEdit.hexCode": "Kode Hex",
   "tagEdit.save": "Simpan",
   "tagEdit.delete": "Hapus",
-
   "settings.title": "Pengaturan",
-  "settings.account": "Akun",
-  "settings.sync": "Sinkronisasi",
   "settings.backup": "Cadangkan & Pulihkan",
   "settings.location": "Lokasi",
   "settings.prayerTime": "Waktu Salat",
@@ -166,24 +146,20 @@
   "settings.appearance": "Tampilan",
   "settings.language": "Bahasa",
   "settings.about": "Tentang",
-
   "appearance.title": "Tampilan",
   "appearance.system": "Sistem",
   "appearance.light": "Terang",
   "appearance.dark": "Gelap",
-
   "language.title": "Bahasa",
   "language.system": "Bawaan sistem",
   "language.english": "Inggris",
   "language.indonesian": "Indonesia",
-
   "about.title": "Tentang",
   "about.version": "Versi %s",
   "about.unknownVersion": "Tidak diketahui",
   "about.legal": "Hukum",
   "about.privacy": "Kebijakan Privasi",
   "about.terms": "Ketentuan Layanan",
-
   "backup.title": "Cadangkan & Pulihkan",
   "backup.description": "Ekspor tugas Anda ke sebuah file, atau pulihkan dari ekspor sebelumnya.",
   "backup.export": "Ekspor data",
@@ -199,24 +175,11 @@
   "backup.merge": "Gabung",
   "backup.replace": "Ganti",
   "backup.cancel": "Batal",
-
-  "sync.title": "Sinkronisasi",
-  "sync.signInPrompt": "Masuk untuk menyinkronkan tugas Anda di seluruh perangkat.",
-  "sync.verifyEmailPrompt": "Verifikasi email Anda untuk menyinkronkan tugas di seluruh perangkat.",
-  "sync.planRequiredPrompt": "Sinkronisasi antar perangkat termasuk dalam paket Sync berbayar. Tugas Anda tetap tersimpan di perangkat ini sampai Anda upgrade.",
-  "sync.viewPlan": "Lihat paket Sync",
-  "sync.lastSynced": "Terakhir disinkronkan %s",
-  "sync.notSyncedYet": "Belum disinkronkan",
-  "sync.syncNow": "Sinkronkan sekarang",
-  "sync.syncing": "Menyinkronkan…",
-  "sync.autoSyncNote": "Menyinkronkan otomatis saat Anda membuat perubahan, saat masuk, terhubung kembali, atau menarik untuk menyegarkan, dan setiap 15 menit di latar belakang.",
-
   "location.title": "Lokasi",
   "location.notSet": "Lokasi belum diatur",
   "location.detecting": "Mendeteksi…",
   "location.useGps": "Gunakan GPS",
   "location.searchCity": "Cari kota",
-
   "prayerTime.title": "Waktu Salat",
   "prayerTime.calculationMethod": "Metode Perhitungan",
   "prayerTime.madhab": "Mazhab (perhitungan Asar)",
@@ -241,38 +204,15 @@
   "prayer.Asr": "Asar",
   "prayer.Maghrib": "Magrib",
   "prayer.Isha": "Isya",
-
   "hijri.title": "Tanggal Hijriah",
   "hijri.description": "Geser tanggal Hijriah yang ditampilkan per bulan jika tidak sesuai dengan rukyat hilal setempat.",
   "hijri.today": "Hari Ini",
   "hijri.withOffset": "Dengan penyesuaian",
   "hijri.gapWarning": "Penyesuaian melonjak lebih dari satu hari dari %1$s ke %2$s — pergeseran rukyat hilal biasanya bertahap dari bulan ke bulan.",
-
   "reminders.title": "Pengingat",
   "reminders.description": "Dapatkan notifikasi sebelum tugas terjadwal jatuh tempo",
   "reminders.permissionRequired": "Izin notifikasi diperlukan untuk pengingat",
   "reminders.permissionRevoked": "Izin pengingat dicabut",
-
-  "auth.account": "Akun",
-  "auth.signOut": "Keluar",
-  "auth.reconnecting": "Menghubungkan kembali untuk memeriksa sesi Anda…",
-  "auth.retryNow": "Coba lagi sekarang",
-  "auth.logoutSecurity": "Anda dikeluarkan demi keamanan — silakan masuk lagi.",
-  "auth.logoutExpired": "Sesi Anda telah berakhir — silakan masuk lagi.",
-  "auth.signInPrompt": "Masuk untuk menyinkronkan tugas Anda di seluruh perangkat.",
-  "auth.firstName": "Nama depan",
-  "auth.lastName": "Nama belakang",
-  "auth.email": "Email",
-  "auth.password": "Kata sandi",
-  "auth.createAccount": "Buat akun",
-  "auth.signIn": "Masuk",
-  "auth.toggleToSignIn": "Sudah punya akun? Masuk",
-  "auth.toggleToSignUp": "Butuh akun? Daftar",
-  "auth.invalidEmail": "Masukkan alamat email yang valid",
-  "auth.passwordTooShort": "Kata sandi minimal %d karakter",
-  "auth.genericError": "Terjadi kesalahan",
-  "auth.networkError": "Tidak dapat menghubungi server. Periksa koneksi Anda dan coba lagi.",
-
   "notification.channelName": "Pengingat tugas",
   "notification.markDone": "Tandai Selesai"
 }

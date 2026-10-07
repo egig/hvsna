@@ -22,20 +22,4 @@ class SettingsStore(boxStore: BoxStore) {
 
     suspend fun findByKey(key: String): SettingsEntry? =
         box.query().equal(SettingsEntry_.key, key, StringOrder.CASE_SENSITIVE).build().use { it.findUnique() }
-
-    /** LWW-guarded apply — see TaskStore's applyIncomingTask doc comment for why this isn't a single write. */
-    suspend fun applyIncoming(incoming: SettingsEntry): Boolean {
-        val existing = findByKey(incoming.key)
-        if (existing != null && existing.updatedAt >= incoming.updatedAt) return false
-        upsert(incoming.copy(_dirty = 0))
-        return true
-    }
-
-    suspend fun findDirty(limit: Int): List<SettingsEntry> =
-        box.query().equal(SettingsEntry_._dirty, 1).build().use { it.find() }.take(limit)
-
-    suspend fun clearDirty(keys: List<String>) {
-        val rows = keys.mapNotNull { findByKey(it) }.map { it.copy(_dirty = 0) }
-        box.put(rows)
-    }
 }

@@ -63,7 +63,7 @@ export default function About() {
               </svg>
             </button>
             <button
-              onClick={() => window.open("https://hvsna.com/privacy", "_blank")}
+              onClick={() => window.open("https://www.recraftory.com/privacy", "_blank")}
               className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <span className="text-gray-900 dark:text-gray-100">
@@ -84,7 +84,7 @@ export default function About() {
               </svg>
             </button>
             <button
-              onClick={() => window.open("https://hvsna.com/terms", "_blank")}
+              onClick={() => window.open("https://www.recraftory.com/terms", "_blank")}
               className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               <span className="text-gray-900 dark:text-gray-100">

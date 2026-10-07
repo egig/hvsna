@@ -226,7 +226,7 @@ private fun Modifier.pagerSwipeHandle(pagerState: PagerState): Modifier {
     )
 }
 
-/** Rendered outside [UpcomingScreen]'s own Scaffold (see MainActivity's SyncPullToRefreshBox) so
+/** Rendered outside [UpcomingScreen]'s own Scaffold so
  * the FAB stays pinned in place rather than stretching along with pull-to-refresh. */
 @Composable
 fun UpcomingScreenFab(onEditTask: (TaskWithTags?, Long?) -> Unit) {

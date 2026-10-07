@@ -31,8 +31,8 @@ android {
         minSdk = 24
         targetSdk = 36
         // Must stay above the live Play Console versionCode, not just this repo's Capacitor build.gradle (13) — verify before release.
-        versionCode = 17
-        versionName = "2.3.0"
+        versionCode = 18
+        versionName = "2.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -49,10 +49,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            // 10.0.2.2 is the emulator's alias for the host machine — pairs with `npm run dev:api` on localhost:3000.
-            buildConfigField("String", "API_BASE_URL", "\"https://api.hvsna.com\"")
-        }
         release {
             if (keystorePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
@@ -60,9 +56,6 @@ android {
             optimization {
                 enable = false
             }
-            // Override via -PhvsnaApiUrl=... or gradle.properties until packages/api has a real production URL.
-            val apiUrl = (project.findProperty("hvsnaApiUrl") as String?) ?: "https://api.hvsna.com"
-            buildConfigField("String", "API_BASE_URL", "\"$apiUrl\"")
         }
     }
     compileOptions {
@@ -94,10 +87,7 @@ dependencies {
     implementation(libs.objectbox.kotlin)
     implementation(libs.adhan.kotlin)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.okhttp)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.tink.android)
-    implementation(libs.androidx.work.runtime.ktx)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

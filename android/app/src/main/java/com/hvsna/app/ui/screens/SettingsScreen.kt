@@ -29,15 +29,13 @@ import androidx.compose.ui.unit.dp
 import com.hvsna.app.backup.BackupFileService
 import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.SettingsRepository
-import com.hvsna.app.sync.SyncManager
-import com.hvsna.app.ui.AuthViewModel
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
 
 private enum class SettingsSubScreen {
-    NONE, LOGIN, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, LANGUAGE, ABOUT
+    NONE, BACKUP, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, LANGUAGE, ABOUT
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,8 +44,6 @@ fun SettingsScreen(
     settingsRepository: SettingsRepository,
     locationRepository: LocationRepository,
     backupFileService: BackupFileService,
-    authViewModel: AuthViewModel,
-    syncManager: SyncManager,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -55,16 +51,8 @@ fun SettingsScreen(
     var subScreen by remember { mutableStateOf(SettingsSubScreen.NONE) }
 
     when (subScreen) {
-        SettingsSubScreen.LOGIN -> {
-            SettingsLoginScreen(viewModel = authViewModel, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
-            return
-        }
         SettingsSubScreen.BACKUP -> {
             SettingsBackupScreen(backupFileService = backupFileService, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
-            return
-        }
-        SettingsSubScreen.SYNC -> {
-            SettingsSyncScreen(syncManager = syncManager, authViewModel = authViewModel, settingsRepository = settingsRepository, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
         SettingsSubScreen.LOCATION -> {
@@ -132,16 +120,6 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
-            ListItem(
-                headlineContent = { Text(strings["settings.account"]) },
-                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_user), contentDescription = null) },
-                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.LOGIN },
-            )
-            ListItem(
-                headlineContent = { Text(strings["settings.sync"]) },
-                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud), contentDescription = null) },
-                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.SYNC },
-            )
             ListItem(
                 headlineContent = { Text(strings["settings.backup"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud_upload), contentDescription = null) },

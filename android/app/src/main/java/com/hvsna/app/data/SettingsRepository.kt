@@ -33,7 +33,7 @@ private fun languageFromPrefs(prefs: Preferences): AppLanguage =
 /**
  * Reads just the theme mode, independent of [SettingsRepository] — used by
  * [com.hvsna.app.MainActivity] to pick the color scheme before the rest of
- * the app's dependency graph (ObjectBox stores, sync engine, etc.) is constructed.
+ * the app's dependency graph (ObjectBox stores, etc.) is constructed.
  */
 fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore.data.map(::themeModeFromPrefs)
 
@@ -45,19 +45,12 @@ fun themeModeFlow(context: Context): Flow<ThemeMode> = context.settingsDataStore
 fun languageFlow(context: Context): Flow<AppLanguage> = context.settingsDataStore.data.map(::languageFromPrefs)
 
 /**
- * `location`/`calculationMethod`/`madhab`/`hijriMonthOffsets` live in
- * ObjectBox as a key-value entity (see [SettingsEntry]) so they can flow through sync —
- * `location` and `hijriMonthOffsets` have web counterparts (shaped to match
- * packages/app/src/modules/settings/settings.ts's `LocationSetting` and
- * `GeneralSettings.hijriMonthOffsets` exactly), `calculationMethod`/`madhab`
- * are Android-only and excluded from push/pull (see the sync module's
- * exclusion set). remindersEnabled/themeMode/language stay in DataStore —
- * they're device-local preferences, not something that should sync.
+ * `location`/`calculationMethod`/`madhab`/`hijriMonthOffsets` live in ObjectBox as a
+ * key-value entity (see [SettingsEntry]); remindersEnabled/themeMode/language stay in DataStore.
  */
-                                    class SettingsRepository(
+class SettingsRepository(
     private val context: Context,
     private val settingsDao: SettingsStore,
-    private val onDataChanged: () -> Unit = {},
 ) {
 
     val settings: Flow<AppSettings> = combine(settingsDao.observeAll(), context.settingsDataStore.data) { rows, prefs ->
@@ -85,17 +78,14 @@ fun languageFlow(context: Context): Flow<AppLanguage> = context.settingsDataStor
         val now = System.currentTimeMillis()
         val value = LocationSettingValue(source = "manual", resolvedAt = now, lat = lat, lng = lng, name = cityName)
         settingsDao.upsert(SettingsEntry(SettingsKeys.LOCATION, settingsJson.encodeToString(value), now))
-        onDataChanged()
     }
 
     suspend fun updateCalculationMethod(method: String) {
         settingsDao.upsert(SettingsEntry(SettingsKeys.CALCULATION_METHOD, method, System.currentTimeMillis()))
-        onDataChanged()
     }
 
     suspend fun updateMadhab(madhab: String) {
         settingsDao.upsert(SettingsEntry(SettingsKeys.MADHAB, madhab, System.currentTimeMillis()))
-        onDataChanged()
     }
 
     suspend fun updateHijriMonthOffsets(offsets: Map<Int, Int>) {
@@ -103,7 +93,6 @@ fun languageFlow(context: Context): Flow<AppLanguage> = context.settingsDataStor
         settingsDao.upsert(
             SettingsEntry(SettingsKeys.HIJRI_MONTH_OFFSETS, settingsJson.encodeToString(cleaned), System.currentTimeMillis()),
         )
-        onDataChanged()
     }
 
     suspend fun updateRemindersEnabled(enabled: Boolean) {

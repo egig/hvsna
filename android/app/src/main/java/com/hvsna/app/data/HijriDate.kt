@@ -89,7 +89,7 @@ fun hijriDateLabel(
 }
 
 /**
- * Paired Gregorian/Hijri label used on task rows, the sync screen, and the due-date picker's
+ * Paired Gregorian/Hijri label used on task rows, and the due-date picker's
  * selected-date field, e.g. "15 Sep / 24 Rabi II" (English) or "15 Sep / 24 Rabiul Akhir"
  * (Indonesian). The Gregorian side always uses a 3-letter month abbreviation ("Sep") for this
  * format specifically (never the 4-letter/full name some surfaces otherwise use);

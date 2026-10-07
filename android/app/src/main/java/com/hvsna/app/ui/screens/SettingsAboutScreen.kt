@@ -94,13 +94,13 @@ fun SettingsAboutScreen(
                 ListItem(
                     headlineContent = { Text(strings["about.privacy"]) },
                     modifier = Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.hvsna.com/privacy")))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.recraftory.com/privacy")))
                     },
                 )
                 ListItem(
                     headlineContent = { Text(strings["about.terms"]) },
                     modifier = Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.hvsna.com/terms")))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.recraftory.com/terms")))
                     },
                 )
             }

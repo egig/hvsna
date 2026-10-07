@@ -172,32 +172,6 @@
       "relations": []
     },
     {
-      "id": "3:2173225228016156748",
-      "lastPropertyId": "3:2820235681560509588",
-      "name": "SyncStateEntry",
-      "properties": [
-        {
-          "id": "1:4287670901936290901",
-          "name": "key",
-          "indexId": "3:1729984087169291223",
-          "type": 9,
-          "flags": 2080
-        },
-        {
-          "id": "2:206302711397300563",
-          "name": "value",
-          "type": 9
-        },
-        {
-          "id": "3:2820235681560509588",
-          "name": "boxId",
-          "type": 6,
-          "flags": 1
-        }
-      ],
-      "relations": []
-    },
-    {
       "id": "4:7547822092392517445",
       "lastPropertyId": "8:5327639006901608879",
       "name": "Tag",
@@ -379,9 +353,17 @@
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [],
-  "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredEntityUids": [
+    2173225228016156748
+  ],
+  "retiredIndexUids": [
+    1729984087169291223
+  ],
+  "retiredPropertyUids": [
+    4287670901936290901,
+    206302711397300563,
+    2820235681560509588
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

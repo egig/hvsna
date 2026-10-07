@@ -52,21 +52,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.coroutines.flow.collectLatest
-import com.hvsna.app.auth.ApiException
-import com.hvsna.app.auth.AuthApi
-import com.hvsna.app.auth.AuthService
-import com.hvsna.app.auth.SessionRepository
-import com.hvsna.app.auth.TokenStore
-import com.hvsna.app.auth.canSync
-import com.hvsna.app.auth.isSyncPlanRequired
 import com.hvsna.app.backup.BackupFileService
+import com.hvsna.app.data.LegacyAccountCleanup
 import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.ObjectBoxStore
 import com.hvsna.app.data.PrayerTimesRepository
 import com.hvsna.app.data.RecurrenceManager
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.SettingsStore
-import com.hvsna.app.data.SyncStateStore
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 import com.hvsna.app.data.TaskRepository
@@ -80,15 +73,6 @@ import com.hvsna.app.data.themeModeFlow
 import com.hvsna.app.i18n.LocalStrings
 import com.hvsna.app.i18n.Translations
 import com.hvsna.app.reminder.ReminderScheduler
-import com.hvsna.app.sync.CursorStore
-import com.hvsna.app.sync.SyncApi
-import com.hvsna.app.sync.SyncEngine
-import com.hvsna.app.sync.SyncManager
-import com.hvsna.app.sync.SyncRepository
-import com.hvsna.app.sync.SyncWorker
-import com.hvsna.app.sync.isOnline
-import com.hvsna.app.sync.networkReconnectEvents
-import com.hvsna.app.ui.AuthViewModel
 import com.hvsna.app.ui.PendingRecurringEdit
 import com.hvsna.app.ui.RecurringScope
 import com.hvsna.app.ui.TaskViewModel
@@ -107,13 +91,13 @@ import com.hvsna.app.ui.screens.TodayScreenFab
 import com.hvsna.app.ui.screens.UpcomingScreen
 import com.hvsna.app.ui.screens.UpcomingScreenFab
 import com.hvsna.app.ui.theme.HvsnaTheme
-import okhttp3.OkHttpClient
 import androidx.compose.ui.res.vectorResource
 import java.util.Calendar
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        LegacyAccountCleanup.runIfNeeded(this)
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         enableEdgeToEdge()
         setContent {
@@ -151,70 +135,20 @@ fun HvsnaApp() {
     val rescheduleSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val context = LocalContext.current
-    val okHttpClient = remember { OkHttpClient() }
     val boxStore = remember { ObjectBoxStore.getInstance(context) }
 
-    val tokenStore = remember { TokenStore() }
-    val authService = remember {
-        AuthService(AuthApi(okHttpClient), tokenStore, SessionRepository(context))
-    }
-    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.Factory(authService, context))
-    val authState by authViewModel.state.collectAsState()
-    val canSync = authState.user?.canSync == true
-
-    val syncCoroutineScope = rememberCoroutineScope()
-    val syncEngine = remember {
-        SyncEngine(
-            SyncRepository(TaskStore(boxStore), SettingsStore(boxStore)),
-            SyncApi(okHttpClient, authService, tokenStore),
-            CursorStore(SyncStateStore(boxStore)),
-        )
-    }
-    val syncManager = remember {
-        SyncManager(
-            fullSync = syncEngine::fullSync,
-            canSync = { authService.isAuthenticated() && authViewModel.state.value.user?.canSync == true },
-            scope = syncCoroutineScope,
-            isOnline = { isOnline(context) },
-            // The plan lapsed since /me was last read — refresh so canSync flips off.
-            onSyncError = { if (it is ApiException && it.isSyncPlanRequired) authViewModel.refreshUser() },
-        )
-    }
-
-    val taskRepo = remember { TaskRepository(TaskStore(boxStore), context, onDataChanged = syncManager::notifyWrite) }
+    val taskRepo = remember { TaskRepository(TaskStore(boxStore), context) }
     val backupFileService = remember(taskRepo) { BackupFileService(taskRepo, context) }
     val settingsRepo = remember {
-        SettingsRepository(context, SettingsStore(boxStore), onDataChanged = syncManager::notifyWrite)
+        SettingsRepository(context, SettingsStore(boxStore))
     }
-    val locationRepo = remember { LocationRepository(context, okHttpClient) }
+    val locationRepo = remember { LocationRepository(context) }
     val prayerTimesRepo = remember { PrayerTimesRepository() }
     val reminderScheduler = remember { ReminderScheduler(context) }
     val recurrenceManager = remember { RecurrenceManager(taskRepo, prayerTimesRepo, reminderScheduler) }
     val taskViewModel: TaskViewModel = viewModel(
         factory = TaskViewModel.Factory(taskRepo, settingsRepo, prayerTimesRepo, recurrenceManager, reminderScheduler)
     )
-
-    // Sign-in / app-foreground trigger, plus WorkManager (de)scheduling on auth transitions.
-    // Only descheduling on a *confirmed* logout, not while merely reconnecting — otherwise
-    // opening the app offline would deschedule background sync entirely until some other
-    // trigger (e.g. a fresh sign-in) re-schedules it.
-    LaunchedEffect(authState.user != null) {
-        if (authState.user != null) {
-            SyncWorker.schedule(context)
-        } else if (!authState.loading && !authState.reconnecting) {
-            SyncWorker.cancel(context)
-        }
-    }
-    // Sign-in / email-verified / plan-activated trigger: fires whenever syncing becomes possible.
-    LaunchedEffect(canSync) {
-        if (canSync) syncManager.requestSync()
-    }
-    // Reconnect trigger.
-    LaunchedEffect(Unit) {
-        networkReconnectEvents(context).collect {
-            if (authService.isAuthenticated()) syncManager.requestSync()
-        }
-    }
 
     val allTags by taskViewModel.allTags.collectAsState()
     val allRecurrenceRules by taskViewModel.allRecurrenceRules.collectAsState()
@@ -306,30 +240,22 @@ fun HvsnaApp() {
     ) {
         NavHost(navController = navController, startDestination = AppRoute.Today) {
             composable<AppRoute.Today> {
-                SyncPullToRefreshBox(
-                    syncManager = syncManager,
-                    canSync = canSync,
-                    floatingActionButton = { TodayScreenFab(onEditTask = onEditTask) },
-                ) {
+                ScreenWithFab(floatingActionButton = { TodayScreenFab(onEditTask = onEditTask) }) {
                     TodayScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask, onReschedule = onReschedule)
                 }
             }
             composable<AppRoute.Upcoming> {
-                SyncPullToRefreshBox(
-                    syncManager = syncManager,
-                    canSync = canSync,
-                    floatingActionButton = { UpcomingScreenFab(onEditTask = onEditTask) },
-                ) {
+                ScreenWithFab(floatingActionButton = { UpcomingScreenFab(onEditTask = onEditTask) }) {
                     UpcomingScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask, onReschedule = onReschedule)
                 }
             }
             composable<AppRoute.Search> {
-                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                ScreenWithFab {
                     SearchScreen(taskViewModel, onTagClick = onTagClick, onEditTask = onEditTask, onReschedule = onReschedule)
                 }
             }
             composable<AppRoute.Browse> {
-                SyncPullToRefreshBox(syncManager = syncManager, canSync = canSync) {
+                ScreenWithFab {
                     BrowseScreen(
                         taskViewModel,
                         onOpenSettings = { navController.navigate(AppRoute.Settings) },
@@ -343,11 +269,7 @@ fun HvsnaApp() {
                 val route: AppRoute.TagDetail = backStackEntry.toRoute()
                 val tag = allTags.firstOrNull { it.id == route.tagId }
                 if (tag != null) {
-                    SyncPullToRefreshBox(
-                        syncManager = syncManager,
-                        canSync = canSync,
-                        floatingActionButton = { TagDetailScreenFab(onAddTaskWithTag = { onAddTaskWithTag(tag.id) }) },
-                    ) {
+                    ScreenWithFab(floatingActionButton = { TagDetailScreenFab(onAddTaskWithTag = { onAddTaskWithTag(tag.id) }) }) {
                         TagDetailScreen(
                             viewModel = taskViewModel,
                             tag = tag,
@@ -367,8 +289,6 @@ fun HvsnaApp() {
                     settingsRepository = settingsRepo,
                     locationRepository = locationRepo,
                     backupFileService = backupFileService,
-                    authViewModel = authViewModel,
-                    syncManager = syncManager,
                     onBack = { navController.popBackStack() },
                 )
             }
@@ -489,52 +409,16 @@ fun HvsnaApp() {
 }
 
 /**
- * Single, shared pull-to-refresh wrapper for every top-level screen — wraps
- * a whole screen (including its own Scaffold/TopAppBar), not just its list
- * content. Wrapping only the content area (inside a screen's own innerPadding)
- * squeezes the indicator into the gap right below a fixed/collapsed app bar,
- * where it has no headroom to animate into and gets clipped by the bar's own
- * (higher z-order) background — wrapping the full screen gives the indicator
- * the whole screen's headroom instead, and centralizes the isRefreshing/
- * onRefresh wiring to one place rather than duplicating it per screen.
+ * Wraps a whole screen (including its own Scaffold/TopAppBar) and pins its floating action
+ * button over it. The FAB is a sibling of the content rather than part of it, so it stays put.
  */
-private val StretchMaxOffset = 28.dp
-private const val StretchScaleAmount = 0.025f
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SyncPullToRefreshBox(
-    syncManager: SyncManager,
-    canSync: Boolean,
+private fun ScreenWithFab(
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val isManualSyncing by syncManager.isManualSyncing.collectAsState()
-    val pullState = rememberPullToRefreshState()
-    PullToRefreshBox(
-        isRefreshing = isManualSyncing,
-        onRefresh = { if (canSync) syncManager.requestSync(manual = true) },
-        state = pullState,
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    // Rubber-band "stretch" while pulling — the page eases down and
-                    // stretches slightly instead of staying rigid under the indicator,
-                    // snapping back once the pull ends (distanceFraction animates to 0).
-                    val stretch = pullState.distanceFraction.coerceIn(0f, 1f)
-                    translationY = stretch * StretchMaxOffset.toPx()
-                    scaleY = 1f + stretch * StretchScaleAmount
-                    transformOrigin = TransformOrigin(0.5f, 0f)
-                }
-        ) {
-            content()
-        }
-        // Rendered as a sibling of the stretched Box above (not inside it) so the FAB stays
-        // pinned in place — genuinely "floating" — instead of dragging/stretching along with
-        // the rest of the screen while the user pulls to refresh.
+    Box(modifier = Modifier.fillMaxSize()) {
+        content()
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)

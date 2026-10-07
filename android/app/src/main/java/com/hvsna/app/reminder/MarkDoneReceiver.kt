@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import com.hvsna.app.data.ObjectBoxStore
 import com.hvsna.app.data.TaskStore
-import com.hvsna.app.sync.SyncWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,8 +20,7 @@ class MarkDoneReceiver : BroadcastReceiver() {
                 val task = dao.getTaskById(taskId)
                 if (task != null && task.isDone == 0) {
                     val now = System.currentTimeMillis()
-                    dao.update(task.copy(isDone = 1, completedTime = now, updatedAt = now, _dirty = 1))
-                    SyncWorker.enqueueOnce(context)
+                    dao.update(task.copy(isDone = 1, completedTime = now, updatedAt = now))
                 }
                 ReminderNotifications.cancel(context, taskId)
             } finally {

@@ -46,7 +46,6 @@ object RoomToObjectBoxImporter {
             importTaskTagCrossRefs(db, store, tagIdByUuid)
             importRecurrenceRuleTagCrossRefs(db, store, ruleIdByUuid)
             importSettings(db, store)
-            importSyncState(db, store)
         }
     }
 
@@ -192,20 +191,6 @@ object RoomToObjectBoxImporter {
                         value = c.getString(c.getColumnIndexOrThrow("value")),
                         updatedAt = c.getLong(c.getColumnIndexOrThrow("updatedAt")),
                         _dirty = c.getInt(c.getColumnIndexOrThrow("_dirty")),
-                    ),
-                )
-            }
-        }
-    }
-
-    private fun importSyncState(db: SQLiteDatabase, store: BoxStore) {
-        val box = store.boxFor(SyncStateEntry::class.java)
-        db.rawQuery("SELECT `key`, `value` FROM _sync_state", null).use { c ->
-            while (c.moveToNext()) {
-                box.put(
-                    SyncStateEntry(
-                        key = c.getString(c.getColumnIndexOrThrow("key")),
-                        value = c.getString(c.getColumnIndexOrThrow("value")),
                     ),
                 )
             }

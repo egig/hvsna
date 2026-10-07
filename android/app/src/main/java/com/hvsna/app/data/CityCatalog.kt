@@ -1,0 +1,178 @@
+package com.hvsna.app.data
+
+/**
+ * Bundled city list for the location picker — the app has no network-backed geocoding, so
+ * city search is a case-insensitive substring match over this table. Seeded from the web
+ * app's `TIMEZONE_COORDINATES` (packages/app/src/config.ts) plus Indonesian and
+ * Muslim-majority cities. Coordinates are city-centre approximations (fine for prayer times).
+ */
+object CityCatalog {
+    val cities: List<CityResult> = listOf(
+        CityResult("Abidjan", 5.36, -4.0083),
+        CityResult("Abu Dhabi, UAE", 24.4539, 54.3773),
+        CityResult("Accra", 5.556, -0.1969),
+        CityResult("Addis Ababa", 9.025, 38.7469),
+        CityResult("Aden", 12.7855, 45.0187),
+        CityResult("Alexandria, Egypt", 31.2001, 29.9187),
+        CityResult("Algiers", 36.7372, 3.0865),
+        CityResult("Almaty", 43.222, 76.8512),
+        CityResult("Ambon, Indonesia", -3.6954, 128.1814),
+        CityResult("Amman", 31.9539, 35.9106),
+        CityResult("Amsterdam", 52.3676, 4.9041),
+        CityResult("Anchorage", 61.2181, -149.9003),
+        CityResult("Ankara, Turkey", 39.9334, 32.8597),
+        CityResult("Ashgabat", 37.9601, 58.3261),
+        CityResult("Athens", 37.9838, 23.7275),
+        CityResult("Auckland", -36.8509, 174.7645),
+        CityResult("Baghdad", 33.3152, 44.3661),
+        CityResult("Bahrain", 26.0667, 50.5577),
+        CityResult("Baku", 40.4093, 49.8671),
+        CityResult("Balikpapan, Indonesia", -1.2379, 116.8529),
+        CityResult("Banda Aceh, Indonesia", 5.5483, 95.3238),
+        CityResult("Bandar Lampung, Indonesia", -5.4295, 105.261),
+        CityResult("Bandar Seri Begawan, Brunei", 4.9031, 114.9398),
+        CityResult("Bandung, Indonesia", -6.9175, 107.6191),
+        CityResult("Bangkok", 13.7563, 100.5018),
+        CityResult("Banjarmasin, Indonesia", -3.3194, 114.5908),
+        CityResult("Batam, Indonesia", 1.0456, 104.0305),
+        CityResult("Beirut", 33.8938, 35.5018),
+        CityResult("Bekasi, Indonesia", -6.2383, 106.9756),
+        CityResult("Belgrade", 44.8176, 20.4569),
+        CityResult("Berlin", 52.52, 13.405),
+        CityResult("Bishkek", 42.8746, 74.5698),
+        CityResult("Bogor, Indonesia", -6.5971, 106.806),
+        CityResult("Bogota", 4.711, -74.0721),
+        CityResult("Brussels", 50.8503, 4.3517),
+        CityResult("Bucharest", 44.4268, 26.1025),
+        CityResult("Budapest", 47.4979, 19.0402),
+        CityResult("Buenos Aires", -34.6037, -58.3816),
+        CityResult("Cairo", 30.0444, 31.2357),
+        CityResult("Casablanca", 33.5731, -7.5898),
+        CityResult("Chicago", 41.8781, -87.6298),
+        CityResult("Cirebon, Indonesia", -6.7063, 108.557),
+        CityResult("Colombo", 6.9271, 79.8612),
+        CityResult("Copenhagen", 55.6761, 12.5683),
+        CityResult("Damascus", 33.5138, 36.2765),
+        CityResult("Dar es Salaam", -6.7924, 39.2083),
+        CityResult("Denpasar, Indonesia", -8.6705, 115.2126),
+        CityResult("Denver", 39.7392, -104.9903),
+        CityResult("Depok, Indonesia", -6.4025, 106.7942),
+        CityResult("Dhaka", 23.8103, 90.4125),
+        CityResult("Djibouti", 11.5892, 43.1456),
+        CityResult("Douala", 4.0511, 9.7679),
+        CityResult("Dubai", 25.2048, 55.2708),
+        CityResult("Dublin", 53.3498, -6.2603),
+        CityResult("Dushanbe", 38.5598, 68.787),
+        CityResult("Gaza", 31.5017, 34.4674),
+        CityResult("Halifax", 44.6488, -63.5752),
+        CityResult("Helsinki", 60.1699, 24.9384),
+        CityResult("Ho Chi Minh", 10.8231, 106.6297),
+        CityResult("Hong Kong", 22.3193, 114.1694),
+        CityResult("Honolulu", 21.3069, -157.8583),
+        CityResult("Islamabad, Pakistan", 33.6844, 73.0479),
+        CityResult("Istanbul", 41.0082, 28.9784),
+        CityResult("Jakarta, Indonesia", -6.2088, 106.8456),
+        CityResult("Jambi, Indonesia", -1.6101, 103.6131),
+        CityResult("Jayapura, Indonesia", -2.5337, 140.7181),
+        CityResult("Jeddah, Saudi Arabia", 21.4858, 39.1925),
+        CityResult("Jerusalem", 31.7683, 35.2137),
+        CityResult("Johannesburg", -26.2041, 28.0473),
+        CityResult("Johor Bahru, Malaysia", 1.4927, 103.7414),
+        CityResult("Kabul", 34.5553, 69.2075),
+        CityResult("Kampala", 0.3476, 32.5825),
+        CityResult("Karachi", 24.8607, 67.0011),
+        CityResult("Kathmandu", 27.7172, 85.324),
+        CityResult("Kendari, Indonesia", -3.9985, 122.513),
+        CityResult("Khartoum", 15.5007, 32.5599),
+        CityResult("Kolkata", 22.5726, 88.3639),
+        CityResult("Kuala Lumpur", 3.139, 101.6869),
+        CityResult("Kupang, Indonesia", -10.1772, 123.607),
+        CityResult("Kuwait", 29.3759, 47.9774),
+        CityResult("Kyiv", 50.4501, 30.5234),
+        CityResult("Lagos", 6.5244, 3.3792),
+        CityResult("Lahore, Pakistan", 31.5204, 74.3587),
+        CityResult("Lima", -12.0464, -77.0428),
+        CityResult("Lisbon", 38.7169, -9.1399),
+        CityResult("London", 51.5074, -0.1278),
+        CityResult("Los Angeles", 34.0522, -118.2437),
+        CityResult("Madrid", 40.4168, -3.7038),
+        CityResult("Makassar, Indonesia", -5.1477, 119.4327),
+        CityResult("Malang, Indonesia", -7.9666, 112.6326),
+        CityResult("Maldives", 4.1755, 73.5093),
+        CityResult("Manado, Indonesia", 1.4748, 124.8421),
+        CityResult("Manila", 14.5995, 120.9842),
+        CityResult("Mataram, Indonesia", -8.5833, 116.1167),
+        CityResult("Mecca, Saudi Arabia", 21.3891, 39.8579),
+        CityResult("Medan, Indonesia", 3.5952, 98.6722),
+        CityResult("Medina, Saudi Arabia", 24.5247, 39.5692),
+        CityResult("Mexico City", 19.4326, -99.1332),
+        CityResult("Minsk", 53.9045, 27.5615),
+        CityResult("Moscow", 55.7558, 37.6173),
+        CityResult("Muscat", 23.5859, 58.4059),
+        CityResult("Nairobi", -1.2921, 36.8219),
+        CityResult("New York", 40.7128, -74.006),
+        CityResult("Nicosia", 35.1856, 33.3823),
+        CityResult("Oslo", 59.9139, 10.7522),
+        CityResult("Padang, Indonesia", -0.9471, 100.4172),
+        CityResult("Palembang, Indonesia", -2.9761, 104.7754),
+        CityResult("Palu, Indonesia", -0.9003, 119.8779),
+        CityResult("Paris", 48.8566, 2.3522),
+        CityResult("Pekanbaru, Indonesia", 0.5071, 101.4478),
+        CityResult("Penang, Malaysia", 5.4141, 100.3288),
+        CityResult("Phoenix", 33.4484, -112.074),
+        CityResult("Pontianak, Indonesia", -0.0263, 109.3425),
+        CityResult("Prague", 50.0755, 14.4378),
+        CityResult("Qatar", 25.2854, 51.531),
+        CityResult("Rabat, Morocco", 34.0209, -6.8416),
+        CityResult("Reykjavik", 64.1265, -21.8174),
+        CityResult("Riyadh", 24.6877, 46.7219),
+        CityResult("Rome", 41.9028, 12.4964),
+        CityResult("Samarinda, Indonesia", -0.5022, 117.1536),
+        CityResult("Sao Paulo", -23.5505, -46.6333),
+        CityResult("Semarang, Indonesia", -6.9667, 110.4167),
+        CityResult("Seoul", 37.5665, 126.978),
+        CityResult("Shanghai", 31.2304, 121.4737),
+        CityResult("Singapore", 1.3521, 103.8198),
+        CityResult("Sofia", 42.6977, 23.3219),
+        CityResult("Stockholm", 59.3293, 18.0686),
+        CityResult("Surabaya, Indonesia", -7.2575, 112.7521),
+        CityResult("Surakarta (Solo), Indonesia", -7.5755, 110.8243),
+        CityResult("Sydney", -33.8688, 151.2093),
+        CityResult("Taipei", 25.033, 121.5654),
+        CityResult("Tangerang, Indonesia", -6.1783, 106.63),
+        CityResult("Tashkent", 41.2995, 69.2401),
+        CityResult("Tehran", 35.6892, 51.389),
+        CityResult("Tokyo", 35.6762, 139.6503),
+        CityResult("Toronto", 43.6532, -79.3832),
+        CityResult("Tripoli", 32.8872, 13.1913),
+        CityResult("Tunis", 36.819, 10.1658),
+        CityResult("Vancouver", 49.2827, -123.1207),
+        CityResult("Vienna", 48.2082, 16.3738),
+        CityResult("Warsaw", 52.2297, 21.0122),
+        CityResult("Yerevan", 40.1872, 44.5152),
+        CityResult("Yogyakarta, Indonesia", -7.7956, 110.3695),
+        CityResult("Zurich", 47.3769, 8.5417),
+    )
+
+    fun search(query: String, limit: Int = 8): List<CityResult> {
+        val q = query.trim()
+        if (q.isEmpty()) return emptyList()
+        return cities.filter { it.name.contains(q, ignoreCase = true) }
+            .sortedByDescending { it.name.startsWith(q, ignoreCase = true) }
+            .take(limit)
+    }
+
+    /** Nearest catalogued city within [maxKm], else null. */
+    fun nearest(lat: Double, lng: Double, maxKm: Double = 75.0): CityResult? =
+        cities.minByOrNull { distanceKm(lat, lng, it.lat, it.lng) }
+            ?.takeIf { distanceKm(lat, lng, it.lat, it.lng) <= maxKm }
+
+    private fun distanceKm(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
+        val r = 6371.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLng = Math.toRadians(lng2 - lng1)
+        val a = Math.sin(dLat / 2).let { it * it } +
+            Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2).let { it * it }
+        return 2 * r * Math.asin(Math.sqrt(a))
+    }
+}

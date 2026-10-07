@@ -3,17 +3,14 @@
   "nav.upcoming": "Upcoming",
   "nav.search": "Search",
   "nav.more": "More",
-
   "common.back": "Back",
   "common.save": "Save",
   "common.delete": "Delete",
   "common.cancel": "Cancel",
   "common.undo": "Undo",
-
   "status.complete": "Complete",
   "status.pending": "To Do",
   "task.statusChangedTo": "Status changed to %s",
-
   "a11y.settings": "Settings",
   "a11y.clearSearch": "Clear search",
   "a11y.search": "Search",
@@ -28,7 +25,6 @@
   "a11y.expand": "Expand",
   "a11y.completeTaskSwipe": "Complete task",
   "a11y.rescheduleTaskSwipe": "Reschedule task",
-
   "unit.day": "Day",
   "unit.days": "Days",
   "unit.week": "Week",
@@ -45,7 +41,6 @@
   "unit.monthsLower": "months",
   "unit.yearLower": "year",
   "unit.yearsLower": "years",
-
   "hijriMonth.1": "Muharram",
   "hijriMonth.2": "Safar",
   "hijriMonth.3": "Rabi' al-awwal",
@@ -58,7 +53,6 @@
   "hijriMonth.10": "Shawwal",
   "hijriMonth.11": "Dhu al-Qi'dah",
   "hijriMonth.12": "Dhu al-Hijjah",
-
   "group.today": "Today",
   "group.tomorrow": "Tomorrow",
   "group.thisWeek": "This Week",
@@ -67,12 +61,10 @@
   "group.upcoming": "Upcoming",
   "group.unscheduled": "Unscheduled",
   "group.completed": "Completed",
-
   "today.emptyTitle": "Nothing scheduled today",
   "today.emptySubtitle": "Tap + to add a task.",
   "today.noTasksUntilSunset": "No more tasks until sunset",
   "today.noTasksUntilTomorrow": "No more tasks until tomorrow",
-
   "upcoming.title": "Upcoming",
   "upcoming.tabScheduled": "Scheduled",
   "upcoming.tabUnscheduled": "Unscheduled",
@@ -80,29 +72,23 @@
   "upcoming.emptyScheduledSubtitle": "Tasks you schedule for the future will show up here.",
   "upcoming.emptyUnscheduledTitle": "No unscheduled tasks",
   "upcoming.emptyUnscheduledSubtitle": "Tasks without a date will show up here.",
-
   "search.placeholder": "Search tasks…",
   "search.emptyTitle": "Search your tasks",
   "search.emptySubtitle": "Find tasks by title or description.",
   "search.noResultsTitle": "No tasks found",
   "search.noResultsSubtitle": "Try a different search term.",
-
   "browse.recurring": "Recurring",
   "browse.completed": "Completed",
   "browse.tags": "Tags",
   "browse.noTags": "No tags yet. Add one while creating or editing a task.",
-
   "completed.title": "Completed",
   "completed.emptyTitle": "No completed tasks yet",
-
   "recurring.title": "Recurring",
   "recurring.emptyTitle": "No recurring tasks yet",
   "recurring.emptySubtitle": "Enable Repeat on a task to see it here.",
   "recurring.cadenceEvery": "every %s",
   "recurring.cadenceEveryN": "every %1$d %2$s",
-
   "tagDetail.emptyTitle": "No tasks with this tag",
-
   "task.titlePlaceholder": "Title",
   "task.descriptionPlaceholder": "Description",
   "task.addTags": "Add tags",
@@ -134,19 +120,16 @@
   "task.recurringDelete.thisOnlyDesc": "Only remove this occurrence",
   "task.recurringDelete.all": "Delete all recurring tasks",
   "task.recurringDelete.allDesc": "Remove all pending occurrences and stop the recurrence",
-
   "reschedule.title": "Reschedule",
   "reschedule.laterToday": "Later today",
   "reschedule.tomorrow": "Tomorrow",
   "reschedule.nextWeek": "Next week",
   "reschedule.pickDateTime": "Choose date & time…",
-
   "reminderPreset.atTime": "At time of",
   "reminderPreset.min5": "5 min before",
   "reminderPreset.min15": "15 min before",
   "reminderPreset.hour1": "1 hour before",
   "reminderPreset.day1": "1 day before",
-
   "tagEdit.title": "Edit tag",
   "tagEdit.name": "Name",
   "tagEdit.color": "Color",
@@ -154,10 +137,7 @@
   "tagEdit.hexCode": "Hex Code",
   "tagEdit.save": "Save",
   "tagEdit.delete": "Delete",
-
   "settings.title": "Settings",
-  "settings.account": "Account",
-  "settings.sync": "Sync",
   "settings.backup": "Backup & Restore",
   "settings.location": "Location",
   "settings.prayerTime": "Prayer Time",
@@ -166,24 +146,20 @@
   "settings.appearance": "Appearance",
   "settings.language": "Language",
   "settings.about": "About",
-
   "appearance.title": "Appearance",
   "appearance.system": "System",
   "appearance.light": "Light",
   "appearance.dark": "Dark",
-
   "language.title": "Language",
   "language.system": "System default",
   "language.english": "English",
   "language.indonesian": "Indonesian",
-
   "about.title": "About",
   "about.version": "Version %s",
   "about.unknownVersion": "Unknown",
   "about.legal": "Legal",
   "about.privacy": "Privacy Policy",
   "about.terms": "Terms of Service",
-
   "backup.title": "Backup & Restore",
   "backup.description": "Export your tasks to a file, or restore from a previous export.",
   "backup.export": "Export data",
@@ -199,24 +175,11 @@
   "backup.merge": "Merge",
   "backup.replace": "Replace",
   "backup.cancel": "Cancel",
-
-  "sync.title": "Sync",
-  "sync.signInPrompt": "Sign in to sync your tasks across devices.",
-  "sync.verifyEmailPrompt": "Verify your email to sync your tasks across devices.",
-  "sync.planRequiredPrompt": "Syncing across devices is part of the paid Sync plan. Your tasks stay on this device until you upgrade.",
-  "sync.viewPlan": "View Sync plan",
-  "sync.lastSynced": "Last synced %s",
-  "sync.notSyncedYet": "Not synced yet",
-  "sync.syncNow": "Sync now",
-  "sync.syncing": "Syncing…",
-  "sync.autoSyncNote": "Syncs automatically as you make changes, when you sign in, reconnect, or pull to refresh, and every 15 minutes in the background.",
-
   "location.title": "Location",
   "location.notSet": "Location not set",
   "location.detecting": "Detecting…",
   "location.useGps": "Use GPS",
   "location.searchCity": "Search city",
-
   "prayerTime.title": "Prayer Time",
   "prayerTime.calculationMethod": "Calculation Method",
   "prayerTime.madhab": "Madhab (Asr calculation)",
@@ -241,38 +204,15 @@
   "prayer.Asr": "Asr",
   "prayer.Maghrib": "Maghrib",
   "prayer.Isha": "Isha",
-
   "hijri.title": "Hijri Date",
   "hijri.description": "Shift the displayed Hijri date per month if it doesn't match your local moon sighting.",
   "hijri.today": "Today",
   "hijri.withOffset": "With offset",
   "hijri.gapWarning": "Offset jumps by more than a day from %1$s to %2$s — moon sighting shifts are usually gradual month to month.",
-
   "reminders.title": "Reminders",
   "reminders.description": "Get notified before scheduled tasks are due",
   "reminders.permissionRequired": "Notification permission is required for reminders",
   "reminders.permissionRevoked": "Reminders permission was revoked",
-
-  "auth.account": "Account",
-  "auth.signOut": "Sign out",
-  "auth.reconnecting": "Reconnecting to check your session…",
-  "auth.retryNow": "Retry now",
-  "auth.logoutSecurity": "You were signed out for your security — please sign in again.",
-  "auth.logoutExpired": "Your session expired — please sign in again.",
-  "auth.signInPrompt": "Sign in to sync your tasks across devices.",
-  "auth.firstName": "First name",
-  "auth.lastName": "Last name",
-  "auth.email": "Email",
-  "auth.password": "Password",
-  "auth.createAccount": "Create account",
-  "auth.signIn": "Sign in",
-  "auth.toggleToSignIn": "Already have an account? Sign in",
-  "auth.toggleToSignUp": "Need an account? Sign up",
-  "auth.invalidEmail": "Enter a valid email address",
-  "auth.passwordTooShort": "Password must be at least %d characters",
-  "auth.genericError": "Something went wrong",
-  "auth.networkError": "Couldn't reach the server. Check your connection and try again.",
-
   "notification.channelName": "Task reminders",
   "notification.markDone": "Mark Done"
 }
