@@ -38,6 +38,7 @@ fun SettingsAboutScreen(
 ) {
     val context = LocalContext.current
     val strings = LocalStrings.current
+    val siteBase = if (strings.locale.language == "id") "https://egig.github.io/hvsna/id" else "https://egig.github.io/hvsna"
 
     val versionName = remember(strings) {
         try {
@@ -94,13 +95,13 @@ fun SettingsAboutScreen(
                 ListItem(
                     headlineContent = { Text(strings["about.privacy"]) },
                     modifier = Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.recraftory.com/privacy")))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("$siteBase/privacy")))
                     },
                 )
                 ListItem(
                     headlineContent = { Text(strings["about.terms"]) },
                     modifier = Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.recraftory.com/terms")))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("$siteBase/terms")))
                     },
                 )
             }

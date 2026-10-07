@@ -42,7 +42,7 @@ Hand-edited static HTML, committed and served as-is at `https://egig.github.io/h
 - **TypeScript strict mode** with `verbatimModuleSyntax: true` — use `import type` for type-only imports
 - **Hijri months are 1-indexed** (not 0-based)
 - Website copy is bilingual: change the `en` and `id` pages together
-- Legal pages (`privacy`, `terms`) describe an offline app with no accounts or payments; the Android app's only network use is Firebase Crashlytics — update them if that changes
+- Legal pages (`privacy`, `terms`, EN and ID) describe an offline, open-source (MIT, see `LICENSE`) app with no accounts or payments; the Android app's only network use is Firebase Crashlytics, and support goes through GitHub issues — update them (and their "Last Updated" date) if the permissions, network use, or license change
 
 ## Key files
 
