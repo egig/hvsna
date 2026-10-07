@@ -10,7 +10,6 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
         links: [
           { name: "Download", href: "/download" },
           { name: "About", href: "/about" },
-          { name: "Pricing", href: "/pricing" },
           { name: "Features", href: "/features" },
           { name: "Help", href: "/help" },
         ],
@@ -20,7 +19,6 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
         links: [
           { name: "Privacy Policy", href: "/privacy" },
           { name: "Terms of Service", href: "/terms" },
-          { name: "Delete Account", href: "/opt-out" },
         ],
       },
       contact: {
@@ -38,7 +36,6 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
         links: [
           { name: "Unduh", href: "/id/download" },
           { name: "Tentang", href: "/id/about" },
-          { name: "Harga", href: "/id/pricing" },
           { name: "Fitur", href: "/id/features" },
           { name: "Bantuan", href: "/help" },
         ],
@@ -48,7 +45,6 @@ export default function Footer({ currentLang = "en" }: { currentLang?: string })
         links: [
           { name: "Kebijakan Privasi", href: "/id/privacy" },
           { name: "Syarat Layanan", href: "/id/terms" },
-          { name: "Hapus Akun", href: "/opt-out" },
         ],
       },
       contact: {

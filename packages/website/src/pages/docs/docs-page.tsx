@@ -3,7 +3,6 @@ import { useParams } from "react-router";
 import { useSeo } from "@/seo/Seo";
 import { getDocPage } from "./registry";
 import { mdxComponents } from "./mdx-components";
-import { PlatformProvider } from "./platform-tabs";
 
 interface TocItem {
   id: string;
@@ -55,9 +54,7 @@ export default function DocsPage() {
   return (
     <div className="flex gap-10">
       <article ref={containerRef} className="min-w-0 flex-1">
-        <PlatformProvider>
-          <Component components={mdxComponents} />
-        </PlatformProvider>
+        <Component components={mdxComponents} />
       </article>
       {toc.length > 0 && (
         <aside className="hidden xl:block w-48 shrink-0 sticky top-20 self-start">

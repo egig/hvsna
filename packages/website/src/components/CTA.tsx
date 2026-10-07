@@ -1,24 +1,21 @@
 import { Link } from "react-router";
-import { ArrowRight, Check, Download } from "lucide-react";
-import { WEB_APP_SIGNUP_URL } from "@/config";
+import { Check, Download } from "lucide-react";
 
 export default function CTA({ currentLang = "en" }: { currentLang?: string }) {
   const content = {
     en: {
       title: "Get your day organized",
       subtitle: "Join other Muslims who are already organizing their days the Islamic way",
-      features: ["Free on Android and Web", "No ads or distractions", "Your data stays private", "Works perfectly offline"],
+      features: ["Free on Android", "No ads or distractions", "Your data stays private", "Works perfectly offline"],
       primaryCTA: "Download",
-      secondaryCTA: "Try it on Web",
-      comingSoon: "iOS app is coming soon. Sync across devices with a Sync plan.",
+      comingSoon: "iOS app is coming soon.",
     },
     id: {
       title: "Buat harimu lebih teratur",
       subtitle: "Bergabunglah dengan  Muslim lainnya yang sudah mengatur hari mereka secara Islami",
-      features: ["Gratis di Android dan Web", "Tanpa iklan atau gangguan", "Datamu tetap privat", "Bekerja sempurna offline"],
+      features: ["Gratis di Android", "Tanpa iklan atau gangguan", "Datamu tetap privat", "Bekerja sempurna offline"],
       primaryCTA: "Unduh",
-      secondaryCTA: "Coba gratis",
-      comingSoon: "Aplikasi iOS akan segera hadir. Sinkronkan antar perangkat dengan paket Sync.",
+      comingSoon: "Aplikasi iOS akan segera hadir.",
     },
   };
 
@@ -58,14 +55,6 @@ export default function CTA({ currentLang = "en" }: { currentLang?: string }) {
                 <Download className="w-5 h-5 mr-2 shrink-0" />
                 {t.primaryCTA}
               </Link>
-
-              <a
-                href={WEB_APP_SIGNUP_URL}
-                className="inline-flex h-12 w-full max-w-xs sm:w-auto items-center justify-center px-5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                {t.secondaryCTA}
-                <ArrowRight className="w-5 h-5 ml-2 shrink-0" />
-              </a>
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-6">{t.comingSoon}</p>

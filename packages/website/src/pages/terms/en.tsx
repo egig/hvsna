@@ -20,15 +20,10 @@ export default function TermsPage() {
             refrain from using our Service.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">1. Account Registration and Eligibility</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            1.1 To use our App, you may need to create an account. By registering, you represent that you are at
-            least 18 years old or of legal age in your jurisdiction to enter into this agreement.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">1. Eligibility</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            1.2 You agree to provide accurate, complete, and up-to-date information during the registration process.
-            You are solely responsible for maintaining the confidentiality of your account and password, and for any
-            activity that occurs under your account.
+            1.1 You must be at least 18 years old or of legal age in your jurisdiction to enter into this agreement.
+            The App does not require an account.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">2. Use of the App</h2>
@@ -37,9 +32,7 @@ export default function TermsPage() {
             purpose.
           </p>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            2.2 You are responsible for any content you create, upload, or store using the App. You retain all
-            intellectual property rights to your content, but you grant us a non-exclusive, worldwide, royalty-free
-            license to use, reproduce, and distribute your content for the sole purpose of providing the Service.
+            2.2 You are responsible for any content you create or store using the App. Your content is stored only on your device, and you retain all rights to it. We do not access or receive it. You are responsible for keeping your own backups.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">3. Prohibited Conduct</h2>
@@ -56,18 +49,10 @@ export default function TermsPage() {
             <li>Impersonating any person or entity or misrepresenting your affiliation with any person or entity</li>
           </ul>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">4. Subscriptions and Payments</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            4.1 Certain features of the App require a paid subscription (&quot;Pro&quot;). By subscribing, you agree
-            to pay the applicable fees as displayed at the time of purchase.
-          </p>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            4.2 Subscriptions automatically renew unless cancelled before the end of the current billing period. You
-            may cancel at any time through your account settings.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">4. Pricing</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            4.3 We reserve the right to change subscription pricing. Any price changes will take effect at the start
-            of the next billing cycle following notice to you.
+            4.1 The App is currently free to use. We may introduce paid features in the future; if we do, we will
+            update these Terms and the terms of purchase will be shown at the time of purchase.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">5. Intellectual Property</h2>

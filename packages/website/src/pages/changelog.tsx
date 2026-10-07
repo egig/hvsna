@@ -37,47 +37,11 @@ const changelogData: ChangelogEntry[] = [
           fixed: ["Fixed a task title input bug on the Today, Upcoming, and Tag screens"],
         },
       },
-      {
-        platform: "Web",
-        version: "v1.1.1",
-        changes: {
-          new: [],
-          improved: [
-            "Hijri (Islamic) date now shown alongside the date when scheduling a task",
-            "Smoother animations when picking a date or time for a task",
-            "Cleaner text, spacing, and checkbox styling throughout the app",
-            "More reliable saving for tags, recurring tasks, and settings",
-          ],
-          fixed: ["Fixed promoting a task to a recurring task not always working", "Fixed a couple of recurring task display glitches"],
-        },
-      },
     ],
   },
   {
     date: "September 11, 2026",
     releases: [
-      {
-        platform: "Web",
-        version: "v1.1.0",
-        changes: {
-          new: [
-            "Tags, so you can organize and filter your tasks your way",
-            "Sync your tasks across devices (Sync plan)",
-            "Redesigned layouts for phone and desktop, each tuned for its screen",
-          ],
-          improved: [
-            "Refreshed icons and dark mode colors for better readability",
-            "Smoother recurring task editing",
-            "More reliable login sessions",
-            "Pricing and sync info on the website is now always up to date",
-          ],
-          fixed: [
-            "Fixed a bug where having multiple tabs open at once could mix up your data",
-            "Fixed prayer time edge cases around sunrise",
-            "Fixed subscription checkout emails not always going out",
-          ],
-        },
-      },
       {
         platform: "Android",
         version: "v2.2.0",
@@ -101,19 +65,10 @@ const changelogData: ChangelogEntry[] = [
     date: "August 14, 2026",
     releases: [
       {
-        platform: "Web",
-        version: "v1.0.1",
-        changes: {
-          new: ["Subscription checkout via Lemon Squeezy in Settings"],
-          improved: ["Email verification moved into a global announcement bar", "Sync now requires a verified email"],
-          fixed: ["Webhook event handling"],
-        },
-      },
-      {
         platform: "Android",
         version: "v2.1.0",
         changes: {
-          new: ["Authentication", "Sync"],
+          new: [],
           improved: ["UI Improvement"],
           fixed: [],
         },

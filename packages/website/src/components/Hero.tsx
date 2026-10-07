@@ -1,6 +1,5 @@
 import { Link } from "react-router";
-import { ArrowRight, Globe, Download } from "lucide-react";
-import { WEB_APP_SIGNUP_URL } from "@/config";
+import { Download } from "lucide-react";
 
 export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
   const content = {
@@ -9,16 +8,14 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
       subtitle:
         "Prayer-first task app with Hijri calendar awareness. Finally, a productivity tool that works with your faith first.",
       primaryCTA: "Download",
-      secondaryCTA: "Try it free",
-      comingSoon: "Free on Android and Web. iOS app is coming soon.",
+      comingSoon: "Free on Android. iOS app is coming soon.",
     },
     id: {
       title: "Atur jadwal harian, berdasarkan waktu sholat",
       subtitle:
         "Aplikasi task berbasis sholat dengan dukungan kalender Hijriah. Akhirnya, alat produktivitas yang bekerja sesuai tujuan hidup kita.",
       primaryCTA: "Unduh",
-      secondaryCTA: "Coba Gratis",
-      comingSoon: "Gratis di Android dan Web. Aplikasi iOS akan segera hadir.",
+      comingSoon: "Gratis di Android. Aplikasi iOS akan segera hadir.",
     },
   };
 
@@ -48,15 +45,6 @@ export default function Hero({ currentLang = "en" }: { currentLang?: string }) {
                 <Download className="w-5 h-5 mr-2 shrink-0" />
                 {t.primaryCTA}
               </Link>
-
-              <a
-                href={WEB_APP_SIGNUP_URL}
-                className="inline-flex h-12 w-full max-w-xs sm:w-auto items-center justify-center px-5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium rounded-lg border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                <Globe className="w-5 h-5 mr-2 shrink-0" />
-                {t.secondaryCTA}
-                <ArrowRight className="w-4 h-4 ml-2 shrink-0" />
-              </a>
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-6">{t.comingSoon}</p>

@@ -6,30 +6,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w @hvsna/app",
-    "build": "npm run build -w @hvsna/app",
-    "typecheck": "npm run typecheck -w @hvsna/app",
-    "test": "npm run test -w @hvsna/app",
-    "test:ui": "npm run test:ui -w @hvsna/app",
-    "test:e2e": "npm run test:e2e -w @hvsna/app",
-    "test:e2e:ui": "npm run test:e2e:ui -w @hvsna/app",
-    "test:e2e:debug": "npm run test:e2e:debug -w @hvsna/app",
     "dev:website": "npm run dev -w @hvsna/website",
     "build:website": "npm run build -w @hvsna/website",
     "typecheck:website": "npm run typecheck -w @hvsna/website",
-    "dev:api": "npm run dev -w @hvsna/api",
-    "build:api": "npm run build -w @hvsna/api",
-    "typecheck:api": "npm run typecheck -w @hvsna/api",
-    "test:api": "npm run test -w @hvsna/api",
-    "db:generate": "npm run db:generate -w @hvsna/api",
-    "db:migrate": "npm run db:migrate -w @hvsna/api",
     "gen:icons": "node scripts/gen-icons.mjs",
     "prepare": "husky || true"
   },
   "devDependencies": {
-    "@svgr/core": "^8.1.0",
-    "@svgr/plugin-jsx": "^8.1.0",
-    "@svgr/plugin-svgo": "^8.1.0",
     "husky": "^9.1.7",
     "svg2vectordrawable": "^2.9.1"
   }

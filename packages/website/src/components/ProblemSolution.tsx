@@ -20,7 +20,7 @@ export default function ProblemSolution({ currentLang = "en" }: { currentLang?: 
           "Prayer-first scheduling — organize tasks around salah, keeping faith at the center",
           "Hijri calendar awareness — view Islamic dates alongside civil calendar",
           "Clean, focused interface — see what matters today at a glance, distraction-free",
-          "Offline-first — fully functional without internet, syncs seamlessly when reconnected",
+          "Offline-first — fully functional without internet",
         ],
       },
       education: {

@@ -20,16 +20,10 @@ export default function TermsPageID() {
             tidak menggunakan Layanan kami.
           </p>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">1. Pendaftaran Akun dan Kelayakan</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            1.1 Untuk menggunakan Aplikasi kami, Anda mungkin perlu membuat akun. Dengan mendaftar, Anda menyatakan
-            bahwa Anda berusia minimal 18 tahun atau telah cukup umur secara hukum di wilayah Anda untuk mengikatkan
-            diri dalam perjanjian ini.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">1. Kelayakan</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            1.2 Anda setuju untuk memberikan informasi yang akurat, lengkap, dan terkini selama proses pendaftaran.
-            Anda bertanggung jawab penuh untuk menjaga kerahasiaan akun dan kata sandi Anda, serta untuk setiap
-            aktivitas yang terjadi di bawah akun Anda.
+            1.1 Anda harus berusia minimal 18 tahun atau telah cukup umur secara hukum di wilayah Anda untuk
+            mengikatkan diri dalam perjanjian ini. Aplikasi tidak memerlukan akun.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">2. Penggunaan Aplikasi</h2>
@@ -38,10 +32,7 @@ export default function TermsPageID() {
             yang tidak sah atau ilegal.
           </p>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            2.2 Anda bertanggung jawab atas konten yang Anda buat, unggah, atau simpan menggunakan Aplikasi. Anda
-            memiliki semua hak kekayaan intelektual atas konten Anda, tetapi Anda memberikan kami lisensi
-            non-eksklusif, di seluruh dunia, dan bebas royalti untuk menggunakan, memproduksi ulang, dan
-            mendistribusikan konten Anda semata-mata untuk tujuan menyediakan Layanan.
+            2.2 Anda bertanggung jawab atas konten yang Anda buat atau simpan menggunakan Aplikasi. Konten Anda hanya disimpan di perangkat Anda dan Anda memiliki semua hak atasnya. Kami tidak mengakses atau menerimanya. Anda bertanggung jawab menjaga cadangan Anda sendiri.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">3. Perilaku yang Dilarang</h2>
@@ -58,18 +49,10 @@ export default function TermsPageID() {
             <li>Menyamar sebagai orang atau entitas lain atau memberikan informasi palsu tentang afiliasi Anda</li>
           </ul>
 
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">4. Langganan dan Pembayaran</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            4.1 Fitur tertentu dari Aplikasi memerlukan langganan berbayar (&quot;Pro&quot;). Dengan berlangganan,
-            Anda setuju untuk membayar biaya yang berlaku sebagaimana ditampilkan pada saat pembelian.
-          </p>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            4.2 Langganan diperpanjang secara otomatis kecuali dibatalkan sebelum akhir periode penagihan saat ini.
-            Anda dapat membatalkan kapan saja melalui pengaturan akun Anda.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">4. Harga</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            4.3 Kami berhak mengubah harga langganan. Perubahan harga akan berlaku pada awal siklus penagihan
-            berikutnya setelah pemberitahuan kepada Anda.
+            4.1 Aplikasi saat ini gratis digunakan. Kami dapat menghadirkan fitur berbayar di masa mendatang; jika
+            demikian, kami akan memperbarui Syarat ini dan ketentuan pembelian akan ditampilkan pada saat pembelian.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">5. Hak Kekayaan Intelektual</h2>

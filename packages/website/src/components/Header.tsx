@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Menu, X, Globe, Download } from "lucide-react";
-import { WEB_APP_SIGNUP_URL } from "@/config";
 
 export default function Header({ currentLang = "en", doc = false }: { currentLang?: string, doc?: boolean }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,27 +10,21 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
       nav: {
         features: "Features",
         about: "About",
-        pricing: "Pricing",
         blog: "Blog",
         changelog: "Changelog",
-        webApp: "Web App",
       },
       language: "Language",
       download: "Download",
-      signIn: "Sign In",
     },
     id: {
       nav: {
         features: "Fitur",
         about: "Tentang",
-        pricing: "Harga",
         blog: "Blog",
         changelog: "Catatan Perubahan",
-        webApp: "Web App",
       },
       language: "Bahasa",
       download: "Unduh",
-      signIn: "Masuk",
     },
   };
 
@@ -58,12 +51,6 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
                 className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none hover:bg-primary-100 px-2 py-1 rounded-lg"
               >
                 {t.nav.about}
-              </Link>
-              <Link
-                to={currentLang === "id" ? "/id/pricing" : "/pricing"}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none hover:bg-primary-100 px-2 py-1 rounded-lg"
-              >
-                {t.nav.pricing}
               </Link>
             </nav>
 
@@ -108,20 +95,6 @@ export default function Header({ currentLang = "en", doc = false }: { currentLan
               >
                 {t.nav.about}
               </Link>
-              <Link
-                to={currentLang === "id" ? "/id/pricing" : "/pricing"}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t.nav.pricing}
-              </Link>
-              <a
-                href={WEB_APP_SIGNUP_URL}
-                className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors outline-none"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t.nav.webApp}
-              </a>
               <Link
                 to={downloadHref}
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-700"

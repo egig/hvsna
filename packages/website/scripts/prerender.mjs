@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -18,6 +18,10 @@ for (const routePath of routes) {
   mkdirSync(outDir, { recursive: true });
   writeFileSync(path.join(outDir, "index.html"), page);
 }
+
+// GitHub Pages: serve the home page for unknown paths (404.html) and skip Jekyll.
+copyFileSync(path.join(distDir, "index.html"), path.join(distDir, "404.html"));
+writeFileSync(path.join(distDir, ".nojekyll"), "");
 
 rmSync(serverDir, { recursive: true, force: true });
 

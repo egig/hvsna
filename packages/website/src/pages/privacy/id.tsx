@@ -23,19 +23,23 @@ export default function PrivacyPageID() {
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">1. Informasi yang Kami Kumpulkan</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            1.1 <strong className="text-gray-900 dark:text-white">Informasi Pribadi:</strong> Saat Anda membuat akun
-            atau menggunakan Aplikasi kami, kami dapat mengumpulkan informasi pribadi tertentu, seperti nama, alamat
-            email, dan informasi identitas lainnya yang Anda berikan secara sukarela.
+            1.1 <strong className="text-gray-900 dark:text-white">Tanpa akun:</strong> Hvsna tidak memiliki akun
+            pengguna, dan kami tidak meminta nama, alamat email, atau informasi identitas lainnya untuk menggunakan
+            Aplikasi.
           </p>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            1.2 <strong className="text-gray-900 dark:text-white">Data Penggunaan:</strong> Kami dapat secara otomatis
-            mengumpulkan informasi tertentu tentang perangkat Anda, termasuk alamat IP, sistem operasi, jenis
-            browser, dan informasi teknis lainnya saat Anda mengakses Aplikasi kami.
+            1.2 <strong className="text-gray-900 dark:text-white">Data yang tersimpan di perangkat Anda:</strong>{" "}
+            Tugas, tag, pengaturan, dan lokasi yang Anda masukkan atau izinkan untuk digunakan Aplikasi hanya
+            disimpan di perangkat Anda. Kami tidak menerima, menyimpan, maupun memiliki akses ke data ini. Perkiraan
+            lokasi Anda digunakan di perangkat untuk menghitung waktu sholat dan zona waktu.
           </p>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            1.3 <strong className="text-gray-900 dark:text-white">Cookie dan Teknologi Serupa:</strong> Kami dapat
-            menggunakan cookie dan teknologi pelacakan serupa untuk meningkatkan pengalaman Anda dengan Aplikasi dan
-            untuk mengumpulkan informasi tentang pola penggunaan Anda.
+            1.3 <strong className="text-gray-900 dark:text-white">Platform distribusi dan situs web ini:</strong>{" "}
+            Aplikasi didistribusikan melalui Google Play, yang dapat mengumpulkan data penggunaan dan diagnostiknya
+            sendiri sesuai kebijakannya. Aplikasi juga menggunakan Firebase Crashlytics untuk mengirim laporan
+            kerusakan anonim (seperti model perangkat, versi OS, dan jejak kerusakan) agar kami dapat memperbaiki bug;
+            laporan ini tidak mencakup tugas Anda. Situs web ini dihosting di GitHub Pages, yang dapat mencatat informasi teknis
+            seperti alamat IP saat Anda berkunjung. Kami tidak menjalankan analitik atau pelacak iklan.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">2. Cara Kami Menggunakan Informasi Anda</h2>
@@ -43,11 +47,8 @@ export default function PrivacyPageID() {
             2.1 Kami menggunakan informasi yang kami kumpulkan untuk tujuan berikut:
           </p>
           <ul className="list-disc list-inside text-lg text-gray-600 dark:text-gray-300 mb-8 space-y-2 pl-4">
-            <li>Untuk menyediakan dan memelihara Aplikasi, termasuk manajemen akun dan autentikasi</li>
-            <li>Untuk meningkatkan fungsionalitas dan pengalaman pengguna Aplikasi</li>
-            <li>Untuk menanggapi pertanyaan, komentar, atau masukan Anda</li>
-            <li>Untuk mengirimkan pemberitahuan administratif, pembaruan, dan komunikasi relevan lainnya</li>
-            <li>Untuk menganalisis dan memantau pola penggunaan, melakukan analisis data, dan melakukan penelitian</li>
+            <li>Untuk menyediakan dan memelihara Aplikasi di perangkat Anda, seperti menghitung waktu sholat dan menjadwalkan pengingat</li>
+            <li>Untuk menanggapi pertanyaan, komentar, atau masukan yang Anda kirim ke email dukungan kami</li>
           </ul>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">3. Pembagian dan Pengungkapan Informasi</h2>
@@ -55,7 +56,6 @@ export default function PrivacyPageID() {
             3.1 Kami dapat membagikan informasi pribadi Anda dalam keadaan berikut:
           </p>
           <ul className="list-disc list-inside text-lg text-gray-600 dark:text-gray-300 mb-8 space-y-2 pl-4">
-            <li>Dengan penyedia layanan yang membantu kami mengoperasikan Aplikasi dan menyediakan Layanan</li>
             <li>Untuk mematuhi kewajiban hukum, menegakkan Syarat Layanan kami, dan melindungi hak kami atau hak pihak lain</li>
             <li>
               Dalam hal pengalihan bisnis, seperti merger, akuisisi, atau penjualan, di mana informasi Anda dapat

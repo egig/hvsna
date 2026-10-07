@@ -1,20 +1,15 @@
-import { Globe, Apple, Check } from "lucide-react";
-import { PLAY_STORE_URL, WEB_APP_SIGNUP_URL } from "@/config";
+import { Apple, Check } from "lucide-react";
+import { PLAY_STORE_URL } from "@/config";
 
 const content = {
   en: {
     title: "Download Hvsna",
-    subtitle: "Free on Android and the web. Your data works offline and syncs across devices with a Sync plan.",
+    subtitle: "Free on Android. Your data stays on your device and works offline.",
     availableLabel: "Available now",
     comingSoonLabel: "Coming soon",
     android: {
       name: "Android",
       description: "Get the native app from Google Play.",
-    },
-    web: {
-      name: "Web",
-      description: "Use Hvsna right in your browser — nothing to install.",
-      cta: "Open the web app",
     },
     ios: {
       name: "iOS",
@@ -26,17 +21,12 @@ const content = {
   },
   id: {
     title: "Unduh Hvsna",
-    subtitle: "Gratis di Android dan web. Datamu bekerja offline dan tersinkron antar perangkat dengan paket Sync.",
+    subtitle: "Gratis di Android. Datamu tersimpan di perangkatmu dan bekerja offline.",
     availableLabel: "Tersedia sekarang",
     comingSoonLabel: "Segera hadir",
     android: {
       name: "Android",
       description: "Dapatkan aplikasi native dari Google Play.",
-    },
-    web: {
-      name: "Web",
-      description: "Gunakan Hvsna langsung di browser — tanpa instalasi.",
-      cta: "Buka aplikasi web",
     },
     ios: {
       name: "iOS",
@@ -93,24 +83,6 @@ export default function Download({ currentLang = "en" }: { currentLang?: string 
               className="inline-flex shrink-0 items-center self-start sm:self-center"
             >
               <img src="/GetItOnGooglePlay_Badge_Web_color_English.svg" alt="Get it on Google Play" className="h-12 w-auto" />
-            </a>
-          </div>
-
-          {/* Web */}
-          <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t.web.name}</h2>
-                <StatusPill available label={t.availableLabel} />
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{t.web.description}</p>
-            </div>
-            <a
-              href={WEB_APP_SIGNUP_URL}
-              className="inline-flex h-12 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-primary-600 px-5 font-semibold text-white transition-colors hover:bg-primary-700 sm:self-center"
-            >
-              <Globe className="w-5 h-5" />
-              {t.web.cta}
             </a>
           </div>
 

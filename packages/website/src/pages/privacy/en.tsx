@@ -23,19 +23,22 @@ export default function PrivacyPage() {
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">1. Information We Collect</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            1.1 <strong className="text-gray-900 dark:text-white">Personal Information:</strong> When you create an
-            account or use our App, we may collect certain personal information, such as your name, email address,
-            and other identifying information you voluntarily provide.
+            1.1 <strong className="text-gray-900 dark:text-white">No accounts:</strong> Hvsna does not have user
+            accounts, and we do not ask for your name, email address, or other identifying information to use the
+            App.
           </p>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
-            1.2 <strong className="text-gray-900 dark:text-white">Usage Data:</strong> We may automatically collect
-            certain information about your device, including your IP address, operating system, browser type, and
-            other technical information when you access our App.
+            1.2 <strong className="text-gray-900 dark:text-white">Data stored on your device:</strong> The tasks,
+            tags, settings, and location you enter or allow the App to use are stored only on your device. We do not
+            receive, store, or have access to this data. Your approximate location is used on the device to calculate
+            prayer times and your timezone.
           </p>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-            1.3 <strong className="text-gray-900 dark:text-white">Cookies and Similar Technologies:</strong> We may
-            use cookies and similar tracking technologies to enhance your experience with the App and to gather
-            information about your usage patterns.
+            1.3 <strong className="text-gray-900 dark:text-white">Distribution platforms and this website:</strong>{" "}
+            The App is distributed through Google Play, which may collect its own usage and diagnostic data under its
+            own policies. The App also uses Firebase Crashlytics to send anonymous crash reports (such as device model,
+            OS version, and the crash stack trace) so we can fix bugs; these reports do not include your tasks. This website is hosted on GitHub Pages, which may log technical information such as your IP
+            address when you visit. We do not run analytics or advertising trackers.
           </p>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">2. How We Use Your Information</h2>
@@ -43,11 +46,8 @@ export default function PrivacyPage() {
             2.1 We use the information we collect for the following purposes:
           </p>
           <ul className="list-disc list-inside text-lg text-gray-600 dark:text-gray-300 mb-8 space-y-2 pl-4">
-            <li>To provide and maintain the App, including account management and authentication</li>
-            <li>To improve the functionality and user experience of the App</li>
-            <li>To respond to your inquiries, comments, or feedback</li>
-            <li>To send you administrative notifications, updates, and other relevant communications</li>
-            <li>To analyze and monitor usage patterns, perform data analytics, and conduct research</li>
+            <li>To provide and maintain the App on your device, such as calculating prayer times and scheduling reminders</li>
+            <li>To respond to your inquiries, comments, or feedback sent to our support email</li>
           </ul>
 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-12 mb-4">3. Information Sharing and Disclosure</h2>
@@ -55,7 +55,6 @@ export default function PrivacyPage() {
             3.1 We may share your personal information in the following circumstances:
           </p>
           <ul className="list-disc list-inside text-lg text-gray-600 dark:text-gray-300 mb-8 space-y-2 pl-4">
-            <li>With service providers who assist us in operating the App and delivering the Service</li>
             <li>To comply with legal obligations, enforce our Terms of Service, and protect our rights or the rights of others</li>
             <li>
               In the event of a business transfer, such as a merger, acquisition, or sale, where your information may
