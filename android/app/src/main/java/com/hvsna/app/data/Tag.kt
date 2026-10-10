@@ -17,6 +17,8 @@ data class Tag(
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val deletedAt: Long? = null,
+    /** Hybrid logical clock timestamp of the last local write, stamped by TaskStore (see com.hvsna.app.sync.Hlc). Empty on rows written before stamping existed. */
+    val hlc: String = "",
     val _dirty: Int = 1,
     @Transient @Id var boxId: Long = 0,
 )

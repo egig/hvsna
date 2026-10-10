@@ -1,19 +1,26 @@
 package com.hvsna.app.data
 
+import com.hvsna.app.sync.HlcClock
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.query.QueryBuilder.StringOrder
 import kotlinx.coroutines.flow.Flow
 
-/** Replaces SettingsDao. */
-class SettingsStore(boxStore: BoxStore) {
+/** Replaces SettingsDao. Every write is stamped with [clock], like TaskStore's. */
+class SettingsStore(boxStore: BoxStore, private val clock: HlcClock) {
     private val box: Box<SettingsEntry> = boxStore.boxFor(SettingsEntry::class.java)
 
     fun observeAll(): Flow<List<SettingsEntry>> = box.query().build().asFlow()
 
     suspend fun upsert(entry: SettingsEntry) {
         val existing = findByKey(entry.key)
-        box.put(if (existing != null) entry.copy(boxId = existing.boxId) else entry)
+        box.put(
+            if (existing != null) {
+                entry.copy(boxId = existing.boxId, hlc = clock.next(existing.hlc))
+            } else {
+                entry.copy(hlc = clock.next(entry.hlc))
+            },
+        )
     }
 
     suspend fun upsertAll(entries: List<SettingsEntry>) {
