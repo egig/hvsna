@@ -2,6 +2,7 @@ package com.hvsna.app.data
 
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class RecurrenceGeneratorTest {
@@ -172,5 +173,15 @@ class RecurrenceGeneratorTest {
         assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a", "b"), recurrenceOn))
         assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a"), recurrenceOn.copy(recurringInterval = 2)))
         assertEquals(true, recurringEditChangedAnything(t, setOf("a"), ruleOn, t.copy(), setOf("a"), RecurrenceInput.None))
+    }
+
+    @Test
+    fun `occurrenceTaskId is stable per rule and date`() {
+        val date = LocalDate.of(2026, 7, 15)
+        val id = occurrenceTaskId("rule-a", date)
+        assertEquals(id, occurrenceTaskId("rule-a", date))
+        assertEquals(id, java.util.UUID.fromString(id).toString())
+        assertNotEquals(id, occurrenceTaskId("rule-a", date.plusDays(1)))
+        assertNotEquals(id, occurrenceTaskId("rule-b", date))
     }
 }

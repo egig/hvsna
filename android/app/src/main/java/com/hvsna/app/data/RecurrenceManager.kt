@@ -89,13 +89,12 @@ class RecurrenceManager(
         val anchorEpoch = original.scheduledTime ?: edited.scheduledTime ?: 0L
         val anchorDate = epochMillisToLocalDate(anchorEpoch)
 
-        val target = edited.copy(
-            id = if (original.isVirtual()) java.util.UUID.randomUUID().toString() else original.id,
+        val linked = edited.copy(
             recurringTaskId = recurringTaskId,
             recurringType = recurrence.recurringType,
             recurringInterval = recurrence.recurringInterval,
         )
-        if (original.isVirtual()) repository.insert(target) else repository.update(target)
+        val target = if (original.isVirtual()) insertOccurrence(original, linked) else linked.copy(id = original.id).also { repository.update(it) }
         repository.setTagsForTask(target.id, tagIds)
 
         repository.deleteFuturePendingForRecurrenceExcept(recurringTaskId, target.id, anchorEpoch)
@@ -134,21 +133,20 @@ class RecurrenceManager(
      * web's demoteTaskFromRecurring.
      */
     suspend fun demoteThisOnly(original: Task, edited: Task, tagIds: List<String> = emptyList()): Task {
-        val standalone = edited.copy(
-            id = if (original.isVirtual()) java.util.UUID.randomUUID().toString() else original.id,
+        val detached = edited.copy(
             recurringTaskId = null,
             recurringType = null,
             recurringInterval = null,
         )
-        if (original.isVirtual()) {
+        val standalone = if (original.isVirtual()) {
             original.recurringTaskId?.let { ruleId ->
                 repository.getRecurrenceRule(ruleId)?.let {
                     repository.updateRecurrenceRule(addOccurrenceException(it, original.scheduledTime!!))
                 }
             }
-            repository.insert(standalone)
+            insertOccurrence(original, detached)
         } else {
-            repository.update(standalone)
+            detached.copy(id = original.id).also { repository.update(it) }
         }
         repository.setTagsForTask(standalone.id, tagIds)
         return standalone
@@ -160,13 +158,12 @@ class RecurrenceManager(
      * Past/completed rows survive. Mirrors demoteTaskFromRecurringAndDeleteFuture.
      */
     suspend fun demoteAllFuture(recurringTaskId: String, original: Task, edited: Task, tagIds: List<String> = emptyList()): Task {
-        val standalone = edited.copy(
-            id = if (original.isVirtual()) java.util.UUID.randomUUID().toString() else original.id,
+        val detached = edited.copy(
             recurringTaskId = null,
             recurringType = null,
             recurringInterval = null,
         )
-        if (original.isVirtual()) repository.insert(standalone) else repository.update(standalone)
+        val standalone = if (original.isVirtual()) insertOccurrence(original, detached) else detached.copy(id = original.id).also { repository.update(it) }
         repository.setTagsForTask(standalone.id, tagIds)
         // Future-sibling cutoff measured from the original occurrence's day (web parity).
         val anchorEpoch = original.scheduledTime ?: edited.scheduledTime ?: 0L
@@ -192,11 +189,31 @@ class RecurrenceManager(
      */
     suspend fun materialize(original: Task, edited: Task = original): Task {
         val rule = repository.getRecurrenceRule(original.recurringTaskId!!)
-        val real = edited.copy(id = java.util.UUID.randomUUID().toString(), recurringTaskId = original.recurringTaskId)
-        repository.insert(real)
+        val real = insertOccurrence(original, edited.copy(recurringTaskId = original.recurringTaskId))
         if (rule != null) {
             repository.updateRecurrenceRule(addOccurrenceException(rule, original.scheduledTime!!))
         }
+        return real
+    }
+
+    /**
+     * Inserts [row] as the real counterpart of virtual occurrence [original],
+     * under that slot's stable [occurrenceTaskId] (keyed on [original]'s date,
+     * not [row]'s, since the slot is what stays fixed when the date is edited).
+     * Goes through `update`, which upserts by UUID: a soft-deleted row left by
+     * an earlier materialization of the same slot is revived in place instead
+     * of tripping the unique index. A *live* row already holding the id means
+     * the slot was re-emitted after its exception was dropped (a series
+     * rebase) — that row is the user's, so fall back to a random id rather
+     * than overwrite it. Tags are reset because a revived row would otherwise
+     * keep its tombstone's tag links (callers that tag the row set them after).
+     */
+    private suspend fun insertOccurrence(original: Task, row: Task): Task {
+        val slotId = occurrenceTaskId(original.recurringTaskId!!, epochMillisToLocalDate(original.scheduledTime!!))
+        val id = if (repository.getTaskById(slotId) == null) slotId else java.util.UUID.randomUUID().toString()
+        val real = row.copy(id = id)
+        repository.update(real)
+        repository.setTagsForTask(id, emptyList())
         return real
     }
 

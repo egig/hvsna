@@ -7,6 +7,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
+import java.util.UUID
 
 /**
  * A read-model wrapper distinguishing a persisted [Task] row from a
@@ -53,6 +54,16 @@ fun stampEndOfDay(date: LocalDate): Long = Calendar.getInstance().apply {
 fun isPrayerAnchored(atTime: String?): Boolean = !atTime.isNullOrBlank() && !atTime.contains(":")
 
 fun occurrenceDateKey(date: LocalDate): String = "%04d%02d%02d".format(date.year, date.monthValue, date.dayOfMonth)
+
+/**
+ * Stable id for the real row materialized from rule [ruleId]'s occurrence on
+ * [date]. Every device maps the same slot to the same id, so two devices
+ * materializing one occurrence independently (completing it offline on both)
+ * converge on a single row instead of producing two. Name-based (v3) UUID, so
+ * it stays a well-formed UUID like every other row id.
+ */
+fun occurrenceTaskId(ruleId: String, date: LocalDate): String =
+    UUID.nameUUIDFromBytes("hvsna-occurrence:$ruleId:${occurrenceDateKey(date)}".toByteArray()).toString()
 
 private val stringListSerializer = ListSerializer(String.serializer())
 
