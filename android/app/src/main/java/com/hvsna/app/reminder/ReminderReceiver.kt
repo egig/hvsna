@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.hvsna.app.data.ObjectBoxStore
+import com.hvsna.app.data.SyncClock
 import com.hvsna.app.data.TaskStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val dao = TaskStore(ObjectBoxStore.getInstance(context))
+                val dao = TaskStore(ObjectBoxStore.getInstance(context), SyncClock.getInstance(context))
                 val task = dao.getTaskById(taskId)
                 if (task != null && task.isDone == 0 && task.reminderEnabled) {
                     ReminderNotifications.show(context, task)

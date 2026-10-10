@@ -60,6 +60,7 @@ import com.hvsna.app.data.PrayerTimesRepository
 import com.hvsna.app.data.RecurrenceManager
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.SettingsStore
+import com.hvsna.app.data.SyncClock
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 import com.hvsna.app.data.TaskRepository
@@ -137,10 +138,10 @@ fun HvsnaApp() {
     val context = LocalContext.current
     val boxStore = remember { ObjectBoxStore.getInstance(context) }
 
-    val taskRepo = remember { TaskRepository(TaskStore(boxStore), context) }
+    val taskRepo = remember { TaskRepository(TaskStore(boxStore, SyncClock.getInstance(context)), context) }
     val backupFileService = remember(taskRepo) { BackupFileService(taskRepo, context) }
     val settingsRepo = remember {
-        SettingsRepository(context, SettingsStore(boxStore))
+        SettingsRepository(context, SettingsStore(boxStore, SyncClock.getInstance(context)))
     }
     val locationRepo = remember { LocationRepository(context) }
     val prayerTimesRepo = remember { PrayerTimesRepository() }

@@ -13,6 +13,8 @@ data class SettingsEntry(
     @Unique @Index val key: String,
     val value: String,
     val updatedAt: Long = 0L,
+    /** Hybrid logical clock timestamp of the last local write, stamped by SettingsStore (see com.hvsna.app.sync.Hlc). Empty on rows written before stamping existed. */
+    val hlc: String = "",
     val _dirty: Int = 1,
     @Transient @Id var boxId: Long = 0,
 )
