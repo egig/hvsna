@@ -11,11 +11,11 @@
 
 The marketing/docs site is plain static HTML in [docs/](docs/), served by GitHub Pages from `main`'s `/docs` folder. There is no build step and no npm workspace.
 
-[android/](android/) is a native Android app (Kotlin, Jetpack Compose, ObjectBox) — offline-only (no sync/accounts). Not an npm workspace. Has its own `android/CLAUDE.md` with build/test commands (Gradle) and architecture notes — read that file before working in `android/`.
+[android/](android/) is a native Android app (Kotlin, Jetpack Compose, ObjectBox) — local-first, no accounts; optional sync goes through the user's own Google Drive (no Hvsna server). Not an npm workspace. Has its own `android/CLAUDE.md` with build/test commands (Gradle) and architecture notes — read that file before working in `android/`.
 
 [icons/](icons/) holds vendored Tabler Icons SVGs (MIT), the source of truth for Android iconography — see `icons/README.md`. `scripts/gen-icons.mjs` (`npm run gen:icons`) generates Android vector drawables into `android/app/src/main/res/drawable/`; the generated files are not meant to be hand-edited.
 
-**The web app and the sync backend moved out of this repo.** `packages/app` (`@hvsna/app`, the Vite/React client with Dexie/IndexedDB) and `packages/api` (`@hvsna/api`, React Router v8 + Neon Postgres, auth/billing/sync) now live in the sibling repo `/Users/egig/workspace/hvsna-sync`. Nothing in this repo references them at build time. The website no longer links to the web app or mentions sync, accounts, subscriptions or pricing — keep it that way unless that decision changes.
+**The web app and the sync backend moved out of this repo.** `packages/app` (`@hvsna/app`, the Vite/React client with Dexie/IndexedDB) and `packages/api` (`@hvsna/api`, React Router v8 + Neon Postgres, auth/billing/sync) now live in the sibling repo `/Users/egig/workspace/hvsna-sync`. Nothing in this repo references them at build time. The website no longer links to the web app or mentions accounts, subscriptions or pricing — keep it that way unless that decision changes. The only sync it describes is the Android app's optional Google Drive sync (help: `docs/help/general-settings`), not the `hvsna-sync` backend.
 
 ## Commands
 
@@ -42,7 +42,7 @@ Hand-edited static HTML, committed and served as-is at `https://egig.github.io/h
 - **TypeScript strict mode** with `verbatimModuleSyntax: true` — use `import type` for type-only imports
 - **Hijri months are 1-indexed** (not 0-based)
 - Website copy is bilingual: change the `en` and `id` pages together
-- Legal pages (`privacy`, `terms`, EN and ID) describe an offline, open-source (MIT, see `LICENSE`) app with no accounts or payments; the Android app's only network use is Firebase Crashlytics, and support goes through GitHub issues — update them (and their "Last Updated" date) if the permissions, network use, or license change
+- Legal pages (`privacy`, `terms`, EN and ID) describe a local-first, open-source (MIT, see `LICENSE`) app with no accounts or payments; the Android app's network use is Firebase Crashlytics plus the optional, user-enabled Google Drive sync (`drive.appdata` scope; the privacy page carries Google's Limited Use statement), and support goes through GitHub issues — update them (and their "Last Updated" date) if the permissions, network use, or license change
 
 ## Key files
 

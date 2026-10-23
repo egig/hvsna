@@ -13,25 +13,30 @@ data class SettingsEntry(
     @Unique @Index val key: String,
     val value: String,
     val updatedAt: Long = 0L,
+    /** Hybrid logical clock timestamp of the last local write, stamped by SettingsStore (see com.hvsna.app.sync.Hlc). Empty on rows written before stamping existed. */
+    val hlc: String = "",
     val _dirty: Int = 1,
     @Transient @Id var boxId: Long = 0,
 )
 
 /**
- * Known keys stored in the `settings` key-value table. `LOCATION` and
- * `HIJRI_MONTH_OFFSETS` have web/server counterparts and sync: `LOCATION`
- * matches packages/app's `LocationSetting` shape exactly, and
- * `HIJRI_MONTH_OFFSETS` matches packages/app's `GeneralSettings.hijriMonthOffsets`
- * (JSON object of Hijri month "1".."12" -> signed day offset, non-zero
- * entries only — mirrors how a JS object with numeric keys serializes).
- * `CALCULATION_METHOD` and `MADHAB` have no web equivalent and are
- * deliberately excluded from sync.
+ * Known keys stored in the `settings` key-value table. `LOCATION` matches
+ * packages/app's `LocationSetting` shape; `HIJRI_MONTH_OFFSETS` matches
+ * packages/app's `GeneralSettings.hijriMonthOffsets` (JSON object of Hijri
+ * month "1".."12" -> signed day offset, non-zero entries only — mirrors how
+ * a JS object with numeric keys serializes).
+ *
+ * [SYNCED] is what Drive sync carries between this user's devices. Location
+ * stays per device: a phone travels and a desktop doesn't, and prayer times
+ * always use the device's own location.
  */
 object SettingsKeys {
     const val LOCATION = "location"
     const val CALCULATION_METHOD = "calculationMethod"
     const val MADHAB = "madhab"
     const val HIJRI_MONTH_OFFSETS = "hijriMonthOffsets"
+
+    val SYNCED = setOf(CALCULATION_METHOD, MADHAB, HIJRI_MONTH_OFFSETS)
 }
 
 /**

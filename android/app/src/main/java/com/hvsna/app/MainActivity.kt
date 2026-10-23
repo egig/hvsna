@@ -60,6 +60,7 @@ import com.hvsna.app.data.PrayerTimesRepository
 import com.hvsna.app.data.RecurrenceManager
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.SettingsStore
+import com.hvsna.app.data.SyncClock
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.Task
 import com.hvsna.app.data.TaskRepository
@@ -70,6 +71,7 @@ import com.hvsna.app.data.AppLanguage
 import com.hvsna.app.data.ThemeMode
 import com.hvsna.app.data.languageFlow
 import com.hvsna.app.data.themeModeFlow
+import com.hvsna.app.drive.DriveSync
 import com.hvsna.app.i18n.LocalStrings
 import com.hvsna.app.i18n.Translations
 import com.hvsna.app.reminder.ReminderScheduler
@@ -98,6 +100,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LegacyAccountCleanup.runIfNeeded(this)
+        DriveSync.getInstance(this).watchLocalChanges()
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         enableEdgeToEdge()
         setContent {
@@ -118,6 +121,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        DriveSync.getInstance(this).requestSync()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -137,10 +145,10 @@ fun HvsnaApp() {
     val context = LocalContext.current
     val boxStore = remember { ObjectBoxStore.getInstance(context) }
 
-    val taskRepo = remember { TaskRepository(TaskStore(boxStore), context) }
+    val taskRepo = remember { TaskRepository(TaskStore(boxStore, SyncClock.getInstance(context)), context) }
     val backupFileService = remember(taskRepo) { BackupFileService(taskRepo, context) }
     val settingsRepo = remember {
-        SettingsRepository(context, SettingsStore(boxStore))
+        SettingsRepository(context, SettingsStore(boxStore, SyncClock.getInstance(context)))
     }
     val locationRepo = remember { LocationRepository(context) }
     val prayerTimesRepo = remember { PrayerTimesRepository() }

@@ -35,7 +35,7 @@ import com.hvsna.app.R
 import com.hvsna.app.i18n.LocalStrings
 
 private enum class SettingsSubScreen {
-    NONE, BACKUP, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, LANGUAGE, ABOUT
+    NONE, BACKUP, SYNC, LOCATION, PRAYER_TIME, HIJRI_MONTH_OFFSETS, REMINDERS, APPEARANCE, LANGUAGE, ABOUT
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +53,10 @@ fun SettingsScreen(
     when (subScreen) {
         SettingsSubScreen.BACKUP -> {
             SettingsBackupScreen(backupFileService = backupFileService, onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
+            return
+        }
+        SettingsSubScreen.SYNC -> {
+            SettingsSyncScreen(onBack = { subScreen = SettingsSubScreen.NONE }, modifier = modifier)
             return
         }
         SettingsSubScreen.LOCATION -> {
@@ -124,6 +128,11 @@ fun SettingsScreen(
                 headlineContent = { Text(strings["settings.backup"]) },
                 leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_cloud_upload), contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.BACKUP },
+            )
+            ListItem(
+                headlineContent = { Text(strings["settings.sync"]) },
+                leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_refresh), contentDescription = null) },
+                modifier = Modifier.fillMaxWidth().clickable { subScreen = SettingsSubScreen.SYNC },
             )
 
             HorizontalDivider()

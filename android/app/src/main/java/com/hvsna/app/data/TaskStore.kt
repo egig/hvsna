@@ -1,5 +1,6 @@
 package com.hvsna.app.data
 
+import com.hvsna.app.sync.HlcClock
 import io.objectbox.Box
 import io.objectbox.BoxStore
 import io.objectbox.query.QueryBuilder
@@ -19,8 +20,12 @@ import java.util.UUID
  * existing row by that UUID must carry its `boxId` forward onto whatever
  * gets `put()` back, or ObjectBox will insert a duplicate row instead of
  * updating in place.
+ *
+ * Every write stamps the rows it changes with a fresh [HlcClock] timestamp
+ * (`hlc`), which is what sync merges by; a write that changes only a task's
+ * or rule's tag links stamps that task or rule too.
  */
-class TaskStore(boxStore: BoxStore) {
+class TaskStore(boxStore: BoxStore, private val clock: HlcClock) {
     private val taskBox: Box<Task> = boxStore.boxFor(Task::class.java)
     private val tagBox: Box<Tag> = boxStore.boxFor(Tag::class.java)
     private val ruleBox: Box<RecurrenceRule> = boxStore.boxFor(RecurrenceRule::class.java)
@@ -105,32 +110,44 @@ class TaskStore(boxStore: BoxStore) {
     // --- writes ---
 
     suspend fun insert(task: Task) {
-        taskBox.put(task)
+        taskBox.put(task.copy(hlc = clock.next(task.hlc)))
     }
 
     suspend fun update(task: Task) {
         val existing = findTaskEntity(task.id)
-        taskBox.put(if (existing != null) task.copy(boxId = existing.boxId) else task)
+        taskBox.put(
+            if (existing != null) {
+                task.copy(boxId = existing.boxId, hlc = clock.next(existing.hlc))
+            } else {
+                task.copy(hlc = clock.next(task.hlc))
+            },
+        )
     }
 
     suspend fun delete(id: String, now: Long = System.currentTimeMillis()) {
         val existing = findTaskEntity(id) ?: return
-        taskBox.put(existing.copy(deletedAt = now, updatedAt = now, _dirty = 1))
+        taskBox.put(existing.copy(deletedAt = now, updatedAt = now, _dirty = 1, hlc = clock.next(existing.hlc)))
     }
 
     suspend fun insertTag(tag: Tag) {
-        tagBox.put(tag)
+        tagBox.put(tag.copy(hlc = clock.next(tag.hlc)))
     }
 
     suspend fun updateTag(tag: Tag) {
         val existing = findTagEntity(tag.id)
-        tagBox.put(if (existing != null) tag.copy(boxId = existing.boxId) else tag)
+        tagBox.put(
+            if (existing != null) {
+                tag.copy(boxId = existing.boxId, hlc = clock.next(existing.hlc))
+            } else {
+                tag.copy(hlc = clock.next(tag.hlc))
+            },
+        )
     }
 
     suspend fun deleteTag(tag: Tag, now: Long = System.currentTimeMillis()) {
         val existing = findTagEntity(tag.id) ?: return
         clearCrossRefsForTag(tag.id)
-        tagBox.put(existing.copy(deletedAt = now, updatedAt = now, _dirty = 1))
+        tagBox.put(existing.copy(deletedAt = now, updatedAt = now, _dirty = 1, hlc = clock.next(existing.hlc)))
     }
 
     private fun clearCrossRefsForTag(tagId: String) {
@@ -139,6 +156,7 @@ class TaskStore(boxStore: BoxStore) {
                 if (task.tags.any { it.id == tagId }) {
                     task.tags.removeAll { it.id == tagId }
                     task.tags.applyChangesToDb()
+                    stampTask(task)
                 }
             }
         }
@@ -147,6 +165,7 @@ class TaskStore(boxStore: BoxStore) {
                 if (rule.tags.any { it.id == tagId }) {
                     rule.tags.removeAll { it.id == tagId }
                     rule.tags.applyChangesToDb()
+                    stampRule(rule)
                 }
             }
         }
@@ -158,23 +177,45 @@ class TaskStore(boxStore: BoxStore) {
     suspend fun setTagsForTask(taskId: String, tagIds: List<String>) {
         val task = findTaskEntity(taskId) ?: return
         val tags = tagIds.mapNotNull { findTagEntity(it) }
+        if (task.tags.map { it.id }.toSet() == tags.map { it.id }.toSet()) return
         task.tags.clear()
         task.tags.addAll(tags)
         task.tags.applyChangesToDb()
+        stampTask(task)
+    }
+
+    /**
+     * Re-stamps a row whose only change was its tag links, so sync sees the
+     * new tag set (tags travel as part of the task/rule record). The copy's
+     * fresh ToMany carries no pending changes, so this put leaves the links
+     * just written untouched.
+     */
+    private fun stampTask(task: Task) {
+        taskBox.put(task.copy(hlc = clock.next(task.hlc)))
+    }
+
+    private fun stampRule(rule: RecurrenceRule) {
+        ruleBox.put(rule.copy(hlc = clock.next(rule.hlc)))
     }
 
     suspend fun insertRecurrenceRule(rule: RecurrenceRule) {
-        ruleBox.put(rule)
+        ruleBox.put(rule.copy(hlc = clock.next(rule.hlc)))
     }
 
     suspend fun updateRecurrenceRule(rule: RecurrenceRule) {
         val existing = findRuleEntity(rule.id)
-        ruleBox.put(if (existing != null) rule.copy(boxId = existing.boxId) else rule)
+        ruleBox.put(
+            if (existing != null) {
+                rule.copy(boxId = existing.boxId, hlc = clock.next(existing.hlc))
+            } else {
+                rule.copy(hlc = clock.next(rule.hlc))
+            },
+        )
     }
 
     suspend fun deleteRecurrenceRule(rule: RecurrenceRule, now: Long = System.currentTimeMillis()) {
         val existing = findRuleEntity(rule.id) ?: return
-        ruleBox.put(existing.copy(deletedAt = now, updatedAt = now, _dirty = 1))
+        ruleBox.put(existing.copy(deletedAt = now, updatedAt = now, _dirty = 1, hlc = clock.next(existing.hlc)))
     }
 
     suspend fun getRecurrenceRule(id: String): RecurrenceRule? =
@@ -200,9 +241,11 @@ class TaskStore(boxStore: BoxStore) {
     suspend fun setTagsForRule(ruleId: String, tagIds: List<String>) {
         val rule = findRuleEntity(ruleId) ?: return
         val tags = tagIds.mapNotNull { findTagEntity(it) }
+        if (rule.tags.map { it.id }.toSet() == tags.map { it.id }.toSet()) return
         rule.tags.clear()
         rule.tags.addAll(tags)
         rule.tags.applyChangesToDb()
+        stampRule(rule)
     }
 
     suspend fun getLatestTaskForRecurrence(recurringTaskId: String): Task? =
@@ -217,7 +260,7 @@ class TaskStore(boxStore: BoxStore) {
         val rows = undoneNotDeleted().equal(Task_.recurringTaskId, recurringTaskId, StringOrder.CASE_SENSITIVE)
             .build().use { it.find() }
         val updated = rows.filter { it.id != exceptTaskId }
-            .map { it.copy(deletedAt = now, updatedAt = now, _dirty = 1) }
+            .map { it.copy(deletedAt = now, updatedAt = now, _dirty = 1, hlc = clock.next(it.hlc)) }
         taskBox.put(updated)
     }
 
@@ -237,7 +280,7 @@ class TaskStore(boxStore: BoxStore) {
             .build().use { it.find() }
         val updated = rows
             .filter { it.id != exceptTaskId && (it.scheduledTime == null || it.scheduledTime >= fromEpoch) }
-            .map { it.copy(deletedAt = now, updatedAt = now, _dirty = 1) }
+            .map { it.copy(deletedAt = now, updatedAt = now, _dirty = 1, hlc = clock.next(it.hlc)) }
         taskBox.put(updated)
     }
 
@@ -268,9 +311,11 @@ class TaskStore(boxStore: BoxStore) {
         taskBox.removeAll()
         tagBox.removeAll()
         ruleBox.removeAll()
-        ruleBox.put(recurrenceRules)
-        tagBox.put(tags)
-        taskBox.put(tasks)
+        // A restore is a local write: restamp so the restored rows win over
+        // older copies elsewhere.
+        ruleBox.put(recurrenceRules.map { it.copy(hlc = clock.next(it.hlc)) })
+        tagBox.put(tags.map { it.copy(hlc = clock.next(it.hlc)) })
+        taskBox.put(tasks.map { it.copy(hlc = clock.next(it.hlc)) })
         linkCrossRefs(taskTagCrossRefs, recurrenceRuleTagCrossRefs)
     }
 
@@ -287,14 +332,15 @@ class TaskStore(boxStore: BoxStore) {
         val tagIdMap = tags.associate { it.id to UUID.randomUUID().toString() }
         val taskIdMap = tasks.associate { it.id to UUID.randomUUID().toString() }
 
-        ruleBox.put(recurrenceRules.map { it.copy(id = recurrenceIdMap.getValue(it.id), boxId = 0) })
-        tagBox.put(tags.map { it.copy(id = tagIdMap.getValue(it.id), boxId = 0) })
+        ruleBox.put(recurrenceRules.map { it.copy(id = recurrenceIdMap.getValue(it.id), boxId = 0, hlc = clock.next()) })
+        tagBox.put(tags.map { it.copy(id = tagIdMap.getValue(it.id), boxId = 0, hlc = clock.next()) })
         taskBox.put(
             tasks.map { task ->
                 task.copy(
                     id = taskIdMap.getValue(task.id),
                     recurringTaskId = task.recurringTaskId?.let { recurrenceIdMap[it] },
                     boxId = 0,
+                    hlc = clock.next(),
                 )
             },
         )
