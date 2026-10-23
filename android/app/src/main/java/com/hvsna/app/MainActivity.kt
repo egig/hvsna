@@ -71,6 +71,7 @@ import com.hvsna.app.data.AppLanguage
 import com.hvsna.app.data.ThemeMode
 import com.hvsna.app.data.languageFlow
 import com.hvsna.app.data.themeModeFlow
+import com.hvsna.app.drive.DriveSync
 import com.hvsna.app.i18n.LocalStrings
 import com.hvsna.app.i18n.Translations
 import com.hvsna.app.reminder.ReminderScheduler
@@ -99,6 +100,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         LegacyAccountCleanup.runIfNeeded(this)
+        DriveSync.getInstance(this).watchLocalChanges()
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         enableEdgeToEdge()
         setContent {
@@ -118,6 +120,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        DriveSync.getInstance(this).requestSync()
     }
 }
 

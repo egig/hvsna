@@ -2,6 +2,7 @@ package com.hvsna.app.data
 
 import com.hvsna.app.sync.Hlc
 import com.hvsna.app.sync.HlcClock
+import com.hvsna.app.sync.LocalRecords
 import com.hvsna.app.sync.RecordType
 import com.hvsna.app.sync.SyncRecord
 import io.objectbox.Box
@@ -27,7 +28,7 @@ import kotlinx.serialization.json.jsonPrimitive
  * after it. A record whose data doesn't decode, or whose data names a
  * different id than the record, is skipped.
  */
-class SyncLocalStore(private val boxStore: BoxStore, private val clock: HlcClock) {
+class SyncLocalStore(private val boxStore: BoxStore, private val clock: HlcClock) : LocalRecords {
     private val taskBox: Box<Task> = boxStore.boxFor(Task::class.java)
     private val tagBox: Box<Tag> = boxStore.boxFor(Tag::class.java)
     private val ruleBox: Box<RecurrenceRule> = boxStore.boxFor(RecurrenceRule::class.java)
@@ -35,7 +36,7 @@ class SyncLocalStore(private val boxStore: BoxStore, private val clock: HlcClock
 
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
-    fun snapshot(): List<SyncRecord> = boxStore.callInReadTx {
+    override fun snapshot(): List<SyncRecord> = boxStore.callInReadTx {
         tagBox.all.map { record(RecordType.TAG, it.id, Hlc.effective(it.hlc, it.updatedAt), Tag.serializer(), it) } +
             ruleBox.all.map { rule ->
                 record(RecordType.RULE, rule.id, Hlc.effective(rule.hlc, rule.updatedAt), RecurrenceRule.serializer(), rule, rule.tags.map { it.id })
@@ -49,7 +50,7 @@ class SyncLocalStore(private val boxStore: BoxStore, private val clock: HlcClock
     }
 
     /** Returns the ids of tasks whose rows changed, so the caller can reschedule their reminders. */
-    fun apply(records: List<SyncRecord>): Set<String> {
+    override fun apply(records: List<SyncRecord>): Set<String> {
         if (records.isEmpty()) return emptySet()
         val changedTaskIds = mutableSetOf<String>()
         val byType = records.groupBy { it.type }
