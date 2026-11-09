@@ -2,6 +2,7 @@ package com.hvsna.app.backup
 
 import android.content.Context
 import android.net.Uri
+import com.hvsna.app.data.QadhaRepository
 import com.hvsna.app.data.TaskRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -10,6 +11,7 @@ import kotlinx.serialization.json.Json
 
 class BackupFileService(
     private val repository: TaskRepository,
+    private val qadhaRepository: QadhaRepository,
     private val context: Context,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -23,6 +25,7 @@ class BackupFileService(
                 taskTagCrossRefs = repository.getAllTaskTagCrossRefsSnapshot(),
                 recurrenceRules = repository.getAllRecurrenceRules().first(),
                 recurrenceRuleTagCrossRefs = repository.getAllRecurrenceRuleTagCrossRefsSnapshot(),
+                qadhaFasts = qadhaRepository.allSnapshot(),
             )
             val text = json.encodeToString(BackupPayload.serializer(), payload)
             context.contentResolver.openOutputStream(uri)?.use { out ->
@@ -41,6 +44,7 @@ class BackupFileService(
                 recurrenceRules = payload.recurrenceRules,
                 recurrenceRuleTagCrossRefs = payload.recurrenceRuleTagCrossRefs,
             )
+            if (payload.hasQadha) qadhaRepository.replaceAll(payload.qadhaFasts)
         }
     }
 
@@ -54,6 +58,7 @@ class BackupFileService(
                 recurrenceRules = payload.recurrenceRules,
                 recurrenceRuleTagCrossRefs = payload.recurrenceRuleTagCrossRefs,
             )
+            qadhaRepository.mergeAll(payload.qadhaFasts)
         }
     }
 

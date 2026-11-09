@@ -57,6 +57,8 @@ import com.hvsna.app.data.LegacyAccountCleanup
 import com.hvsna.app.data.LocationRepository
 import com.hvsna.app.data.ObjectBoxStore
 import com.hvsna.app.data.PrayerTimesRepository
+import com.hvsna.app.data.QadhaRepository
+import com.hvsna.app.data.QadhaStore
 import com.hvsna.app.data.RecurrenceManager
 import com.hvsna.app.data.SettingsRepository
 import com.hvsna.app.data.SettingsStore
@@ -75,6 +77,7 @@ import com.hvsna.app.i18n.Translations
 import com.hvsna.app.reminder.ReminderScheduler
 import com.hvsna.app.ui.PendingRecurringEdit
 import com.hvsna.app.ui.RecurringScope
+import com.hvsna.app.ui.QadhaViewModel
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.rememberCompletionFeedback
 import com.hvsna.app.ui.components.RecurringScopeDialog
@@ -138,7 +141,8 @@ fun HvsnaApp() {
     val boxStore = remember { ObjectBoxStore.getInstance(context) }
 
     val taskRepo = remember { TaskRepository(TaskStore(boxStore), context) }
-    val backupFileService = remember(taskRepo) { BackupFileService(taskRepo, context) }
+    val qadhaRepo = remember { QadhaRepository(QadhaStore(boxStore)) }
+    val backupFileService = remember(taskRepo, qadhaRepo) { BackupFileService(taskRepo, qadhaRepo, context) }
     val settingsRepo = remember {
         SettingsRepository(context, SettingsStore(boxStore))
     }
@@ -148,6 +152,9 @@ fun HvsnaApp() {
     val recurrenceManager = remember { RecurrenceManager(taskRepo, prayerTimesRepo, reminderScheduler) }
     val taskViewModel: TaskViewModel = viewModel(
         factory = TaskViewModel.Factory(taskRepo, settingsRepo, prayerTimesRepo, recurrenceManager, reminderScheduler)
+    )
+    val qadhaViewModel: QadhaViewModel = viewModel(
+        factory = QadhaViewModel.Factory(qadhaRepo, settingsRepo)
     )
 
     val allTags by taskViewModel.allTags.collectAsState()
@@ -258,6 +265,7 @@ fun HvsnaApp() {
                 ScreenWithFab {
                     BrowseScreen(
                         taskViewModel,
+                        qadhaViewModel = qadhaViewModel,
                         onOpenSettings = { navController.navigate(AppRoute.Settings) },
                         onTagClick = onTagClick,
                         onEditTask = onEditTask,

@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hvsna.app.data.Tag
 import com.hvsna.app.data.TaskWithTags
+import com.hvsna.app.ui.QadhaViewModel
 import com.hvsna.app.ui.TaskViewModel
 import com.hvsna.app.ui.components.TagPill
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,6 +41,7 @@ import com.hvsna.app.i18n.LocalStrings
 @Composable
 fun BrowseScreen(
     viewModel: TaskViewModel,
+    qadhaViewModel: QadhaViewModel,
     onOpenSettings: () -> Unit,
     onTagClick: (Tag) -> Unit = {},
     onEditTask: (TaskWithTags?, Long?) -> Unit,
@@ -49,6 +51,7 @@ fun BrowseScreen(
     val strings = LocalStrings.current
     var showCompleted by remember { mutableStateOf(false) }
     var showRecurring by remember { mutableStateOf(false) }
+    var showQadha by remember { mutableStateOf(false) }
 
     if (showCompleted) {
         CompletedScreen(
@@ -71,6 +74,11 @@ fun BrowseScreen(
             onReschedule = onReschedule,
             modifier = modifier,
         )
+        return
+    }
+
+    if (showQadha) {
+        QadhaScreen(viewModel = qadhaViewModel, onBack = { showQadha = false }, modifier = modifier)
         return
     }
 
@@ -112,6 +120,17 @@ fun BrowseScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { showCompleted = true },
+                )
+            }
+
+            item {
+                ListItem(
+                    headlineContent = { Text(strings["browse.qadha"], style = MaterialTheme.typography.bodyLarge) },
+                    leadingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_calendar_event), contentDescription = null) },
+                    trailingContent = { Icon(ImageVector.vectorResource(id = R.drawable.ic_chevron_right), contentDescription = null) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showQadha = true },
                 )
             }
 

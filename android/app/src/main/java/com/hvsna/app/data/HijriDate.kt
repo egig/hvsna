@@ -53,7 +53,7 @@ private fun resolveOffset(date: LocalDate, monthOffsets: Map<Int, Int>): Int {
     return monthOffsets[rawMonth] ?: 0
 }
 
-private fun adjustedHijrahDate(date: LocalDate, monthOffsets: Map<Int, Int>): HijrahDate {
+internal fun adjustedHijrahDate(date: LocalDate, monthOffsets: Map<Int, Int>): HijrahDate {
     val offset = resolveOffset(date, monthOffsets)
     return HijrahDate.from(date.plusDays(offset.toLong()))
 }
@@ -127,4 +127,29 @@ fun combinedDateLabel(
     val sunsetShift = if (maghribEpochMillis != null && epochMillis >= maghribEpochMillis) 1L else 0L
     val date = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate().plusDays(sunsetShift)
     return combinedDateLabel(date, monthOffsets, strings, includeYear)
+}
+
+/** The user-adjusted Hijri year/month/day for [date] (month 1-indexed), honoring [monthOffsets]. */
+data class HijriYmd(val year: Int, val month: Int, val day: Int)
+
+fun hijriYmd(date: LocalDate, monthOffsets: Map<Int, Int> = emptyMap()): HijriYmd {
+    val hijrah = adjustedHijrahDate(date, monthOffsets)
+    return HijriYmd(
+        year = hijrah.get(ChronoField.YEAR),
+        month = hijrah.get(ChronoField.MONTH_OF_YEAR),
+        day = hijrah.get(ChronoField.DAY_OF_MONTH),
+    )
+}
+
+/**
+ * Every Gregorian date that falls in Ramadan of [hijriYear] after the user's month offsets are
+ * applied, in order — so a Ramadan the user shifted by a day (e.g. to match Indonesia's official
+ * start) yields the shifted dates. Scans from 10 days before to 40 days after the unadjusted
+ * 1 Ramadan, which covers offsets of up to ±10 days (real-world corrections are ±1–2).
+ */
+fun ramadanDates(hijriYear: Int, monthOffsets: Map<Int, Int> = emptyMap()): List<LocalDate> {
+    val rawStart = LocalDate.from(HijrahDate.of(hijriYear, 9, 1))
+    return (-10L..40L)
+        .map { rawStart.plusDays(it) }
+        .filter { hijriYmd(it, monthOffsets).let { ymd -> ymd.year == hijriYear && ymd.month == 9 } }
 }
